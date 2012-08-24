@@ -8,9 +8,9 @@
 
 (def mongouri "mongodb://127.0.0.1/lupapalvelu")
 (def users "users")
-(def projects "projects")
 (def partys "partys")
 (def partyGroupings "partyGroupings")
+(def documents "documents")
 
 ;;
 ;; Utils
@@ -82,11 +82,11 @@
 (defn init []
   (m/connect-via-uri! mongouri)
   (mc/remove users)
-  (mc/remove projects)
   (mc/remove partys)
   (mc/remove partyGroupings)
+  (mc/remove documents)
   (dorun (map #(insert users %) (data/users)))
-  (dorun (map #(insert projects %) (data/projects)))
   (dorun (map #(insert partys %) (data/partys)))
   (dorun (map #(insert partyGroupings %) (data/partyGroupings)))
+  (dorun (map #(insert documents %) (data/documents)))
   )

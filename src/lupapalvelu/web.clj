@@ -36,11 +36,11 @@
 ;; REST API:
 ;;
 
-(defpage "/rest/project" []
-  (json {:ok true :projects (mongo/all mongo/projects)}))
+(defpage "/rest/document" []
+  (json {:ok true :documents (mongo/all mongo/documents)}))
 
-(defpage "/rest/project/:id" {:keys [id]}
-  (json {:ok true :project (mongo/by-id mongo/projects id)}))
+(defpage "/rest/document/:id" {:keys [id]}
+  (json {:ok true :document (mongo/by-id mongo/documents id)}))
 
 (defpage "/rest/user" []
   (json
@@ -103,7 +103,7 @@
 
 (defn apikey-authentication
   "Reads apikeyfrom 'Auhtorization' headers, pushed it to :user request header
-   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/rest/project"
+   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/rest/document"
   [handler]
   (fn [request]
     (let [authorization (get-in request [:headers "authorization"])
@@ -116,11 +116,11 @@
 ;; File upload/download:
 ;;
 
-(defpage [:post "/rest/upload"] {projectId :projectId {:keys [size tempfile content-type filename]} :upload}
-  (debug "file upload: uploading: projectId=%s, filename=%s, tempfile=%s" projectId filename tempfile)
+(defpage [:post "/rest/upload"] {documentId :documentId {:keys [size tempfile content-type filename]} :upload}
+  (debug "file upload: uploading: documentId=%s, filename=%s, tempfile=%s" documentId filename tempfile)
   (let [attachment (mongo/upload filename content-type tempfile)
         attachment-id (:id attachment)]
-    (mongo/update mongo/projects projectId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
+    (mongo/update mongo/documents documentId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
     (.delete (file tempfile))
     (json {:ok true :attachmentId attachment-id})))
 
