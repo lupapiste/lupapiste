@@ -11,7 +11,7 @@
 (def projects "projects")
 
 ;;
-;; Mongo Api
+;; Utils
 ;; 
 
 (defn string-to-objectid [id]
