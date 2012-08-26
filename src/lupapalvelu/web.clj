@@ -25,6 +25,18 @@
   "fetches the current user from 1) http-session 2) apikey from headers"
   (or (session/get :user) ((ring-request) :user)))
 
+(defn logged-in? []
+  (not (nil? (current-user))))
+
+(defmacro secured [path params & content]
+  `(defpage
+     ~path
+     ~params
+     (if (logged-in?)
+       (do ~@content)
+       (json {:ok false 
+              :text "user not logged in"})))) ; should return 401?
+
 ;;
 ;; Alive?
 ;;
@@ -36,10 +48,10 @@
 ;; REST API:
 ;;
 
-(defpage "/rest/document" []
+(secured "/rest/document" []
   (json {:ok true :documents (mongo/all mongo/documents)}))
 
-(defpage "/rest/document/:id" {:keys [id]}
+(secured "/rest/document/:id" {:keys [id]}
   (json {:ok true :document (mongo/by-id mongo/documents id)}))
 
 (defpage "/rest/user" []
@@ -48,14 +60,13 @@
       {:ok true :user user}
       {:ok false :message "No session"})))
 
-(defpage [:post "/rest/command"] []
-  (let [data (from-json)]
-    (if-let [user (current-user)]
+(secured [:post "/rest/command"] []
+  (let [data (from-json)
+        user (current-user)]
       (json (command/execute {:command (:command data)
                               :user user
                               :created (System/currentTimeMillis) 
-                              :data (dissoc data :command) }))
-      (json {:ok false :text "user not logged in"}))))
+                              :data (dissoc data :command) }))))
 
 ;;
 ;; Web UI:
