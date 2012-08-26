@@ -61,12 +61,11 @@
       {:ok false :message "No session"})))
 
 (secured [:post "/rest/command"] []
-  (let [data (from-json)
-        user (current-user)]
-      (json (command/execute {:command (:command data)
-                              :user user
-                              :created (System/currentTimeMillis) 
-                              :data (dissoc data :command) }))))
+  (let [data (from-json)]
+    (json (command/execute {:command (:command data)
+                            :user (current-user)
+                            :created (System/currentTimeMillis) 
+                            :data (dissoc data :command) }))))
 
 ;;
 ;; Web UI:
