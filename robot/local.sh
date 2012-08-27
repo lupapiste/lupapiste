@@ -1,3 +1,9 @@
 #!/bin/bash
 
-pybot -d target --variable SELENIUM: tests
+target=$1
+
+if [ -z $target ] ; then
+	target="tests"
+fi
+
+pybot -d target --variable SELENIUM: $target
