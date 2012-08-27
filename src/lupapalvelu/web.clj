@@ -29,13 +29,10 @@
   (not (nil? (current-user))))
 
 (defmacro secured [path params & content]
-  `(defpage
-     ~path
-     ~params
+  `(defpage ~path ~params
      (if (logged-in?)
        (do ~@content)
-       (json {:ok false 
-              :text "user not logged in"})))) ; should return 401?
+       (json {:ok false :text "user not logged in"})))) ; should return 401?
 
 ;;
 ;; Alive?
