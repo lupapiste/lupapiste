@@ -6,4 +6,4 @@ if [ -z $target ] ; then
 	target="tests"
 fi
 
-pybot -d target --variable SELENIUM: $target
+pybot -d target $target

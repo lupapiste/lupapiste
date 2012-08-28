@@ -93,7 +93,7 @@
         {:ok true :user user})
       (do
         (info "login: failed: username=%s" username)
-        {:ok false :message "gtfo!"}))))
+        {:ok false :message "Tunnus tai salasana on väärin."}))))
 
 (defpage [:post "/rest/logout"] []
   (session/clear!)
