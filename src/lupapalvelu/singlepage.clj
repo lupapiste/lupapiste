@@ -2,14 +2,9 @@
   (:require [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.env :as env])
   (:use [lupapalvelu.log])
-  (:import [org.springframework.core.io Resource]
-           [org.springframework.core.io.support PathMatchingResourcePatternResolver]
-           [java.io ByteArrayOutputStream ByteArrayInputStream]
+  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
            [org.apache.commons.io IOUtils]))
-
-(defmethod enlive/get-resource Resource [^Resource r loader]
-  (enlive/get-resource (.getInputStream r) loader))
 
 (defn- get-content [r]
   (-> r (enlive/html-resource) (enlive/select [:.page])))
