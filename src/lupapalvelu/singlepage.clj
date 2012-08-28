@@ -26,11 +26,8 @@
     [:#body]
     (enlive/content (map (comp make-invisible* get-content) pages))))
 
-(defn- pages []
-  (.getResources (PathMatchingResourcePatternResolver.) "html/pages/*.html"))
-
 (defn- main-page []
-  (enlive/html-resource "html/main.html"))
+  (enlive/html-resource "public/html/main.html"))
 
 (defn- script-tags [r]
   (enlive/select r [:script]))
@@ -38,16 +35,28 @@
 (defn- css-tags [r]
   (filter #(= (-> % :attrs :rel) "stylesheet") (enlive/select r [:link])))
 
+(defn- page-tags [r]
+  (filter #(= (-> % :attrs :rel) "page") (enlive/select r [:link])))
+
 (defn- strip-script-tags [r]
   (enlive/transform r [:script] nil))
 
 (defn- strip-css-tags [r]
   (enlive/transform r [:link] (fn [e] (if (not= (-> e :attrs :rel) "stylesheet") e))))
 
+(defn- strip-page-tags [r]
+  (enlive/transform r [:link] (fn [e] (if (not= (-> e :attrs :rel) "page") e))))
+
 (defn- add-combined-tags [r]
   (enlive/transform r [:title] (enlive/after
                                  [{:tag :script :attrs {:src "js/lupapalvelu.js" :type "text/javascript"}}
                                   {:tag :link :attrs {:href "css/lupapalvelu.css" :rel "stylesheet"}}])))
+
+(defn- pages [r]
+  (let [loader (clojure.lang.RT/baseLoader)]
+    (map
+      #(->> % :attrs :href (str "public/html/pages/") (.getResourceAsStream loader))
+      (page-tags r))))
 
 #_(if (= :dev env/mode)
   (do
@@ -56,14 +65,16 @@
     (def strip-combined-tags identity)))
 
 (defn compose-singlepage-html []
-  (apply str
-         (enlive/emit*
-           (inject-pages (->
-                           (main-page)
-                           (strip-script-tags)
-                           (strip-css-tags)
-                           (add-combined-tags))
-                         (pages)))))
+  (let [main (main-page)]
+    (apply str
+           (enlive/emit*
+             (inject-pages (->
+                             main
+                             (strip-script-tags)
+                             (strip-css-tags)
+                             (strip-page-tags)
+                             (add-combined-tags))
+                           (pages main))))))
 
 (defn gzip [a]
   (let [i (ByteArrayInputStream. a)
