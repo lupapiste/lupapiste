@@ -45,6 +45,10 @@
 ;; REST API:
 ;;
 
+(defpage "/rest/ping" []
+  (json {:ok true}))
+
+
 (secured "/rest/document" []
   (json {:ok true :documents (mongo/all mongo/documents)}))
 
@@ -66,7 +70,7 @@
 
 (defpage "/rest/email-available" {email :email}
    (Thread/sleep 1000)
-   (json {:ok (not= "bad" email)}))
+   (json {:ok (= "bad" email)}))
 
 ;;
 ;; Web UI:
