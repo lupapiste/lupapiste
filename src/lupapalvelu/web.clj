@@ -48,7 +48,7 @@
 (secured "/rest/document" []
   (json {:ok true :documents (mongo/all mongo/documents)}))
 
-(secured "/rest/document/:id" {:keys [id]}
+(secured "/rest/document/:id" {id :id}
   (json {:ok true :document (mongo/by-id mongo/documents id)}))
 
 (defpage "/rest/party" []
@@ -63,6 +63,10 @@
                             :party (current-party)
                             :created (System/currentTimeMillis) 
                             :data (dissoc data :command) }))))
+
+(defpage "/rest/email-available" {email :email}
+   (Thread/sleep 1000)
+   (json {:ok (not= "bad" email)}))
 
 ;;
 ;; Web UI:
