@@ -21,18 +21,18 @@
 (defn from-json []
   (json/parse-string (slurp (:body (ring-request))) true))
 
-(defn current-user []
-  "fetches the current user from 1) http-session 2) apikey from headers"
-  (or (session/get :user) ((ring-request) :user)))
+(defn current-party []
+  "fetches the current party from 1) http-session 2) apikey from headers"
+  (or (session/get :party) ((ring-request) :party)))
 
 (defn logged-in? []
-  (not (nil? (current-user))))
+  (not (nil? (current-party))))
 
 (defmacro secured [path params & content]
   `(defpage ~path ~params
      (if (logged-in?)
        (do ~@content)
-       (json {:ok false :text "user not logged in"})))) ; should return 401?
+       (json {:ok false :text "party not logged in"})))) ; should return 401?
 
 ;;
 ;; Alive?
@@ -51,16 +51,16 @@
 (secured "/rest/document/:id" {:keys [id]}
   (json {:ok true :document (mongo/by-id mongo/documents id)}))
 
-(defpage "/rest/user" []
+(defpage "/rest/party" []
   (json
-    (if-let [user (current-user)]
-      {:ok true :user user}
+    (if-let [party (current-party)]
+      {:ok true :party party}
       {:ok false :message "No session"})))
 
 (secured [:post "/rest/command"] []
   (let [data (from-json)]
     (json (command/execute {:command (:command data)
-                            :user (current-user)
+                            :party (current-party)
                             :created (System/currentTimeMillis) 
                             :data (dissoc data :command) }))))
 
@@ -86,11 +86,11 @@
 
 (defpage [:post "/rest/login"] {:keys [username password]}
   (json
-    (if-let [user (security/login username password)] 
+    (if-let [party (security/login username password)] 
       (do
         (info "login: successful: username=%s" username)
-        (session/put! :user user)
-        {:ok true :user user})
+        (session/put! :party party)
+        {:ok true :party party})
       (do
         (info "login: failed: username=%s" username)
         {:ok false :message "Tunnus tai salasana on väärin."}))))
@@ -109,13 +109,13 @@
       (.trim (.substring value-string (.length key))))))
 
 (defn apikey-authentication
-  "Reads apikeyfrom 'Auhtorization' headers, pushed it to :user request header
+  "Reads apikeyfrom 'Auhtorization' headers, pushed it to :party request header
    'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/rest/document"
   [handler]
   (fn [request]
     (let [authorization (get-in request [:headers "authorization"])
           apikey        (parse "apikey" authorization)]
-      (handler (assoc request :user (security/login-with-apikey apikey))))))
+      (handler (assoc request :party (security/login-with-apikey apikey))))))
 
 (server/add-middleware apikey-authentication)
 
