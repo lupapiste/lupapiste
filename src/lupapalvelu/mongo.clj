@@ -1,9 +1,9 @@
-(ns lupapalvelu.mongo
+(ns lupapalvelu.mongo 
   (:use monger.operators)
   (:require [monger.core :as m]
             [monger.collection :as mc]
             [monger.gridfs :as gfs]
-            [lupapalvelu.data :as data])
+            [lupapalvelu.fixture.full :as fixture])
   (:import [org.bson.types ObjectId]))
 
 (def mongouri "mongodb://127.0.0.1/lupapalvelu")
@@ -83,7 +83,7 @@
   (mc/remove partys)
   (mc/remove partyGroupings)
   (mc/remove applications)
-  (dorun (map #(insert partys %) (data/partys)))
-  (dorun (map #(insert partyGroupings %) (data/partyGroupings)))
-  (dorun (map #(insert applications %) (data/applications)))
+  (dorun (map #(insert partys %) (fixture/partys)))
+  (dorun (map #(insert partyGroupings %) (fixture/partyGroupings)))
+  (dorun (map #(insert applications %) (fixture/applications)))
   )
