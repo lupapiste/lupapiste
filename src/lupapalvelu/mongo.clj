@@ -1,5 +1,6 @@
 (ns lupapalvelu.mongo 
-  (:use monger.operators)
+  (:use monger.operators
+        lupapalvelu.log)
   (:require [monger.core :as m]
             [monger.collection :as mc]
             [monger.gridfs :as gfs]
@@ -80,7 +81,9 @@
 ;;
 
 (defn- clear []
+  (debug "Connecting to DB: %s" mongouri)
   (m/connect-via-uri! mongouri)
+  (debug "DB is %s" (str (m/get-db)))
   (mc/remove partys)
   (mc/remove applications))
 
@@ -98,4 +101,5 @@
   "minimal data set initialized")
 
 (defn init []
+  (info "Initializing DB")
   init-minimal)
