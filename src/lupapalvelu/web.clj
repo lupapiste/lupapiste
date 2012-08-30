@@ -156,5 +156,5 @@
   (defpage "/fixture/:type" {type :type}
     (case type
       "minimal" (mongo/init-minimal)
-      "full" (mongo/init)
+      "full" (mongo/init-full)
       "nothing was done")))

@@ -79,19 +79,23 @@
 ;; Bootstrappin'
 ;;
 
-(defn init []
+(defn- clear []
   (m/connect-via-uri! mongouri)
   (mc/remove partys)
-  (mc/remove applications)
+  (mc/remove applications))
+
+(defn init-full []
+  (clear)
   (dorun (map #(insert partys %)       (full/partys)))
   (dorun (map #(insert applications %) (full/applications)))
   "full data set initialized")
 
 ; copy-paste, use generics
 (defn init-minimal []
-  (m/connect-via-uri! mongouri)
-  (mc/remove partys)
-  (mc/remove applications)
+  (clear)
   (dorun (map #(insert partys %)       (minimal/partys)))
   (dorun (map #(insert applications %) (minimal/applications)))
   "minimal data set initialized")
+
+(defn init []
+  init-minimal)
