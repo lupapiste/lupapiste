@@ -102,4 +102,4 @@
 
 (defn init []
   (info "Initializing DB")
-  init-minimal)
+  (init-minimal))
