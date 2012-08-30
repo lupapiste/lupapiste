@@ -21,15 +21,15 @@
 (defn objectid-to-string [id] 
   (.toString id)) 
 
-(defn- with-objectid [data]
-  (if-let [id (:id data)]
-    (-> data 
-      (assoc :_id (string-to-objectid id)) 
+(defn- with-objectid [map]
+  (if-let [id (:id map)]
+    (-> map
+      (assoc :_id (string-to-objectid id))
       (dissoc :id))))
 
-(defn- with-id [data]
-  (if-let [id (:_id data)]
-    (-> data 
+(defn- with-id [map]
+  (if-let [id (:_id map)]
+    (-> map 
       (assoc :id (objectid-to-string id)) 
       (dissoc :_id))))
 
@@ -78,7 +78,7 @@
 ;; Bootstrappin'
 ;;
 
-(defn init []
+(defn init [fixture]
   (m/connect-via-uri! mongouri)
   (mc/remove partys)
   (mc/remove partyGroupings)
