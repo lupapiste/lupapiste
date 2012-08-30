@@ -7,7 +7,7 @@
     :firstName "Mikko"
     :lastName "Intonen"
     :phone "+35834343433"
-    :username "mikko@example.com"
+    :username "mikko"
     :private {:password "mikko"
               :apikey "502cb9e58426c613c8b85abc"}
     }
@@ -17,7 +17,7 @@
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
-    :username "veikko@example.com"
+    :username "veikko"
     :private {:password "veikko"}
     }
   ])
