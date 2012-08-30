@@ -78,7 +78,7 @@
 ;; Bootstrappin'
 ;;
 
-(defn init [fixture]
+(defn init []
   (m/connect-via-uri! mongouri)
   (mc/remove partys)
   (mc/remove partyGroupings)
