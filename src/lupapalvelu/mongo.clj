@@ -2,8 +2,9 @@
   (:use monger.operators)
   (:require [monger.core :as m]
             [monger.collection :as mc]
-            [monger.gridfs :as gfs]
-            [lupapalvelu.fixture.full :as fixture])
+            [monger.gridfs :as gfs] 
+            [lupapalvelu.fixture.full :as full] 
+            [lupapalvelu.fixture.minimal :as minimal])
   (:import [org.bson.types ObjectId]))
 
 (def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
@@ -81,8 +82,6 @@
 (defn init []
   (m/connect-via-uri! mongouri)
   (mc/remove partys)
-  (mc/remove partyGroupings)
   (mc/remove applications)
-  (dorun (map #(insert partys %) (fixture/partys)))
-  (dorun (map #(insert partyGroupings %) (fixture/partyGroupings)))
-  (dorun (map #(insert applications %) (fixture/applications))))
+  (dorun (map #(insert partys %) (full/partys)))
+  (dorun (map #(insert applications %) (full/applications))))
