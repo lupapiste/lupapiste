@@ -3,15 +3,14 @@
   (:require [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
             [lupapalvelu.web]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.env :as env])
+            [lupapalvelu.env :as env]
+            [lupapalvelu.mongo :as mongo])
   (:gen-class))
 
 (defn -main [& m]
   (info "Server starting")
-  (if (env/dev-mode?)
-    (do
-      (mongo/init)
-      (nrepl/start-server :port 9000)))
+  (env/in-dev
+    (mongo/init)
+    (nrepl/start-server :port 9000))
   (server/start env/port {:mode env/mode :ns 'lupapalvelu.web})
   (info "Server running"))
