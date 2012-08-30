@@ -6,10 +6,10 @@
             [lupapalvelu.fixture.full :as fixture])
   (:import [org.bson.types ObjectId]))
 
-(def mongouri "mongodb://127.0.0.1/lupapalvelu")
-(def partys "partys")
-(def partyGroupings "partyGroupings")
-(def applications "applications")
+(def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
+(def ^:const partys "partys")
+(def ^:const partyGroupings "partyGroupings")
+(def ^:const applications "applications")
 
 ;;
 ;; Utils
