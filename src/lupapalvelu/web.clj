@@ -8,7 +8,6 @@
             [noir.session :as session]
             [noir.server :as server]
             [cheshire.core :as json]
-            [lupapalvelu.data :as data]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.command :as command]
             [lupapalvelu.singlepage :as singlepage]
@@ -70,7 +69,7 @@
 
 (defpage "/rest/email-available" {email :email}
    (Thread/sleep 1000)
-   (json {:ok (= "bad" email)}))
+   (json {:ok (not= "bad" email)}))
 
 ;;
 ;; Web UI:
