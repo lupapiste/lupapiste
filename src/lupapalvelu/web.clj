@@ -49,8 +49,14 @@
   (json {:ok true}))
 
 
+; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
-  (json {:ok true :applications (mongo/all mongo/applications)}))
+  (let [user (current-party)]
+    (json
+      (case (keyword (:role user))
+        :applicant {:ok true :applications (mongo/all mongo/applications) }
+        :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
+        {:ok false :text "invalid role to load applications"}))))
 
 (secured "/rest/application/:id" {id :id}
   (json {:ok true :application (mongo/by-id mongo/applications id)}))
@@ -157,4 +163,4 @@
     (case type
       "minimal" (mongo/init-minimal)
       "full" (mongo/init-full)
-      "nothing was done")))
+      "fixture not found")))
