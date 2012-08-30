@@ -9,7 +9,7 @@
 
 (defn -main [& m]
   (info "Server starting")
-  (if (= :dev env/mode)
+  (if (env/dev-mode?)
     (do
       (mongo/init)
       (nrepl/start-server :port 9000)))
