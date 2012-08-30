@@ -9,7 +9,7 @@
 (def mongouri "mongodb://127.0.0.1/lupapalvelu")
 (def partys "partys")
 (def partyGroupings "partyGroupings")
-(def documents "documents")
+(def applications "applications")
 
 ;;
 ;; Utils
@@ -82,8 +82,8 @@
   (m/connect-via-uri! mongouri)
   (mc/remove partys)
   (mc/remove partyGroupings)
-  (mc/remove documents)
+  (mc/remove applications)
   (dorun (map #(insert partys %) (data/partys)))
   (dorun (map #(insert partyGroupings %) (data/partyGroupings)))
-  (dorun (map #(insert documents %) (data/documents)))
+  (dorun (map #(insert applications %) (data/applications)))
   )
