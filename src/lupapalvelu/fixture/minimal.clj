@@ -1,3 +1,5 @@
+(ns lupapalvelu.fixture.minimal)
+
 (defn partys []
   [{:id "777777777777777777000010" ;; Hakija Mikko Intonen, rakentaa Sipooseen omakotitalon, talousrakennuksen ja maalämmön.
     :type :applicant
