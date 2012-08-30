@@ -84,4 +84,14 @@
   (mc/remove partys)
   (mc/remove applications)
   (dorun (map #(insert partys %)       (full/partys)))
-  (dorun (map #(insert applications %) (full/applications))))
+  (dorun (map #(insert applications %) (full/applications)))
+  "full data set initialized")
+
+; copy-paste, use generics
+(defn init-minimal []
+  (m/connect-via-uri! mongouri)
+  (mc/remove partys)
+  (mc/remove applications)
+  (dorun (map #(insert partys %)       (minimal/partys)))
+  (dorun (map #(insert applications %) (minimal/applications)))
+  "minimal data set initialized")

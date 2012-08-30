@@ -8,6 +8,7 @@
             [noir.session :as session]
             [noir.server :as server]
             [cheshire.core :as json]
+            [lupapalvelu.env :as env] 
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.command :as command]
             [lupapalvelu.singlepage :as singlepage]
@@ -147,3 +148,13 @@
                "Content-Length" (str (:content-length attachment))}}))
 ;; Force automatic saving: "Content-Disposition" (str "attachment; filename=\"" (:file-name attachment) "\"")
 
+;;
+;; Initializing fixtures
+;;
+
+(env/in-dev
+  (defpage "/fixture/:type" {type :type}
+    (case type
+      "minimal" (mongo/init-minimal)
+      "full" (mongo/init)
+      "nothing was done")))
