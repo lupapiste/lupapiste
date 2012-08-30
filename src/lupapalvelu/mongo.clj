@@ -85,5 +85,4 @@
   (mc/remove applications)
   (dorun (map #(insert partys %) (fixture/partys)))
   (dorun (map #(insert partyGroupings %) (fixture/partyGroupings)))
-  (dorun (map #(insert applications %) (fixture/applications)))
-  )
+  (dorun (map #(insert applications %) (fixture/applications))))
