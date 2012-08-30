@@ -13,6 +13,7 @@
     }
    {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :role :authority
+    :authority :tampere
     :personId "031112-1234"
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -20,13 +21,22 @@
     :username "veikko"
     :private {:password "veikko"}
     }
-  ])
+   {:id "777777777777777777000023" ;; Sonja Sibbo - Sipoon lupa-arkkitehti
+    :role :authority
+    :authority :sipoo
+    :personId "230112-1234"
+    :firstName "Sonja"
+    :lastName "Sibbo"
+    :phone "03121991"
+    :username "sonja"
+    :private {:password "sonja"}}
+   ])
 
 (defn applications []
   [ {:id "777777777777777777000100"
      :title "Omakotitalon rakentaminen"
      :permitType :buildingPermit
-     :authority :tampere
+     :authority :sipoo
      :status :active
      :created 1330776303000
      :location {:lat 61.518362 :lon 23.622344} 
@@ -36,7 +46,7 @@
      :roles [ {:partyId "777777777777777777000010"
                :displayName "Mikko Intonen"
                :role :applicant}
-              {:partyId "777777777777777777000016" 
+              {:partyId "777777777777777777000023" 
                :displayName "Veikko Viranomainen"
                :role :authority}]
      }])
