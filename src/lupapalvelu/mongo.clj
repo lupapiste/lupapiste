@@ -57,8 +57,10 @@
 (defn all [collection]
   (map with-id (mc/find-maps collection)))
 
-(defn select [collection data]
-  (map with-id (mc/find-maps collection data)))
+(defn select 
+  "returns multipse entries by matching the monger query"
+  [collection query]
+  (map with-id (mc/find-maps collection query)))
 
 (defn upload [file-name content-type temp-file]
   (with-id
