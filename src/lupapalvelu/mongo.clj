@@ -58,7 +58,7 @@
   (map with-id (mc/find-maps collection)))
 
 (defn select 
-  "returns multipse entries by matching the monger query"
+  "returns multiple entries by matching the monger query"
   [collection query]
   (map with-id (mc/find-maps collection query)))
 
