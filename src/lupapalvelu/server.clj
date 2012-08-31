@@ -9,8 +9,9 @@
 
 (defn -main [& m]
   (info "Server starting")
+  (mongo/connect!)
   (env/in-dev
-    (mongo/init)
+    (mongo/init!)
     (nrepl/start-server :port 9000))
   (server/start env/port {:mode env/mode :ns 'lupapalvelu.web})
   (info "Server running"))

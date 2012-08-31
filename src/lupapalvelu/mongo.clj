@@ -77,31 +77,34 @@
      :content-length (.getLength attachment)
      :file-name (.get (.getMetaData attachment) "file-name")}))
 
-
 ;;
 ;; Bootstrappin'
 ;;
 
-(defn- clear []
+(defn connect! []
   (debug "Connecting to DB: %s" mongouri)
   (m/connect-via-uri! mongouri)
-  (debug "DB is %s" (str (m/get-db)))
+  (debug "DB is %s" (str (m/get-db))))
+
+(defn- clear! []
+  (warn "** Clearing DB **")
   (mc/remove partys)
   (mc/remove applications))
 
-(defn init-full []
-  (clear)
+(defn init-full! []
+  (clear!)
+  (warn "Initializing DB with profile 'full'")
   (dorun (map #(insert partys %)       (full/partys)))
   (dorun (map #(insert applications %) (full/applications)))
   "full data set initialized")
 
 ; copy-paste, use generics
-(defn init-minimal []
-  (clear)
+(defn init-minimal! []
+  (clear!)
+  (warn "Initializing DB with profile 'minimal'")
   (dorun (map #(insert partys %)       (minimal/partys)))
   (dorun (map #(insert applications %) (minimal/applications)))
   "minimal data set initialized")
 
-(defn init []
-  (info "Initializing DB")
-  (init-minimal))
+(defn init! []
+  (init-minimal!))

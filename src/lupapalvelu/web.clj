@@ -161,6 +161,6 @@
 (env/in-dev
   (defpage "/fixture/:type" {type :type}
     (case type
-      "minimal" (mongo/init-minimal)
-      "full" (mongo/init-full)
+      "minimal" (mongo/init-minimal!)
+      "full" (mongo/init-full!)
       "fixture not found")))
