@@ -11,6 +11,7 @@
 (def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
 (def ^:const users "users")
 (def ^:const applications "applications")
+(def collections [users applications])
 
 ;;
 ;; Utils
@@ -83,27 +84,22 @@
 (defn connect! []
   (debug "Connecting to DB: %s" mongouri)
   (m/connect-via-uri! mongouri)
-  (debug "DB is %s" (str (m/get-db))))
+  (debug "DB is \"%s\"" (str (m/get-db))))
 
 (defn- clear! []
   (warn "** Clearing DB **")
-  (mc/remove users)
-  (mc/remove applications))
+  (dorun (map #(mc/remove %) collections))
+  (mc/ensure-index "users" {:email 1} {:unique true}))
 
-(defn init-full! []
+(defn init-fixture! [name p a]
   (clear!)
-  (warn "Initializing DB with profile 'full'")
-  (dorun (map #(insert users %)       (full/users)))
-  (dorun (map #(insert applications %) (full/applications)))
-  "full data set initialized")
+  (warn "Initializing DB with profile '%s'" name)
+  (dorun (map #(insert users %)       p))
+  (dorun (map #(insert applications %) a))
+  (str name " data set initialized"))
 
-; copy-paste, use generics
-(defn init-minimal! []
-  (clear!)
-  (warn "Initializing DB with profile 'minimal'")
-  (dorun (map #(insert users %)       (minimal/users)))
-  (dorun (map #(insert applications %) (minimal/applications)))
-  "minimal data set initialized")
+(defn init-full! [] (init-fixture! "full" (full/users) (full/applications)))
+(defn init-minimal! [] (init-fixture! "minimal" (minimal/users) (minimal/applications)))
 
 (defn init! []
   (init-minimal!))
