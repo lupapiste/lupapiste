@@ -1,6 +1,6 @@
 (ns lupapalvelu.fixture.minimal)
 
-(defn partys []
+(defn users []
   [{:id "777777777777777777000010" ;; Hakija Mikko Intonen, rakentaa Sipooseen omakotitalon, talousrakennuksen ja maalämmön.
     :role :applicant
     :personId "121212-1212"
@@ -43,10 +43,10 @@
      :streetAddress "Hunninsuonkatu 5 B"
      :postalCode "33560"
      :postalPlace "Tampere"
-     :roles [ {:partyId "777777777777777777000010"
+     :roles [ {:userId "777777777777777777000010"
                :displayName "Mikko Intonen"
                :role :applicant}
-              {:partyId "777777777777777777000023" 
+              {:useryId "777777777777777777000023" 
                :displayName "Veikko Viranomainen"
                :role :authority}]
      }])

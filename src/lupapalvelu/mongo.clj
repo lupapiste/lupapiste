@@ -9,8 +9,7 @@
   (:import [org.bson.types ObjectId]))
 
 (def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
-(def ^:const partys "partys")
-(def ^:const partyGroupings "partyGroupings")
+(def ^:const users "users")
 (def ^:const applications "applications")
 
 ;;
@@ -88,13 +87,13 @@
 
 (defn- clear! []
   (warn "** Clearing DB **")
-  (mc/remove partys)
+  (mc/remove users)
   (mc/remove applications))
 
 (defn init-full! []
   (clear!)
   (warn "Initializing DB with profile 'full'")
-  (dorun (map #(insert partys %)       (full/partys)))
+  (dorun (map #(insert users %)       (full/users)))
   (dorun (map #(insert applications %) (full/applications)))
   "full data set initialized")
 
@@ -102,7 +101,7 @@
 (defn init-minimal! []
   (clear!)
   (warn "Initializing DB with profile 'minimal'")
-  (dorun (map #(insert partys %)       (minimal/partys)))
+  (dorun (map #(insert users %)       (minimal/users)))
   (dorun (map #(insert applications %) (minimal/applications)))
   "minimal data set initialized")
 

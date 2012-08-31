@@ -21,18 +21,18 @@
 (defn from-json []
   (json/parse-string (slurp (:body (ring-request))) true))
 
-(defn current-party []
-  "fetches the current party from 1) http-session 2) apikey from headers"
-  (or (session/get :party) ((ring-request) :party)))
+(defn current-user []
+  "fetches the current user from 1) http-session 2) apikey from headers"
+  (or (session/get :user) ((ring-request) :user)))
 
 (defn logged-in? []
-  (not (nil? (current-party))))
+  (not (nil? (current-user))))
 
 (defmacro secured [path params & content]
   `(defpage ~path ~params
      (if (logged-in?)
        (do ~@content)
-       (json {:ok false :text "party not logged in"})))) ; should return 401?
+       (json {:ok false :text "user not logged in"})))) ; should return 401?
 
 ;;
 ;; Alive?
@@ -51,7 +51,7 @@
 
 ; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
-  (let [user (current-party)]
+  (let [user (current-user)]
     (json
       (case (keyword (:role user))
         :applicant {:ok true :applications (mongo/all mongo/applications) }
@@ -61,16 +61,16 @@
 (secured "/rest/application/:id" {id :id}
   (json {:ok true :application (mongo/by-id mongo/applications id)}))
 
-(defpage "/rest/party" []
+(defpage "/rest/user" []
   (json
-    (if-let [party (current-party)]
-      {:ok true :party party}
+    (if-let [user (current-user)]
+      {:ok true :user user}
       {:ok false :message "No session"})))
 
 (secured [:post "/rest/command"] []
   (let [data (from-json)]
     (json (command/execute {:command (:command data)
-                            :party (current-party)
+                            :user (current-user)
                             :created (System/currentTimeMillis) 
                             :data (dissoc data :command) }))))
 
@@ -100,11 +100,11 @@
 
 (defpage [:post "/rest/login"] {:keys [username password]}
   (json
-    (if-let [party (security/login username password)] 
+    (if-let [user (security/login username password)] 
       (do
         (info "login: successful: username=%s" username)
-        (session/put! :party party)
-        {:ok true :party party})
+        (session/put! :user user)
+        {:ok true :user user})
       (do
         (info "login: failed: username=%s" username)
         {:ok false :message "Tunnus tai salasana on väärin."}))))
@@ -123,13 +123,13 @@
       (.trim (.substring value-string (.length key))))))
 
 (defn apikey-authentication
-  "Reads apikeyfrom 'Auhtorization' headers, pushed it to :party request header
+  "Reads apikeyfrom 'Auhtorization' headers, pushed it to :user request header
    'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/rest/application"
   [handler]
   (fn [request]
     (let [authorization (get-in request [:headers "authorization"])
           apikey        (parse "apikey" authorization)]
-      (handler (assoc request :party (security/login-with-apikey apikey))))))
+      (handler (assoc request :user (security/login-with-apikey apikey))))))
 
 (server/add-middleware apikey-authentication)
 
