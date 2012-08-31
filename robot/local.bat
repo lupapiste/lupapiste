@@ -1,0 +1,1 @@
+pybot -d target tests
