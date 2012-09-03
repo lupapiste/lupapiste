@@ -9,10 +9,9 @@
   (:import [org.bson.types ObjectId]))
 
 (def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
-(def ^:const partys "partys")
-(def ^:const partyGroupings "partyGroupings")
+(def ^:const users "users")
 (def ^:const applications "applications")
-(def collections [partys applications partyGroupings])
+(def collections [users applications])
 
 ;;
 ;; Utils
@@ -90,17 +89,17 @@
 (defn- clear! []
   (warn "** Clearing DB **")
   (dorun (map #(mc/remove %) collections))
-  (mc/ensure-index "partys" {:email 1} {:unique true}))
+  (mc/ensure-index "users" {:email 1} {:unique true}))
 
-(defn init-fixture! [name p a]
+(defn init-fixture! [name u a]
   (clear!)
   (warn "Initializing DB with profile '%s'" name)
-  (dorun (map #(insert partys %)       p))
+  (dorun (map #(insert users %)        u))
   (dorun (map #(insert applications %) a))
   (str name " data set initialized"))
 
-(defn init-full! [] (init-fixture! "full" (full/partys) (full/applications)))
-(defn init-minimal! [] (init-fixture! "minimal" (minimal/partys) (minimal/applications)))
+(defn init-full! [] (init-fixture! "full" (full/users) (full/applications)))
+(defn init-minimal! [] (init-fixture! "minimal" (minimal/users) (minimal/applications)))
 
 (defn init! []
   (init-minimal!))

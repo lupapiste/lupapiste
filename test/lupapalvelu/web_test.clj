@@ -7,7 +7,7 @@
 
 #_(facts
   (against-background
-    (session/get :party) => :session-party
-    (security/login-with-apikey "123") => :apikey-party)
-  (current-party {}) => :session-party
-  (current-party {:apikey "123"}) => :apikey-party (provided (session/get :party) => nil))
+    (session/get :user) => :session-user
+    (security/login-with-apikey "123") => :apikey-user)
+  (current-user {}) => :session-user
+  (current-user {:apikey "123"}) => :apikey-user (provided (session/get :user) => nil))
