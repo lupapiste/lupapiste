@@ -9,7 +9,8 @@
     :lastName "Intonen"
     :phone "+35834343433"
     :username "mikko"
-    :private {:password "mikko"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIu9zJl6HNkSIY9tdnGaL0eKhphW0iyicS"
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "502cb9e58426c613c8b85abc"}}
    {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :email "veikko.viranomainen@tampere.fi"
@@ -20,7 +21,8 @@
     :lastName "Viranomainen"
     :phone "03121991"
     :username "veikko"
-    :private {:password "veikko"}}
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}}
    {:id "777777777777777777000023" ;; Sonja Sibbo - Sipoon lupa-arkkitehti
     :email "sonja.sibbo@sipoo.fi"
     :role :authority
@@ -30,7 +32,8 @@
     :lastName "Sibbo"
     :phone "03121991"
     :username "sonja"
-    :private {:password "sonja"}}])
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}}])
 
 (defn applications []
   [ {:id "777777777777777777000100"

@@ -62,6 +62,12 @@
   [collection query]
   (map with-id (mc/find-maps collection query)))
 
+(defn select-one 
+  "returns one entry by matching the monger query"
+  [collection query]
+  (with-id (mc/find-one-as-map collection query)))
+
+
 (defn upload [file-name content-type temp-file]
   (with-id
     (gfs/store-file
