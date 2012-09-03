@@ -42,13 +42,7 @@
      :streetAddress "Hunninsuonkatu 5 B"
      :postalCode "33560"
      :postalPlace "Tampere"
-     :roles [ {:userId "777777777777777777000010"
-               :displayName "Mikko Intonen"
-               :role :applicant}
-              {:userId "777777777777777777000023" 
-               :displayName "Sonja Sibbo"
-               :role :authority}]
-     :rolez { :applicant {:userId "777777777777777777000010"
+     :roles { :applicant {:userId "777777777777777777000010"
                           :displayName "Mikko Intonen"}
               :authority {:userId "777777777777777777000023" 
                           :displayName "Sonja Sibbo"}}}
