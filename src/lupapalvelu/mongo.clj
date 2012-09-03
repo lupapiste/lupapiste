@@ -54,13 +54,12 @@
 (defn by-id [collection id]
   (with-id (mc/find-one-as-map collection {:_id (string-to-objectid id)})))
 
-(defn all [collection]
-  (map with-id (mc/find-maps collection)))
-
 (defn select 
   "returns multiple entries by matching the monger query"
-  [collection query]
-  (map with-id (mc/find-maps collection query)))
+  ([collection]
+    (select collection {}))
+  ([collection query]
+    (map with-id (mc/find-maps collection query))))
 
 (defn select-one 
   "returns one entry by matching the monger query"

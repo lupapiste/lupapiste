@@ -54,7 +54,7 @@
   (let [user (current-user)]
     (json
       (case (keyword (:role user))
-        :applicant {:ok true :applications (mongo/all mongo/applications) }
+        :applicant {:ok true :applications (mongo/select mongo/applications) }
         :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
         {:ok false :text "invalid role to load applications"}))))
 
