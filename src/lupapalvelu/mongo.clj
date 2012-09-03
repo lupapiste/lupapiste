@@ -91,10 +91,10 @@
   (dorun (map #(mc/remove %) collections))
   (mc/ensure-index "users" {:email 1} {:unique true}))
 
-(defn init-fixture! [name p a]
+(defn init-fixture! [name u a]
   (clear!)
   (warn "Initializing DB with profile '%s'" name)
-  (dorun (map #(insert users %)       p))
+  (dorun (map #(insert users %)        u))
   (dorun (map #(insert applications %) a))
   (str name " data set initialized"))
 
