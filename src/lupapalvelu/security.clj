@@ -13,3 +13,11 @@
 (defn login-with-apikey [apikey]
   "returns non-private information of first party with the apikey"
   (and apikey (non-private (first (mongo/select mongo/partys {"private.apikey" apikey})))))
+
+;; TODO: Use jBCrypt
+(defn get-hash [password salt]
+  password)
+
+;; TODO: Use jBCrypt
+(defn dispense-salt []
+  "")
