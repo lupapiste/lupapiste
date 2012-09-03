@@ -35,7 +35,6 @@
 (defn applications []
   [ {:id "777777777777777777000100"
      :title "Omakotitalon rakentaminen"
-     :permitType :buildingPermit
      :authority :sipoo
      :status :active
      :created 1330776303000
@@ -46,7 +45,11 @@
      :roles [ {:userId "777777777777777777000010"
                :displayName "Mikko Intonen"
                :role :applicant}
-              {:useryId "777777777777777777000023" 
-               :displayName "Veikko Viranomainen"
+              {:userId "777777777777777777000023" 
+               :displayName "Sonja Sibbo"
                :role :authority}]
-     }])
+     :rolez { :applicant {:userId "777777777777777777000010"
+                          :displayName "Mikko Intonen"}
+              :authority {:userId "777777777777777777000023" 
+                          :displayName "Sonja Sibbo"}}}
+   ])
