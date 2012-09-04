@@ -1,5 +1,4 @@
 (ns lupapalvelu.domain)
 
-(defn get-user-role-in-application [user application]
-  (if-let [user-id (:id user)]
-    (filter #(= (:userId (val %)) user-id) (:roles application))))
+(defn role-in-application [user-id application]
+  (and user-id (first (map key (filter #(= (:userId (val %)) user-id) (:roles application))))))
