@@ -1,6 +1,19 @@
 (ns lupapalvelu.security-test
   (:use clojure.test
-        lupapalvelu.security))
+        midje.sweet
+        lupapalvelu.security)
+  (:require [noir.session :as session]
+            [lupapalvelu.security :as security]))
+
+
+
+#_(facts
+  (against-background
+    (session/get :user) => :session-user
+    (security/login-with-apikey "123") => :apikey-user)
+  (current-user {}) => :session-user
+  (current-user {:apikey "123"}) => :apikey-user (provided (session/get :user) => nil))
+
 
 #_(deftest login-tests
   (testing "can't login with bad credentials"
