@@ -21,8 +21,8 @@
     [:#body]
     (enlive/content (map (comp make-invisible* get-content) pages))))
 
-(defn- main-page []
-  (enlive/html-resource "public/html/main.html"))
+(defn- load-page [name]
+  (enlive/html-resource name))
 
 (defn- script-tags [r]
   (enlive/select r [:script]))
@@ -44,8 +44,8 @@
 
 (defn- add-combined-tags [r]
   (enlive/transform r [:title] (enlive/after
-                                 [{:tag :script :attrs {:src "js/lupapalvelu.js" :type "text/javascript"}}
-                                  {:tag :link :attrs {:href "css/lupapalvelu.css" :rel "stylesheet"}}])))
+                                 [{:tag :script :attrs {:src "lupapalvelu.js" :type "text/javascript"}}
+                                  {:tag :link :attrs {:href "lupapalvelu.css" :rel "stylesheet"}}])))
 
 (defn- pages [r]
   (let [loader (clojure.lang.RT/baseLoader)]
@@ -59,8 +59,8 @@
     (def strip-css-tags identity)
     (def strip-combined-tags identity)))
 
-(defn compose-singlepage-html []
-  (let [main (main-page)]
+(defn compose-singlepage-html [name]
+  (let [main (load-page name)]
     (apply str
            (enlive/emit*
              (inject-pages (->
@@ -79,11 +79,11 @@
     (.close g)
     (.toByteArray o)))
 
-(defn compose-singlepage-resources [selector content-type]
+(defn compose-singlepage-resources [name selector content-type]
   (let [loader (clojure.lang.RT/baseLoader)
         buffer (ByteArrayOutputStream.)]
     (dorun
-      (for [src (selector (main-page))]
+      (for [src (selector (load-page name))]
         (if-let [r (.getResourceAsStream loader (str "public/" src))]
           (do
             (IOUtils/copy r buffer)
@@ -95,8 +95,8 @@
                  "Content-Encoding" "gzip"
                  "Content-Length" (str (alength content))}})))
 
-(defn compose-singlepage-js []
-  (compose-singlepage-resources (fn [r] (map #(-> % :attrs :src) (script-tags r))) "application/javascript"))
+(defn compose-singlepage-js [name]
+  (compose-singlepage-resources name (fn [r] (map #(-> % :attrs :src) (script-tags r))) "application/javascript"))
 
-(defn compose-singlepage-css []
-  (compose-singlepage-resources (fn [r] (map #(-> % :attrs :href) (css-tags r))) "text/css"))
+(defn compose-singlepage-css [name]
+  (compose-singlepage-resources name (fn [r] (map #(-> % :attrs :href) (css-tags r))) "text/css"))

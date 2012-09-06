@@ -82,13 +82,13 @@
   (resp/redirect "/lupapalvelu#!/login"))
 
 (defpage "/lupapalvelu" []
-  (singlepage/compose-singlepage-html))
+  (singlepage/compose-singlepage-html "public/html/main.html"))
 
-(defpage "/js/lupapalvelu.js" []
-  (singlepage/compose-singlepage-js))
+(defpage "/lupapalvelu.js" []
+  (singlepage/compose-singlepage-js "public/html/main.html"))
 
-(defpage "/css/lupapalvelu.css" []
-  (singlepage/compose-singlepage-css))
+(defpage "/lupapalvelu.css" []
+  (singlepage/compose-singlepage-css "public/html/main.html"))
 
 ;;
 ;; Login/logout:
