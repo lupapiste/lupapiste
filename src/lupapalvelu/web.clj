@@ -80,7 +80,7 @@
 
 (defpage "/" [] (resp/redirect "/welcome"))
 
-(defpage "/welcome" [] (singlepage/compose-singlepage-html "welcome"))
+(defpage "/welcome" [] (session/clear!) (singlepage/compose-singlepage-html "welcome"))
 (defpage "/welcome.js" [] (singlepage/compose-singlepage-js "welcome"))
 (defpage "/welcome.css" [] (singlepage/compose-singlepage-css "welcome"))
 
