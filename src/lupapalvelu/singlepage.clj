@@ -22,7 +22,7 @@
     (enlive/content (map (comp make-invisible* get-content) pages))))
 
 (defn- load-page [name]
-  (enlive/html-resource name))
+  (enlive/html-resource (str "public/html/" name ".html")))
 
 (defn- script-tags [r]
   (enlive/select r [:script]))
@@ -42,10 +42,10 @@
 (defn- strip-page-tags [r]
   (enlive/transform r [:link] (fn [e] (if (not= (-> e :attrs :rel) "page") e))))
 
-(defn- add-combined-tags [r]
+(defn- add-combined-tags [r name]
   (enlive/transform r [:title] (enlive/after
-                                 [{:tag :script :attrs {:src "lupapalvelu.js" :type "text/javascript"}}
-                                  {:tag :link :attrs {:href "lupapalvelu.css" :rel "stylesheet"}}])))
+                                 [{:tag :script :attrs {:src (str name ".js") :type "text/javascript"}}
+                                  {:tag :link :attrs {:href (str name ".css") :rel "stylesheet"}}])))
 
 (defn- pages [r]
   (let [loader (clojure.lang.RT/baseLoader)]
@@ -68,7 +68,7 @@
                              (strip-script-tags)
                              (strip-css-tags)
                              (strip-page-tags)
-                             (add-combined-tags))
+                             (add-combined-tags name))
                            (pages main))))))
 
 (defn gzip [a]
