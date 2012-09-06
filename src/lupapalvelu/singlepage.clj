@@ -25,7 +25,7 @@
   (enlive/html-resource (str "public/html/" name ".html")))
 
 (defn- script-tags [r]
-  (enlive/select r [:script]))
+  (filter #(-> % :attrs :src) (enlive/select r [:script])))
 
 (defn- css-tags [r]
   (filter #(= (-> % :attrs :rel) "stylesheet") (enlive/select r [:link])))
@@ -34,7 +34,7 @@
   (filter #(= (-> % :attrs :rel) "page") (enlive/select r [:link])))
 
 (defn- strip-script-tags [r]
-  (enlive/transform r [:script] nil))
+  (enlive/transform r [:script] (fn [e] (if (-> e :attrs :src) nil e))))
 
 (defn- strip-css-tags [r]
   (enlive/transform r [:link] (fn [e] (if (not= (-> e :attrs :rel) "stylesheet") e))))
