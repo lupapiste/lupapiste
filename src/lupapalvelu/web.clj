@@ -74,10 +74,6 @@
                             :created (System/currentTimeMillis) 
                             :data (dissoc data :command) }))))
 
-(defpage "/rest/user/email-not-in-use" {email :email}
-   (Thread/sleep 1000) ; TODO: Remove this heavy processing simulation
-   (json {:ok (not= "bad" email)})) ; TODO: Implement me
-
 ;;
 ;; Web UI:
 ;;
