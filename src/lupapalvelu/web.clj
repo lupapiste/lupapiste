@@ -78,17 +78,15 @@
 ;; Web UI:
 ;;
 
-(defpage "/" []
-  (resp/redirect "/lupapalvelu#!/login"))
+(defpage "/" [] (resp/redirect "/welcome"))
 
-(defpage "/lupapalvelu" []
-  (singlepage/compose-singlepage-html))
+(defpage "/welcome" [] (session/clear!) (singlepage/compose-singlepage-html "welcome"))
+(defpage "/welcome.js" [] (singlepage/compose-singlepage-js "welcome"))
+(defpage "/welcome.css" [] (singlepage/compose-singlepage-css "welcome"))
 
-(defpage "/js/lupapalvelu.js" []
-  (singlepage/compose-singlepage-js))
-
-(defpage "/css/lupapalvelu.css" []
-  (singlepage/compose-singlepage-css))
+(defpage "/lupapiste" [] (singlepage/compose-singlepage-html "lupapiste"))
+(defpage "/lupapiste.js" [] (singlepage/compose-singlepage-js "lupapiste"))
+(defpage "/lupapiste.css" [] (singlepage/compose-singlepage-css "lupapiste"))
 
 ;;
 ;; Login/logout:

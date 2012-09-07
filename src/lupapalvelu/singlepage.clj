@@ -21,11 +21,11 @@
     [:#body]
     (enlive/content (map (comp make-invisible* get-content) pages))))
 
-(defn- main-page []
-  (enlive/html-resource "public/html/main.html"))
+(defn- load-page [name]
+  (enlive/html-resource (str "public/html/" name ".html")))
 
 (defn- script-tags [r]
-  (enlive/select r [:script]))
+  (filter #(-> % :attrs :src) (enlive/select r [:script])))
 
 (defn- css-tags [r]
   (filter #(= (-> % :attrs :rel) "stylesheet") (enlive/select r [:link])))
@@ -34,7 +34,7 @@
   (filter #(= (-> % :attrs :rel) "page") (enlive/select r [:link])))
 
 (defn- strip-script-tags [r]
-  (enlive/transform r [:script] nil))
+  (enlive/transform r [:script] (fn [e] (if (-> e :attrs :src) nil e))))
 
 (defn- strip-css-tags [r]
   (enlive/transform r [:link] (fn [e] (if (not= (-> e :attrs :rel) "stylesheet") e))))
@@ -42,10 +42,10 @@
 (defn- strip-page-tags [r]
   (enlive/transform r [:link] (fn [e] (if (not= (-> e :attrs :rel) "page") e))))
 
-(defn- add-combined-tags [r]
+(defn- add-combined-tags [r name]
   (enlive/transform r [:title] (enlive/after
-                                 [{:tag :script :attrs {:src "js/lupapalvelu.js" :type "text/javascript"}}
-                                  {:tag :link :attrs {:href "css/lupapalvelu.css" :rel "stylesheet"}}])))
+                                 [{:tag :script :attrs {:src (str name ".js") :type "text/javascript"}}
+                                  {:tag :link :attrs {:href (str name ".css") :rel "stylesheet"}}])))
 
 (defn- pages [r]
   (let [loader (clojure.lang.RT/baseLoader)]
@@ -59,8 +59,8 @@
     (def strip-css-tags identity)
     (def strip-combined-tags identity)))
 
-(defn compose-singlepage-html []
-  (let [main (main-page)]
+(defn compose-singlepage-html [name]
+  (let [main (load-page name)]
     (apply str
            (enlive/emit*
              (inject-pages (->
@@ -68,7 +68,7 @@
                              (strip-script-tags)
                              (strip-css-tags)
                              (strip-page-tags)
-                             (add-combined-tags))
+                             (add-combined-tags name))
                            (pages main))))))
 
 (defn gzip [a]
@@ -79,11 +79,11 @@
     (.close g)
     (.toByteArray o)))
 
-(defn compose-singlepage-resources [selector content-type]
+(defn compose-singlepage-resources [name selector content-type]
   (let [loader (clojure.lang.RT/baseLoader)
         buffer (ByteArrayOutputStream.)]
     (dorun
-      (for [src (selector (main-page))]
+      (for [src (selector (load-page name))]
         (if-let [r (.getResourceAsStream loader (str "public/" src))]
           (do
             (IOUtils/copy r buffer)
@@ -95,8 +95,8 @@
                  "Content-Encoding" "gzip"
                  "Content-Length" (str (alength content))}})))
 
-(defn compose-singlepage-js []
-  (compose-singlepage-resources (fn [r] (map #(-> % :attrs :src) (script-tags r))) "application/javascript"))
+(defn compose-singlepage-js [name]
+  (compose-singlepage-resources name (fn [r] (map #(-> % :attrs :src) (script-tags r))) "application/javascript"))
 
-(defn compose-singlepage-css []
-  (compose-singlepage-resources (fn [r] (map #(-> % :attrs :href) (css-tags r))) "text/css"))
+(defn compose-singlepage-css [name]
+  (compose-singlepage-resources name (fn [r] (map #(-> % :attrs :href) (css-tags r))) "text/css"))
