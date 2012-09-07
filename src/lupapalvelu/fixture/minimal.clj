@@ -62,7 +62,14 @@
               :authority {:userId "777777777777777777000023"
                           :displayName "Sonja Sibbo"}
               }
-     :attachments [{:attachmentId "5049c08169a6a872c4154d50",
+     :attachments [{:name "Joku kuva"
+                    :attachmentId "5049c08169a6a872c4154d50",
                     :fileName "marker-green.png",
                     :contentType "image/png",
-                    :size 753}]}])
+                    :size 753}
+                   {:name "Evil plan to conguer the world"
+                    :attachmentId "5049c08169a6a872c4154d51",
+                    :fileName "plan9.pdf",
+                    :contentType "application/pdf",
+                    :size 12323753}
+                   {:name "Virallinen piirrustus"}]}])
