@@ -78,15 +78,15 @@
 ;; Web UI:
 ;;
 
-(defpage "/" [] (resp/redirect "/welcome"))
+(defpage "/" [] (resp/redirect "/welcome#"))
 
 (defpage "/welcome" [] (session/clear!) (singlepage/compose-singlepage-html "welcome"))
 (defpage "/welcome.js" [] (singlepage/compose-singlepage-js "welcome"))
 (defpage "/welcome.css" [] (singlepage/compose-singlepage-css "welcome"))
 
-(defpage "/lupapiste" [] (singlepage/compose-singlepage-html "lupapiste"))
-(defpage "/lupapiste.js" [] (singlepage/compose-singlepage-js "lupapiste"))
-(defpage "/lupapiste.css" [] (singlepage/compose-singlepage-css "lupapiste"))
+(defpage "/lupapiste" [] (if (logged-in?) (singlepage/compose-singlepage-html "lupapiste") (resp/redirect "/welcome#")))
+(defpage "/lupapiste.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
+(defpage "/lupapiste.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
 
 ;;
 ;; Login/logout:
