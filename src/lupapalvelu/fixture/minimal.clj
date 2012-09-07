@@ -46,7 +46,5 @@
      :postalCode "33560"
      :postalPlace "Tampere"
      :roles { :applicant {:userId "777777777777777777000010"
-                          :displayName "Mikko Intonen"}
-              :authority {:userId "777777777777777777000023" 
-                          :displayName "Sonja Sibbo"}}}
+                          :displayName "Mikko Intonen"}}}
    ])
