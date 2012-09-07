@@ -46,5 +46,17 @@
      :postalCode "33560"
      :postalPlace "Tampere"
      :roles { :applicant {:userId "777777777777777777000010"
+                          :displayName "Mikko Intonen"}}},
+   {:id "777777777777777777000101"
+     :title "Omakotitalon rakentaminen2"
+     :authority :sipoo
+     :status :active
+     :created 1330776303000
+     :location {:lat 61.518362 :lon 23.622344} 
+     :streetAddress "Hunninsuonkatu 5 B"
+     :postalCode "33560"
+     :postalPlace "Tampere"
+     :roles { :applicant {:userId "777777777777777777000010"
                           :displayName "Mikko Intonen"}}}
+
    ])
