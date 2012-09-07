@@ -44,11 +44,6 @@
   (mc/update-by-id collection (string-to-objectid id) data)
   nil)
 
-(defn update [collection select data]
-  "Updates data in collection matching select. Always returns nil."
-  (mc/update-by-id collection (string-to-objectid id) data)
-  nil)
-
 (defn insert [collection data]
   "Inserts data into collection. Re-uses 'id' as  Always returns nil."
   (if (contains? data :id)
