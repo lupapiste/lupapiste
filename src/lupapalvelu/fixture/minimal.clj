@@ -33,7 +33,19 @@
     :phone "03121991"
     :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}}])
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}},
+   {:id "777777777777777777000024" ;; Seppo Sibbo - Sipoon lupa-arkkitehti
+    :email "seppo.sibbo@sipoo.fi"
+    :role :authority
+    :authority :sipoo
+    :personId "230112-1234"
+    :firstName "Seppo"
+    :lastName "Simonen"
+    :phone "03121991"
+    :username "seppo"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}}   
+   ])
 
 (defn applications []
   [ {:id "777777777777777777000100"
@@ -41,14 +53,15 @@
      :authority :sipoo
      :status :active
      :created 1330776303000
-     :location {:lat 61.518362 :lon 23.622344} 
+     :location {:lat 61.518362 :lon 23.622344}
      :streetAddress "Hunninsuonkatu 5 B"
      :postalCode "33560"
      :postalPlace "Tampere"
      :roles { :applicant {:userId "777777777777777777000010"
                           :displayName "Mikko Intonen"}
-              :authority {:userId "777777777777777777000023" 
-                          :displayName "Sonja Sibbo"}}
+              :authority {:userId "777777777777777777000023"
+                          :displayName "Sonja Sibbo"}
+              }
      :attachments [{:attachmentId "5049c08169a6a872c4154d50",
                     :fileName "marker-green.png",
                     :contentType "image/png",
