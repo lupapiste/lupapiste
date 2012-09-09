@@ -67,7 +67,7 @@
       {:ok true :user user}
       {:ok false :message "No session"})))
 
-(secured [:post "/rest/command"] []
+(defpage [:post "/rest/command"] []
   (let [data (from-json)]
     (json (command/execute {:command (:command data)
                             :user (current-user)
@@ -84,9 +84,9 @@
 (defpage "/welcome.js" [] (singlepage/compose-singlepage-js "welcome"))
 (defpage "/welcome.css" [] (singlepage/compose-singlepage-css "welcome"))
 
-(defpage "/lupapiste" [] (if (logged-in?) (singlepage/compose-singlepage-html "lupapiste") (resp/redirect "/welcome#")))
-(defpage "/lupapiste.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
-(defpage "/lupapiste.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
+(defpage "/lupapiste" [] (if logged-in? (singlepage/compose-singlepage-html "lupapiste") (resp/redirect "/welcome#")))
+(defpage "/lupapiste.js" [] (if logged-in? (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
+(defpage "/lupapiste.css" [] (if logged-in? (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
 
 ;;
 ;; Login/logout:
@@ -117,7 +117,7 @@
       (.trim (.substring value-string (.length key))))))
 
 (defn apikey-authentication
-  "Reads apikeyfrom 'Auhtorization' headers, pushed it to :user request header
+  "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
    'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/rest/application"
   [handler]
   (fn [request]
