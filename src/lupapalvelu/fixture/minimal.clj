@@ -27,7 +27,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :role :authority
     :authority :sipoo
-    :personId "230112-1234"
+    :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -38,7 +38,7 @@
     :email "seppo.sibbo@sipoo.fi"
     :role :authority
     :authority :sipoo
-    :personId "230112-1234"
+    :personId "kunta124"
     :firstName "Seppo"
     :lastName "Simonen"
     :phone "03121991"
