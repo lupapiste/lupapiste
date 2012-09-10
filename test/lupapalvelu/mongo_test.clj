@@ -9,4 +9,6 @@
   (testing "invalid id returns nil"
            (is (= nil (string-to-objectid invalid-id))))
   (testing "string id can be converted to objectid and back"
-           (is (= valid-id (-> valid-id string-to-objectid objectid-to-string)))))
+           (is (= valid-id (-> valid-id string-to-objectid objectid-to-string))))
+  (testing "make-objectid returns string"
+           (is (string? (make-objectid)))))

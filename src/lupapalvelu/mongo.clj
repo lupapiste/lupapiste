@@ -35,6 +35,9 @@
       (assoc :id (objectid-to-string id)) 
       (dissoc :_id))))
 
+(defn make-objectid []
+  (.toString (ObjectId.)))
+
 ;;
 ;; Mongo Api
 ;; 
