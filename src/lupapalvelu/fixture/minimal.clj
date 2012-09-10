@@ -48,25 +48,24 @@
    ])
 
 (defn applications []
-  [ {:id "777777777777777777000100"
-     :title "Omakotitalon rakentaminen"
-     :authority :sipoo
-     :status :active
-     :created 1330776303000
-     :location {:lat 61.518362 :lon 23.622344}
-     :streetAddress "Hunninsuonkatu 5 B"
-     :postalCode "33560"
-     :postalPlace "Tampere"
-     :roles { :applicant {:userId "777777777777777777000010"
-                          :displayName "Mikko Intonen"}}
-     :attachments [{:name "Joku kuva"
-                    :attachmentId "5049c08169a6a872c4154d50",
-                    :fileName "marker-green.png",
-                    :contentType "image/png",
-                    :size 753}
-                   {:name "Evil plan to conguer the world"
-                    :attachmentId "5049c08169a6a872c4154d51",
-                    :fileName "plan9.pdf",
-                    :contentType "application/pdf",
-                    :size 12323753}
-                   {:name "Virallinen piirrustus"}]}])
+  [{:id "777777777777777777000100"
+    :title "Omakotitalon rakentaminen"
+    :authority :sipoo
+    :status :active
+    :created 1330776303000
+    :location {:lat 61.518362 :lon 23.622344}
+    :streetAddress "Hunninsuonkatu 5 B"
+    :postalCode "33560"
+    :postalPlace "Tampere"
+    :roles { :applicant {:userId "777777777777777777000010"
+                         :displayName "Mikko Intonen"}}
+    :attachments {"5049c08169a6a872c4154d50" {:name "Joku kuva"
+                                              :fileName "marker-green.png"
+                                              :contentType "image/png"
+                                              :size 753}
+                  "5049c08169a6a872c4154d51" {:name "Evil plan to conguer the world"
+                                              :fileName "plan9.pdf"
+                                              :contentType "application/pdf"
+                                              :size 12323753}
+                  "5049c08169a6a872c4154d52" {:name "Virallinen piirrustus"
+                                              :size 0}}}])
