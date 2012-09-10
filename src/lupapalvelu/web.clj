@@ -74,6 +74,9 @@
                             :created (System/currentTimeMillis) 
                             :data (dissoc data :command) }))))
 
+(secured "/rest/genid" []
+  (json {:ok true :id (mongo/make-objectid)}))
+
 ;;
 ;; Web UI:
 ;;
@@ -146,7 +149,6 @@
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
                "Content-Length" (str (:content-length attachment))}}))
-;; Force automatic saving: "Content-Disposition" (str "attachment; filename=\"" (:file-name attachment) "\"")
 
 ;;
 ;; Initializing fixtures
