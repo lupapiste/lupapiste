@@ -130,14 +130,16 @@
 
 (server/add-middleware apikey-authentication)
 
-(defn slow-network [delay]
-  (fn [handler]
-    (fn [request]
-      (warn "Hit speed bump")
-      (Thread/sleep delay)
-      (handler request))))
-
-#_ (server/add-middleware (slow-network 1000))
+(env/in-dev
+  (def speed-bump (atom 0))
+  (server/add-middleware
+    (fn [handler]
+      (fn [request]
+        (let [bump @speed-bump]
+          (when (> bump 0)
+            (warn "Hit speed bump %d ms: %s" bump (:uri request))
+            (Thread/sleep bump)))
+        (handler request)))))
 
 ;;
 ;; File upload/download:
