@@ -138,7 +138,7 @@
   (debug "file upload: uploading: applicationId=%s, filename=%s, tempfile=%s" applicationId filename tempfile)
   (let [attachment (mongo/upload filename content-type tempfile)
         attachment-id (:id attachment)]
-    (mongo/update mongo/applications applicationId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
+    (mongo/update-by-id mongo/applications applicationId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
     (.delete (file tempfile))
     (json {:ok true :attachmentId attachment-id})))
 

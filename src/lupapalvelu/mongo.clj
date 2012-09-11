@@ -42,7 +42,12 @@
 ;; Mongo Api
 ;; 
 
-(defn update [collection id data]
+(defn update [collection query data]
+  "Updates data into collection by query. Always returns nil."
+  (mc/update collection query data)
+  nil)
+
+(defn update-by-id [collection id data]
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   (mc/update-by-id collection (string-to-objectid id) data)
   nil)

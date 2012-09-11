@@ -51,7 +51,7 @@
   [{:id "777777777777777777000100"
     :title "Omakotitalon rakentaminen"
     :authority :sipoo
-    :status :active
+    :status :open
     :created 1330776303000
     :location {:lat 61.518362 :lon 23.622344}
     :streetAddress "Hunninsuonkatu 5 B"
