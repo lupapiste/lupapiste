@@ -51,14 +51,43 @@
   [{:id "777777777777777777000100"
     :title "Omakotitalon rakentaminen"
     :authority :sipoo
-    :status :active
+    :status :open
     :created 1330776303000
     :location {:lat 61.518362 :lon 23.622344}
     :streetAddress "Hunninsuonkatu 5 B"
     :postalCode "33560"
     :postalPlace "Tampere"
+    :permitType :buildingPermit
+    :documents {"5049c08169a6a871a4154d50" {:documentType :hakijaTieto
+                                             :content {:nimi "Mikko Intonen"
+                                                       :postiosoite "Vanhakatu 8"
+                                                       :puhelinnumero "+3584522334455"
+                                                       :sahkopostiosoite "mikko.intonen@example.com"}}
+                "5049c08169a6a871a4154d52" {:documentType :paasuunnittelijaTieto
+                                             :content {:nimi "Mirja Nieminen"
+                                                       :postiosoite "Niemikatu 8 A"
+                                                       :puhelinnumero "+3584522334455"
+                                                       :sahkopostiosoite "mirja.nieminen@example.com"
+                                                       :kokemus "10 v"}}
+                 
+                "5049c08169a6a871a4154d53" {:documentType :toimenpide
+                                             :type :new
+                                             :content {:otsikko "Uusi omakotitalo"}}
+                "5049c08169a6a871a4154d54" {:documentType :toimenpide
+                                             :type :new
+                                             :content {:otsikko "Talousrakennus"}}
+                "5049c08169a6a871a4154d55" {:documentType :toimenpide
+                                             :type :other
+                                             :content {:otsikko "Maalämpö"}}
+                "5049c08169a6a871a4154d56" {:documentType :rh1
+                                             :content {:lorem "ipsum"
+                                                       :dolor "sit"
+                                                       :amet "foo"}}}
+                 
     :roles { :applicant {:userId "777777777777777777000010"
-                         :displayName "Mikko Intonen"}}
+                         :displayName "Mikko Intonen"}
+            :architect {:userId "777777777777777777000010"
+                        :displayName "Mikko Intonen"}}
     :attachments {"5049c08169a6a872c4154d50" {:name "Joku kuva"
                                               :fileName "marker-green.png"
                                               :contentType "image/png"
