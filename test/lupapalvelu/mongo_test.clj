@@ -1,7 +1,8 @@
 (ns lupapalvelu.mongo-test
   (:use clojure.test
         midje.sweet
-        lupapalvelu.mongo))
+        lupapalvelu.mongo)
+  (:require [monger.collection :as mc]))
 
 (def valid-id "502770568de2282ae6fbb0be")
 (def invalid-id "123")
@@ -16,14 +17,23 @@
 
 (facts "Facts about with-objectid"
   (against-background
-    (string-to-objectid "foo") => "FOO")
+    (string-to-objectid "foo") => ...id...)
   (fact (with-objectid nil) => nil)
   (fact (with-objectid {:data "data"}) => {:data "data"})
-  (fact (with-objectid {:id "foo" :data "data"}) => {:_id "FOO" :data "data"}))
+  (fact (with-objectid {:id "foo" :data "data"}) => {:_id ...id... :data "data"}))
 
 (facts "Facts about with-id"
   (against-background
-    (objectid-to-string "foo") => "FOO")
+    (objectid-to-string "foo") => ...id...)
   (fact (with-id nil) => nil)
   (fact (with-id {:data "data"}) => {:data "data"})
-  (fact (with-id {:_id "foo" :data "data"}) => {:id "FOO" :data "data"}))
+  (fact (with-id {:_id "foo" :data "data"}) => {:id ...id... :data "data"}))
+
+(facts "Facts about insert"
+  (fact (insert "c" {:id "foo" :data "data"}) => ...result...
+        (provided
+          (string-to-objectid "foo") => ...id...
+          (mc/insert-and-return "c" {:_id ...id... :data "data"}) => ...result...))
+  (fact (insert "c" {:data "data"}) => ..result..
+        (provided
+          (mc/insert-and-return "c" {:data "data"}) => ..result..)))
