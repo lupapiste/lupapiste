@@ -38,7 +38,9 @@
     m))
 
 (defn make-objectid []
-  (.toString (ObjectId.)))
+ (let [id (.toString (ObjectId.))]
+   (println "ID IS:" id)
+   id))
 
 ;;
 ;; Mongo Api
