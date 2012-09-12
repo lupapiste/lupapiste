@@ -69,10 +69,13 @@
 
 (defpage [:post "/rest/command"] []
   (let [data (from-json)]
-    (json (command/execute {:command (:command data)
+    (let [response (command/execute {:command (:command data)
                             :user (current-user)
                             :created (System/currentTimeMillis) 
-                            :data (dissoc data :command) }))))
+                            :data (dissoc data :command) })]
+      (do 
+        (println response)
+        (json response)))))
 
 (secured "/rest/genid" []
   (json {:ok true :id (mongo/make-objectid)}))
@@ -91,9 +94,18 @@
 (defpage "/lupapiste.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
 (defpage "/lupapiste.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
 
+(defpage "/authority" [] (if (logged-in?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
+(defpage "/authority.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "authority") {:status 401}))
+(defpage "/authority.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "authority") {:status 401}))
+
 ;;
 ;; Login/logout:
 ;;
+
+(def applicationpage-for {
+                   :applicant "/lupapiste"
+                   :authority "/authority"
+                   })
 
 (defpage [:post "/rest/login"] {:keys [username password]}
   (json
@@ -101,7 +113,8 @@
       (do
         (info "login: successful: username=%s" username)
         (session/put! :user user)
-        {:ok true :user user})
+        (let [userrole (keyword (:role user))]
+          {:ok true :user user :applicationpage (userrole applicationpage-for) }))
       (do
         (info "login: failed: username=%s" username)
         {:ok false :message "Tunnus tai salasana on väärin."}))))
@@ -129,6 +142,17 @@
       (handler (assoc request :user (security/login-with-apikey apikey))))))
 
 (server/add-middleware apikey-authentication)
+
+(env/in-dev
+  (def speed-bump (atom 0))
+  (server/add-middleware
+    (fn [handler]
+      (fn [request]
+        (let [bump @speed-bump]
+          (when (> bump 0)
+            (warn "Hit speed bump %d ms: %s" bump (:uri request))
+            (Thread/sleep bump)))
+        (handler request)))))
 
 ;;
 ;; File upload/download:

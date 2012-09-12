@@ -7,6 +7,9 @@
     :personId "121212-1212"
     :firstName "Mikko"
     :lastName "Intonen"
+    :streetAddress "Vanhakatu 5"
+    :postalCode "55550"
+    :postalPlace "Viitasaari"
     :phone "+35834343433"
     :username "mikko"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIu9zJl6HNkSIY9tdnGaL0eKhphW0iyicS"
@@ -57,8 +60,44 @@
     :streetAddress "Hunninsuonkatu 5 B"
     :postalCode "33560"
     :postalPlace "Tampere"
+    :permitType :buildingPermit
+    :documents {"5049c08169a6a871a4154d50" {:documentType :hakijaTieto
+                                             :content {:nimi "Mikko Intonen"
+                                                       :postiosoite "Vanhakatu 5"
+                                                       :puhelinnumero "+3584522334455"
+                                                       :sahkopostiosoite "mikko.intonen@example.com"}}
+                "5049c08169a6a871a4154d52" {:documentType :paasuunnittelijaTieto
+                                             :content {:nimi "Mirja Nieminen"
+                                                       :postiosoite "Niemikatu 8 A"
+                                                       :puhelinnumero "+3584522334455"
+                                                       :sahkopostiosoite "mirja.nieminen@example.com"
+                                                       :koulutus "Arkkitehti"
+                                                       :kokemus "10 v"}}
+                 
+                "5049c08169a6a871a4154d53" {:documentType :toimenpide
+                                             :type :buildNew
+                                             :content {:otsikko "Omakotitalon rakentaminen"}}
+                "5049c08169a6a871a4154d54" {:documentType :toimenpide
+                                             :type :buildNew
+                                             :content {:otsikko "Talousrakennus"}}
+                "5049c08169a6a871a4154d55" {:documentType :toimenpide
+                                             :type :buildOther
+                                             :content {:otsikko "Maalämpö"}}
+                "5049c08169a6a871a4154d56" {:documentType :rh1
+                                            :parentDocument "5049c08169a6a871a4154d53" ;; Omakotitalon RH1
+                                            :content {:rakennusaine "puu",
+                                                      :kerrosluku 2,
+                                                      :kerrosala 232}}
+                "5049c08169a6a871a4154d57" {:documentType :rh1
+                                            :parentDocument "5049c08169a6a871a4154d54" ;; Talousrakennuksen RH1
+                                            :content {:rakennusaine "betoni",
+                                                      :kerrosluku 1,
+                                                      :kerrosala 42}}}
+                 
     :roles { :applicant {:userId "777777777777777777000010"
-                         :displayName "Mikko Intonen"}}
+                         :displayName "Mikko Intonen"}
+            :architect {:userId "777777777777777777000010"
+                        :displayName "Mikko Intonen"}}
     :attachments {"5049c08169a6a872c4154d50" {:name "Joku kuva"
                                               :fileName "marker-green.png"
                                               :contentType "image/png"

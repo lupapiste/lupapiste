@@ -23,17 +23,19 @@
 (defn objectid-to-string [id] 
   (.toString id)) 
 
-(defn- with-objectid [map]
-  (if-let [id (:id map)]
-    (-> map
+(defn with-objectid [m]
+  (if-let [id (:id m)]
+    (-> m
       (assoc :_id (string-to-objectid id))
-      (dissoc :id))))
+      (dissoc :id))
+    m))
 
-(defn- with-id [map]
-  (if-let [id (:_id map)]
-    (-> map 
+(defn with-id [m]
+  (if-let [id (:_id m)]
+    (-> m 
       (assoc :id (objectid-to-string id)) 
-      (dissoc :_id))))
+      (dissoc :_id))
+    m))
 
 (defn make-objectid []
   (.toString (ObjectId.)))
@@ -53,11 +55,8 @@
   nil)
 
 (defn insert [collection data]
-  "Inserts data into collection. Re-uses 'id' as  Always returns nil."
-  (if (contains? data :id)
-    (mc/insert collection (with-objectid data))
-    (mc/insert collection data))
-  nil)
+  "Inserts data into collection. The 'id' in 'data' (if it exists) is converted to MongoDB ObjectID. Returns inserted document."
+  (mc/insert-and-return collection (with-objectid data)))
 
 (defn by-id [collection id]
   (with-id (mc/find-one-as-map collection {:_id (string-to-objectid id)})))
