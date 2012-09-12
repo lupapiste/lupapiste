@@ -7,6 +7,9 @@
     :personId "121212-1212"
     :firstName "Mikko"
     :lastName "Intonen"
+    :streetAddress "Vanhakatu 5"
+    :postalCode "55550"
+    :postalPlace "Viitasaari"
     :phone "+35834343433"
     :username "mikko"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIu9zJl6HNkSIY9tdnGaL0eKhphW0iyicS"
@@ -60,7 +63,7 @@
     :permitType :buildingPermit
     :documents {"5049c08169a6a871a4154d50" {:documentType :hakijaTieto
                                              :content {:nimi "Mikko Intonen"
-                                                       :postiosoite "Vanhakatu 8"
+                                                       :postiosoite "Vanhakatu 5"
                                                        :puhelinnumero "+3584522334455"
                                                        :sahkopostiosoite "mikko.intonen@example.com"}}
                 "5049c08169a6a871a4154d52" {:documentType :paasuunnittelijaTieto
