@@ -1,7 +1,8 @@
 (ns lupapalvelu.mongo-test
   (:use clojure.test
         midje.sweet
-        lupapalvelu.mongo))
+        lupapalvelu.mongo)
+  (:require [monger.collection :as mc]))
 
 (def valid-id "502770568de2282ae6fbb0be")
 (def invalid-id "123")
@@ -27,3 +28,12 @@
   (fact (with-id nil) => nil)
   (fact (with-id {:data "data"}) => {:data "data"})
   (fact (with-id {:_id "foo" :data "data"}) => {:id "FOO" :data "data"}))
+
+(facts "Facts about insert"
+  (fact (insert "c" {:id "foo" :data "data"}) => nil
+        (provided
+          (string-to-objectid "foo") => "FOO"
+          (mc/insert "c" {:_id "FOO" :data "data"}) => nil))
+  (fact (insert "c" {:data "data"}) => nil
+        (provided
+          (mc/insert "c" {:data "data"}) => nil)))
