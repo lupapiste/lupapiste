@@ -55,8 +55,9 @@
   nil)
 
 (defn insert [collection data]
-  "Inserts data into collection. The 'id' in 'data' (if it exists) is converted to MongoDB ObjectID. Returns inserted document."
-  (mc/insert-and-return collection (with-objectid data)))
+  "Inserts data into collection. The 'id' in 'data' (if it exists) is converted to MongoDB ObjectID."
+  (mc/insert collection (with-objectid data))
+  nil)
 
 (defn by-id [collection id]
   (with-id (mc/find-one-as-map collection {:_id (string-to-objectid id)})))
