@@ -51,9 +51,7 @@
 
 (defn insert [collection data]
   "Inserts data into collection. Re-uses 'id' as  Always returns nil."
-  (if (contains? data :id)
-    (mc/insert collection (with-objectid data))
-    (mc/insert collection data))
+  (mc/insert collection (with-objectid data))
   nil)
 
 (defn by-id [collection id]
