@@ -91,9 +91,18 @@
 (defpage "/lupapiste.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
 (defpage "/lupapiste.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
 
+(defpage "/authority" [] (if (logged-in?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
+(defpage "/authority.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "authority") {:status 401}))
+(defpage "/authority.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "authority") {:status 401}))
+
 ;;
 ;; Login/logout:
 ;;
+
+(def applicationpage-for {
+                   :applicant "/lupapiste"
+                   :authority "/authority"
+                   })
 
 (defpage [:post "/rest/login"] {:keys [username password]}
   (json
@@ -101,7 +110,8 @@
       (do
         (info "login: successful: username=%s" username)
         (session/put! :user user)
-        {:ok true :user user})
+        (let [userrole (keyword (:role user))]
+          {:ok true :user user :applicationpage (userrole applicationpage-for) }))
       (do
         (info "login: failed: username=%s" username)
         {:ok false :message "Tunnus tai salasana on väärin."}))))
