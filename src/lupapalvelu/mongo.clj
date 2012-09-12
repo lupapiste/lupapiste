@@ -23,17 +23,19 @@
 (defn objectid-to-string [id] 
   (.toString id)) 
 
-(defn- with-objectid [map]
-  (if-let [id (:id map)]
-    (-> map
+(defn with-objectid [m]
+  (if-let [id (:id m)]
+    (-> m
       (assoc :_id (string-to-objectid id))
-      (dissoc :id))))
+      (dissoc :id))
+    m))
 
-(defn- with-id [map]
-  (if-let [id (:_id map)]
-    (-> map 
+(defn with-id [m]
+  (if-let [id (:_id m)]
+    (-> m 
       (assoc :id (objectid-to-string id)) 
-      (dissoc :_id))))
+      (dissoc :_id))
+    m))
 
 (defn make-objectid []
   (.toString (ObjectId.)))
