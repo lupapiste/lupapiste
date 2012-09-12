@@ -83,9 +83,9 @@
                                              :type :other
                                              :content {:otsikko "Maalämpö"}}
                 "5049c08169a6a871a4154d56" {:documentType :rh1
-                                             :content {:lorem "ipsum"
-                                                       :dolor "sit"
-                                                       :amet "foo"}}}
+                                             :content {:rakennusaine "puu",
+                                                       :kerrosluku 3,
+                                                       :kerrosala 232}}}
                  
     :roles { :applicant {:userId "777777777777777777000010"
                          :displayName "Mikko Intonen"}
