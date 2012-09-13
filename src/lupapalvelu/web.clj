@@ -131,10 +131,8 @@
 ;; Login/logout:
 ;;
 
-(def applicationpage-for {
-                   :applicant "/lupapiste"
-                   :authority "/authority"
-                   })
+(def applicationpage-for {:applicant "/lupapiste"
+                          :authority "/authority"})
 
 (defpage [:post "/rest/login"] {:keys [username password]}
   (json
@@ -187,13 +185,14 @@
 ;; File upload/download:
 ;;
 
-(defpage [:post "/rest/upload"] {applicationId :applicationId {:keys [size tempfile content-type filename]} :upload}
-  (debug "file upload: uploading: applicationId=%s, filename=%s, tempfile=%s" applicationId filename tempfile)
-  (let [attachment (mongo/upload filename content-type tempfile)
-        attachment-id (:id attachment)]
-    (mongo/update-by-id mongo/applications applicationId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
-    (.delete (file tempfile))
-    (json {:ok true :attachmentId attachment-id})))
+(defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
+  (debug "upload: %s: %s" name (str upload))
+  (json
+    (command/execute
+      (create-command (assoc upload :command "upload-attachment" 
+                                    :id applicationId
+                                    :attachmentId attachmentId
+                                    :name name)))))
 
 (defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
   (debug "file download: attachmentId=%s" attachmentId)

@@ -5,7 +5,8 @@
             [monger.collection :as mc]
             [monger.gridfs :as gfs]
             [lupapalvelu.fixture.minimal :as minimal])
-  (:import [org.bson.types ObjectId]))
+  (:import [org.bson.types ObjectId]
+           [com.mongodb.gridfs GridFS GridFSInputFile]))
 
 (def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
 (def ^:const users "users")
@@ -73,14 +74,18 @@
   [collection query]
   (with-id (mc/find-one-as-map collection query)))
 
+(defn set-file-id [^GridFSInputFile input ^String id]
+  (.setId input (string-to-objectid id))
+  input)
 
-(defn upload [file-name content-type temp-file]
+(defn upload [id filename content-type tempfile timestamp]
   (with-id
     (gfs/store-file
-      (gfs/make-input-file temp-file)
-      (gfs/filename file-name)
+      (gfs/make-input-file tempfile)
+      (set-file-id id)
+      (gfs/filename filename)
       (gfs/content-type content-type)
-      (gfs/metadata {:uploaded (System/currentTimeMillis)}))))
+      (gfs/metadata {:uploaded timestamp}))))
 
 (defn download [attachmentId]
   (if-let [attachment (gfs/find-one (string-to-objectid attachmentId))]
