@@ -84,17 +84,15 @@
 
 (defn- validated [command]
   (let [result (command/validate command)]
-    {(:command command) 
-     {:ok (:ok result)
-      :text (:text result)}}))
+    {(:command command) (:ok result)}))
 
 (env/in-dev 
   (defpage "/rest/commands" []
-    (json command/commands)))
+    (json {:ok true :commands command/commands})))
 
 (env/in-dev
   (defpage "/rest/commands/valid" []
-    (json (into {} (map #(validated %) (foreach-command))))))
+    (json {:ok true :commands (into {} (map #(validated %) (foreach-command)))})))
 
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json)))))
