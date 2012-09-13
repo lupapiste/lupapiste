@@ -44,14 +44,20 @@
 ;; Mongo Api
 ;; 
 
-(defn update [collection id data]
+(defn update [collection query data]
+  "Updates data into collection by query. Always returns nil."
+  (mc/update collection query data)
+  nil)
+
+(defn update-by-id [collection id data]
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   (mc/update-by-id collection (string-to-objectid id) data)
   nil)
 
 (defn insert [collection data]
-  "Inserts data into collection. The 'id' in 'data' (if it exists) is converted to MongoDB ObjectID. Returns inserted document."
-  (mc/insert-and-return collection (with-objectid data)))
+  "Inserts data into collection. The 'id' in 'data' (if it exists) is converted to MongoDB ObjectID."
+  (mc/insert collection (with-objectid data))
+  nil)
 
 (defn by-id [collection id]
   (with-id (mc/find-one-as-map collection {:_id (string-to-objectid id)})))

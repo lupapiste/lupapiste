@@ -72,10 +72,13 @@
 
 (defpage [:post "/rest/command"] []
   (let [data (from-json)]
-    (json (command/execute {:command (:command data)
+    (let [response (command/execute {:command (:command data)
                             :user (current-user)
                             :created (System/currentTimeMillis) 
-                            :data (dissoc data :command) }))))
+                            :data (dissoc data :command) })]
+      (do 
+        (println response)
+        (json response)))))
 
 (secured "/rest/genid" []
   (json {:ok true :id (mongo/make-objectid)}))
@@ -162,7 +165,7 @@
   (debug "file upload: uploading: applicationId=%s, filename=%s, tempfile=%s" applicationId filename tempfile)
   (let [attachment (mongo/upload filename content-type tempfile)
         attachment-id (:id attachment)]
-    (mongo/update mongo/applications applicationId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
+    (mongo/update-by-id mongo/applications applicationId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
     (.delete (file tempfile))
     (json {:ok true :attachmentId attachment-id})))
 
