@@ -25,7 +25,8 @@
     :phone "03121991"
     :username "veikko"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}}
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
+              :apikey "5051ba0caa2480f374dcfeff"}}
    {:id "777777777777777777000023" ;; Sonja Sibbo - Sipoon lupa-arkkitehti
     :email "sonja.sibbo@sipoo.fi"
     :role :authority
