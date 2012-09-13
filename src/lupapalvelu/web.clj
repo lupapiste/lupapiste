@@ -174,7 +174,6 @@
 
 (env/in-dev
   (def speed-bump (atom 0))
-  (println "IN DEV MODE " @speed-bump)
   (server/add-middleware
     (fn [handler]
       (fn [request]
