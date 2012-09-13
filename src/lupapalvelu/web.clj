@@ -74,9 +74,18 @@
 ;; Commands
 ;;
 
+(defn create-command [data]
+  {:command (:command data)
+   :user (current-user)
+   :created (System/currentTimeMillis) 
+   :data (dissoc data :command) })
+
 (env/in-dev 
   (defpage "/rest/commands" []
     (json command/commands)))
+
+(defn- create-commands []
+  (map #(create-command {:command % }) (keys command/commands)))
 
 (env/in-dev 
   (defpage "/rest/valid-commands" []
@@ -88,13 +97,7 @@
               {(:command command) 
                {:ok (:ok result)
                 :text (:text result)}}))
-          (map #(merge command {:command %}) (keys command/commands)))))))
-
-(defn create-command [data]
-  {:command (:command data)
-   :user (current-user)
-   :created (System/currentTimeMillis) 
-   :data (dissoc data :command) })
+          (create-commands))))))
 
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json)))))
