@@ -50,7 +50,7 @@
 (defn- pages [r]
   (let [loader (clojure.lang.RT/baseLoader)]
     (map
-      #(->> % :attrs :href (str "public/html/pages/") (.getResourceAsStream loader))
+      #(->> % :attrs :href (.getResourceAsStream loader))
       (page-tags r))))
 
 #_(if (= :dev env/mode)
