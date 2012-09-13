@@ -144,7 +144,7 @@
 (server/add-middleware apikey-authentication)
 
 (env/in-dev
-  (def speed-bump (atom 1000))
+  (def speed-bump (atom 0))
   (println "IN DEV MODE " @speed-bump)
   (server/add-middleware
     (fn [handler]
