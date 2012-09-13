@@ -144,7 +144,8 @@
 (server/add-middleware apikey-authentication)
 
 (env/in-dev
-  (def speed-bump (atom 0))
+  (def speed-bump (atom 1000))
+  (println "IN DEV MODE " @speed-bump)
   (server/add-middleware
     (fn [handler]
       (fn [request]
@@ -182,5 +183,4 @@
   (defpage "/fixture/:type" {type :type}
     (case type
       "minimal" (mongo/init-minimal!)
-      "full" (mongo/init-full!)
       "fixture not found")))
