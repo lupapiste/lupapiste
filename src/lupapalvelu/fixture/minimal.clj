@@ -103,13 +103,18 @@
                         :displayName "Mikko Intonen"}
             :architect {:userId "777777777777777777000010"
                         :displayName "Mikko Intonen"}}
-    :attachments {"5049c08169a6a872c4154d50" {:name "Joku kuva"
-                                              :fileName "marker-green.png"
+    :attachments {"5049c08169a6a872c4154d50" {:id "5049c08169a6a872c4154d50"
+                                              :name "Joku kuva"
+                                              :filename "marker-green.png"
                                               :contentType "image/png"
                                               :size 753}
-                  "5049c08169a6a872c4154d51" {:name "Evil plan to conguer the world"
-                                              :fileName "plan9.pdf"
+                  "5049c08169a6a872c4154d51" {:id "5049c08169a6a872c4154d51"
+                                              :name "Evil plan to conguer the world"
+                                              :filename "plan9.pdf"
                                               :contentType "application/pdf"
                                               :size 12323753}
-                  "5049c08169a6a872c4154d52" {:name "Virallinen piirrustus"
-                                              :size 0}}}])
+                  "5049c08169a6a872c4154d52" {:id "5049c08169a6a872c4154d52"
+                                              :name nil
+                                              :filename nil
+                                              :contentType nil
+                                              :size nil}}}])
