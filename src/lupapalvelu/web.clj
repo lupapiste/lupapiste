@@ -70,13 +70,39 @@
       {:ok true :user user}
       {:ok false :message "No session"})))
 
-(defpage [:post "/rest/command"] []
-  (let [data (from-json)]
-    (json (command/execute {:command (:command data)
-                            :user (current-user)
-                            :created (System/currentTimeMillis) 
-                            :data (dissoc data :command) }))))
+;;
+;; Commands
+;;
 
+(env/in-dev 
+  (defpage "/rest/commands" []
+    (json command/commands)))
+
+(env/in-dev 
+  (defpage "/rest/valid-commands" []
+    (json 
+      (into {}
+        (map 
+          (fn [command] 
+            (let [result (command/validate command)]
+              {(:command command) 
+               {:ok (:ok result)
+                :text (:text result)}}))
+          (map #(merge command {:command %}) (keys command/commands)))))))
+
+(defn create-command [data]
+  {:command (:command data)
+   :user (current-user)
+   :created (System/currentTimeMillis) 
+   :data (dissoc data :command) })
+
+(defpage [:post "/rest/command"] []
+  (json (command/execute (create-command (from-json)))))
+
+(defpage [:get "/rest/command"] []
+  (json (command/validate (create-command (from-json)))))
+
+; way cool naming dudes! Love this.
 (secured "/rest/genid" []
   (json {:ok true :id (mongo/make-objectid)}))
 
