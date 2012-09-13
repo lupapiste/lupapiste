@@ -4,7 +4,6 @@
   (:require [monger.core :as m]
             [monger.collection :as mc]
             [monger.gridfs :as gfs]
-            [lupapalvelu.fixture.full :as full]
             [lupapalvelu.fixture.minimal :as minimal])
   (:import [org.bson.types ObjectId]))
 
@@ -112,7 +111,6 @@
   (dorun (map #(insert applications %) a))
   (str name " data set initialized"))
 
-(defn init-full! [] (init-fixture! "full" (full/users) (full/applications)))
 (defn init-minimal! [] (init-fixture! "minimal" (minimal/users) (minimal/applications)))
 
 (defn init! []

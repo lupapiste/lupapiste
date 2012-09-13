@@ -63,31 +63,31 @@
     :postalPlace "Tampere"
     :permitType :buildingPermit
     :documents {"5049c08169a6a871a4154d50" {:documentType :hakijaTieto
-                                             :content {:nimi "Mikko Intonen"
-                                                       :katuosoite "Vanhakatu 5"
-                                                       :postinumero "55550"
-                                                       :postitoimipaikka "Viiselä"
-                                                       :puhelinnumero "+3584522334455"
-                                                       :sahkopostiosoite "mikko.intonen@example.com"}}
+                                            :content {:nimi "Mikko Intonen"
+                                                      :katuosoite "Vanhakatu 5"
+                                                      :postinumero "55550"
+                                                      :postitoimipaikka "Viiselä"
+                                                      :puhelinnumero "+3584522334455"
+                                                      :sahkopostiosoite "mikko.intonen@example.com"}}
                 "5049c08169a6a871a4154d52" {:documentType :paasuunnittelijaTieto
-                                             :content {:nimi "Mirja Nieminen"
-                                                       :katusosoite "Niemikatu 8 A"
-                                                       :postinumero "44440"
-                                                       :postitoimipaikka "Niemelä"
-                                                       :puhelinnumero "+3584522334455"
-                                                       :sahkopostiosoite "mirja.nieminen@example.com"
-                                                       :koulutus "Arkkitehti"
-                                                       :kokemus "10 v"}}
-                 
+                                            :content {:nimi "Mirja Nieminen"
+                                                      :katusosoite "Niemikatu 8 A"
+                                                      :postinumero "44440"
+                                                      :postitoimipaikka "Niemelä"
+                                                      :puhelinnumero "+3584522334455"
+                                                      :sahkopostiosoite "mirja.nieminen@example.com"
+                                                      :koulutus "Arkkitehti"
+                                                      :kokemus "10 v"}}
+                
                 "5049c08169a6a871a4154d53" {:documentType :toimenpide
-                                             :type :buildNew
-                                             :content {:otsikko "Omakotitalon rakentaminen"}}
+                                            :type :buildNew
+                                            :content {:otsikko "Omakotitalon rakentaminen"}}
                 "5049c08169a6a871a4154d54" {:documentType :toimenpide
-                                             :type :buildNew
-                                             :content {:otsikko "Talousrakennus"}}
+                                            :type :buildNew
+                                            :content {:otsikko "Talousrakennus"}}
                 "5049c08169a6a871a4154d55" {:documentType :toimenpide
-                                             :type :buildOther
-                                             :content {:otsikko "Maalämpö"}}
+                                            :type :buildOther
+                                            :content {:otsikko "Maalämpö"}}
                 "5049c08169a6a871a4154d56" {:documentType :rh1
                                             :parentDocument "5049c08169a6a871a4154d53" ;; Omakotitalon RH1
                                             :content {:rakennusaine "puu",
@@ -98,9 +98,9 @@
                                             :content {:rakennusaine "betoni",
                                                       :kerrosluku 1,
                                                       :kerrosala 42}}}
-                 
-    :roles { :applicant {:userId "777777777777777777000010"
-                         :displayName "Mikko Intonen"}
+    
+    :roles {:applicant {:userId "777777777777777777000010"
+                        :displayName "Mikko Intonen"}
             :architect {:userId "777777777777777777000010"
                         :displayName "Mikko Intonen"}}
     :attachments {"5049c08169a6a872c4154d50" {:name "Joku kuva"
