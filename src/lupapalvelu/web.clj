@@ -72,13 +72,10 @@
 
 (defpage [:post "/rest/command"] []
   (let [data (from-json)]
-    (let [response (command/execute {:command (:command data)
+    (json (command/execute {:command (:command data)
                             :user (current-user)
                             :created (System/currentTimeMillis) 
-                            :data (dissoc data :command) })]
-      (do 
-        (println response)
-        (json response)))))
+                            :data (dissoc data :command) }))))
 
 (secured "/rest/genid" []
   (json {:ok true :id (mongo/make-objectid)}))
