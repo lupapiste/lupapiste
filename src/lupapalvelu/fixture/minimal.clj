@@ -56,6 +56,7 @@
     :authority :sipoo
     :status :open
     :created 1330776303000
+    :modified 1330776303000
     :location {:lat 61.518362 :lon 23.622344}
     :streetAddress "Hunninsuonkatu 5 B"
     :postalCode "33560"
