@@ -63,12 +63,16 @@
     :permitType :buildingPermit
     :documents {"5049c08169a6a871a4154d50" {:documentType :hakijaTieto
                                              :content {:nimi "Mikko Intonen"
-                                                       :postiosoite "Vanhakatu 5"
+                                                       :katuosoite "Vanhakatu 5"
+                                                       :postinumero "55550"
+                                                       :postitoimipaikka "Viiselä"
                                                        :puhelinnumero "+3584522334455"
                                                        :sahkopostiosoite "mikko.intonen@example.com"}}
                 "5049c08169a6a871a4154d52" {:documentType :paasuunnittelijaTieto
                                              :content {:nimi "Mirja Nieminen"
-                                                       :postiosoite "Niemikatu 8 A"
+                                                       :katusosoite "Niemikatu 8 A"
+                                                       :postinumero "44440"
+                                                       :postitoimipaikka "Niemelä"
                                                        :puhelinnumero "+3584522334455"
                                                        :sahkopostiosoite "mirja.nieminen@example.com"
                                                        :koulutus "Arkkitehti"

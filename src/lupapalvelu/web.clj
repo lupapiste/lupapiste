@@ -28,6 +28,9 @@
 (defn logged-in? []
   (not (nil? (current-user))))
 
+(defn logged-in-as-authority? []
+  (and logged-in? (= :authority (keyword (:role (current-user))))))
+
 (defmacro secured [path params & content]
   `(defpage ~path ~params
      (if (logged-in?)
@@ -94,9 +97,9 @@
 (defpage "/lupapiste.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
 (defpage "/lupapiste.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
 
-(defpage "/authority" [] (if (logged-in?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
-(defpage "/authority.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "authority") {:status 401}))
-(defpage "/authority.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "authority") {:status 401}))
+(defpage "/authority" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
+(defpage "/authority.js" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-js "authority") {:status 401}))
+(defpage "/authority.css" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-css "authority") {:status 401}))
 
 ;;
 ;; Login/logout:
