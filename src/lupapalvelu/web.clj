@@ -2,7 +2,6 @@
   (:use noir.core
         noir.request
         [noir.response :only [json redirect]]
-        [clojure.java.io :only [file]]
         lupapalvelu.log)
   (:require [noir.response :as resp]
             [noir.session :as session]
