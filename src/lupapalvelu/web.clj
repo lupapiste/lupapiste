@@ -80,19 +80,19 @@
    :data (dissoc data :command) })
 
 (defn- foreach-command []
-  (map #(create-command (merge (from-json) {:command % })) (keys (command/get-commands))))
+  (let [json (from-json)]
+    (map #(create-command (merge json {:command % })) (keys (command/get-commands)))))
 
 (defn- validated [command]
-  (let [result (command/validate command)]
-    {(:command command) (:ok result)}))
+  {(:command command) (command/validate command)})
 
 (env/in-dev 
   (defpage "/rest/commands" []
     (json {:ok true :commands (command/get-commands)})))
 
 (env/in-dev
-  (defpage "/rest/commands/valid" []
-    (json {:ok true :commands (into {} (map #(validated %) (foreach-command)))})))
+  (defpage [:post "/rest/commands/valid"] []
+    (json {:ok true :commands (into {} (map validated (foreach-command)))})))
 
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json)))))
