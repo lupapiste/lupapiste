@@ -79,13 +79,12 @@
   input)
 
 (defn upload [id filename content-type tempfile timestamp]
-  (with-id
-    (gfs/store-file
-      (gfs/make-input-file tempfile)
-      (set-file-id id)
-      (gfs/filename filename)
-      (gfs/content-type content-type)
-      (gfs/metadata {:uploaded timestamp}))))
+  (gfs/store-file
+    (gfs/make-input-file tempfile)
+    (set-file-id id)
+    (gfs/filename filename)
+    (gfs/content-type content-type)
+    (gfs/metadata {:uploaded timestamp})))
 
 (defn download [attachmentId]
   (if-let [attachment (gfs/find-one (string-to-objectid attachmentId))]

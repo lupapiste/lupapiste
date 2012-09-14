@@ -187,7 +187,7 @@
       (create-command (assoc upload :command "upload-attachment" 
                                     :id applicationId
                                     :attachmentId attachmentId
-                                    :name name)))))
+                                    :name (or name ""))))))
 
 (defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
   (debug "file download: attachmentId=%s" attachmentId)
