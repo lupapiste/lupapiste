@@ -2,7 +2,6 @@
   (:use noir.core
         noir.request
         [noir.response :only [json redirect]]
-        [clojure.java.io :only [file]]
         lupapalvelu.log)
   (:require [noir.response :as resp]
             [noir.session :as session]
@@ -70,13 +69,38 @@
       {:ok true :user user}
       {:ok false :message "No session"})))
 
-(defpage [:post "/rest/command"] []
-  (let [data (from-json)]
-    (json (command/execute {:command (:command data)
-                            :user (current-user)
-                            :created (System/currentTimeMillis) 
-                            :data (dissoc data :command) }))))
+;;
+;; Commands
+;;
 
+(defn create-command [data]
+  {:command (:command data)
+   :user (current-user)
+   :created (System/currentTimeMillis) 
+   :data (dissoc data :command) })
+
+(defn- foreach-command []
+  (map #(create-command (merge (from-json) {:command % })) (keys (command/get-commands))))
+
+(defn- validated [command]
+  (let [result (command/validate command)]
+    {(:command command) (:ok result)}))
+
+(env/in-dev 
+  (defpage "/rest/commands" []
+    (json {:ok true :commands (command/get-commands)})))
+
+(env/in-dev
+  (defpage "/rest/commands/valid" []
+    (json {:ok true :commands (into {} (map #(validated %) (foreach-command)))})))
+
+(defpage [:post "/rest/command"] []
+  (json (command/execute (create-command (from-json)))))
+
+(defpage [:get "/rest/command"] []
+  (json (command/validate (create-command (from-json)))))
+
+; way cool naming dudes! Love this.
 (secured "/rest/genid" []
   (json {:ok true :id (mongo/make-objectid)}))
 
@@ -102,10 +126,8 @@
 ;; Login/logout:
 ;;
 
-(def applicationpage-for {
-                   :applicant "/lupapiste"
-                   :authority "/authority"
-                   })
+(def applicationpage-for {:applicant "/lupapiste"
+                          :authority "/authority"})
 
 (defpage [:post "/rest/login"] {:keys [username password]}
   (json
@@ -158,13 +180,14 @@
 ;; File upload/download:
 ;;
 
-(defpage [:post "/rest/upload"] {applicationId :applicationId {:keys [size tempfile content-type filename]} :upload}
-  (debug "file upload: uploading: applicationId=%s, filename=%s, tempfile=%s" applicationId filename tempfile)
-  (let [attachment (mongo/upload filename content-type tempfile)
-        attachment-id (:id attachment)]
-    (mongo/update mongo/applications applicationId {:$push {:attachments {:attachmentId attachment-id :fileName filename :contentType content-type :size size}}})
-    (.delete (file tempfile))
-    (json {:ok true :attachmentId attachment-id})))
+(defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
+  (debug "upload: %s: %s" name (str upload))
+  (json
+    (command/execute
+      (create-command (assoc upload :command "upload-attachment" 
+                                    :id applicationId
+                                    :attachmentId attachmentId
+                                    :name name)))))
 
 (defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
   (debug "file download: attachmentId=%s" attachmentId)
@@ -182,5 +205,4 @@
   (defpage "/fixture/:type" {type :type}
     (case type
       "minimal" (mongo/init-minimal!)
-      "full" (mongo/init-full!)
       "fixture not found")))

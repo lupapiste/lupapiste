@@ -25,7 +25,8 @@
     :phone "03121991"
     :username "veikko"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}}
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
+              :apikey "5051ba0caa2480f374dcfeff"}}
    {:id "777777777777777777000023" ;; Sonja Sibbo - Sipoon lupa-arkkitehti
     :email "sonja.sibbo@sipoo.fi"
     :role :authority
@@ -54,7 +55,7 @@
   [{:id "777777777777777777000100"
     :title "Omakotitalon rakentaminen"
     :authority :sipoo
-    :status :open
+    :state :open
     :created 1330776303000
     :modified 1330776303000
     :location {:lat 61.518362 :lon 23.622344}
@@ -63,31 +64,31 @@
     :postalPlace "Tampere"
     :permitType :buildingPermit
     :documents {"5049c08169a6a871a4154d50" {:documentType :hakijaTieto
-                                             :content {:nimi "Mikko Intonen"
-                                                       :katuosoite "Vanhakatu 5"
-                                                       :postinumero "55550"
-                                                       :postitoimipaikka "Viiselä"
-                                                       :puhelinnumero "+3584522334455"
-                                                       :sahkopostiosoite "mikko.intonen@example.com"}}
+                                            :content {:nimi "Mikko Intonen"
+                                                      :katuosoite "Vanhakatu 5"
+                                                      :postinumero "55550"
+                                                      :postitoimipaikka "Viiselä"
+                                                      :puhelinnumero "+3584522334455"
+                                                      :sahkopostiosoite "mikko.intonen@example.com"}}
                 "5049c08169a6a871a4154d52" {:documentType :paasuunnittelijaTieto
-                                             :content {:nimi "Mirja Nieminen"
-                                                       :katusosoite "Niemikatu 8 A"
-                                                       :postinumero "44440"
-                                                       :postitoimipaikka "Niemelä"
-                                                       :puhelinnumero "+3584522334455"
-                                                       :sahkopostiosoite "mirja.nieminen@example.com"
-                                                       :koulutus "Arkkitehti"
-                                                       :kokemus "10 v"}}
-                 
+                                            :content {:nimi "Mirja Nieminen"
+                                                      :katusosoite "Niemikatu 8 A"
+                                                      :postinumero "44440"
+                                                      :postitoimipaikka "Niemelä"
+                                                      :puhelinnumero "+3584522334455"
+                                                      :sahkopostiosoite "mirja.nieminen@example.com"
+                                                      :koulutus "Arkkitehti"
+                                                      :kokemus "10 v"}}
+                
                 "5049c08169a6a871a4154d53" {:documentType :toimenpide
-                                             :type :buildNew
-                                             :content {:otsikko "Omakotitalon rakentaminen"}}
+                                            :type :buildNew
+                                            :content {:otsikko "Omakotitalon rakentaminen"}}
                 "5049c08169a6a871a4154d54" {:documentType :toimenpide
-                                             :type :buildNew
-                                             :content {:otsikko "Talousrakennus"}}
+                                            :type :buildNew
+                                            :content {:otsikko "Talousrakennus"}}
                 "5049c08169a6a871a4154d55" {:documentType :toimenpide
-                                             :type :buildOther
-                                             :content {:otsikko "Maalämpö"}}
+                                            :type :buildOther
+                                            :content {:otsikko "Maalämpö"}}
                 "5049c08169a6a871a4154d56" {:documentType :rh1
                                             :parentDocument "5049c08169a6a871a4154d53" ;; Omakotitalon RH1
                                             :content {:rakennusaine "puu",
@@ -98,18 +99,23 @@
                                             :content {:rakennusaine "betoni",
                                                       :kerrosluku 1,
                                                       :kerrosala 42}}}
-                 
-    :roles { :applicant {:userId "777777777777777777000010"
-                         :displayName "Mikko Intonen"}
+    
+    :roles {:applicant {:userId "777777777777777777000010"
+                        :displayName "Mikko Intonen"}
             :architect {:userId "777777777777777777000010"
                         :displayName "Mikko Intonen"}}
-    :attachments {"5049c08169a6a872c4154d50" {:name "Joku kuva"
-                                              :fileName "marker-green.png"
+    :attachments {"5049c08169a6a872c4154d50" {:id "5049c08169a6a872c4154d50"
+                                              :name "Joku kuva"
+                                              :filename "marker-green.png"
                                               :contentType "image/png"
                                               :size 753}
-                  "5049c08169a6a872c4154d51" {:name "Evil plan to conguer the world"
-                                              :fileName "plan9.pdf"
+                  "5049c08169a6a872c4154d51" {:id "5049c08169a6a872c4154d51"
+                                              :name "Evil plan to conguer the world"
+                                              :filename "plan9.pdf"
                                               :contentType "application/pdf"
                                               :size 12323753}
-                  "5049c08169a6a872c4154d52" {:name "Virallinen piirrustus"
-                                              :size 0}}}])
+                  "5049c08169a6a872c4154d52" {:id "5049c08169a6a872c4154d52"
+                                              :name nil
+                                              :filename nil
+                                              :contentType nil
+                                              :size nil}}}])
