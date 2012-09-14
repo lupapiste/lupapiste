@@ -50,7 +50,7 @@
 (defn- pages [r]
   (let [loader (clojure.lang.RT/baseLoader)]
     (map
-      #(->> % :attrs :href (str "public/html/pages/") (.getResourceAsStream loader))
+      #(->> % :attrs :href (.getResourceAsStream loader))
       (page-tags r))))
 
 #_(if (= :dev env/mode)
@@ -84,7 +84,7 @@
         buffer (ByteArrayOutputStream.)]
     (dorun
       (for [src (selector (load-page name))]
-        (if-let [r (.getResourceAsStream loader (str "public/" src))]
+        (if-let [r (.getResourceAsStream loader src)]
           (do
             (IOUtils/copy r buffer)
             (IOUtils/closeQuietly r)))))
@@ -95,8 +95,22 @@
                  "Content-Encoding" "gzip"
                  "Content-Length" (str (alength content))}})))
 
+(defn js-path [src]
+  (if (or (.startsWith src "js/") (.startsWith src "lib/"))
+    (str "public/" src)
+    src))
+
+(defn css-path [href]
+  (if (.startsWith href "css/" )
+    (str "public/" href)
+    href))
+
 (defn compose-singlepage-js [name]
-  (compose-singlepage-resources name (fn [r] (map #(-> % :attrs :src) (script-tags r))) "application/javascript"))
+  (compose-singlepage-resources 
+    name 
+    (fn [r] (map #(js-path (-> % :attrs :src)) (script-tags r))) "application/javascript"))
 
 (defn compose-singlepage-css [name]
-  (compose-singlepage-resources name (fn [r] (map #(-> % :attrs :href) (css-tags r))) "text/css"))
+  (compose-singlepage-resources 
+    name 
+    (fn [r] (map #(css-path (-> % :attrs :href)) (css-tags r))) "text/css"))
