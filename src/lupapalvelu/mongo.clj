@@ -4,9 +4,9 @@
   (:require [monger.core :as m]
             [monger.collection :as mc]
             [monger.gridfs :as gfs]
-            [lupapalvelu.fixture.full :as full]
             [lupapalvelu.fixture.minimal :as minimal])
-  (:import [org.bson.types ObjectId]))
+  (:import [org.bson.types ObjectId]
+           [com.mongodb.gridfs GridFS GridFSInputFile]))
 
 (def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
 (def ^:const users "users")
@@ -38,20 +38,26 @@
     m))
 
 (defn make-objectid []
- (.toString (ObjectId.)))
+  (.toString (ObjectId.)))
 
 ;;
 ;; Mongo Api
 ;; 
 
-(defn update [collection id data]
+(defn update [collection query data]
+  "Updates data into collection by query. Always returns nil."
+  (mc/update collection query data)
+  nil)
+
+(defn update-by-id [collection id data]
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   (mc/update-by-id collection (string-to-objectid id) data)
   nil)
 
 (defn insert [collection data]
-  "Inserts data into collection. The 'id' in 'data' (if it exists) is converted to MongoDB ObjectID. Returns inserted document."
-  (mc/insert-and-return collection (with-objectid data)))
+  "Inserts data into collection. The 'id' in 'data' (if it exists) is converted to MongoDB ObjectID."
+  (mc/insert collection (with-objectid data))
+  nil)
 
 (defn by-id [collection id]
   (with-id (mc/find-one-as-map collection {:_id (string-to-objectid id)})))
@@ -68,14 +74,18 @@
   [collection query]
   (with-id (mc/find-one-as-map collection query)))
 
+(defn set-file-id [^GridFSInputFile input ^String id]
+  (.setId input (string-to-objectid id))
+  input)
 
-(defn upload [file-name content-type temp-file]
+(defn upload [id filename content-type tempfile timestamp]
   (with-id
     (gfs/store-file
-      (gfs/make-input-file temp-file)
-      (gfs/filename file-name)
+      (gfs/make-input-file tempfile)
+      (set-file-id id)
+      (gfs/filename filename)
       (gfs/content-type content-type)
-      (gfs/metadata {:uploaded (System/currentTimeMillis)}))))
+      (gfs/metadata {:uploaded timestamp}))))
 
 (defn download [attachmentId]
   (if-let [attachment (gfs/find-one (string-to-objectid attachmentId))]
@@ -106,7 +116,6 @@
   (dorun (map #(insert applications %) a))
   (str name " data set initialized"))
 
-(defn init-full! [] (init-fixture! "full" (full/users) (full/applications)))
 (defn init-minimal! [] (init-fixture! "minimal" (minimal/users) (minimal/applications)))
 
 (defn init! []
