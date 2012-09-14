@@ -79,24 +79,20 @@
    :created (System/currentTimeMillis) 
    :data (dissoc data :command) })
 
+(defn- foreach-command []
+  (map #(create-command (merge (from-json) {:command % })) (keys (command/get-commands))))
+
+(defn- validated [command]
+  (let [result (command/validate command)]
+    {(:command command) (:ok result)}))
+
 (env/in-dev 
   (defpage "/rest/commands" []
-    (json command/commands)))
+    (json {:ok true :commands (command/get-commands)})))
 
-(defn- create-commands []
-  (map #(create-command {:command % }) (keys command/commands)))
-
-(env/in-dev 
-  (defpage "/rest/valid-commands" []
-    (json 
-      (into {}
-        (map 
-          (fn [command] 
-            (let [result (command/validate command)]
-              {(:command command) 
-               {:ok (:ok result)
-                :text (:text result)}}))
-          (create-commands))))))
+(env/in-dev
+  (defpage "/rest/commands/valid" []
+    (json {:ok true :commands (into {} (map #(validated %) (foreach-command)))})))
 
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json)))))
