@@ -8,5 +8,6 @@
                  [org.mindrot/jbcrypt "0.3m"]]
   :main lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
-  :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]}}
+  :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
+                   :plugins [[lein-midje "2.0.0-SNAPSHOT"]]}}
   :min-lein-version "2.0.0")
