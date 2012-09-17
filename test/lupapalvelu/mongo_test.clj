@@ -33,7 +33,7 @@
   (fact (insert "c" {:id "foo" :data "data"}) => ...result...
         (provided
           (string-to-objectid "foo") => ...id...
-          (mc/insert-and-return "c" {:_id ...id... :data "data"}) => ...result...))
+          (mc/insert "c" {:_id ...id... :data "data"}) => ...result...))
   (fact (insert "c" {:data "data"}) => ..result..
         (provided
-          (mc/insert-and-return "c" {:data "data"}) => ..result..)))
+          (mc/insert "c" {:data "data"}) => ..result..)))
