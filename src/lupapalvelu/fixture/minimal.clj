@@ -37,7 +37,8 @@
     :phone "03121991"
     :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}},
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
+              :apikey "5056e6d3aa24a1c901e6b9dd"}},
    {:id "777777777777777777000024" ;; Seppo Sibbo - Sipoon lupa-arkkitehti
     :email "seppo.sibbo@sipoo.fi"
     :role :authority
