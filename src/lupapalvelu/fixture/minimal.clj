@@ -49,7 +49,12 @@
     :phone "03121991"
     :username "seppo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
-              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}}   
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"}},
+   {:id "505718b0aa24a1c901e6ba24" ;; Admin
+    :firstName "Judge"
+    :lastName "Dread"
+    :role :admin
+    :private {:apikey "505718b0aa24a1c901e6ba24"}}
    ])
 
 (defn applications []
