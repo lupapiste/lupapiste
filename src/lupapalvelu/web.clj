@@ -206,3 +206,12 @@
     (case type
       "minimal" (mongo/init-minimal!)
       "fixture not found")))
+
+(env/in-dev
+  (defpage "/verdict" {:keys [id verdict text]}
+    (json 
+      (command/execute 
+        (merge 
+          (create-command {:command "give-application-verdict"}) 
+          {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
+           :data {:id id :verdict verdict :text text}})))))
