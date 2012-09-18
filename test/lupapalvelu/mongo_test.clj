@@ -30,10 +30,10 @@
   (fact (with-id {:_id "foo" :data "data"}) => {:id ...id... :data "data"}))
 
 (facts "Facts about insert"
-  (fact (insert "c" {:id "foo" :data "data"}) => ...result...
+  (fact (insert "c" {:id "foo" :data "data"}) => nil
         (provided
           (string-to-objectid "foo") => ...id...
-          (mc/insert-and-return "c" {:_id ...id... :data "data"}) => ...result...))
-  (fact (insert "c" {:data "data"}) => ..result..
+          (mc/insert "c" {:_id ...id... :data "data"}) => nil))
+  (fact (insert "c" {:data "data"}) => nil
         (provided
-          (mc/insert-and-return "c" {:data "data"}) => ..result..)))
+          (mc/insert "c" {:data "data"}) => nil)))
