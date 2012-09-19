@@ -4,4 +4,4 @@
 @set server=%2
 @if [%server%]==[] set server=localhost:8000
 
-pybot -d target --variable SERVER:%server%  %target%
+pybot -d target --variable SERVER:http://%server%  %target%
