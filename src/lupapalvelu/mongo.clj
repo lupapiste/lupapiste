@@ -4,7 +4,8 @@
   (:require [monger.core :as m]
             [monger.collection :as mc]
             [monger.gridfs :as gfs]
-            [lupapalvelu.fixture.minimal :as minimal])
+            [lupapalvelu.fixture.minimal :as minimal]
+            [lupapalvelu.fixture.full :as full])
   (:import [org.bson.types ObjectId]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
@@ -116,6 +117,7 @@
   (str name " data set initialized"))
 
 (defn init-minimal! [] (init-fixture! "minimal" (minimal/users) (minimal/applications)))
+(defn init-full! [] (init-fixture! "full" (full/users) (full/applications)))
 
 (defn init! []
   (init-minimal!))
