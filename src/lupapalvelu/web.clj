@@ -50,13 +50,11 @@
 (defpage "/rest/ping" []
   (json {:ok true}))
 
-
-; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
   (let [user (current-user)]
     (json
       (case (keyword (:role user))
-        :applicant {:ok true :applications (mongo/select mongo/applications) }
+        :applicant {:ok true :applications (mongo/select mongo/applications {:roles.applicant.userID (:id user)} ) }
         :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
         {:ok false :text "invalid role to load applications"}))))
 
