@@ -1,7 +1,7 @@
 (ns lupapalvelu.web
   (:use noir.core
         noir.request
-        [noir.response :only [json redirect]]
+        [noir.response :only [json redirect content-type]]
         lupapalvelu.log
         monger.operators)
   (:require [noir.response :as resp]
@@ -218,9 +218,11 @@
 
 (env/in-dev
   (defpage "/verdict" {:keys [id ok text]}
-    (json 
-      (command/execute 
-        (merge 
-          (create-command {:command "give-application-verdict"}) 
-          {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-           :data {:id id :ok ok :text text}})))))
+    (content-type 
+      "text/plain"
+      (json 
+        (command/execute 
+          (merge 
+            (create-command {:command "give-application-verdict"}) 
+            {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
+             :data {:id id :ok ok :text text}}))))))
