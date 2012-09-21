@@ -203,15 +203,14 @@
 ;;
 
 (env/in-dev
+
   (defpage "/fixture/:name" {name :name}
     (fixture/apply-fixture name)
-    (str name " data set initialized")))
+    (str name " data set initialized"))
 
-(env/in-dev
   (defpage "/fixture" []
-    (json (keys @fixture/fixtures))))
+    (json (keys @fixture/fixtures)))
 
-(env/in-dev
   (defpage "/verdict" {:keys [id ok text]}
     (command/execute 
       (merge 
