@@ -2,7 +2,8 @@
   (:use noir.core
         noir.request
         [noir.response :only [json redirect content-type]]
-        lupapalvelu.log)
+        lupapalvelu.log
+        monger.operators)
   (:require [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
@@ -50,18 +51,25 @@
 (defpage "/rest/ping" []
   (json {:ok true}))
 
-
-; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
   (let [user (current-user)]
     (json
       (case (keyword (:role user))
-        :applicant {:ok true :applications (mongo/select mongo/applications) }
+        :applicant {:ok true :applications (mongo/select mongo/applications {:roles.applicant.userId (:id user)} ) }
         :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
         {:ok false :text "invalid role to load applications"}))))
 
 (secured "/rest/application/:id" {id :id}
-  (json {:ok true :application (mongo/by-id mongo/applications id)}))
+  (let [oid (mongo/string-to-objectid id)]
+    (let [user (current-user)]
+	    (json
+	      (case (keyword (:role user))
+	        :applicant {:ok true :applications 
+	                    (mongo/select mongo/applications {$and [{:_id oid} {:roles.applicant.userId (:id user)}]} ) }
+	        :authority {:ok true :applications 
+	                    (mongo/select mongo/applications {$and [{:_id oid} {:authority (:authority user)}]})}
+	        {:ok false :text "invalid role to load application"}))))
+  )
 
 (defpage "/rest/user" []
   (json
