@@ -9,6 +9,7 @@
             [cheshire.core :as json]
             [lupapalvelu.env :as env] 
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture :as fixture]
             [lupapalvelu.command :as command]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]))
@@ -202,19 +203,18 @@
 ;;
 
 (env/in-dev
-  (defpage "/fixture/:type" {type :type}
-    (case type
-      "minimal" (mongo/init-minimal!)
-      "full" (mongo/init-full!)
-      "fixture not found")))
+  (defpage "/fixture/:name" {name :name}
+    (fixture/apply-fixture name)
+    (str name " data set initialized")))
+
+(env/in-dev
+  (defpage "/fixture" []
+    (json (keys @fixture/fixtures))))
 
 (env/in-dev
   (defpage "/verdict" {:keys [id ok text]}
-    (content-type 
-      "text/plain"
-      (json 
-        (command/execute 
-          (merge 
-            (create-command {:command "give-application-verdict"}) 
-            {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-             :data {:id id :ok ok :text text}}))))))
+    (command/execute 
+      (merge 
+        (create-command {:command "give-application-verdict"}) 
+        {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
+         :data {:id id :ok ok :text text}}))))
