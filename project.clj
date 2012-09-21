@@ -9,5 +9,6 @@
   :main lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
-                   :plugins [[lein-midje "2.0.0-SNAPSHOT"]]}}
+                   :plugins [[lein-midje "2.0.0-SNAPSHOT"]
+                             [lein-buildid "0.1.0-SNAPSHOT"]]}}
   :min-lein-version "2.0.0")
