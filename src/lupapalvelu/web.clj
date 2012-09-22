@@ -51,7 +51,6 @@
 (defpage "/rest/ping" []
   (json {:ok true}))
 
-
 ; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
   (let [user (current-user)]
@@ -91,9 +90,8 @@
   (defpage "/rest/commands" []
     (json {:ok true :commands (command/get-commands)})))
 
-(env/in-dev
   (defpage [:post "/rest/commands/valid"] []
-    (json {:ok true :commands (into {} (map validated (foreach-command)))})))
+    (json {:ok true :commands (into {} (map validated (foreach-command)))}))
 
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json)))))
@@ -166,17 +164,6 @@
 
 (server/add-middleware apikey-authentication)
 
-(env/in-dev
-  (def speed-bump (atom 0))
-  (server/add-middleware
-    (fn [handler]
-      (fn [request]
-        (let [bump @speed-bump]
-          (when (> bump 0)
-            (warn "Hit speed bump %d ms: %s" bump (:uri request))
-            (Thread/sleep bump)))
-        (handler request)))))
-
 ;;
 ;; File upload/download:
 ;;
@@ -199,7 +186,7 @@
                "Content-Length" (str (:content-length attachment))}}))
 
 ;;
-;; Initializing fixtures
+;; Development thingies
 ;;
 
 (env/in-dev
@@ -216,4 +203,15 @@
       (merge 
         (create-command {:command "give-application-verdict"}) 
         {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-         :data {:id id :ok ok :text text}}))))
+         :data {:id id :ok ok :text text}})))
+
+  (def speed-bump (atom 0))  
+  (server/add-middleware
+    (fn [handler]
+      (fn [request]
+        (let [bump @speed-bump]
+          (when (> bump 0)
+            (warn "Hit speed bump %d ms: %s" bump (:uri request))
+            (Thread/sleep bump)))
+        (handler request)))))
+
