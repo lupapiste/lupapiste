@@ -48,7 +48,7 @@
 ;; REST API:
 ;;
 
-(defpage "/rest/buildid" []
+(defpage "/rest/buildinfo" []
   (json (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))))
 
 (defpage "/rest/ping" []
