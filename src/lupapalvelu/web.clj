@@ -48,6 +48,9 @@
 ;; REST API:
 ;;
 
+(defpage "/rest/buildinfo" []
+  (json (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))))
+
 (defpage "/rest/ping" []
   (json {:ok true}))
 
@@ -147,7 +150,7 @@
           {:ok true :user user :applicationpage (userrole applicationpage-for) }))
       (do
         (info "login: failed: username=%s" username)
-        {:ok false :message "Tunnus tai salasana on väärin."}))))
+        {:ok false :message "Tunnus tai salasana on v\u00E4\u00E4rin."}))))
 
 (defpage [:post "/rest/logout"] []
   (session/clear!)
