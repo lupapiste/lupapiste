@@ -11,5 +11,5 @@
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
                                   [clj-http "0.5.3"]]
                    :plugins [[lein-midje "2.0.0-SNAPSHOT"]
-                             [lein-buildid "0.1.0-SNAPSHOT"]]}}
+                              [lein-buildid "0.1.0-SNAPSHOT"]]}}
   :min-lein-version "2.0.0")
