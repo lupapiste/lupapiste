@@ -1,6 +1,8 @@
-(ns lupapalvelu.fixture.minimal)
+(ns lupapalvelu.fixture.minimal
+  (:use lupapalvelu.fixture)
+  (:require [lupapalvelu.mongo :as mongo]))
 
-(defn users []
+(def users
   [
    {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :email "veikko.viranomainen@tampere.fi"
@@ -33,5 +35,6 @@
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
    ])
 
-(defn applications [] {})
-    :modified 1330776303000
+(deffixture "minimal" {}
+  (mongo/clear!)
+  (dorun (map #(mongo/insert mongo/users %) users)))
