@@ -65,16 +65,14 @@
         {:ok false :text "invalid role to load applications"}))))
 
 (secured "/rest/application/:id" {id :id}
-  (let [oid (mongo/string-to-objectid id)]
     (let [user (current-user)]
 	    (json
 	      (case (keyword (:role user))
 	        :applicant {:ok true :applications 
-	                    (mongo/select mongo/applications {$and [{:_id oid} {:roles.applicant.userId (:id user)}]} ) }
+	                    (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.userId (:id user)}]} ) }
 	        :authority {:ok true :applications 
-	                    (mongo/select mongo/applications {$and [{:_id oid} {:authority (:authority user)}]})}
+	                    (mongo/select mongo/applications {$and [{:_id id} {:authority (:authority user)}]})}
 	        {:ok false :text "invalid role to load application"}))))
-  )
 
 (defpage "/rest/user" []
   (json
@@ -112,9 +110,8 @@
 (defpage [:get "/rest/command"] []
   (json (command/validate (create-command (from-json)))))
 
-; way cool naming dudes! Love this.
 (secured "/rest/genid" []
-  (json {:ok true :id (mongo/make-objectid)}))
+  (json {:ok true :id (mongo/create-id)}))
 
 ;;
 ;; Web UI:
