@@ -1,14 +1,16 @@
 (ns lupapalvelu.web
   (:use noir.core
         noir.request
-        [noir.response :only [json redirect]]
-        lupapalvelu.log)
+        [noir.response :only [json redirect content-type]]
+        lupapalvelu.log
+        monger.operators)
   (:require [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
             [cheshire.core :as json]
             [lupapalvelu.env :as env] 
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.fixture :as fixture]
             [lupapalvelu.command :as command]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]))
@@ -47,21 +49,32 @@
 ;; REST API:
 ;;
 
+(defpage "/rest/buildinfo" []
+  (json (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))))
+
 (defpage "/rest/ping" []
   (json {:ok true}))
-
 
 ; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
   (let [user (current-user)]
     (json
       (case (keyword (:role user))
-        :applicant {:ok true :applications (mongo/select mongo/applications) }
+        :applicant {:ok true :applications (mongo/select mongo/applications {:roles.applicant.userId (:id user)} ) }
         :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
         {:ok false :text "invalid role to load applications"}))))
 
 (secured "/rest/application/:id" {id :id}
-  (json {:ok true :application (mongo/by-id mongo/applications id)}))
+  (let [oid (mongo/string-to-objectid id)]
+    (let [user (current-user)]
+	    (json
+	      (case (keyword (:role user))
+	        :applicant {:ok true :applications 
+	                    (mongo/select mongo/applications {$and [{:_id oid} {:roles.applicant.userId (:id user)}]} ) }
+	        :authority {:ok true :applications 
+	                    (mongo/select mongo/applications {$and [{:_id oid} {:authority (:authority user)}]})}
+	        {:ok false :text "invalid role to load application"}))))
+  )
 
 (defpage "/rest/user" []
   (json
@@ -90,9 +103,8 @@
   (defpage "/rest/commands" []
     (json {:ok true :commands (command/get-commands)})))
 
-(env/in-dev
   (defpage [:post "/rest/commands/valid"] []
-    (json {:ok true :commands (into {} (map validated (foreach-command)))})))
+    (json {:ok true :commands (into {} (map validated (foreach-command)))}))
 
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json)))))
@@ -139,7 +151,7 @@
           {:ok true :user user :applicationpage (userrole applicationpage-for) }))
       (do
         (info "login: failed: username=%s" username)
-        {:ok false :message "Tunnus tai salasana on väärin."}))))
+        {:ok false :message "Tunnus tai salasana on v\u00E4\u00E4rin."}))))
 
 (defpage [:post "/rest/logout"] []
   (session/clear!)
@@ -165,17 +177,6 @@
 
 (server/add-middleware apikey-authentication)
 
-(env/in-dev
-  (def speed-bump (atom 0))
-  (server/add-middleware
-    (fn [handler]
-      (fn [request]
-        (let [bump @speed-bump]
-          (when (> bump 0)
-            (warn "Hit speed bump %d ms: %s" bump (:uri request))
-            (Thread/sleep bump)))
-        (handler request)))))
-
 ;;
 ;; File upload/download:
 ;;
@@ -198,20 +199,32 @@
                "Content-Length" (str (:content-length attachment))}}))
 
 ;;
-;; Initializing fixtures
+;; Development thingies
 ;;
 
 (env/in-dev
-  (defpage "/fixture/:type" {type :type}
-    (case type
-      "minimal" (mongo/init-minimal!)
-      "fixture not found")))
 
-(env/in-dev
+  (defpage "/fixture/:name" {name :name}
+    (fixture/apply-fixture name)
+    (str name " data set initialized"))
+
+  (defpage "/fixture" []
+    (json (keys @fixture/fixtures)))
+
   (defpage "/verdict" {:keys [id ok text]}
-    (json 
-      (command/execute 
-        (merge 
-          (create-command {:command "give-application-verdict"}) 
-          {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-           :data {:id id :ok ok :text text}})))))
+    (command/execute 
+      (merge 
+        (create-command {:command "give-application-verdict"}) 
+        {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
+         :data {:id id :ok ok :text text}})))
+
+  (def speed-bump (atom 0))  
+  (server/add-middleware
+    (fn [handler]
+      (fn [request]
+        (let [bump @speed-bump]
+          (when (> bump 0)
+            (warn "Hit speed bump %d ms: %s" bump (:uri request))
+            (Thread/sleep bump)))
+        (handler request)))))
+

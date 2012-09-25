@@ -7,8 +7,9 @@
   (dissoc map :private))
 
 (defn get-hash [password salt] (BCrypt/hashpw password salt))
-(defn dispense-salt [] (BCrypt/gensalt 10))
+(defn dispense-salt ([] (dispense-salt 10)) ([n] (BCrypt/gensalt n)))
 (defn check-password [candidate hashed] (BCrypt/checkpw candidate hashed))
+(defn create-apikey [] (apply str (take 40 (repeatedly #(rand-int 10)))))
 
 (defn login [username password]
   "returns non-private information of first user with the username and password"
@@ -19,4 +20,3 @@
 (defn login-with-apikey [apikey]
   "returns non-private information of first user with the apikey"
   (and apikey (non-private (first (mongo/select mongo/users {"private.apikey" apikey})))))
-

@@ -3,8 +3,7 @@
         lupapalvelu.log)
   (:require [monger.core :as m]
             [monger.collection :as mc]
-            [monger.gridfs :as gfs]
-            [lupapalvelu.fixture.minimal :as minimal])
+            [monger.gridfs :as gfs])
   (:import [org.bson.types ObjectId]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
@@ -102,20 +101,8 @@
   (m/connect-via-uri! mongouri)
   (debug "DB is \"%s\"" (str (m/get-db))))
 
-(defn- clear! []
+(defn clear! []
   (warn "** Clearing DB **")
   (dorun (map #(mc/remove %) collections))
   (mc/ensure-index "users" {:email 1} {:unique true})
   (mc/ensure-index "users" {:personId 1} {:unique true}))
-
-(defn init-fixture! [name u a]
-  (clear!)
-  (warn "Initializing DB with profile '%s'" name)
-  (dorun (map #(insert users %)        u))
-  (dorun (map #(insert applications %) a))
-  (str name " data set initialized"))
-
-(defn init-minimal! [] (init-fixture! "minimal" (minimal/users) (minimal/applications)))
-
-(defn init! []
-  (init-minimal!))
