@@ -49,7 +49,6 @@
 (defpage "/rest/ping" []
   (json {:ok true}))
 
-; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
   (let [user (current-user)]
     (json
@@ -87,14 +86,14 @@
 
 (defn- foreach-command []
   (let [json (from-json)]
-    (map #(create-command (merge json {:command % :method :post})) (keys (command/get-commands)))))
+    (map #(create-command (merge json {:command % :method :post})) (keys (command/get-actions)))))
 
 (defn- validated [command]
   {(:command command) (command/validate command)})
 
 (env/in-dev 
   (defpage "/rest/commands" []
-    (json {:ok true :commands (command/get-commands)})))
+    (json {:ok true :commands (command/get-actions)})))
 
   (defpage [:post "/rest/commands/valid"] []
     (json {:ok true :commands (into {} (map validated (foreach-command)))}))
