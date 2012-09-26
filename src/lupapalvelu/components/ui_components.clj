@@ -1,4 +1,5 @@
 (ns lupapalvelu.components.ui-components
+  (:use [lupapalvelu.log])
   (:require [lupapalvelu.components.core :as c]))
 
 (def ui-components
@@ -28,9 +29,9 @@
                   :html ["application.html"]
                   :depends [:common :repository]}
    
-   :applications {:js ["application.js" "lupapiste.tablesorter.js"]
+   :applications {:js ["applications.js" "lupapiste.tablesorter.js"]
                   :css ["tablesorter.css"]
-                  :html "applications.html"
+                  :html ["applications.html"]
                   :depends [:common :repository]}
    
    :attachment   {:js ["attachment.js" "upload.js"]
@@ -40,11 +41,11 @@
 
    :register     {:css ["register.css"]
                   :js ["register.js"]
-                  :html ["register.html register2.html"]
+                  :html ["register.html" "register2.html"]
                   :depends [:common]}
 
    :wizard       {:js ["application-create-wizard.js"]
-                  :html [(map (partial format "application-create-wizard-%02d.html") (range 1 4))]}
+                  :html (map (partial format "application-create-wizard-%02d.html") (range 1 4))}
 
    :applicant    {:depends [:application :applications :attachment :wizard]}
    
@@ -56,3 +57,13 @@
 
 (defn get-ui-resources [kind component]
   (c/get-resources ui-components kind component))
+
+; Make sure that all resources are available:
+
+(doseq [c (keys ui-components)]
+  (doseq [resource (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
+    (let [r (.getResourceAsStream (clojure.lang.RT/baseLoader) (str "components/" resource))]
+      (if r
+        (.close r)
+        (throw (Exception. (str "Resource missing: " (str "components/" resource))))))))
+
