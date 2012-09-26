@@ -16,14 +16,14 @@
 ;; Utils
 ;; 
 
-(defn- with-_id [m]
+(defn with-_id [m]
   (if-let [id (:id m)]
     (-> m
       (assoc :_id id)
       (dissoc :id))
     m))
 
-(defn- with-id [m]
+(defn with-id [m]
   (if-let [id (:_id m)]
     (-> m 
       (assoc :id id) 
