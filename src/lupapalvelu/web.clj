@@ -50,7 +50,7 @@
 ;;
 
 (defpage "/rest/buildinfo" []
-  (json (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))))
+  (json {:ok true :data (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))}))
 
 (defpage "/rest/ping" []
   (json {:ok true}))
