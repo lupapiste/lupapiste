@@ -3,6 +3,7 @@
         noir.request
         [noir.response :only [json redirect content-type]]
         lupapalvelu.log
+        [clojure.walk :only [keywordize-keys]]
         monger.operators)
   (:require [noir.response :as resp]
             [noir.session :as session]
@@ -84,15 +85,16 @@
 ;; Commands
 ;;
 
-(defn create-command [data]
+(defn create-command [data type]
   {:command (:command data)
    :user (current-user)
+   :type type
    :created (System/currentTimeMillis) 
    :data (dissoc data :command) })
 
 (defn- foreach-command []
   (let [json (from-json)]
-    (map #(create-command (merge json {:command % })) (keys (command/get-commands)))))
+    (map #(create-command (merge json {:command % :method :post})) (keys (command/get-commands)))))
 
 (defn- validated [command]
   {(:command command) (command/validate command)})
@@ -105,7 +107,14 @@
     (json {:ok true :commands (into {} (map validated (foreach-command)))}))
 
 (defpage [:post "/rest/command"] []
-  (json (command/execute (create-command (from-json)))))
+  (json (command/execute (create-command (from-json) :command))))
+
+(defpage "/rest/query" []
+  (json 
+    (command/execute 
+      (create-command 
+        (keywordize-keys (:query-params (ring-request))) 
+        :query))))
 
 (defpage [:get "/rest/command"] []
   (json (command/validate (create-command (from-json)))))
