@@ -2,7 +2,7 @@
   (:require [lupapalvelu.components.core :as c]))
 
 (def ui-components
-  {:open-layers  {:js ["OpenLayers.js"]}
+  {:openlayers   {:js ["OpenLayers.js"]}
   
    :jquery       {:css ["jquery.pnotify.default.css"]
                   :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js" "jquery.filedrop.js"
@@ -13,8 +13,7 @@
    
    :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js" "ko.init.js"]}
    
-   :common       {:js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "main.js"
-                       "nav.js" "repository.js"]
+   :common       {:js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "main.js" "nav.js"]
                   :css ["main.css"]
                   :html ["error.html"]
                   :depends [:jquery :knockout :bootstrap]}
@@ -22,19 +21,22 @@
    :buildinfo    {:js ["buildinfo.js"]
                   :depends [:jquery]}
    
+   :repository   {:js ["repository.js"]
+                  :depends [:common]}
+   
    :application  {:js ["application.js"]
                   :html ["application.html"]
-                  :depends [:common]}
+                  :depends [:common :repository]}
    
    :applications {:js ["application.js" "lupapiste.tablesorter.js"]
                   :css ["tablesorter.css"]
                   :html "applications.html"
-                  :depends [:common]}
+                  :depends [:common :repository]}
    
    :attachment   {:js ["attachment.js" "upload.js"]
                   :css ["upload.css"]
                   :html ["attachment.html"]
-                  :depends [:common]}
+                  :depends [:common :repository]}
 
    :register     {:css ["register.css"]
                   :js ["register.js"]
