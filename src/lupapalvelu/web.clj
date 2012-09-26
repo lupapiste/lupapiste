@@ -40,13 +40,6 @@
        (json {:ok false :text "user not logged in"})))) ; should return 401?
 
 ;;
-;; Alive?
-;;
-
-(defpage "/ping" []
-  "pong\r\n")
-
-;;
 ;; REST API:
 ;;
 
