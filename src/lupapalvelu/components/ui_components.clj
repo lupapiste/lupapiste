@@ -1,4 +1,4 @@
-(ns lupapalvelu.ui-components
+(ns lupapalvelu.components.ui-components
   (:require [lupapalvelu.components.core :as c]))
 
 (def ui-components
