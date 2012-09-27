@@ -8,32 +8,23 @@
 (def invalid-id "123")
 
 (deftest a-test
-  (testing "invalid id returns nil"
-           (is (= nil (string-to-objectid invalid-id))))
-  (testing "string id can be converted to objectid and back"
-           (is (= valid-id (-> valid-id string-to-objectid objectid-to-string))))
-  (testing "make-objectid returns string"
-           (is (string? (make-objectid)))))
+  (testing "create-id returns string"
+           (is (string? (create-id)))))
 
 (facts "Facts about with-objectid"
-  (against-background
-    (string-to-objectid "foo") => ...id...)
-  (fact (with-objectid nil) => nil)
-  (fact (with-objectid {:data "data"}) => {:data "data"})
-  (fact (with-objectid {:id "foo" :data "data"}) => {:_id ...id... :data "data"}))
+  (fact (with-_id nil) => nil)
+  (fact (with-_id {:data "data"}) => {:data "data"})
+  (fact (with-_id {:id "foo" :data "data"}) => {:_id "foo" :data "data"}))
 
 (facts "Facts about with-id"
-  (against-background
-    (objectid-to-string "foo") => ...id...)
   (fact (with-id nil) => nil)
   (fact (with-id {:data "data"}) => {:data "data"})
-  (fact (with-id {:_id "foo" :data "data"}) => {:id ...id... :data "data"}))
+  (fact (with-id {:_id "foo" :data "data"}) => {:id "foo" :data "data"}))
 
 (facts "Facts about insert"
   (fact (insert "c" {:id "foo" :data "data"}) => nil
         (provided
-          (string-to-objectid "foo") => ...id...
-          (mc/insert "c" {:_id ...id... :data "data"}) => nil))
+          (mc/insert "c" {:_id "foo" :data "data"}) => nil))
   (fact (insert "c" {:data "data"}) => nil
         (provided
           (mc/insert "c" {:data "data"}) => nil)))
