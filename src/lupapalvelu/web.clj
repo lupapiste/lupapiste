@@ -40,15 +40,19 @@
        (do ~@content)
        (json (fail "user not logged in"))))) ; should return 401?
 
+(defmacro defjson [path params & content]
+  `(defpage ~path ~params
+     (json (do ~@content))))
+
 ;;
 ;; REST API:
 ;;
 
-(defpage "/rest/buildinfo" []
-  (json (ok (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj"))))))
+(defjson "/rest/buildinfo" []
+  (ok (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))))
 
-(defpage "/rest/ping" []
-  (json (ok)))
+(defjson "/rest/ping" []
+  (ok))
 
 ;;
 ;; Commands
@@ -69,27 +73,26 @@
   {(:command command) (command/validate command)})
 
 (env/in-dev 
-  (defpage "/rest/commands" []
-    (json (ok :commands (command/get-actions)))))
+  (defjson "/rest/commands" []
+    (ok :commands (command/get-actions))))
 
-  (defpage [:post "/rest/commands/valid"] []
-    (json (ok :commands (into {} (map validated (foreach-command))))))
+  (defjson [:post "/rest/commands/valid"] []
+    (ok :commands (into {} (map validated (foreach-command)))))
 
-(defpage [:post "/rest/command"] []
-  (json (command/execute (create-command (from-json) :command))))
+(defjson [:post "/rest/command"] []
+  (command/execute (create-command (from-json) :command)))
 
-(defpage "/rest/query/:name" {name :name}
-  (json 
-    (command/execute 
-      (create-command 
-        (keywordize-keys 
-          (merge 
-            (:query-params (ring-request)) 
-            {:command name})) 
-        :query))))
+(defjson "/rest/query/:name" {name :name}
+  (command/execute 
+    (create-command 
+      (keywordize-keys 
+        (merge 
+          (:query-params (ring-request)) 
+          {:command name})) 
+      :query)))
 
-(defpage [:get "/rest/command"] []
-  (json (command/validate (create-command (from-json)))))
+(defjson [:get "/rest/command"] []
+  (command/validate (create-command (from-json))))
 
 (secured "/rest/genid" []
   (json (ok :id (mongo/create-id))))
@@ -119,21 +122,20 @@
 (def applicationpage-for {:applicant "/lupapiste"
                           :authority "/authority"})
 
-(defpage [:post "/rest/login"] {:keys [username password]}
-  (json
-    (if-let [user (security/login username password)] 
-      (do
-        (info "login: successful: username=%s" username)
-        (session/put! :user user)
-        (let [userrole (keyword (:role user))]
-          (ok :user user :applicationpage (userrole applicationpage-for))))
-      (do
-        (info "login: failed: username=%s" username)
-        (fail "Tunnus tai salasana on v\u00E4\u00E4rin.")))))
+(defjson [:post "/rest/login"] {:keys [username password]}
+  (if-let [user (security/login username password)] 
+    (do
+      (info "login: successful: username=%s" username)
+      (session/put! :user user)
+      (let [userrole (keyword (:role user))]
+        (ok :user user :applicationpage (userrole applicationpage-for))))
+    (do
+      (info "login: failed: username=%s" username)
+      (fail "Tunnus tai salasana on v\u00E4\u00E4rin."))))
 
-(defpage [:post "/rest/logout"] []
+(defjson [:post "/rest/logout"] []
   (session/clear!)
-  (json (ok)))
+  (ok))
 
 ;; 
 ;; Apikey-authentication
@@ -159,14 +161,13 @@
 ;; File upload/download:
 ;;
 
-(defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
+(defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
   (debug "upload: %s: %s" name (str upload))
-  (json
-    (command/execute
-      (create-command (assoc upload :command "upload-attachment" 
-                                    :id applicationId
-                                    :attachmentId attachmentId
-                                    :name (or name ""))))))
+  (command/execute
+    (create-command (assoc upload :command "upload-attachment" 
+                                  :id applicationId
+                                  :attachmentId attachmentId
+                                  :name (or name "")))))
 
 (defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
   (debug "file download: attachmentId=%s" attachmentId)
@@ -186,8 +187,8 @@
     (fixture/apply-fixture name)
     (str name " data set initialized"))
 
-  (defpage "/fixture" []
-    (json (keys @fixture/fixtures)))
+  (defjson "/fixture" []
+    (keys @fixture/fixtures))
 
   (defpage "/verdict" {:keys [id ok text]}
     (command/execute 
