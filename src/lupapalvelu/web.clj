@@ -46,10 +46,10 @@
 (defpage "/rest/buildinfo" []
   (json {:ok true :data (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))}))
 
-(defpage "/rest/ping" []
+#_(defpage "/rest/ping" []
   (json {:ok true}))
 
-(secured "/rest/application" []
+#_(secured "/rest/application" []
   (let [user (current-user)]
     (json
       (case (keyword (:role user))
@@ -57,7 +57,7 @@
         :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
         {:ok false :text "invalid role to load applications"}))))
 
-(secured "/rest/application/:id" {id :id}
+#_(secured "/rest/application/:id" {id :id}
     (let [user (current-user)]
 	    (json
 	      (case (keyword (:role user))
@@ -67,7 +67,7 @@
 	                    (mongo/select mongo/applications {$and [{:_id id} {:authority (:authority user)}]})}
 	        {:ok false :text "invalid role to load application"}))))
 
-(defpage "/rest/user" []
+#_(defpage "/rest/user" []
   (json
     (if-let [user (current-user)]
       {:ok true :user user}
@@ -101,11 +101,15 @@
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json) :command))))
 
-(defpage "/rest/query" []
+(defpage "/rest/query/:name" {name :name}
+  (println "**" name)
   (json 
     (command/execute 
       (create-command 
-        (keywordize-keys (:query-params (ring-request))) 
+        (keywordize-keys 
+          (merge 
+            (:query-params (ring-request)) 
+            {:command name})) 
         :query))))
 
 (defpage [:get "/rest/command"] []
@@ -217,6 +221,7 @@
          :data {:id id :ok ok :text text}})))
 
   (def speed-bump (atom 0))  
+
   (server/add-middleware
     (fn [handler]
       (fn [request]
