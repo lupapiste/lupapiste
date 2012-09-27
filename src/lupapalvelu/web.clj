@@ -57,16 +57,18 @@
 ;; Commands
 ;;
 
-(defn create-command [data type]
-  {:command (:command data)
-   :user (current-user)
-   :type type
-   :created (System/currentTimeMillis) 
-   :data (dissoc data :command) })
-
+(defn create-command 
+  ([data] (create-command data :command))
+  ([data type]
+    {:command (:command data)
+     :user (current-user)
+     :type type
+     :created (System/currentTimeMillis) 
+     :data (dissoc data :command) }))
+  
 (defn- foreach-command []
   (let [json (from-json)]
-    (map #(create-command (merge json {:command %}) :post) (keys (command/get-actions)))))
+    (map #(create-command (merge json {:command %})) (keys (command/get-actions)))))
 
 (defn- validated [command]
   {(:command command) (command/validate command)})
@@ -79,7 +81,7 @@
     (ok :commands (into {} (map validated (foreach-command)))))
 
 (defjson [:post "/rest/command"] []
-  (command/execute (create-command (from-json) :command)))
+  (command/execute (create-command (from-json))))
 
 (defjson "/rest/query/:name" {name :name}
   (command/execute 
@@ -192,7 +194,7 @@
   (defpage "/verdict" {:keys [id ok text]}
     (command/execute 
       (merge 
-        (create-command {:command "give-application-verdict"} :command) 
+        (create-command {:command "give-application-verdict"}) 
         {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
          :data {:id id :ok ok :text text}})))
 
