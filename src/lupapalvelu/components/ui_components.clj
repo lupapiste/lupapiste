@@ -14,56 +14,54 @@
    
    :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js" "ko.init.js"]}
    
-   :common       {:js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "main.js" "nav.js"]
+   :common       {:depends [:jquery :knockout :bootstrap]
+                  :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "main.js" "nav.js"]
                   :css ["main.css"]
-                  :html ["error.html"]
-                  :depends [:jquery :knockout :bootstrap]}
+                  :html ["error.html"]}
    
-   :buildinfo    {:js ["buildinfo.js"]
-                  :depends [:jquery]}
+   :buildinfo    {:depends [:jquery]
+                  :js ["buildinfo.js"]}
    
-   :repository   {:js ["repository.js"]
-                  :depends [:common]}
+   :repository   {:depends [:common]
+                  :js ["repository.js"]}
    
-   :application  {:js ["application.js"]
-                  :html ["application.html"]
-                  :depends [:common :repository]}
+   :application  {:depends [:common :repository]
+                  :js ["application.js"]
+                  :html ["application.html"]}
    
-   :applications {:js ["applications.js" "lupapiste.tablesorter.js"]
+   :applications {:depends [:common :repository]
+                  :js ["applications.js" "lupapiste.tablesorter.js"]
                   :css ["tablesorter.css"]
-                  :html ["applications.html"]
-                  :depends [:common :repository]}
+                  :html ["applications.html"]}
    
-   :attachment   {:js ["attachment.js" "upload.js"]
+   :attachment   {:depends [:common :repository]
+                  :js ["attachment.js" "upload.js"]
                   :css ["upload.css"]
-                  :html ["attachment.html"]
-                  :depends [:common :repository]}
+                  :html ["attachment.html"]}
 
-   :register     {:css ["register.css"]
+   :register     {:depends [:common]
+                  :css ["register.css"]
                   :js ["register.js"]
-                  :html ["register.html" "register2.html"]
-                  :depends [:common]}
+                  :html ["register.html" "register2.html"]}
 
    :wizard       {:js ["application-create-wizard.js"]
-                  :html (map (partial format "application-create-wizard-%02d.html") (range 1 4))}
+                  :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:application :applications :attachment :wizard]}
+   :applicant    {:depends [:application :applications :attachment :wizard]
+                  :html ["index.html"]}
    
-   :authority    {:depends [:application :applications :attachment]}
+   :authority    {:depends [:application :applications :attachment]
+                  :html ["index.html"]}
 
-   :welcome      {:js ["login.js"]
-                  :html ["login.html"]
-                  :depends [:register :jquery]}})
-
-(defn get-ui-resources [kind component]
-  (c/get-resources ui-components kind component))
+   :welcome      {:depends [:register :jquery]
+                  :js ["login.js"]
+                  :html ["login.html" "index.html"]}})
 
 ; Make sure that all resources are available:
 
-(doseq [c (keys ui-components)]
-  (doseq [resource (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-    (let [r (.getResourceAsStream (clojure.lang.RT/baseLoader) (str "components/" resource))]
-      (if r
-        (.close r)
-        (throw (Exception. (str "Resource missing: " (str "components/" resource))))))))
-
+(doseq [c (keys ui-components)
+        resource (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
+  (let [r (.getResourceAsStream (clojure.lang.RT/baseLoader) (str "components/" resource))]
+    (if r
+      (.close r)
+      (throw (Exception. (str "Resource missing: " (str "components/" resource)))))))

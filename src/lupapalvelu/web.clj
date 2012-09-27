@@ -119,17 +119,17 @@
 
 (defpage "/" [] (resp/redirect "/welcome#"))
 
-(defpage "/welcome" [] (session/clear!) (singlepage/compose-singlepage-html "welcome"))
-(defpage "/welcome.js" [] (singlepage/compose-singlepage-js "welcome"))
-(defpage "/welcome.css" [] (singlepage/compose-singlepage-css "welcome"))
+(defpage "/welcome" []      (session/clear!) (singlepage/compose :html :welcome))
+(defpage "/welcome.js" []   (singlepage/compose :js  :welcome))
+(defpage "/welcome.css" []  (singlepage/compose :css :welcome))
 
-(defpage "/lupapiste" [] (if (logged-in?) (singlepage/compose-singlepage-html "lupapiste") (resp/redirect "/welcome#")))
-(defpage "/lupapiste.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
-(defpage "/lupapiste.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
+(defpage "/lupapiste" []      (if (logged-in?) (singlepage/compose-singlepage-html "lupapiste") (resp/redirect "/welcome#")))
+(defpage "/lupapiste.js" []   (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
+(defpage "/lupapiste.css" []  (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
 
-(defpage "/authority" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
-(defpage "/authority.js" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-js "authority") {:status 401}))
-(defpage "/authority.css" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-css "authority") {:status 401}))
+(defpage "/authority" []      (if (logged-in-as-authority?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
+(defpage "/authority.js" []   (if (logged-in-as-authority?) (singlepage/compose-singlepage-js "authority") {:status 401}))
+(defpage "/authority.css" []  (if (logged-in-as-authority?) (singlepage/compose-singlepage-css "authority") {:status 401}))
 
 ;;
 ;; Login/logout:
