@@ -192,7 +192,7 @@
   (defpage "/verdict" {:keys [id ok text]}
     (command/execute 
       (merge 
-        (create-command {:command "give-application-verdict"}) 
+        (create-command {:command "give-application-verdict"} :command) 
         {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
          :data {:id id :ok ok :text text}})))
 
