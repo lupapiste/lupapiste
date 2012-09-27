@@ -46,32 +46,8 @@
 (defpage "/rest/buildinfo" []
   (json {:ok true :data (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))}))
 
-#_(defpage "/rest/ping" []
+(defpage "/rest/ping" []
   (json {:ok true}))
-
-#_(secured "/rest/application" []
-  (let [user (current-user)]
-    (json
-      (case (keyword (:role user))
-        :applicant {:ok true :applications (mongo/select mongo/applications {:roles.applicant.userId (:id user)} ) }
-        :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
-        {:ok false :text "invalid role to load applications"}))))
-
-#_(secured "/rest/application/:id" {id :id}
-    (let [user (current-user)]
-	    (json
-	      (case (keyword (:role user))
-	        :applicant {:ok true :applications 
-	                    (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.userId (:id user)}]} ) }
-	        :authority {:ok true :applications 
-	                    (mongo/select mongo/applications {$and [{:_id id} {:authority (:authority user)}]})}
-	        {:ok false :text "invalid role to load application"}))))
-
-#_(defpage "/rest/user" []
-  (json
-    (if-let [user (current-user)]
-      {:ok true :user user}
-      {:ok false :message "No session"})))
 
 ;;
 ;; Commands
@@ -86,7 +62,7 @@
 
 (defn- foreach-command []
   (let [json (from-json)]
-    (map #(create-command (merge json {:command % :method :post})) (keys (command/get-actions)))))
+    (map #(create-command (merge json {:command %}) :post) (keys (command/get-actions)))))
 
 (defn- validated [command]
   {(:command command) (command/validate command)})
@@ -102,7 +78,6 @@
   (json (command/execute (create-command (from-json) :command))))
 
 (defpage "/rest/query/:name" {name :name}
-  (println "**" name)
   (json 
     (command/execute 
       (create-command 
