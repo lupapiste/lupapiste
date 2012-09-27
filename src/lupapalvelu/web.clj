@@ -51,8 +51,7 @@
 (defjson "/rest/buildinfo" []
   (ok (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))))
 
-(defjson "/rest/ping" []
-  (ok))
+(defjson "/rest/ping" [] (ok))
 
 ;;
 ;; Commands
