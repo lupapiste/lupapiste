@@ -2,6 +2,7 @@
   (:use noir.core
         noir.request
         [noir.response :only [json redirect content-type]]
+        [lupapalvelu.command :only [ok fail]]
         lupapalvelu.log
         [clojure.walk :only [keywordize-keys]]
         monger.operators)
@@ -37,17 +38,17 @@
   `(defpage ~path ~params
      (if (logged-in?)
        (do ~@content)
-       (json {:ok false :text "user not logged in"})))) ; should return 401?
+       (json (fail "user not logged in"))))) ; should return 401?
 
 ;;
 ;; REST API:
 ;;
 
 (defpage "/rest/buildinfo" []
-  (json {:ok true :data (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))}))
+  (json (ok (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj"))))))
 
 (defpage "/rest/ping" []
-  (json {:ok true}))
+  (json (ok)))
 
 ;;
 ;; Commands
@@ -69,10 +70,10 @@
 
 (env/in-dev 
   (defpage "/rest/commands" []
-    (json {:ok true :commands (command/get-actions)})))
+    (json (ok :commands (command/get-actions)))))
 
   (defpage [:post "/rest/commands/valid"] []
-    (json {:ok true :commands (into {} (map validated (foreach-command)))}))
+    (json (ok :commands (into {} (map validated (foreach-command))))))
 
 (defpage [:post "/rest/command"] []
   (json (command/execute (create-command (from-json) :command))))
@@ -91,7 +92,7 @@
   (json (command/validate (create-command (from-json)))))
 
 (secured "/rest/genid" []
-  (json {:ok true :id (mongo/create-id)}))
+  (json (ok :id (mongo/create-id))))
 
 ;;
 ;; Web UI:
@@ -125,14 +126,14 @@
         (info "login: successful: username=%s" username)
         (session/put! :user user)
         (let [userrole (keyword (:role user))]
-          {:ok true :user user :applicationpage (userrole applicationpage-for) }))
+          (ok :user user :applicationpage (userrole applicationpage-for))))
       (do
         (info "login: failed: username=%s" username)
-        {:ok false :message "Tunnus tai salasana on v\u00E4\u00E4rin."}))))
+        (fail "Tunnus tai salasana on v\u00E4\u00E4rin.")))))
 
 (defpage [:post "/rest/logout"] []
   (session/clear!)
-  (json {:ok true}))
+  (json (ok)))
 
 ;; 
 ;; Apikey-authentication
