@@ -13,11 +13,10 @@
 
 (defn summary [user]
   "returns common information about the user"
-  {:userId (:id user)
+  {:userId    (:id user)
    :firstName (:firstName user)
-   :lastName (:lastName user)
-   :role     (:role user)
-   :displayName (str (:firstName user) " " (:lastName user))})
+   :lastName  (:lastName user)
+   :role      (:role user)})
 
 (defn login [username password]
   "returns non-private information of first user with the username and password"
