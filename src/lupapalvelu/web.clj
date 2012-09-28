@@ -57,8 +57,8 @@
 ;; Commands
 ;;
 
-(defn create-command 
-  ([data] (create-command data :command))
+(defn create-action 
+  ([data] (create-action data :command))
   ([data type]
     {:command (:command data)
      :user (current-user)
@@ -68,7 +68,7 @@
   
 (defn- foreach-command []
   (let [json (from-json)]
-    (map #(create-command (merge json {:command %})) (keys (command/get-actions)))))
+    (map #(create-action (merge json {:command %})) (keys (command/get-actions)))))
 
 (defn- validated [command]
   {(:command command) (command/validate command)})
@@ -81,11 +81,11 @@
     (ok :commands (into {} (map validated (foreach-command)))))
 
 (defjson [:post "/rest/command"] []
-  (command/execute (create-command (from-json))))
+  (command/execute (create-action (from-json))))
 
 (defjson "/rest/query/:name" {name :name}
   (command/execute 
-    (create-command 
+    (create-action 
       (keywordize-keys 
         (merge 
           (:query-params (ring-request)) 
@@ -93,7 +93,7 @@
       :query)))
 
 (defjson [:get "/rest/command"] []
-  (command/validate (create-command (from-json))))
+  (command/validate (create-action (from-json))))
 
 (secured "/rest/genid" []
   (json (ok :id (mongo/create-id))))
@@ -165,7 +165,7 @@
 (defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
   (debug "upload: %s: %s" name (str upload))
   (command/execute
-    (create-command (assoc upload :command "upload-attachment" 
+    (create-action (assoc upload :command "upload-attachment" 
                                   :id applicationId
                                   :attachmentId attachmentId
                                   :name (or name "")))))
@@ -194,7 +194,7 @@
   (defpage "/verdict" {:keys [id ok text]}
     (command/execute 
       (merge 
-        (create-command {:command "give-application-verdict"}) 
+        (create-action {:command "give-application-verdict"}) 
         {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
          :data {:id id :ok ok :text text}})))
 
