@@ -1,10 +1,9 @@
 (ns lupapalvelu.web
-  (:use noir.core
-        noir.request
-        [noir.response :only [json redirect content-type]]
-        lupapalvelu.log
-        monger.operators)
-  (:require [noir.response :as resp]
+  (:use [noir.core :only [defpage]]
+        [lupapalvelu.log]
+        [monger.operators])
+  (:require [noir.request :as request]
+            [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
             [cheshire.core :as json]
@@ -20,11 +19,11 @@
 ;;
 
 (defn from-json []
-  (json/parse-string (slurp (:body (ring-request))) true))
+  (json/decode (slurp (:body (request/ring-request))) true))
 
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
-  (or (session/get :user) ((ring-request) :user)))
+  (or (session/get :user) ((request/ring-request) :user)))
 
 (defn logged-in? []
   (not (nil? (current-user))))
@@ -36,7 +35,7 @@
   `(defpage ~path ~params
      (if (logged-in?)
        (do ~@content)
-       (json {:ok false :text "user not logged in"})))) ; should return 401?
+       (json/encode {:ok false :text "user not logged in"})))) ; should return 401?
 
 ;;
 ;; Alive?
@@ -50,15 +49,15 @@
 ;;
 
 (defpage "/rest/buildinfo" []
-  (json {:ok true :data (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))}))
+  (json/encode {:ok true :data (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj")))}))
 
 (defpage "/rest/ping" []
-  (json {:ok true}))
+  (json/encode {:ok true}))
 
 ; TODO: for applicants, return only their own applications
 (secured "/rest/application" []
   (let [user (current-user)]
-    (json
+    (json/encode
       (case (keyword (:role user))
         :applicant {:ok true :applications (mongo/select mongo/applications {:roles.applicant.userId (:id user)} ) }
         :authority {:ok true :applications (mongo/select mongo/applications {:authority (:authority user)})}
@@ -66,7 +65,7 @@
 
 (secured "/rest/application/:id" {id :id}
     (let [user (current-user)]
-	    (json
+	    (json/encode
 	      (case (keyword (:role user))
 	        :applicant {:ok true :applications 
 	                    (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.userId (:id user)}]} ) }
@@ -75,7 +74,7 @@
 	        {:ok false :text "invalid role to load application"}))))
 
 (defpage "/rest/user" []
-  (json
+  (json/encode
     (if-let [user (current-user)]
       {:ok true :user user}
       {:ok false :message "No session"})))
@@ -91,27 +90,27 @@
    :data (dissoc data :command) })
 
 (defn- foreach-command []
-  (let [json (from-json)]
-    (map #(create-command (merge json {:command % })) (keys (command/get-commands)))))
+  (let [m (from-json)]
+    (map #(create-command (merge m {:command %})) (keys (command/get-commands)))))
 
 (defn- validated [command]
   {(:command command) (command/validate command)})
 
 (env/in-dev 
   (defpage "/rest/commands" []
-    (json {:ok true :commands (command/get-commands)})))
+    (json/encode {:ok true :commands (command/get-commands)})))
 
   (defpage [:post "/rest/commands/valid"] []
-    (json {:ok true :commands (into {} (map validated (foreach-command)))}))
+    (json/encode {:ok true :commands (into {} (map validated (foreach-command)))}))
 
 (defpage [:post "/rest/command"] []
-  (json (command/execute (create-command (from-json)))))
+  (json/encode (command/execute (create-command (from-json)))))
 
 (defpage [:get "/rest/command"] []
-  (json (command/validate (create-command (from-json)))))
+  (json/encode (command/validate (create-command (from-json)))))
 
 (secured "/rest/genid" []
-  (json {:ok true :id (mongo/create-id)}))
+  (json/encode {:ok true :id (mongo/create-id)}))
 
 ;;
 ;; Web UI:
@@ -119,27 +118,31 @@
 
 (defpage "/" [] (resp/redirect "/welcome#"))
 
-(defpage "/welcome" []      (session/clear!) (singlepage/compose :html :welcome))
-(defpage "/welcome.js" []   (singlepage/compose :js  :welcome))
-(defpage "/welcome.css" []  (singlepage/compose :css :welcome))
+(def content-type {:html "text/html; charset=utf-8"
+                   :js   "application/javascript"
+                   :css  "text/css"})
 
-(defpage "/lupapiste" []      (if (logged-in?) (singlepage/compose-singlepage-html "lupapiste") (resp/redirect "/welcome#")))
-(defpage "/lupapiste.js" []   (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
-(defpage "/lupapiste.css" []  (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
+(defpage "/welcome" []      (session/clear!) (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
+(defpage "/welcome.js" []   (resp/content-type (:js content-type) (singlepage/compose :js :welcome)))
+(defpage "/welcome.css" []  (resp/content-type (:css content-type) (singlepage/compose :css :welcome)))
 
-(defpage "/authority" []      (if (logged-in-as-authority?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
-(defpage "/authority.js" []   (if (logged-in-as-authority?) (singlepage/compose-singlepage-js "authority") {:status 401}))
-(defpage "/authority.css" []  (if (logged-in-as-authority?) (singlepage/compose-singlepage-css "authority") {:status 401}))
+(defpage "/applicant" []      (if (logged-in?) (resp/content-type (:html content-type) (singlepage/compose :html :applicant)) (resp/redirect "/welcome#")))
+(defpage "/applicant.js" []   (if (logged-in?) (resp/content-type (:js content-type)   (singlepage/compose :js   :applicant)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/applicant.css" []  (if (logged-in?) (resp/content-type (:css content-type)  (singlepage/compose :css  :applicant)) (resp/status 401 "Unauthorized\r\n")))
+
+(defpage "/authority" []      (if (logged-in-as-authority?) (resp/content-type (:html content-type) (singlepage/compose :html :authority)) (resp/redirect "/welcome#")))
+(defpage "/authority.js" []   (if (logged-in-as-authority?) (resp/content-type (:js content-type)   (singlepage/compose :js   :authority)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/authority.css" []  (if (logged-in-as-authority?) (resp/content-type (:css content-type)  (singlepage/compose :css  :authority)) (resp/status 401 "Unauthorized\r\n")))
 
 ;;
 ;; Login/logout:
 ;;
 
-(def applicationpage-for {:applicant "/lupapiste"
+(def applicationpage-for {:applicant "/applicant"
                           :authority "/authority"})
 
 (defpage [:post "/rest/login"] {:keys [username password]}
-  (json
+  (json/encode
     (if-let [user (security/login username password)] 
       (do
         (info "login: successful: username=%s" username)
@@ -152,7 +155,7 @@
 
 (defpage [:post "/rest/logout"] []
   (session/clear!)
-  (json {:ok true}))
+  (json/encode {:ok true}))
 
 ;; 
 ;; Apikey-authentication
@@ -180,7 +183,7 @@
 
 (defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
   (debug "upload: %s: %s" name (str upload))
-  (json
+  (json/encode
     (command/execute
       (create-command (assoc upload :command "upload-attachment" 
                                     :id applicationId
@@ -206,7 +209,7 @@
     (str name " data set initialized"))
 
   (defpage "/fixture" []
-    (json (keys @fixture/fixtures)))
+    (json/encode (keys @fixture/fixtures)))
 
   (defpage "/verdict" {:keys [id ok text]}
     (command/execute 

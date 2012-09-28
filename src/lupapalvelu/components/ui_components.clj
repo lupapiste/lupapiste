@@ -12,10 +12,10 @@
    :bootstrap    {:css ["bootstrap.css"	"bootstrap-responsive.css" "addedStyles.css"]
                   :js ["bootstrap-dropdown.js" "bootstrap-collapse.js"]}
    
-   :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js" "ko.init.js"]}
+   :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    
-   :common       {:depends [:jquery :knockout :bootstrap]
-                  :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "main.js" "nav.js"]
+   :common       {:depends [:openlayers :jquery :knockout :bootstrap]
+                  :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "nav.js" "ko.init.js"]
                   :css ["main.css"]
                   :html ["error.html"]}
    
@@ -30,9 +30,12 @@
                   :html ["application.html"]}
    
    :applications {:depends [:common :repository]
-                  :js ["applications.js" "lupapiste.tablesorter.js"]
-                  :css ["tablesorter.css"]
+                  :js ["applications-config.js" "applications.js" "lupapiste.tablesorter.js"]                   :css ["tablesorter.css" "applications.css"]
                   :html ["applications.html"]}
+   
+   :auth-applications {:depends [:common :repository]
+                       :js ["applications-config.js" "applications.js"]
+                       :html ["applications.html"]}
    
    :attachment   {:depends [:common :repository]
                   :js ["attachment.js" "upload.js"]
@@ -48,9 +51,11 @@
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
    :applicant    {:depends [:application :applications :attachment :wizard]
+                  :js ["applicant.js"]
                   :html ["index.html"]}
    
-   :authority    {:depends [:application :applications :attachment]
+   :authority    {:depends [:application :auth-applications :attachment]
+                  :ka ["authority.js"]
                   :html ["index.html"]}
 
    :welcome      {:depends [:register :jquery]
