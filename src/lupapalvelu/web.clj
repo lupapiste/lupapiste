@@ -60,7 +60,7 @@
 (defn create-action [name & args]
   (apply command/create-action name (into args [(current-user) :user])))
  
-(defn- foreach-command []
+(defn- foreach-action []
   (let [json (from-json)]
     (map 
       #(create-action % :data json)
@@ -70,11 +70,11 @@
   {(:action command) (command/validate command)})
 
 (env/in-dev 
-  (defjson "/rest/commands" []
+  (defjson "/rest/actions" []
     (ok :commands (command/get-actions))))
 
-  (defjson [:post "/rest/commands/valid"] []
-    (ok :commands (into {} (map validated (foreach-command)))))
+  (defjson [:post "/rest/actions/valid"] []
+    (ok :commands (into {} (map validated (foreach-action)))))
 
 (defjson [:post "/rest/command/:name"] {name :name}
   (command/execute 
@@ -89,6 +89,7 @@
       :type :query
       :data (keywordize-keys (:query-params (ring-request))))))
 
+; TODO: make command out of this, needs :loggedin true -kinda validation. 
 (secured "/rest/genid" []
   (json (ok :id (mongo/create-id))))
 
