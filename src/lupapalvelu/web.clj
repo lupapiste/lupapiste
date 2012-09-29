@@ -57,18 +57,14 @@
 ;; Commands
 ;;
 
-(defn create-action 
-  ([data] (create-action data :command))
-  ([data type]
-    {:command (:command data)
-     :user (current-user)
-     :type type
-     :created (System/currentTimeMillis) 
-     :data (dissoc data :command) }))
-  
+(defn create-action [name & args]
+  (apply command/create-action name (into args [(current-user) :user])))
+ 
 (defn- foreach-command []
   (let [json (from-json)]
-    (map #(create-action (merge json {:command %})) (keys (command/get-actions)))))
+    (map 
+      #(create-action % :data json)
+      (keys (command/get-actions)))))
 
 (defn- validated [command]
   {(:command command) (command/validate command)})
@@ -80,20 +76,18 @@
   (defjson [:post "/rest/commands/valid"] []
     (ok :commands (into {} (map validated (foreach-command)))))
 
-(defjson [:post "/rest/command"] []
-  (command/execute (create-action (from-json))))
+(defjson [:post "/rest/command/:name"] {name :name}
+  (command/execute 
+    (create-action 
+      name
+      :data (from-json))))
 
 (defjson "/rest/query/:name" {name :name}
   (command/execute 
-    (create-action 
-      (keywordize-keys 
-        (merge 
-          (:query-params (ring-request)) 
-          {:command name})) 
-      :query)))
-
-(defjson [:get "/rest/command"] []
-  (command/validate (create-action (from-json))))
+    (create-action
+      name
+      :type :query
+      :data (keywordize-keys (:query-params (ring-request))))))
 
 (secured "/rest/genid" []
   (json (ok :id (mongo/create-id))))
@@ -186,17 +180,18 @@
 
   (defpage "/fixture/:name" {name :name}
     (fixture/apply-fixture name)
-    (str name " data set initialized"))
+    (format "fixture applied: %s" name))
 
   (defjson "/fixture" []
     (keys @fixture/fixtures))
 
   (defpage "/verdict" {:keys [id ok text]}
-    (command/execute 
-      (merge 
-        (create-action {:command "give-application-verdict"}) 
-        {:user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-         :data {:id id :ok ok :text text}})))
+    (command/execute
+      (command/create-action
+        "give-application-verdict" 
+        :user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
+        :data {:id id :ok ok :text text}))
+    (format "verdict is given for application %s" id))
 
   (def speed-bump (atom 0))  
 
@@ -208,4 +203,3 @@
             (warn "Hit speed bump %d ms: %s" bump (:uri request))
             (Thread/sleep bump)))
         (handler request)))))
-
