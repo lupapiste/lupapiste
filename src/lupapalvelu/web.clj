@@ -67,7 +67,7 @@
       (keys (command/get-actions)))))
 
 (defn- validated [command]
-  {(:command command) (command/validate command)})
+  {(:action command) (command/validate command)})
 
 (env/in-dev 
   (defjson "/rest/commands" []
@@ -159,7 +159,7 @@
 (defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
   (debug "upload: %s: %s" name (str upload))
   (command/execute
-    (create-action (assoc upload :command "upload-attachment" 
+    (create-action (assoc upload :action "upload-attachment" 
                                   :id applicationId
                                   :attachmentId attachmentId
                                   :name (or name "")))))
