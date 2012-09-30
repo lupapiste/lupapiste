@@ -2,7 +2,7 @@
   (:use noir.core
         noir.request
         [noir.response :only [json redirect content-type]]
-        [lupapalvelu.command :only [ok fail]]
+        [lupapalvelu.core :only [ok fail]]
         lupapalvelu.log
         [clojure.walk :only [keywordize-keys]]
         monger.operators)
@@ -13,7 +13,7 @@
             [lupapalvelu.env :as env] 
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture :as fixture]
-            [lupapalvelu.command :as command]
+            [lupapalvelu.core :as core]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]))
 
@@ -58,32 +58,32 @@
 ;;
 
 (defn create-action [name & args]
-  (apply command/create-action name (into args [(current-user) :user])))
+  (apply core/create-action name (into args [(current-user) :user])))
  
 (defn- foreach-action []
   (let [json (from-json)]
     (map 
       #(create-action % :data json)
-      (keys (command/get-actions)))))
+      (keys (core/get-actions)))))
 
 (defn- validated [command]
-  {(:action command) (command/validate command)})
+  {(:action command) (core/validate command)})
 
 (env/in-dev 
   (defjson "/rest/actions" []
-    (ok :commands (command/get-actions))))
+    (ok :commands (core/get-actions))))
 
   (defjson [:post "/rest/actions/valid"] []
     (ok :commands (into {} (map validated (foreach-action)))))
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (command/execute 
+  (core/execute 
     (create-action 
       name
       :data (from-json))))
 
 (defjson "/rest/query/:name" {name :name}
-  (command/execute 
+  (core/execute 
     (create-action
       name
       :type :query
@@ -159,7 +159,7 @@
 
 (defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
   (debug "upload: %s: %s" name (str upload))
-  (command/execute
+  (core/execute
     (create-action (assoc upload :action "upload-attachment" 
                                   :id applicationId
                                   :attachmentId attachmentId
@@ -187,8 +187,8 @@
     (keys @fixture/fixtures))
 
   (defpage "/verdict" {:keys [id ok text]}
-    (command/execute
-      (command/create-action
+    (core/execute
+      (core/create-action
         "give-application-verdict" 
         :user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
         :data {:id id :ok ok :text text}))
