@@ -1,12 +1,11 @@
 (ns lupapalvelu.web
-  (:use noir.core
-        noir.request
-        [noir.response :only [json redirect content-type]]
+  (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail]]
-        lupapalvelu.log
+        [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]]
-        monger.operators)
-  (:require [noir.response :as resp]
+        [monger.operators])
+  (:require [noir.request :as request]
+            [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
             [cheshire.core :as json]
@@ -22,11 +21,11 @@
 ;;
 
 (defn from-json []
-  (json/parse-string (slurp (:body (ring-request))) true))
+  (json/decode (slurp (:body (request/ring-request))) true))
 
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
-  (or (session/get :user) ((ring-request) :user)))
+  (or (session/get :user) ((request/ring-request) :user)))
 
 (defn logged-in? []
   (not (nil? (current-user))))
@@ -36,7 +35,7 @@
 
 (defmacro defjson [path params & content]
   `(defpage ~path ~params
-     (json (do ~@content))))
+     (resp/json (do ~@content))))
 
 ;;
 ;; REST API:
@@ -81,7 +80,7 @@
     (create-action
       name
       :type :query
-      :data (keywordize-keys (:query-params (ring-request))))))
+      :data (keywordize-keys (:query-params (request/ring-request))))))
 
 ;;
 ;; Web UI:
@@ -89,23 +88,27 @@
 
 (defpage "/" [] (resp/redirect "/welcome#"))
 
-(defpage "/welcome" [] (session/clear!) (singlepage/compose-singlepage-html "welcome"))
-(defpage "/welcome.js" [] (singlepage/compose-singlepage-js "welcome"))
-(defpage "/welcome.css" [] (singlepage/compose-singlepage-css "welcome"))
+(def content-type {:html "text/html; charset=utf-8"
+                   :js   "application/javascript"
+                   :css  "text/css"})
 
-(defpage "/lupapiste" [] (if (logged-in?) (singlepage/compose-singlepage-html "lupapiste") (resp/redirect "/welcome#")))
-(defpage "/lupapiste.js" [] (if (logged-in?) (singlepage/compose-singlepage-js "lupapiste") {:status 401}))
-(defpage "/lupapiste.css" [] (if (logged-in?) (singlepage/compose-singlepage-css "lupapiste") {:status 401}))
+(defpage "/welcome" []      (session/clear!) (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
+(defpage "/welcome.js" []   (resp/content-type (:js content-type) (singlepage/compose :js :welcome)))
+(defpage "/welcome.css" []  (resp/content-type (:css content-type) (singlepage/compose :css :welcome)))
 
-(defpage "/authority" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-html "authority") (resp/redirect "/welcome#")))
-(defpage "/authority.js" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-js "authority") {:status 401}))
-(defpage "/authority.css" [] (if (logged-in-as-authority?) (singlepage/compose-singlepage-css "authority") {:status 401}))
+(defpage "/applicant" []      (if (logged-in?) (resp/content-type (:html content-type) (singlepage/compose :html :applicant)) (resp/redirect "/welcome#")))
+(defpage "/applicant.js" []   (if (logged-in?) (resp/content-type (:js content-type)   (singlepage/compose :js   :applicant)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/applicant.css" []  (if (logged-in?) (resp/content-type (:css content-type)  (singlepage/compose :css  :applicant)) (resp/status 401 "Unauthorized\r\n")))
+
+(defpage "/authority" []      (if (logged-in-as-authority?) (resp/content-type (:html content-type) (singlepage/compose :html :authority)) (resp/redirect "/welcome#")))
+(defpage "/authority.js" []   (if (logged-in-as-authority?) (resp/content-type (:js content-type)   (singlepage/compose :js   :authority)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/authority.css" []  (if (logged-in-as-authority?) (resp/content-type (:css content-type)  (singlepage/compose :css  :authority)) (resp/status 401 "Unauthorized\r\n")))
 
 ;;
 ;; Login/logout:
 ;;
 
-(def applicationpage-for {:applicant "/lupapiste"
+(def applicationpage-for {:applicant "/applicant"
                           :authority "/authority"})
 
 (defjson [:post "/rest/login"] {:keys [username password]}

@@ -1,4 +1,4 @@
-(ns lupapalvelu.mongo 
+(ns lupapalvelu.mongo
   (:use monger.operators
         lupapalvelu.log)
   (:require [monger.core :as m]
@@ -14,7 +14,7 @@
 
 ;;
 ;; Utils
-;; 
+;;
 
 (defn with-_id [m]
   (if-let [id (:id m)]
@@ -25,8 +25,8 @@
 
 (defn with-id [m]
   (if-let [id (:_id m)]
-    (-> m 
-      (assoc :id id) 
+    (-> m
+      (assoc :id id)
       (dissoc :_id))
     m))
 
@@ -35,7 +35,7 @@
 
 ;;
 ;; Database Api
-;; 
+;;
 
 (defn update [collection query data]
   "Updates data into collection by query. Always returns nil."
@@ -55,14 +55,14 @@
 (defn by-id [collection id]
   (with-id (mc/find-one-as-map collection {:_id id})))
 
-(defn select 
+(defn select
   "returns multiple entries by matching the monger query"
   ([collection]
     (select collection {}))
   ([collection query]
     (map with-id (mc/find-maps collection query))))
 
-(defn select-one 
+(defn select-one
   "returns one entry by matching the monger query"
   [collection query]
   (with-id (mc/find-one-as-map collection query)))
@@ -71,16 +71,16 @@
   (.setId input id)
   input)
 
-(defn upload [id filename content-type tempfile timestamp]
+(defn upload [applicationId attachmentId filename content-type tempfile timestamp]
   (gfs/store-file
     (gfs/make-input-file tempfile)
-    (set-file-id id)
+    (set-file-id attachmentId)
     (gfs/filename filename)
     (gfs/content-type content-type)
-    (gfs/metadata {:uploaded timestamp})))
+    (gfs/metadata {:uploaded timestamp, :application applicationId})))
 
 (defn download [attachmentId]
-  (if-let [attachment (gfs/find-one attachmentId)]
+  (if-let [attachment (gfs/find-one {:_id attachmentId})]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
      :content-length (.getLength attachment)
