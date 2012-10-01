@@ -8,6 +8,7 @@
             [lupapalvelu.fixture.full]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
+            [lupapalvelu.action]
             [lupapalvelu.mongo :as mongo])
   (:gen-class))
 
