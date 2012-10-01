@@ -34,12 +34,6 @@
 (defn logged-in-as-authority? []
   (and logged-in? (= :authority (keyword (:role (current-user))))))
 
-(defmacro secured [path params & content]
-  `(defpage ~path ~params
-     (if (logged-in?)
-       (do ~@content)
-       (json (fail "user not logged in"))))) ; should return 401?
-
 (defmacro defjson [path params & content]
   `(defpage ~path ~params
      (json (do ~@content))))
@@ -88,10 +82,6 @@
       name
       :type :query
       :data (keywordize-keys (:query-params (ring-request))))))
-
-; TODO: make command out of this, needs :loggedin true -kinda validation. 
-(secured "/rest/genid" []
-  (json (ok :id (mongo/create-id))))
 
 ;;
 ;; Web UI:
