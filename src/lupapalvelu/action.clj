@@ -11,10 +11,11 @@
 
 (defquery "ping" {} [q] (ok "pong"))
 
-(defquery "user" {} [{user :user}]
-  (if (not (nil? user))
-    (ok :user user)
-    (fail "user not logged in")))
+(defquery "user" {:authenticated true} [{user :user}]
+  (ok :user user))
+
+(defcommand "create-id" {:authenticated true} [command]
+  (ok :id (mongo/create-id)))
 
 (defquery "applications" {} [{user :user}]
   (case (keyword (:role user))
