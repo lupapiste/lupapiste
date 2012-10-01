@@ -7,9 +7,9 @@
                  [org.clojure/tools.nrepl "0.2.0-beta8"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [clj-http "0.5.3"]]
-  :main lupapalvelu.server
-  :repl-options {:init-ns lupapalvelu.server}
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
                    :plugins [[lein-midje "2.0.0-SNAPSHOT"]
                              [lein-buildid "0.1.0-SNAPSHOT"]]}}
+  :main lupapalvelu.server
+  :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

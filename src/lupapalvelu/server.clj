@@ -11,7 +11,7 @@
             [lupapalvelu.mongo :as mongo])
   (:gen-class))
 
-(defn -main [& m]
+(defn -main [& args]
   (info "Server starting")
   (mongo/connect!)
   (env/in-dev
