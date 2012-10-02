@@ -9,7 +9,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]))
 
-(defquery "ping" {} [q] (ok "pong"))
+(defquery "ping" {} [q] (ok :text "pong"))
 
 (defquery "user" {:authenticated true} [{user :user}]
   (ok :user user))
@@ -72,7 +72,7 @@
 
 (defn test-command [command])
 
-(defn pong [command] (ok "ping"))
+(defn pong [command] (ok :text "ping"))
 
 (defn add-comment [command]
   (with-application command
