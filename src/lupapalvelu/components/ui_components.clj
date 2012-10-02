@@ -50,15 +50,15 @@
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:application :applications :attachment :wizard]
+   :applicant    {:depends [:application :applications :attachment :wizard :buildinfo]
                   :js ["applicant.js"]
                   :html ["index.html"]}
    
-   :authority    {:depends [:application :auth-applications :attachment]
+   :authority    {:depends [:application :auth-applications :attachment :buildinfo]
                   :ka ["authority.js"]
                   :html ["index.html"]}
 
-   :welcome      {:depends [:register :jquery]
+   :welcome      {:depends [:register :jquery :buildinfo]
                   :js ["login.js"]
                   :html ["login.html" "index.html"]}})
 
