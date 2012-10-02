@@ -13,7 +13,8 @@
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.strings :as strings]))
 
 ;;
 ;; Helpers
@@ -159,22 +160,15 @@
 
 (def windows-filename-max-length 255)
 
-(defn to-max-length [s max-length]
-  (if (and (not (nil? s)) (> (.length s) max-length))
-    (let [start (- (.length s) max-length)]
-      (let [end (+ start max-length)]
-        (subs s start  end)))
-    s))
-
 (defn encode-filename
   "Replaces all non-ascii chars and other that the allowed punctuation with dash.
    UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
   [unencoded-filename]
-  (if (nil? unencoded-filename)
-    nil
-    (clojure.string/replace
-      (to-max-length unencoded-filename windows-filename-max-length)
-      #"[^a-zA-Z0-9\.\-_ ]" "-")))
+  (when unencoded-filename
+    (let [de-accented (strings/de-accent unencoded-filename)]
+      (clojure.string/replace
+        (strings/to-max-length de-accented windows-filename-max-length)
+        #"[^a-zA-Z0-9\.\-_ ]" "-"))))
 
 (defn output-attachment [attachmentId download]
   (debug "file download: attachmentId=%s" attachmentId)
