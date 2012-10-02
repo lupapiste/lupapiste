@@ -157,15 +157,36 @@
                                   :attachmentId attachmentId
                                   :name (or name "")))))
 
-(defn output-attachment [attachmentId doDownload]
+(def windows-filename-max-length 255)
+
+(defn to-max-length [s max-length]
+  (if (and (not (nil? s)) (> (.length s) max-length))
+    (let [start (- (.length s) max-length)]
+      (let [end (+ start max-length)]
+        (subs s start  end)))
+    s))
+
+(defn encode-filename
+  "Replaces all non-ascii chars and other that the allowed punctuation with dash.
+   UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
+  [unencoded-filename]
+  (if (nil? unencoded-filename)
+    nil
+    (clojure.string/replace
+      (to-max-length unencoded-filename windows-filename-max-length)
+      #"[^a-zA-Z0-9\.\-_ ]" "-")))
+
+(defn output-attachment [attachmentId download]
   (debug "file download: attachmentId=%s" attachmentId)
   (if-let [attachment (action/get-attachment attachmentId)]
-    (let [response {:status 200
-     :body ((:content attachment))
-     :headers {"Content-Type" (:content-type attachment)
-               "Content-Length" (str (:content-length attachment))}}]
-        (if doDownload
-          (assoc-in response [:headers "Content-Disposition"] (str "attachment;filename=" (:file-name attachment)))
+    (let [response
+          {:status 200
+           :body ((:content attachment))
+           :headers {"Content-Type" (:content-type attachment)
+                     "Content-Length" (str (:content-length attachment))}}]
+        (if download
+          (assoc-in response [:headers "Content-Disposition"]
+            (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
           response))))
 
 (defpage "/rest/view/:attachmentId" {attachmentId :attachmentId}
