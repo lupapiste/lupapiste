@@ -42,6 +42,20 @@
                :state :verdictGiven
                :verdict {:text (-> command :data :text)}}}))))
 
+(defquery "open-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :states     [:draft]}
+  [command]
+  (with-application command
+    (fn [application]
+      (mongo/update
+        mongo/applications {:_id (:id application)}
+        {$set {:modified (:created command)
+               :state :open
+               }}))))
+
+
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
@@ -77,6 +91,8 @@
 (defn add-comment [command]
   (with-application command 
     (fn [application]
+      (if (= :draft (:state application))
+        (executed "open-application" command))
       (let [user (:user command)]
         (mongo/update-by-id
           mongo/applications (:id application) 
@@ -105,7 +121,7 @@
   (with-application command
     (fn [application]
       (mongo/update
-        mongo/applications {:_id (:id application) :state :open}
+        mongo/applications {:_id (:id application)}
           {$set {:state :submitted, :submitted (:created command) }}))))
 
 (defn add-application [command]
@@ -145,7 +161,7 @@
                   {:id id
                    :created created
                    :modified created
-                   :state :open
+                   :state :draft
                    :permitType :buildingPermit
                    :location {:lat (:lat data) :lon (:lon data)}
                    :title (:streetAddress data)
