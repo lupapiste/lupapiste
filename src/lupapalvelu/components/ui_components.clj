@@ -33,9 +33,10 @@
                   :js ["applications-config.js" "applications.js" "lupapiste.tablesorter.js"]                   :css ["tablesorter.css" "applications.css"]
                   :html ["applications.html"]}
    
-   :auth-applications {:depends [:common :repository]
-                       :js ["applications-config.js" "applications.js"]
-                       :html ["applications.html"]}
+   :authority_applications {:depends [:common :repository]
+                            :js ["applications-config.js" "applications.js" "lupapiste.tablesorter.js"]
+                            :css ["tablesorter.css"]
+                            :html ["applications.html"]}
    
    :attachment   {:depends [:common :repository]
                   :js ["attachment.js" "upload.js"]
@@ -54,8 +55,8 @@
                   :js ["applicant.js"]
                   :html ["index.html"]}
    
-   :authority    {:depends [:application :auth-applications :attachment :buildinfo]
-                  :ka ["authority.js"]
+   :authority    {:depends [:application :authority_applications :attachment :buildinfo]
+                  :js ["authority.js"]
                   :html ["index.html"]}
 
    :welcome      {:depends [:register :jquery :buildinfo]
