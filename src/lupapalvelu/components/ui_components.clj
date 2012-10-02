@@ -67,7 +67,7 @@
 
 (doseq [c (keys ui-components)
         resource (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-  (let [r (.getResourceAsStream (clojure.lang.RT/baseLoader) (str "components/" resource))]
+  (let [r (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path resource))]
     (if r
       (.close r)
-      (throw (Exception. (str "Resource missing: " (str "components/" resource)))))))
+      (throw (Exception. (str "Resource missing: " (c/path resource)))))))

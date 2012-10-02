@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+	<section class="page" id="attachment">
+
+		<div class="container">
+			<div class="row">
+				<ul class="breadcrumb">
+					<li><a href="#!/applications">Lupahakemukset</a></li>
+					<li><span class="divider">/</span></li>
+					<li><a data-bind="text: application.title, attr: {href: '#!/application/' + application.id()}"></a></li>
+					<li><span class="divider">/</span></li>
+					<li class="active"><span data-bind="text: filename"></span></li>
+				</ul>
+			</div>
+
+			<h1>Liite</h1>			
+			<div class="row">
+				<div class="span4">
+					<div>Liitteen nimi: <input data-bind="value: name" type="text" placeholder="Liitteen nimi"></input></div>
+					<table style="margin-top: 15px;">
+						<tr><td>Tiedoston nimi:</td><td data-bind="text: filename"></td></tr>
+						<tr><td>Tyyppi:</td><td data-bind="ltext: contentType"></td></tr>
+						<tr><td>Koko:</td><td data-bind="size: size"></td></tr>
+						<!-- <tr><td>Tunniste:</td><td data-bind="text: attachmentId"></td></tr> -->
+					</table>
+				</div>
+				<div class="span8">
+					<form id="attachmentUploadForm">
+						<input type="file" multiple="multiple"></input>
+						<div class="droparea">
+							<span>Raahaa liite t&auml;h&auml;n</span>
+							<img src="/img/ajax-loader-32.gif" style="display: none;"></img>
+						</div>
+					</form>
+				</div>
+				<div class="span12">
+					<button class="btn" data-bind="click: save">Tallenna</button>
+					<button class="btn" data-bind="click: toApplication">Palaa</button>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>
