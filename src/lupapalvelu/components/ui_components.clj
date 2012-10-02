@@ -66,8 +66,9 @@
 ; Make sure that all resources are available:
 
 (doseq [c (keys ui-components)
-        resource (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-  (let [r (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path resource))]
-    (if r
-      (.close r)
-      (throw (Exception. (str "Resource missing: " (c/path resource)))))))
+        r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
+  (let [file      (c/path r)
+        resource (.getResourceAsStream (clojure.lang.RT/baseLoader) file)]
+    (if resource
+      (.close resource)
+      (throw (Exception. (str "Resource missing: " file))))))
