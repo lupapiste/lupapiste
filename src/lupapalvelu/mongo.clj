@@ -84,7 +84,7 @@
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
      :content-length (.getLength attachment)
-     :file-name (.get (.getMetaData attachment) "file-name")}))
+     :file-name (.getFilename attachment)}))
 
 ;;
 ;; Bootstrappin'

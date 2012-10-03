@@ -11,6 +11,13 @@
 (defn check-password [candidate hashed] (BCrypt/checkpw candidate hashed))
 (defn create-apikey [] (apply str (take 40 (repeatedly #(rand-int 10)))))
 
+(defn summary [user]
+  "returns common information about the user"
+  {:userId    (:id user)
+   :firstName (:firstName user)
+   :lastName  (:lastName user)
+   :role      (:role user)})
+
 (defn login [username password]
   "returns non-private information of first user with the username and password"
   (if-let [user (mongo/select-one mongo/users {:username username})]

@@ -8,13 +8,15 @@
             [lupapalvelu.fixture.full]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
+            [lupapalvelu.action]
             [lupapalvelu.mongo :as mongo])
   (:gen-class))
 
-(defn -main [& m]
+(defn -main [& args]
   (info "Server starting")
   (mongo/connect!)
   (env/in-dev
+    (warn "*** Starting development services ***")
     (fixture/apply-fixture "minimal")
     (nrepl/start-server :port 9000))
   (server/start env/port {:mode env/mode :ns 'lupapalvelu.web})
