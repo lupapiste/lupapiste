@@ -42,7 +42,7 @@
                :state :verdictGiven
                :verdict {:text (-> command :data :text)}}}))))
 
-(defquery "open-application"
+(defcommand "open-application"
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft]}
