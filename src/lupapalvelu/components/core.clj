@@ -36,6 +36,6 @@
    dependencies. The seq contains strings, each representing a resource of 'kind', where 'kind' is one
    of :js, :html or :css."
   [components kind c]
-  (mapcat (partial component-resources components kind) (get-dependencies components [] c)))
+  (mapcat (partial component-resources components kind) (get-dependencies components c)))
 
 (defn path [& dir] (str "private/" (join "/" dir)))
