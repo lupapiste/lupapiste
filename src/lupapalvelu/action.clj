@@ -91,7 +91,7 @@
 (defn add-comment [command]
   (with-application command 
     (fn [application]
-      (if (= :draft (:state application))
+      (if (= "draft" (:state application))
         (executed "open-application" command))
       (let [user (:user command)]
         (mongo/update-by-id
