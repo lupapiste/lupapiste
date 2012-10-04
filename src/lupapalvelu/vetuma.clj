@@ -39,24 +39,19 @@
 
 (defn generate-stamp [] (apply str (take 20 (repeatedly #(rand-int 10)))))
 
-(def time-format 
-  (format/formatter-local "yyyyMMddHHmmssSSS"))
+(def time-format (format/formatter-local "yyyyMMddHHmmssSSS"))
 
-(defn timestamp [] 
-  (format/unparse time-format (local-now)))
+(defn timestamp [] (format/unparse time-format (local-now)))
 
-(defn string-keys [m]
-  (into (empty m) (for [[k v] m] [(.toUpperCase (name k)) v])))
+(defn string-keys [m] (into {} (for [[k v] m] [(.toUpperCase (name k)) v])))
 
 ;;
 ;; Mac
 ;;
 
-(defn secret [m]
-  (str (:rcvid m) "-" (:key m)))
+(defn secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
 
-(defn mac [data] 
-  (-> data digest/sha-256 .toUpperCase))
+(defn mac [data]  (-> data digest/sha-256 .toUpperCase))
 
 (defn mac-of [m]
   (->
@@ -77,8 +72,8 @@
 (defn generate-data [id]
   (-> 
     constants 
-    (merge {:trid id})
-    (merge {:timestmp (timestamp)})
+    (assoc :trid id)
+    (assoc :timestmp (timestamp))
     with-mac
     string-keys))
 
@@ -86,8 +81,8 @@
 ;; Web stuff
 ;;
 
-(defn field [kv]
-  (hidden-field (key kv) (val kv)))
+(defn field [[k v]]
+  (hidden-field k v))
 
 (defpage "/vetuma" []
   (let [stamp (generate-stamp)

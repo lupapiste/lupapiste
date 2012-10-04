@@ -20,5 +20,6 @@
     (warn "*** Starting development services ***")
     (fixture/apply-fixture "minimal")
     (nrepl/start-server :port 9000))
-  (server/start env/port {:mode env/mode :ns 'lupapalvelu.web})
+  (server/start env/port {:mode env/mode
+                          :ns 'lupapalvelu.web})
   (info "Server running"))
