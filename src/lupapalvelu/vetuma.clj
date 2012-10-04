@@ -93,4 +93,4 @@
         (map field data)
         (submit-button "submit")))))
 
-(defpage "/vetuma/:status" {status :status} status)
+(defpage [:post "/vetuma/:status"] {status :status} status)

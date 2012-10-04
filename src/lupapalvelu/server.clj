@@ -21,5 +21,9 @@
     (fixture/apply-fixture "minimal")
     (nrepl/start-server :port 9000))
   (server/start env/port {:mode env/mode
+                          :jetty-options {:ssl? true
+                                          :ssl-port 8443
+                                          :keystore "./resources/keystore"
+                                          :key-password "lupapiste"}
                           :ns 'lupapalvelu.web})
   (info "Server running"))
