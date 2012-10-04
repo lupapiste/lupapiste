@@ -23,7 +23,7 @@
   (server/start env/port {:mode env/mode
                           :jetty-options {:ssl? true
                                           :ssl-port 8443
-                                          :keystore "./resources/keystore"
+                                          :keystore "./keystore"
                                           :key-password "lupapiste"}
                           :ns 'lupapalvelu.web})
   (info "Server running"))
