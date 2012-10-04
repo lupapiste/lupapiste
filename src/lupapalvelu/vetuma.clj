@@ -45,7 +45,7 @@
 
 (defn timestamp [] (format/unparse time-format (local-now)))
 
-(defn string-keys [m] (into {} (for [[k v] m] [(.toUpperCase (name k)) v])))
+(defn keys-as-strings [m] (into {} (for [[k v] m] [(.toUpperCase (name k)) v])))
 
 ;;
 ;; Mac
@@ -77,7 +77,7 @@
     (assoc :trid id)
     (assoc :timestmp (timestamp))
     with-mac
-    string-keys))
+    keys-as-strings))
 
 ;;
 ;; Web stuff
