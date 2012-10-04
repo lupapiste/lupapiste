@@ -15,8 +15,8 @@
 ;;
 
 (def session-key "vetuma")
-
-(def mac-keys [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :trid])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :trid])
+(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid])
 
 (def constants 
   {:url    "https://testitunnistus.suomi.fi/VETUMALogin/app"
@@ -37,8 +37,6 @@
 ;; Helpers
 ;;
 
-(defn url [] (:url constants))
-
 (defn generate-stamp [] (apply str (take 20 (repeatedly #(rand-int 10)))))
 
 (def time-format (format/formatter-local "yyyyMMddHHmmssSSS"))
@@ -46,6 +44,7 @@
 (defn timestamp [] (format/unparse time-format (local-now)))
 
 (defn keys-as-strings [m] (into {} (for [[k v] m] [(.toUpperCase (name k)) v])))
+(defn keys-as-keywords [m] (into {} (for [[k v] m] [(keyword (.toLowerCase k)) v])))
 
 ;;
 ;; Mac
@@ -55,9 +54,9 @@
 
 (defn mac [data]  (-> data digest/sha-256 .toUpperCase))
 
-(defn mac-of [m]
+(defn mac-of [m keys]
   (->
-    (for [k mac-keys] (k m))
+    (for [k keys] (k m))
     vec
     (conj (secret m))
     (conj "")
@@ -65,13 +64,16 @@
     mac))
 
 (defn with-mac [m]
-  (merge m {:mac (mac-of m)}))
+  (merge m {:mac (mac-of m request-mac-keys)}))
+
+(defn mac-verified [m]
+  (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
 
 ;;
 ;; Beef
 ;;
 
-(defn generate-data [id]
+(defn request-data [id]
   (-> 
     constants 
     (assoc :trid id)
@@ -88,16 +90,21 @@
 
 (defpage "/vetuma" []
   (let [stamp (generate-stamp)
-        data  (generate-data stamp)]
+        data  (request-data stamp)]
     (session/put! session-key stamp)
     (html 
-      (form-to [:post (url)]
+      (form-to [:post (:url constants)]
         (map field data)
         (submit-button "submit")))))
 
 (defpage [:post "/vetuma/:status"] {status :status}
-  (let [m (:form-params (request/ring-request))]
-    (str status " --> " m)))
+  (str (->
+         (request/ring-request)
+         :form-params
+         keys-as-keywords
+         (assoc :key (:key constants))
+         mac-verified
+         (dissoc :key))))
 
 (def ret {"RCVID" "***REMOVED***1"
           "USERID" "210281-9988"
@@ -112,5 +119,3 @@
           "LG" "fi"
           "SO" "62"
           "CANURL" "https://localhost:8443/vetuma/cancel"})
-
-
