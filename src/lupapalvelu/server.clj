@@ -3,6 +3,7 @@
   (:require [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
             [lupapalvelu.web]
+            [lupapalvelu.vetuma]
             [lupapalvelu.env :as env]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.full]
