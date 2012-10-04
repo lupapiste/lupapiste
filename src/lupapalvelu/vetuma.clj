@@ -105,17 +105,3 @@
          (assoc :key (:key constants))
          mac-verified
          (dissoc :key))))
-
-(def ret {"RCVID" "***REMOVED***1"
-          "USERID" "210281-9988"
-          "ERRURL" "https://localhost:8443/vetuma/error"
-          "RETURL" "https://localhost:8443/vetuma/return"
-          "MAC" "CB25FB2CAF6CF7CB2577B053C1604D3F4174A225E94F2551CAA2C9F2669B7CEB"
-          "TIMESTMP" "20121004131351353"
-          "STATUS" "SUCCESSFUL"
-          "SUBJECTDATA" "ETUNIMI=PORTAALIA, SUKUNIMI=TESTAA"
-          "TRID" "58775279672526028038"
-          "EXTRADATA" "HETU=210281-9988"
-          "LG" "fi"
-          "SO" "62"
-          "CANURL" "https://localhost:8443/vetuma/cancel"})
