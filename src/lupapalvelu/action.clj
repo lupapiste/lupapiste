@@ -73,7 +73,7 @@
   [command]
   (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
     (let [apikey (security/create-apikey)]
-      (mongo/update 
+      (mongo/update
         mongo/users
         {:username (:username user)}
         {$set {"private.apikey" apikey}})
@@ -82,20 +82,20 @@
 
 ;;
 ;; Command functions
-;; 
+;;
 
 (defn test-command [command])
 
 (defn pong [command] (ok :text "ping"))
 
 (defn add-comment [command]
-  (with-application command 
+  (with-application command
     (fn [application]
       (if (= "draft" (:state application))
         (executed "open-application" command))
       (let [user (:user command)]
         (mongo/update-by-id
-          mongo/applications (:id application) 
+          mongo/applications (:id application)
           {$set {:modified (:created command)}
            $push {:comments {:text    (-> command :data :text)
                              :created (-> command :created)
@@ -116,7 +116,7 @@
       (mongo/update
         mongo/applications {:_id (:id application) :state :submitted}
         {$set {:state :sent}}))))
-  
+
 (defn submit-application [command]
   (with-application command
     (fn [application]
@@ -168,14 +168,14 @@
                    :streetAddress (:streetAddress data)
                    :postalCode (:postalCode data)
                    :postalPlace (:postalPlace data)
-                   :authority (:postalPlace data) 
+                   :authority (:postalPlace data)
                    :roles {:applicant (security/summary user)}
                    :documents {applicant-document-id {:documentType :hakijaTieto
                                                       :content {:nimi (str (:firstName user) " " (:lastName user))
                                                                 :katuosoite (:streetAddress user)
                                                                 :postinumero (:postalCode user)
                                                                 :postitoimipaikka (:postalPlace user)
-                                                                :puhelinnumero (:phone user) 
+                                                                :puhelinnumero (:phone user)
                                                                 :sahkopostiosoite (:email user)}}
                                operation-id {:documentType :toimenpide
                                              :type (:categories data)
@@ -196,20 +196,26 @@
     (ok :applicationId application-id :attachmentId attachment-id)))
 
 (defn set-attachment-name [{{:keys [id attachmentId name]} :data created :created}]
-  (mongo/update-by-id 
-    mongo/applications id 
+  (mongo/update-by-id
+    mongo/applications id
     {$set {:modified created
            (str "attachments." attachmentId ".name") name}}))
 
 (defn upload-attachment [{created :created {:keys [id attachmentId name filename tempfile content-type size]} :data}]
-  (debug "upload: %s %s %s %s %s %s %d" id attachmentId name filename tempfile content-type size)
-  (mongo/upload attachmentId filename content-type tempfile created)
+  (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId name filename tempfile content-type size)
+  (mongo/upload id attachmentId filename content-type tempfile created)
   (mongo/update-by-id
     mongo/applications id
     {$set {:modified created
            (str "attachments." attachmentId) {:id attachmentId
                                               :name name
+                                              ; File name will be presented in ASCII when the file is downloaded.
+                                              ; Conversion could be done here as well, but we don't want to lose information.
                                               :filename filename
                                               :contentType content-type
                                               :size size}}})
   (.delete (file tempfile)))
+
+(defn get-attachment [attachmentId]
+  ;; FIXME access rights
+  (mongo/download attachmentId))

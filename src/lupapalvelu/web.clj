@@ -2,19 +2,19 @@
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
-        [clojure.walk :only [keywordize-keys]]
-        [monger.operators])
+        [clojure.walk :only [keywordize-keys]])
   (:require [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
             [cheshire.core :as json]
-            [lupapalvelu.env :as env] 
-            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.env :as env]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.core :as core]
+            [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.strings :as strings]))
 
 ;;
 ;; Helpers
@@ -52,17 +52,17 @@
 
 (defn create-action [name & args]
   (apply core/create-action name (into args [(current-user) :user])))
- 
+
 (defn- foreach-action []
   (let [json (from-json)]
-    (map 
+    (map
       #(create-action % :data json)
       (keys (core/get-actions)))))
 
 (defn- validated [command]
   {(:action command) (core/validate command)})
 
-(env/in-dev 
+(env/in-dev
   (defjson "/rest/actions" []
     (ok :commands (core/get-actions))))
 
@@ -70,13 +70,13 @@
     (ok :commands (into {} (map validated (foreach-action)))))
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute 
-    (create-action 
+  (core/execute
+    (create-action
       name
       :data (from-json))))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute 
+  (core/execute
     (create-action
       name
       :type :query
@@ -112,7 +112,7 @@
                           :authority "/authority"})
 
 (defjson [:post "/rest/login"] {:keys [username password]}
-  (if-let [user (security/login username password)] 
+  (if-let [user (security/login username password)]
     (do
       (info "login: successful: username=%s" username)
       (session/put! :user user)
@@ -126,7 +126,7 @@
   (session/clear!)
   (ok))
 
-;; 
+;;
 ;; Apikey-authentication
 ;;
 
@@ -153,18 +153,40 @@
 (defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
   (debug "upload: %s: %s" name (str upload))
   (core/execute
-    (create-action (assoc upload :action "upload-attachment" 
+    (create-action "upload-attachment" :data (assoc upload
                                   :id applicationId
                                   :attachmentId attachmentId
                                   :name (or name "")))))
 
-(defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
+(def windows-filename-max-length 255)
+
+(defn encode-filename
+  "Replaces all non-ascii chars and other that the allowed punctuation with dash.
+   UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
+  [unencoded-filename]
+  (when-let [de-accented (strings/de-accent unencoded-filename)]
+      (clojure.string/replace
+        (strings/last-n windows-filename-max-length de-accented)
+        #"[^a-zA-Z0-9\.\-_ ]" "-")))
+
+(defn output-attachment [attachmentId download]
   (debug "file download: attachmentId=%s" attachmentId)
-  (if-let [attachment (mongo/download attachmentId)]
-    {:status 200
-     :body ((:content attachment))
-     :headers {"Content-Type" (:content-type attachment)
-               "Content-Length" (str (:content-length attachment))}}))
+  (if-let [attachment (action/get-attachment attachmentId)]
+    (let [response
+          {:status 200
+           :body ((:content attachment))
+           :headers {"Content-Type" (:content-type attachment)
+                     "Content-Length" (str (:content-length attachment))}}]
+        (if download
+          (assoc-in response [:headers "Content-Disposition"]
+            (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
+          response))))
+
+(defpage "/rest/view/:attachmentId" {attachmentId :attachmentId}
+  (output-attachment attachmentId false))
+
+(defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
+  (output-attachment attachmentId true))
 
 ;;
 ;; Development thingies
@@ -182,12 +204,12 @@
   (defpage "/verdict" {:keys [id ok text]}
     (core/execute
       (core/create-action
-        "give-application-verdict" 
+        "give-application-verdict"
         :user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
         :data {:id id :ok ok :text text}))
     (format "verdict is given for application %s" id))
 
-  (def speed-bump (atom 0))  
+  (def speed-bump (atom 0))
 
   (server/add-middleware
     (fn [handler]
