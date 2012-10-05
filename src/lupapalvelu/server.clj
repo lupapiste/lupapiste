@@ -12,12 +12,19 @@
             [lupapalvelu.mongo :as mongo])
   (:gen-class))
 
+(defn start-server [port mode]
+  (server/start port {:mode mode :ns 'lupapalvelu.web}))
+
+(defn stop-server [server]
+  (server/stop server))
+
 (defn -main [& args]
   (info "Server starting")
-  (mongo/connect!)
+  (mongo/connect! mongo/mongouri)
   (env/in-dev
-    (warn "*** Starting development services ***")
+    (warn "*** Applying test fixture")
     (fixture/apply-fixture "minimal")
+    (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
-  (server/start env/port {:mode env/mode :ns 'lupapalvelu.web})
+  (start-server env/port env/mode)
   (info "Server running"))
