@@ -166,7 +166,7 @@
   [unencoded-filename]
   (when-let [de-accented (strings/de-accent unencoded-filename)]
       (clojure.string/replace
-        (strings/to-max-length de-accented windows-filename-max-length)
+        (strings/last-n windows-filename-max-length de-accented)
         #"[^a-zA-Z0-9\.\-_ ]" "-")))
 
 (defn output-attachment [attachmentId download]
