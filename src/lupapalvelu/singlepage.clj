@@ -15,11 +15,11 @@
 (defn compose-resource [kind component]
   (let [out (ByteArrayOutputStream.)]
     (doseq [src (c/get-resources ui-components kind component)]
-      (with-open [resource (clojure.lang.RT/resourceAsStream nil (str "components/" src))]
+      (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))]
         (IOUtils/copy resource (write-header out src))))
     (.toByteArray out)))
 
-(def template (enlive/html-resource "components/template.html"))
+(def template (enlive/html-resource (c/path "template.html")))
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
 (defn parse-html-resource [c resource]
@@ -43,7 +43,7 @@
   (let [out (ByteArrayOutputStream.)]
     (doseq [element (inject-content
                       template
-                      (reduce parse-html-resource {} (map (partial str "components/") (c/get-resources ui-components :html component)))
+                      (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
                       component)]
       (.write out (.getBytes element utf8)))
     (.toByteArray out)))
