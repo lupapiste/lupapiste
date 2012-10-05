@@ -7,6 +7,7 @@ var ajax = function() {
 	var nop = function() { };
 	
 	function Call(url, type) {
+		hub.setPageNotReady();
 
 		var self = this;
 		
@@ -18,8 +19,10 @@ var ajax = function() {
 			cache:     false,
 			timeout:   60000,
 			success: function(e) {
-				var handler = e.ok ? self.successHandler : self.errorHandler;
-				handler(e);
+				//setTimeout(function(){ 
+					var handler = e.ok ? self.successHandler : self.errorHandler;
+					handler(e);
+				//}, 1000);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				self.failHandler(jqXHR, textStatus, errorThrown);

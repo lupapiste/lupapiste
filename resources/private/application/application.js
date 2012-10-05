@@ -145,6 +145,7 @@
 			.success(function(d) {
 				authorization.data(d.commands);
 				showApplicationPart2(data);
+				hub.setPageReady("application");
 			})
 			.call();
 	}
@@ -200,6 +201,7 @@
 		marker = map.makeMarker(position, icon);
 		markers.addMarker(marker);
 		if (applicationMap) applicationMap.setCenter(position, 12);
+
 	}
 	
 	function uploadCompleted(file, size, type, attachmentId) {
@@ -239,6 +241,7 @@
 
 	function submitApplication(model) {
 		var applicationId = application.id();
+		console.log("applicationid:" + applicationId);
 		ajax.command("submit-application", { id: applicationId})
 		.success(function(d) {
 			notify.success("hakemus j\u00E4tetty",model);
