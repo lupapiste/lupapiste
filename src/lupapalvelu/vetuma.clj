@@ -109,7 +109,7 @@
     with-mac
     keys-as-strings))
 
-(defn- to-response-data [m]
+(defn- parsed [m]
   (-> m
     keys-as-keywords
     (assoc :key (:key constants))
@@ -135,7 +135,7 @@
     (:user session-keys) 
     (-> (:form-params (request/ring-request))
       logged
-      to-response-data
+      parsed
       user-extracted
       logged))
   (redirect (session/get! (:url session-keys))))
