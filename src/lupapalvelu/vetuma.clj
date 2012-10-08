@@ -15,23 +15,24 @@
 ;;
 
 (def session-key "vetuma")
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :trid])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid])
 
 (def constants 
-  {:url    "https://testitunnistus.suomi.fi/VETUMALogin/app"
-   :rcvid  "***REMOVED***1"
-   :appid  "VETUMA-APP2"
-   :so     "6"
-   :solist "6,11"
-   :type   "LOGIN"
-   :au     "EXTAUTH"
-   :lg     "fi"
-   :returl "https://localhost:8443/vetuma/return"
-   :canurl "https://localhost:8443/vetuma/cancel"
-   :errurl "https://localhost:8443/vetuma/error"
-   :ap     "***REMOVED***"
-   :key    "***REMOVED***"})
+  {:url     "https://testitunnistus.suomi.fi/VETUMALogin/app"
+   :rcvid   "***REMOVED***1"
+   :appid   "VETUMA-APP2"
+   :so      "6"
+   :solist  "6,11"
+   :type    "LOGIN"
+   :au      "EXTAUTH"
+   :lg      "fi"
+   :returl  "https://localhost:8443/vetuma/return"
+   :canurl  "https://localhost:8443/vetuma/cancel"
+   :errurl  "https://localhost:8443/vetuma/error"
+   :ap      "***REMOVED***"
+   :appname "Lupapiste"
+   :key     "***REMOVED***"})
 
 ;;
 ;; Helpers
@@ -92,7 +93,7 @@
   (let [stamp (generate-stamp)
         data  (request-data stamp)]
     (session/put! session-key stamp)
-    (html 
+    (html
       (form-to [:post (:url constants)]
         (map field data)
         (submit-button "submit")))))
