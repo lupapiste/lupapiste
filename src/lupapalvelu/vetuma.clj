@@ -2,6 +2,7 @@
   (:use [clojure.string :only [join split]]
         [clojure.set :only [rename-keys]]
         [noir.core :only [defpage]]
+        [noir.response :only [redirect]]
         [hiccup.core :only [html]]
         [clj-time.local :only [local-now]]
         [hiccup.form]
@@ -16,7 +17,9 @@
 ;; Configuration
 ;;
 
-(def session-key "vetuma")
+(def session-keys {:url  "vetuma-return-url"
+                   :user "vetuma-user"})
+
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
@@ -79,7 +82,7 @@
 ;; response parsing
 ;;
 
-(defn- extract-subject [m]
+(defn- extract-subjectdata [m]
   (-> m
     :subjectdata
     (split #", ")
@@ -91,16 +94,16 @@
 
 (defn- extract-person-id [m] (:userid m))
 
-(defn- extract-response [m]
-  (assoc (extract-subject m) :personId (extract-person-id m)))
+(defn- extract-user [m]
+  (assoc (extract-subjectdata m) :personId (extract-person-id m)))
 
 ;;
 ;; Request & Response mapping to clojure
 ;;
 
-(defn request-data [id]
+(defn request-data []
   (-> constants 
-    (assoc :trid id)
+    (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     with-mac
     keys-as-strings))
@@ -119,20 +122,19 @@
 (defn field [[k v]]
   (hidden-field k v))
 
-(defpage "/vetuma" []
-  (let [stamp (generate-stamp)
-        data  (request-data stamp)]
-    (session/put! session-key stamp)
-    (html
-      (form-to [:post (:url constants)]
-        (map field data)
-        (submit-button "submit")))))
+(defpage "/vetuma" {:keys [url]}
+  (session/put! (:url session-keys) url)
+  (html
+    (form-to [:post (:url constants)]
+      (map field (request-data))
+      (submit-button "submit"))))
 
 (defpage [:post "/vetuma/:status"] {status :status}
-  (-> 
-    (:form-params (request/ring-request)) 
-    logged
-    response-data
-    extract-response
-    str))
-  
+  (session/put! 
+    (:user session-keys) 
+    (-> (:form-params (request/ring-request)) 
+      logged
+      response-data
+      extract-user))
+  (redirect (session/get! (:url session-keys))))
+
