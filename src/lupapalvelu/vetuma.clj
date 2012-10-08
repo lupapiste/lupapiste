@@ -1,9 +1,11 @@
 (ns lupapalvelu.vetuma
-  (:use [clojure.string :only [join]]
+  (:use [clojure.string :only [join split]]
+        [clojure.set :only [rename-keys]]
         [noir.core :only [defpage]]
         [hiccup.core :only [html]]
         [clj-time.local :only [local-now]]
-        [hiccup.form])
+        [hiccup.form]
+        [lupapalvelu.log])
   (:require [digest]
             [noir.request :as request]
             [noir.session :as session]
@@ -48,6 +50,8 @@
 (defn keys-as-strings [m] (into {} (for [[k v] m] [(.toUpperCase (name k)) v])))
 (defn keys-as-keywords [m] (into {} (for [[k v] m] [(keyword (.toLowerCase k)) v])))
 
+(defn logged [m] (info "%s" (str m)) m)
+
 ;;
 ;; Mac
 ;;
@@ -72,16 +76,41 @@
   (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
 
 ;;
-;; Beef
+;; response parsing
+;;
+
+(defn- extract-subject [m]
+  (-> m
+    :subjectdata
+    (split #", ")
+    (->> (map #(split % #"=")))
+    (->> (into {}))
+    keys-as-keywords
+    (rename-keys {:etunimi :firstName})
+    (rename-keys {:sukunimi :lastName})))
+
+(defn- extract-person-id [m] (:userid m))
+
+(defn- extract-response [m]
+  (assoc (extract-subject m) :personId (extract-person-id m)))
+
+;;
+;; Request & Response mapping to clojure
 ;;
 
 (defn request-data [id]
-  (-> 
-    constants 
+  (-> constants 
     (assoc :trid id)
     (assoc :timestmp (timestamp))
     with-mac
     keys-as-strings))
+
+(defn response-data [m]
+  (-> m
+    keys-as-keywords
+    (assoc :key (:key constants))
+    mac-verified
+    (dissoc :key)))
 
 ;;
 ;; Web stuff
@@ -100,10 +129,10 @@
         (submit-button "submit")))))
 
 (defpage [:post "/vetuma/:status"] {status :status}
-  (str (->
-         (request/ring-request)
-         :form-params
-         keys-as-keywords
-         (assoc :key (:key constants))
-         mac-verified
-         (dissoc :key))))
+  (-> 
+    (:form-params (request/ring-request)) 
+    logged
+    response-data
+    extract-response
+    str))
+  
