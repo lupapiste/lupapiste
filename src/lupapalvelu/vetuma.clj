@@ -2,7 +2,7 @@
   (:use [clojure.string :only [join split]]
         [clojure.set :only [rename-keys]]
         [noir.core :only [defpage]]
-        [noir.response :only [redirect]]
+        [noir.response :only [redirect json]]
         [hiccup.core :only [html]]
         [clj-time.local :only [local-now]]
         [hiccup.form]
@@ -116,7 +116,7 @@
     (dissoc :key)))
 
 ;;
-;; Web stuff
+;; Web stuff -> FIXME: secure return uri setting
 ;;
 
 (defn field [[k v]]
@@ -132,9 +132,11 @@
 (defpage [:post "/vetuma/:status"] {status :status}
   (session/put! 
     (:user session-keys) 
-    (-> (:form-params (request/ring-request)) 
+    (-> (:form-params (request/ring-request))
       logged
       response-data
       extract-user))
   (redirect (session/get! (:url session-keys))))
-
+ 
+(defpage "/vetuma/user" [] 
+  (json (session/get! (:user session-keys))))
