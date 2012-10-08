@@ -7,11 +7,13 @@
                  [org.clojure/tools.nrepl "0.2.0-beta9"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [clj-http "0.5.3"]]
-  :test-paths ["test" "itest"]
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
                                   [clj-webdriver "0.6.0-alpha11"]]
                    :plugins [[lein-midje "2.0.0-SNAPSHOT"]
-                             [lein-buildid "0.1.0-SNAPSHOT"]]}}
+                             [lein-buildid "0.1.0-SNAPSHOT"]]}
+             :itest {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
+                                    [clj-webdriver "0.6.0-alpha11"]]
+                     :test-paths ^:replace ["itest"]}}
   :main lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")
