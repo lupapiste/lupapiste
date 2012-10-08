@@ -129,17 +129,6 @@
 		return v;
 	}
 	
-	var applicationMap;
-	var markers = new OpenLayers.Layer.Markers( "Markers" );
-
-	var marker;
-	var icon = (function() {
-		var size = new OpenLayers.Size(21,25);
-		var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-		return new OpenLayers.Icon('/img/marker-green.png', size, offset);
-	})();
-	
-
 	function showApplication(data) {
 		ajax.postJson("/rest/actions/valid",{id: data.id})
 			.success(function(d) {
@@ -189,18 +178,6 @@
 				application.comments.push(comments[i]);
 			}
 		}
-
-		var position = map.toLatLon(data.location.lat, data.location.lon);
-		
-		if (marker) {
-			markers.removeMarker(marker);
-			marker.destroy();
-			marker = null;
-		}
-		
-		marker = map.makeMarker(position, icon);
-		markers.addMarker(marker);
-		if (applicationMap) applicationMap.setCenter(position, 12);
 
 	}
 	
@@ -272,10 +249,6 @@
 	$(function() {
 		var page = $("#application");
 
-		applicationMap = new OpenLayers.Map("application-map");
-		applicationMap.addLayer(new OpenLayers.Layer.OSM());
-		applicationMap.addLayer(markers);
-		
 		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1}, page[0]);
 		initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
 	});
