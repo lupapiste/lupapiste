@@ -50,8 +50,9 @@
 
 (defn timestamp [] (format/unparse time-format (local-now)))
 
-(defn keys-as-strings [m] (into {} (for [[k v] m] [(.toUpperCase (name k)) v])))
-(defn keys-as-keywords [m] (into {} (for [[k v] m] [(keyword (.toLowerCase k)) v])))
+(defn- keys-as [f m] (into {} (for [[k v] m] [(f k) v])))
+(defn keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
+(defn keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
 (defn logged [m] (info "%s" (str m)) m)
 
