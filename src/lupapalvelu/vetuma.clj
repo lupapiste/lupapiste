@@ -44,27 +44,27 @@
 ;; Helpers
 ;;
 
-(defn generate-stamp [] (apply str (take 20 (repeatedly #(rand-int 10)))))
-
 (def time-format (format/formatter-local "yyyyMMddHHmmssSSS"))
 
-(defn timestamp [] (format/unparse time-format (local-now)))
+(defn- timestamp [] (format/unparse time-format (local-now)))
+
+(defn- generate-stamp [] (apply str (take 20 (repeatedly #(rand-int 10)))))
 
 (defn- keys-as [f m] (into {} (for [[k v] m] [(f k) v])))
-(defn keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
-(defn keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
+(defn- keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
+(defn- keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
-(defn logged [m] (info "%s" (str m)) m)
+(defn- logged [m] (info "%s" (str m)) m)
 
 ;;
 ;; Mac
 ;;
 
-(defn secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
+(defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
 
-(defn mac [data]  (-> data digest/sha-256 .toUpperCase))
+(defn- mac [data]  (-> data digest/sha-256 .toUpperCase))
 
-(defn mac-of [m keys]
+(defn- mac-of [m keys]
   (->
     (for [k keys] (k m))
     vec
@@ -73,10 +73,10 @@
     (->> (join "&"))
     mac))
 
-(defn with-mac [m]
+(defn- with-mac [m]
   (merge m {:mac (mac-of m request-mac-keys)}))
 
-(defn mac-verified [m]
+(defn- mac-verified [m]
   (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
 
 ;;
@@ -95,21 +95,21 @@
 
 (defn- extract-person-id [m] (:userid m))
 
-(defn- extract-user [m]
+(defn- user-extracted [m]
   (assoc (extract-subjectdata m) :personId (extract-person-id m)))
 
 ;;
 ;; Request & Response mapping to clojure
 ;;
 
-(defn request-data []
+(defn- request-data []
   (-> constants 
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     with-mac
     keys-as-strings))
 
-(defn response-data [m]
+(defn- to-response-data [m]
   (-> m
     keys-as-keywords
     (assoc :key (:key constants))
@@ -120,7 +120,7 @@
 ;; Web stuff -> FIXME: secure return uri setting
 ;;
 
-(defn field [[k v]]
+(defn- field [[k v]]
   (hidden-field k v))
 
 (defpage "/vetuma" {:keys [url]}
@@ -135,8 +135,8 @@
     (:user session-keys) 
     (-> (:form-params (request/ring-request))
       logged
-      response-data
-      extract-user
+      to-response-data
+      user-extracted
       logged))
   (redirect (session/get! (:url session-keys))))
 
