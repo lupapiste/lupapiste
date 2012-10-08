@@ -93,10 +93,10 @@
     (rename-keys {:etunimi :firstName})
     (rename-keys {:sukunimi :lastName})))
 
-(defn- extract-person-id [m] (:userid m))
+(defn- extract-userid [m] (:userid m))
 
 (defn- user-extracted [m]
-  (assoc (extract-subjectdata m) :personId (extract-person-id m)))
+  (assoc (extract-subjectdata m) :userid (extract-userid m)))
 
 ;;
 ;; Request & Response mapping to clojure
