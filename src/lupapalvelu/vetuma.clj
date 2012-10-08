@@ -15,24 +15,25 @@
 ;;
 
 (def session-key "vetuma")
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :appname :trid])
-(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
+(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
 (def constants 
-  {:url     "https://testitunnistus.suomi.fi/VETUMALogin/app"
-   :rcvid   "***REMOVED***1"
-   :appid   "VETUMA-APP2"
-   :so      "6"
-   :solist  "6,11"
-   :type    "LOGIN"
-   :au      "EXTAUTH"
-   :lg      "fi"
-   :returl  "https://localhost:8443/vetuma/return"
-   :canurl  "https://localhost:8443/vetuma/cancel"
-   :errurl  "https://localhost:8443/vetuma/error"
-   :ap      "***REMOVED***"
-   :appname "Lupapiste"
-   :key     "***REMOVED***"})
+  {:url       "https://testitunnistus.suomi.fi/VETUMALogin/app"
+   :rcvid     "***REMOVED***1"
+   :appid     "VETUMA-APP2"
+   :so        "6"
+   :solist    "6,11"
+   :type      "LOGIN"
+   :au        "EXTAUTH"
+   :lg        "fi"
+   :returl    "https://localhost:8443/vetuma/return"
+   :canurl    "https://localhost:8443/vetuma/cancel"
+   :errurl    "https://localhost:8443/vetuma/error"
+   :ap        "***REMOVED***"
+   :appname   "Lupapiste"
+   :extradata "VTJTT=T1" 
+   :key       "***REMOVED***"})
 
 ;;
 ;; Helpers
