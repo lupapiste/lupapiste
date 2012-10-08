@@ -140,5 +140,5 @@
       logged))
   (redirect (session/get! (:url session-keys))))
 
-(defpage "/vetuma/user" [] 
-  (json (session/get! (:user session-keys))))
+(defpage "/vetuma/user" []
+  (json (session/get (:user session-keys))))
