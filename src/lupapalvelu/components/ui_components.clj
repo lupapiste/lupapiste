@@ -4,6 +4,9 @@
 
 (def ui-components
   {:openlayers   {:js ["OpenLayers.js"]}
+   
+   :oskari       {:js ["oskarimap.js"]
+                  :css ["oskarimap.css"]}
   
    :jquery       {:css ["jquery.pnotify.default.css"]
                   :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js" "jquery.filedrop.js"
@@ -51,7 +54,7 @@
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:application :applications :attachment :wizard :buildinfo]
+   :applicant    {:depends [:oskari :application :applications :attachment :wizard :buildinfo]
                   :js ["applicant.js"]
                   :html ["index.html"]}
    
