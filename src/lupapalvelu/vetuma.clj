@@ -92,7 +92,7 @@
     (rename-keys {:etunimi :firstName})
     (rename-keys {:sukunimi :lastName})))
 
-(defn- extract-userid [m] (:userid m))
+(defn- extract-userid [{s :extradata}] (last (split s #"=")))
 
 (defn- user-extracted [m]
   (assoc (extract-subjectdata m) :userid (extract-userid m)))
