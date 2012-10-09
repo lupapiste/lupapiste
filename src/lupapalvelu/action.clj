@@ -66,6 +66,30 @@
       (ok :apikey apikey))
     (fail "unauthorized")))
 
+(defcommand "register-user" 
+  {:parameters [:personId :firstName :lastName :email :password :street :zip :city :phone]}
+  [command]
+  (let [password (-> command :data :password)
+        data     (dissoc (:data command) :password)
+        salt     (security/dispense-salt)]
+    (info "Registering new user: %s" (str data))
+    (mongo/insert
+      mongo/users
+      (assoc data
+             :id (mongo/create-id)
+             :username (:email data)
+             :role :applicant
+             :personId (:personId data)
+             :firstName (:firstName data)
+             :lastName (:lastName data)
+             :email (:email data)
+             :streetAddress (:street data)
+             :postalCode (:zip data)
+             :postalPlace (:city data)
+             :phone (:phone data)
+             :private {:salt salt
+                       :password (security/get-hash password salt)}))))
+
 ;;
 ;; Command functions
 ;; 
@@ -114,28 +138,6 @@
     {:name (-> command :data :name)
      :position {:lon (-> command :data :lon)
                 :lat (-> command :data :lat)}}))
-
-(defn register-user [command]
-  (let [password (-> command :data :password)
-        data     (dissoc (:data command) :password)
-        salt     (security/dispense-salt)]
-    (info "Registering new user: %s" (str data))
-    (mongo/insert
-      mongo/users
-      (assoc data
-             :id (mongo/create-id)
-             :username (:email data)
-             :role :applicant
-             :personId (:personId data)
-             :firstName (:firstName data)
-             :lastName (:lastName data)
-             :email (:email data)
-             :streetAddress (:street data)
-             :postalCode (:zip data)
-             :postalPlace (:city data)
-             :phone (:phone data)
-             :private {:salt salt
-                       :password (security/get-hash password salt)}))))
 
 (defn create-application [{user :user data :data created :created :as command}]
   (let [id  (mongo/create-id)
