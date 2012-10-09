@@ -2,12 +2,12 @@
 <html lang="en">
 <body>
 	<section class="page" id="application">
-		<div class="container" data-bind="with: application">
+		<div class="container">
 			<div class="row">
 				<ul class="breadcrumb">
 					<li><a href="#!/applications"  id="test-applications">Lupahakemukset</a></li>
 					<li><span class="divider">/</span></li>
-					<li class="active"><span data-bind="text: title"></span></li>
+					<li class="active"><span data-bind="text: application.title"></span></li>
 				</ul>
 			</div>
 
@@ -17,38 +17,38 @@
 				</div>
 				<div class="span7">
 					<h1>
-						<span id="test-application-street-address" data-bind="text: streetAddress"></span>, <span data-bind="text: postalCode"></span> <span data-bind="text: postalPlace"></span>
+						<span id="test-application-street-address" data-bind="text: application.streetAddress"></span>, <span data-bind="text: application.postalCode"></span> <span data-bind="text: application.postalPlace"></span>
 					</h1>
-					<h2 data-bind="text: title"></h2>
-					<b>Lupatunnus:</b>							   <span data-bind-test-id="application-id" data-bind="text: id"></span><br/>
-					<b>Tila:</b>									 <span data-bind="ltext: state"></span><br/>
-					<b>Lupatyyppi:</b>							   <span data-bind="ltext: permitType"></span><br/>
+					<h2 data-bind="text: application.title"></h2>
+					<b>Lupatunnus:</b>							   <span data-bind-test-id="application-id" data-bind="text: application.id"></span><br/>
+					<b>Tila:</b>									 <span name="test-application-state" data-bind="ltext: application.state"></span><br/>
+					<b>Lupatyyppi:</b>							   <span data-bind="ltext: application.permitType"></span><br/>
 					<b class="todo">Arvioitu käsittelyaika:</b>	  <br/>
 					<b class="todo">Lupapäätöksen toimittaminen:</b> <br/>
-					<b>Hakemus luotu:</b>				 <span data-bind="dateString: created"></span> <br/>
+					<b>Hakemus luotu:</b>				 <span data-bind="dateString: application.created"></span> <br/>
 				</div>
 				<div class="span2">
 				</div>
 			</div>
-			
+
 			<div class="row">
 				<div class="span10">
 					<div class="accordion-group">
 						<div class="accordion-heading active">
 							<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-1" href="#collapseOne">Hakemuksen perustiedot</a>
 						</div>
-						
+
 						<div id="collapseOne" class="accordion-body in collapse" style="height: auto; ">
 							<div class="accordion-inner">
-	
+
 						<h1>
 						</h1>
 						<h2>Hakemuksen perustiedot</h2>
 						<h3>Hakijat</h3>
-						
-						<ul data-bind="foreach: documents">
+
+						<ul data-bind="foreach: application.documents">
 							<!-- ko if: documentType == 'hakijaTieto' -->
-							<li> 
+							<li>
 								<b>Nimi:</b>			 <span name="test-applicant-name" data-bind="text: content.nimi">Mikko Intonen</span><br/>
 								<b>Katuosoite:</b>	     <span name="test-applicant-street-address" data-bind="text: content.katuosoite">Vanhakatu 5</span><br/>
 								<b>Postinumero:</b>	     <span name="test-applicant-postal-code" data-bind="text: content.postinumero">55550</span><br/>
@@ -58,11 +58,11 @@
 							</li>
 							<!-- /ko -->
 						</ul>
-						
+
 						<h3>Pääsuunnittelija</h3>
-						<ul data-bind="foreach: documents">
+						<ul data-bind="foreach: application.documents">
 							<!-- ko if: documentType == 'paasuunnittelijaTieto' -->
-							<li> 
+							<li>
 								<b>Nimi:</b>			 <span data-bind="text: content.nimi">Mirja Nieminen</span><br/>
 								<b>Koulutus:</b>		 <span data-bind="text: content.koulutus">Arkkitehtu</span><br/>
 								<b>Kokemus:</b>		  <span data-bind="text: content.kokemus">10 v</span><br/>
@@ -74,18 +74,18 @@
 							</li>
 							<!-- /ko -->
 						</ul>
-						
+
 					 </div>
 				 </div>
 			  </div>
-			  
+
 			  </div>
 				<div class="span2">
-						<button id="test-submit-application" data-bind="disable: !$data.authorization || authorization.data()['submit-application'] && !authorization.data()['submit-application'].ok, click: submitApplication" type="submit" class="btn btn-success mr10">
+						<button id="test-submit-application" data-bind="disable: !$data.authorization || authorization.data()['submit-application'] && !authorization.data()['submit-application'].ok, click: application.submitApplication" type="submit" class="btn btn-success mr10">
 							Jätä hakemus käsiteltäväksi
 						</button>
 						<br/><br/>
-						<button id="test-approve-application" data-bind="disable: !$data.authorization || authorization.data()['approve-application'] && !authorization.data()['approve-application'].ok, click: approveApplication" type="submit" class="btn btn-success mr10">
+						<button id="test-approve-application" data-bind="disable: !$data.authorization || authorization.data()['approve-application'] && !authorization.data()['approve-application'].ok, click: application.approveApplication" type="submit" class="btn btn-success mr10">
 							Siirrä kuntarekisteriin
 						</button>
 						<br/><br/>
@@ -104,13 +104,13 @@
 						<br/><br/>
 				</div>
 			</div>
-			
+
 			<div class="row">
 				<div class="span10">
-					<div class="accordion-group" data-bind="foreach: documents">
+					<div class="accordion-group" data-bind="foreach: application.documents">
 					<!-- ko if: documentType == 'rh1' -->
-						<div class="accordion-heading active"> 
-						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-2" href="#collapseTwo" 
+						<div class="accordion-heading active">
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-2" href="#collapseTwo"
 						data-bind="text: documentType + ' liittyen toimenpiteeseen ' + parentDocument">Dokumentti </a> </div>
 						  <div id="collapseThree" class="accordion-body in collapse" style="height: auto; ">
 							<div class="accordion-inner">
@@ -123,7 +123,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="row">
 				<div class="span10">
 					<div class="accordion-group">
@@ -131,7 +131,7 @@
  						  <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-2" href="#collapseThree">Liitteet</a> </div>
 						  <div id="collapseThree" class="accordion-body in collapse" style="height: auto; ">
 							<div class="accordion-inner">
-								<table data-bind="visible: $data.attachments && attachments().length > 0, foreach: attachments" class="table table-striped">
+								<table data-bind="visible: $data.application.attachments && application.attachments().length > 0, foreach: application.attachments" class="table table-striped">
 									<tr style="cursor: pointer;">
 										<td data-bind="attr: {onclick: open}">
 											<span data-bind="visible: name != null && name.length > 0">
@@ -142,11 +142,16 @@
 											</span>
 										</td>
 										<td>
-											<span data-bind="ltext: contentType"></span> <a href="" data-bind="text: filename, attr: {href: '/rest/download/' + id}" target="_blank"></a> <i data-bind="size: size"></i>
+											<span data-bind="if: filename">
+												<a href="" data-bind="text: loc('view') + ' ' + filename, attr: {href: '/rest/view/' + id}" target="_blank"></a>
+												-
+												<a href="" data-bind="text: loc('download') + ' ' + filename, attr: {href: '/rest/download/' + id}"></a>
+												<i data-bind="ltext: contentType"></i> <i data-bind="size: size"></i>
+											</span>
 										</td>
 									</tr>
 								</table>
-								<div data-bind="visible: $data.attachments && attachments().length == 0">
+								<div data-bind="visible: $data.application.attachments && application.attachments().length == 0">
 									<i>Ei liitteitä</i>
 								</div>
 								<button class="btn btn-success" data-bind="click: attachment.newAttachment">Lisää liite</button>
@@ -156,7 +161,7 @@
 				</div>
 			</div>
 
-			<div class="row" data-bind="with: verdict">
+			<div class="row" data-bind="with: application.verdict">
 				<div class="span10">
 					<div class="accordion-group">
 					  <div class="accordion-heading active"> <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-2" href="#collapseThree">Päätös</a> </div>
@@ -168,8 +173,8 @@
 					</div>
 				</div>
 			</div>
-			
-			<div class="row" data-bind="with: $root.rh1">
+
+			<div class="row" data-bind="with: rh1">
 				<div class="span10">
 					<div class="accordion-group">
 						<div class="accordion-heading active">
@@ -411,7 +416,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 
 			<div class="row">
 				<div class="span10">
@@ -419,9 +424,9 @@
 						  <div class="accordion-heading active"> <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-3" href="#collapseFour">Keskusteluketju</a> </div>
 						  <div id="collapseFour" class="accordion-body in collapse" style="height: auto; ">
 							<div class="accordion-inner">
-		
+
 							<table class="table table-striped">
-								<tbody data-bind="foreach: comments">
+								<tbody data-bind="foreach: application.comments">
 									<tr class="comment">
 										<td class="commentParty">
 											<span class="date" data-bind="dateTimeString: created"></span> <br />
@@ -438,9 +443,9 @@
 									<div class="span12">Keskustele hakemuksesta:</div>
 								</div>
 								<div class="row">&nbsp;</div>
-								<textarea class="input-xlarge span5" id="commentText" data-bind="value: $root.comment.text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+								<textarea class="input-xlarge span5" id="commentText" data-bind="value: comment.text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
 								<div class="btn-toolbar">
-									<button id="addComment" data-bind="disable: $root.comment.disabled, $root.click: $root.comment.submit" type="submit" class="add-comment btn btn-success mr10">Lähetä viesti</button>
+									<button id="application.addComment" data-bind="disable: comment.disabled, click: comment.submit" type="submit" class="add-comment btn btn-success mr10">Lähetä viesti</button>
 								</div>
 							</form>
 							</div>
