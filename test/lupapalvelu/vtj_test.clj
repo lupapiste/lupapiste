@@ -7,6 +7,17 @@
 
 (facts
   (fact "data can be extracted"
-    (extract data) => truthy)
+    (parse data) => truthy)
   (fact "select returns right info"
-    (-> data extract (select :NykyisetEtunimet :Etunimet)) => "Sylvi Sofie"))
+    (-> data parse (select :NykyisetEtunimet :Etunimet)) => "Sylvi Sofie")
+  (fact "data is parsed correctly"
+     (extract data {:firstName   [:NykyisetEtunimet :Etunimet]
+                    :lastName    [:NykyinenSukunimi :Sukunimi]
+                    :street      [:VakinainenKotimainenLahiosoite :LahiosoiteS]
+                    :zip         [:VakinainenKotimainenLahiosoite :Postinumero]
+                    :city        [:VakinainenKotimainenLahiosoite :PostitoimipaikkaS]}) 
+     => {:lastName "Marttila"
+         :firstName "Sylvi Sofie"
+         :city "KUOPIO"
+         :street "Sepänkatu 11 A 5"
+         :zip "70100"}))
