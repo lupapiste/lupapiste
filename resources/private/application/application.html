@@ -30,25 +30,25 @@
 				<div class="span2">
 				</div>
 			</div>
-			
+
 			<div class="row">
 				<div class="span10">
 					<div class="accordion-group">
 						<div class="accordion-heading active">
 							<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-1" href="#collapseOne">Hakemuksen perustiedot</a>
 						</div>
-						
+
 						<div id="collapseOne" class="accordion-body in collapse" style="height: auto; ">
 							<div class="accordion-inner">
-	
+
 						<h1>
 						</h1>
 						<h2>Hakemuksen perustiedot</h2>
 						<h3>Hakijat</h3>
-						
+
 						<ul data-bind="foreach: application.documents">
 							<!-- ko if: documentType == 'hakijaTieto' -->
-							<li> 
+							<li>
 								<b>Nimi:</b>			 <span name="test-applicant-name" data-bind="text: content.nimi">Mikko Intonen</span><br/>
 								<b>Katuosoite:</b>	     <span name="test-applicant-street-address" data-bind="text: content.katuosoite">Vanhakatu 5</span><br/>
 								<b>Postinumero:</b>	     <span name="test-applicant-postal-code" data-bind="text: content.postinumero">55550</span><br/>
@@ -58,11 +58,11 @@
 							</li>
 							<!-- /ko -->
 						</ul>
-						
+
 						<h3>Pääsuunnittelija</h3>
 						<ul data-bind="foreach: application.documents">
 							<!-- ko if: documentType == 'paasuunnittelijaTieto' -->
-							<li> 
+							<li>
 								<b>Nimi:</b>			 <span data-bind="text: content.nimi">Mirja Nieminen</span><br/>
 								<b>Koulutus:</b>		 <span data-bind="text: content.koulutus">Arkkitehtu</span><br/>
 								<b>Kokemus:</b>		  <span data-bind="text: content.kokemus">10 v</span><br/>
@@ -74,11 +74,11 @@
 							</li>
 							<!-- /ko -->
 						</ul>
-						
+
 					 </div>
 				 </div>
 			  </div>
-			  
+
 			  </div>
 				<div class="span2">
 						<button id="test-submit-application" data-bind="disable: !$data.authorization || authorization.data()['submit-application'] && !authorization.data()['submit-application'].ok, click: application.submitApplication" type="submit" class="btn btn-success mr10">
@@ -104,13 +104,13 @@
 						<br/><br/>
 				</div>
 			</div>
-			
+
 			<div class="row">
 				<div class="span10">
 					<div class="accordion-group" data-bind="foreach: application.documents">
 					<!-- ko if: documentType == 'rh1' -->
-						<div class="accordion-heading active"> 
-						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-2" href="#collapseTwo" 
+						<div class="accordion-heading active">
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-2" href="#collapseTwo"
 						data-bind="text: documentType + ' liittyen toimenpiteeseen ' + parentDocument">Dokumentti </a> </div>
 						  <div id="collapseThree" class="accordion-body in collapse" style="height: auto; ">
 							<div class="accordion-inner">
@@ -123,7 +123,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="row">
 				<div class="span10">
 					<div class="accordion-group">
@@ -142,7 +142,12 @@
 											</span>
 										</td>
 										<td>
-											<span data-bind="ltext: contentType"></span> <a href="" data-bind="text: filename, attr: {href: '/rest/download/' + id}" target="_blank"></a> <i data-bind="size: size"></i>
+											<span data-bind="if: filename">
+												<a href="" data-bind="text: loc('view') + ' ' + filename, attr: {href: '/rest/view/' + id}" target="_blank"></a>
+												-
+												<a href="" data-bind="text: loc('download') + ' ' + filename, attr: {href: '/rest/download/' + id}"></a>
+												<i data-bind="ltext: contentType"></i> <i data-bind="size: size"></i>
+											</span>
 										</td>
 									</tr>
 								</table>
@@ -168,7 +173,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="row" data-bind="with: rh1">
 				<div class="span10">
 					<div class="accordion-group">
@@ -411,7 +416,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 
 			<div class="row">
 				<div class="span10">
@@ -419,7 +424,7 @@
 						  <div class="accordion-heading active"> <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-3" href="#collapseFour">Keskusteluketju</a> </div>
 						  <div id="collapseFour" class="accordion-body in collapse" style="height: auto; ">
 							<div class="accordion-inner">
-		
+
 							<table class="table table-striped">
 								<tbody data-bind="foreach: application.comments">
 									<tr class="comment">
