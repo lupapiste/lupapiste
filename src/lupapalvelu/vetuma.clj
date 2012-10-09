@@ -83,9 +83,8 @@
 ;; response parsing
 ;;
 
-(defn- extract-subjectdata [m]
-  (-> m
-    :subjectdata
+(defn- extract-subjectdata [{s :subjectdata}]
+  (-> s
     (split #", ")
     (->> (map #(split % #"=")))
     (->> (into {}))
