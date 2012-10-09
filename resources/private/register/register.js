@@ -73,9 +73,12 @@
 	model.isValid.subscribe(function(valid) { model().disabled(!valid); });
 	
 	$(function() {
-		var register2url = document.location.origin+"/welcome#!/register2"
+		var register2url = window.location.protocol+"//"+window.location.host+"/welcome#!/register2"
+		console.log(register2url);
 		$.get("/vetuma", {url: register2url},function(d) {
-			$("#vetuma").html(d).find(":submit").addClass("btn btn-primary").attr('value','Kirjaudu sis\u00E4\u00E4n');
+			$("#vetuma").html(d).find(":submit").addClass("btn btn-primary")
+												.attr('value','Kirjaudu sis\u00E4\u00E4n')
+												.attr("id", "vetuma-init");
 		});
 		$.get("/vetuma/user", function(data) {
 			model().personId(data.userid);
