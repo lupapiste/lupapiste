@@ -10,7 +10,7 @@
     (parse data) => truthy)
   (fact "select returns right info"
     (-> data parse (select :NykyisetEtunimet :Etunimet)) => "Sylvi Sofie")
-  (fact "data is parsed correctly"
+  (fact "data is extracted"
      (extract data {:firstName   [:NykyisetEtunimet :Etunimet]
                     :lastName    [:NykyinenSukunimi :Sukunimi]
                     :street      [:VakinainenKotimainenLahiosoite :LahiosoiteS]
