@@ -76,7 +76,7 @@
 		var register2url = window.location.protocol+"//"+window.location.host+"/welcome#!/register2"
 		console.log(register2url);
 		$.get("/vetuma", {url: register2url},function(d) {
-			$("#vetuma").html(d).find(":submit").addClass("btn btn-primary")
+			$("#vetuma-register").html(d).find(":submit").addClass("btn btn-primary")
 												.attr('value','Kirjaudu sis\u00E4\u00E4n')
 												.attr("id", "vetuma-init");
 		});
