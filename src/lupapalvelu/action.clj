@@ -48,13 +48,10 @@
    :states     [:draft]}
   [command]
   (with-application command
-    (fn [application]
-      (mongo/update
-        mongo/applications {:_id (:id application)}
+    (fn [{id :id}]
+      (mongo/update-by-id mongo/applications id
         {$set {:modified (:created command)
-               :state :open
-               }}))))
-
+               :state :open}}))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
@@ -80,7 +77,7 @@
       (ok :apikey apikey))
     (fail "unauthorized")))
 
-(defcommand "register-user" 
+(defcommand "register-user"
   {:parameters [:personId :firstName :lastName :email :password :street :zip :city :phone]}
   [command]
   (let [password (-> command :data :password)
