@@ -17,7 +17,7 @@
 ;; Configuration
 ;;
 
-(def session-keys {:url  "vetuma-return-url"
+(def session-keys {:path "vetuma-return-path"
                    :user "vetuma-user"})
 
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
@@ -122,13 +122,13 @@
 (defn- field [[k v]]
   (hidden-field k v))
 
-(defn- local-url? [s] (= -1 (.indexOf s ":")))
+(defn- local? [s] (= -1 (.indexOf s ":")))
 
-(defpage "/vetuma" {:keys [url]}
-  (if (not (local-url? url))
-    (status 400 (format "invalid url: %s" url))
+(defpage "/vetuma" {:keys [path]}
+  (if (not (local? path))
+    (status 400 (format "invalid return path: %s" path))
     (do
-      (session/put! (:url session-keys) url)
+      (session/put! (:path session-keys) path)
       (html
         (form-to [:post (:url constants)]
           (map field (request-data))
@@ -142,7 +142,7 @@
       parsed
       user-extracted
       logged))
-  (redirect (session/get! (:url session-keys))))
+  (redirect (session/get! (:path session-keys))))
 
 (defpage "/vetuma/user" []
   (json (session/get (:user session-keys))))

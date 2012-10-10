@@ -74,7 +74,7 @@
 	
 	hub.subscribe({type: "page-change", pageId: "register"}, function() {
 		console.log("now");
-		$.get("/vetuma", {url: "/welcome#!/register2"},function(d) {
+		$.get("/vetuma", {path: "/welcome#!/register2"},function(d) {
 			$("#vetuma-register").html(d).find(":submit").addClass("btn btn-primary")
 												.attr('value','Kirjaudu sis\u00E4\u00E4n')
 												.attr("id", "vetuma-init");
