@@ -55,7 +55,7 @@
 (defn- keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
 (defn- map-data [v m] (into {} (for [k v] [k (m k)])))
-(defn- map-contants [v] (map-data v constants))
+(defn- map-constants [v] (map-data v constants))
 
 (defn- logged [m] (info "%s" (str m)) m)
 
