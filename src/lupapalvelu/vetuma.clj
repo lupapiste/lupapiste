@@ -2,7 +2,7 @@
   (:use [clojure.string :only [join split]]
         [clojure.set :only [rename-keys]]
         [noir.core :only [defpage]]
-        [noir.response :only [redirect json]]
+        [noir.response :only [redirect status json]]
         [hiccup.core :only [html]]
         [clj-time.local :only [local-now]]
         [hiccup.form]
@@ -116,18 +116,23 @@
     (dissoc :key)))
 
 ;;
-;; Web stuff -> FIXME: secure return uri setting
+;; Web stuff
 ;;
 
 (defn- field [[k v]]
   (hidden-field k v))
 
+(defn- local-url? [s] (= -1 (.indexOf s ":")))
+
 (defpage "/vetuma" {:keys [url]}
-  (session/put! (:url session-keys) url)
-  (html
-    (form-to [:post (:url constants)]
-      (map field (request-data))
-      (submit-button "submit"))))
+  (if (not (local-url? url))
+    (status 400 (format "invalid url: %s" url))
+    (do
+      (session/put! (:url session-keys) url)
+      (html
+        (form-to [:post (:url constants)]
+          (map field (request-data))
+          (submit-button "submit"))))))
 
 (defpage [:post "/vetuma/:status"] {status :status}
   (session/put!
