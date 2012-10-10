@@ -122,7 +122,13 @@
     (dissoc :key)))
 
 ;;
-;; Web stuff
+;; Persistent storage
+;;
+
+(defonce mem (atom {}))
+
+;;
+;; Web stuff 
 ;;
 
 (defn- field [[k v]]
@@ -141,14 +147,22 @@
           (submit-button "submit"))))))
 
 (defpage [:post "/vetuma/:status"] {status :status}
-  (session/put!
-    (:user session-keys) 
-    (-> (:form-params (request/ring-request))
-      logged
-      parsed
-      user-extracted
-      logged))
-  (redirect (session/get! (:path session-keys))))
+  (let [user (-> (:form-params (request/ring-request))
+               logged
+               parsed
+               user-extracted
+               logged)]
+    (session/put! (:user session-keys) user)
+    (println user)
+    (swap! mem assoc (:stamp user) user)
+    (println @mem)
+    (redirect (session/get! (:path session-keys)))))
 
 (defpage "/vetuma/user" []
   (json (session/get (:user session-keys))))
+
+(defpage "/vetuma/stamp/:stamp" {:keys [stamp]}
+  (println stamp)
+  (let [user (@mem stamp)]
+    (swap! mem dissoc stamp)
+    (json user)))
