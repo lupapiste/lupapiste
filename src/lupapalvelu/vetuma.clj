@@ -54,6 +54,8 @@
 (defn- keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
 (defn- keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
+(defn- filter-keys [m v] (into {} (for [k v] [k (m k)])))
+
 (defn- logged [m] (info "%s" (str m)) m)
 
 ;;
@@ -108,7 +110,8 @@
 ;;
 
 (defn- request-data []
-  (-> constants 
+  (-> constants
+    (filter-keys request-mac-keys)
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     with-mac

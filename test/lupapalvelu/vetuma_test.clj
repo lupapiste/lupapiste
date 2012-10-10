@@ -14,6 +14,9 @@
 
   (fact "request-data can be generated"
     (request-data) => truthy)
+  
+  (fact "request-data does not contain (secret) key"
+    (contains? (request-data) "KEY") => falsey) 
 
   (fact "response-data can be parsed"
     (parsed valid-response) => (contains {:userid "210281-9988"}))
@@ -22,7 +25,7 @@
     (extract-subjectdata {:subjectdata "ETUNIMI=PORTAALIA, SUKUNIMI=TESTAA"}) => {:firstName "PORTAALIA" :lastName "TESTAA"})
 
   (fact "parsing response just works"
-    (-> valid-response parsed user-extracted) => {:userid "210281-9988" :firstName "PORTAALIA" :lastName "TESTAA"})
+    (-> valid-response parsed user-extracted) => (contains {:userid "210281-9988" :firstName "PORTAALIA" :lastName "TESTAA"}))
   
   (fact "with invalid data, empty map is returned"
     (parsed invalid-response) => (just {})))
