@@ -17,8 +17,8 @@
 ;; Configuration
 ;;
 
-(def session-keys {:path "vetuma-return-path"
-                   :user "vetuma-user"})
+(def ^:dynamic *path-session-key* "vetuma-return-paths")
+(def ^:dynamic *user-session-key* "vetuma-user")
 
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
@@ -32,7 +32,7 @@
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "https://localhost:8443/vetuma/return"
+   :returl    "https://localhost:8443/vetuma/success"
    :canurl    "https://localhost:8443/vetuma/cancel"
    :errurl    "https://localhost:8443/vetuma/error"
    :ap        "***REMOVED***"
@@ -134,13 +134,14 @@
 (defn- field [[k v]]
   (hidden-field k v))
 
-(defn- local? [s] (= -1 (.indexOf s ":")))
+(defn- non-local? [& rest] (some #(not= -1 (.indexOf % ":")) rest))
 
-(defpage "/vetuma" {:keys [path]}
-  (if (not (local? path))
-    (status 400 (format "invalid return path: %s" path))
+; TODO: does not strip unneeded parameters
+(defpage "/vetuma" {:keys [success cancel error] :as paths}
+  (if (non-local? success cancel error)
+    (status 400 (format "invalid return paths: %s" paths))
     (do
-      (session/put! (:path session-keys) path)
+      (session/put! *path-session-key* paths)
       (html
         (form-to [:post (:url constants)]
           (map field (request-data))
@@ -152,11 +153,9 @@
                parsed
                user-extracted
                logged)]
-    (session/put! (:user session-keys) user)
-    (println user)
+    (session/put! *user-session-key* user)
     (swap! mem assoc (:stamp user) user)
-    (println @mem)
-    (redirect (session/get! (:path session-keys)))))
+    (redirect ((session/get *path-session-key*) (keyword status)))))
 
 (defpage "/vetuma/user" []
   (json (session/get (:user session-keys))))
