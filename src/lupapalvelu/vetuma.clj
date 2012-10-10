@@ -54,9 +54,6 @@
 (defn- keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
 (defn- keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
-(defn- map-data [v m] (into {} (for [k v] [k (m k)])))
-(defn- map-constants [v] (map-data v constants))
-
 (defn- logged [m] (info "%s" (str m)) m)
 
 ;;
@@ -111,11 +108,11 @@
 ;;
 
 (defn- request-data []
-  (-> request-mac-keys
-    map-constants
+  (-> constants
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     with-mac
+    (dissoc :key)
     keys-as-strings))
 
 (defn- parsed [m]
