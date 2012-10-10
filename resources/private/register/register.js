@@ -80,7 +80,7 @@
 		});
 	});
 
-	$(function() {
+	hub.subscribe({type: "page-change", pageId: "register2"}, function() {
 		$.get("/vetuma/user", function(data) {
 			model().personId(data.userid);
 			model().firstName(data.firstName);
@@ -88,6 +88,5 @@
 		});
 
 		ko.applyBindings(model, $("#register2")[0]);
-	});
-	
+	});	
 })();
