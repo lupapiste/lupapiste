@@ -32,7 +32,7 @@
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "https://localhost:8443/vetuma/success"
+   :returl    "https://localhost:8443/vetuma"
    :canurl    "https://localhost:8443/vetuma/cancel"
    :errurl    "https://localhost:8443/vetuma/error"
    :ap        "***REMOVED***"
@@ -147,7 +147,7 @@
           (map field (request-data))
           (submit-button "submit"))))))
 
-(defpage [:post "/vetuma/:status"] {status :status}
+(defpage [:post "/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
                logged
                parsed
@@ -155,13 +155,15 @@
                logged)]
     (session/put! *user-session-key* user)
     (swap! mem assoc (:stamp user) user)
-    (redirect ((session/get *path-session-key*) (keyword status)))))
+    (redirect (:success (session/get *path-session-key*)))))
+
+(defpage [:post "/vetuma/:status"] {status :status}
+  (redirect ((session/get *path-session-key*) (keyword status))))
 
 (defpage "/vetuma/user" []
-  (json (session/get (:user session-keys))))
+  (json (session/get *user-session-key*)))
 
 (defpage "/vetuma/stamp/:stamp" {:keys [stamp]}
-  (println stamp)
   (let [user (@mem stamp)]
     (swap! mem dissoc stamp)
     (json user)))
