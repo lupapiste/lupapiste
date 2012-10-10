@@ -33,7 +33,24 @@
     :lastName "Dread"
     :role :admin
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
-   ])
+{:lastName "Nieminen",
+  :firstName "Teppo",
+  :postalCode "33200",
+  :city "Tampere",
+  :username "teppo@example.com",
+  :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe",
+            :password
+            "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"},
+  :street "Mutakatu 7",
+  :phone "0505503171",
+  :email "teppo@example.com",
+  :personId "210281-0001",
+  :role "applicant",
+  :zip "33200",
+  :id "5073c0a1c2e6c470aef589a5",
+  :streetAddress "Mutakatu 7",
+  :postalPlace "Tampere"}
+])
 
 (deffixture "minimal" {}
   (mongo/clear!)

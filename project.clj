@@ -6,7 +6,9 @@
                  [enlive "1.0.1"]
                  [org.clojure/tools.nrepl "0.2.0-beta8"]
                  [org.mindrot/jbcrypt "0.3m"]
-                 [clj-http "0.5.3"]]
+                 [digest "1.3.0"]
+                 [clj-http "0.5.3"]
+                 [clj-time "0.4.4"]]
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
                    :plugins [[lein-midje "2.0.0-SNAPSHOT"]
                              [lein-buildid "0.1.0-SNAPSHOT"]]}}

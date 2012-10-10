@@ -92,7 +92,7 @@
                    :js   "application/javascript"
                    :css  "text/css"})
 
-(defpage "/welcome" []      (session/clear!) (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
+(defpage "/welcome" []      (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
 (defpage "/welcome.js" []   (resp/content-type (:js content-type) (singlepage/compose :js :welcome)))
 (defpage "/welcome.css" []  (resp/content-type (:css content-type) (singlepage/compose :css :welcome)))
 
