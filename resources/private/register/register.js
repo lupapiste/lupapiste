@@ -4,7 +4,7 @@
 
 ;(function() {
 
-	var keys = ["personId", "firstName", "lastName", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
+	var keys = ["stamp", "personId", "firstName", "lastName", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
 	
 	function json(model) {
 		var d = {};
@@ -57,6 +57,7 @@
 		personId: ko.observable(),
 		firstName: ko.observable(),
 		lastName: ko.observable(),
+		stamp: ko.observable(),
 		street: ko.observable().extend({required: true}),
 		city: ko.observable().extend({required: true}),
 		zip: ko.observable().extend({required: true, number: true, maxLength: 5}),
@@ -85,6 +86,7 @@
 			model().personId(data.userid);
 			model().firstName(data.firstName);
 			model().lastName(data.lastName);
+			model().stamp(data.stamp);
 		});
 
 		ko.applyBindings(model, $("#register2")[0]);
