@@ -73,7 +73,6 @@
 	model.isValid.subscribe(function(valid) { model().disabled(!valid); });
 	
 	hub.subscribe({type: "page-change", pageId: "register"}, function() {
-		console.log("now");
 		$.get("/vetuma", {path: "/welcome#!/register2"},function(d) {
 			$("#vetuma-register").html(d).find(":submit").addClass("btn btn-primary")
 												.attr('value','Kirjaudu sis\u00E4\u00E4n')
