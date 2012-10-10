@@ -7,7 +7,8 @@
         [clojure.java.io :only [file]]
         [clojure.set :only [difference]])
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.client :as client]))
 
 (defquery "ping" {} [q] (ok :text "pong"))
 
@@ -78,28 +79,28 @@
     (fail "unauthorized")))
 
 (defcommand "register-user"
-  {:parameters [:personId :firstName :lastName :email :password :street :zip :city :phone]}
+  {:parameters [:stamp :email :password :street :zip :city :phone]}
   [command]
   (let [password (-> command :data :password)
         data     (dissoc (:data command) :password)
-        salt     (security/dispense-salt)]
-    (info "Registering new user: %s" (str data))
-    (mongo/insert
-      mongo/users
+        salt     (security/dispense-salt)
+        user     (client/json-get (str "/vetuma/stamp/" (-> command :data :stamp)))] ;; loose coupling
+    (info "Registering new user: %s - details from vetuma: %s" (str data) (str user))
+    (mongo/insert mongo/users
       (assoc data
              :id (mongo/create-id)
-             :username (:email data)
-             :role :applicant
-             :personId (:personId data)
-             :firstName (:firstName data)
-             :lastName (:lastName data)
-             :email (:email data)
+             :username      (:email data)
+             :role          :applicant
+             :personId      (:userid user)
+             :firstName     (:firstName user)
+             :lastName      (:lastName user)
+             :email         (:email data)
              :streetAddress (:street data)
-             :postalCode (:zip data)
-             :postalPlace (:city data)
-             :phone (:phone data)
-             :private {:salt salt
-                       :password (security/get-hash password salt)}))))
+             :postalCode    (:zip data)
+             :postalPlace   (:city data)
+             :phone         (:phone data)
+             :private       {:salt salt
+                             :password (security/get-hash password salt)}))))
 
 ;;
 ;; Command functions
