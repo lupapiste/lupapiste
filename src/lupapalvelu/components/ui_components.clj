@@ -9,14 +9,11 @@
                   :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js" "jquery.filedrop.js"
                        "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
    
-   :bootstrap    {:css ["bootstrap.css"	"bootstrap-responsive.css" "addedStyles.css"]
-                  :js ["bootstrap-dropdown.js" "bootstrap-collapse.js"]}
-   
    :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    
-   :common       {:depends [:openlayers :jquery :knockout :bootstrap]
+   :common       {:depends [:openlayers :jquery :knockout]
                   :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "nav.js" "ko.init.js"]
-                  :css ["main.css"]
+                  :css ["css/main.css"]
                   :html ["error.html"]}
    
    :buildinfo    {:depends [:jquery]
