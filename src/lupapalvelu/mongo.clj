@@ -97,6 +97,7 @@
 
 (defn clear! []
   (warn "** Clearing DB **")
+  (gfs/remove-all)
   (dorun (map #(mc/remove %) collections))
   (mc/ensure-index "users" {:email 1} {:unique true})
   (mc/ensure-index "users" {:personId 1} {:unique true}))
