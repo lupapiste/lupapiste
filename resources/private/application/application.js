@@ -4,26 +4,26 @@
 
 ;(function() {
 
-	function onMapInitialized(data) {
-		refreshMap();
-	}
-	
 	function refreshMap() {
-		hub.send("map-clear-request");
-		$("#mapdiv").width($("#application-map").width());
-		$("#mapdiv").height($("#application-map").height());
-		hub.send("map-update-size");
+		// refresh map for applications
+		hub.clearMapWithDelay(refreshMapPoints);
+	}
+
+	function refreshMapPoints() {
+		// FIXME Hack: we'll have to wait 100ms
+		setTimeout(function() {
+			var mapPoints = [];
+
+			mapPoints.push({
+				id: "markerFor" + application.id(),
+				location: {x: application.location().lon, y: application.location().lat}
+			});
+
+			hub.send("documents-map", {
+				data : mapPoints
+			});
+		}, 99);
 		
-		var mapPoints = [];
-
-		mapPoints.push({
-			id: "markerFor" + application.id(),
-			location: {x: application.location().lon, y: application.location().lat}
-		});
-
-		hub.send("documents-map", {
-			data : mapPoints
-		});
 	}
 
 	var application = {
@@ -209,17 +209,6 @@
 		// if (attachments) attachments.push(new Attachment(file, type, size, attachmentId));
 	}
 
-		
-	hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
-		var id = e.pagePath[0];
-		if (application.id() != id) {
-			repository.getApplication(id, showApplication, function() {
-				// TODO: Show "No such application, or not permission"
-				error("No such application, or not permission");
-			});
-		}
-	});
-
 	hub.subscribe("repository-application-reload", function(e) {
 		if (application.id() === e.applicationId) {
 			repository.getApplication(e.applicationId, showApplication, function() {
@@ -271,17 +260,25 @@
 	
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
 			
-	function onPageChange() {
-		$("#contentMap").show().appendTo("#application-map");
-		hub.send("map-update-size");
-		refreshMap();
+	function onPageChange(e) {
+		var id = e.pagePath[0];
+		if (application.id() != id) {
+			repository.getApplication(id, showApplication, function() {
+				// TODO: Show "No such application, or not permission"
+				error("No such application, or not permission");
+			});
+		}
+
+		hub.whenOskariMapIsReady(function() {
+			hub.moveOskariMapToDiv("application-map");
+			refreshMap();
+		});
 	}
 
 	$(function() {
-		hub.subscribe({
-			type : "page-change",
-			pageId : "application"
-		}, onPageChange);
+		hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
+			onPageChange(e);
+		});
 		
 		var page = $("#application");
 
