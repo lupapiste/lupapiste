@@ -25,7 +25,7 @@
 						    </span></div>
 					    <div><p class="todo">Lupapäätöksen toimittaminen:</p></div>
 					    <div><p>Hakemus luotu:</p><span class="application_summary_text" data-bind="dateString: application.created"></span></div>
-                   </div> 
+                   </div>
 
                 <div class="application_actions">
                            <button id="test-submit-application" data-bind="disable: !$data.authorization || authorization.data()['submit-application'] && !authorization.data()['submit-application'].ok, click: application.submitApplication" type="submit" class="btn btn-success mr10 action-bar-button">
@@ -45,7 +45,7 @@
 				            </button>
                  </div>
 			</div>
-	
+
             <div class="sidebar">
                 <button class="todo btn btn-large btn-success action-bar-button" style="display: none">
 					            Tallenna
@@ -53,18 +53,18 @@
 				<aside class="instructions">
 					<h3>Ohje</h3>
 					<p>
-						Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. 
+						Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa.
 						Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi
 						ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen
 						päätöspöytäkirjan löydät "Päätös"-välilehdeltä
 					</p>
 				</aside>
 			</div>
-            
+
             <div id="tabs_container">
 				<ul id="tabs">
 					<li class="active"><a data-bind="click: tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
-					<li><a data-bind="click: tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
+					<li><a id="test-attachments-tab" data-bind="click: tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
 					<li><a data-bind="click: tab.tabClick, clickBubble: false" href="#hearings_tab">Naapurien kuuleminen</a></li>
 					<li><a data-bind="click: tab.tabClick, clickBubble: false" href="#pleadings_tab">Lausunnot</a></li>
 					<li><a id="test-conversation-tab" data-bind="click: tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
@@ -74,16 +74,16 @@
             <div id="tab_content_container" class="container">
                 <div class="tab_content" id="application_tab" style="display: block;">
                     <div class="application_section">
-                        
+
                         <h2 class="application_section_header" data-bind="click: accordian.accordianClick, clickBubble: false">
                             Hakemuksen perustiedot
                         </h2>
                         <div class="application_section_content content_expanded">
                             <h3>Hakijat</h3>
-						
+
 						    <ul data-bind="foreach: application.documents">
 							    <!-- ko if: documentType == 'hakijaTieto' -->
-							    <li> 
+							    <li>
 								    <b>Nimi:</b>			 <span name="test-applicant-name" data-bind="text: content.nimi">Mikko Intonen</span><br/>
 								    <b>Katuosoite:</b>	     <span name="test-applicant-street-address" data-bind="text: content.katuosoite">Vanhakatu 5</span><br/>
 								    <b>Postinumero:</b>	     <span name="test-applicant-postal-code" data-bind="text: content.postinumero">55550</span><br/>
@@ -93,11 +93,11 @@
 							    </li>
 							    <!-- /ko -->
 						    </ul>
-						
+
 						    <h3>Pääsuunnittelija</h3>
 						    <ul data-bind="foreach: application.documents">
 							    <!-- ko if: documentType == 'paasuunnittelijaTieto' -->
-							    <li> 
+							    <li>
 								    <b>Nimi:</b>			 <span data-bind="text: content.nimi">Mirja Nieminen</span><br/>
 								    <b>Koulutus:</b>		 <span data-bind="text: content.koulutus">Arkkitehtu</span><br/>
 								    <b>Kokemus:</b>		  <span data-bind="text: content.kokemus">10 v</span><br/>
@@ -161,7 +161,7 @@
 			                             <option value="other">Muu syy</option>
 			                        </select>
 							    </form>
-                            
+
 					            <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
                             </div>
                             <div class="content-actions" data-bind="visible: $data.authorization && authorization.data()['approve-content'] && authorization.data()['approve-content'].ok">
@@ -292,7 +292,7 @@
                                             <label class="group-label"> Kaasu</label>
 	                                    <input class="form_input" type="checkbox" data-bind="checked: sewer">
                                             <label class="group-label"> Viemäri</label>
-	                                    <input class="form_input" type="checkbox" data-bind="checked: water"> 
+	                                    <input class="form_input" type="checkbox" data-bind="checked: water">
                                             <label class="group-label">Vesijohto</label>
 	                                    <input class="form_input" type="checkbox" data-bind="checked: warm_water"">
                                         <label class="group-label"> Lämmin vesi</label>
@@ -320,44 +320,44 @@
                                         </tr>
                                         <tr>
                                             <td><p>Myymälä- majoitus- ja ravitsemistilaa</p></td>
-                                            <td><input type="text" data-bind="value: a2"></td>     
+                                            <td><input type="text" data-bind="value: a2"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Hoitotilaa</p></td>
-                                            <td><input type="text" data-bind="value: a3"></td>     
+                                            <td><input type="text" data-bind="value: a3"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Toimisto- ja hallintotilaa</p></td>
-                                            <td><input type="text" data-bind="value: a4"></td>     
+                                            <td><input type="text" data-bind="value: a4"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Kokoontumistilaa</p></td>
-                                            <td><input type="text" data-bind="value: a5"></td>     
+                                            <td><input type="text" data-bind="value: a5"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Opetustilaa</p></td>
-                                            <td><input type="text" data-bind="value: a6"></td>     
+                                            <td><input type="text" data-bind="value: a6"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Tuotantotilaa (teollisuus)</p></td>
-                                            <td><input type="text" data-bind="value: a7"></td>     
+                                            <td><input type="text" data-bind="value: a7"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Varastotilaa</p></td>
-                                            <td><input type="text" data-bind="value: a8"></td>     
+                                            <td><input type="text" data-bind="value: a8"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Muuta huoneistoalaan kuuluvaa tilaa</p></td>
-                                            <td><input type="text" data-bind="value: a9"></td>     
+                                            <td><input type="text" data-bind="value: a9"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Huoneistoala yhteensä</p></td>
-                                            <td><input type="text" data-bind="value: a10"></td>     
+                                            <td><input type="text" data-bind="value: a10"></td>
                                         </tr>
                                     </table>
                                 </form>
                                 <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
-                            </div> 
+                            </div>
                             <div class="content-actions" data-bind="visible: $data.authorization && authorization.data()['approve-content'] && authorization.data()['approve-content'].ok">
                                 <button class="todo btn btn-small content-accept">
 					                Hyväksy
@@ -365,7 +365,7 @@
                                 <button class="todo btn btn-small content-reject">
 					                Hylkää
 				                </button>
-                            </div>  
+                            </div>
                         </div>
                     </div>
                     <div class="application_section">
@@ -387,7 +387,7 @@
                                     <input type="radio" data-bind="checked: apartments" value="new_apartments"> Useampia asuntoja uudessa rakennuksessa tai asuntoon tehdään muutoksia <br/>
                                     </div>
 
-                                    
+
                                     <label class="form_label" for="apartment_id">Huoneiston tunniste (jos on käytössä): </label>
                                     <input class="form_input" type="text" data-bind="value: apartment_id" /><br />
                                     <label class="form_label" for="room_count">Huoneluku ilman keittiötä (kpl): </label>
@@ -418,8 +418,8 @@
                                     <input class="form_input" type="text" data-bind="value: new_apartments" /><br />
                                     <label class="form_label" for="apartments_total_floor_area">Asuntojen pinta-ala yhteensä </label>
                                     <input class="form_input" type="text" name="apartments_total_floor_area" /><br />
-                                </form> 
-                 
+                                </form>
+
 								    <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
                             </div>
                         </div>
@@ -428,7 +428,7 @@
                 <div class="tab_content" id="hearings_tab">TPD</div>
                 <div class="tab_content" id="pleadings_tab">TPD</div>
                 <div class="tab_content" id="attachments_tab">
-                    <div class="tab-wrapper"> 
+                    <div class="tab-wrapper">
                         <table data-bind="visible: $data.application.attachments && application.attachments().length > 0, foreach: application.attachments" class="table table-striped">
 						    <tr style="cursor: pointer;">
 							    <td data-bind="attr: {onclick: open}">
@@ -452,7 +452,7 @@
 						<div data-bind="visible: $data.application.attachments && application.attachments().length == 0">
 							<i>Ei liitteitä</i>
 						</div>
-						<button class="btn btn-success" data-bind="click: attachment.newAttachment">Lisää liite</button>
+						<button id="test-open-add-attachment" class="btn btn-success" data-bind="click: attachment.newAttachment">Lisää liite</button>
                     </div>
                 </div>
                 <div class="tab_content" id="conversation_tab">
@@ -483,7 +483,7 @@
                     </div>
                 </div>
                 <div class="tab_content" id="decision_tab">
-                    <div class="tab-wrapper"> 
+                    <div class="tab-wrapper">
 	                    <div class="row" data-bind="with: application.verdict">
 							<span id="test-application-verdict" data-bind="text: text"></span>
 				        </div>
