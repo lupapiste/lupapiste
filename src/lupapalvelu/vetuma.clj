@@ -11,7 +11,7 @@
             [noir.session :as session]
             [clj-time.core :as time]
             [clj-time.format :as format]))
-
+                     
 ;;
 ;; Configuration
 ;;
