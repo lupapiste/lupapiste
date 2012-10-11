@@ -4,9 +4,32 @@
 
 ;(function() {
 
+	function onMapInitialized(data) {
+		refreshMap();
+	}
+	
+	function refreshMap() {
+		hub.send("map-clear-request");
+		$("#mapdiv").width($("#application-map").width());
+		$("#mapdiv").height($("#application-map").height());
+		hub.send("map-update-size");
+		
+		var mapPoints = [];
+
+		mapPoints.push({
+			id: "markerFor" + application.id(),
+			location: {x: application.location().lon, y: application.location().lat}
+		});
+
+		hub.send("documents-map", {
+			data : mapPoints
+		});
+	}
+
 	var application = {
 		id: ko.observable(),
 		state: ko.observable(),
+		location: ko.observable(),
 	    permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
@@ -143,6 +166,7 @@
 
 		application.id(data.id);
 		application.state(data.state);
+		application.location(data.location);
 		application.title(data.title);
 		application.created(data.created);
 		application.permitType(data.permitType);
@@ -184,6 +208,7 @@
 	function uploadCompleted(file, size, type, attachmentId) {
 		// if (attachments) attachments.push(new Attachment(file, type, size, attachmentId));
 	}
+
 		
 	hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
 		var id = e.pagePath[0];
@@ -246,7 +271,18 @@
 	
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
 			
+	function onPageChange() {
+		$("#contentMap").show().appendTo("#application-map");
+		hub.send("map-update-size");
+		refreshMap();
+	}
+
 	$(function() {
+		hub.subscribe({
+			type : "page-change",
+			pageId : "application"
+		}, onPageChange);
+		
 		var page = $("#application");
 
 		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1}, page[0]);

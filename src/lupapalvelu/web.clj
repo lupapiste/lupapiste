@@ -1,5 +1,6 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
+        [noir.request]
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]])
@@ -14,7 +15,8 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
-            [lupapalvelu.strings :as strings]))
+            [lupapalvelu.strings :as strings]
+            [clj-http.client :as client]))
 
 ;;
 ;; Helpers
@@ -187,6 +189,16 @@
 
 (defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
   (output-attachment attachmentId true))
+
+;;
+;; Oskari map ajax request proxy
+;;
+(defpage [:post "/ajaxProxy/:srv"] {srv :srv}
+  (let [request (ring-request) body (slurp(:body request)) urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
+    (client/post (get urls srv)
+	     {:body body
+	      :content-type :json
+	      :accept :json})))
 
 ;;
 ;; Development thingies
