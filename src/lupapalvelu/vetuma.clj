@@ -4,7 +4,6 @@
         [noir.core :only [defpage]]
         [noir.response :only [redirect status json]]
         [hiccup.core :only [html]]
-        [clj-time.local :only [local-now]]
         [hiccup.form]
         [lupapalvelu.log])
   (:require [digest]
@@ -46,7 +45,7 @@
 
 (def time-format (format/formatter-local "yyyyMMddHHmmssSSS"))
 
-(defn- timestamp [] (format/unparse time-format (local-now)))
+(defn- timestamp [] (format/unparse time-format (time/to-time-zone (time/now) (time/time-zone-for-offset +3))))
 
 (defn- generate-stamp [] (apply str (take 20 (repeatedly #(rand-int 10)))))
 
