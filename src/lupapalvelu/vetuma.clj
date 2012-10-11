@@ -36,7 +36,7 @@
    :errurl    "https://localhost:8443/vetuma/error"
    :ap        "***REMOVED***"
    :appname   "Lupapiste"
-   :extradata "VTJTT=VTJ-VETUMA-Perus" 
+   :extradata "VTJTT=VTJ-VETUMA-Perus"
    :key       "***REMOVED***"})
 
 ;;
