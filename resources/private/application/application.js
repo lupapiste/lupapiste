@@ -302,10 +302,6 @@
 		
 		var page = $("#application");
 
-		applicationMap = new OpenLayers.Map("application-map");
-		applicationMap.addLayer(new OpenLayers.Layer.OSM());
-		applicationMap.addLayer(markers);
-		
 		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1, tab: tab, accordian: accordian}, page[0]);
 		initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
 	});

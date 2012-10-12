@@ -7,22 +7,43 @@
                 <a href="#!/applications"  id="test-applications">Omat hakemukset</a> / <span data-bind="text: application.title"></span>
 			</div>
 
-			<div class="row">
-				<div class="span6">
+			<div class="application_summary">
+					<div id="application-map" class="todo map" style="width: 280px; height: 220px;"></div>
 					<h1>
 						<span id="test-application-street-address" data-bind="text: application.streetAddress"></span>, <span data-bind="text: application.postalCode"></span> <span data-bind="text: application.postalPlace"></span>
 					</h1>
-					<h2 data-bind="text: application.title"></h2>
-					<b>Lupatunnus:</b>							   <span data-bind-test-id="application-id" data-bind="text: application.id"></span><br/>
-					<b>Tila:</b>									 <span name="test-application-state" data-bind="ltext: application.state"></span><br/>
-					<b>Lupatyyppi:</b>							   <span data-bind="ltext: application.permitType"></span><br/>
-					<b class="todo">Arvioitu käsittelyaika:</b>	  <br/>
-					<b class="todo">Lupapäätöksen toimittaminen:</b> <br/>
-					<b>Hakemus luotu:</b>				 <span data-bind="dateString: application.created"></span> <br/>
-				</div>
-				<div class="span6">
-				<div id="application-map" class="todo map map-medium"></div>
-				</div>
+                    <div class="application_summary_info">
+					    <div><p>Lupatunnus: </p><span class="application_summary_text" data-bind-test-id="application-id" data-bind="text: application.id()"></span></div>
+					    <div><p>Tila:</p><span id="test-application-state" class="application_summary_text" data-bind="ltext: application.state()"></span></div>
+					    <div><p>Lupatyyppi:</p><span class="application_summary_text" data-bind="ltext: application.permitType()"></span></div>
+					    <div><p class="todo">Arvioitu käsittelyaika:</p></div>
+					    <div><p>Toimenpiteet:</p>
+						    <span data-bind="foreach: application.documents">
+							    <!-- ko if: documentType == 'toimenpide' -->
+							    <span class="application_summary_text" data-bind="text: loc(type)">Uuden rakentaminen</span>
+							    <!-- /ko -->
+						    </span></div>
+					    <div><p class="todo">Lupapäätöksen toimittaminen:</p></div>
+					    <div><p>Hakemus luotu:</p><span class="application_summary_text" data-bind="dateString: application.created"></span></div>
+                   </div> 
+
+                <div class="application_actions">
+                           <button id="test-submit-application" data-bind="disable: !$data.authorization || authorization.data()['submit-application'] && !authorization.data()['submit-application'].ok, click: application.submitApplication" type="submit" class="btn btn-success mr10 action-bar-button">
+							Jätä hakemus käsiteltäväksi
+						    </button>
+						    <button id="test-approve-application" data-bind="disable: !$data.authorization || authorization.data()['approve-application'] && !authorization.data()['approve-application'].ok, click: application.approveApplication" type="submit" class="btn btn-success mr10 action-bar-button">
+							    Siirrä kuntarekisteriin
+						    </button>
+				            <button class="todo btn btn-large action-bar-button">
+					            Kysy neuvoa
+				            </button>
+				            <button class="todo btn btn-large action-bar-button">
+					             Lisää toimenpide
+				            </button>
+				            <button class="todo btn btn-large action-bar-button">
+					             Poista hakemus
+				            </button>
+                 </div>
 			</div>
 	
             <div class="sidebar">
