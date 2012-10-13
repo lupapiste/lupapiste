@@ -4,7 +4,7 @@
 
 ;(function() {
 
-	var keys = ["personId", "firstName", "lastName", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
+	var keys = ["stamp", "personId", "firstName", "lastName", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
 	
 	function json(model) {
 		var d = {};
@@ -22,7 +22,6 @@
 			model[keys[i]]("");
 			model[keys[i]].isModified(false);
 		}
-		model["personId"] = null;
 		return false;
 	}
 	
@@ -54,11 +53,11 @@
 		return false;
 	}
 	
-	//TODO: personId, firstName & lastName should come from Tupas
 	var model = {
-		personId: ko.observable(Math.floor(Math.random() * 1000000) + "-1234"),
-		firstName: ko.observable(["Matti", "Teppo", "Seppo", "Maija", "Kaija", "Raija"][Math.floor(Math.random()*5)]),
-		lastName: ko.observable(["Nieminen", "Korhonen", "H\u00E4m\u00E4l\u00E4inen", "Himanen", "Jormanainen", "Ehn"][Math.floor(Math.random()*5)]),
+		personId: ko.observable(),
+		firstName: ko.observable(),
+		lastName: ko.observable(),
+		stamp: ko.observable(),
 		street: ko.observable().extend({required: true}),
 		city: ko.observable().extend({required: true}),
 		zip: ko.observable().extend({required: true, number: true, maxLength: 5}),
@@ -74,10 +73,24 @@
 	model = ko.validatedObservable(model);
 	model.isValid.subscribe(function(valid) { model().disabled(!valid); });
 	
-	$(function() {
-		ko.applyBindings(model, $("#register")[0]);
-		ko.applyBindings(model, $("#register2")[0]);
-		$("#test-skip-tupas").click(function() { window.location.hash = "!/register2"; });
+	hub.subscribe({type: "page-change", pageId: "register"}, function() {
+		$.get("/vetuma", {success: "/welcome#!/register2",
+			              cancel:  "/welcome#!/register/cancel",
+			              error:   "/welcome#!/register/error"},function(d) {
+			$("#vetuma-register").html(d).find(":submit").addClass("btn btn-primary")
+												.attr('value','Kirjaudu sis\u00E4\u00E4n')
+												.attr("id", "vetuma-init");
+		});
 	});
-	
+
+	hub.subscribe({type: "page-change", pageId: "register2"}, function() {
+		$.get("/vetuma/user", function(data) {
+			model().personId(data.userid);
+			model().firstName(data.firstName);
+			model().lastName(data.lastName);
+			model().stamp(data.stamp);
+		});
+
+		ko.applyBindings(model, $("#register2")[0]);
+	});	
 })();

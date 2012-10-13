@@ -268,7 +268,27 @@
 	};
 	
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
-			
+		
+    var tab = {
+        tabClick: function(data, event) {
+           var self = event.target;
+           console.log(self);
+           $("#tabs li").removeClass('active');
+           $(self).parent().addClass("active");
+           console.log($(".tab_content"));
+           $(".tab_content").hide();
+           var selected_tab = $(self).attr("href");
+           $(selected_tab).fadeIn();
+        }
+    };
+
+    var accordian = {
+        accordianClick: function(data, event) {
+           self = event.target;
+           $(self).next(".application_section_content").toggleClass('content_expanded');
+        }
+    };
+    	
 	$(function() {
 		var page = $("#application");
 
@@ -276,7 +296,7 @@
 		applicationMap.addLayer(new OpenLayers.Layer.OSM());
 		applicationMap.addLayer(markers);
 		
-		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1}, page[0]);
+		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1, tab: tab, accordian: accordian}, page[0]);
 		initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
 	});
 

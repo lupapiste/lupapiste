@@ -7,7 +7,8 @@
         [clojure.java.io :only [file]]
         [clojure.set :only [difference]])
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.client :as client]))
 
 (defquery "ping" {} [q] (ok :text "pong"))
 
@@ -48,13 +49,10 @@
    :states     [:draft]}
   [command]
   (with-application command
-    (fn [application]
-      (mongo/update
-        mongo/applications {:_id (:id application)}
+    (fn [{id :id}]
+      (mongo/update-by-id mongo/applications id
         {$set {:modified (:created command)
-               :state :open
-               }}))))
-
+               :state :open}}))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
@@ -79,6 +77,30 @@
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey))
     (fail "unauthorized")))
+
+(defcommand "register-user"
+  {:parameters [:stamp :email :password :street :zip :city :phone]}
+  [command]
+  (let [password (-> command :data :password)
+        data     (dissoc (:data command) :password)
+        salt     (security/dispense-salt)
+        user     (client/json-get (str "/vetuma/stamp/" (-> command :data :stamp)))] ;; loose coupling
+    (info "Registering new user: %s - details from vetuma: %s" (str data) (str user))
+    (mongo/insert mongo/users
+      (assoc data
+             :id (mongo/create-id)
+             :username      (:email data)
+             :role          :applicant
+             :personId      (:userid user)
+             :firstName     (:firstName user)
+             :lastName      (:lastName user)
+             :email         (:email data)
+             :streetAddress (:street data)
+             :postalCode    (:zip data)
+             :postalPlace   (:city data)
+             :phone         (:phone data)
+             :private       {:salt salt
+                             :password (security/get-hash password salt)}))))
 
 ;;
 ;; Command functions
@@ -130,28 +152,6 @@
     {:name (-> command :data :name)
      :position {:lon (-> command :data :lon)
                 :lat (-> command :data :lat)}}))
-
-(defn register-user [command]
-  (let [password (-> command :data :password)
-        data     (dissoc (:data command) :password)
-        salt     (security/dispense-salt)]
-    (info "Registering new user: %s" (str data))
-    (mongo/insert
-      mongo/users
-      (assoc data
-             :id (mongo/create-id)
-             :username (:email data)
-             :role :applicant
-             :personId (:personId data)
-             :firstName (:firstName data)
-             :lastName (:lastName data)
-             :email (:email data)
-             :streetAddress (:street data)
-             :postalCode (:zip data)
-             :postalPlace (:city data)
-             :phone (:phone data)
-             :private {:salt salt
-                       :password (security/get-hash password salt)}))))
 
 (defn create-application [{user :user data :data created :created :as command}]
   (let [id  (mongo/create-id)
