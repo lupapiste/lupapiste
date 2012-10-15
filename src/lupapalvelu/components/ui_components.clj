@@ -7,7 +7,10 @@
                   :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js" "jquery.filedrop.js"
                        "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
    
-   :oskari       {:depends [:jquery]}
+   :oskari       {:depends [:jquery]
+                  :js ["oskarimap.js" "map.js"]
+                  :css ["oskarimap.css"]
+                  :html ["map.html"]}
   
    :bootstrap    {:css ["bootstrap.css"	"bootstrap-responsive.css" "addedStyles.css"]
                   :js ["bootstrap-dropdown.js" "bootstrap-collapse.js"]}

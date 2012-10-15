@@ -8,7 +8,7 @@
                  [org.mindrot/jbcrypt "0.3m"]
                  [digest "1.3.0"]
                  [clj-http "0.5.3"]
-                 [clj-time "0.4.4"]]
+                 [clj-time "0.4.4"]
                  [fi.sito.oskari/oskari "0.1"]]
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
                    :plugins [[lein-midje "2.0.0-SNAPSHOT"]
