@@ -4,9 +4,32 @@
 
 ;(function() {
 
+	function refreshMap() {
+		// refresh map for applications
+		hub.clearMapWithDelay(refreshMapPoints);
+	}
+
+	function refreshMapPoints() {
+		// FIXME Hack: we'll have to wait 100ms
+		setTimeout(function() {
+			var mapPoints = [];
+
+			mapPoints.push({
+				id: "markerFor" + application.id(),
+				location: {x: application.location().lon, y: application.location().lat}
+			});
+
+			hub.send("documents-map", {
+				data : mapPoints
+			});
+		}, 99);
+		
+	}
+
 	var application = {
 		id: ko.observable(),
 		state: ko.observable(),
+		location: ko.observable(),
 	    permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
@@ -129,17 +152,6 @@
 		return v;
 	}
 	
-	var applicationMap;
-	var markers = new OpenLayers.Layer.Markers( "Markers" );
-
-	var marker;
-	var icon = (function() {
-		var size = new OpenLayers.Size(21,25);
-		var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-		return new OpenLayers.Icon('/img/marker-green.png', size, offset);
-	})();
-	
-
 	function showApplication(data) {
 		ajax.postJson("/rest/actions/valid",{id: data.id})
 			.success(function(d) {
@@ -154,6 +166,7 @@
 
 		application.id(data.id);
 		application.state(data.state);
+		application.location(data.location);
 		application.title(data.title);
 		application.created(data.created);
 		application.permitType(data.permitType);
@@ -190,33 +203,11 @@
 			}
 		}
 
-		var position = map.toLatLon(data.location.lat, data.location.lon);
-		
-		if (marker) {
-			markers.removeMarker(marker);
-			marker.destroy();
-			marker = null;
-		}
-		
-		marker = map.makeMarker(position, icon);
-		markers.addMarker(marker);
-		if (applicationMap) applicationMap.setCenter(position, 12);
-
 	}
 	
 	function uploadCompleted(file, size, type, attachmentId) {
 		// if (attachments) attachments.push(new Attachment(file, type, size, attachmentId));
 	}
-		
-	hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
-		var id = e.pagePath[0];
-		if (application.id() != id) {
-			repository.getApplication(id, showApplication, function() {
-				// TODO: Show "No such application, or not permission"
-				error("No such application, or not permission");
-			});
-		}
-	});
 
 	hub.subscribe("repository-application-reload", function(e) {
 		if (application.id() === e.applicationId) {
@@ -268,7 +259,7 @@
 	};
 	
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
-		
+
     var tab = {
         tabClick: function(data, event) {
            var self = event.target;
@@ -283,19 +274,34 @@
     };
 
     var accordian = {
-        accordianClick: function(data, event) {
-           self = event.target;
-           $(self).next(".application_section_content").toggleClass('content_expanded');
-        }
-    };
-    	
+            accordianClick: function(data, event) {
+               self = event.target;
+               $(self).next(".application_section_content").toggleClass('content_expanded');
+            }
+        };
+    
+	function onPageChange(e) {
+		var id = e.pagePath[0];
+		if (application.id() != id) {
+			repository.getApplication(id, showApplication, function() {
+				// TODO: Show "No such application, or not permission"
+				error("No such application, or not permission");
+			});
+		}
+
+		hub.whenOskariMapIsReady(function() {
+			hub.moveOskariMapToDiv("application-map");
+			refreshMap();
+		});
+	}
+
 	$(function() {
+		hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
+			onPageChange(e);
+		});
+		
 		var page = $("#application");
 
-		applicationMap = new OpenLayers.Map("application-map");
-		applicationMap.addLayer(new OpenLayers.Layer.OSM());
-		applicationMap.addLayer(markers);
-		
 		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1, tab: tab, accordian: accordian}, page[0]);
 		initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
 	});
