@@ -189,31 +189,84 @@
       application-id
       {$set {:modified created
              (str "attachments." attachment-id) {:id attachment-id
-                                                 :name nil
-                                                 :filename nil
-                                                 :contentType nil
-                                                 :size nil}}})
+                                                 :type nil
+                                                 :latest-version   {:major 0, :minor 0}
+                                                 :versions []
+                                                 }}}
+      )
     (ok :applicationId application-id :attachmentId attachment-id)))
 
-(defn set-attachment-name [{{:keys [id attachmentId name]} :data created :created}]
+;; TODO refactor?
+(defcommand "set-attachment-name"
+  {:parameters [:id :attachmentId :type]
+   :roles      [:applicant :authority]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [application]
   (mongo/update-by-id
-    mongo/applications id
-    {$set {:modified created
-           (str "attachments." attachmentId ".name") name}}))
+    mongo/applications (:id application)
+    {$set {:modified (:created command)
+           (str "attachments." (-> command :data :attachmentId) ".type") (-> command :data :type)}}))))
 
-(defn upload-attachment [{created :created {:keys [id attachmentId name filename tempfile content-type size]} :data}]
-  (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId name filename tempfile content-type size)
+#_(def attachments-sample {
+  "_id"  "5077bbb46bb799214013f9e2",
+  :attachments  {
+    "5077bbcb6bb799214013f9e5" {
+        "id"  "5077bbcb6bb799214013f9e5"
+        :type  "attachment-foo"
+        :latest-version   {:major 0, :minor 1}
+        "versions" [
+          {
+            "fileid"    "5077bbcb6bb799214013f9e5"
+            "version"   {"major" 0, "minor" 1}
+            "filename"  "robotframework-testfile-05_application_editing.txt"
+            "contentType"  "text/plain"
+            "size" 68
+          }
+        ]
+      }
+    }
+  })
+
+
+(defn- next-attachment-version [current-version]
+  {:major (inc (:major current-version)), :minor 0}
+  )
+
+(defn- set-attachment-version [application-id attachment-id type filename content-type size created]
+  (when-let [application (mongo/by-id mongo/applications application-id)]
+    (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latest-version)
+          next-version (next-attachment-version latest-version)]
+      (mongo/update-by-query
+        mongo/applications
+        {:_id application-id
+         (str "attachments." attachment-id ".latest-version.major") (:major latest-version)
+         (str "attachments." attachment-id ".latest-version.minor") (:minor latest-version)}
+
+        {$set {:modified created
+               (str "attachments." attachment-id ".type")  type
+               (str "attachments." attachment-id ".latest-version")  next-version}
+         $push {(str "attachments." attachment-id ".versions") {
+                  :version  next-version
+                  ; File name will be presented in ASCII when the file is downloaded.
+                  ; Conversion could be done here as well, but we don't want to lose information.
+                  :filename filename
+                  :contentType content-type
+                  :size size}
+                }})
+      )
+    )
+  )
+
+(defcommand "upload-attachment"
+  {:parameters [:id :attachmentId :type :filename :tempfile :content-type :size]
+   :roles      [:applicant :authority]
+   :states     [:draft :open]}
+  [{created :created {:keys [id attachmentId type filename tempfile content-type size]} :data}]
+  (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId type filename tempfile content-type size)
   (mongo/upload id attachmentId filename content-type tempfile created)
-  (mongo/update-by-id
-    mongo/applications id
-    {$set {:modified created
-           (str "attachments." attachmentId) {:id attachmentId
-                                              :name name
-                                              ; File name will be presented in ASCII when the file is downloaded.
-                                              ; Conversion could be done here as well, but we don't want to lose information.
-                                              :filename filename
-                                              :contentType content-type
-                                              :size size}}})
+  (set-attachment-version id attachmentId type filename content-type size created)
   (.delete (file tempfile)))
 
 (defn get-attachment [attachmentId]

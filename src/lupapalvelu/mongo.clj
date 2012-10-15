@@ -47,6 +47,10 @@
   (mc/update-by-id collection id data)
   nil)
 
+(defn update-by-query [collection query data]
+  "Updates data into collection. Returns the number of documents updated"
+  (.getN (mc/update collection query data)))
+
 (defn insert [collection data]
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
   (mc/insert collection (with-_id data))

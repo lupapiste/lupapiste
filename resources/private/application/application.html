@@ -432,15 +432,15 @@
                         <table data-bind="visible: $data.application.attachments && application.attachments().length > 0, foreach: application.attachments" class="table table-striped">
 						    <tr style="cursor: pointer;">
 							    <td data-bind="attr: {onclick: open}">
-								    <span data-bind="visible: name != null && name.length > 0">
-									    <span data-bind="text: name"></span>
+								    <span data-bind="visible: type != null && type.length > 0">
+									    <span data-bind="text: type"></span>
 								    </span>
-								    <span data-bind="visible: name == null || name.length == 0">
+								    <span data-bind="visible: type == null || type.length == 0">
 									    <i>Nimetön</i>
 								    </span>
 							    </td>
 							    <td>
-								    <span data-bind="if: filename">
+								    <span data-bind="if: $data.filename">
 										<a href="" data-bind="text: loc('view') + ' ' + filename, attr: {href: '/rest/view/' + id}" target="_blank"></a>
 										-
 										<a href="" data-bind="text: loc('download') + ' ' + filename, attr: {href: '/rest/download/' + id}"></a>
@@ -449,7 +449,7 @@
 							    </td>
 						    </tr>
 					    </table>
-						<div data-bind="visible: $data.application.attachments && application.attachments().length == 0">
+						<div data-bind="visible: !$data.application.attachments || application.attachments().length == 0">
 							<i>Ei liitteitä</i>
 						</div>
 						<button id="test-open-add-attachment" class="btn btn-success" data-bind="click: attachment.newAttachment">Lisää liite</button>
