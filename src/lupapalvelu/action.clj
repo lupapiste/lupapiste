@@ -61,12 +61,14 @@
   (with-application command
     (fn [{application-id :id}]
       (with-user (-> command :data :email)
-        (fn [{user-id :id}]
-          (mongo/update-by-id mongo/users user-id 
-            {$push {:tasks {:type        :invitation_planner
-                            :application application-id
-                            :created     (-> command :created)
-                            :user        (security/summary (-> command :user))}}}))))))
+        (fn [{user-id :id role :role}]
+          (if (= role "authority")
+            (fail "can't ask authority to be a planner")
+            (mongo/update-by-id mongo/users user-id 
+              {$push {:tasks {:type        :invitation_planner
+                              :application application-id
+                              :created     (-> command :created)
+                              :user        (security/summary (-> command :user))}}})))))))
   
 (defcommand "rh1-demo"
   {:parameters [:id :data]
