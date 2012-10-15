@@ -32,13 +32,13 @@
 						    <button id="test-approve-application" data-bind="disable: !$data.authorization || authorization.data()['approve-application'] && !authorization.data()['approve-application'].ok, click: application.approveApplication" type="submit" class="btn btn-success mr10 action-bar-button">
 							    Siirrä kuntarekisteriin
 						    </button>
-				            <button class="todo btn btn-large action-bar-button">
+				            <button class="todo btn btn-large action-bar-button" data-bind="enable:false">
 					            Kysy neuvoa
 				            </button>
-				            <button class="todo btn btn-large action-bar-button">
+				            <button class="todo btn btn-large action-bar-button" data-bind="enable:false">
 					             Lisää toimenpide
 				            </button>
-				            <button class="todo btn btn-large action-bar-button">
+				            <button class="todo btn btn-large action-bar-button" data-bind="enable:false">
 					             Poista hakemus
 				            </button>
                  </div>
