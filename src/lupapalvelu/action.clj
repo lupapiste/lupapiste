@@ -54,6 +54,20 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
+(defcommand "ask-for-planner"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [command]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user (-> command :data :email)
+        (fn [{user-id :id}]
+          (mongo/update-by-id mongo/users user-id 
+            {$push {:tasks {:type        :invitation_planner
+                            :application application-id
+                            :created     (-> command :created)
+                            :user        (security/summary (-> command :user))}}}))))))
+  
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
