@@ -69,7 +69,17 @@
                               :application application-id
                               :created     (-> command :created)
                               :user        (security/summary (-> command :user))}}})))))))
-  
+
+(defcommand "approve-as-planner"
+  {:parameters [:id]
+   :roles      [:applicant]}
+  [{user :user :as command}]
+  (with-application command
+    (fn [{id :id}]
+      (mongo/update-by-id 
+        mongo/applications id
+        {$set {"roles.planner" (security/summary user)}}))))
+
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
