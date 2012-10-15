@@ -7,6 +7,7 @@
 	var application = {
 		id: ko.observable(),
 		state: ko.observable(),
+		roles: ko.observable(),
 	    permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
@@ -154,6 +155,7 @@
 
 		application.id(data.id);
 		application.state(data.state);
+		application.roles(data.roles);
 		application.title(data.title);
 		application.created(data.created);
 		application.permitType(data.permitType);
@@ -161,7 +163,7 @@
 		application.postalCode(data.postalCode);
 		application.postalPlace(data.postalPlace);
 		application.verdict(data.verdict);
-
+		
 		ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 		
 		application.documents.removeAll();
@@ -229,7 +231,8 @@
 			
 	function submitComment(model) {
 		var applicationId = application.id();
-		ajax.command("add-comment", { id: applicationId, text: model.comment.text()})
+		console.log(model);
+		ajax.command("add-comment", { id: applicationId, text: model.text()})
 			.success(function(d) { 
 				repository.reloadAllApplications();
 				model.comment.text(undefined);
@@ -296,7 +299,12 @@
 		applicationMap.addLayer(new OpenLayers.Layer.OSM());
 		applicationMap.addLayer(markers);
 		
-		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1, tab: tab, accordian: accordian}, page[0]);
+		ko.applyBindings({application: application,
+						  comment: comment,
+						  authorization: authorization,
+						  rh1: rh1,
+						  tab: tab,
+						  accordian: accordian}, page[0]);
 		initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
 	});
 
