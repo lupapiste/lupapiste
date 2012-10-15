@@ -16,14 +16,12 @@
 					    <div><p>Lupatunnus: </p><span class="application_summary_text" data-bind-test-id="application-id" data-bind="text: application.id()"></span></div>
 					    <div><p>Tila:</p><span id="test-application-state" class="application_summary_text" data-bind="ltext: application.state()"></span></div>
 					    <div><p>Lupatyyppi:</p><span class="application_summary_text" data-bind="ltext: application.permitType()"></span></div>
-					    <div><p class="todo">Arvioitu käsittelyaika:</p></div>
 					    <div><p>Toimenpiteet:</p>
 						    <span data-bind="foreach: application.documents">
 							    <!-- ko if: documentType == 'toimenpide' -->
 							    <span class="application_summary_text" data-bind="text: loc(type)">Uuden rakentaminen</span>
 							    <!-- /ko -->
 						    </span></div>
-					    <div><p class="todo">Lupapäätöksen toimittaminen:</p></div>
 					    <div><p>Hakemus luotu:</p><span class="application_summary_text" data-bind="dateString: application.created"></span></div>
                    </div> 
 
