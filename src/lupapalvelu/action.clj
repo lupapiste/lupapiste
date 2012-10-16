@@ -64,13 +64,13 @@
         (fn [planner]
           (if (= (:role planner) "authority")
             (fail "can't ask authority to be a planner")
+            ;; TODO: check for duplicates
             (do
               (mongo/update-by-id mongo/users (:id planner)
                 {$push {:tasks {:type        :invitation_planner
                                 :application application-id
                                 :created     (-> command :created)
                                 :user        (security/summary (-> command :user))}}})
-              ;; TODO: should check for duplicates?
               (mongo/update-by-id mongo/applications application-id 
                 {$push {:planners {:state :pending
                                    :user  (security/summary planner)}}}))))))))
