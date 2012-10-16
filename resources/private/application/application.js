@@ -7,7 +7,7 @@
 	var application = {
 		id: ko.observable(),
 		state: ko.observable(),
-	    permitType: ko.observable(),
+		permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
 		documents: ko.observableArray(),
@@ -64,17 +64,17 @@
 			heating_source: "",
 			heating_source_other: "",
 			building_equipments: {
-                electricity: false,
-                gas: false,
-                sewer: false,
-                water: false,
-                warm_water: false,
-                solar_panel: false,
-                elevator: false,
-                air_conditioning: false,
-                saunas: false,
-                swimming_pools: false,
-                shelter: false
+				electricity: false,
+				gas: false,
+				sewer: false,
+				water: false,
+				warm_water: false,
+				solar_panel: false,
+				elevator: false,
+				air_conditioning: false,
+				saunas: false,
+				swimming_pools: false,
+				shelter: false
 			},
 			aaa: {
 				a1: "",
@@ -269,26 +269,26 @@
 	
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
 		
-    var tab = {
-        tabClick: function(data, event) {
-           var self = event.target;
-           console.log(self);
-           $("#tabs li").removeClass('active');
-           $(self).parent().addClass("active");
-           console.log($(".tab_content"));
-           $(".tab_content").hide();
-           var selected_tab = $(self).attr("href");
-           $(selected_tab).fadeIn();
-        }
-    };
+	var tab = {
+		tabClick: function(data, event) {
+			var self = event.target;
+			console.log(self);
+			$("#tabs li").removeClass('active');
+			$(self).parent().addClass("active");
+			console.log($(".tab_content"));
+			$(".tab_content").hide();
+			var selected_tab = $(self).attr("href");
+			$(selected_tab).fadeIn();
+		}
+	};
 
-    var accordian = {
-        accordianClick: function(data, event) {
-           self = event.target;
-           $(self).next(".application_section_content").toggleClass('content_expanded');
-        }
-    };
-    	
+	var accordian = {
+		accordianClick: function(data, event) {
+			self = event.target;
+			$(self).next(".application_section_content").toggleClass('content_expanded');
+		}
+	};
+		
 	$(function() {
 		var page = $("#application");
 
