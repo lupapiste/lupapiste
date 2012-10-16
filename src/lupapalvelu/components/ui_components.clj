@@ -45,14 +45,18 @@
                   :js ["register.js"]
                   :html ["register.html" "register2.html"]}
 
+   :docgen       {:depends [:common]
+                  :js ["docgen.js"]
+                  :html ["templates.html"]}
+   
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:application :applications :attachment :wizard :buildinfo]
+   :applicant    {:depends [:application :applications :attachment :wizard :buildinfo :docgen]
                   :js ["applicant.js"]
                   :html ["index.html"]}
    
-   :authority    {:depends [:application :authority_applications :attachment :buildinfo]
+   :authority    {:depends [:application :authority_applications :attachment :buildinfo :docgen]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -63,9 +67,8 @@
 ; Make sure that all resources are available:
 
 (doseq [c (keys ui-components)
-        r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-  (let [file      (c/path r)
-        resource (.getResourceAsStream (clojure.lang.RT/baseLoader) file)]
+        r (map c/path (mapcat #(c/component-resources ui-components % c) [:js :html :css]))]
+  (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) r)]
     (if resource
       (.close resource)
-      (throw (Exception. (str "Resource missing: " file))))))
+      (throw (Exception. (str "Resource missing: " r))))))
