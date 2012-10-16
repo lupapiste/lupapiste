@@ -20,7 +20,7 @@
 
 (defquery "applications" {} [{user :user}]
   (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {:roles.applicant.userId (:id user)}))
+    :applicant (ok :applications (mongo/select mongo/applications {:roles.applicant.id (:id user)}))
     :authority (ok :applications (mongo/select mongo/applications {:authority (:authority user)}))
     (fail "invalid role to get applications")))
 
@@ -177,7 +177,10 @@
         mongo/applications {:_id (:id application)}
           {$set {:state :submitted, :submitted (:created command) }}))))
 
-(defn create-application [{user :user data :data created :created :as command}]
+(defcommand "create-application"
+  {:create-application {:parameters [:lat :lon :streetAddress :postalCode :postalPlace :categories]
+                       :roles      [:applicant]}}
+  [{user :user data :data created :created :as command}]
   (let [id  (mongo/create-id)]
     (mongo/insert mongo/applications
       {:id id
