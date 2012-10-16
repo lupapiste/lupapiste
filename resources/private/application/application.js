@@ -44,7 +44,7 @@
 
 		askForPlanner: function(model) {
 			var applicationId = application.id();
-			ajax.command("ask-for-planner", { id: application.id(), email: "mikko"})
+			ajax.command("ask-for-planner", { id: application.id(), email: "mikko@example.com"})
 				.success(function(d) { 
 					repository.reloadAllApplications();
 				})
