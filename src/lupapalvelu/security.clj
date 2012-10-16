@@ -13,7 +13,7 @@
 
 (defn summary [user]
   "returns common information about the user"
-  {:userId    (:id user)
+  {:id        (:id user)
    :firstName (:firstName user)
    :lastName  (:lastName user)
    :role      (:role user)})
