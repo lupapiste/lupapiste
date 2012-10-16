@@ -7,7 +7,6 @@
 	var application = {
 		id: ko.observable(),
 		state: ko.observable(),
-		roles: ko.observable(),
 	    permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
@@ -18,8 +17,40 @@
 		postalCode: ko.observableArray(),
 		postalPlace: ko.observableArray(),
 		verdict: ko.observable(),
-		submitApplication: submitApplication,
-		approveApplication: approveApplication
+
+		submitApplication: function(model) {
+			var applicationId = application.id();
+			console.log("applicationid:" + applicationId);
+			ajax.command("submit-application", { id: applicationId})
+			.success(function(d) {
+				notify.success("hakemus j\u00E4tetty",model);
+				repository.reloadAllApplications();
+			})
+			.call();
+			return false;
+		},
+
+		approveApplication: function(model) {
+			var applicationId = application.id();
+			ajax.command("approve-application", { id: applicationId})
+				.success(function(d) {
+					notify.success("hakemus hyv\u00E4ksytty",model);
+					repository.reloadAllApplications();
+				})
+				.call();
+			return false;
+		},
+
+		askForPlanner: function(model) {
+			var applicationId = application.id();
+			console.log(model);
+			ajax.command("ask-for-planner", { id: application.id(), email: "mikko"})
+				.success(function(d) { 
+					repository.reloadAllApplications();
+				})
+				.call();
+			return false;
+		}
 	};
 	
 	var emptyRh1 = {
@@ -139,7 +170,6 @@
 		var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
 		return new OpenLayers.Icon('/img/marker-green.png', size, offset);
 	})();
-	
 
 	function showApplication(data) {
 		ajax.postJson("/rest/actions/valid",{id: data.id})
@@ -152,18 +182,7 @@
 	}
 
 	function showApplicationPart2(data) {
-
-		application.id(data.id);
-		application.state(data.state);
-		application.roles(data.roles);
-		application.title(data.title);
-		application.created(data.created);
-		application.permitType(data.permitType);
-		application.streetAddress(data.streetAddress);
-		application.postalCode(data.postalCode);
-		application.postalPlace(data.postalPlace);
-		application.verdict(data.verdict);
-		
+		ko.mapping.fromJS(data, null, application);
 		ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 		
 		application.documents.removeAll();
@@ -181,14 +200,6 @@
 				var attachment = attachments[attachmentId];
 				attachment.open = "window.location.hash = '!/attachment/" + data.id + "/" + attachment.id + "';";
 				application.attachments.push(attachment);
-			}
-		}
-
-		application.comments.removeAll();
-		var comments = data.comments;
-		if (comments) {
-			for (var i = 0; i < comments.length; i++) {
-				application.comments.push(comments[i]);
 			}
 		}
 
@@ -229,45 +240,20 @@
 		}
 	});
 			
-	function submitComment(model) {
-		var applicationId = application.id();
-		console.log(model);
-		ajax.command("add-comment", { id: applicationId, text: model.text()})
-			.success(function(d) { 
-				repository.reloadAllApplications();
-				model.comment.text(undefined);
-				// model.comment.text.isModified(false); FIXME TypeError: model.comment.text.isModified is not a function 
-			})
-			.call();
-		return false;
-	}
-
-	function submitApplication(model) {
-		var applicationId = application.id();
-		console.log("applicationid:" + applicationId);
-		ajax.command("submit-application", { id: applicationId})
-		.success(function(d) {
-			notify.success("hakemus j\u00E4tetty",model);
-			repository.reloadAllApplications();
-		})
-		.call();
-		return false;
-	}
-
-	function approveApplication(model) {
-		var applicationId = application.id();
-		ajax.command("approve-application", { id: applicationId})
-			.success(function(d) {
-				notify.success("hakemus hyv\u00E4ksytty",model);
-				repository.reloadAllApplications();
-			})
-			.call();
-		return false;
-	}
-
 	var comment = {
 		text: ko.observable(),
-		submit: submitComment
+		submit: function(model) {
+			var applicationId = application.id();
+			console.log(model);
+			ajax.command("add-comment", { id: applicationId, text: model.text()})
+				.success(function(d) { 
+					repository.reloadAllApplications();
+					model.comment.text(undefined);
+					// model.comment.text.isModified(false); FIXME TypeError: model.comment.text.isModified is not a function 
+				})
+				.call();
+			return false;
+		}
 	};
 	
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });

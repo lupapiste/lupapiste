@@ -65,6 +65,8 @@
 						<h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
 						<div class="application_section_content content_expanded">
 							<h3>Pääsuunnittelija</h3>
+              <button id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: askForPlanner" type="submit" class="btn btn-success mr10 action-bar-button">Pyydä suunnittelijaa</button>
+							
 							<h3>Hakijat</h3>
 							<ul data-bind="foreach: documents">
 								<!-- ko if: documentType == 'hakijaTieto' -->
