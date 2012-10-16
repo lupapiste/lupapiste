@@ -12,7 +12,7 @@
    :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    
    :common       {:depends [:openlayers :jquery :knockout]
-                  :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "nav.js" "ko.init.js"]
+                  :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "map.js" "nav.js" "ko.init.js" "combobox.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
    

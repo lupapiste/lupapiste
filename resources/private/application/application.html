@@ -28,7 +28,7 @@
                    </div> 
 
                 <div class="application_actions">
-                           <button id="test-submit-application" data-bind="disable: !$data.authorization || authorization.data()['submit-application'] && !authorization.data()['submit-application'].ok, click: application.submitApplication" type="submit" class="btn btn-success mr10 action-bar-button">
+                           <button id="test-submit-application" data-bind="disable: !$data.authorization || authorization.data()['submit-application'] && !authorization.data()['submit-application'].ok, click: application.submitApplication" type="submit" class="btn btn-primary action-bar-button">
 							Jätä hakemus käsiteltäväksi
 						    </button>
 						    <button id="test-approve-application" data-bind="disable: !$data.authorization || authorization.data()['approve-application'] && !authorization.data()['approve-application'].ok, click: application.approveApplication" type="submit" class="btn btn-success mr10 action-bar-button">
@@ -457,6 +457,7 @@
                 </div>
                 <div class="tab_content" id="conversation_tab">
                     <div class="tab-wrapper">
+                        <div class="span12">Keskustele hakemuksesta:</div>
                         <table class="table table-striped">
 						    <tbody data-bind="foreach: application.comments">
 							    <tr class="comment">
@@ -471,14 +472,8 @@
 						    </tbody>
 					    </table>
 					    <form class="well">
-						    <div class="row">
-							    <div class="span12">Keskustele hakemuksesta:</div>
-						    </div>
-						    <div class="row">&nbsp;</div>
-						    <textarea class="input-xlarge span5" id="commentText" data-bind="value: comment.text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
-						    <div class="btn-toolbar">
-							    <button id="application.addComment" data-bind="disable: comment.disabled, click: comment.submit" type="submit" class="add-comment btn btn-success mr10">Lähetä viesti</button>
-						    </div>
+						    <textarea class="conversation-input" id="commentText" data-bind="value: comment.text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+							<button id="application.addComment" data-bind="disable: comment.disabled, click: comment.submit" type="submit" class="add-comment btn btn-primary">Lähetä viesti</button>
 					    </form>
                     </div>
                 </div>
