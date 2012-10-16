@@ -177,13 +177,6 @@
         mongo/applications {:_id (:id application)}
           {$set {:state :submitted, :submitted (:created command) }}))))
 
-(defn add-application [command]
-  (mongo/insert
-    mongo/applications
-    {:name (-> command :data :name)
-     :position {:lon (-> command :data :lon)
-                :lat (-> command :data :lat)}}))
-
 (defn create-application [{user :user data :data created :created :as command}]
   (let [id  (mongo/create-id)]
     (mongo/insert mongo/applications
