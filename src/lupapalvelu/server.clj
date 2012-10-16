@@ -14,7 +14,11 @@
   (:gen-class))
 
 (defn -main [& args]
-  (info "Server starting")
+  (info "Server starting: Running on %s %s %s (%s)"
+        (System/getProperty "java.vm.vendor")
+        (System/getProperty "java.vm.name")
+        (System/getProperty "java.runtime.version")
+        (System/getProperty "java.vm.info"))
   (mongo/connect!)
   (env/in-dev
     (warn "*** Starting development services ***")
