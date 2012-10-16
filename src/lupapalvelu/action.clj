@@ -180,32 +180,31 @@
                 :lat (-> command :data :lat)}}))
 
 (defn create-application [{user :user data :data created :created :as command}]
-  (let [id  (mongo/create-id)
-        applicant-document-id (mongo/create-id)
-        operation-id (mongo/create-id)]
+  (let [id  (mongo/create-id)]
     (mongo/insert mongo/applications
-                  {:id id
-                   :created created
-                   :modified created
-                   :state :draft
-                   :permitType :buildingPermit
-                   :location {:lat (:lat data) :lon (:lon data)}
-                   :title (:streetAddress data)
-                   :streetAddress (:streetAddress data)
-                   :postalCode (:postalCode data)
-                   :postalPlace (:postalPlace data)
-                   :authority (:postalPlace data)
-                   :roles {:applicant (security/summary user)}
-                   :documents {applicant-document-id {:documentType :hakijaTieto
-                                                      :content {:nimi (str (:firstName user) " " (:lastName user))
-                                                                :katuosoite (:streetAddress user)
-                                                                :postinumero (:postalCode user)
-                                                                :postitoimipaikka (:postalPlace user)
-                                                                :puhelinnumero (:phone user)
-                                                                :sahkopostiosoite (:email user)}}
-                               operation-id {:documentType :toimenpide
-                                             :type (:categories data)
-                                             :content {:otsikko (str (:lastName user) ", " (:streetAddress data))}}}})
+      {:id id
+       :created created
+       :modified created
+       :state :draft
+       :permitType :buildingPermit
+       :location {:lat (:lat data) 
+                  :lon (:lon data)}
+       :title (:streetAddress data)
+       :streetAddress (:streetAddress data)
+       :postalCode (:postalCode data)
+       :postalPlace (:postalPlace data)
+       :authority (:postalPlace data)
+       :roles {:applicant (security/summary user)}
+       :hakija {:id (mongo/create-id)
+                :nimi (str (:firstName user) " " (:lastName user))
+                :katuosoite (:streetAddress user)
+                :postinumero (:postalCode user)
+                :postitoimipaikka (:postalPlace user)
+                :puhelinnumero (:phone user)
+                :sahkopostiosoite (:email user)}
+       :toimenpide  {:id (mongo/create-id)
+                     :type (:categories data)
+                     :otsikko (str (:lastName user) ", " (:streetAddress data))}})
     (ok :id id)))
 
 (defn create-attachment [{{application-id :id} :data created :created}]

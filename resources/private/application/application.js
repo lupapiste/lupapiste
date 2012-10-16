@@ -10,17 +10,18 @@
 	    permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
-		documents: ko.observableArray(),
+		documents: ko.observable(),
 		attachments: ko.observableArray(),
-		comments: ko.observableArray(),
-		streetAddress: ko.observableArray(),
-		postalCode: ko.observableArray(),
-		postalPlace: ko.observableArray(),
+		comments: ko.observable(),
+		streetAddress: ko.observable(),
+		postalCode: ko.observable(),
+		postalPlace: ko.observable(),
 		verdict: ko.observable(),
 
+		hakija: ko.observable(),
+		
 		submitApplication: function(model) {
 			var applicationId = application.id();
-			console.log("applicationid:" + applicationId);
 			ajax.command("submit-application", { id: applicationId})
 			.success(function(d) {
 				notify.success("hakemus j\u00E4tetty",model);
@@ -43,7 +44,6 @@
 
 		askForPlanner: function(model) {
 			var applicationId = application.id();
-			console.log(model);
 			ajax.command("ask-for-planner", { id: application.id(), email: "mikko"})
 				.success(function(d) { 
 					repository.reloadAllApplications();
@@ -185,14 +185,6 @@
 		ko.mapping.fromJS(data, null, application);
 		ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 		
-		application.documents.removeAll();
-		var documents = data.documents;
-		if (documents) {
-			for (var d in documents) {
-				application.documents.push(documents[d]);
-			}
-		}
-
 		application.attachments.removeAll();
 		var attachments = data.attachments;
 		if (attachments) {
@@ -244,12 +236,10 @@
 		text: ko.observable(),
 		submit: function(model) {
 			var applicationId = application.id();
-			console.log(model);
 			ajax.command("add-comment", { id: applicationId, text: model.text()})
 				.success(function(d) { 
 					repository.reloadAllApplications();
-					model.comment.text(undefined);
-					// model.comment.text.isModified(false); FIXME TypeError: model.comment.text.isModified is not a function 
+					model.text("");
 				})
 				.call();
 			return false;
@@ -261,10 +251,8 @@
     var tab = {
         tabClick: function(data, event) {
            var self = event.target;
-           console.log(self);
            $("#tabs li").removeClass('active');
            $(self).parent().addClass("active");
-           console.log($(".tab_content"));
            $(".tab_content").hide();
            var selected_tab = $(self).attr("href");
            $(selected_tab).fadeIn();

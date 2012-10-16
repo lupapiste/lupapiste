@@ -46,7 +46,8 @@
     ko.bindingHandlers.fullName = {
 	    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
 			var value = ko.utils.unwrapObservable(valueAccessor());
-			$(element).text(value ? value.firstName+" "+value.lastName : "");
+			var fullName = value ? value.firstName+" "+value.lastName : "";
+			$(element).text(fullName); //TODO: does not work with comments in application.html
 	    }
 	};
 		
