@@ -72,8 +72,8 @@
                                 :user        (security/summary (-> command :user))}}})
               ;; TODO: should check for duplicates?
               (mongo/update-by-id mongo/applications application-id 
-                {$push {:planner {:state :pending
-                                  :user  (security/summary planner)}}}))))))))
+                {$push {:planners {:state :pending
+                                   :user  (security/summary planner)}}}))))))))
 
 (defcommand "approve-as-planner"
   {:parameters [:id]

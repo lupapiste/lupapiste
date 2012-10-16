@@ -64,8 +64,16 @@
 					<div class="application_section">
 						<h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
 						<div class="application_section_content content_expanded">
-							<h3>Pääsuunnittelija</h3>
-              <button id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: askForPlanner" type="submit" class="btn btn-success mr10 action-bar-button">Pyydä suunnittelijaa</button>
+						  <span>
+								<h3>Pääsuunnittelija</h3>
+								<span data-bind="foreach: planners">
+								  <span data-bind="text: user.username"></span> (<span data-bind="text: loc(state())"></span>)<br/>
+								</span>
+								<span data-bind="with: $root.askForPlanner">
+								  <input class="form_input" type="text" data-bind="value: email" />
+	                <button id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit" type="submit" class="btn btn-success mr10 action-bar-button">Pyydä suunnittelijaa</button>
+								</span>
+              </span>
 							<h3>Hakijat</h3>
 							<ul data-bind="with: hakija">
 								<li><b>Nimi:</b> <span name="test-applicant-name" data-bind="text: nimi"></span><br/>

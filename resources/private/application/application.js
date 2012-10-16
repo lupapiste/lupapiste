@@ -18,7 +18,9 @@
 		postalPlace: ko.observable(),
 		verdict: ko.observable(),
 
+		// new stuff
 		hakija: ko.observable(),
+		planners: ko.observableArray(),
 		
 		submitApplication: function(model) {
 			var applicationId = application.id();
@@ -41,16 +43,6 @@
 				.call();
 			return false;
 		},
-
-		askForPlanner: function(model) {
-			var applicationId = application.id();
-			ajax.command("ask-for-planner", { id: application.id(), email: "mikko@example.com"})
-				.success(function(d) { 
-					repository.reloadAllApplications();
-				})
-				.call();
-			return false;
-		}
 	};
 	
 	var emptyRh1 = {
@@ -240,13 +232,27 @@
 				.success(function(d) { 
 					repository.reloadAllApplications();
 					model.text("");
-				})
-				.call();
+				}).call();
 			return false;
 		}
 	};
 	
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
+	
+	var askForPlanner = {
+	    email : ko.observable(),
+		submit: function(model) {
+			ajax.command("ask-for-planner", { id: application.id(), email: model.email()})
+				.success(function(d) { 
+					repository.reloadAllApplications();
+				})
+				.error(function(d) {
+					notify.info("kutsun lähettäminen epäonnistui");
+				})
+				.call();
+			return false;
+		}
+	}
 		
     var tab = {
         tabClick: function(data, event) {
@@ -275,6 +281,7 @@
 		
 		ko.applyBindings({application: application,
 						  comment: comment,
+						  askForPlanner: askForPlanner,
 						  authorization: authorization,
 						  rh1: rh1,
 						  tab: tab,
