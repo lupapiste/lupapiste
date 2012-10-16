@@ -26,7 +26,7 @@
 
 (defquery "application" {:parameters [:id]} [{{id :id} :data user :user}]
   (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.userId (:id user)}]}))
+    :applicant (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.id (:id user)}]}))
     :authority (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:authority (:authority user)}]}))
     (fail :text "invalid role to get application")))
 
