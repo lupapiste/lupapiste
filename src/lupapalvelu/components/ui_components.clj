@@ -11,9 +11,6 @@
                   :js ["oskarimap.js" "map.js"]
                   :css ["oskarimap.css"]
                   :html ["map.html"]}
-  
-   :bootstrap    {:css ["bootstrap.css"	"bootstrap-responsive.css" "addedStyles.css"]
-                  :js ["bootstrap-dropdown.js" "bootstrap-collapse.js"]}
    
    :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    

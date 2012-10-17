@@ -35,8 +35,8 @@
 					</div>
 				</div>
 				<div class="application_actions">
-					<button id="test-submit-application" data-bind="disable: !$root.authorization || $root.authorization.data()['submit-application'] && !$root.authorization.data()['submit-application'].ok, click: submitApplication" type="submit" class="btn btn-success mr10 action-bar-button">Jätä hakemus käsiteltäväksi</button>
-					<button id="test-approve-application" data-bind="disable: !$root.authorization || $root.authorization.data()['approve-application'] && !$root.authorization.data()['approve-application'].ok, click: approveApplication" type="submit" class="btn btn-success mr10 action-bar-button">Siirrä kuntarekisteriin</button>
+					<button id="test-submit-application" data-bind="disable: !$root.authorization || $root.authorization.data()['submit-application'] && !$root.authorization.data()['submit-application'].ok, click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
+					<button id="test-approve-application" data-bind="disable: !$root.authorization || $root.authorization.data()['approve-application'] && !$root.authorization.data()['approve-application'].ok, click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
 					<button class="todo btn btn-large action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
 					<button class="todo btn btn-large action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
 					<button class="todo btn btn-large action-bar-button" data-bind="enable:false">Poista hakemus</button>
@@ -291,6 +291,7 @@
 				</div>
 				<div class="tab_content" id="conversation_tab">
 					<div class="tab-wrapper">
+                        <div class="span12">Keskustele hakemuksesta:</div>
 						<table class="table table-striped">
 							<tbody data-bind="foreach: comments">
 								<tr class="comment">
@@ -311,7 +312,7 @@
 							<div class="row">&nbsp;</div>
 							<textarea class="input-xlarge span5" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
 							<div class="btn-toolbar">
-								<button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="add-comment btn btn-success mr10">Lähetä viesti</button>
+								<button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="add-comment btn btn-primary">Lähetä viesti</button>
 							</div>
 						</form>
 					</div>
