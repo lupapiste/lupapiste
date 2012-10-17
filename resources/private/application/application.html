@@ -33,7 +33,7 @@
 						<p>Hakemus luotu:</p>
 						<span class="application_summary_text" data-bind="dateString: created"></span>
 					</div>
-                   </div> 
+                   </div>
                 <div class="application_actions">
 					<button id="test-submit-application" data-bind="disable: !$root.authorization || $root.authorization.data()['submit-application'] && !$root.authorization.data()['submit-application'].ok, click: submitApplication" type="submit" class="btn btn-success mr10 action-bar-button">Jätä hakemus käsiteltäväksi</button>
 					<button id="test-approve-application" data-bind="disable: !$root.authorization || $root.authorization.data()['approve-application'] && !$root.authorization.data()['approve-application'].ok, click: approveApplication" type="submit" class="btn btn-success mr10 action-bar-button">Siirrä kuntarekisteriin</button>
@@ -198,48 +198,48 @@
                                         </tr>
                                         <tr>
                                             <td><p>Myymälä- majoitus- ja ravitsemistilaa</p></td>
-                                            <td><input type="text" data-bind="value: a2"></td>     
+                                            <td><input type="text" data-bind="value: a2"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Hoitotilaa</p></td>
-                                            <td><input type="text" data-bind="value: a3"></td>     
+                                            <td><input type="text" data-bind="value: a3"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Toimisto- ja hallintotilaa</p></td>
-                                            <td><input type="text" data-bind="value: a4"></td>     
+                                            <td><input type="text" data-bind="value: a4"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Kokoontumistilaa</p></td>
-                                            <td><input type="text" data-bind="value: a5"></td>     
+                                            <td><input type="text" data-bind="value: a5"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Opetustilaa</p></td>
-                                            <td><input type="text" data-bind="value: a6"></td>     
+                                            <td><input type="text" data-bind="value: a6"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Tuotantotilaa (teollisuus)</p></td>
-                                            <td><input type="text" data-bind="value: a7"></td>     
+                                            <td><input type="text" data-bind="value: a7"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Varastotilaa</p></td>
-                                            <td><input type="text" data-bind="value: a8"></td>     
+                                            <td><input type="text" data-bind="value: a8"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Muuta huoneistoalaan kuuluvaa tilaa</p></td>
-                                            <td><input type="text" data-bind="value: a9"></td>     
+                                            <td><input type="text" data-bind="value: a9"></td>
                                         </tr>
                                         <tr>
                                             <td><p>Huoneistoala yhteensä</p></td>
-                                            <td><input type="text" data-bind="value: a10"></td>     
+                                            <td><input type="text" data-bind="value: a10"></td>
                                         </tr>
                                     </table>
                                 </form>
                                 <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
-                            </div> 
+                            </div>
 							<div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.data()['approve-content'] && $root.authorization.data()['approve-content'].ok">
 								<button class="todo btn btn-small content-accept">Hyväksy</button>
 								<button class="todo btn btn-small content-reject">Hylkää</button>
-                            </div>  
+                            </div>
                         </div>
                     </div>
                     <div class="application_section">
@@ -264,7 +264,7 @@
 										<input class="form_input" type="checkbox" data-bind="checked: toilet"> <label class="group-label"> WC</label> <input class="form_input" type="checkbox" data-bind="checked: shower"> <label class="group-label"> Amme / Suihku</label> <input class="form_input" type="checkbox" data-bind="checked: sauna"> <label class="group-label"> Sauna</label> <input class="form_input" type="checkbox" data-bind="checked: balcony"> <label class="group-label"> Parveke / terassi</label> <input class="form_input" type="checkbox" data-bind="checked: warm_water"> <label class="group-label"> Lämmin vesi</label> <br />
 	                                  </div>
 									<label class="form_label" for="new_apartments">Uusia asuntoja yhteensä </label> <input class="form_input" type="text" data-bind="value: new_apartments" /><br /> <label class="form_label" for="apartments_total_floor_area">Asuntojen pinta-ala yhteensä </label> <input class="form_input" type="text" name="apartments_total_floor_area" /><br />
-                                </form> 
+                                </form>
 								    <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
                             </div>
                         </div>
@@ -273,13 +273,13 @@
                 <div class="tab_content" id="hearings_tab">TPD</div>
                 <div class="tab_content" id="pleadings_tab">TPD</div>
                 <div class="tab_content" id="attachments_tab">
-                    <div class="tab-wrapper"> 
+                    <div class="tab-wrapper">
 						<table data-bind="visible: attachments && attachments().length > 0, foreach: attachments" class="table table-striped">
 						    <tr style="cursor: pointer;">
 								<td data-bind="attr: {onclick: open}"><span data-bind="visible: type != null && type.length > 0"> <span data-bind="text: type"></span>
 								</span> <span data-bind="visible: type == null || type.length == 0"> <i>Nimetön</i>
 								</span></td>
-								<td><span data-bind="if: filename"> <a href="" data-bind="text: loc('view') + ' ' + filename, attr: {href: '/rest/view/' + id}" target="_blank"></a> - <a href="" data-bind="text: loc('download') + ' ' + filename, attr: {href: '/rest/download/' + id}"></a> <i data-bind="ltext: contentType"></i> <i data-bind="size: size"></i>
+								<td><span data-bind="if: $data.filename"> <a href="" data-bind="text: loc('view') + ' ' + filename, attr: {href: '/rest/view/' + id}" target="_blank"></a> - <a href="" data-bind="text: loc('download') + ' ' + filename, attr: {href: '/rest/download/' + id}"></a> <i data-bind="ltext: contentType"></i> <i data-bind="size: size"></i>
 								</span></td>
 						    </tr>
 					    </table>
@@ -317,7 +317,7 @@
                     </div>
                 </div>
                 <div class="tab_content" id="decision_tab">
-                    <div class="tab-wrapper"> 
+                    <div class="tab-wrapper">
 						<div class="row" data-bind="with: verdict">
 							<span id="test-application-verdict" data-bind="text: text"></span>
 				        </div>

@@ -141,7 +141,7 @@ var attachment = function() {
 	});
 
 	function newAttachment(m) {
-		ajax.command("create-attachment", {id:  m.application.id()})
+		ajax.command("create-attachment", {id:  m.id()})
 		.success(function(d) {
 			repository.reloadAllApplications(function() {
 				window.location.hash = "!/attachment/" + d.applicationId + "/" + d.attachmentId;
