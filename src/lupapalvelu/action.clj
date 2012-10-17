@@ -20,13 +20,13 @@
 
 (defquery "applications" {} [{user :user}]
   (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {:roles.applicant.userId (:id user)}))
+    :applicant (ok :applications (mongo/select mongo/applications {:roles.applicant.id (:id user)}))
     :authority (ok :applications (mongo/select mongo/applications {:authority (:authority user)}))
     (fail "invalid role to get applications")))
 
 (defquery "application" {:parameters [:id]} [{{id :id} :data user :user}]
   (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.userId (:id user)}]}))
+    :applicant (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.id (:id user)}]}))
     :authority (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:authority (:authority user)}]}))
     (fail :text "invalid role to get application")))
 
@@ -53,6 +53,37 @@
       (mongo/update-by-id mongo/applications id
         {$set {:modified (:created command)
                :state :open}}))))
+
+(defcommand "ask-for-planner"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [command]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user (-> command :data :email)
+        (fn [planner]
+          (if (= (:role planner) "authority")
+            (fail "can't ask authority to be a planner")
+            ;; TODO: check for duplicates
+            (do
+              (mongo/update-by-id mongo/users (:id planner)
+                {$push {:tasks {:type        :invitation_planner
+                                :application application-id
+                                :created     (-> command :created)
+                                :user        (security/summary (-> command :user))}}})
+              (mongo/update-by-id mongo/applications application-id 
+                {$push {:planners {:state :pending
+                                   :user  (security/summary planner)}}}))))))))
+
+(defcommand "approve-as-planner"
+  {:parameters [:id]
+   :roles      [:applicant]}
+  [{user :user :as command}]
+  (with-application command
+    (fn [{id :id}]
+      (mongo/update-by-id 
+        mongo/applications id
+        {$set {"roles.planner" (security/summary user)}}))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
@@ -146,40 +177,35 @@
         mongo/applications {:_id (:id application)}
           {$set {:state :submitted, :submitted (:created command) }}))))
 
-(defn add-application [command]
-  (mongo/insert
-    mongo/applications
-    {:name (-> command :data :name)
-     :position {:lon (-> command :data :lon)
-                :lat (-> command :data :lat)}}))
-
-(defn create-application [{user :user data :data created :created :as command}]
-  (let [id  (mongo/create-id)
-        applicant-document-id (mongo/create-id)
-        operation-id (mongo/create-id)]
+(defcommand "create-application"
+  {:create-application {:parameters [:lat :lon :streetAddress :postalCode :postalPlace :categories]
+                       :roles      [:applicant]}}
+  [{user :user data :data created :created :as command}]
+  (let [id  (mongo/create-id)]
     (mongo/insert mongo/applications
-                  {:id id
-                   :created created
-                   :modified created
-                   :state :draft
-                   :permitType :buildingPermit
-                   :location {:lat (:lat data) :lon (:lon data)}
-                   :title (:streetAddress data)
-                   :streetAddress (:streetAddress data)
-                   :postalCode (:postalCode data)
-                   :postalPlace (:postalPlace data)
-                   :authority (:postalPlace data)
-                   :roles {:applicant (security/summary user)}
-                   :documents {applicant-document-id {:documentType :hakijaTieto
-                                                      :content {:nimi (str (:firstName user) " " (:lastName user))
-                                                                :katuosoite (:streetAddress user)
-                                                                :postinumero (:postalCode user)
-                                                                :postitoimipaikka (:postalPlace user)
-                                                                :puhelinnumero (:phone user)
-                                                                :sahkopostiosoite (:email user)}}
-                               operation-id {:documentType :toimenpide
-                                             :type (:categories data)
-                                             :content {:otsikko (str (:lastName user) ", " (:streetAddress data))}}}})
+      {:id id
+       :created created
+       :modified created
+       :state :draft
+       :permitType :buildingPermit
+       :location {:lat (:lat data) 
+                  :lon (:lon data)}
+       :title (:streetAddress data)
+       :streetAddress (:streetAddress data)
+       :postalCode (:postalCode data)
+       :postalPlace (:postalPlace data)
+       :authority (:postalPlace data)
+       :roles {:applicant (security/summary user)}
+       :hakija {:id (mongo/create-id)
+                :nimi (str (:firstName user) " " (:lastName user))
+                :katuosoite (:streetAddress user)
+                :postinumero (:postalCode user)
+                :postitoimipaikka (:postalPlace user)
+                :puhelinnumero (:phone user)
+                :sahkopostiosoite (:email user)}
+       :toimenpide  {:id (mongo/create-id)
+                     :type (:categories data)
+                     :otsikko (str (:lastName user) ", " (:streetAddress data))}})
     (ok :id id)))
 
 (defn create-attachment [{{application-id :id} :data created :created}]
