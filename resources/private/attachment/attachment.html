@@ -14,10 +14,10 @@
 				</ul>
 			</div>
 
-			<h1>Liite</h1>			
+			<h1>Liite</h1>
 			<div class="row">
 				<div class="span4">
-					<div>Liitteen nimi: <input data-bind="value: name" type="text" placeholder="Liitteen nimi"></input></div>
+					<div>Liitteen nimi: <input id="test-new-attachment-name" data-bind="value: type" type="text" placeholder="Liitteen nimi"></input></div>
 					<table style="margin-top: 15px;">
 						<tr><td>Tiedoston nimi:</td><td data-bind="text: filename"></td></tr>
 						<tr><td>Tyyppi:</td><td data-bind="ltext: contentType"></td></tr>
@@ -35,7 +35,7 @@
 					</form>
 				</div>
 				<div class="span12">
-					<button class="btn" data-bind="click: save">Tallenna</button>
+					<button id="test-save-new-attachment" class="btn" data-bind="click: save">Tallenna</button>
 					<button class="btn" data-bind="click: toApplication">Palaa</button>
 				</div>
 			</div>

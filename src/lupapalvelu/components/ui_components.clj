@@ -11,8 +11,8 @@
                   :js ["oskarimap.js" "map.js"]
                   :css ["oskarimap.css"]
                   :html ["map.html"]}
-   
-   :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
+  
+   :knockout     {:js ["knockout-2.1.0.debug.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    
    :common       {:depends [:oskari :jquery :knockout]
                   :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "nav.js" "ko.init.js"]
@@ -30,7 +30,8 @@
                   :html ["application.html"]}
    
    :applications {:depends [:common :repository]
-                  :js ["applications-config.js" "applications.js" "lupapiste.tablesorter.js"]                   :css ["tablesorter.css" "applications.css"]
+                  :js ["applications-config.js" "applications.js" "lupapiste.tablesorter.js"] 
+                  :css ["tablesorter.css" "applications.css"]
                   :html ["applications.html"]}
    
    :authority_applications {:depends [:common :repository]
