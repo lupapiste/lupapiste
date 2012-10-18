@@ -196,16 +196,17 @@
        :postalPlace (:postalPlace data)
        :authority (:postalPlace data)
        :roles {:applicant (security/summary user)}
-       :hakija {:id (mongo/create-id)
-                :nimi (str (:firstName user) " " (:lastName user))
-                :katuosoite (:streetAddress user)
-                :postinumero (:postalCode user)
-                :postitoimipaikka (:postalPlace user)
-                :puhelinnumero (:phone user)
-                :sahkopostiosoite (:email user)}
-       :toimenpide  {:id (mongo/create-id)
-                     :type (:categories data)
-                     :otsikko (str (:lastName user) ", " (:streetAddress data))}})
+       :documents {:hakija {:id (mongo/create-id)
+                            :nimi (str (:firstName user) " " (:lastName user))
+                            :osoite {
+                                     :katuosoite (:streetAddress user)
+                                     :postinumero (:postalCode user)
+                                     :postitoimipaikka (:postalPlace user)}
+                            :puhelinnumero (:phone user)
+                            :sahkopostiosoite (:email user)}
+                   :toimenpide  {:id (mongo/create-id)
+                                 :type (:categories data)
+                                 :otsikko (str (:lastName user) ", " (:streetAddress data))}}})
     (ok :id id)))
 
 (defn create-attachment [{{application-id :id} :data created :created}]
