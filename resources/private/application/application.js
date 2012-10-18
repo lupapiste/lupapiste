@@ -42,7 +42,7 @@
 		verdict: ko.observable(),
 
 		// new stuff
-		hakija: ko.observable(),
+		//hakija: ko.observable(),
 		planners: ko.observableArray(),
 		
 		submitApplication: function(model) {
@@ -294,7 +294,6 @@
 		});
 		
 		var page = $("#application");
-
 		ko.applyBindings({application: application,
 						  comment: comment,
 						  askForPlanner: askForPlanner,
