@@ -4,21 +4,68 @@
 
 ;(function() {
 
+	function refreshMap() {
+		// refresh map for applications
+		hub.clearMapWithDelay(refreshMapPoints);
+	}
+
+	function refreshMapPoints() {
+		// FIXME Hack: we'll have to wait 100ms
+		setTimeout(function() {
+			var mapPoints = [];
+
+			mapPoints.push({
+				id: "markerFor" + application.id(),
+				location: {x: application.location().lon, y: application.location().lat}
+			});
+
+			hub.send("documents-map", {
+				data : mapPoints
+			});
+		}, 99);
+		
+	}
+
 	var application = {
 		id: ko.observable(),
 		state: ko.observable(),
+		location: ko.observable(),
 	    permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
-		documents: ko.observableArray(),
+		documents: ko.observable(),
 		attachments: ko.observableArray(),
-		comments: ko.observableArray(),
-		streetAddress: ko.observableArray(),
-		postalCode: ko.observableArray(),
-		postalPlace: ko.observableArray(),
+		comments: ko.observable(),
+		streetAddress: ko.observable(),
+		postalCode: ko.observable(),
+		postalPlace: ko.observable(),
 		verdict: ko.observable(),
-		submitApplication: submitApplication,
-		approveApplication: approveApplication
+
+		// new stuff
+		//hakija: ko.observable(),
+		planners: ko.observableArray(),
+		
+		submitApplication: function(model) {
+			var applicationId = application.id();
+			ajax.command("submit-application", { id: applicationId})
+			.success(function(d) {
+				notify.success("hakemus j\u00E4tetty",model);
+				repository.reloadAllApplications();
+			})
+			.call();
+			return false;
+		},
+
+		approveApplication: function(model) {
+			var applicationId = application.id();
+			ajax.command("approve-application", { id: applicationId})
+				.success(function(d) {
+					notify.success("hakemus hyv\u00E4ksytty",model);
+					repository.reloadAllApplications();
+				})
+				.call();
+			return false;
+		},
 	};
 	
 	var emptyRh1 = {
@@ -138,39 +185,21 @@
 		var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
 		return new OpenLayers.Icon('/img/marker-green.png', size, offset);
 	})();
-	
 
 	function showApplication(data) {
 		ajax.postJson("/rest/actions/valid",{id: data.id})
 			.success(function(d) {
 				authorization.data(d.commands);
 				showApplicationPart2(data);
+				hub.setPageReady("application");
 			})
 			.call();
 	}
 
 	function showApplicationPart2(data) {
-
-		application.id(data.id);
-		application.state(data.state);
-		application.title(data.title);
-		application.created(data.created);
-		application.permitType(data.permitType);
-		application.streetAddress(data.streetAddress);
-		application.postalCode(data.postalCode);
-		application.postalPlace(data.postalPlace);
-		application.verdict(data.verdict);
-
+		ko.mapping.fromJS(data, null, application);
 		ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 		
-		application.documents.removeAll();
-		var documents = data.documents;
-		if (documents) {
-			for (var d in documents) {
-				application.documents.push(documents[d]);
-			}
-		}
-
 		application.attachments.removeAll();
 		var attachments = data.attachments;
 		if (attachments) {
@@ -181,41 +210,12 @@
 			}
 		}
 
-		application.comments.removeAll();
-		var comments = data.comments;
-		if (comments) {
-			for (var i = 0; i < comments.length; i++) {
-				application.comments.push(comments[i]);
-			}
-		}
-
-		var position = map.toLatLon(data.location.lat, data.location.lon);
-		
-		if (marker) {
-			markers.removeMarker(marker);
-			marker.destroy();
-			marker = null;
-		}
-		
-		marker = map.makeMarker(position, icon);
-		markers.addMarker(marker);
-		if (applicationMap) applicationMap.setCenter(position, 12);
 	}
 	
 	function uploadCompleted(file, size, type, attachmentId) {
 		// if (attachments) attachments.push(new Attachment(file, type, size, attachmentId));
 	}
 		
-	hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
-		var id = e.pagePath[0];
-		if (application.id() != id) {
-			repository.getApplication(id, showApplication, function() {
-				// TODO: Show "No such application, or not permission"
-				error("No such application, or not permission");
-			});
-		}
-	});
-
 	hub.subscribe("repository-application-reload", function(e) {
 		if (application.id() === e.applicationId) {
 			repository.getApplication(e.applicationId, showApplication, function() {
@@ -225,55 +225,82 @@
 		}
 	});
 			
-	function submitComment(model) {
+	var comment = {
+		text: ko.observable(),
+		submit: function(model) {
 		var applicationId = application.id();
-		ajax.command("add-comment", { id: applicationId, text: model.comment.text()})
+			ajax.command("add-comment", { id: applicationId, text: model.text()})
 			.success(function(d) { 
 				repository.reloadAllApplications();
-				model.comment.text(undefined);
-				// model.comment.text.isModified(false); FIXME TypeError: model.comment.text.isModified is not a function 
-			})
-			.call();
+					model.text("");
+				}).call();
 		return false;
 	}
+	};
 
-	function submitApplication(model) {
-		var applicationId = application.id();
-		ajax.command("submit-application", { id: applicationId})
+	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
+	
+	var askForPlanner = {
+	    email : ko.observable(),
+		submit: function(model) {
+			ajax.command("ask-for-planner", { id: application.id(), email: model.email()})
 		.success(function(d) {
-			notify.success("hakemus j\u00E4tetty",model);
 			repository.reloadAllApplications();
 		})
+				.error(function(d) {
+					notify.info("kutsun lähettäminen epäonnistui");
+				})
 		.call();
 		return false;
 	}
-
-	function approveApplication(model) {
-		var applicationId = application.id();
-		ajax.command("approve-application", { id: applicationId})
-			.success(function(d) {
-				notify.success("hakemus hyv\u00E4ksytty",model);
-				repository.reloadAllApplications();
-			})
-			.call();
-		return false;
 	}
 
-	var comment = {
-		text: ko.observable(),
-		submit: submitComment
-	};
-	
-	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
-			
-	$(function() {
-		var page = $("#application");
+    var tab = {
+        tabClick: function(data, event) {
+           var self = event.target;
+           $("#tabs li").removeClass('active');
+           $(self).parent().addClass("active");
+           $(".tab_content").hide();
+           var selected_tab = $(self).attr("href");
+           $(selected_tab).fadeIn();
+        }
+    };
 
-		applicationMap = new OpenLayers.Map("application-map");
-		applicationMap.addLayer(new OpenLayers.Layer.OSM());
-		applicationMap.addLayer(markers);
+    var accordian = {
+        accordianClick: function(data, event) {
+           self = event.target;
+           $(self).next(".application_section_content").toggleClass('content_expanded');
+        }
+    };
+    	
+	function onPageChange(e) {
+		var id = e.pagePath[0];
+		if (application.id() != id) {
+			repository.getApplication(id, showApplication, function() {
+				// TODO: Show "No such application, or not permission"
+				error("No such application, or not permission");
+			});
+		}
+
+		hub.whenOskariMapIsReady(function() {
+			hub.moveOskariMapToDiv("application-map");
+			refreshMap();
+		});
+	}
+
+	$(function() {
+		hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
+			onPageChange(e);
+		});
 		
-		ko.applyBindings({application: application, comment: comment, authorization: authorization, rh1: rh1}, page[0]);
+		var page = $("#application");
+		ko.applyBindings({application: application,
+						  comment: comment,
+						  askForPlanner: askForPlanner,
+						  authorization: authorization,
+						  rh1: rh1,
+						  tab: tab,
+						  accordian: accordian}, page[0]);
 		initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
 	});
 
