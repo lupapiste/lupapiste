@@ -75,10 +75,10 @@
   (.setId input id)
   input)
 
-(defn upload [applicationId attachmentId filename content-type tempfile timestamp]
+(defn upload [applicationId file-id filename content-type tempfile timestamp]
   (gfs/store-file
     (gfs/make-input-file tempfile)
-    (set-file-id attachmentId)
+    (set-file-id file-id)
     (gfs/filename filename)
     (gfs/content-type content-type)
     (gfs/metadata {:uploaded timestamp, :application applicationId})))

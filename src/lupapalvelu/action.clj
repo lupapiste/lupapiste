@@ -18,17 +18,19 @@
 (defcommand "create-id" {:authenticated true} [command]
   (ok :id (mongo/create-id)))
 
-(defquery "applications" {} [{user :user}]
+(defn- application-restriction-for [user]
   (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {:roles.applicant.id (:id user)}))
-    :authority (ok :applications (mongo/select mongo/applications {:authority (:authority user)}))
-    (fail "invalid role to get applications")))
+    :applicant {:roles.applicant.id (:id user)}
+    :authority {:authority (:authority user)}
+    (do
+      (warn "invalid role to get applications")
+      {:_id "-1"} ))) ; should not yield any results
 
-(defquery "application" {:parameters [:id]} [{{id :id} :data user :user}]
-  (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.id (:id user)}]}))
-    :authority (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:authority (:authority user)}]}))
-    (fail :text "invalid role to get application")))
+(defquery "applications" {:authenticated true} [{user :user}]
+  (ok :applications (mongo/select mongo/applications (application-restriction-for user))))
+
+(defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-restriction-for user)]})))
 
 (defcommand "give-application-verdict"
   {:parameters [:id :ok :text]
@@ -71,7 +73,7 @@
                                 :application application-id
                                 :created     (-> command :created)
                                 :user        (security/summary (-> command :user))}}})
-              (mongo/update-by-id mongo/applications application-id 
+              (mongo/update-by-id mongo/applications application-id
                 {$push {:planners {:state :pending
                                    :user  (security/summary planner)}}}))))))))
 
@@ -81,7 +83,7 @@
   [{user :user :as command}]
   (with-application command
     (fn [{id :id}]
-      (mongo/update-by-id 
+      (mongo/update-by-id
         mongo/applications id
         {$set {"roles.planner" (security/summary user)}}))))
 
@@ -188,7 +190,7 @@
        :modified created
        :state :draft
        :permitType :buildingPermit
-       :location {:lat (:lat data) 
+       :location {:lat (:lat data)
                   :lon (:lon data)}
        :title (:streetAddress data)
        :streetAddress (:streetAddress data)
@@ -216,7 +218,7 @@
       {$set {:modified created
              (str "attachments." attachment-id) {:id attachment-id
                                                  :type nil
-                                                 :latest-version   {:major 0, :minor 0}
+                                                 :latestVersion   {:version {:major 0, :minor 0}}
                                                  :versions []
                                                  }}}
       )
@@ -241,7 +243,7 @@
     "5077bbcb6bb799214013f9e5" {
         "id"  "5077bbcb6bb799214013f9e5"
         :type  "attachment-foo"
-        :latest-version   {:major 0, :minor 1}
+        :latestVersion   {:major 0, :minor 1}
         "versions" [
           {
             "fileid"    "5077bbcb6bb799214013f9e5"
@@ -257,33 +259,29 @@
 
 
 (defn- next-attachment-version [current-version]
-  {:major (inc (:major current-version)), :minor 0}
-  )
+  {:major (inc (:major current-version)), :minor 0})
 
-(defn- set-attachment-version [application-id attachment-id type filename content-type size created]
+(defn- set-attachment-version [application-id attachment-id file-id type filename content-type size created]
   (when-let [application (mongo/by-id mongo/applications application-id)]
-    (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latest-version)
-          next-version (next-attachment-version latest-version)]
-      (mongo/update-by-query
-        mongo/applications
-        {:_id application-id
-         (str "attachments." attachment-id ".latest-version.major") (:major latest-version)
-         (str "attachments." attachment-id ".latest-version.minor") (:minor latest-version)}
-
-        {$set {:modified created
-               (str "attachments." attachment-id ".type")  type
-               (str "attachments." attachment-id ".latest-version")  next-version}
-         $push {(str "attachments." attachment-id ".versions") {
+    (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
+          next-version (next-attachment-version latest-version)
+          version-model {
                   :version  next-version
+                  :fileId   file-id
                   ; File name will be presented in ASCII when the file is downloaded.
                   ; Conversion could be done here as well, but we don't want to lose information.
                   :filename filename
                   :contentType content-type
-                  :size size}
-                }})
-      )
-    )
-  )
+                  :size size}]
+        (mongo/update-by-query
+        mongo/applications
+        {:_id application-id
+         (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
+         (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
+        {$set {:modified created
+               (str "attachments." attachment-id ".type")  type
+               (str "attachments." attachment-id ".latestVersion") version-model}
+         $push {(str "attachments." attachment-id ".versions") version-model}}))))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :content-type :size]
@@ -291,9 +289,10 @@
    :states     [:draft :open]}
   [{created :created {:keys [id attachmentId type filename tempfile content-type size]} :data}]
   (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId type filename tempfile content-type size)
-  (mongo/upload id attachmentId filename content-type tempfile created)
-  (set-attachment-version id attachmentId type filename content-type size created)
-  (.delete (file tempfile)))
+  (let [file-id (mongo/create-id)]
+    (mongo/upload file-id file-id filename content-type tempfile created)
+    (set-attachment-version id attachmentId file-id type filename content-type size created)
+    (.delete (file tempfile))))
 
 (defn get-attachment [attachmentId]
   ;; FIXME access rights
