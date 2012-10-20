@@ -274,20 +274,36 @@
 				<div class="tab_content" id="pleadings_tab">TPD</div>
 				<div class="tab_content" id="attachments_tab">
 					<div class="tab-wrapper">
-						<table data-bind="visible: attachments && attachments().length, foreach: attachments" class="table table-striped">
-							<tr style="cursor: pointer;">
-								<td data-bind="text: loc('attachmentState_' + state)"
-								    class="attachment-state"></td>
-								<td data-bind="attr: {onclick: open}">
-									<span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
-									<span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i>
-								</span></td>
-								<td><span data-bind="if: $data.latestVersion.filename">
-								    <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
-								    <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
-								    <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
-								</span></td>
-							</tr>
+						<table data-bind="if: attachments && attachments().length"
+						       class="table table-striped">
+							<thead>
+								<tr>
+									<th>Tila</th>
+									<th>Tyyppi</th>
+									<th>Tiedosto</th>
+									<th>Versio</th>
+									<th>Muokattu</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody data-bind="foreach: attachments">
+								<tr style="cursor: pointer;">
+									<td data-bind="text: loc('attachmentState_' + state)"
+									    class="attachment-state"></td>
+									<td data-bind="attr: {onclick: open}">
+										<span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
+										<span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i>
+									</span></td>
+									<td><span data-bind="if: $data.latestVersion.filename">
+									    <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
+									    <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
+									    <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
+									</span></td>
+									<td data-bind="if: $data.latestVersion"><span data-bind="version: latestVersion.version"></span></td>
+									<td data-bind="if: $data.modified"><span data-bind="dateString: modified"></span></td>
+									<td></td>
+								</tr>
+							</tbody>
 						</table>
 						<div data-bind="ifnot: attachments && attachments().length">
 							<i>Ei liitteitä</i>

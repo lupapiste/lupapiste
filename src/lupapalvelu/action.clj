@@ -236,16 +236,20 @@
     {$set {:modified (:created command)
            (str "attachments." (-> command :data :attachmentId) ".type") (-> command :data :type)}}))))
 
-(defn- next-attachment-version [current-version]
-  {:major (inc (:major current-version)), :minor 0})
+(defn- next-attachment-version [current-version user]
+  (if (= (keyword (:role user)) :authority)
+    {:major (:major current-version), :minor (inc (:minor current-version))}
+    {:major (inc (:major current-version)), :minor 0}))
 
-(defn- set-attachment-version [application-id attachment-id file-id type filename content-type size now]
+(defn- set-attachment-version [application-id attachment-id file-id type filename content-type size now user]
   (when-let [application (mongo/by-id mongo/applications application-id)]
     (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
-          next-version (next-attachment-version latest-version)
+          next-version (next-attachment-version latest-version user)
           version-model {
                   :version  next-version
                   :fileId   file-id
+                  :created  now
+                  :user    (security/summary user)
                   ; File name will be presented in ASCII when the file is downloaded.
                   ; Conversion could be done here as well, but we don't want to lose information.
                   :filename filename
@@ -259,6 +263,7 @@
            (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
            (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
           {$set {:modified now
+                 (str "attachments." attachment-id ".modified") now
                  (str "attachments." attachment-id ".type")  type
                  (str "attachments." attachment-id ".state")  :added
                  (str "attachments." attachment-id ".latestVersion") version-model}
@@ -268,11 +273,13 @@
   {:parameters [:id :attachmentId :type :filename :tempfile :content-type :size]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [{created :created {:keys [id attachmentId type filename tempfile content-type size]} :data}]
+  [{created :created
+    user    :user
+    {:keys [id attachmentId type filename tempfile content-type size]} :data}]
   (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId type filename tempfile content-type size)
   (let [file-id (mongo/create-id)]
     (mongo/upload file-id file-id filename content-type tempfile created)
-    (set-attachment-version id attachmentId file-id type filename content-type size created)
+    (set-attachment-version id attachmentId file-id type filename content-type size created user)
     (.delete (file tempfile))))
 
 (defn get-attachment [attachmentId]

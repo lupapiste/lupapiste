@@ -4,10 +4,10 @@
 
 ;(function() {
 
-	//	
+	//
 	// initialize Knockout validation
-	// 
-	
+	//
+
 	ko.validation.init({
 		insertMessages: true,
 		decorateElement: true,
@@ -17,9 +17,9 @@
 	    messageTemplate: "error-template",
 	    registerExtenders: true
 	});
-	
+
 	ko.validation.localize(loc.toMap());
-	
+
 	ko.bindingHandlers.dateString = {
 	    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
 			var value = ko.utils.unwrapObservable(valueAccessor());
@@ -27,7 +27,7 @@
 			$(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear());
 	    }
 	};
-		
+
 	ko.bindingHandlers.dateTimeString = {
 	    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
 			var value = ko.utils.unwrapObservable(valueAccessor());
@@ -35,7 +35,7 @@
 			$(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes());
 	    }
 	};
-	
+
     ko.bindingHandlers.ltext = {
 	    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
 			var value = ko.utils.unwrapObservable(valueAccessor());
@@ -50,7 +50,7 @@
 			$(element).text(fullName); //TODO: does not work with comments in application.html
 	    }
 	};
-		
+
 	ko.bindingHandlers.size = {
 	    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
 	    	var v = ko.utils.unwrapObservable(valueAccessor());
@@ -59,14 +59,15 @@
 	    		$(element).text("");
 	    		return;
 	    	}
-	    	
+
 			var value = parseFloat(v);
 			var unit = "B";
-			
+
 			if (value > 1200.0) {
 				value = value / 1024.0;
 				unit = "kB";
 			}
+
 			if (value > 1200.0) {
 				value = value / 1024.0;
 				unit = "MB";
@@ -79,9 +80,24 @@
 				value = value / 1024.0;
 				unit = "TB"; // Future proof?
 			}
-			
-			$(element).text(value.toFixed(1) + " " + unit);
+
+			if (unit != "B") {
+				value = value.toFixed(1);
+			}
+
+			$(element).text(value + " " + unit);
 	    }
 	};
-			
+
+	ko.bindingHandlers.version = {
+			update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+				var verValue = ko.utils.unwrapObservable(valueAccessor());
+
+				var version = "";
+				if (verValue && (verValue.major || verValue.minor)) {
+					version = verValue.major + "." + verValue.minor;
+				}
+				$(element).text(version);
+		    }
+		};
 })();
