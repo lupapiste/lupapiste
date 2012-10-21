@@ -8,7 +8,6 @@
 			</div>
 			<div class="application_summary">
 				<div id="application-map" class="todo map" style="width: 280px; height: 220px;"></div>
-				
 				<h1 data-bind="with: address">
 					<span id="test-application-street" data-bind="text: street"></span>, 
 					<span data-bind="text: zip"></span> <span data-bind="text: city"></span>
@@ -28,7 +27,7 @@
 					</div>
 					<div>
 						<p>Toimenpiteet:</p>
-						<span data-bind="foreach: documents.toimenpide"> <!-- ko if: documentType == 'toimenpide' --> <span class="application_summary_text" data-bind="text: loc(type)">Uuden rakentaminen</span> <!-- /ko -->
+						<span data-bind="foreach: documents"> <!-- ko if: documentType == 'toimenpide' --> <span class="application_summary_text" data-bind="text: loc(type)">Uuden rakentaminen</span> <!-- /ko -->
 						</span>
 					</div>
 					<div>
@@ -54,7 +53,7 @@
 			<div id="tabs_container">
 				<ul id="tabs">
 					<li class="active"><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
-					<li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
+					<li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
 					<li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#hearings_tab">Naapurien kuuleminen</a></li>
 					<li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#pleadings_tab">Lausunnot</a></li>
 					<li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
@@ -69,9 +68,9 @@
 							<h3>Hakija</h3>
 							<ul data-bind="with: documents">
 								<li><b>Nimi:</b> <span name="test-applicant-name" data-bind="text: hakija.nimi"></span><br/>
-								    <b>Katuosoite:</b> <span name="test-applicant-street" data-bind="text: hakija.address.street"></span><br/>
-								    <b>Postinumero:</b> <span name="test-applicant-zip" data-bind="text: hakija.address.zip"></span><br/>
-								    <b>Postitoimipaikka:</b> <span name="test-applicant-city" data-bind="text: hakija.address.city"></span><br/>
+								    <b>Katuosoite:</b> <span name="test-applicant-street-address" data-bind="text: hakija.osoite.katuosoite"></span><br/>
+								    <b>Postinumero:</b> <span name="test-applicant-postal-code" data-bind="text: hakija.osoite.postinumero"></span><br/>
+								    <b>Postitoimipaikka:</b> <span name="test-applicant-postal-place" data-bind="text: hakija.osoite.postitoimipaikka"></span><br/>
 								    <b>Puh:</b> <span data-bind="text: hakija.puhelinnumero"></span><br/>
 								    <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
 							   </li>
@@ -278,17 +277,20 @@
 					<div class="tab-wrapper">
 						<table data-bind="visible: attachments && attachments().length > 0, foreach: attachments" class="table table-striped">
 							<tr style="cursor: pointer;">
-								<td data-bind="attr: {onclick: open}"><span data-bind="visible: name != null && name.length > 0"> <span data-bind="text: name"></span>
-								</span> <span data-bind="visible: name == null || name.length == 0"> <i>Nimetön</i>
+								<td data-bind="attr: {onclick: open}"><span data-bind="visible: type != null && type.length > 0"> <span data-bind="text: type"></span>
+								</span> <span data-bind="visible: type == null || type.length == 0"> <i>Nimetön</i>
 								</span></td>
-								<td><span data-bind="if: filename"> <a href="" data-bind="text: loc('view') + ' ' + filename, attr: {href: '/rest/view/' + id}" target="_blank"></a> - <a href="" data-bind="text: loc('download') + ' ' + filename, attr: {href: '/rest/download/' + id}"></a> <i data-bind="ltext: contentType"></i> <i data-bind="size: size"></i>
+								<td><span data-bind="if: $data.latestVersion.filename">
+								    <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
+								    <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
+								    <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
 								</span></td>
 							</tr>
 						</table>
 						<div data-bind="visible: $root.attachments && $root.attachments().length == 0">
 							<i>Ei liitteitä</i>
 						</div>
-						<button class="btn btn-success" data-bind="click: attachment.newAttachment">Lisää liite</button>
+						<button id="test-open-add-attachment" class="btn btn-success" data-bind="click: attachment.newAttachment">Lisää liite</button>
 					</div>
 				</div>
 				<div class="tab_content" id="conversation_tab">
@@ -331,3 +333,4 @@
 	</section>
 </body>
 </html>
+>>>>>>> other

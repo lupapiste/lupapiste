@@ -152,13 +152,13 @@
 ;; File upload/download:
 ;;
 
-(defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
+(defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload}
   (debug "upload: %s: %s" name (str upload))
   (core/execute
     (create-action "upload-attachment" :data (assoc upload
                                   :id applicationId
                                   :attachmentId attachmentId
-                                  :name (or name "")))))
+                                  :type (or type "")))))
 
 (def windows-filename-max-length 255)
 

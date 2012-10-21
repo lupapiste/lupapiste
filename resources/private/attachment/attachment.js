@@ -7,11 +7,11 @@ var attachment = function() {
 	var applicationId;
 	var attachmentId;
 	var model;
-	
+
 	function createModel() {
 		return {
 			attachmentId:   ko.observable(),
-			name:           ko.observable(),
+			type:           ko.observable(),
 			filename:       ko.observable(),
 			size:           ko.observable(),
 			contentType:    ko.observable(),
@@ -32,12 +32,12 @@ var attachment = function() {
 			error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
 			return;
 		}
-		
+
 		var fileUploadForm = document.getElementById("attachmentUploadForm");
 		fileUploadForm.reset();
 		$(".droparea span").html("Raahaa liite t&auml;h&auml;n");
 		model.attachmentId(attachmentId);
-		model.name(attachment.name); 
+		model.type(attachment.type);
 		model.filename(attachment.filename);
 		model.size(attachment.size);
 		model.contentType(attachment.contentType);
@@ -45,13 +45,13 @@ var attachment = function() {
 		model.application.title(application.title);
 		model.newFile(null);
 	}
-	
+
 	hub.subscribe({type: "page-change", pageId: "attachment"}, function(e) {
 		applicationId = e.pagePath[0];
 		attachmentId = e.pagePath[1];
 		repository.getApplication(applicationId, showAttachment);
 	});
-	
+
 	hub.subscribe("repository-application-reload", function(e) {
 		if (applicationId === e.applicationId) {
 			repository.getApplication(applicationId, showAttachment);
@@ -66,13 +66,13 @@ var attachment = function() {
 		if (typeof event.target.files !== "undefined") {
 			files = event.target.files
 		} else if (typeof event.dataTransfer !== "undefined" && typeof event.dataTransfer.files !== "undefined") {
-			files = event.dataTransfer.files;	
+			files = event.dataTransfer.files;
 		} else {
 			debug("No files detected!");
 			return false;
 		}
-		
-		
+
+
 		var file = files[0];
 		model.filename(file.name);
 		model.size(file.size);
@@ -81,9 +81,10 @@ var attachment = function() {
 		$(".droparea span").html("Valmis");
 		return false;
 	}
-	
+
+	// TODO refactor
 	function save(m) {
-		ajax.command("set-attachment-name", {id: m.application.id(), attachmentId: m.attachmentId(), name: m.name()})
+		ajax.command("set-attachment-name", {id: m.application.id(), attachmentId: m.attachmentId(), type: m.type()})
 			.success(function() { repository.reloadAllApplications(); })
 			.call();
 		var file = model.newFile();
@@ -91,11 +92,11 @@ var attachment = function() {
 			upload(file);
 		}
 	}
-	
+
     function upload(file) {
 		$(".droparea span").hide();
 		$(".droparea img").show();
-		
+
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", "/rest/upload");
 
@@ -115,16 +116,16 @@ var attachment = function() {
 			}, false);
 		xhr.upload.addEventListener("error", function() { error("Tiedoston lataaminen ep\u00E4onnistui"); }, false);
 		xhr.upload.addEventListener("abort", function() { warn("Tiedoston lataaminen keskeytyi"); }, false);
-		
+
 		var formData = new FormData();
 		formData.append("upload", file);
-		formData.append("name", model.name());
+		formData.append("type", model.type());
 		formData.append("applicationId", applicationId);
 		formData.append("attachmentId", attachmentId);
-		
+
 		xhr.send(formData);
 	}
-    
+
     function toApplication(){
     	window.location.href="#!/application/"+ model.application.id();
     }
@@ -140,7 +141,7 @@ var attachment = function() {
 	});
 
 	function newAttachment(m) {
-		ajax.command("create-attachment", {id:  m.application.id()})
+		ajax.command("create-attachment", {id:  m.id()})
 		.success(function(d) {
 			repository.reloadAllApplications(function() {
 				window.location.hash = "!/attachment/" + d.applicationId + "/" + d.attachmentId;
@@ -148,7 +149,7 @@ var attachment = function() {
 		})
 		.call();
 	}
-	
+
 	return { newAttachment: newAttachment };
-	
+
 }();
