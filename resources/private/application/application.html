@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-	<section class="page" id="application" data-bind="with:application">
+	<section class="page" id="application" data-bind="with: application">
 		<div>
 			<div class="breadcrumb">
 				<a href="#!/applications" id="test-applications">Omat hakemukset</a> / <span data-bind="text: title"></span>
 			</div>
 			<div class="application_summary">
 				<div id="application-map" class="todo map" style="width: 280px; height: 220px;"></div>
-				<h1>
-					<span id="test-application-street-address" data-bind="text: streetAddress"></span>, <span data-bind="text: postalCode"></span> <span data-bind="text: postalPlace"></span>
+				
+				<h1 data-bind="with: address">
+					<span id="test-application-street" data-bind="text: street"></span>, 
+					<span data-bind="text: zip"></span> <span data-bind="text: city"></span>
 				</h1>
 				<div class="application_summary_info">
 					<div>
@@ -26,7 +28,7 @@
 					</div>
 					<div>
 						<p>Toimenpiteet:</p>
-						<span data-bind="foreach: documents"> <!-- ko if: documentType == 'toimenpide' --> <span class="application_summary_text" data-bind="text: loc(type)">Uuden rakentaminen</span> <!-- /ko -->
+						<span data-bind="foreach: documents.toimenpide"> <!-- ko if: documentType == 'toimenpide' --> <span class="application_summary_text" data-bind="text: loc(type)">Uuden rakentaminen</span> <!-- /ko -->
 						</span>
 					</div>
 					<div>
@@ -67,9 +69,9 @@
 							<h3>Hakija</h3>
 							<ul data-bind="with: documents">
 								<li><b>Nimi:</b> <span name="test-applicant-name" data-bind="text: hakija.nimi"></span><br/>
-								    <b>Katuosoite:</b> <span name="test-applicant-street-address" data-bind="text: hakija.osoite.katuosoite"></span><br/>
-								    <b>Postinumero:</b> <span name="test-applicant-postal-code" data-bind="text: hakija.osoite.postinumero"></span><br/>
-								    <b>Postitoimipaikka:</b> <span name="test-applicant-postal-place" data-bind="text: hakija.osoite.postitoimipaikka"></span><br/>
+								    <b>Katuosoite:</b> <span name="test-applicant-street" data-bind="text: hakija.address.street"></span><br/>
+								    <b>Postinumero:</b> <span name="test-applicant-zip" data-bind="text: hakija.address.zip"></span><br/>
+								    <b>Postitoimipaikka:</b> <span name="test-applicant-city" data-bind="text: hakija.address.city"></span><br/>
 								    <b>Puh:</b> <span data-bind="text: hakija.puhelinnumero"></span><br/>
 								    <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
 							   </li>

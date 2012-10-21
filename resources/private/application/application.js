@@ -36,9 +36,7 @@
 		documents: ko.observable(),
 		attachments: ko.observableArray(),
 		comments: ko.observable(),
-		streetAddress: ko.observable(),
-		postalCode: ko.observable(),
-		postalPlace: ko.observable(),
+		address: ko.observable(),
 		verdict: ko.observable(),
 
 		// new stuff
@@ -281,7 +279,7 @@
 				error("No such application, or not permission");
 			});
 		}
-
+		
 		hub.whenOskariMapIsReady(function() {
 			hub.moveOskariMapToDiv("application-map");
 			refreshMap();
