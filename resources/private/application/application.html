@@ -68,9 +68,9 @@
 							<h3>Hakija</h3>
 							<ul data-bind="with: documents">
 								<li><b>Nimi:</b> <span name="test-applicant-name" data-bind="text: hakija.nimi"></span><br/>
-								    <b>Katuosoite:</b> <span name="test-applicant-street-address" data-bind="text: hakija.osoite.katuosoite"></span><br/>
-								    <b>Postinumero:</b> <span name="test-applicant-postal-code" data-bind="text: hakija.osoite.postinumero"></span><br/>
-								    <b>Postitoimipaikka:</b> <span name="test-applicant-postal-place" data-bind="text: hakija.osoite.postitoimipaikka"></span><br/>
+								    <b>Katuosoite:</b> <span name="test-applicant-street" data-bind="text: hakija.address.street"></span><br/>
+								    <b>Postinumero:</b> <span name="test-applicant-zip" data-bind="text: hakija.address.zip"></span><br/>
+								    <b>Postitoimipaikka:</b> <span name="test-applicant-city" data-bind="text: hakija.address.city"></span><br/>
 								    <b>Puh:</b> <span data-bind="text: hakija.puhelinnumero"></span><br/>
 								    <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
 							   </li>
