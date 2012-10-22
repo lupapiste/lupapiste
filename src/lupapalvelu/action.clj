@@ -61,6 +61,9 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
+(defquery "invites" {:authenticated true} [{user :user}]
+  (ok :invites (:invites (mongo/select-one mongo/users {:_id (:id user)}))))
+
 (defcommand "invite"
   {:parameters [:id :email :type]
    :roles      [:applicant]}
