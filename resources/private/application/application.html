@@ -79,7 +79,7 @@
                 <h3>Pääsuunnittelijat</h3>
                 <span data-bind="foreach: planners">
                   <span data-bind="text: user.username"></span>
-                  <span data-bind="text: user.type">!!!</span>
+                  <span data-bind="text: type"></span>
                   (<span data-bind="text: loc(state())"></span>)<br/>
                 </span>
                 <span data-bind="with: $root.askForPlanner">
