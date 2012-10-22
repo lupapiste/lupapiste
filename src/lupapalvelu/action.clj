@@ -73,7 +73,7 @@
                                 :application application-id
                                 :created     (-> command :created)
                                 :user        (security/summary (-> command :user))}}})
-              (mongo/update-by-id mongo/applications application-id
+              (mongo/update-by-id mongo/applications application-id ;; store in krysp-format dude
                 {$push {:planners {:state :pending
                                    :type  (-> command :data :type)
                                    :user  (security/summary planner)}}}))))))))
