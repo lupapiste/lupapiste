@@ -36,18 +36,18 @@
    {:lastName "Nieminen", ;; Mikkos neighbour
     :firstName "Teppo",
     :postalCode "33200",
-    :city "Tampere",
     :username "teppo@example.com",
     :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe",
               :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"},
-    :street "Mutakatu 7",
     :phone "0505503171",
     :email "teppo@example.com",
     :personId "210281-0001",
     :role "applicant",
     :id "5073c0a1c2e6c470aef589a5",
-    :streetAddress "Mutakatu 7",
-    :postalPlace "Tampere"}
+    :street "Mutakatu 7"
+    :zip "33560"
+    :city "Tampere"
+     }
    {:id "777777777777777777000010", ;; Mikko Intonen
     :username "mikko@example.com",
     :role "applicant",
@@ -55,9 +55,9 @@
     :firstName "Mikko",
     :lastName "Intonen",
     :email "mikko@example.com",
-    :streetAddress "Rambokuja 6"
-    :postalCode "55550",
-    :postalPlace "sipoo"
+    :street "Rambokuja 6"
+    :zip "55550"
+    :city "sipoo"
     :phone "0505503171"
     :private {:password "$2a$10$zwb/nvYQu4b1oZGpxz8.QOqHEBx3vXw9brc3NqDexgMbDuU2pwL9q"
               :salt "$2a$10$zwb/nvYQu4b1oZGpxz8.QO"

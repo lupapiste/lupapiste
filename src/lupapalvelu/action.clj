@@ -128,9 +128,11 @@
              :firstName     (:firstName user)
              :lastName      (:lastName user)
              :email         (:email data)
-             :streetAddress (:street data)
-             :postalCode    (:zip data)
-             :postalPlace   (:city data)
+             :address      {
+                            :street (:street data)
+                            :zip    (:zip data)
+                            :city   (:city data)
+                            }
              :phone         (:phone data)
              :private       {:salt salt
                              :password (security/get-hash password salt)}))))
@@ -180,7 +182,7 @@
           {$set {:state :submitted, :submitted (:created command) }}))))
 
 (defcommand "create-application"
-  {:create-application {:parameters [:lat :lon :streetAddress :postalCode :postalPlace :categories]
+  {:create-application {:parameters [:lat :lon :street :zip :city :categories]
                        :roles      [:applicant]}}
   [{user :user data :data created :created :as command}]
   (let [id  (mongo/create-id)]
@@ -192,23 +194,22 @@
        :permitType :buildingPermit
        :location {:lat (:lat data)
                   :lon (:lon data)}
-       :title (:streetAddress data)
-       :streetAddress (:streetAddress data)
-       :postalCode (:postalCode data)
-       :postalPlace (:postalPlace data)
-       :authority (:postalPlace data)
+       :address {:street (:street data)
+                 :zip (:zip data)
+                 :city (:city data)}
+       :title (:street data)
+       :authority (:city data)
        :roles {:applicant (security/summary user)}
        :documents {:hakija {:id (mongo/create-id)
                             :nimi (str (:firstName user) " " (:lastName user))
-                            :osoite {
-                                     :katuosoite (:streetAddress user)
-                                     :postinumero (:postalCode user)
-                                     :postitoimipaikka (:postalPlace user)}
+                            :address {:street (:street user)
+                                      :zip (:zip user)
+                                      :city (:city user)}
                             :puhelinnumero (:phone user)
                             :sahkopostiosoite (:email user)}
                    :toimenpide  {:id (mongo/create-id)
                                  :type (:categories data)
-                                 :otsikko (str (:lastName user) ", " (:streetAddress data))}}})
+                                 :otsikko (str (:lastName user) ", " (:street data))}}})
     (ok :id id)))
 
 (defn create-attachment [{{application-id :id} :data created :created}]
