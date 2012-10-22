@@ -62,7 +62,7 @@
   [command]
   (with-application command
     (fn [{application-id :id}]
-      (with-user (-> command :data :email) ;; allows only existing users
+      (with-user (-> command :data :email) ;; allows invites only existing users
         (fn [planner]
           (if (= (:role planner) "authority")
             (fail "can't ask authority to be a planner")
@@ -87,6 +87,8 @@
       (mongo/update-by-id
         mongo/applications id
         {$set {"roles.planner" (security/summary user)}}))))
+
+
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
