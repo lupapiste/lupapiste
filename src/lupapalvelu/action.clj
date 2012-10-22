@@ -207,9 +207,9 @@
                                       :city (:city user)}
                             :puhelinnumero (:phone user)
                             :sahkopostiosoite (:email user)}
-                   :toimenpide  {:id (mongo/create-id)
-                                 :type (:categories data)
-                                 :otsikko (str (:lastName user) ", " (:street data))}}})
+                   :toimenpiteet [{:id (mongo/create-id)
+                                   :type (:categories data)
+                                   :otsikko (str (:lastName user) ", " (:street data))}]}})
     (ok :id id)))
 
 (defn create-attachment [{{application-id :id} :data created :created}]
