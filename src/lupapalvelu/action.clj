@@ -62,7 +62,8 @@
                :state :open}}))))
 
 (defquery "invites" {:authenticated true} [{user :user}]
-  (ok :invites (:invites (mongo/select mongo/users {:_id (:id user)}) [])))
+  (let [user (mongo/select-one mongo/users {:_id (:id user)})]
+    (ok :invites (:invites user))))
 
 (defcommand "invite"
   {:parameters [:id :email :type]
@@ -97,7 +98,7 @@
     (fn [{application-id :id}] ;; verify against user in validation?
       (do
         (mongo/update-by-id mongo/applications application-id
-          {$set  {"roles.invited" (security/summary user)}
+          {$push {"roles.invited" (security/summary user)}
            $pull {:invites {:user.id (:id user)}}})
         (mongo/update-by-id mongo/users (:id user)
           {$pull {:invites {:application application-id}}})))))
