@@ -57,12 +57,12 @@
                :state :open}}))))
 
 (defcommand "ask-for-planner"
-  {:parameters [:id :email]
+  {:parameters [:id :email :type]
    :roles      [:applicant]}
   [command]
   (with-application command
     (fn [{application-id :id}]
-      (with-user (-> command :data :email)
+      (with-user (-> command :data :email) ;; allows only existing users
         (fn [planner]
           (if (= (:role planner) "authority")
             (fail "can't ask authority to be a planner")
@@ -75,6 +75,7 @@
                                 :user        (security/summary (-> command :user))}}})
               (mongo/update-by-id mongo/applications application-id
                 {$push {:planners {:state :pending
+                                   :type  (-> command :data :type)
                                    :user  (security/summary planner)}}}))))))))
 
 (defcommand "approve-as-planner"

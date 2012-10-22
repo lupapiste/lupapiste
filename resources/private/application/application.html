@@ -78,10 +78,20 @@
               <span>
                 <h3>Pääsuunnittelijat</h3>
                 <span data-bind="foreach: planners">
-                  <span data-bind="text: user.username"></span> (<span data-bind="text: loc(state())"></span>)<br/>
+                  <span data-bind="text: user.username"></span>
+                  <span data-bind="text: user.type">!!!</span>
+                  (<span data-bind="text: loc(state())"></span>)<br/>
                 </span>
                 <span data-bind="with: $root.askForPlanner">
                   <input class="form_input" type="text" data-bind="value: email" />
+                  <select class="form_input combobox" data-bind="value: type">
+                    <option value="ei tiedossa">ei tiedossa</option>
+                    <option value="pääsuunnittelija">Pääsuunnittelija</option>
+                    <option value="ARK-rakennussuunnittelija">ARK-rakennussuunnittelija</option>
+                    <option value="GEO-suunnittelija">GEO-suunnittelija</option>
+                    <option value="LVI-suunnittelija">LVI-suunnittelija</option>
+                    <option value="RAK-rakennesuunnittelija">RAK-rakennesuunnittelija</option>
+                  </select>
                   <a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">lisää uusi suunnittelija</a>
                 </span>
               </span>

@@ -240,14 +240,19 @@
 	
 	var askForPlanner = {
 	    email : ko.observable(),
+	    type  : ko.observable(),
 		submit: function(model) {
-			ajax.command("ask-for-planner", { id: application.id(), email: model.email()})
+			console.log(model.type());
+			console.log(application.id());
+			ajax.command("ask-for-planner", { id: application.id(),
+											  email: model.email(),
+											  type: model.type()})
 		.success(function(d) {
 			repository.reloadAllApplications();
 		})
-				.error(function(d) {
-					notify.info("kutsun lähettäminen epäonnistui");
-				})
+		.error(function(d) {
+			notify.info("kutsun lähettäminen epäonnistui");
+		})
 		.call();
 		return false;
 	}
