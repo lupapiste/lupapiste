@@ -76,13 +76,13 @@
 							   </li>
 							</ul>
               <span>
-                <h3>Suunnittelijat</h3>
+                <h3>Kutsutut</h3>
                 <span data-bind="foreach: invites">
                   <span data-bind="text: user.username"></span>
                   <span data-bind="text: type"></span>
                   (<span data-bind="text: loc(state())"></span>)<br/>
                 </span>
-                <span data-bind="with: $root.askForPlanner">
+                <span data-bind="with: $root.invite">
                   <input class="form_input" type="text" data-bind="value: email" />
                   <select class="form_input combobox" data-bind="value: type">
                     <option value="ei tiedossa">ei tiedossa</option>

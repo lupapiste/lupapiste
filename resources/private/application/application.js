@@ -238,15 +238,15 @@
 
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
 	
-	var askForPlanner = {
+	var invite = {
 	    email : ko.observable(),
 	    type  : ko.observable(),
 		submit: function(model) {
 			console.log(model.type());
 			console.log(application.id());
-			ajax.command("ask-for-planner", { id: application.id(),
-											  email: model.email(),
-											  type: model.type()})
+			ajax.command("invite", { id: application.id(),
+				                     email: model.email(),
+				                     type: model.type()})
 		.success(function(d) {
 			repository.reloadAllApplications();
 		})
@@ -299,7 +299,7 @@
 		var page = $("#application");
 		ko.applyBindings({application: application,
 						  comment: comment,
-						  askForPlanner: askForPlanner,
+						  invite: invite,
 						  authorization: authorization,
 						  rh1: rh1,
 						  tab: tab,

@@ -16,7 +16,7 @@
 (defquery "user" {:authenticated true} [{user :user}]
   (ok :user user))
 
-(in-dev
+(in-dev ;; FIXME: remove private stuff!
   (defquery "users" {:roles [:admin]} [_]
     (ok :users (mongo/select mongo/users))))
 
@@ -61,7 +61,7 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
-(defcommand "ask-for-planner"
+(defcommand "invite"
   {:parameters [:id :email :type]
    :roles      [:applicant]}
   [command]
@@ -72,23 +72,21 @@
           (if (= (:role planner) "authority")
             (fail "can't ask authority to be a planner")
             ;; TODO: check for duplicates
-            (let [task-id (mongo/create-id)]
-              (mongo/update-by-id mongo/users (:id planner)
-                {$push {:tasks {:task        :invitation
-                                :id          task-id
-                                :status      :created
-                                :type        (-> command :data :type)
-                                :application application-id
-                                :created     (-> command :created)
-                                :user        (security/summary (-> command :user))}}})
-              (mongo/update-by-id mongo/applications application-id ;; store in krysp-format dude
-                {$push {:invites {:state :pending
-                                  :id    task-id
-                                  :type  (-> command :data :type)
+            (let [invite-id (mongo/create-id)]
+              (mongo/update-by-id mongo/users  (:id planner)
+                {$push {:invites {:id          invite-id
+                                  :text        (-> command :data :type)
+                                  :application application-id
+                                  :created     (-> command :created)
+                                  :inviter     (security/summary (-> command :user))}}})
+              (mongo/update-by-id mongo/applications application-id
+                {$push {:invites {:id    invite-id
+                                  :text  (-> command :data :type)
+                                  :created     (-> command :created)
+                                  :inviter     (security/summary (-> command :user))
                                   :user  (security/summary planner)}}}))))))))
 
-; TODO: approves all tasks for application. use task-id instead 
-(defcommand "approve-as-planner"
+(defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
   [{user :user :as command}]
@@ -96,10 +94,10 @@
     (fn [{application-id :id}] ;; verify against user in validation?
       (do
         (mongo/update-by-id mongo/applications application-id
-          {$set  {"roles.planner" (security/summary user)}
+          {$set  {"roles.invited" (security/summary user)}
            $pull {:invites {:user.id (:id user)}}})
         (mongo/update-by-id mongo/users (:id user)
-          {$pull {:tasks {:application application-id}}})))))
+          {$pull {:invites {:application application-id}}})))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
