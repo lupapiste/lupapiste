@@ -250,6 +250,7 @@
                   :version  next-version
                   :fileId   file-id
                   :created  now
+                  :accepted nil
                   :user    (security/summary user)
                   ; File name will be presented in ASCII when the file is downloaded.
                   ; Conversion could be done here as well, but we don't want to lose information.
