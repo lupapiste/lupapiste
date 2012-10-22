@@ -27,8 +27,12 @@
 					</div>
 					<div>
 						<p>Toimenpiteet:</p>
-						<span data-bind="foreach: documents"> <!-- ko if: documentType == 'toimenpide' --> <span class="application_summary_text" data-bind="text: loc(type)">Uuden rakentaminen</span> <!-- /ko -->
-						</span>
+						<ul data-bind="with: documents">
+							<li><span data-bind="text: toimenpiteet()[0].otsikko" style="display: none;"></span>
+							<ul data-bind="foreach: toimenpiteet">
+								<li data-bind="text: otsikko" id="test-application-operation"></li>
+							</ul>
+						</ul>
 					</div>
 					<div>
 						<p>Hakemus luotu:</p>
