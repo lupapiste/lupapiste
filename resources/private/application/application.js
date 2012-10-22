@@ -41,7 +41,7 @@
 
 		// new stuff
 		//hakija: ko.observable(),
-		planners: ko.observableArray(),
+		invites: ko.observableArray(),
 		
 		submitApplication: function(model) {
 			var applicationId = application.id();

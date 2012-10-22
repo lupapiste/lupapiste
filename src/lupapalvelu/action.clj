@@ -74,7 +74,7 @@
             ;; TODO: check for duplicates
             (let [task-id (mongo/create-id)]
               (mongo/update-by-id mongo/users (:id planner)
-                {$push {:tasks {:task        :invitation_planner
+                {$push {:tasks {:task        :invitation
                                 :id          task-id
                                 :status      :created
                                 :type        (-> command :data :type)
@@ -82,10 +82,10 @@
                                 :created     (-> command :created)
                                 :user        (security/summary (-> command :user))}}})
               (mongo/update-by-id mongo/applications application-id ;; store in krysp-format dude
-                {$push {:planners {:state :pending
-                                   :id          task-id
-                                   :type  (-> command :data :type)
-                                   :user  (security/summary planner)}}}))))))))
+                {$push {:invites {:state :pending
+                                  :id    task-id
+                                  :type  (-> command :data :type)
+                                  :user  (security/summary planner)}}}))))))))
 
 ; TODO: approves all tasks for application. use task-id instead 
 (defcommand "approve-as-planner"
@@ -97,7 +97,7 @@
       (do
         (mongo/update-by-id mongo/applications application-id
           {$set  {"roles.planner" (security/summary user)}
-           $pull {:planners {:user.id "5073c0a1c2e6c470aef589a5"}}})
+           $pull {:invites {:user.id (:id user)}}})
         (mongo/update-by-id mongo/users (:id user)
           {$pull {:tasks {:application application-id}}})))))
 
