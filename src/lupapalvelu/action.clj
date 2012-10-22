@@ -2,6 +2,7 @@
   (:use [monger.operators]
         [clojure.string :only [join]]
         [lupapalvelu.core]
+        [lupapalvelu.env]
         [lupapalvelu.log]
         [lupapalvelu.domain]
         [clojure.java.io :only [file]]
@@ -14,6 +15,10 @@
 
 (defquery "user" {:authenticated true} [{user :user}]
   (ok :user user))
+
+(in-dev
+  (defquery "users" {:roles [:admin]} [_]
+    (ok :users (mongo/select mongo/users))))
 
 (defcommand "create-id" {:authenticated true} [command]
   (ok :id (mongo/create-id)))
@@ -67,28 +72,34 @@
           (if (= (:role planner) "authority")
             (fail "can't ask authority to be a planner")
             ;; TODO: check for duplicates
-            (do
+            (let [task-id (mongo/create-id)]
               (mongo/update-by-id mongo/users (:id planner)
-                {$push {:tasks {:type        :invitation_planner
+                {$push {:tasks {:task        :invitation_planner
+                                :id          task-id
+                                :status      :created
+                                :type        (-> command :data :type)
                                 :application application-id
                                 :created     (-> command :created)
                                 :user        (security/summary (-> command :user))}}})
               (mongo/update-by-id mongo/applications application-id ;; store in krysp-format dude
                 {$push {:planners {:state :pending
+                                   :id          task-id
                                    :type  (-> command :data :type)
                                    :user  (security/summary planner)}}}))))))))
 
+; TODO: approves all tasks for application. use task-id instead 
 (defcommand "approve-as-planner"
   {:parameters [:id]
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{id :id}]
-      (mongo/update-by-id
-        mongo/applications id
-        {$set {"roles.planner" (security/summary user)}}))))
-
-
+    (fn [{application-id :id}] ;; verify against user in validation?
+      (do
+        (mongo/update-by-id mongo/applications application-id
+          {$set  {"roles.planner" (security/summary user)}
+           $pull {:planners {:user.id "5073c0a1c2e6c470aef589a5"}}})
+        (mongo/update-by-id mongo/users (:id user)
+          {$pull {:tasks {:application application-id}}})))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
