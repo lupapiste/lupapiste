@@ -62,7 +62,7 @@
                :state :open}}))))
 
 (defquery "invites" {:authenticated true} [{user :user}]
-  (ok :invites (:invites (mongo/select-one mongo/users {:_id (:id user)}))))
+  (ok :invites (:invites (mongo/select mongo/users {:_id (:id user)}) [])))
 
 (defcommand "invite"
   {:parameters [:id :email :type]
