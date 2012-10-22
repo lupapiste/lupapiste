@@ -80,8 +80,8 @@
                 <h3>Suunnittelijat</h3>
                 <ul data-bind="foreach: invites">
                   <li>
-                    <span data-bind="text: user.username"></span>
-                    (<span data-bind="text: text"></span>)<br/>
+                    <span data-bind="text: user.username"/>
+                    (<span data-bind="text: text"/>) - kutsuttu<br/>
                   </li>
                 </ul>
                 <span data-bind="with: $root.invite">
@@ -94,7 +94,7 @@
                     <option value="LVI-suunnittelija">LVI-suunnittelija</option>
                     <option value="RAK-rakennesuunnittelija">RAK-rakennesuunnittelija</option>
                   </select>
-                  <a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">lisää uusi suunnittelija</a>
+                  <a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a>
                 </span>
               </span>
 						</div>
