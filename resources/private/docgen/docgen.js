@@ -8,7 +8,7 @@ var docgen = (function() {
 		info("saveCheckbox", "path:", e.target.getAttribute("data-path"), "value:", e.target.checked);
 	}
 	
-	function buildChoice(spec, model, path) {
+	function buildGroup(spec, model, path) {
 		var label = document.createElement("label");
 		label.setAttribute("class", "form_label");
 		label.appendChild(document.createTextNode(spec.name));
@@ -76,8 +76,9 @@ var docgen = (function() {
 	
 	var builders = {
 		string: buildString,
-		choice: buildChoice,
+		choice: buildGroup,
 		checkbox: buildCheckbox,
+		group: buildGroup,
 		unknown: buildUnknown
 	}
 	
