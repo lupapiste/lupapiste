@@ -8,6 +8,7 @@ var invites = function() {
 		debug("getting invites");
 		ajax.query("invites")
 			.success(function(d) {
+				debug("got some nice invites");
 				if (callback) callback(d);
 			})
 			.call();
