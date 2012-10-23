@@ -5,7 +5,7 @@ var docgen = (function() {
 	}
 	
 	function saveCheckbox(e) {
-		info("saveCheckbox", e.target, e.target.getAttribute("data-path"));
+		info("saveCheckbox", e.target.getAttribute("data-path"));
 	}
 	
 	function buildChoice(spec, model, path) {
@@ -13,15 +13,19 @@ var docgen = (function() {
 		label.setAttribute("class", "form_label");
 		label.appendChild(document.createTextNode(spec.name));
 
-		var choices = document.createElement("div");
-		for (var i = 0; i < spec.body.length; i++) {
-			choices.appendChild(build(spec.body[i], model, path));
+		var choices = spec.body;
+		var myModel = model[spec.name] || {};
+		var myPath = path.concat([spec.name]);
+		
+		var choicesDiv = document.createElement("div");
+		for (var i = 0; i < choices.length; i++) {
+			choicesDiv.appendChild(build(choices[i], myModel, myPath));
 		}
 		
 		var div = document.createElement("div");
 		div.setAttribute("class", "form_field");
 		div.appendChild(label);
-		div.appendChild(choices);
+		div.appendChild(choicesDiv);
 		return div;
 	}
 	
@@ -29,7 +33,8 @@ var docgen = (function() {
 		var input = document.createElement("input");
 		input.setAttribute("type", "checkbox");
 		input.setAttribute("class", "form_input");
-		input.setAttribute("data-path", path.concat([spec.name]));
+		input.setAttribute("data-path", path.concat([spec.name]).join("."));
+		if (model[spec.name]) input.setAttribute("checked", "checked");
 		input.onchange = saveCheckbox;
 
 		var label = document.createElement("label");
@@ -53,7 +58,7 @@ var docgen = (function() {
 		var input = document.createElement("input");
 		input.setAttribute("class", "form_input");
 		input.setAttribute("type", "text");
-		input.setAttribute("data-path", path.concat([spec.name]));
+		input.setAttribute("data-path", path.concat([spec.name]).join("."));
 		input.onchange = saveString;
 		input.value = model[spec.name] || "";
 
