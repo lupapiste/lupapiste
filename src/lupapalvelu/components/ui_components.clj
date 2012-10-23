@@ -48,8 +48,7 @@
 
    :docgen       {:depends [:common]
                   :js ["accordion.js" "docgen.js"]
-                  :css ["docgen.css"]
-                  :html ["templates.html"]}
+                  :css ["docgen.css"]}
    
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
