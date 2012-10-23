@@ -1,11 +1,11 @@
 var docgen = (function() {
 	
 	function saveString(e) {
-		info("saveString", typeof(e.target.value), e.target.value, e.target.getAttribute("data-path"));
+		info("saveString", "path:", e.target.getAttribute("data-path"), "value:", e.target.value);
 	}
 	
 	function saveCheckbox(e) {
-		info("saveCheckbox", e.target.getAttribute("data-path"));
+		info("saveCheckbox", "path:", e.target.getAttribute("data-path"), "value:", e.target.checked);
 	}
 	
 	function buildChoice(spec, model, path) {
