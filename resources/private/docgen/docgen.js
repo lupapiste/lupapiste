@@ -1,18 +1,59 @@
 var docgen = (function() {
 	
-	function saveString(e) {
-		info("saveString", "path:", e.target.getAttribute("data-path"), "value:", e.target.value);
+	function save(path, value) {
+		info("save", path, value);
+	}
+	
+	function saveValue(e) {
+		var target = e.target;
+		save(target.getAttribute("data-path"), target.value);
 	}
 	
 	function saveCheckbox(e) {
-		info("saveCheckbox", "path:", e.target.getAttribute("data-path"), "value:", e.target.checked);
+		var target = e.target;
+		save(target.getAttribute("data-path"), target.checked);
 	}
 	
-	function makeLabel(text) {
+	function makeLabel(text, path) {
 		var label = document.createElement("label");
-		label.className = "form_label";
-		label.appendChild(document.createTextNode(text));
+		label.className = "form-label";
+		label.appendChild(document.createTextNode(loc(text)));
 		return label;
+	}
+
+	function makeInput(type, path, value) {
+		var input = document.createElement("input");
+		input.setAttribute("data-path", path);
+		input.type = type;
+		input.className = "form-input form-" + type;
+		if (type === "checkbox") {
+			input.onchange = saveCheckbox;
+			if (value) input.checked = "checked"; 
+		} else {
+			input.onchange = saveValue;
+			input.value = value || "";
+		}
+		return input;
+	}
+	
+	function buildCheckbox(spec, model, path) {
+		var myPath = path.concat([spec.name]).join(".");
+
+		var span = document.createElement("span");
+		span.className = "form-entry";
+		span.appendChild(makeInput("checkbox", myPath, model[spec.name]));
+		span.appendChild(makeLabel(myPath));
+		return span;
+	}
+	
+	function buildString(spec, model, path) {
+		var myPath = path.concat([spec.name]).join(".");
+
+		var div = document.createElement("div");
+		div.className = "form-entry";
+		div.appendChild(makeLabel(myPath));
+		div.appendChild(makeInput("text", myPath, model[spec.name]));
+		return div;
 	}
 	
 	function buildGroup(spec, model, path) {
@@ -27,41 +68,9 @@ var docgen = (function() {
 		}
 		
 		var div = document.createElement("div");
-		div.className = "form_field";
-		div.appendChild(makeLabel(name));
+		div.className = "form-field";
+		div.appendChild(makeLabel(myPath.join(".")));
 		div.appendChild(choicesDiv);
-		return div;
-	}
-	
-	function buildCheckbox(spec, model, path) {
-		var input = document.createElement("input");
-		input.setAttribute("type", "checkbox");
-		input.setAttribute("data-path", path.concat([spec.name]).join("."));
-		if (model[spec.name]) input.setAttribute("checked", "checked");
-		input.onchange = saveCheckbox;
-		input.className = "form_input";
-
-		var span = document.createElement("span");
-		span.className = "form_field, form_checkbox";
-		span.appendChild(input);
-		span.appendChild(makeLabel(spec.name));
-		return span;
-	}
-	
-	function buildString(spec, model, path) {
-		info("buildString", spec, model, path);
-		
-		var input = document.createElement("input");
-		input.setAttribute("type", "text");
-		input.setAttribute("data-path", path.concat([spec.name]).join("."));
-		input.onchange = saveString;
-		input.value = model[spec.name] || "";
-		input.className = "form_input";
-
-		var div = document.createElement("div");
-		div.setAttribute("class", "form_field");
-		div.appendChild(makeLabel(spec.name));
-		div.appendChild(input);
 		return div;
 	}
 	
@@ -76,7 +85,7 @@ var docgen = (function() {
 		checkbox: buildCheckbox,
 		group: buildGroup,
 		unknown: buildUnknown
-	}
+	};
 	
 	function build(spec, model, path) {
 		var builder = builders[spec.type] || buildUnknown;
@@ -96,7 +105,7 @@ var docgen = (function() {
 		section.className = "accordion";
 		
 		var title = document.createElement("h2");
-		title.appendChild(document.createTextNode(spec.info.name));
+		title.appendChild(document.createTextNode(loc(spec.info.name)));
 		title.onclick = accordion.toggle;
 		
 		var elements = document.createElement("article");
