@@ -21,6 +21,9 @@
    
    :buildinfo    {:depends [:jquery]
                   :js ["buildinfo.js"]}
+
+   :invites      {:depends [:common]
+                  :js ["invites.js"]}
    
    :repository   {:depends [:common]
                   :js ["repository.js"]}
@@ -29,7 +32,7 @@
                   :js ["application.js"]
                   :html ["application.html"]}
    
-   :applications {:depends [:common :repository]
+   :applications {:depends [:common :repository :invites]
                   :js ["applications-config.js" "applications.js" "lupapiste.tablesorter.js"] 
                   :css ["tablesorter.css" "applications.css"]
                   :html ["applications.html"]}
