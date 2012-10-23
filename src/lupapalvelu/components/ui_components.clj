@@ -60,6 +60,10 @@
                   :js ["authority.js"]
                   :html ["index.html"]}
 
+   :admin        {:depends [:oskari :application :applications :attachment :wizard :buildinfo]
+                  :js ["admin.js"]
+                  :html ["index.html" "admin.html"]}
+
    :welcome      {:depends [:register :jquery :buildinfo]
                   :js ["login.js"]
                   :html ["login.html" "index.html"]}})
