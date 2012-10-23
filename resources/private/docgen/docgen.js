@@ -1,11 +1,46 @@
 var docgen = (function() {
 	
-	function buildGroup(spec, model, path) {
-		
+	function saveString(e) {
+		info("saveString", typeof(e.target.value), e.target.value, e.target.getAttribute("data-path"));
 	}
 	
-	function blur(e) {
-		console.log("blur", typeof(e.target.value), e.target.value, e.target.getAttribute("data-path"));
+	function saveCheckbox(e) {
+		info("saveCheckbox", e.target, e.target.getAttribute("data-path"));
+	}
+	
+	function buildChoice(spec, model, path) {
+		var label = document.createElement("label");
+		label.setAttribute("class", "form_label");
+		label.appendChild(document.createTextNode(spec.name));
+
+		var choices = document.createElement("div");
+		for (var i = 0; i < spec.body.length; i++) {
+			choices.appendChild(build(spec.body[i], model, path));
+		}
+		
+		var div = document.createElement("div");
+		div.setAttribute("class", "form_field");
+		div.appendChild(label);
+		div.appendChild(choices);
+		return div;
+	}
+	
+	function buildCheckbox(spec, model, path) {
+		var input = document.createElement("input");
+		input.setAttribute("type", "checkbox");
+		input.setAttribute("class", "form_input");
+		input.setAttribute("data-path", path.concat([spec.name]));
+		input.onchange = saveCheckbox;
+
+		var label = document.createElement("label");
+		label.setAttribute("class", "form_label");
+		label.appendChild(document.createTextNode(spec.name));
+		
+		var span = document.createElement("span");
+		span.setAttribute("class", "form_checkbox");
+		span.appendChild(input);
+		span.appendChild(label);
+		return span;
 	}
 	
 	function buildString(spec, model, path) {
@@ -19,18 +54,13 @@ var docgen = (function() {
 		input.setAttribute("class", "form_input");
 		input.setAttribute("type", "text");
 		input.setAttribute("data-path", path.concat([spec.name]));
-		
-		var value = model[spec.name];
-		if (value) input.value = value;
-		
-		input.onblur = blur;
-		
+		input.onchange = saveString;
+		input.value = model[spec.name] || "";
+
 		var div = document.createElement("div");
 		div.setAttribute("class", "form_field");
 		div.appendChild(label);
 		div.appendChild(input);
-		div.appendChild(document.createElement("br"));
-		
 		return div;
 	}
 	
@@ -40,8 +70,10 @@ var docgen = (function() {
 	}
 	
 	var builders = {
-		group: buildGroup,
-		string: buildString
+		string: buildString,
+		choice: buildChoice,
+		checkbox: buildCheckbox,
+		unknown: buildUnknown
 	}
 	
 	function build(spec, model, path) {
