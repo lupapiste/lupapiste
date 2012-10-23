@@ -3,7 +3,6 @@ var docgen = (function() {
 	function loaderImg() {
 		var img = document.createElement("img");
 		img.src = "loader.gif";
-		img.setAttribute("style", "width: 12px; height: 12px;");
 		return img;
 	}
 	
