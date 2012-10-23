@@ -6,8 +6,9 @@
   {:openlayers   {:js ["OpenLayers.js"]}
   
    :jquery       {:css ["jquery.pnotify.default.css"]
-                  :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js" "jquery.filedrop.js"
-                       "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
+                  :js ["jquery-1.8.0.min.js"
+                       "jquery-ui-1.9.0.custom.min.js"
+                       "jquery.ba-hashchange.js" "jquery.filedrop.js" "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
    
    :knockout     {:js ["knockout-2.1.0.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    
@@ -46,7 +47,8 @@
                   :html ["register.html" "register2.html"]}
 
    :docgen       {:depends [:common]
-                  :js ["docgen.js"]
+                  :js ["accordion.js" "docgen.js"]
+                  :css ["docgen.css"]
                   :html ["templates.html"]}
    
    :wizard       {:js ["application-create-wizard.js"]
