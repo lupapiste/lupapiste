@@ -13,15 +13,13 @@
 
 (defquery "ping" {} [q] (ok :text "pong"))
 
-(defquery "user" {:authenticated true} [{user :user}]
-  (ok :user user))
+(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
 (in-dev
   (defquery "users" {:roles [:admin]} [_]
     (ok :users (map #(security/non-private %) (mongo/select mongo/users)))))
 
-(defcommand "create-id" {:authenticated true} [command]
-  (ok :id (mongo/create-id)))
+(defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
 (defn- application-restriction-for [user]
   (case (keyword (:role user))
@@ -199,7 +197,7 @@
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
-        {$set {"roles.authority" (security/summary user)}}))))
+        {$set {:roles.authority (security/summary user)}}))))
 
 (defn approve-application [command]
   (with-application command
