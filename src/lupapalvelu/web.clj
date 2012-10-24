@@ -77,9 +77,6 @@
   {(:action command) (core/validate command)})
 
 (env/in-dev
-  (defjson "/rest/actions" []
-    (ok :commands (core/get-actions))))
-
   (defjson [:post "/rest/actions/valid"] []
     (ok :commands (into {} (map validated (foreach-action)))))
 

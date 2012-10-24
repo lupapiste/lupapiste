@@ -13,6 +13,10 @@
 
 (defquery "ping" {} [q] (ok :text "pong"))
 
+(in-dev
+  (defquery "actions" {} [_] 
+    (ok :actions (get-actions-without-handlers))))
+
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
 (in-dev
