@@ -93,6 +93,21 @@
                                   :user  (security/summary invited)}
                         :roles.reader (security/summary invited)}}))))))))
 
+(defcommand "remove-invite"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email
+        (fn [invited]
+          (do
+            (mongo/update-by-id mongo/applications application-id
+              {$pull {:invites {:user.username email}
+                      :roles.reader  {:username email}}})
+            (mongo/update-by-id mongo/users (:id invited)
+              {$pull {:invites {:application application-id}}})))))))
+
 (defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
