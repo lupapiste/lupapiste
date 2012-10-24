@@ -58,19 +58,14 @@
 ;; Commands
 ;;
 
-(defn- with-user [m]
-  (merge m {:user (current-user)}))
-
-(defn query [name data]
-  (core/create-action name :type :query :data data))
-
-(defn command [name data]
-  (create-action name :data data))
+(defn- with-user 
+  ([m] (with-user m (current-user)))
+  ([m user] (merge m {:user user})))
 
 (defn- foreach-action []
-  (let [json (from-json)]
+  (let [data (from-json)]
     (map
-      #(create-action % :data json)
+      #(with-user (core/command % data))
       (keys (core/get-actions)))))
 
 (defn- validated [command]
@@ -81,10 +76,10 @@
     (ok :commands (into {} (map validated (foreach-action))))))
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute (with-user (command name (from-json)))))
+  (core/execute (with-user (core/command name (from-json)))))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute (with-user (query name (from-query)))))
+  (core/execute (with-user (core/query name (from-query)))))
 
 ;;
 ;; Web UI:
@@ -162,10 +157,11 @@
 (defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload}
   (debug "upload: %s: %s" name (str upload))
   (core/execute
-    (create-action "upload-attachment" :data (assoc upload
-                                  :id applicationId
-                                  :attachmentId attachmentId
-                                  :type (or type "")))))
+    (with-user
+      (core/command "upload-attachment" (assoc upload
+                                               :id applicationId
+                                               :attachmentId attachmentId
+                                               :type (or type ""))))))
 
 (def windows-filename-max-length 255)
 
@@ -222,10 +218,9 @@
 
   (defpage "/verdict" {:keys [id ok text]}
     (core/execute
-      (core/create-action
-        "give-application-verdict"
-        :user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-        :data {:id id :ok ok :text text}))
+      (with-user
+        (core/command "give-application-verdict" {:id id :ok ok :text text})
+        (security/login-with-apikey "505718b0aa24a1c901e6ba24")))
     (format "verdict is given for application %s" id))
 
   (def speed-bump (atom 0))
