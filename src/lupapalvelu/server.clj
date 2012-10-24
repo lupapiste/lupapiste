@@ -10,7 +10,8 @@
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.action]
-            [lupapalvelu.mongo :as mongo])
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.commands])
   (:gen-class))
 
 (defn -main [& args]
