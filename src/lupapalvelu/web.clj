@@ -61,11 +61,11 @@
 (defn- create-action [name & args]
   (apply core/create-action name (into args [(current-user) :user])))
 
-(defn query [name]
-  (create-action name :type :query :data (from-query)))
+(defn query [name data]
+  (create-action name :type :query :data data))
 
-(defn command [name]
-  (create-action name :data (from-json)))
+(defn command [name data]
+  (create-action name :data data))
 
 (defn- foreach-action []
   (let [json (from-json)]
@@ -81,10 +81,10 @@
     (ok :commands (into {} (map validated (foreach-action))))))
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute (command name)))
+  (core/execute (command name (from-json))))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute (query name)))
+  (core/execute (query name (from-query))))
 
 ;;
 ;; Web UI:
