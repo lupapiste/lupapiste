@@ -33,7 +33,7 @@ var ajax = function() {
 		
 		self.successHandler = function(e) { notify.error("rest",e); };
 		self.errorHandler = function(e) { notify.error("error",e); };
-		self.failHandler = function(jqXHR, textStatus, errorThrown) { console.log("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
+		self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
 		self.completeHandler = function(jqXHR, textStatus) { };
 		
 		self.dataType = function(dataType) {
