@@ -7,7 +7,8 @@
 
 (defn make-model   [name version & body] {:info {:name name :version version} :body body})
 (defn make-elem    [name type & args]    (apply hash-map :name name :type type args))
-(defn make-string  [name & args]         (merge (make-elem name :string :min-len 0 :max-len 32 :multiline false) (apply hash-map args)))
+(defn make-string  [name & args]         (merge (make-elem name :string :min-len 0 :max-len 32) (apply hash-map args)))
+(defn make-text    [name & args]         (merge (make-elem name :text :min-len 0 :max-len 256) (apply hash-map args)))
 (defn make-boolean [name & args]         (merge (make-elem name :boolean) (apply hash-map args)))
 (defn make-group   [name & body]         {:type :group :name name :body (or body [])})
 

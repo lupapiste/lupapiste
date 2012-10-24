@@ -68,18 +68,36 @@ var docgen = (function() {
 		var div = document.createElement("span");
 		var sizeClass = "";
 		if (spec.size) {
-			if (spec.size === "s") sizeClass = "form-text-small";
-			if (spec.size === "l") sizeClass = "form-text-large";
+			if (spec.size === "s") sizeClass = "form-string-small";
+			if (spec.size === "l") sizeClass = "form-string-large";
 		}
 		div.className = "form-entry";
-		div.appendChild(makeLabel(partOfChoice ? "text-choice" : "text", myPath));
-		div.appendChild(makeInput("text", myPath, model[spec.name], sizeClass));
+		div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
+		div.appendChild(makeInput("string", myPath, model[spec.name], sizeClass));
 		if (spec.unit) {
 			var unit = document.createElement("span");
-			unit.className = "form-text-unit";
+			unit.className = "form-string-unit";
 			unit.appendChild(document.createTextNode(loc(spec.unit)));
 			div.appendChild(unit);
 		}
+		return div;
+	}
+	
+	function buildText(spec, model, path) {
+		var myPath = path.concat([spec.name]).join(".");
+
+		var input = document.createElement("textarea");
+		input.setAttribute("data-path", myPath);
+		input.setAttribute("rows", spec["rows"] || "10");
+		input.setAttribute("cols", spec["cols"] || "40");
+		input.className = "form-input form-text";
+		input.onchange = save;
+		input.value = model[spec.name] || "";
+
+		var div = document.createElement("span");
+		div.className = "form-entry";
+		div.appendChild(makeLabel("text", myPath));
+		div.appendChild(input);
 		return div;
 	}
 	
@@ -126,14 +144,17 @@ var docgen = (function() {
 	
 	function buildUnknown(spec, model, path) {
 		error("Unknown element type:", spec.type, path);
-		return $("<h2>Unknown element type: " + spec.type + "</h2>");
+		var div = document.createElement("div");
+		div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
+		return div;
 	}
 	
 	var builders = {
+		group: buildGroup,
 		string: buildString,
+		text: buildText,
 		choice: buildChoice,
 		checkbox: buildCheckbox,
-		group: buildGroup,
 		unknown: buildUnknown
 	};
 	
