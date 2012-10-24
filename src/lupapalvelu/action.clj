@@ -111,7 +111,7 @@
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
-   :states     [:open]}
+   :states     [:open :draft]}
   [command]
   (with-application command
     (fn [application]
