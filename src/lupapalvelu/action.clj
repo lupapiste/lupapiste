@@ -11,11 +11,22 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]))
 
-(defquery "ping" {} [q] (ok :text "pong"))
-
 (in-dev
-  (defquery "actions" {} [_] 
-    (ok :actions (get-actions-without-handlers))))
+  (defquery "actions" {} [_]
+    (ok :actions (get-actions-without-handlers)))
+  
+  (defn foreach-action [user data]
+      (map
+        #(assoc (command % data) :user user)
+        (keys (get-actions))))
+  
+  (defn validated [command]
+    {(:action command) (validate command)})
+
+  (defquery "allowed-actions" {} [{data :data user :user}]
+    (ok :actions (into {} (map validated (foreach-action user data))))))
+
+(defquery "ping" {} [q] (ok :text "pong"))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 

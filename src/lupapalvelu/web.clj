@@ -62,19 +62,6 @@
   ([m] (with-user m (current-user)))
   ([m user] (merge m {:user user})))
 
-(defn- foreach-action []
-  (let [data (from-json)]
-    (map
-      #(with-user (core/command % data))
-      (keys (core/get-actions)))))
-
-(defn- validated [command]
-  {(:action command) (core/validate command)})
-
-(env/in-dev
-  (defjson [:post "/rest/actions/valid"] []
-    (ok :commands (into {} (map validated (foreach-action))))))
-
 (defjson [:post "/rest/command/:name"] {name :name}
   (core/execute (with-user (core/command name (from-json)))))
 

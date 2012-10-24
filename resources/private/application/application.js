@@ -191,9 +191,9 @@
 	})();
 
 	function showApplication(data) {
-		ajax.postJson("/rest/actions/valid",{id: data.id})
+		ajax.query("allowed-actions",{id: data.id})
 			.success(function(d) {
-				authorization.data(d.commands);
+				authorization.data(d.actions);
 				showApplicationPart2(data);
 				hub.setPageReady("application");
 			})
