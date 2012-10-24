@@ -7,8 +7,6 @@ var ajax = function() {
 	var nop = function() { };
 	
 	function Call(url, type) {
-		hub.setPageNotReady();
-
 		var self = this;
 		
 		self.request = {
