@@ -23,6 +23,10 @@
    :repository   {:depends [:common]
                   :js ["repository.js"]}
    
+   :accordion    {:depends [:jquery]
+                  :js ["accordion.js"]
+                  :css ["accordion.css"]}
+   
    :application  {:depends [:common :repository]
                   :js ["application.js"]
                   :html ["application.html"]}
@@ -46,9 +50,9 @@
                   :js ["register.js"]
                   :html ["register.html" "register2.html"]}
 
-   :docgen       {:depends [:common]
-                  :js ["accordion.js" "docgen.js"]
-                  :css ["accordion.css" "docgen.css"]}
+   :docgen       {:depends [:accordion :common]
+                  :js ["docgen.js"]
+                  :css ["docgen.css"]}
    
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
