@@ -25,6 +25,9 @@
 (defn from-json []
   (json/decode (slurp (:body (request/ring-request))) true))
 
+(defn from-query []
+  (keywordize-keys (:query-params (request/ring-request))))
+                 
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
   (or (session/get :user) ((request/ring-request) :user)))
@@ -55,8 +58,14 @@
 ;; Commands
 ;;
 
-(defn create-action [name & args]
+(defn- create-action [name & args]
   (apply core/create-action name (into args [(current-user) :user])))
+
+(defn query [name]
+  (create-action name :type :query :data (from-query)))
+
+(defn command [name]
+  (create-action name :data (from-json)))
 
 (defn- foreach-action []
   (let [json (from-json)]
@@ -75,17 +84,10 @@
     (ok :commands (into {} (map validated (foreach-action)))))
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute
-    (create-action
-      name
-      :data (from-json))))
+  (core/execute (command name)))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute
-    (create-action
-      name
-      :type :query
-      :data (keywordize-keys (:query-params (request/ring-request))))))
+  (core/execute (query name)))
 
 ;;
 ;; Web UI:
