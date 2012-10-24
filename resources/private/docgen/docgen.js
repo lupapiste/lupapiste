@@ -11,24 +11,27 @@ var docgen = (function() {
 		var path = target.getAttribute("data-path");
 		var value = (target.type === "checkbox") ? target.checked : target.value;
 		
-		info("saving", path, value);
-		
-		var label = document.getElementById(path.replace(/\./g, "-"));
 		var loader = loaderImg();
+		var label = document.getElementById(path.replace(/\./g, "-"));
 		label.appendChild(loader);
-		// Simulate lengthy ajax call...
-		setTimeout(function() {
-			info("saved", path, value);
-			label.removeChild(loader);
-			if (value === "err") {
-				target.className = "form-input form-input-err";
-			} else if (value === "warn") {
-				target.className = "form-input form-input-warn";				
-			} else {
-				target.className = "form-input";
-			}
-		}, 1000);
 		
+		ajax
+			.query("update-doc", {doc: "123", updates: [[path, value]]})
+			.success(function() {
+				target.className = "form-input";
+			})
+			.error(function(e) {
+				var status = e["status"] || "err";
+				target.className = "form-input form-input-" + status;
+			})
+			.fail(function() {
+				target.className = "form-input form-input-err";
+			})
+			.complete(function() {
+				label.removeChild(loader);
+			})
+			.call();
+				
 		return false;
 	}
 	
