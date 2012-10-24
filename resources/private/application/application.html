@@ -76,23 +76,25 @@
 							   </li>
 							</ul>
               <br/>
-                <span>
+                <div>
                   <h3>Valtuutetut</h3>
-                  <span data-bind="with: $root.applicationModel.data">
-                    <span data-bind="with: roles">
-                      <span data-bind="foreach: invited">
-                        <span data-bind="text: id"></span>
-                        <span data-bind="text: firstName"></span>
-                        <span data-bind="text: lastName"></span>
-                      </span>
-                    </span>
-                  </span>
-                </span>
+                  <div data-bind="with: $root.applicationModel.data">
+                    <div data-bind="with: roles">
+                      <ul data-bind="foreach: invited">
+                        <li>
+                          <span data-bind="text: username"></span> 
+                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
                 <h3>Kutsutut</h3>
                 <ul data-bind="foreach: invites">
                   <li>
-                    <span data-bind="text: user.username"/>
-                    (<span data-bind="text: text"/>) - kutsuttu<br/>
+                    <span data-bind="text: user.username"></span>
+                    (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                    - <span data-bind="text: text"></span>
                   </li>
                 </ul>
                 <span data-bind="with: $root.invite">
@@ -107,7 +109,7 @@
                   </select>
                   <a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a>
                 </span>
-              </span>
+              </div>
 						</div>
 					</div>
 					<div class="application_section">
