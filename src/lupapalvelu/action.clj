@@ -228,23 +228,21 @@
                                       :city (:city user)}
                             :puhelinnumero (:phone user)
                             :sahkopostiosoite (:email user)}
-                   :toimenpide  {:id (mongo/create-id)
-                                 :type (:categories data)
-                                 :otsikko (str (:lastName user) ", " (:street data))}}})
+                   :toimenpiteet [{:id (mongo/create-id)
+                                   :type (:categories data)
+                                   :otsikko (str (:lastName user) ", " (:street data))}]}})
     (ok :id id)))
 
 (defn create-attachment [{{application-id :id} :data created :created}]
-  (let [attachment-id (mongo/create-id)]
-    (mongo/update-by-id
-      mongo/applications
-      application-id
-      {$set {:modified created
-             (str "attachments." attachment-id) {:id attachment-id
-                                                 :type nil
-                                                 :latestVersion   {:version {:major 0, :minor 0}}
-                                                 :versions []
-                                                 }}}
-      )
+  (let [attachment-id (mongo/create-id)
+        attachment-model {:id attachment-id
+                          :type nil
+                          :state :none
+                          :latestVersion   {:version {:major 0, :minor 0}}
+                          :versions []
+                          :comments []}]
+    (mongo/update-by-id mongo/applications application-id
+      {$set {:modified created, (str "attachments." attachment-id) attachment-model}})
     (ok :applicationId application-id :attachmentId attachment-id)))
 
 ;; TODO refactor?
@@ -260,61 +258,51 @@
     {$set {:modified (:created command)
            (str "attachments." (-> command :data :attachmentId) ".type") (-> command :data :type)}}))))
 
-#_(def attachments-sample {
-  "_id"  "5077bbb46bb799214013f9e2",
-  :attachments  {
-    "5077bbcb6bb799214013f9e5" {
-        "id"  "5077bbcb6bb799214013f9e5"
-        :type  "attachment-foo"
-        :latestVersion   {:major 0, :minor 1}
-        "versions" [
-          {
-            "fileid"    "5077bbcb6bb799214013f9e5"
-            "version"   {"major" 0, "minor" 1}
-            "filename"  "robotframework-testfile-05_application_editing.txt"
-            "contentType"  "text/plain"
-            "size" 68
-          }
-        ]
-      }
-    }
-  })
+(defn- next-attachment-version [current-version user]
+  (if (= (keyword (:role user)) :authority)
+    {:major (:major current-version), :minor (inc (:minor current-version))}
+    {:major (inc (:major current-version)), :minor 0}))
 
-
-(defn- next-attachment-version [current-version]
-  {:major (inc (:major current-version)), :minor 0})
-
-(defn- set-attachment-version [application-id attachment-id file-id type filename content-type size created]
+(defn- set-attachment-version [application-id attachment-id file-id type filename content-type size now user]
   (when-let [application (mongo/by-id mongo/applications application-id)]
     (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
-          next-version (next-attachment-version latest-version)
+          next-version (next-attachment-version latest-version user)
           version-model {
                   :version  next-version
                   :fileId   file-id
+                  :created  now
+                  :accepted nil
+                  :user    (security/summary user)
                   ; File name will be presented in ASCII when the file is downloaded.
                   ; Conversion could be done here as well, but we don't want to lose information.
                   :filename filename
                   :contentType content-type
                   :size size}]
+
+        ; TODO check return value and try again with new version number
         (mongo/update-by-query
-        mongo/applications
-        {:_id application-id
-         (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
-         (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
-        {$set {:modified created
-               (str "attachments." attachment-id ".type")  type
-               (str "attachments." attachment-id ".latestVersion") version-model}
-         $push {(str "attachments." attachment-id ".versions") version-model}}))))
+          mongo/applications
+          {:_id application-id
+           (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
+           (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
+          {$set {:modified now
+                 (str "attachments." attachment-id ".modified") now
+                 (str "attachments." attachment-id ".type")  type
+                 (str "attachments." attachment-id ".state")  :added
+                 (str "attachments." attachment-id ".latestVersion") version-model}
+           $push {(str "attachments." attachment-id ".versions") version-model}}))))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :content-type :size]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [{created :created {:keys [id attachmentId type filename tempfile content-type size]} :data}]
+  [{created :created
+    user    :user
+    {:keys [id attachmentId type filename tempfile content-type size]} :data}]
   (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId type filename tempfile content-type size)
   (let [file-id (mongo/create-id)]
     (mongo/upload file-id file-id filename content-type tempfile created)
-    (set-attachment-version id attachmentId file-id type filename content-type size created)
+    (set-attachment-version id attachmentId file-id type filename content-type size created user)
     (.delete (file tempfile))))
 
 (defn get-attachment [attachmentId]

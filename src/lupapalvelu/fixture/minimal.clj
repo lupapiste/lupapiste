@@ -4,7 +4,18 @@
 
 (def users
   [
-   {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
+   {:id "777777777777777777000099" ;; admin
+    :email "admin@solita.fi"
+    :role :admin
+    :personId "solita123"
+    :firstName "Admin"
+    :lastName "Admin"
+    :phone "03030303"
+    :username "admin"
+    :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
+              :salt "$2a$10$WHPur/hjvaOTlm41VFjtju"
+              :apikey "5056e6d3aa24a1c901e6b9dd"}}
+    {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :email "veikko.viranomainen@tampere.fi"
     :role :authority
     :authority :tampere

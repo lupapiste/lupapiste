@@ -16,7 +16,7 @@
 
 			mapPoints.push({
 				id: "markerFor" + application.id(),
-				location: {x: application.location().lon, y: application.location().lat}
+				location: {x: application.location().lon(), y: application.location().lat()}
 			});
 
 			hub.send("documents-map", {

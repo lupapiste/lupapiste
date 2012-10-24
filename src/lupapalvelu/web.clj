@@ -35,6 +35,9 @@
 (defn logged-in-as-authority? []
   (and logged-in? (= :authority (keyword (:role (current-user))))))
 
+(defn logged-in-as-admin? []
+  (and logged-in? (= :admin (keyword (:role (current-user))))))
+
 (defmacro defjson [path params & content]
   `(defpage ~path ~params
      (resp/json (do ~@content))))
@@ -106,12 +109,17 @@
 (defpage "/authority.js" []   (if (logged-in-as-authority?) (resp/content-type (:js content-type)   (singlepage/compose :js   :authority)) (resp/status 401 "Unauthorized\r\n")))
 (defpage "/authority.css" []  (if (logged-in-as-authority?) (resp/content-type (:css content-type)  (singlepage/compose :css  :authority)) (resp/status 401 "Unauthorized\r\n")))
 
+(defpage "/admin" []      (if (logged-in-as-admin?) (resp/content-type (:html content-type) (singlepage/compose :html :admin)) (resp/redirect "/welcome#")))
+(defpage "/admin.js" []   (if (logged-in-as-admin?) (resp/content-type (:js content-type)   (singlepage/compose :js   :admin)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/admin.css" []  (if (logged-in-as-admin?) (resp/content-type (:css content-type)  (singlepage/compose :css  :admin)) (resp/status 401 "Unauthorized\r\n")))
+
 ;;
 ;; Login/logout:
 ;;
 
 (def applicationpage-for {:applicant "/applicant"
-                          :authority "/authority"})
+                          :authority "/authority"
+                          :admin "/admin"})
 
 (defjson [:post "/rest/login"] {:keys [username password]}
   (if-let [user (security/login username password)]
