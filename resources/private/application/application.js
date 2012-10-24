@@ -237,12 +237,12 @@
 		submit: function(model) {
 			var applicationId = application.id();
 			ajax.command("add-comment", { id: applicationId, text: model.text()})
-			.success(function(d) {
-				repository.reloadAllApplications();
-				model.text("");
-			}).call();
-		return false;
-	}
+  			.success(function(d) {
+  				repository.reloadAllApplications();
+  				model.text("");
+  			}).call();
+			return false;
+		}
 	};
 
 	comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
