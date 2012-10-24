@@ -40,11 +40,11 @@ var docgen = (function() {
 		return label;
 	}
 
-	function makeInput(type, path, value) {
+	function makeInput(type, path, value, extraClass) {
 		var input = document.createElement("input");
 		input.setAttribute("data-path", path);
 		input.type = type;
-		input.className = "form-input form-" + type;
+		input.className = "form-input form-" + type + " " + (extraClass || "");
 		input.onchange = save;
 		if (type === "checkbox") {
 			if (value) input.checked = "checked"; 
@@ -66,9 +66,14 @@ var docgen = (function() {
 	function buildString(spec, model, path) {
 		var myPath = path.concat([spec.name]).join(".");
 		var div = document.createElement("div");
+		var sizeClass = "";
+		if (spec.size) {
+			if (spec.size === "s") sizeClass = "form-text-small";
+			if (spec.size === "l") sizeClass = "form-text-large";
+		}
 		div.className = "form-entry";
 		div.appendChild(makeLabel("text", myPath));
-		div.appendChild(makeInput("text", myPath, model[spec.name]));
+		div.appendChild(makeInput("text", myPath, model[spec.name], sizeClass));
 		return div;
 	}
 	
