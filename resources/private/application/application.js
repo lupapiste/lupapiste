@@ -206,7 +206,6 @@
 		applicationModel.data(ko.mapping.fromJS(data));
 
 		ko.mapping.fromJS(data, {}, application);
-		console.log(application);
 		ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 
 		application.attachments.removeAll();
