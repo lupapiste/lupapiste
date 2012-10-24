@@ -266,7 +266,7 @@
            (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
           {$set {:modified now
                  (str "attachments." attachment-id ".modified") now
-                 (str "attachments." attachment-id ".type")  type
+                 (str "attachments." attachment-id ".type")  type ; TODO is it OK to update type? Should be set at first time and not thereafter
                  (str "attachments." attachment-id ".state")  :added
                  (str "attachments." attachment-id ".latestVersion") version-model}
            $push {(str "attachments." attachment-id ".versions") version-model}}))))
