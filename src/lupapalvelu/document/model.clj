@@ -34,8 +34,8 @@
 ;; Processing
 ;;
 
-(defn get-elem [model name]
-  (some #(if (= (:name %) name) %) model))
+(defn get-elem [model n]
+  (some #(if (= (:name %) n) %) model))
 
 (defn group? [elem]
   (= (:type elem) :group))
