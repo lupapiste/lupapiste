@@ -80,12 +80,24 @@
                   <h3>Valtuutetut</h3>
                   <div data-bind="with: $root.applicationModel.data">
                     <div data-bind="with: roles">
-                      <ul data-bind="foreach: invited">
+                      <h4>Lukuoikeudet</h4>
+                      <!-- ko if: $data.reader -->
+                      <ul data-bind="foreach: reader">
                         <li>
                           <span data-bind="text: username"></span> 
                           (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
                         </li>
                       </ul>
+                      <!--  /ko -->
+                      <h4>Kirjoitusoikeudet</h4>
+                      <!-- ko if: $data.writer -->
+                       <ul data-bind="foreach: writer">
+                        <li>
+                          <span data-bind="text: username"></span> 
+                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        </li>
+                      </ul>
+                      <!--  /ko -->
                     </div>
                   </div>
                 </div>

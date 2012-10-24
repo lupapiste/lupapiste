@@ -72,12 +72,12 @@
   (with-application command
     (fn [{application-id :id}]
       (with-user (-> command :data :email) ;; allows invites only existing users
-        (fn [planner]
-          (if (= (:role planner) "authority")
-            (fail "can't ask authority to be a planner")
+        (fn [invited]
+          (if (= (:role invited) "authority")
+            (fail "can't ask authority to be a invited") ;; TODO: really?
             ;; TODO: check for duplicates
             (let [invite-id (mongo/create-id)]
-              (mongo/update-by-id mongo/users  (:id planner)
+              (mongo/update-by-id mongo/users  (:id invited)
                 {$push {:invites {:id          invite-id
                                   :text        (-> command :data :type)
                                   :application application-id
@@ -88,17 +88,19 @@
                                   :text  (-> command :data :type)
                                   :created     (-> command :created)
                                   :inviter     (security/summary (-> command :user))
-                                  :user  (security/summary planner)}}}))))))))
+                                  :user  (security/summary invited)}
+                        :roles.reader (security/summary invited)}}))))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{application-id :id}] ;; verify against user in validation?
+    (fn [{application-id :id}] 
+      ;; verify against user in validation?
       (do
         (mongo/update-by-id mongo/applications application-id
-          {$push {"roles.invited" (security/summary user)}
+          {$push {"roles.writer" (security/summary user)}
            $pull {:invites {:user.id (:id user)}}})
         (mongo/update-by-id mongo/users (:id user)
           {$pull {:invites {:application application-id}}})))))

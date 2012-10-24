@@ -202,7 +202,7 @@
 	}
 
 	function showApplicationPart2(data) {
-
+	  
 		// new data mapping
 		applicationModel.data(ko.mapping.fromJS(data));
 
