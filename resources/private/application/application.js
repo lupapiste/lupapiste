@@ -3,7 +3,7 @@
  */
 
 ;(function() {
-
+  
 	function refreshMap() {
 		// refresh map for applications
 		hub.clearMapWithDelay(refreshMapPoints);
@@ -26,11 +26,15 @@
 		
 	}
 
+	var applicationModel = {
+	    data: ko.observable()
+	}
+	
 	var application = {
 		id: ko.observable(),
 		state: ko.observable(),
 		location: ko.observable(),
-	    permitType: ko.observable(),
+	  permitType: ko.observable(),
 		title: ko.observable(),
 		created: ko.observable(),
 		documents: ko.observable(),
@@ -40,8 +44,11 @@
 		verdict: ko.observable(),
 
 		// new stuff
-		//hakija: ko.observable(),
 		invites: ko.observableArray(),
+		roles: ko.observableArray(),
+		
+		// all data in here
+		data: ko.observable(),
 		
 		submitApplication: function(model) {
 			var applicationId = application.id();
@@ -195,9 +202,21 @@
 	}
 
 	function showApplicationPart2(data) {
-		ko.mapping.fromJS(data, null, application);
+
+		// new data mapping
+    console.log("**");
+	  console.log(applicationModel.data())
+		applicationModel.data(ko.mapping.fromJS(data));
+		console.log("****");
+		console.log(data);
+    console.log("********");
+		console.log(applicationModel.data());
+    console.log("*************");
+
+		ko.mapping.fromJS(data, {}, application);
+		console.log(application);
 		ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
-		
+
 		application.attachments.removeAll();
 		var attachments = data.attachments;
 		if (attachments) {
@@ -207,7 +226,6 @@
 				application.attachments.push(attachment);
 			}
 		}
-
 	}
 	
 	function uploadCompleted(file, size, type, attachmentId) {
@@ -226,7 +244,7 @@
 	var comment = {
 		text: ko.observable(),
 		submit: function(model) {
-		var applicationId = application.id();
+			var applicationId = application.id();
 			ajax.command("add-comment", { id: applicationId, text: model.text()})
 			.success(function(d) { 
 				repository.reloadAllApplications();
@@ -242,20 +260,14 @@
 	    email : ko.observable(),
 	    type  : ko.observable(),
 		submit: function(model) {
-			console.log(model.type());
-			console.log(application.id());
 			ajax.command("invite", { id: application.id(),
 				                     email: model.email(),
 				                     type: model.type()})
-		.success(function(d) {
-			repository.reloadAllApplications();
-		})
-		.error(function(d) {
-			notify.info("kutsun lähettäminen epäonnistui");
-		})
-		.call();
-		return false;
-	}
+				.success(function(d) { repository.reloadAllApplications(); })
+				.error(function(d) { notify.info("kutsun lähettäminen epäonnistui"); })
+				.call();
+			return false;
+		}
 	}
 
     var tab = {
@@ -295,15 +307,19 @@
 		hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
 			onPageChange(e);
 		});
-		
-		var page = $("#application");
-		ko.applyBindings({application: application,
-						  comment: comment,
-						  invite: invite,
-						  authorization: authorization,
-						  rh1: rh1,
-						  tab: tab,
-						  accordian: accordian}, page[0]);
+
+    var page = $("#application");
+
+    ko.applyBindings(
+        { application: application,
+          applicationModel: applicationModel,
+          comment: comment,
+          invite: invite,
+          authorization: authorization,
+          rh1: rh1,
+          tab: tab,
+          accordian: accordian},page[0]);
+
 		initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
 	});
 

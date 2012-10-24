@@ -76,8 +76,19 @@
 							   </li>
 							</ul>
               <br/>
-              <span>
-                <h3>Suunnittelijat</h3>
+                <span>
+                  <h3>Valtuutetut</h3>
+                  <span data-bind="with: $root.applicationModel.data">
+                    <span data-bind="with: roles">
+                      <span data-bind="foreach: invited">
+                        <span data-bind="text: id"></span>
+                        <span data-bind="text: firstName"></span>
+                        <span data-bind="text: lastName"></span>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+                <h3>Kutsutut</h3>
                 <ul data-bind="foreach: invites">
                   <li>
                     <span data-bind="text: user.username"/>
@@ -345,4 +356,3 @@
 	</section>
 </body>
 </html>
->>>>>>> other
