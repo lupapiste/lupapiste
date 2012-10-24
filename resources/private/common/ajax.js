@@ -19,10 +19,8 @@ var ajax = function() {
 			cache:     false,
 			timeout:   60000,
 			success: function(e) {
-				//setTimeout(function(){ 
-					var handler = e.ok ? self.successHandler : self.errorHandler;
-					handler(e);
-				//}, 1000);
+				var handler = e.ok ? self.successHandler : self.errorHandler;
+				handler(e);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				self.failHandler(jqXHR, textStatus, errorThrown);
