@@ -237,10 +237,10 @@
 		submit: function(model) {
 			var applicationId = application.id();
 			ajax.command("add-comment", { id: applicationId, text: model.text()})
-			.success(function(d) { 
+			.success(function(d) {
 				repository.reloadAllApplications();
-					model.text("");
-				}).call();
+				model.text("");
+			}).call();
 		return false;
 	}
 	};
@@ -249,16 +249,23 @@
 	
 	var invite = {
 	    email : ko.observable(),
-	    type  : ko.observable(),
-		submit: function(model) {
-			ajax.command("invite", { id: application.id(),
-				                     email: model.email(),
-				                     type: model.type()})
-				.success(function(d) { repository.reloadAllApplications(); })
-				.error(function(d) { notify.info("kutsun lähettäminen epäonnistui"); })
-				.call();
-			return false;
-		}
+	    title : ko.observable("uuden suunnittelijan lisääminen"),
+	    text  : ko.observable(),
+	    submit: function(model) {
+  			ajax.command("invite", { id: application.id(),
+  				                     email: model.email(),
+  				                     title: model.title(),
+  				                     text: model.text()})
+  				.success(function(d) {
+  				  model.email(undefined);
+  				  model.title(undefined);
+  				  model.text(undefined);
+  				  repository.reloadAllApplications(); 
+  				})
+  				.error(function(d) { notify.info("kutsun lähettäminen epäonnistui",d); })
+  				.call();
+  			return false;
+  		}
 	}
 
     var tab = {

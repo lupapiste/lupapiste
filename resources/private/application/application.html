@@ -114,18 +114,13 @@
                     - <span data-bind="text: text"></span>
                   </li>
                 </ul>
-                <span data-bind="with: $root.invite">
-                  <input class="form_input" type="text" data-bind="value: email" />
-                  <select class="form_input combobox" data-bind="value: type">
-                    <option value="ei tiedossa">ei tiedossa</option>
-                    <option value="pääsuunnittelija">Pääsuunnittelija</option>
-                    <option value="ARK-rakennussuunnittelija">ARK-rakennussuunnittelija</option>
-                    <option value="GEO-suunnittelija">GEO-suunnittelija</option>
-                    <option value="LVI-suunnittelija">LVI-suunnittelija</option>
-                    <option value="RAK-rakennesuunnittelija">RAK-rakennesuunnittelija</option>
-                  </select>
-                  <a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a>
-                </span>
+                <div data-bind="with: $root.invite">
+                  <table>
+                    <tr><td>sähköpostiosoite</td><td><input class="form_input" type="text" data-bind="value: email" /></td></tr>
+                    <tr><td>teksti          </td><td><textarea rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
+                    <tr><td>&nbsp;          </td><td><a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a></td></tr>
+                  </table>
+                </div>
               </div>
 						</div>
 					<div class="application_section">

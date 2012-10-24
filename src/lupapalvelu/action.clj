@@ -66,12 +66,14 @@
     (ok :invites (:invites user))))
 
 (defcommand "invite"
-  {:parameters [:id :email :type]
+  {:parameters [:id :email :title :text]
    :roles      [:applicant]}
-  [command]
+  [{created :created
+    user    :user
+    {:keys [id email title text]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user (-> command :data :email) ;; allows invites only existing users
+      (with-user email ;; allows invites only existing users
         (fn [invited]
           (if (= (:role invited) "authority")
             (fail "can't ask authority to be a invited") ;; TODO: really?
@@ -79,15 +81,17 @@
             (let [invite-id (mongo/create-id)]
               (mongo/update-by-id mongo/users  (:id invited)
                 {$push {:invites {:id          invite-id
-                                  :text        (-> command :data :type)
+                                  :title       title
+                                  :text        text
                                   :application application-id
-                                  :created     (-> command :created)
-                                  :inviter     (security/summary (-> command :user))}}})
+                                  :created     created
+                                  :inviter     (security/summary user)}}})
               (mongo/update-by-id mongo/applications application-id
                 {$push {:invites {:id    invite-id
-                                  :text  (-> command :data :type)
-                                  :created     (-> command :created)
-                                  :inviter     (security/summary (-> command :user))
+                                  :title       title
+                                  :text        text
+                                  :created     created
+                                  :inviter     (security/summary user)
                                   :user  (security/summary invited)}
                         :roles.reader (security/summary invited)}}))))))))
 
