@@ -25,7 +25,9 @@
 
 (defn- application-restriction-for [user]
   (case (keyword (:role user))
-    :applicant {:roles.applicant.id (:id user)}
+    :applicant {$or [{:roles.applicant.id (:id user)}
+                     {:roles.reader.id (:id user)}
+                     {:roles.writer.id (:id user)}]}
     :authority {:authority (:authority user)}
     (do
       (warn "invalid role to get applications")
@@ -100,8 +102,9 @@
       ;; verify against user in validation?
       (do
         (mongo/update-by-id mongo/applications application-id
-          {$push {"roles.writer" (security/summary user)}
-           $pull {:invites {:user.id (:id user)}}})
+          {$push {:roles.writer (security/summary user)}
+           $pull {:invites {:user.id (:id user)}
+                  :roles.reader  {:id (:id user)}}})
         (mongo/update-by-id mongo/users (:id user)
           {$pull {:invites {:application application-id}}})))))
 
