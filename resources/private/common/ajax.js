@@ -121,6 +121,7 @@ var ajax = function() {
 	}
 	
 	function command(name, data) {
+		// TODO: Do we need this copy?
 		var message = {};
 		for (var k in data) message[k] = data[k];
 		return new Call("/rest/command/"+name, "POST").json(message);
@@ -133,11 +134,11 @@ var ajax = function() {
 	}
 
 	return {
-		post:   post,
-		postJson: postJson,
-		get:    get,
-		command: command,
-		query: query
+		post:      post,
+		postJson:  postJson,
+		get:       get,
+		command:   command,
+		query:     query
 	};
 	
 }();
