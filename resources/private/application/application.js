@@ -45,7 +45,6 @@
 
 		// new stuff
 		invites: ko.observableArray(),
-		roles: ko.observableArray(),
 		
 		// all data in here
 		data: ko.observable(),
