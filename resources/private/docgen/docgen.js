@@ -63,16 +63,16 @@ var docgen = (function() {
 		return span;
 	}
 	
-	function buildString(spec, model, path) {
+	function buildString(spec, model, path, partOfChoice) {
 		var myPath = path.concat([spec.name]).join(".");
-		var div = document.createElement("div");
+		var div = document.createElement("span");
 		var sizeClass = "";
 		if (spec.size) {
 			if (spec.size === "s") sizeClass = "form-text-small";
 			if (spec.size === "l") sizeClass = "form-text-large";
 		}
 		div.className = "form-entry";
-		div.appendChild(makeLabel("text", myPath));
+		div.appendChild(makeLabel(partOfChoice ? "text-choice" : "text", myPath));
 		div.appendChild(makeInput("text", myPath, model[spec.name], sizeClass));
 		if (spec.unit) {
 			var unit = document.createElement("span");
@@ -83,7 +83,7 @@ var docgen = (function() {
 		return div;
 	}
 	
-	function buildGroup(spec, model, path) {
+	function buildChoice(spec, model, path) {
 		var name = spec.name;
 		var choices = spec.body;
 		var myModel = model[name] || {};
@@ -91,13 +91,36 @@ var docgen = (function() {
 		
 		var choicesDiv = document.createElement("div");
 		for (var i = 0; i < choices.length; i++) {
-			choicesDiv.appendChild(build(choices[i], myModel, myPath));
+			var choice = choices[i];
+			if (choice.type === "string") {
+				choicesDiv.appendChild(buildString(choice, myModel, myPath, true));
+			} else {
+				choicesDiv.appendChild(build(choice, myModel, myPath));				
+			}
+		}
+		
+		var div = document.createElement("div");
+		div.className = "form-choice";
+		div.appendChild(makeLabel("choice", myPath.join(".")));
+		div.appendChild(choicesDiv);
+		return div;
+	}
+	
+	function buildGroup(spec, model, path) {
+		var name = spec.name;
+		var parts = spec.body;
+		var myModel = model[name] || {};
+		var myPath = path.concat([name]);
+		
+		var partsDiv = document.createElement("div");
+		for (var i = 0; i < parts.length; i++) {
+			partsDiv.appendChild(build(parts[i], myModel, myPath));
 		}
 		
 		var div = document.createElement("div");
 		div.className = "form-group";
 		div.appendChild(makeLabel("group", myPath.join(".")));
-		div.appendChild(choicesDiv);
+		div.appendChild(partsDiv);
 		return div;
 	}
 	
@@ -108,7 +131,7 @@ var docgen = (function() {
 	
 	var builders = {
 		string: buildString,
-		choice: buildGroup,
+		choice: buildChoice,
 		checkbox: buildCheckbox,
 		group: buildGroup,
 		unknown: buildUnknown
