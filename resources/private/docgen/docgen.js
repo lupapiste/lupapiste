@@ -74,6 +74,12 @@ var docgen = (function() {
 		div.className = "form-entry";
 		div.appendChild(makeLabel("text", myPath));
 		div.appendChild(makeInput("text", myPath, model[spec.name], sizeClass));
+		if (spec.unit) {
+			var unit = document.createElement("span");
+			unit.className = "form-text-unit";
+			unit.appendChild(document.createTextNode(loc(spec.unit)));
+			div.appendChild(unit);
+		}
 		return div;
 	}
 	
