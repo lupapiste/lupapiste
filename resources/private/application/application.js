@@ -204,14 +204,7 @@
 	function showApplicationPart2(data) {
 
 		// new data mapping
-    console.log("**");
-	  console.log(applicationModel.data())
 		applicationModel.data(ko.mapping.fromJS(data));
-		console.log("****");
-		console.log(data);
-    console.log("********");
-		console.log(applicationModel.data());
-    console.log("*************");
 
 		ko.mapping.fromJS(data, {}, application);
 		console.log(application);
