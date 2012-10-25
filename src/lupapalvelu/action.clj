@@ -76,9 +76,12 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
-(defquery "invites" {:authenticated true} [{user :user}]
-  (let [user (mongo/select-one mongo/users {:_id (:id user)})]
-    (ok :invites (:invites user))))
+(defquery "invites" {:authenticated true} [{{:keys [id]} :user}]
+  (let [filter     {:invites {$elemMatch {:user.id id}}}
+        projection (assoc filter :_id 0)
+        data       (mongo/select mongo/applications filter projection)
+        invites    (flatten (map (comp :invites) data))]
+    (ok :invites invites)))
 
 (defcommand "invite"
   {:parameters [:id :email :title :text]
