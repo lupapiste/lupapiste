@@ -25,6 +25,9 @@
 (defn from-json []
   (json/decode (slurp (:body (request/ring-request))) true))
 
+(defn from-query []
+  (keywordize-keys (:query-params (request/ring-request))))
+                 
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
   (or (session/get :user) ((request/ring-request) :user)))
@@ -55,37 +58,15 @@
 ;; Commands
 ;;
 
-(defn create-action [name & args]
-  (apply core/create-action name (into args [(current-user) :user])))
-
-(defn- foreach-action []
-  (let [json (from-json)]
-    (map
-      #(create-action % :data json)
-      (keys (core/get-actions)))))
-
-(defn- validated [command]
-  {(:action command) (core/validate command)})
-
-(env/in-dev
-  (defjson "/rest/actions" []
-    (ok :commands (core/get-actions))))
-
-  (defjson [:post "/rest/actions/valid"] []
-    (ok :commands (into {} (map validated (foreach-action)))))
+(defn- with-user 
+  ([m] (with-user m (current-user)))
+  ([m user] (merge m {:user user})))
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute
-    (create-action
-      name
-      :data (from-json))))
+  (core/execute (with-user (core/command name (from-json)))))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute
-    (create-action
-      name
-      :type :query
-      :data (keywordize-keys (:query-params (request/ring-request))))))
+  (core/execute (with-user (core/query name (from-query)))))
 
 ;;
 ;; Web UI:
@@ -163,10 +144,11 @@
 (defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload}
   (debug "upload: %s: %s" name (str upload))
   (core/execute
-    (create-action "upload-attachment" :data (assoc upload
-                                  :id applicationId
-                                  :attachmentId attachmentId
-                                  :type (or type "")))))
+    (with-user
+      (core/command "upload-attachment" (assoc upload
+                                               :id applicationId
+                                               :attachmentId attachmentId
+                                               :type (or type ""))))))
 
 (def windows-filename-max-length 255)
 
@@ -223,10 +205,9 @@
 
   (defpage "/verdict" {:keys [id ok text]}
     (core/execute
-      (core/create-action
-        "give-application-verdict"
-        :user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-        :data {:id id :ok ok :text text}))
+      (with-user
+        (core/command "give-application-verdict" {:id id :ok ok :text text})
+        (security/login-with-apikey "505718b0aa24a1c901e6ba24")))
     (format "verdict is given for application %s" id))
 
   (def speed-bump (atom 0))
