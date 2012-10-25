@@ -29,7 +29,7 @@
                   :js ["repository.js"]}
 
    :application  {:depends [:common :repository]
-                  :js ["application.js" "../common/dialog.js"]
+                  :js ["application.js"]
                   :html ["application.html"]}
 
    :applications-common {:depends [:invites]
