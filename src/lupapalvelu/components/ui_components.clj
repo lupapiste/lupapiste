@@ -15,7 +15,7 @@
    :knockout     {:js ["knockout-2.1.0.debug.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
 
    :common       {:depends [:oskari :jquery :knockout]
-                  :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "nav.js" "ko.init.js"]
+                  :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "nav.js" "combobox.js" "ko.init.js"  "dialog.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
@@ -26,7 +26,7 @@
                   :js ["repository.js"]}
 
    :application  {:depends [:common :repository]
-                  :js ["application.js"]
+                  :js ["application.js" "../common/dialog.js"]
                   :html ["application.html"]}
 
    :applications-common {:js ["applications.js" "lupapiste.tablesorter.js"]
@@ -54,8 +54,8 @@
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:oskari :application :applications :attachment :wizard :buildinfo]
-                  :js ["applicant.js"]
+   :applicant    {:depends [:common :application :applications :attachment :wizard :buildinfo]
+                  :js ["applicant.js" ]
                   :html ["index.html"]}
 
    :authority    {:depends [:application :authority_applications :attachment :buildinfo]

@@ -293,7 +293,7 @@
     hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
       onPageChange(e);
     });
-
+    
     var page = $("#application");
     
     ko.applyBindings({application: application,
@@ -307,3 +307,5 @@
   });
 
 })();
+
+  
