@@ -191,7 +191,7 @@
 	      :accept :json})))
 
 ;;
-;; Development thingies
+;; Development thingies.
 ;;
 
 (env/in-dev
