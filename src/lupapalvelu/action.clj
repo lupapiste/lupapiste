@@ -76,7 +76,9 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
-(defquery "invites" {:authenticated true} [{{:keys [id]} :user}]
+(defquery "invites"
+  {:authenticated true} 
+  [{{id :id} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select mongo/applications filter projection)
