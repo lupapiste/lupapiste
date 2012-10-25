@@ -79,18 +79,50 @@
 								    <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
 							   </li>
 							</ul>
-              <span>
-                <h3>Pääsuunnittelijat</h3>
-                <span data-bind="foreach: planners">
-                  <span data-bind="text: user.username"></span> (<span data-bind="text: loc(state())"></span>)<br/>
-                </span>
-                <span data-bind="with: $root.askForPlanner">
-                  <input class="form-input" type="text" data-bind="value: email" />
-                  <a href="#" class="form-add" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">lisää uusi suunnittelija</a>
-                </span>
-              </span>
+              <br/>
+                <div>
+                  <h3>Valtuutetut</h3>
+                  <div data-bind="with: $root.applicationModel.data">
+                    <div data-bind="with: roles">
+                      <h4>Lukuoikeudet</h4>
+                      <!-- ko if: $data.reader -->
+                      <ul data-bind="foreach: reader">
+                        <li>
+                          <span data-bind="text: username"></span> 
+                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        </li>
+                      </ul>
+                      <!--  /ko -->
+                      <h4>Kirjoitusoikeudet</h4>
+                      <!-- ko if: $data.writer -->
+                       <ul data-bind="foreach: writer">
+                        <li>
+                          <span data-bind="text: username"></span> 
+                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        </li>
+                      </ul>
+                      <!--  /ko -->
+                      <br/>
+                    </div>
+                  </div>
+                </div>
+                <h3>Kutsutut</h3>
+                <ul data-bind="foreach: invites">
+                  <li>
+                    <span data-bind="text: user.username"></span>
+                    (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                    - <span data-bind="text: text"></span>
+                  </li>
+                </ul>
+                <div data-bind="with: $root.invite">
+                  <table>
+                    <tr><td>sähköpostiosoite</td><td><input class="form_input" type="text" data-bind="value: email" /></td></tr>
+                    <tr><td>teksti          </td><td><textarea rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
+                    <tr><td>&nbsp;          </td><td><a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a></td></tr>
+                  </table>
+                </div>
+              </div>
 						</div>
-					</div>
 					<div class="application_section">
 						<h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Rakennuspaikan tiedot</h2>
 						<div class="application_section_content content_expanded">
@@ -461,7 +493,6 @@
 					</div>
 				</div>
 			</div>
-		</div>
 	</section>
 </body>
 </html>

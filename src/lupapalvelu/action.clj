@@ -2,6 +2,7 @@
   (:use [monger.operators]
         [clojure.string :only [join]]
         [lupapalvelu.core]
+        [lupapalvelu.env]
         [lupapalvelu.log]
         [lupapalvelu.domain]
         [clojure.java.io :only [file]]
@@ -10,17 +11,36 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]))
 
+(in-dev
+  (defquery "actions" {} [_]
+    (ok :actions (get-actions-without-handlers)))
+  
+  (defn foreach-action [user data]
+      (map
+        #(assoc (command % data) :user user)
+        (keys (get-actions))))
+  
+  (defn validated [command]
+    {(:action command) (validate command)})
+
+  (defquery "allowed-actions" {} [{data :data user :user}]
+    (ok :actions (into {} (map validated (foreach-action user data))))))
+
 (defquery "ping" {} [q] (ok :text "pong"))
 
-(defquery "user" {:authenticated true} [{user :user}]
-  (ok :user user))
+(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
-(defcommand "create-id" {:authenticated true} [command]
-  (ok :id (mongo/create-id)))
+(in-dev
+  (defquery "users" {:roles [:admin]} [_]
+    (ok :users (map #(security/non-private %) (mongo/select mongo/users)))))
+
+(defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
 (defn- application-restriction-for [user]
   (case (keyword (:role user))
-    :applicant {:roles.applicant.id (:id user)}
+    :applicant {$or [{:roles.applicant.id (:id user)}
+                     {:roles.reader.id (:id user)}
+                     {:roles.writer.id (:id user)}]}
     :authority {:authority (:authority user)}
     (do
       (warn "invalid role to get applications")
@@ -56,41 +76,74 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
-(defcommand "ask-for-planner"
-  {:parameters [:id :email]
+(defquery "invites" {:authenticated true} [{user :user}]
+  (let [user (mongo/select-one mongo/users {:_id (:id user)})]
+    (ok :invites (:invites user))))
+
+(defcommand "invite"
+  {:parameters [:id :email :title :text]
    :roles      [:applicant]}
-  [command]
+  [{created :created
+    user    :user
+    {:keys [id email title text]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user (-> command :data :email)
-        (fn [planner]
-          (if (= (:role planner) "authority")
-            (fail "can't ask authority to be a planner")
+      (with-user email ;; allows invites only existing users
+        (fn [invited]
+          (if (= (:role invited) "authority")
+            (fail "can't ask authority to be a invited") ;; TODO: really?
             ;; TODO: check for duplicates
-            (do
-              (mongo/update-by-id mongo/users (:id planner)
-                {$push {:tasks {:type        :invitation_planner
-                                :application application-id
-                                :created     (-> command :created)
-                                :user        (security/summary (-> command :user))}}})
+            (let [invite-id (mongo/create-id)]
+              (mongo/update-by-id mongo/users  (:id invited)
+                {$push {:invites {:id          invite-id
+                                  :title       title
+                                  :text        text
+                                  :application application-id
+                                  :created     created
+                                  :inviter     (security/summary user)}}})
               (mongo/update-by-id mongo/applications application-id
-                {$push {:planners {:state :pending
-                                   :user  (security/summary planner)}}}))))))))
+                {$push {:invites {:id    invite-id
+                                  :title       title
+                                  :text        text
+                                  :created     created
+                                  :inviter     (security/summary user)
+                                  :user  (security/summary invited)}
+                        :roles.reader (security/summary invited)}}))))))))
 
-(defcommand "approve-as-planner"
+(defcommand "remove-invite"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email
+        (fn [invited]
+          (do
+            (mongo/update-by-id mongo/applications application-id
+              {$pull {:invites {:user.username email}
+                      :roles.reader  {:username email}}})
+            (mongo/update-by-id mongo/users (:id invited)
+              {$pull {:invites {:application application-id}}})))))))
+
+(defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{id :id}]
-      (mongo/update-by-id
-        mongo/applications id
-        {$set {"roles.planner" (security/summary user)}}))))
+    (fn [{application-id :id}] 
+      ;; verify against user in validation?
+      (do
+        (mongo/update-by-id mongo/applications application-id
+          {$push {:roles.writer (security/summary user)}
+           $pull {:invites {:user.id (:id user)}
+                  :roles.reader  {:id (:id user)}}})
+        (mongo/update-by-id mongo/users (:id user)
+          {$pull {:invites {:application application-id}}})))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
-   :states     [:open]}
+   :states     [:open :draft]}
   [command]
   (with-application command
     (fn [application]
@@ -163,7 +216,7 @@
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
-        {$set {"roles.authority" (security/summary user)}}))))
+        {$set {:roles.authority (security/summary user)}}))))
 
 (defn approve-application [command]
   (with-application command
