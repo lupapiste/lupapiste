@@ -271,6 +271,9 @@
         }
     };
 
+    //Modal dialog
+    
+
   function onPageChange(e) {
     var id = e.pagePath[0];
     if (application.id() != id) {
@@ -292,6 +295,7 @@
     });
 
     var page = $("#application");
+    
     ko.applyBindings({application: application,
               comment: comment,
               askForPlanner: askForPlanner,
