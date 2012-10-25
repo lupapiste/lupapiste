@@ -38,9 +38,7 @@
 
 (defn- application-restriction-for [user]
   (case (keyword (:role user))
-    :applicant {$or [{:roles.applicant.id (:id user)}
-                     {:roles.reader.id (:id user)}
-                     {:roles.writer.id (:id user)}]}
+    :applicant {:rolez.id (:id user)}
     :authority {:authority (:authority user)}
     (do
       (warn "invalid role to get applications")
@@ -105,7 +103,8 @@
                                 :created     created
                                 :inviter     (security/summary user)
                                 :user  (security/summary invited)}
-                      :roles.reader (security/summary invited)}})))))))
+                      :roles.reader (security/summary invited)
+                      :rolez (role invited :reader)}})))))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -116,8 +115,9 @@
       (with-user email
         (fn [invited]
           (mongo/update-by-id mongo/applications application-id
-            {$pull {:invites {:user.username email}
-                    :roles.reader  {:username email}}}))))))
+            {$pull {:invites      {:user.username email}
+                    :roles.reader {:username email}
+                    :rolez        {:username email}}}))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -128,9 +128,10 @@
       ;; verify against user in validation?
       (do
         (mongo/update-by-id mongo/applications application-id
-          {$push {:roles.writer (security/summary user)}
-           $pull {:invites {:user.id (:id user)}
-                  :roles.reader  {:id (:id user)}}})))))
+          {$push {:roles.writer (security/summary user)
+                  :rolez        (role user :writer)}
+           $pull {:invites      {:user.id (:id user)}
+                  :roles.reader {:id (:id user)}}})))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
@@ -245,6 +246,7 @@
        :title (:street data)
        :authority (:city data)
        :roles {:applicant (security/summary user)}
+       :rolez [(role user :owner)]
        :documents {:hakija {:id (mongo/create-id)
                             :nimi (str (:firstName user) " " (:lastName user))
                             :address {:street (:street user)
