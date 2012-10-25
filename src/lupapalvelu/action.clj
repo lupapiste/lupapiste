@@ -76,9 +76,14 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
-(defquery "invites" {:authenticated true} [{user :user}]
-  (let [user (mongo/select-one mongo/users {:_id (:id user)})]
-    (ok :invites (:invites user))))
+(defquery "invites"
+  {:authenticated true} 
+  [{{id :id} :user}]
+  (let [filter     {:invites {$elemMatch {:user.id id}}}
+        projection (assoc filter :_id 0)
+        data       (mongo/select mongo/applications filter projection)
+        invites    (flatten (map (comp :invites) data))]
+    (ok :invites invites)))
 
 (defcommand "invite"
   {:parameters [:id :email :title :text]
@@ -91,24 +96,16 @@
       (with-user email ;; allows invites only existing users
         (fn [invited]
           (if (= (:role invited) "authority")
-            (fail "can't ask authority to be a invited") ;; TODO: really?
+            (fail "can't ask authority to be a invited")
             ;; TODO: check for duplicates
-            (let [invite-id (mongo/create-id)]
-              (mongo/update-by-id mongo/users  (:id invited)
-                {$push {:invites {:id          invite-id
-                                  :title       title
-                                  :text        text
-                                  :application application-id
-                                  :created     created
-                                  :inviter     (security/summary user)}}})
-              (mongo/update-by-id mongo/applications application-id
-                {$push {:invites {:id    invite-id
-                                  :title       title
-                                  :text        text
-                                  :created     created
-                                  :inviter     (security/summary user)
-                                  :user  (security/summary invited)}
-                        :roles.reader (security/summary invited)}}))))))))
+            (mongo/update-by-id mongo/applications application-id
+              {$push {:invites {:title       title
+                                :application application-id
+                                :text        text
+                                :created     created
+                                :inviter     (security/summary user)
+                                :user  (security/summary invited)}
+                      :roles.reader (security/summary invited)}})))))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -118,12 +115,9 @@
     (fn [{application-id :id}]
       (with-user email
         (fn [invited]
-          (do
-            (mongo/update-by-id mongo/applications application-id
-              {$pull {:invites {:user.username email}
-                      :roles.reader  {:username email}}})
-            (mongo/update-by-id mongo/users (:id invited)
-              {$pull {:invites {:application application-id}}})))))))
+          (mongo/update-by-id mongo/applications application-id
+            {$pull {:invites {:user.username email}
+                    :roles.reader  {:username email}}}))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -136,9 +130,7 @@
         (mongo/update-by-id mongo/applications application-id
           {$push {:roles.writer (security/summary user)}
            $pull {:invites {:user.id (:id user)}
-                  :roles.reader  {:id (:id user)}}})
-        (mongo/update-by-id mongo/users (:id user)
-          {$pull {:invites {:application application-id}}})))))
+                  :roles.reader  {:id (:id user)}}})))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]

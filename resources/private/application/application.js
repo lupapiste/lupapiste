@@ -258,7 +258,6 @@
                                text: model.text()})
     .success(function(d) {
             model.email(undefined);
-            model.title(undefined);
             model.text(undefined);
       repository.reloadAllApplications();
     })
