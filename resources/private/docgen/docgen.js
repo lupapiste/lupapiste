@@ -104,6 +104,23 @@ var docgen = (function() {
 		return div;
 	}
 	
+	function buildDate(spec, model, path) {
+		var myPath = path.concat([spec.name]).join(".");
+
+		var input = document.createElement("input");
+		input.setAttribute("data-path", myPath);
+		input.type = "date";
+		input.className = "form-input form-date";
+		input.onchange = save;
+		input.value = model[spec.name] || "";
+
+		var div = document.createElement("span");
+		div.className = "form-entry";
+		div.appendChild(makeLabel("date", myPath));
+		div.appendChild(input);
+		return div;
+	}
+	
 	function buildChoice(spec, model, path) {
 		var name = spec.name;
 		var choices = spec.body;
@@ -158,6 +175,7 @@ var docgen = (function() {
 		text: buildText,
 		choice: buildChoice,
 		checkbox: buildCheckbox,
+		date: buildDate,
 		unknown: buildUnknown
 	};
 	
