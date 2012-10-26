@@ -6,44 +6,34 @@ var docgen = (function() {
 		return img;
 	}
 	
-	function save(e) {
-		var target = e.target;
-		var path = target.name;
-		var value = (target.type === "checkbox") ? target.checked : target.value;
-		
-		var loader = loaderImg();
-		var label = document.getElementById(path.replace(/\./g, "-"));
-		label.appendChild(loader);
-		
-		console.log("save", path, value);
-		setTimeout(function() {
-			target.className = "form-input";
-			label.removeChild(loader);
-		}, 1000);
+	function makeSaver(save) {
+		return function(e) {
+			e.preventDefault();
+			var target = e.target;
+			var path = target.name;
+			var value = (target.type === "checkbox") ? target.checked : target.value;
 
-		/*
-		ajax
-			.query("update-doc", {doc: "123", updates: [[path, value]]})
-			.success(function() {
-				target.className = "form-input";
-			})
-			.error(function(e) {
-				var status = e["status"] || "err";
-				target.className = "form-input form-input-" + status;
-			})
-			.fail(function() {
-				target.className = "form-input form-input-err";
-			})
-			.complete(function() {
+			var loader = loaderImg();
+			var label = document.getElementById(path.replace(/\./g, "-"));
+			label.appendChild(loader);
+			
+			save(path, value, function(result) {
 				label.removeChild(loader);
-			})
-			.call();
-		*/
-		
-		e.preventDefault();
-		return false;
+				if (result === "ok") {
+					target.className = "form-input";
+				} else if (result === "warn") {
+					target.className = "form-input form-input-warn";
+				} else if (result === "err") {
+					target.className = "form-input form-input-err";
+				} else {
+					error("Unknown result:", result, "path:", path);
+				}
+			});
+			
+			return false;
+		};
 	}
-	
+				
 	function makeLabel(type, path) {
 		var label = document.createElement("label");
 		label.id = path.replace(/\./g, "-");
@@ -52,7 +42,7 @@ var docgen = (function() {
 		return label;
 	}
 
-	function makeInput(type, path, value, extraClass) {
+	function makeInput(type, path, value, save, extraClass) {
 		var input = document.createElement("input");
 		input.name = path;
 		input.type = type;
@@ -66,16 +56,16 @@ var docgen = (function() {
 		return input;
 	}
 	
-	function buildCheckbox(spec, model, path) {
+	function buildCheckbox(spec, model, path, save) {
 		var myPath = path.concat([spec.name]).join(".");
 		var span = document.createElement("span");
 		span.className = "form-entry";
-		span.appendChild(makeInput("checkbox", myPath, model[spec.name]));
+		span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
 		span.appendChild(makeLabel("checkbox", myPath));
 		return span;
 	}
 	
-	function buildString(spec, model, path, partOfChoice) {
+	function buildString(spec, model, path, save, partOfChoice) {
 		var myPath = path.concat([spec.name]).join(".");
 		var div = document.createElement("span");
 		var sizeClass = "";
@@ -85,7 +75,7 @@ var docgen = (function() {
 		}
 		div.className = "form-entry";
 		div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
-		div.appendChild(makeInput("string", myPath, model[spec.name], sizeClass));
+		div.appendChild(makeInput("string", myPath, model[spec.name], save, sizeClass));
 		if (spec.unit) {
 			var unit = document.createElement("span");
 			unit.className = "form-string-unit";
@@ -95,7 +85,7 @@ var docgen = (function() {
 		return div;
 	}
 	
-	function buildText(spec, model, path) {
+	function buildText(spec, model, path, save) {
 		var myPath = path.concat([spec.name]).join(".");
 
 		var input = document.createElement("textarea");
@@ -113,7 +103,7 @@ var docgen = (function() {
 		return div;
 	}
 	
-	function buildDate(spec, model, path) {
+	function buildDate(spec, model, path, save) {
 		var myPath = path.concat([spec.name]).join(".");
 
 		var input = document.createElement("input");
@@ -130,7 +120,7 @@ var docgen = (function() {
 		return div;
 	}
 	
-	function buildSelect(spec, model, path) {
+	function buildSelect(spec, model, path, save) {
 		var myPath = path.concat([spec.name]).join(".");
 
 		var select = document.createElement("select");
@@ -138,15 +128,14 @@ var docgen = (function() {
 		select.className = "form-input form-select";
 		select.onchange = save;
 		
-		var selectedOption = Object.keys(model[spec.name])[0];
-		console.log("selectedOption", selectedOption, spec.name);
+		var selectedOption = model[spec.name] || "";
 		
 		var option = document.createElement("option");
 		option.value = "";
 		option.appendChild(document.createTextNode(loc("selectone")));
 		if (selectedOption === "") option.selected = "selected";
 		select.appendChild(option);
-		
+
 		$.each(spec.body, function(i, o) {
 			var name = o.name;
 			var option = document.createElement("option");
@@ -162,31 +151,21 @@ var docgen = (function() {
 		div.appendChild(select);
 		return div;
 	}
-
-	/*
-	<select name="cars">
-	<option value="volvo">Volvo</option>
-	<option value="saab">Saab</option>
-	<option value="fiat">Fiat</option>
-	<option value="audi">Audi</option>
-	</select>
-	*/
 	
-	function buildChoice(spec, model, path) {
+	function buildChoice(spec, model, path, save) {
 		var name = spec.name;
 		var choices = spec.body;
 		var myModel = model[name] || {};
 		var myPath = path.concat([name]);
 		
 		var choicesDiv = document.createElement("div");
-		for (var i = 0; i < choices.length; i++) {
-			var choice = choices[i];
+		$.each(choices, function(i, choice) {
 			if (choice.type === "string") {
-				choicesDiv.appendChild(buildString(choice, myModel, myPath, true));
+				choicesDiv.appendChild(buildString(choice, myModel, myPath, save, true));
 			} else {
-				choicesDiv.appendChild(build(choice, myModel, myPath));				
+				choicesDiv.appendChild(build(choice, myModel, myPath, save));				
 			}
-		}
+		})
 		
 		var div = document.createElement("div");
 		div.className = "form-choice";
@@ -195,7 +174,7 @@ var docgen = (function() {
 		return div;
 	}
 	
-	function buildGroup(spec, model, path) {
+	function buildGroup(spec, model, path, save) {
 		var name = spec.name;
 		var parts = spec.body;
 		var myModel = model[name] || {};
@@ -203,7 +182,7 @@ var docgen = (function() {
 		
 		var partsDiv = document.createElement("div");
 		for (var i = 0; i < parts.length; i++) {
-			partsDiv.appendChild(build(parts[i], myModel, myPath));
+			partsDiv.appendChild(build(parts[i], myModel, myPath, save));
 		}
 		
 		var div = document.createElement("div");
@@ -213,7 +192,7 @@ var docgen = (function() {
 		return div;
 	}
 	
-	function buildUnknown(spec, model, path) {
+	function buildUnknown(spec, model, path, save) {
 		error("Unknown element type:", spec.type, path);
 		var div = document.createElement("div");
 		div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
@@ -231,20 +210,20 @@ var docgen = (function() {
 		unknown: buildUnknown
 	};
 	
-	function build(spec, model, path) {
+	function build(spec, model, path, save) {
 		var builder = builders[spec.type] || buildUnknown;
-		return builder(spec, model, path);
+		return builder(spec, model, path, save);
 	}
 	
-	function appendElements(body, specs, model, path) {
+	function appendElements(body, specs, model, path, save) {
 		var l = specs.length;
 		for (var i = 0; i < l; i++) {
-			body.appendChild(build(specs[i], model, path));
+			body.appendChild(build(specs[i], model, path, save));
 		}
 		return body;
 	}
 
-	function buildDocument(spec, model) {
+	function buildDocument(spec, model, save) {
 		var section = document.createElement("section");
 		section.className = "accordion";
 		
@@ -253,7 +232,7 @@ var docgen = (function() {
 		title.onclick = accordion.toggle;
 		
 		var elements = document.createElement("article");
-		appendElements(elements, spec.body, model, []);
+		appendElements(elements, spec.body, model, [], makeSaver(save));
 		
 		section.appendChild(title);
 		section.appendChild(elements);
