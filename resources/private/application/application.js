@@ -34,7 +34,7 @@
     id: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
-      permitType: ko.observable(),
+    permitType: ko.observable(),
     title: ko.observable(),
     created: ko.observable(),
     documents: ko.observable(),
@@ -69,6 +69,21 @@
         })
         .call();
       return false;
+    },
+    
+    deleteInvite: function(model) {
+      var invite = application.invites()[0];
+      var applicationId = invite.application();
+      var email = invite.user.username();
+      debug(applicationId);
+      debug(email);
+      ajax.command("remove-invite", { id: applicationId, email: email })
+        .success(function(d) {
+          notify.success("kutsu poistettu",model);
+          repository.reloadAllApplications();
+        })
+        .call();
+    return false;
     }
   };
   
@@ -248,23 +263,25 @@
   comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
   
   var invite = {
-      email : ko.observable(),
-      title : ko.observable("uuden suunnittelijan lisääminen"),
-      text  : ko.observable(),
+    email : ko.observable(),
+    title : ko.observable("uuden suunnittelijan lisääminen"),
+    text  : ko.observable(),
     submit: function(model) {
-        ajax.command("invite", { id: application.id(),
+      ajax.command("invite", { id: application.id(),
                                email: model.email(),
                                title: model.title(),
                                text: model.text()})
-    .success(function(d) {
-            model.email(undefined);
-            model.text(undefined);
-      repository.reloadAllApplications();
-    })
-          .error(function(d) { notify.info("kutsun lähettäminen epäonnistui",d); })
-    .call();
-    return false;
-  }
+        .success(function(d) {
+          model.email(undefined);
+          model.text(undefined);
+          repository.reloadAllApplications();
+        })
+        .error(function(d) {
+          notify.info("kutsun lähettäminen epäonnistui",d);
+        })
+        .call();
+      return false;
+    }
   }
 
     var tab = {
@@ -299,7 +316,7 @@
       refreshMap();
     });
   }
-
+  
   $(function() {
     hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
       onPageChange(e);

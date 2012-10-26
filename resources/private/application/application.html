@@ -12,6 +12,7 @@
 					<span id="test-application-street" data-bind="text: street"></span>, 
 					<span data-bind="text: zip"></span> <span data-bind="text: city"></span>
 				</h1>
+        
 				<div class="application_summary_info">
 					<div>
 						<p>Lupatunnus:</p>
@@ -107,10 +108,12 @@
                   </div>
                 </div>
                 <h3>Kutsutut</h3>
+
                 <ul data-bind="foreach: invites">
                   <li>
                     <span data-bind="text: user.username"></span>
                     (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                    
                     - <span data-bind="text: text"></span>
                   </li>
                 </ul>
