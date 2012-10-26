@@ -8,13 +8,20 @@ var docgen = (function() {
 	
 	function save(e) {
 		var target = e.target;
-		var path = target.getAttribute("data-path");
+		var path = target.name;
 		var value = (target.type === "checkbox") ? target.checked : target.value;
 		
 		var loader = loaderImg();
 		var label = document.getElementById(path.replace(/\./g, "-"));
 		label.appendChild(loader);
 		
+		console.log("save", path, value);
+		setTimeout(function() {
+			target.className = "form-input";
+			label.removeChild(loader);
+		}, 1000);
+
+		/*
 		ajax
 			.query("update-doc", {doc: "123", updates: [[path, value]]})
 			.success(function() {
@@ -31,7 +38,9 @@ var docgen = (function() {
 				label.removeChild(loader);
 			})
 			.call();
-				
+		*/
+		
+		e.preventDefault();
 		return false;
 	}
 	
@@ -45,7 +54,7 @@ var docgen = (function() {
 
 	function makeInput(type, path, value, extraClass) {
 		var input = document.createElement("input");
-		input.setAttribute("data-path", path);
+		input.name = path;
 		input.type = type;
 		input.className = "form-input form-" + type + " " + (extraClass || "");
 		input.onchange = save;
@@ -90,7 +99,7 @@ var docgen = (function() {
 		var myPath = path.concat([spec.name]).join(".");
 
 		var input = document.createElement("textarea");
-		input.setAttribute("data-path", myPath);
+		input.name = myPath;
 		input.setAttribute("rows", spec["rows"] || "10");
 		input.setAttribute("cols", spec["cols"] || "40");
 		input.className = "form-input form-text";
@@ -108,7 +117,7 @@ var docgen = (function() {
 		var myPath = path.concat([spec.name]).join(".");
 
 		var input = document.createElement("input");
-		input.setAttribute("data-path", myPath);
+		input.name = myPath;
 		input.type = "date";
 		input.className = "form-input form-date";
 		input.onchange = save;
@@ -120,6 +129,48 @@ var docgen = (function() {
 		div.appendChild(input);
 		return div;
 	}
+	
+	function buildSelect(spec, model, path) {
+		var myPath = path.concat([spec.name]).join(".");
+
+		var select = document.createElement("select");
+		select.name = myPath;
+		select.className = "form-input form-select";
+		select.onchange = save;
+		
+		var selectedOption = Object.keys(model[spec.name])[0];
+		console.log("selectedOption", selectedOption, spec.name);
+		
+		var option = document.createElement("option");
+		option.value = "";
+		option.appendChild(document.createTextNode(loc("selectone")));
+		if (selectedOption === "") option.selected = "selected";
+		select.appendChild(option);
+		
+		$.each(spec.body, function(i, o) {
+			var name = o.name;
+			var option = document.createElement("option");
+			option.value = name;
+			option.appendChild(document.createTextNode(loc(name)));
+			if (selectedOption === name) option.selected = "selected";
+			select.appendChild(option);
+		});
+
+		var div = document.createElement("span");
+		div.className = "form-entry";
+		div.appendChild(makeLabel("select", myPath));
+		div.appendChild(select);
+		return div;
+	}
+
+	/*
+	<select name="cars">
+	<option value="volvo">Volvo</option>
+	<option value="saab">Saab</option>
+	<option value="fiat">Fiat</option>
+	<option value="audi">Audi</option>
+	</select>
+	*/
 	
 	function buildChoice(spec, model, path) {
 		var name = spec.name;
@@ -175,6 +226,7 @@ var docgen = (function() {
 		text: buildText,
 		choice: buildChoice,
 		checkbox: buildCheckbox,
+		select: buildSelect,
 		date: buildDate,
 		unknown: buildUnknown
 	};
