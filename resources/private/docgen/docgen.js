@@ -1,39 +1,5 @@
 var docgen = (function() {
 	
-	function loaderImg() {
-		var img = document.createElement("img");
-		img.src = "loader.gif";
-		return img;
-	}
-	
-	function makeSaver(save) {
-		return function(e) {
-			e.preventDefault();
-			var target = e.target;
-			var path = target.name;
-			var value = (target.type === "checkbox") ? target.checked : target.value;
-
-			var loader = loaderImg();
-			var label = document.getElementById(path.replace(/\./g, "-"));
-			label.appendChild(loader);
-			
-			save(path, value, function(result) {
-				label.removeChild(loader);
-				if (result === "ok") {
-					target.className = "form-input";
-				} else if (result === "warn") {
-					target.className = "form-input form-input-warn";
-				} else if (result === "err") {
-					target.className = "form-input form-input-err";
-				} else {
-					error("Unknown result:", result, "path:", path);
-				}
-			});
-			
-			return false;
-		};
-	}
-				
 	function makeLabel(type, path) {
 		var label = document.createElement("label");
 		label.id = path.replace(/\./g, "-");
@@ -223,6 +189,40 @@ var docgen = (function() {
 		return body;
 	}
 
+	function loaderImg() {
+		var img = document.createElement("img");
+		img.src = "loader.gif";
+		return img;
+	}
+	
+	function makeSaverDelegate(save) {
+		return function(e) {
+			e.preventDefault();
+			var target = e.target;
+			var path = target.name;
+			var value = (target.type === "checkbox") ? target.checked : target.value;
+
+			var loader = loaderImg();
+			var label = document.getElementById(path.replace(/\./g, "-"));
+			label.appendChild(loader);
+			
+			save(path, value, function(result) {
+				label.removeChild(loader);
+				if (result === "ok") {
+					target.className = "form-input";
+				} else if (result === "warn") {
+					target.className = "form-input form-input-warn";
+				} else if (result === "err") {
+					target.className = "form-input form-input-err";
+				} else {
+					error("Unknown result:", result, "path:", path);
+				}
+			});
+			
+			return false;
+		};
+	}
+				
 	function buildDocument(spec, model, save) {
 		var section = document.createElement("section");
 		section.className = "accordion";
@@ -232,7 +232,7 @@ var docgen = (function() {
 		title.onclick = accordion.toggle;
 		
 		var elements = document.createElement("article");
-		appendElements(elements, spec.body, model, [], makeSaver(save));
+		appendElements(elements, spec.body, model, [], makeSaverDelegate(save));
 		
 		section.appendChild(title);
 		section.appendChild(elements);
