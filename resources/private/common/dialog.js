@@ -1,7 +1,8 @@
 
 ;(function() {
   $(function() {
-    $(".modal").click(function (e) {
+    /*
+    $(".modal2").click(function (e) {
       e.preventDefault();
       var id = $(this).attr('href');
       var maskHeight = $(document).height();
@@ -23,7 +24,8 @@
     $('#mask').click(function () {
         $(this).hide();
         $('.window').hide();
-    }); 
+    });*/
+
     
   });
 })();       

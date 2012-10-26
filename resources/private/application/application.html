@@ -2,7 +2,6 @@
 <html lang="en">
 <body>
 	<section class="page" id="application" data-bind="with: application">
-	  
 			<div class="breadcrumb">
 				<a href="#!/applications" id="test-applications">Omat hakemukset</a> / <span data-bind="text: title"></span>
 			</div>
@@ -114,13 +113,7 @@
                     - <span data-bind="text: text"></span>
                   </li>
                 </ul>
-                <div data-bind="with: $root.invite">
-                  <table>
-                    <tr><td>sähköpostiosoite</td><td><input class="form_input" type="text" data-bind="value: email" /></td></tr>
-                    <tr><td>teksti          </td><td><textarea rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
-                    <tr><td>&nbsp;          </td><td><a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a></td></tr>
-                  </table>
-                </div>
+                
               </div>
 						</div>
 					<div class="application_section">
