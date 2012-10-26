@@ -317,6 +317,7 @@
       hub.moveOskariMapToDiv("application-map");
       refreshMap();
     });
+
   }
   
   $(function() {
