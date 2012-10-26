@@ -228,8 +228,8 @@
           {$set {:state :submitted, :submitted (:created command) }}))))
 
 (defcommand "create-application"
-  {:create-application {:parameters [:lat :lon :street :zip :city :categories]
-                       :roles      [:applicant]}}
+  {:parameters [:lat :lon :street :zip :city :categories]
+   :roles      [:applicant]}
   [{user :user data :data created :created :as command}]
   (let [id  (mongo/create-id)]
     (mongo/insert mongo/applications
