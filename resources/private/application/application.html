@@ -12,6 +12,7 @@
 					<span id="test-application-street" data-bind="text: street"></span>, 
 					<span data-bind="text: zip"></span> <span data-bind="text: city"></span>
 				</h1>
+        
 				<div class="application_summary_info">
 					<div>
 						<p>Lupatunnus:</p>
@@ -107,8 +108,13 @@
                   </div>
                 </div>
                 <h3>Kutsutut</h3>
+                
+                <span data-bind="if: invites().length > 0">
+                  <a href="#" id="delete-all-invites" data-bind="click: deleteAllInvites">Poista kaikki kutsut</a>
+                </span> 
+
                 <ul data-bind="foreach: invites">
-                  <li>
+                  <li id="user-invite" class="user-invite">
                     <span data-bind="text: user.username"></span>
                     (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
                     - <span data-bind="text: text"></span>
@@ -116,8 +122,8 @@
                 </ul>
                 <div data-bind="with: $root.invite">
                   <table>
-                    <tr><td>sähköpostiosoite</td><td><input class="form_input" type="text" data-bind="value: email" /></td></tr>
-                    <tr><td>teksti          </td><td><textarea rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
+                    <tr><td>sähköpostiosoite</td><td><input id="invite-email" class="form_input" type="text" data-bind="value: email" /></td></tr>
+                    <tr><td>teksti          </td><td><textarea id="invite-text" rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
                     <tr><td>&nbsp;          </td><td><a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a></td></tr>
                   </table>
                 </div>
