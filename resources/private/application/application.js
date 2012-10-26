@@ -71,19 +71,21 @@
       return false;
     },
     
-    deleteInvite: function(model) {
-      var invite = application.invites()[0];
-      var applicationId = invite.application();
-      var email = invite.user.username();
-      debug(applicationId);
-      debug(email);
-      ajax.command("remove-invite", { id: applicationId, email: email })
-        .success(function(d) {
-          notify.success("kutsu poistettu",model);
-          repository.reloadAllApplications();
-        })
-        .call();
-    return false;
+    deleteAllInvites: function(model) {
+      for(var i = 0; i < application.invites().length; i++) {
+        var invite = application.invites()[i];
+        var applicationId = invite.application();
+        var email = invite.user.username();
+        debug(applicationId);
+        debug(email);
+        ajax.command("remove-invite", { id: applicationId, email: email })
+          .success(function(d) {
+            notify.success("kutsu poistettu",model);
+            repository.reloadAllApplications();
+          })
+          .call();
+      }
+      return false;
     }
   };
   
