@@ -73,8 +73,8 @@ var docgen = (function() {
 		var myPath = path.concat([spec.name]).join(".");
 
 		var input = document.createElement("input");
+		input.setAttribute("type", "date");
 		input.name = myPath;
-		input.type = "date";
 		input.className = "form-input form-date";
 		input.onchange = save;
 		input.value = model[spec.name] || "";
