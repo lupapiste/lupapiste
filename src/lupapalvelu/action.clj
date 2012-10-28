@@ -126,8 +126,7 @@
       ;; verify against user in validation?
       (do
         (mongo/update-by-id mongo/applications application-id
-          {$push {:roles.writer (security/summary user)
-                  :auth         (role user :writer)}
+          {$push {:auth         (role user :writer)}
            $pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "rh1-demo"
