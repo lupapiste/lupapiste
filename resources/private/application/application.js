@@ -81,7 +81,8 @@
         })
         .call();
       return false;
-    },
+    }
+  };
   
   var emptyRh1 = {
     rakennuspaikanTiedot: {
