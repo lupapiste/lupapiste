@@ -71,17 +71,29 @@
       return false;
     },
 
-    deleteInvite : function(model) {
-      console.log(model);
-      ajax.command("remove-invite", { id : model.application(),
-                                      email : model.user.username()})
+    removeInvite : function(model) {
+      var applicationId = application.id();
+      ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function(d) { 
           notify.success("kutsu poistettu", model);
           repository.reloadAllApplications();
         })
         .call();
       return false;
+    },
+    
+    removeAuth : function(model) {
+      console.log(model);
+      var applicationId = application.id();
+      ajax.command("remove-auth", { id : applicationId, email : model.username()})
+        .success(function(d) { 
+          notify.success("oikeus poistettu", model);
+          repository.reloadAllApplications();
+        })
+        .call();
+      return false;
     }
+
   };
   
   var emptyRh1 = {

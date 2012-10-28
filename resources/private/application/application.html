@@ -88,6 +88,7 @@
                       <li>
                         <span data-bind="text: username"></span> 
                         (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        <a name="remove-invite" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
                       </li>
                     </ul>
                     <h4>Kirjoitusoikeudet</h4>
@@ -95,6 +96,7 @@
                       <li>
                         <span data-bind="text: username"></span> 
                         (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        <a name="remove-invite" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
                       </li>
                     </ul>
                     <!--  /ko -->
@@ -108,7 +110,7 @@
                     <span data-bind="text: user.username"></span>
                     (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
                     - <span data-bind="text: text"></span>
-                    <a name="remove-invite" href="#" data-bind="click: $root.application.deleteInvite">Poista</a>
+                    <a name="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
                   </li>
                 </ul>
 

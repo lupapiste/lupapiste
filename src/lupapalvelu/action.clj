@@ -129,6 +129,18 @@
           {$push {:auth         (role user :writer)}
            $pull {:invites      {:user.id (:id user)}}})))))
 
+;; FIXME: can remove original owner auths.
+(defcommand "remove-auth"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email
+        (fn [invited]
+          (mongo/update-by-id mongo/applications application-id
+            {$pull {:auth         {:username email}}}))))))
+
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
