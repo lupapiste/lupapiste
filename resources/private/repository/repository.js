@@ -14,21 +14,12 @@ var repository = function() {
 		for (var n = 0; n < applications.length; n++) {
 			var application = applications[n];
 			var id = application.id;
-			applicationsById[id] = pimped(application);
+			applicationsById[id] = application;
 			
 			hub.send("repository-application-reload", {applicationId: id});
 		}
 		hub.send("repository-reload");
 	}
-	
-  // I am mutable evil
-  function pimped(application) {
-    var owner = _.find(application.rolez,function(r) {return r.role == "owner"});
-    var ownerName = owner.firstName + ' ' + owner.lastName;
-    debug("pimping application "+application.id+", setting ownerName -> "+ownerName)
-    application.ownerName = ownerName;
-    return application;
-  }
 	
 	function reloadAllApplications(callback) {
 		debug("reloading started");

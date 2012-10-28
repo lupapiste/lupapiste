@@ -38,7 +38,7 @@
 
 (defn- application-restriction-for [user]
   (case (keyword (:role user))
-    :applicant {:rolez.id (:id user)}
+    :applicant {:auth.id (:id user)}
     :authority {:authority (:authority user)}
     (do
       (warn "invalid role to get applications")
@@ -103,8 +103,7 @@
                                 :created     created
                                 :inviter     (security/summary user)
                                 :user  (security/summary invited)}
-                      :roles.reader (security/summary invited)
-                      :rolez (role invited :reader)}})))))))
+                      :auth (role invited :reader)}})))))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -116,8 +115,7 @@
         (fn [invited]
           (mongo/update-by-id mongo/applications application-id
             {$pull {:invites      {:user.username email}
-                    :roles.reader {:username email}
-                    :rolez        {:username email}}}))))))
+                    :auth         {:username email}}}))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -129,9 +127,8 @@
       (do
         (mongo/update-by-id mongo/applications application-id
           {$push {:roles.writer (security/summary user)
-                  :rolez        (role user :writer)}
-           $pull {:invites      {:user.id (:id user)}
-                  :roles.reader {:id (:id user)}}})))))
+                  :auth         (role user :writer)}
+           $pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
@@ -231,7 +228,8 @@
   {:parameters [:lat :lon :street :zip :city :categories]
    :roles      [:applicant]}
   [{user :user data :data created :created :as command}]
-  (let [id  (mongo/create-id)]
+  (let [id    (mongo/create-id)
+        owner (role user :owner)]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -245,8 +243,8 @@
                  :city (:city data)}
        :title (:street data)
        :authority (:city data)
-       :roles {:applicant (security/summary user)}
-       :rolez [(role user :owner)]
+       :roles {:applicant owner}
+       :auth [owner]
        :documents {:hakija {:id (mongo/create-id)
                             :nimi (str (:firstName user) " " (:lastName user))
                             :address {:street (:street user)

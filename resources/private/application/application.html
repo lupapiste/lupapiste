@@ -83,27 +83,22 @@
                 <div>
                   <h3>Valtuutetut</h3>
                   <div data-bind="with: $root.applicationModel.data">
-                    <div data-bind="with: roles">
-                      <h4>Lukuoikeudet</h4>
-                      <!-- ko if: $data.reader -->
-                      <ul data-bind="foreach: reader">
-                        <li>
-                          <span data-bind="text: username"></span> 
-                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        </li>
-                      </ul>
-                      <!--  /ko -->
-                      <h4>Kirjoitusoikeudet</h4>
-                      <!-- ko if: $data.writer -->
-                       <ul data-bind="foreach: writer">
-                        <li>
-                          <span data-bind="text: username"></span> 
-                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        </li>
-                      </ul>
-                      <!--  /ko -->
-                      <br/>
-                    </div>
+                    <h4>Lukuoikeudet</h4>
+                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'reader'})">
+                      <li>
+                        <span data-bind="text: username"></span> 
+                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                      </li>
+                    </ul>
+                    <h4>Kirjoitusoikeudet</h4>
+                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'writer'})">
+                      <li>
+                        <span data-bind="text: username"></span> 
+                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                      </li>
+                    </ul>
+                    <!--  /ko -->
+                    <br/>
                   </div>
                 </div>
                 <h3>Kutsutut</h3>
