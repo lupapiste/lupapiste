@@ -104,11 +104,11 @@
                 <h3>Kutsutut</h3>
                 
                 <ul data-bind="foreach: invites">
-                  <li class="user-invite">
+                  <li class="user-invite" name="user-invite">
                     <span data-bind="text: user.username"></span>
                     (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
                     - <span data-bind="text: text"></span>
-                    <a href="#" data-bind="click: $root.application.deleteInvite">Poista</a>
+                    <a name="remove-invite" href="#" data-bind="click: $root.application.deleteInvite">Poista</a>
                   </li>
                 </ul>
 
