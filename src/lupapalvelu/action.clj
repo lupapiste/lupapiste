@@ -105,18 +105,6 @@
                                 :user  (security/summary invited)}
                       :auth (role invited :reader)}})))))))
 
-(defcommand "remove-invite"
-  {:parameters [:id :email]
-   :roles      [:applicant]}
-  [{{:keys [id email]} :data :as command}]
-  (with-application command
-    (fn [{application-id :id}]
-      (with-user email
-        (fn [invited]
-          (mongo/update-by-id mongo/applications application-id
-            {$pull {:invites      {:user.username email}
-                    :auth         {$and [{:username email} {$not {:type :owner}}]}}}))))))
-
 (defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
@@ -129,6 +117,19 @@
           {$push {:auth         (role user :writer)}
            $pull {:invites      {:user.id (:id user)}}})))))
 
+(defcommand "remove-invite"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email
+        (fn [invited]
+          (mongo/update-by-id mongo/applications application-id
+            {$pull {:invites      {:user.username email}
+                    :auth         {$and [{:username email} 
+                                         {:type {$ne :owner}}]}}}))))))
+
 ;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
   {:parameters [:id :email]
@@ -137,7 +138,8 @@
   (with-application command
     (fn [{application-id :id}]
       (mongo/update-by-id mongo/applications application-id
-        {$pull {:auth {$and [{:username email} {$not {:type :owner}}]}}}))))
+        {$pull {:auth {$and [{:username email} 
+                             {:type {$ne :owner}}]}}}))))
 
 
 (defcommand "rh1-demo"
