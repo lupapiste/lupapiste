@@ -11,23 +11,6 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]))
 
-(in-dev
-  (defquery "actions" {} [_]
-    (ok :actions (get-actions-without-handlers)))
-  
-  (defn foreach-action [user data]
-      (map
-        #(assoc (command % data) :user user)
-        (keys (get-actions))))
-  
-  (defn validated [command]
-    {(:action command) (validate command)})
-
-  (defquery "allowed-actions" {} [{data :data user :user}]
-    (ok :actions (into {} (map validated (foreach-action user data))))))
-
-(defquery "ping" {} [q] (ok :text "pong"))
-
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
 (in-dev
@@ -111,10 +94,9 @@
   [{user :user :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (do
-        (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
-          {$push {:auth         (role user :writer)}
-           $pull {:invites      {:user.id (:id user)}}})))))
+      (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+        {$push {:auth         (role user :writer)}
+         $pull {:invites      {:user.id (:id user)}}}))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
