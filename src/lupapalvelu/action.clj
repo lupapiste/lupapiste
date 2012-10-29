@@ -78,8 +78,11 @@
         (fn [invited]
           (if (= (:role invited) "authority")
             (fail "can't ask authority to be a invited")
-            ;; TODO: check for duplicates
-            (mongo/update-by-id mongo/applications application-id
+            (mongo/update mongo/applications
+              {:_id application-id 
+               $or [{:invites {$not {$elemMatch {:user.username email}}}}
+                    {:invites []}
+                    {:invites {$exists false}}]}
               {$push {:invites {:title       title
                                 :application application-id
                                 :text        text
