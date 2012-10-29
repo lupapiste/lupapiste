@@ -223,7 +223,7 @@ var docgen = (function() {
 		};
 	}
 				
-	function buildDocument(spec, model, save) {
+	function buildElement(spec, model, save) {
 		var section = document.createElement("section");
 		section.className = "accordion";
 		
@@ -240,8 +240,25 @@ var docgen = (function() {
 		return section;
 	}
 	
+	function DocModel(spec, model, callback) {
+		var self = this;
+		
+		self.spec = spec;
+		self.model = model;
+		self.callback = callback;
+		
+		self.element = buildElement(self.spec, self.model, self.callback);
+		
+		self.applyUpdates = function(updates) {
+			// TODO: Implement me.
+			$.each(updates, function(i, u) {
+				debug("update", u[0], u[1]);
+			});
+		};
+	}
+	
 	return {
-		build: buildDocument
+		build: function(spec, model, callback) { return new DocModel(spec, model, callback); }
 	};
 	
 })();
