@@ -80,9 +80,7 @@
             (fail "can't ask authority to be a invited")
             (mongo/update mongo/applications
               {:_id application-id 
-               $or [{:invites {$not {$elemMatch {:user.username email}}}}
-                    {:invites []}
-                    {:invites {$exists false}}]}
+               $or [{:invites {$not {$elemMatch {:user.username email}}}}]}
               {$push {:invites {:title       title
                                 :application application-id
                                 :text        text
