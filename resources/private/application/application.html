@@ -88,7 +88,7 @@
                       <li>
                         <span data-bind="text: username"></span> 
                         (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        <a name="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                        <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
                       </li>
                     </ul>
                     <h4>Kirjoitusoikeudet</h4>
@@ -96,7 +96,7 @@
                       <li>
                         <span data-bind="text: username"></span> 
                         (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        <a name="remove-write" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                        <a class="remove-write" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
                       </li>
                     </ul>
                     <!--  /ko -->
@@ -106,11 +106,11 @@
                 <h3>Kutsutut</h3>
                 
                 <ul data-bind="foreach: invites">
-                  <li class="user-invite" name="user-invite">
+                  <li class="user-invite">
                     <span data-bind="text: user.username"></span>
                     (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
                     - <span data-bind="text: text"></span>
-                    <a name="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
+                    <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
                   </li>
                 </ul>
 
