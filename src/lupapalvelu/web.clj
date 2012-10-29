@@ -27,7 +27,7 @@
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
-                 
+
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
   (or (session/get :user) ((request/ring-request) :user)))
@@ -61,7 +61,7 @@
 ;; Commands
 ;;
 
-(defn- with-user 
+(defn- with-user
   ([m] (with-user m (current-user)))
   ([m user] (merge m {:user user})))
 
@@ -144,14 +144,16 @@
 ;; File upload/download:
 ;;
 
-(defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload}
-  (debug "upload: %s: %s" name (str upload))
-  (core/execute
+;; Content type must not be JSON. Damn you IE.
+(defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload :as data}
+  (debug "upload: %s: %s" data (str upload))
+
+  (json/generate-string (core/execute
     (with-user
       (core/command "upload-attachment" (assoc upload
                                                :id applicationId
                                                :attachmentId attachmentId
-                                               :type (or type ""))))))
+                                               :type (or type "")))))))
 
 (def windows-filename-max-length 255)
 
@@ -189,9 +191,9 @@
 (defpage [:post "/ajaxProxy/:srv"] {srv :srv}
   (let [request (ring-request) body (slurp(:body request)) urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
     (client/post (get urls srv)
-	     {:body body
-	      :content-type :json
-	      :accept :json})))
+       {:body body
+        :content-type :json
+        :accept :json})))
 
 ;;
 ;; Development thingies.

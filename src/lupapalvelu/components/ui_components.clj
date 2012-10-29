@@ -4,7 +4,7 @@
 
 (def ui-components
   {:jquery       {:css ["jquery.pnotify.default.css"]
-                  :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js" "jquery.filedrop.js"
+                  :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js"
                        "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
 
    :oskari       {:depends [:jquery]
@@ -23,7 +23,7 @@
 
    :buildinfo    {:depends [:jquery]
                   :js ["buildinfo.js"]}
-   
+
    :invites      {:depends [:common]
                   :js ["invites.js"]}
 
@@ -48,8 +48,7 @@
                             :html ["applications.html"]}
 
    :attachment   {:depends [:common :repository]
-                  :js ["attachment.js" "upload.js"]
-                  :css ["upload.css"]
+                  :js ["attachment.js"]
                   :html ["attachment.html"]}
 
    :register     {:depends [:common]
