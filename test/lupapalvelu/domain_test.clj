@@ -4,8 +4,8 @@
         midje.sweet))
 
 (def application
-  {:roles {:role-x {:userId :user-x}
-           :role-y {:userId :user-y}}})
+  {:roles {:role-x {:id :user-x}
+           :role-y {:id :user-y}}})
 
 (facts
   (fact (role-in-application :user-x application) => :role-x)

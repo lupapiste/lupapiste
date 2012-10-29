@@ -3,7 +3,7 @@
   (:require [lupapalvelu.mongo :as mongo])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
-(defn- non-private [map]
+(defn non-private [map]
   (dissoc map :private))
 
 (defn get-hash [password salt] (BCrypt/hashpw password salt))
@@ -13,7 +13,8 @@
 
 (defn summary [user]
   "returns common information about the user"
-  {:userId    (:id user)
+  {:id        (:id user)
+   :username  (:username user)
    :firstName (:firstName user)
    :lastName  (:lastName user)
    :role      (:role user)})

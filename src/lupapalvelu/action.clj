@@ -2,6 +2,7 @@
   (:use [monger.operators]
         [clojure.string :only [join]]
         [lupapalvelu.core]
+        [lupapalvelu.env]
         [lupapalvelu.log]
         [lupapalvelu.domain]
         [clojure.java.io :only [file]]
@@ -10,25 +11,27 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]))
 
-(defquery "ping" {} [q] (ok :text "pong"))
+(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
-(defquery "user" {:authenticated true} [{user :user}]
-  (ok :user user))
+(in-dev
+  (defquery "users" {:roles [:admin]} [_]
+    (ok :users (map #(security/non-private %) (mongo/select mongo/users)))))
 
-(defcommand "create-id" {:authenticated true} [command]
-  (ok :id (mongo/create-id)))
+(defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
-(defquery "applications" {} [{user :user}]
+(defn- application-query-for [user]
   (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {:roles.applicant.userId (:id user)}))
-    :authority (ok :applications (mongo/select mongo/applications {:authority (:authority user)}))
-    (fail "invalid role to get applications")))
+    :applicant {:auth.id (:id user)}
+    :authority {:authority (:authority user)}
+    (do
+      (warn "invalid role to get applications")
+      {:_id "-1"} ))) ; should not yield any results
 
-(defquery "application" {:parameters [:id]} [{{id :id} :data user :user}]
-  (case (keyword (:role user))
-    :applicant (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:roles.applicant.userId (:id user)}]}))
-    :authority (ok :applications (mongo/select mongo/applications {$and [{:_id id} {:authority (:authority user)}]}))
-    (fail :text "invalid role to get application")))
+(defquery "applications" {:authenticated true} [{user :user}]
+  (ok :applications (mongo/select mongo/applications (application-query-for user))))
+
+(defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-query-for user)]})))
 
 (defcommand "give-application-verdict"
   {:parameters [:id :ok :text]
@@ -54,10 +57,77 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
+(defquery "invites"
+  {:authenticated true} 
+  [{{id :id} :user}]
+  (let [filter     {:invites {$elemMatch {:user.id id}}}
+        projection (assoc filter :_id 0)
+        data       (mongo/select mongo/applications filter projection)
+        invites    (flatten (map (comp :invites) data))]
+    (ok :invites invites)))
+
+(defcommand "invite"
+  {:parameters [:id :email :title :text]
+   :roles      [:applicant]}
+  [{created :created
+    user    :user
+    {:keys [id email title text]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email ;; allows invites only existing users
+        (fn [invited]
+          (if (= (:role invited) "authority")
+            (fail "can't ask authority to be a invited")
+            (mongo/update mongo/applications
+              {:_id application-id 
+               $or [{:invites {$not {$elemMatch {:user.username email}}}}]}
+              {$push {:invites {:title       title
+                                :application application-id
+                                :text        text
+                                :created     created
+                                :inviter     (security/summary user)
+                                :user  (security/summary invited)}
+                      :auth (role invited :reader)}})))))))
+
+(defcommand "approve-invite"
+  {:parameters [:id]
+   :roles      [:applicant]}
+  [{user :user :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+        {$push {:auth         (role user :writer)}
+         $pull {:invites      {:user.id (:id user)}}}))))
+
+(defcommand "remove-invite"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email
+        (fn [invited]
+          (mongo/update-by-id mongo/applications application-id
+            {$pull {:invites      {:user.username email}
+                    :auth         {$and [{:username email} 
+                                         {:type {$ne :owner}}]}}}))))))
+
+;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
+(defcommand "remove-auth"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (mongo/update-by-id mongo/applications application-id
+        {$pull {:auth {$and [{:username email} 
+                             {:type {$ne :owner}}]}}}))))
+
+
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
-   :states     [:open]}
+   :states     [:open :draft]}
   [command]
   (with-application command
     (fn [application]
@@ -95,9 +165,11 @@
              :firstName     (:firstName user)
              :lastName      (:lastName user)
              :email         (:email data)
-             :streetAddress (:street data)
-             :postalCode    (:zip data)
-             :postalPlace   (:city data)
+             :address      {
+                            :street (:street data)
+                            :zip    (:zip data)
+                            :city   (:city data)
+                            }
              :phone         (:phone data)
              :private       {:salt salt
                              :password (security/get-hash password salt)}))))
@@ -128,7 +200,7 @@
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
-        {$set {"roles.authority" (security/summary user)}}))))
+        {$set {:roles.authority (security/summary user)}}))))
 
 (defn approve-application [command]
   (with-application command
@@ -146,75 +218,110 @@
         mongo/applications {:_id (:id application)}
           {$set {:state :submitted, :submitted (:created command) }}))))
 
-(defn add-application [command]
-  (mongo/insert
-    mongo/applications
-    {:name (-> command :data :name)
-     :position {:lon (-> command :data :lon)
-                :lat (-> command :data :lat)}}))
-
-(defn create-application [{user :user data :data created :created :as command}]
-  (let [id  (mongo/create-id)
-        applicant-document-id (mongo/create-id)
-        operation-id (mongo/create-id)]
+(defcommand "create-application"
+  {:parameters [:lat :lon :street :zip :city :categories]
+   :roles      [:applicant]}
+  [{user :user data :data created :created :as command}]
+  (let [id    (mongo/create-id)
+        owner (role user :owner :type :owner)]
     (mongo/insert mongo/applications
-                  {:id id
-                   :created created
-                   :modified created
-                   :state :draft
-                   :permitType :buildingPermit
-                   :location {:lat (:lat data) :lon (:lon data)}
-                   :title (:streetAddress data)
-                   :streetAddress (:streetAddress data)
-                   :postalCode (:postalCode data)
-                   :postalPlace (:postalPlace data)
-                   :authority (:postalPlace data)
-                   :roles {:applicant (security/summary user)}
-                   :documents {applicant-document-id {:documentType :hakijaTieto
-                                                      :content {:nimi (str (:firstName user) " " (:lastName user))
-                                                                :katuosoite (:streetAddress user)
-                                                                :postinumero (:postalCode user)
-                                                                :postitoimipaikka (:postalPlace user)
-                                                                :puhelinnumero (:phone user)
-                                                                :sahkopostiosoite (:email user)}}
-                               operation-id {:documentType :toimenpide
-                                             :type (:categories data)
-                                             :content {:otsikko (str (:lastName user) ", " (:streetAddress data))}}}})
+      {:id id
+       :created created
+       :modified created
+       :state :draft
+       :permitType :buildingPermit
+       :location {:lat (:lat data)
+                  :lon (:lon data)}
+       :address {:street (:street data)
+                 :zip (:zip data)
+                 :city (:city data)}
+       :title (:street data)
+       :authority (:city data)
+       :roles {:applicant owner}
+       :auth [owner]
+       :documents {:hakija {:id (mongo/create-id)
+                            :nimi (str (:firstName user) " " (:lastName user))
+                            :address {:street (:street user)
+                                      :zip (:zip user)
+                                      :city (:city user)}
+                            :puhelinnumero (:phone user)
+                            :sahkopostiosoite (:email user)}
+                   :toimenpiteet [{:id (mongo/create-id)
+                                   :type (:categories data)
+                                   :otsikko (str (:lastName user) ", " (:street data))}]}})
     (ok :id id)))
 
 (defn create-attachment [{{application-id :id} :data created :created}]
-  (let [attachment-id (mongo/create-id)]
-    (mongo/update-by-id
-      mongo/applications
-      application-id
-      {$set {:modified created
-             (str "attachments." attachment-id) {:id attachment-id
-                                                 :name nil
-                                                 :filename nil
-                                                 :contentType nil
-                                                 :size nil}}})
+  (let [attachment-id (mongo/create-id)
+        attachment-model {:id attachment-id
+                          :type nil
+                          :state :none
+                          :latestVersion   {:version {:major 0, :minor 0}}
+                          :versions []
+                          :comments []}]
+    (mongo/update-by-id mongo/applications application-id
+      {$set {:modified created, (str "attachments." attachment-id) attachment-model}})
     (ok :applicationId application-id :attachmentId attachment-id)))
 
-(defn set-attachment-name [{{:keys [id attachmentId name]} :data created :created}]
+;; TODO refactor?
+(defcommand "set-attachment-name"
+  {:parameters [:id :attachmentId :type]
+   :roles      [:applicant :authority]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [application]
   (mongo/update-by-id
-    mongo/applications id
-    {$set {:modified created
-           (str "attachments." attachmentId ".name") name}}))
+    mongo/applications (:id application)
+    {$set {:modified (:created command)
+           (str "attachments." (-> command :data :attachmentId) ".type") (-> command :data :type)}}))))
 
-(defn upload-attachment [{created :created {:keys [id attachmentId name filename tempfile content-type size]} :data}]
-  (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId name filename tempfile content-type size)
-  (mongo/upload id attachmentId filename content-type tempfile created)
-  (mongo/update-by-id
-    mongo/applications id
-    {$set {:modified created
-           (str "attachments." attachmentId) {:id attachmentId
-                                              :name name
-                                              ; File name will be presented in ASCII when the file is downloaded.
-                                              ; Conversion could be done here as well, but we don't want to lose information.
-                                              :filename filename
-                                              :contentType content-type
-                                              :size size}}})
-  (.delete (file tempfile)))
+(defn- next-attachment-version [current-version user]
+  (if (= (keyword (:role user)) :authority)
+    {:major (:major current-version), :minor (inc (:minor current-version))}
+    {:major (inc (:major current-version)), :minor 0}))
+
+(defn- set-attachment-version [application-id attachment-id file-id type filename content-type size now user]
+  (when-let [application (mongo/by-id mongo/applications application-id)]
+    (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
+          next-version (next-attachment-version latest-version user)
+          version-model {
+                  :version  next-version
+                  :fileId   file-id
+                  :created  now
+                  :accepted nil
+                  :user    (security/summary user)
+                  ; File name will be presented in ASCII when the file is downloaded.
+                  ; Conversion could be done here as well, but we don't want to lose information.
+                  :filename filename
+                  :contentType content-type
+                  :size size}]
+
+        ; TODO check return value and try again with new version number
+        (mongo/update-by-query
+          mongo/applications
+          {:_id application-id
+           (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
+           (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
+          {$set {:modified now
+                 (str "attachments." attachment-id ".modified") now
+                 (str "attachments." attachment-id ".type")  type ; TODO is it OK to update type? Should be set at first time and not thereafter
+                 (str "attachments." attachment-id ".state")  :added
+                 (str "attachments." attachment-id ".latestVersion") version-model}
+           $push {(str "attachments." attachment-id ".versions") version-model}}))))
+
+(defcommand "upload-attachment"
+  {:parameters [:id :attachmentId :type :filename :tempfile :content-type :size]
+   :roles      [:applicant :authority]
+   :states     [:draft :open]}
+  [{created :created
+    user    :user
+    {:keys [id attachmentId type filename tempfile content-type size]} :data}]
+  (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId type filename tempfile content-type size)
+  (let [file-id (mongo/create-id)]
+    (mongo/upload file-id file-id filename content-type tempfile created)
+    (set-attachment-version id attachmentId file-id type filename content-type size created user)
+    (.delete (file tempfile))))
 
 (defn get-attachment [attachmentId]
   ;; FIXME access rights
