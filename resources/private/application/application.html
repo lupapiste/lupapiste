@@ -83,40 +83,34 @@
                 <div>
                   <h3>Valtuutetut</h3>
                   <div data-bind="with: $root.applicationModel.data">
-                    <div data-bind="with: roles">
-                      <h4>Lukuoikeudet</h4>
-                      <!-- ko if: $data.reader -->
-                      <ul data-bind="foreach: reader">
-                        <li>
-                          <span data-bind="text: username"></span> 
-                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        </li>
-                      </ul>
-                      <!--  /ko -->
-                      <h4>Kirjoitusoikeudet</h4>
-                      <!-- ko if: $data.writer -->
-                       <ul data-bind="foreach: writer">
-                        <li>
-                          <span data-bind="text: username"></span> 
-                          (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        </li>
-                      </ul>
-                      <!--  /ko -->
-                      <br/>
-                    </div>
+                    <h4>Lukuoikeudet</h4>
+                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'reader'})">
+                      <li>
+                        <span data-bind="text: username"></span> 
+                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        <a name="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                      </li>
+                    </ul>
+                    <h4>Kirjoitusoikeudet</h4>
+                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'writer'})">
+                      <li>
+                        <span data-bind="text: username"></span> 
+                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        <a name="remove-write" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                      </li>
+                    </ul>
+                    <!--  /ko -->
+                    <br/>
                   </div>
                 </div>
                 <h3>Kutsutut</h3>
                 
-                <span data-bind="if: invites().length > 0">
-                  <a href="#" id="delete-all-invites" data-bind="click: deleteAllInvites">Poista kaikki kutsut</a>
-                </span> 
-
                 <ul data-bind="foreach: invites">
-                  <li id="user-invite" class="user-invite">
+                  <li class="user-invite" name="user-invite">
                     <span data-bind="text: user.username"></span>
                     (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
                     - <span data-bind="text: text"></span>
+                    <a name="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
                   </li>
                 </ul>
 

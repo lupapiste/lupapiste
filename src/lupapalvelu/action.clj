@@ -36,21 +36,19 @@
 
 (defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
-(defn- application-restriction-for [user]
+(defn- application-query-for [user]
   (case (keyword (:role user))
-    :applicant {$or [{:roles.applicant.id (:id user)}
-                     {:roles.reader.id (:id user)}
-                     {:roles.writer.id (:id user)}]}
+    :applicant {:auth.id (:id user)}
     :authority {:authority (:authority user)}
     (do
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
 
 (defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (mongo/select mongo/applications (application-restriction-for user))))
+  (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-restriction-for user)]})))
+  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-query-for user)]})))
 
 (defcommand "give-application-verdict"
   {:parameters [:id :ok :text]
@@ -105,7 +103,18 @@
                                 :created     created
                                 :inviter     (security/summary user)
                                 :user  (security/summary invited)}
-                      :roles.reader (security/summary invited)}})))))))
+                      :auth (role invited :reader)}})))))))
+
+(defcommand "approve-invite"
+  {:parameters [:id]
+   :roles      [:applicant]}
+  [{user :user :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (do
+        (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+          {$push {:auth         (role user :writer)}
+           $pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -116,21 +125,21 @@
       (with-user email
         (fn [invited]
           (mongo/update-by-id mongo/applications application-id
-            {$pull {:invites {:user.username email}
-                    :roles.reader  {:username email}}}))))))
+            {$pull {:invites      {:user.username email}
+                    :auth         {$and [{:username email} 
+                                         {:type {$ne :owner}}]}}}))))))
 
-(defcommand "approve-invite"
-  {:parameters [:id]
+;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
+(defcommand "remove-auth"
+  {:parameters [:id :email]
    :roles      [:applicant]}
-  [{user :user :as command}]
+  [{{:keys [id email]} :data :as command}]
   (with-application command
-    (fn [{application-id :id}] 
-      ;; verify against user in validation?
-      (do
-        (mongo/update-by-id mongo/applications application-id
-          {$push {:roles.writer (security/summary user)}
-           $pull {:invites {:user.id (:id user)}
-                  :roles.reader  {:id (:id user)}}})))))
+    (fn [{application-id :id}]
+      (mongo/update-by-id mongo/applications application-id
+        {$pull {:auth {$and [{:username email} 
+                             {:type {$ne :owner}}]}}}))))
+
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
@@ -227,10 +236,11 @@
           {$set {:state :submitted, :submitted (:created command) }}))))
 
 (defcommand "create-application"
-  {:create-application {:parameters [:lat :lon :street :zip :city :categories]
-                       :roles      [:applicant]}}
+  {:parameters [:lat :lon :street :zip :city :categories]
+   :roles      [:applicant]}
   [{user :user data :data created :created :as command}]
-  (let [id  (mongo/create-id)]
+  (let [id    (mongo/create-id)
+        owner (role user :owner :type :owner)]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -244,7 +254,8 @@
                  :city (:city data)}
        :title (:street data)
        :authority (:city data)
-       :roles {:applicant (security/summary user)}
+       :roles {:applicant owner}
+       :auth [owner]
        :documents {:hakija {:id (mongo/create-id)
                             :nimi (str (:firstName user) " " (:lastName user))
                             :address {:street (:street user)

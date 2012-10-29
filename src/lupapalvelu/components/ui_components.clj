@@ -14,7 +14,9 @@
 
    :knockout     {:js ["knockout-2.1.0.debug.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
 
-   :common       {:depends [:oskari :jquery :knockout]
+   :underscore   {:js ["underscore.js"]}
+
+   :common       {:depends [:oskari :jquery :knockout :underscore]
                   :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "nav.js" "combobox.js" "ko.init.js"  "dialog.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}

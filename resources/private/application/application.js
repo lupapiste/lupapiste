@@ -70,23 +70,30 @@
         .call();
       return false;
     },
+
+    removeInvite : function(model) {
+      var applicationId = application.id();
+      ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
+        .success(function(d) { 
+          notify.success("kutsu poistettu", model);
+          repository.reloadAllApplications();
+        })
+        .call();
+      return false;
+    },
     
-    deleteAllInvites: function(model) {
-      for(var i = 0; i < application.invites().length; i++) {
-        var invite = application.invites()[i];
-        var applicationId = invite.application();
-        var email = invite.user.username();
-        debug(applicationId);
-        debug(email);
-        ajax.command("remove-invite", { id: applicationId, email: email })
-          .success(function(d) {
-            notify.success("kutsu poistettu",model);
-            repository.reloadAllApplications();
-          })
-          .call();
-      }
+    removeAuth : function(model) {
+      console.log(model);
+      var applicationId = application.id();
+      ajax.command("remove-auth", { id : applicationId, email : model.username()})
+        .success(function(d) { 
+          notify.success("oikeus poistettu", model);
+          repository.reloadAllApplications();
+        })
+        .call();
       return false;
     }
+
   };
   
   var emptyRh1 = {
