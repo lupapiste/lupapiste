@@ -64,7 +64,9 @@
   ([collection]
     (select collection {}))
   ([collection query]
-    (map with-id (mc/find-maps collection query))))
+    (select collection query {}))
+  ([collection query projection]
+    (map with-id (mc/find-maps collection query projection))))
 
 (defn select-one
   "returns one entry by matching the monger query"

@@ -2,6 +2,7 @@
   (:use [monger.operators]
         [clojure.string :only [join]]
         [lupapalvelu.core]
+        [lupapalvelu.env]
         [lupapalvelu.log]
         [lupapalvelu.domain]
         [clojure.java.io :only [file]]
@@ -10,27 +11,27 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]))
 
-(defquery "ping" {} [q] (ok :text "pong"))
+(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
-(defquery "user" {:authenticated true} [{user :user}]
-  (ok :user user))
+(in-dev
+  (defquery "users" {:roles [:admin]} [_]
+    (ok :users (map #(security/non-private %) (mongo/select mongo/users)))))
 
-(defcommand "create-id" {:authenticated true} [command]
-  (ok :id (mongo/create-id)))
+(defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
-(defn- application-restriction-for [user]
+(defn- application-query-for [user]
   (case (keyword (:role user))
-    :applicant {:roles.applicant.id (:id user)}
+    :applicant {:auth.id (:id user)}
     :authority {:authority (:authority user)}
     (do
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
 
 (defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (mongo/select mongo/applications (application-restriction-for user))))
+  (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-restriction-for user)]})))
+  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-query-for user)]})))
 
 (defcommand "give-application-verdict"
   {:parameters [:id :ok :text]
@@ -56,41 +57,76 @@
         {$set {:modified (:created command)
                :state :open}}))))
 
-(defcommand "ask-for-planner"
-  {:parameters [:id :email]
+(defquery "invites"
+  {:authenticated true} 
+  [{{id :id} :user}]
+  (let [filter     {:invites {$elemMatch {:user.id id}}}
+        projection (assoc filter :_id 0)
+        data       (mongo/select mongo/applications filter projection)
+        invites    (flatten (map (comp :invites) data))]
+    (ok :invites invites)))
+
+(defcommand "invite"
+  {:parameters [:id :email :title :text]
    :roles      [:applicant]}
-  [command]
+  [{created :created
+    user    :user
+    {:keys [id email title text]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user (-> command :data :email)
-        (fn [planner]
-          (if (= (:role planner) "authority")
-            (fail "can't ask authority to be a planner")
+      (with-user email ;; allows invites only existing users
+        (fn [invited]
+          (if (= (:role invited) "authority")
+            (fail "can't ask authority to be a invited")
             ;; TODO: check for duplicates
-            (do
-              (mongo/update-by-id mongo/users (:id planner)
-                {$push {:tasks {:type        :invitation_planner
+            (mongo/update-by-id mongo/applications application-id
+              {$push {:invites {:title       title
                                 :application application-id
-                                :created     (-> command :created)
-                                :user        (security/summary (-> command :user))}}})
-              (mongo/update-by-id mongo/applications application-id
-                {$push {:planners {:state :pending
-                                   :user  (security/summary planner)}}}))))))))
+                                :text        text
+                                :created     created
+                                :inviter     (security/summary user)
+                                :user  (security/summary invited)}
+                      :auth (role invited :reader)}})))))))
 
-(defcommand "approve-as-planner"
+(defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{id :id}]
-      (mongo/update-by-id
-        mongo/applications id
-        {$set {"roles.planner" (security/summary user)}}))))
+    (fn [{application-id :id}]
+      (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+        {$push {:auth         (role user :writer)}
+         $pull {:invites      {:user.id (:id user)}}}))))
+
+(defcommand "remove-invite"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email
+        (fn [invited]
+          (mongo/update-by-id mongo/applications application-id
+            {$pull {:invites      {:user.username email}
+                    :auth         {$and [{:username email} 
+                                         {:type {$ne :owner}}]}}}))))))
+
+;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
+(defcommand "remove-auth"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (mongo/update-by-id mongo/applications application-id
+        {$pull {:auth {$and [{:username email} 
+                             {:type {$ne :owner}}]}}}))))
+
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
    :roles      [:applicant]
-   :states     [:open]}
+   :states     [:open :draft]}
   [command]
   (with-application command
     (fn [application]
@@ -163,7 +199,7 @@
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
-        {$set {"roles.authority" (security/summary user)}}))))
+        {$set {:roles.authority (security/summary user)}}))))
 
 (defn approve-application [command]
   (with-application command
@@ -182,10 +218,11 @@
           {$set {:state :submitted, :submitted (:created command) }}))))
 
 (defcommand "create-application"
-  {:create-application {:parameters [:lat :lon :street :zip :city :categories]
-                       :roles      [:applicant]}}
+  {:parameters [:lat :lon :street :zip :city :categories]
+   :roles      [:applicant]}
   [{user :user data :data created :created :as command}]
-  (let [id  (mongo/create-id)]
+  (let [id    (mongo/create-id)
+        owner (role user :owner :type :owner)]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -199,7 +236,8 @@
                  :city (:city data)}
        :title (:street data)
        :authority (:city data)
-       :roles {:applicant (security/summary user)}
+       :roles {:applicant owner}
+       :auth [owner]
        :documents {:hakija {:id (mongo/create-id)
                             :nimi (str (:firstName user) " " (:lastName user))
                             :address {:street (:street user)

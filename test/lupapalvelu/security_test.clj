@@ -6,6 +6,11 @@
             [lupapalvelu.security :as security]))
 
 
+(facts "non-private"
+  (fact "strips away private keys from map"
+    (non-private {:name "tommi" :private {:secret "1234"}}) => {:name "tommi"})
+  (fact ".. but not non-recursively"
+    (non-private {:name "tommi" :child {:private {:secret "1234"}}}) => {:name "tommi" :child {:private {:secret "1234"}}}))
 
 #_(facts
   (against-background

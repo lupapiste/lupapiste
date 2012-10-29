@@ -3,7 +3,7 @@
   (:require [lupapalvelu.mongo :as mongo])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
-(defn- non-private [map]
+(defn non-private [map]
   (dissoc map :private))
 
 (defn get-hash [password salt] (BCrypt/hashpw password salt))
