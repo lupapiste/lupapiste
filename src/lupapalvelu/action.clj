@@ -115,7 +115,7 @@
         (fn [invited]
           (mongo/update-by-id mongo/applications application-id
             {$pull {:invites      {:user.username email}
-                    :auth         {:username email}}}))))))
+                    :auth         {$and [{:username email} {$not {:type :owner}}]}}}))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -129,17 +129,16 @@
           {$push {:auth         (role user :writer)}
            $pull {:invites      {:user.id (:id user)}}})))))
 
-;; FIXME: can remove original owner auths.
+;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
   {:parameters [:id :email]
    :roles      [:applicant]}
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user email
-        (fn [invited]
-          (mongo/update-by-id mongo/applications application-id
-            {$pull {:auth         {:username email}}}))))))
+      (mongo/update-by-id mongo/applications application-id
+        {$pull {:auth {$and [{:username email} {$not {:type :owner}}]}}}))))
+
 
 (defcommand "rh1-demo"
   {:parameters [:id :data]
@@ -240,7 +239,7 @@
    :roles      [:applicant]}
   [{user :user data :data created :created :as command}]
   (let [id    (mongo/create-id)
-        owner (role user :owner)]
+        owner (role user :owner :type :owner)]
     (mongo/insert mongo/applications
       {:id id
        :created created
