@@ -195,9 +195,11 @@ var docgen = (function() {
 		return img;
 	}
 	
-	function makeSaverDelegate(save) {
+	function makeSaverDelegate(save, eventData) {
 		return function(e) {
 			e.preventDefault();
+			e.stopPropagation();
+			
 			var target = e.target;
 			var path = target.name;
 			var value = (target.type === "checkbox") ? target.checked : target.value;
@@ -217,7 +219,7 @@ var docgen = (function() {
 				} else {
 					error("Unknown result:", result, "path:", path);
 				}
-			});
+			}, eventData);
 			
 			return false;
 		};
@@ -232,7 +234,7 @@ var docgen = (function() {
 		title.onclick = accordion.toggle;
 		
 		var elements = document.createElement("article");
-		appendElements(elements, spec.body, model, [], makeSaverDelegate(save));
+		appendElements(elements, spec.body, model, [], save);
 		
 		section.appendChild(title);
 		section.appendChild(elements);
@@ -240,14 +242,15 @@ var docgen = (function() {
 		return section;
 	}
 	
-	function DocModel(spec, model, callback) {
+	function DocModel(spec, model, callback, eventData) {
 		var self = this;
 		
 		self.spec = spec;
 		self.model = model;
 		self.callback = callback;
+		self.eventData = eventData;
 		
-		self.element = buildElement(self.spec, self.model, self.callback);
+		self.element = buildElement(self.spec, self.model, makeSaverDelegate(self.callback, self.eventData));
 		
 		self.applyUpdates = function(updates) {
 			// TODO: Implement me.
@@ -257,8 +260,12 @@ var docgen = (function() {
 		};
 	}
 	
+	function makeDocModel(spec, model, callback, eventData) {
+		return new DocModel(spec, model, callback, eventData || {});
+	}
+	
 	return {
-		build: function(spec, model, callback) { return new DocModel(spec, model, callback); }
+		build: makeDocModel
 	};
 	
 })();
