@@ -36,7 +36,7 @@
 
 (defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
-(defn- application-restriction-for [user]
+(defn- application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
     :authority {:authority (:authority user)}
@@ -45,10 +45,10 @@
       {:_id "-1"} ))) ; should not yield any results
 
 (defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (mongo/select mongo/applications (application-restriction-for user))))
+  (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-restriction-for user)]})))
+  (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-query-for user)]})))
 
 (defcommand "give-application-verdict"
   {:parameters [:id :ok :text]
@@ -110,10 +110,9 @@
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{application-id :id}] 
-      ;; verify against user in validation?
+    (fn [{application-id :id}]
       (do
-        (mongo/update-by-id mongo/applications application-id
+        (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
           {$push {:auth         (role user :writer)}
            $pull {:invites      {:user.id (:id user)}}})))))
 
