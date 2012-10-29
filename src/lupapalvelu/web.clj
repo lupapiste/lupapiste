@@ -188,10 +188,9 @@
 ;;
 (defpage [:post "/ajaxProxy/:srv"] {srv :srv}
   (let [request (ring-request) body (slurp(:body request)) urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
-    (client/post (get urls srv)
-	     {:body body
-	      :content-type :json
-	      :accept :json})))
+    (client/post (get urls srv) {:body body
+                                 :content-type :json
+                                 :accept :json})))
 
 ;;
 ;; Development thingies.
