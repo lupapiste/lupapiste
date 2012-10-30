@@ -4,6 +4,21 @@
 
 ;(function() {
 
+//hub.whenOskariMapIsReady(function() {
+//hub.moveOskariMapToDiv("application-map");
+//refreshMap();
+//});
+
+//var applicationMap;
+//var markers = new OpenLayers.Layer.Markers( "Markers" );
+//
+//var marker;
+//var icon = (function() {
+//  var size = new OpenLayers.Size(21,25);
+//  var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+//  return new OpenLayers.Icon('/img/marker-green.png', size, offset);
+//})();
+
 //  function refreshMap() {
 //    // refresh map for applications
 //    hub.clearMapWithDelay(refreshMapPoints);
@@ -203,17 +218,7 @@
     v.subscribe(listener);
     return v;
   }
-  
-//  var applicationMap;
-//  var markers = new OpenLayers.Layer.Markers( "Markers" );
-//
-//  var marker;
-//  var icon = (function() {
-//    var size = new OpenLayers.Size(21,25);
-//    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-//    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
-//  })();
-
+ 
   function showApplication(data) {
     ajax.query("allowed-actions",{id: data.id})
       .success(function(d) {
@@ -320,11 +325,6 @@
       });
     }
     
-//    hub.whenOskariMapIsReady(function() {
-//      hub.moveOskariMapToDiv("application-map");
-//      refreshMap();
-//    });
-
   }
   
   $(function() {
