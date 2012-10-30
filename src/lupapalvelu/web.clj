@@ -15,7 +15,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
-            [lupapalvelu.strings :as strings]
+            [lupapalvelu.attachment :as attachment]
             [clj-http.client :as client]))
 
 ;;
@@ -153,7 +153,6 @@
 ;; File upload/download:
 ;;
 
-;; Content type must not be JSON. Damn you IE.
 (defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload :as data}
   (debug "upload: %s: %s" data (str upload))
 
@@ -165,35 +164,11 @@
       )
     ))
 
-(def windows-filename-max-length 255)
-
-(defn encode-filename
-  "Replaces all non-ascii chars and other that the allowed punctuation with dash.
-   UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
-  [unencoded-filename]
-  (when-let [de-accented (strings/de-accent unencoded-filename)]
-      (clojure.string/replace
-        (strings/last-n windows-filename-max-length de-accented)
-        #"[^a-zA-Z0-9\.\-_ ]" "-")))
-
-(defn output-attachment [attachmentId download]
-  (debug "file download: attachmentId=%s" attachmentId)
-  (if-let [attachment (action/get-attachment attachmentId)]
-    (let [response
-          {:status 200
-           :body ((:content attachment))
-           :headers {"Content-Type" (:content-type attachment)
-                     "Content-Length" (str (:content-length attachment))}}]
-        (if download
-          (assoc-in response [:headers "Content-Disposition"]
-            (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
-          response))))
-
 (defpage "/rest/view/:attachmentId" {attachmentId :attachmentId}
-  (output-attachment attachmentId false))
+  (attachment/output-attachment attachmentId false))
 
 (defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
-  (output-attachment attachmentId true))
+  (attachment/output-attachment attachmentId true))
 
 ;;
 ;; Oskari map ajax request proxy

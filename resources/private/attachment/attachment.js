@@ -48,12 +48,25 @@ var attachment = function() {
     }
   });
 
-  hub.subscribe("upload-done", function(e) {
+  function resetUploadIframe() {
     var originalUrl = $("#uploadFrame").attr("src");
     $("#uploadFrame").attr("src", originalUrl);
-    $("#uploadFrame").css("visibility", "hidden");
+    $("#uploadFrame").hide();
+    $("#add-attachment").show();
+  }
 
+  hub.subscribe("upload-done", function(e) {
+    resetUploadIframe();
     repository.reloadAllApplications();
+  });
+
+  hub.subscribe("upload-cancelled", function(e) {
+    resetUploadIframe();
+    ajax.command("delete-empty-attachment", { id: e.applicationId, attachmentId: e.attachmentId})
+    .success(function(d) {
+      repository.reloadAllApplications();
+    })
+    .call();
   });
 
   function toApplication(){
@@ -69,12 +82,11 @@ var attachment = function() {
     ajax.command("create-attachment", {id:  m.id()})
     .success(function(d) {
       repository.reloadAllApplications(function() {
-        //window.location.hash = "!/attachment/" + d.applicationId + "/" + d.attachmentId;
-
         var iframe = $("#uploadFrame").contents();
         iframe.find("#applicationId").val(d.applicationId);
         iframe.find("#attachmentId").val(d.attachmentId);
-        $("#uploadFrame").css("visibility", "visible");
+        $("#uploadFrame").show();
+        $("#add-attachment").hide();
       });
     })
     .call();
