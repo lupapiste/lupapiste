@@ -11,10 +11,6 @@
     refreshMap();
   });
   
-  var applicationMap;
-  var markers = new OpenLayers.Layer.Markers( "Markers" );
-  
-  var marker;
   var icon = (function() {
     var size = new OpenLayers.Size(21,25);
     var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
@@ -247,9 +243,6 @@
     
     // new data mapping
     applicationViewModel.data(ko.mapping.fromJS(data));
-
-    //function f(r, i) { var u = r[i.id] || (i.roles = [], i); u.roles.push(i.role); r[i.id] = u; return r;}
-    //_.reduce(a, f, {});
 
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
