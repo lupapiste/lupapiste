@@ -317,23 +317,23 @@
     }
   }
 
-    var tab = {
-        tabClick: function(data, event) {
-           var self = event.target;
-           $("#tabs li").removeClass('active');
-           $(self).parent().addClass("active");
-           $(".tab_content").hide();
-           var selected_tab = $(self).attr("href");
-           $(selected_tab).fadeIn();
-        }
-    };
+  var tab = {
+      tabClick: function(data, event) {
+         var self = event.target;
+         $("#tabs li").removeClass('active');
+         $(self).parent().addClass("active");
+         $(".tab_content").hide();
+         var selected_tab = $(self).attr("href");
+         $(selected_tab).fadeIn();
+      }
+  };
 
-    var accordian = {
-        accordianClick: function(data, event) {
-           self = event.target;
-           $(self).next(".application_section_content").toggleClass('content_expanded');
-        }
-    };
+  var accordian = {
+      accordianClick: function(data, event) {
+         self = event.target;
+         $(self).next(".application_section_content").toggleClass('content_expanded');
+      }
+  };
       
   function onPageChange(e) {
     var id = e.pagePath[0];
