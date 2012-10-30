@@ -16,4 +16,6 @@
                              [lein-buildid "0.1.0-SNAPSHOT"]]}}
   :main lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
-  :min-lein-version "2.0.0")
+  :min-lein-version "2.0.0"
+  :nitpicker {:exts ["clj" "js" "html"]
+              :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]})
