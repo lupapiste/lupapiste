@@ -76,18 +76,16 @@
     (fn [{application-id :id}]
       (with-user email ;; allows invites only existing users
         (fn [invited]
-          (if (= (:role invited) "authority")
-            (fail "can't ask authority to be a invited")
-            (mongo/update mongo/applications
-              {:_id application-id 
-               $or [{:invites {$not {$elemMatch {:user.username email}}}}]}
-              {$push {:invites {:title       title
-                                :application application-id
-                                :text        text
-                                :created     created
-                                :inviter     (security/summary user)
+          (mongo/update mongo/applications
+            {:_id application-id 
+             :invites {$not {$elemMatch {:user.username email}}}}
+            {$push {:invites {:title       title
+                              :application application-id
+                              :text        text
+                              :created     created
+                              :inviter     (security/summary user)
                                 :user  (security/summary invited)}
-                      :auth (role invited :reader)}})))))))
+                      :auth (role invited :reader)}}))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]

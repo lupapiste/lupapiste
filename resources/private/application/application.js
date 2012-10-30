@@ -4,27 +4,27 @@
 
 ;(function() {
 
-  function refreshMap() {
-    // refresh map for applications
-    hub.clearMapWithDelay(refreshMapPoints);
-  }
+//  function refreshMap() {
+//    // refresh map for applications
+//    hub.clearMapWithDelay(refreshMapPoints);
+//  }
 
-  function refreshMapPoints() {
-    // FIXME Hack: we'll have to wait 100ms
-    setTimeout(function() {
-      var mapPoints = [];
-
-      mapPoints.push({
-        id: "markerFor" + application.id(),
-        location: {x: application.location().lon(), y: application.location().lat()}
-      });
-
-      hub.send("documents-map", {
-        data : mapPoints
-      });
-    }, 99);
-    
-  }
+//  function refreshMapPoints() {
+//    // FIXME Hack: we'll have to wait 100ms
+//    setTimeout(function() {
+//      var mapPoints = [];
+//
+//      mapPoints.push({
+//        id: "markerFor" + application.id(),
+//        location: {x: application.location().lon(), y: application.location().lat()}
+//      });
+//
+//      hub.send("documents-map", {
+//        data : mapPoints
+//      });
+//    }, 99);
+//    
+//  }
 
   var applicationModel = {
       data: ko.observable()
@@ -204,15 +204,15 @@
     return v;
   }
   
-  var applicationMap;
-  var markers = new OpenLayers.Layer.Markers( "Markers" );
-
-  var marker;
-  var icon = (function() {
-    var size = new OpenLayers.Size(21,25);
-    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
-  })();
+//  var applicationMap;
+//  var markers = new OpenLayers.Layer.Markers( "Markers" );
+//
+//  var marker;
+//  var icon = (function() {
+//    var size = new OpenLayers.Size(21,25);
+//    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+//    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
+//  })();
 
   function showApplication(data) {
     ajax.query("allowed-actions",{id: data.id})
@@ -320,10 +320,10 @@
       });
     }
     
-    hub.whenOskariMapIsReady(function() {
-      hub.moveOskariMapToDiv("application-map");
-      refreshMap();
-    });
+//    hub.whenOskariMapIsReady(function() {
+//      hub.moveOskariMapToDiv("application-map");
+//      refreshMap();
+//    });
 
   }
   
@@ -334,17 +334,17 @@
     
     var page = $("#application");
 
-    ko.applyBindings(
-        { application: application,
-          applicationModel: applicationModel,
-              comment: comment,
-          invite: invite,
-              authorization: authorization,
-              rh1: rh1,
-              tab: tab,
-          accordian: accordian},page[0]);
+    ko.applyBindings({
+      application : application,
+      applicationModel : applicationModel,
+      comment : comment,
+      invite : invite,
+      authorization : authorization,
+      rh1 : rh1,
+      tab : tab,
+      accordian : accordian
+    }, page[0]);
 
-    initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
   });
 
 })();

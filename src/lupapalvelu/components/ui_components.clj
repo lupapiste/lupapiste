@@ -9,7 +9,7 @@
                        "jquery.ba-hashchange.js" "jquery.filedrop.js" "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
    
    :oskari       {:depends [:jquery]
-                  :js ["oskarimap.js" "map.js"]
+                  :js ["map.js"]
                   :css ["oskarimap.css"]
                   :html ["map.html"]}
 
@@ -24,7 +24,7 @@
    
    :buildinfo    {:depends [:jquery]
                   :js ["buildinfo.js"]}
-   
+
    :invites      {:depends [:common]
                   :js ["invites.js"]}
 
@@ -53,8 +53,7 @@
                             :html ["applications.html"]}
    
    :attachment   {:depends [:common :repository]
-                  :js ["attachment.js" "upload.js"]
-                  :css ["upload.css"]
+                  :js ["attachment.js"]
                   :html ["attachment.html"]}
 
    :register     {:depends [:common]

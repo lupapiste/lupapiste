@@ -27,7 +27,7 @@
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
-                 
+
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
   (or (session/get :user) ((request/ring-request) :user)))
@@ -61,7 +61,7 @@
 ;; Commands
 ;;
 
-(defn- with-user 
+(defn- with-user
   ([m] (with-user m (current-user)))
   ([m user] (merge m {:user user})))
 
@@ -96,6 +96,15 @@
 (defpage "/admin" []          (if (admin?)     (resp/content-type (:html content-type) (singlepage/compose :html :admin)) (resp/redirect "/welcome#")))
 (defpage "/admin.js" []       (if (admin?)     (resp/content-type (:js content-type)   (singlepage/compose :js   :admin)) (resp/status 401 "Unauthorized\r\n")))
 (defpage "/admin.css" []      (if (admin?)     (resp/content-type (:css content-type)  (singlepage/compose :css  :admin)) (resp/status 401 "Unauthorized\r\n")))
+
+;
+; Oskari:
+;
+
+(defpage "/oskarimap.js" []
+  (->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
+    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
+    (resp/content-type (:js content-type))))
 
 ;;
 ;; Login/logout:
@@ -144,14 +153,17 @@
 ;; File upload/download:
 ;;
 
-(defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload}
-  (debug "upload: %s: %s" name (str upload))
-  (core/execute
-    (with-user
-      (core/command "upload-attachment" (assoc upload
-                                               :id applicationId
-                                               :attachmentId attachmentId
-                                               :type (or type ""))))))
+;; Content type must not be JSON. Damn you IE.
+(defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload :as data}
+  (debug "upload: %s: %s" data (str upload))
+
+  (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
+        result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
+    (if (:ok result)
+      (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
+      (json/generate-string result) ; TODO display error message
+      )
+    ))
 
 (def windows-filename-max-length 255)
 
@@ -186,11 +198,15 @@
 ;;
 ;; Oskari map ajax request proxy
 ;;
+
 (defpage [:post "/ajaxProxy/:srv"] {srv :srv}
-  (let [request (ring-request) body (slurp(:body request)) urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
-    (client/post (get urls srv) {:body body
-                                 :content-type :json
-                                 :accept :json})))
+  (let [request (ring-request)
+        body (slurp (:body request))
+        urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
+    (client/post (get urls srv)
+       {:body body
+        :content-type :json
+        :accept :json})))
 
 ;;
 ;; Development thingies.

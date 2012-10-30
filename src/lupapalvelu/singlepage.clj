@@ -19,7 +19,6 @@
         (IOUtils/copy resource (write-header out src))))
     (.toByteArray out)))
 
-(def template (enlive/html-resource (c/path "template.html")))
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
 (defn parse-html-resource [c resource]
@@ -42,7 +41,7 @@
 (defn compose-html [component]
   (let [out (ByteArrayOutputStream.)]
     (doseq [element (inject-content
-                      template
+                      (enlive/html-resource (c/path "template.html"))
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
                       component)]
       (.write out (.getBytes element utf8)))
