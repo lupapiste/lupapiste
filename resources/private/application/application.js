@@ -3,6 +3,8 @@
  */
 
 ;(function() {
+  
+  var applicationViewModel;
 
 //hub.whenOskariMapIsReady(function() {
 //hub.moveOskariMapToDiv("application-map");
@@ -41,8 +43,20 @@
 //    
 //  }
 
-  var applicationModel = {
-      data: ko.observable()
+  function ApplicationViewModel() {
+    var self = this;
+    
+    self.data = ko.observable();
+    
+    self.auth = ko.computed(function() {
+      var value = [];
+      if(self.data() != undefined) {
+        var auth = ko.utils.unwrapObservable(self.data().auth());
+        console.log(auth);
+        var value = _.values(_.reduce(auth, function f(r, i) { var u = r[i.id()] || (i.roles = [], i); u.roles.push(i.role()); r[i.id()] = u; return r;}, {}));
+      } 
+      return value;
+    },self);
   }
   
   var application = {
@@ -232,7 +246,10 @@
   function showApplicationPart2(data) {
     
     // new data mapping
-    applicationModel.data(ko.mapping.fromJS(data));
+    applicationViewModel.data(ko.mapping.fromJS(data));
+
+    //function f(r, i) { var u = r[i.id] || (i.roles = [], i); u.roles.push(i.role); r[i.id] = u; return r;}
+    //_.reduce(a, f, {});
 
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
@@ -332,11 +349,13 @@
       onPageChange(e);
     });
     
+    applicationViewModel = new ApplicationViewModel();
+    
     var page = $("#application");
 
     ko.applyBindings({
       application : application,
-      applicationModel : applicationModel,
+      applicationModel : applicationViewModel,
       comment : comment,
       invite : invite,
       authorization : authorization,
