@@ -4,9 +4,10 @@
 
 ;(function() {
   
-  var applicationViewModel;
-  var inviteModel;
-  var commentModel;
+  var applicationQueryModel;
+  var inviteCommandModel;
+  var commentCommandModel;
+  var authorizationCommandModel;
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
@@ -41,7 +42,7 @@
     
   }
 
-  function ApplicationViewModel() {
+  function ApplicationQueryModel() {
     var self = this;
     
     self.data = ko.observable();
@@ -221,10 +222,6 @@
   
   var rh1 = ko.mapping.fromJS(emptyRh1);
   
-  var authorization = {
-    data: ko.observable({})
-  };
-
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
@@ -234,7 +231,7 @@
   function showApplication(data) {
     ajax.query("allowed-actions",{id: data.id})
       .success(function(d) {
-        authorization.data(d.actions);
+        authorizationCommandModel.data(d.actions);
         showApplicationPart2(data);
         hub.setPageReady("application");
       })
@@ -244,7 +241,7 @@
   function showApplicationPart2(data) {
     
     // new data mapping
-    applicationViewModel.data(ko.mapping.fromJS(data));
+    applicationQueryModel.data(ko.mapping.fromJS(data));
 
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
@@ -272,8 +269,14 @@
       });
     }
   });
-      
-  function CommentModel() {
+
+  function AuthorizationQueryModel() {
+    var self = this;
+    
+    self.data = ko.observable({})
+  }
+
+  function CommentCommandModel() {
     var self = this;
     
     self.text = ko.observable();
@@ -292,7 +295,7 @@
     }
   };
   
-  function InviteModel() {
+  function InviteCommandModel() {
     var self = this;
 
     self.email = ko.observable();
@@ -351,18 +354,19 @@
       onPageChange(e);
     });
     
-    applicationViewModel = new ApplicationViewModel();
-    inviteModel = new InviteModel();
-    commentModel = new CommentModel();
+    applicationQueryModel = new ApplicationQueryModel();
+    authorizationCommandModel = new AuthorizationQueryModel();
+    inviteCommandModel = new InviteCommandModel();
+    commentCommandModel = new CommentCommandModel();
     
     var page = $("#application");
 
     ko.applyBindings({
       application : application,
-      applicationModel : applicationViewModel,
-      comment : commentModel,
-      invite : inviteModel,
-      authorization : authorization,
+      applicationModel : applicationQueryModel,
+      comment : commentCommandModel,
+      invite : inviteCommandModel,
+      authorization : authorizationCommandModel,
       rh1 : rh1,
       tab : tab,
       accordian : accordian
