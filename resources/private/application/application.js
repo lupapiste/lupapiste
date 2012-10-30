@@ -5,6 +5,7 @@
 ;(function() {
   
   var applicationViewModel;
+  var inviteModel;
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
@@ -286,18 +287,21 @@
 
   comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
   
-  var invite = {
-    email : ko.observable(),
-    title : ko.observable("uuden suunnittelijan lisääminen"),
-    text  : ko.observable(),
-    submit: function(model) {
+  function InviteModel() {
+    var self = this;
+
+    self.email = ko.observable();
+    self.title = ko.observable("uuden suunnittelijan lisääminen");
+    self.text = ko.observable();
+
+    self.submit = function(model) {
       ajax.command("invite", { id: application.id(),
                                email: model.email(),
                                title: model.title(),
                                text: model.text()})
         .success(function(d) {
-          model.email(undefined);
-          model.text(undefined);
+          self.email(undefined);
+          self.text(undefined);
           repository.reloadAllApplications();
         })
         .error(function(d) {
@@ -343,6 +347,7 @@
     });
     
     applicationViewModel = new ApplicationViewModel();
+    inviteModel = new InviteModel();
     
     var page = $("#application");
 
@@ -350,7 +355,7 @@
       application : application,
       applicationModel : applicationViewModel,
       comment : comment,
-      invite : invite,
+      invite : inviteModel,
       authorization : authorization,
       rh1 : rh1,
       tab : tab,
