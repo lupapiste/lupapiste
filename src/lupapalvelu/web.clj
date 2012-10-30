@@ -97,6 +97,15 @@
 (defpage "/admin.js" []       (if (admin?)     (resp/content-type (:js content-type)   (singlepage/compose :js   :admin)) (resp/status 401 "Unauthorized\r\n")))
 (defpage "/admin.css" []      (if (admin?)     (resp/content-type (:css content-type)  (singlepage/compose :css  :admin)) (resp/status 401 "Unauthorized\r\n")))
 
+;
+; Oskari:
+;
+
+(defpage "/oskarimap.js" []
+  (->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
+    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
+    (resp/content-type (:js content-type))))
+
 ;;
 ;; Login/logout:
 ;;

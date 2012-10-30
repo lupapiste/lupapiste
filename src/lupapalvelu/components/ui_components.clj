@@ -8,7 +8,7 @@
                        "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
 
    :oskari       {:depends [:jquery]
-                  :js ["oskarimap.js" "map.js"]
+                  :js ["map.js"]
                   :css ["oskarimap.css"]
                   :html ["map.html"]}
 
