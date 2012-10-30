@@ -52,8 +52,8 @@
       var value = [];
       if(self.data() != undefined) {
         var auth = ko.utils.unwrapObservable(self.data().auth());
-        console.log(auth);
-        var value = _.values(_.reduce(auth, function f(r, i) { var u = r[i.id()] || (i.roles = [], i); u.roles.push(i.role()); r[i.id()] = u; return r;}, {}));
+        var pimped = _.reduce(auth, function(r, i) { var a = r[i.id()] || (i.roles = [], i); a.roles.push(i.role()); r[i.id()] = a; return r;}, {});
+        value = _.values(pimped);
       } 
       return value;
     },self);
