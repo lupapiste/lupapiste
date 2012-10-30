@@ -345,7 +345,6 @@
       accordian : accordian
     }, page[0]);
 
-    initUpload($(".dropbox", page), function() { return application.id(); }, uploadCompleted);
   });
 
 })();

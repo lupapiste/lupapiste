@@ -1,45 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html >
 <body>
-	<section class="page" id="attachment">
-
-		<div class="container">
-			<div class="row">
-				<ul class="breadcrumb">
-					<li><a href="#!/applications">Lupahakemukset</a></li>
-					<li><span class="divider">/</span></li>
-					<li><a data-bind="text: application.title, attr: {href: '#!/application/' + application.id()}"></a></li>
-					<li><span class="divider">/</span></li>
-					<li class="active"><span data-bind="text: filename"></span></li>
-				</ul>
-			</div>
-
-			<h1>Liite</h1>
-			<div class="row">
-				<div class="span4">
-					<div>Liitteen nimi: <input id="test-new-attachment-name" data-bind="value: type" type="text" placeholder="Liitteen nimi"></input></div>
-					<table style="margin-top: 15px;">
-						<tr><td>Tiedoston nimi:</td><td data-bind="text: filename"></td></tr>
-						<tr><td>Tyyppi:</td><td data-bind="ltext: contentType"></td></tr>
-						<tr><td>Koko:</td><td data-bind="size: size"></td></tr>
-						<!-- <tr><td>Tunniste:</td><td data-bind="text: attachmentId"></td></tr> -->
-					</table>
-				</div>
-				<div class="span8">
-					<form id="attachmentUploadForm">
-						<input type="file" multiple="multiple"></input>
-						<div class="droparea">
-							<span>Raahaa liite t&auml;h&auml;n</span>
-							<img src="/img/ajax-loader-32.gif" style="display: none;"></img>
-						</div>
-					</form>
-				</div>
-				<div class="span12">
-					<button id="test-save-new-attachment" class="btn" data-bind="click: save">Tallenna</button>
-					<button class="btn" data-bind="click: toApplication">Palaa</button>
-				</div>
-			</div>
-		</div>
-	</section>
+  <section class="page" id="attachment">
+    <div class="container">
+<!--       <h1>Lis&auml;&auml; liite</h1>
+      <form id="attachmentUploadForm" action="/rest/upload" method="post" enctype="multipart/form-data">
+          <input id="test-new-attachment-name" name="type" data-bind="value: type" type="text" placeholder="Liitteen nimi" />
+          <input id="fileupload" type="file" name="upload" data-url="/rest/upload" >
+          <input type="hidden" name="attachmentId" data-bind="value: attachmentId" ><br>
+          <input type="hidden" name="applicationId" data-bind="value: application.id()" /><br>
+          <input type="submit">
+      </form> -->
+    <h1 data-bind="text: application.id"></h1>
+    <h1 data-bind="text: attachmentId"></h1>
+    </div>
+  </section>
 </body>
 </html>
