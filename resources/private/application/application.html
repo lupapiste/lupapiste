@@ -40,8 +40,8 @@
           </div>
         </div>
         <div class="application_actions">
-          <button id="test-submit-application" data-bind="disable: !$root.authorization || $root.authorization.data()['submit-application'] && !$root.authorization.data()['submit-application'].ok, click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
-          <button id="test-approve-application" data-bind="disable: !$root.authorization || $root.authorization.data()['approve-application'] && !$root.authorization.data()['approve-application'].ok, click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
+          <button id="test-submit-application" data-bind="disable: !$root.authorization || !$root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
+          <button id="test-approve-application" data-bind="disable: !$root.authorization || !$root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
           <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
           <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
           <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Poista hakemus</button>
@@ -118,7 +118,7 @@
                   <table>
                     <tr><td>sähköpostiosoite</td><td><input id="invite-email" class="form_input" type="text" data-bind="value: email" /></td></tr>
                     <tr><td>teksti          </td><td><textarea id="invite-text" rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
-                    <tr><td>&nbsp;          </td><td><a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">kutsu uusi suunnittelija</a></td></tr>
+                    <tr><td>&nbsp;          </td><td><a href="#" id="test-ask-for-planner" data-bind="disable: !$root.authorization || !$root.authorization.ok('ask-for-planner'), click: submit">kutsu uusi suunnittelija</a></td></tr>
                   </table>
                 </div>
               </div>
@@ -126,7 +126,7 @@
           <div class="application_section">
             <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Rakennuspaikan tiedot</h2>
             <div class="application_section_content content_expanded">
-              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.data()['approve-content'] && $root.authorization.data()['approve-content'].ok">
+              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.ok('approve-content')">
                 <button class="todo btn btn-small content-accept">Hyväksy</button>
                 <button class="todo btn btn-small content-reject">Hylkää</button>
               </div>
@@ -172,7 +172,7 @@
                   </select>
                 </form>
               </div>
-              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.data()['approve-content'] && $root.authorization.data()['approve-content'].ok">
+              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.ok('approve-content')">
                 <button class="todo btn btn-small content-accept">Hyväksy</button>
                 <button class="todo btn btn-small content-reject">Hylkää</button>
               </div>
@@ -181,7 +181,7 @@
           <div class="application_section">
             <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Rakennuksen tiedot</h2>
             <div class="application_section_content content_expanded">
-              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.data()['approve-content'] && $root.authorization.data()['approve-content'].ok">
+              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.ok('approve-content')">
                 <button class="todo btn btn-small content-accept">Hyväksy</button>
                 <button class="todo btn btn-small content-reject">Hylkää</button>
               </div>
@@ -379,7 +379,7 @@
                 </form>
                 <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
               </div>
-              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.data()['approve-content'] && $root.authorization.data()['approve-content'].ok">
+              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.ok('approve-content')">
                 <button class="todo btn btn-small content-accept">Hyväksy</button>
                 <button class="todo btn btn-small content-reject">Hylkää</button>
               </div>
@@ -388,7 +388,7 @@
           <div class="application_section">
             <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Huoneiston tiedot</h2>
             <div class="application_section_content content_expanded">
-              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.data()['approve-content'] && $root.authorization.data()['approve-content'].ok">
+              <div class="content-actions" data-bind="visible: $root.authorization && $root.authorization.ok('approve-content')">
                 <button class="todo btn btn-small content-accept">Hyväksy</button>
                 <button class="todo btn btn-small content-reject">Hylkää</button>
               </div>
@@ -454,7 +454,9 @@
             <div data-bind="ifnot: attachments && attachments().length">
               <i>Ei liitteitä</i>
             </div>
-            <button id="add-attachment" class="btn btn-success" data-bind="click: attachment.newAttachment">Lisää liite</button>
+            <button id="add-attachment" class="btn btn-success"
+                    data-bind="visible: $root.authorization && $root.authorization.ok('create-attachment'),click: attachment.newAttachment"
+            >Lisää liite</button>
 
             <iframe id="uploadFrame"
                     src="/html/pages/upload.html"
