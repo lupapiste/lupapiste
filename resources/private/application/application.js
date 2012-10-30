@@ -6,6 +6,7 @@
   
   var applicationViewModel;
   var inviteModel;
+  var commentModel;
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
@@ -272,20 +273,24 @@
     }
   });
       
-  var comment = {
-    text: ko.observable(),
-    submit: function(model) {
-    var applicationId = application.id();
-      ajax.command("add-comment", { id: applicationId, text: model.text()})
-      .success(function(d) { 
-        repository.reloadAllApplications();
-          model.text("");
-        }).call();
-    return false;
-  }
-  };
+  function CommentModel() {
+    var self = this;
+    
+    self.text = ko.observable();
+    
+    self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
 
-  comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
+    self.submit = function(model) {
+      var applicationId = application.id();
+      ajax.command("add-comment", { id: applicationId, text: model.text()})
+        .success(function(d) { 
+          repository.reloadAllApplications();
+            model.text("");
+          })
+          .call();
+      return false;
+    }
+  };
   
   function InviteModel() {
     var self = this;
@@ -348,13 +353,14 @@
     
     applicationViewModel = new ApplicationViewModel();
     inviteModel = new InviteModel();
+    commentModel = new CommentModel();
     
     var page = $("#application");
 
     ko.applyBindings({
       application : application,
       applicationModel : applicationViewModel,
-      comment : comment,
+      comment : commentModel,
       invite : inviteModel,
       authorization : authorization,
       rh1 : rh1,
