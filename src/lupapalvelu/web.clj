@@ -27,7 +27,7 @@
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
-                 
+
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
   (or (session/get :user) ((request/ring-request) :user)))
@@ -61,7 +61,7 @@
 ;; Commands
 ;;
 
-(defn- with-user 
+(defn- with-user
   ([m] (with-user m (current-user)))
   ([m user] (merge m {:user user})))
 
@@ -153,14 +153,17 @@
 ;; File upload/download:
 ;;
 
-(defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload}
-  (debug "upload: %s: %s" name (str upload))
-  (core/execute
-    (with-user
-      (core/command "upload-attachment" (assoc upload
-                                               :id applicationId
-                                               :attachmentId attachmentId
-                                               :type (or type ""))))))
+;; Content type must not be JSON. Damn you IE.
+(defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload :as data}
+  (debug "upload: %s: %s" data (str upload))
+
+  (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
+        result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
+    (if (:ok result)
+      (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
+      (json/generate-string result) ; TODO display error message
+      )
+    ))
 
 (def windows-filename-max-length 255)
 
@@ -198,9 +201,9 @@
 (defpage [:post "/ajaxProxy/:srv"] {srv :srv}
   (let [request (ring-request) body (slurp(:body request)) urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
     (client/post (get urls srv)
-	     {:body body
-	      :content-type :json
-	      :accept :json})))
+       {:body body
+        :content-type :json
+        :accept :json})))
 
 ;;
 ;; Development thingies.
