@@ -4,32 +4,32 @@
 
 ;(function() {
 
-  function refreshMap() {
-    // refresh map for applications
-    hub.clearMapWithDelay(refreshMapPoints);
-  }
+//  function refreshMap() {
+//    // refresh map for applications
+//    hub.clearMapWithDelay(refreshMapPoints);
+//  }
 
-  function refreshMapPoints() {
-    // FIXME Hack: we'll have to wait 100ms
-    setTimeout(function() {
-      var mapPoints = [];
-
-      mapPoints.push({
-        id: "markerFor" + application.id(),
-        location: {x: application.location().lon(), y: application.location().lat()}
-      });
-
-      hub.send("documents-map", {
-        data : mapPoints
-      });
-    }, 99);
-
-  }
+//  function refreshMapPoints() {
+//    // FIXME Hack: we'll have to wait 100ms
+//    setTimeout(function() {
+//      var mapPoints = [];
+//
+//      mapPoints.push({
+//        id: "markerFor" + application.id(),
+//        location: {x: application.location().lon(), y: application.location().lat()}
+//      });
+//
+//      hub.send("documents-map", {
+//        data : mapPoints
+//      });
+//    }, 99);
+//    
+//  }
 
   var applicationModel = {
       data: ko.observable()
   }
-
+  
   var application = {
     id: ko.observable(),
     state: ko.observable(),
@@ -45,10 +45,10 @@
 
     // new stuff
     invites: ko.observableArray(),
-
+    
     // all data in here
     data: ko.observable(),
-
+    
     submitApplication: function(model) {
       var applicationId = application.id();
       ajax.command("submit-application", { id: applicationId})
@@ -74,19 +74,19 @@
     removeInvite : function(model) {
       var applicationId = application.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
-        .success(function(d) {
+        .success(function(d) { 
           notify.success("kutsu poistettu", model);
           repository.reloadAllApplications();
         })
         .call();
       return false;
     },
-
+    
     removeAuth : function(model) {
       console.log(model);
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
-        .success(function(d) {
+        .success(function(d) { 
           notify.success("oikeus poistettu", model);
           repository.reloadAllApplications();
         })
@@ -95,7 +95,7 @@
     }
 
   };
-
+  
   var emptyRh1 = {
     rakennuspaikanTiedot: {
       building_location: "",
@@ -110,7 +110,7 @@
       tenure: "",
       owner: "",
       plan_readiness: "",
-      exemption: ""
+      exemption: ""     
     },
     rakennuksenTiedot: {
       ownership: "",
@@ -191,9 +191,9 @@
       return false;
     }
   };
-
+  
   var rh1 = ko.mapping.fromJS(emptyRh1);
-
+  
   var authorization = {
     data: ko.observable({})
   };
@@ -203,16 +203,16 @@
     v.subscribe(listener);
     return v;
   }
-
-  var applicationMap;
-  var markers = new OpenLayers.Layer.Markers( "Markers" );
-
-  var marker;
-  var icon = (function() {
-    var size = new OpenLayers.Size(21,25);
-    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
-  })();
+  
+//  var applicationMap;
+//  var markers = new OpenLayers.Layer.Markers( "Markers" );
+//
+//  var marker;
+//  var icon = (function() {
+//    var size = new OpenLayers.Size(21,25);
+//    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+//    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
+//  })();
 
   function showApplication(data) {
     ajax.query("allowed-actions",{id: data.id})
@@ -225,13 +225,13 @@
   }
 
   function showApplicationPart2(data) {
-
+    
     // new data mapping
     applicationModel.data(ko.mapping.fromJS(data));
 
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
-
+    
     application.attachments.removeAll();
     var attachments = data.attachments;
     if (attachments) {
@@ -242,11 +242,11 @@
       }
     }
   }
-
+  
   function uploadCompleted(file, size, type, attachmentId) {
     // if (attachments) attachments.push(new Attachment(file, type, size, attachmentId));
   }
-
+    
   hub.subscribe("repository-application-reload", function(e) {
     if (application.id() === e.applicationId) {
       repository.getApplication(e.applicationId, showApplication, function() {
@@ -255,13 +255,13 @@
       });
     }
   });
-
+      
   var comment = {
     text: ko.observable(),
     submit: function(model) {
     var applicationId = application.id();
       ajax.command("add-comment", { id: applicationId, text: model.text()})
-      .success(function(d) {
+      .success(function(d) { 
         repository.reloadAllApplications();
           model.text("");
         }).call();
@@ -270,7 +270,7 @@
   };
 
   comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
-
+  
   var invite = {
     email : ko.observable(),
     title : ko.observable("uuden suunnittelijan lisääminen"),
@@ -310,7 +310,7 @@
            $(self).next(".application_section_content").toggleClass('content_expanded');
         }
     };
-
+      
   function onPageChange(e) {
     var id = e.pagePath[0];
     if (application.id() != id) {
@@ -319,30 +319,32 @@
         error("No such application, or not permission");
       });
     }
-
-    hub.whenOskariMapIsReady(function() {
-      hub.moveOskariMapToDiv("application-map");
-      refreshMap();
-    });
+    
+//    hub.whenOskariMapIsReady(function() {
+//      hub.moveOskariMapToDiv("application-map");
+//      refreshMap();
+//    });
 
   }
-
+  
   $(function() {
     hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
       onPageChange(e);
     });
-
+    
     var page = $("#application");
 
-    ko.applyBindings(
-        { application: application,
-          applicationModel: applicationModel,
-              comment: comment,
-          invite: invite,
-              authorization: authorization,
-              rh1: rh1,
-              tab: tab,
-          accordian: accordian},page[0]);
+    ko.applyBindings({
+      application : application,
+      applicationModel : applicationModel,
+      comment : comment,
+      invite : invite,
+      authorization : authorization,
+      rh1 : rh1,
+      tab : tab,
+      accordian : accordian
+    }, page[0]);
+
   });
 
 })();
