@@ -129,8 +129,21 @@ var attachment = function() {
     function toApplication(){
       window.location.href="#!/application/"+ model.application.id();
     }
+    
+  function onChangeToAttachmentPage(e) {
+    var id = e.pagePath[0];
+    bindAttachmentData(id);
+  }
+  
+  function bindAttachmentData(attachmentId) {
+    alert("load and bind" + attachmentId);
+  }
 
   $(function() {
+    hub.subscribe({type: "page-change", pageId: "attachment"}, function(e) {
+      onChangeToAttachmentPage(e);
+    });
+
     model = createModel();
     ko.applyBindings(model, $("#attachment")[0]);
     $(".droparea")
