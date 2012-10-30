@@ -29,9 +29,6 @@ var attachment = function() {
       return;
     }
 
-    var fileUploadFormField = document.getElementById("fileupload");
-    fileUploadFormField.value= "";
-
     model.attachmentId(attachmentId);
     model.type(attachment.type);
     model.application.id(applicationId);
@@ -49,6 +46,14 @@ var attachment = function() {
     if (applicationId === e.applicationId) {
       repository.getApplication(applicationId, showAttachment);
     }
+  });
+
+  hub.subscribe("upload-done", function(e) {
+    var originalUrl = $("#uploadFrame").attr("src");
+    $("#uploadFrame").attr("src", originalUrl);
+    $("#uploadFrame").css("visibility", "hidden");
+
+    repository.reloadAllApplications();
   });
 
   function toApplication(){
@@ -69,7 +74,7 @@ var attachment = function() {
         var iframe = $("#uploadFrame").contents();
         iframe.find("#applicationId").val(d.applicationId);
         iframe.find("#attachmentId").val(d.attachmentId);
-        $("#uploadFrame").css("display", "block");
+        $("#uploadFrame").css("visibility", "visible");
       });
     })
     .call();
