@@ -87,42 +87,13 @@
                       <li>
                         <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                         (<span data-bind="text: username"></span>) 
-                        <span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span>
+                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                         <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
                       </li>
                     </ul>
                   </div>
-                  <div data-bind="with: $root.applicationModel.data">
-                    <h4>Da thing</h4>
-                    <ul data-bind="foreach: _.groupBy(auth(),function(role) {return role.username();})">
-                      <li>
-                        <span data-bind="text: username"></span> 
-                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
-                      </li>
-                    </ul>
-                    <h4>Lukuoikeudet</h4>
-                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'reader'})">
-                      <li>
-                        <span data-bind="text: username"></span> 
-                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
-                      </li>
-                    </ul>
-                    <h4>Kirjoitusoikeudet</h4>
-                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'writer'})">
-                      <li>
-                        <span data-bind="text: username"></span> 
-                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        <a class="remove-write" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
-                      </li>
-                    </ul>
-                    <!--  /ko -->
-                    <br/>
-                  </div>
-                </div>
+                  <br/>
                 <h3>Kutsutut</h3>
-                
                 <ul data-bind="foreach: invites">
                   <li class="user-invite">
                     <span data-bind="text: user.username"></span>
