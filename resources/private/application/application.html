@@ -424,7 +424,7 @@
                   <td data-bind="text: loc('attachmentState_' + state)"
                       class="attachment-state"></td>
                   <td data-bind="attr: {onclick: open}">
-                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
+                    <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
                       <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
                       <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
                     </a>
