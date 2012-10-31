@@ -13,7 +13,7 @@
     hub.moveOskariMapToDiv("application-map");
     refreshMap();
   });
-  
+
   var icon = (function() {
     var size = new OpenLayers.Size(21,25);
     var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
@@ -30,16 +30,18 @@
     setTimeout(function() {
       var mapPoints = [];
 
-      mapPoints.push({
-        id: "markerFor" + application.id(),
-        location: {x: application.location().lon(), y: application.location().lat()}
-      });
+      if (application.id() && application.location()) {
+        mapPoints.push({
+          id: "markerFor" + application.id(),
+          location: {x: application.location().lon(), y: application.location().lat()}
+        });
+      }
 
       hub.send("documents-map", {
         data : mapPoints
       });
     }, 99);
-    
+
   }
 
   function ApplicationQueryModel() {
@@ -53,11 +55,11 @@
         var auth = ko.utils.unwrapObservable(self.data().auth());
         var pimped = _.reduce(auth, function(r, i) { var a = r[i.id()] || (i.roles = [], i); a.roles.push(i.role()); r[i.id()] = a; return r;}, {});
         value = _.values(pimped);
-      } 
+      }
       return value;
     },self);
   }
-  
+
   var application = {
     id: ko.observable(),
     state: ko.observable(),
@@ -73,10 +75,10 @@
 
     // new stuff
     invites: ko.observableArray(),
-    
+
     // all data in here
     data: ko.observable(),
-    
+
     submitApplication: function(model) {
       var applicationId = application.id();
       ajax.command("submit-application", { id: applicationId})
@@ -102,19 +104,19 @@
     removeInvite : function(model) {
       var applicationId = application.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
-        .success(function(d) { 
+        .success(function(d) {
           notify.success("kutsu poistettu", model);
           repository.reloadAllApplications();
         })
         .call();
       return false;
     },
-    
+
     removeAuth : function(model) {
       console.log(model);
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
-        .success(function(d) { 
+        .success(function(d) {
           notify.success("oikeus poistettu", model);
           repository.reloadAllApplications();
         })
@@ -123,7 +125,7 @@
     }
 
   };
-  
+
   var emptyRh1 = {
     rakennuspaikanTiedot: {
       building_location: "",
@@ -138,7 +140,7 @@
       tenure: "",
       owner: "",
       plan_readiness: "",
-      exemption: ""     
+      exemption: ""
     },
     rakennuksenTiedot: {
       ownership: "",
@@ -219,15 +221,15 @@
       return false;
     }
   };
-  
+
   var rh1 = ko.mapping.fromJS(emptyRh1);
-  
+
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
     return v;
   }
-  
+
   function showApplication(data) {
     ajax.query("allowed-actions",{id: data.id})
       .success(function(d) {
@@ -239,13 +241,13 @@
   }
 
   function showApplicationPart2(data) {
-    
+
     // new data mapping
     applicationQueryModel.data(ko.mapping.fromJS(data));
 
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
-    
+
     application.attachments.removeAll();
     var attachments = data.attachments;
     if (attachments) {
@@ -256,11 +258,11 @@
       }
     }
   }
-  
+
   function uploadCompleted(file, size, type, attachmentId) {
     // if (attachments) attachments.push(new Attachment(file, type, size, attachmentId));
   }
-    
+
   hub.subscribe("repository-application-reload", function(e) {
     if (application.id() === e.applicationId) {
       repository.getApplication(e.applicationId, showApplication, function() {
@@ -269,27 +271,28 @@
       });
     }
   });
-      
+
   function AuthorizationQueryModel() {
     var self = this;
-    
+
     self.data = ko.observable({})
-    ok: function(command) {
+
+    self.ok = function(command) {
       return self.data && self.data()[command] && self.data()[command].ok;
     }
   }
 
   function CommentCommandModel() {
     var self = this;
-    
+
     self.text = ko.observable();
-    
+
     self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
 
     self.submit = function(model) {
     var applicationId = application.id();
       ajax.command("add-comment", { id: applicationId, text: model.text()})
-      .success(function(d) { 
+      .success(function(d) {
         repository.reloadAllApplications();
           model.text("");
           })
@@ -304,7 +307,7 @@
     self.email = ko.observable();
     self.title = ko.observable("uuden suunnittelijan lisääminen");
     self.text = ko.observable();
-  
+
     self.submit = function(model) {
       ajax.command("invite", { id: application.id(),
                                email: model.email(),
@@ -340,7 +343,7 @@
            $(self).next(".application_section_content").toggleClass('content_expanded');
         }
     };
-      
+
   function onPageChange(e) {
     var id = e.pagePath[0];
     if (application.id() != id) {
@@ -349,19 +352,19 @@
         error("No such application, or not permission");
       });
     }
-    
+
   }
-  
+
   $(function() {
     hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
       onPageChange(e);
     });
-    
+
     applicationQueryModel = new ApplicationQueryModel();
     authorizationCommandModel = new AuthorizationQueryModel();
     inviteCommandModel = new InviteCommandModel();
     commentCommandModel = new CommentCommandModel();
-    
+
     var page = $("#application");
 
     ko.applyBindings({
