@@ -14,7 +14,7 @@
                        :child [{:tag :a :attr{:a "a"}
                                 :child[{:tag :ab}]}
                                {:tag :b}]})
-(def data-childs {:main {
+(def data-with-childs {:main {
                               :a {
                                   :ab "AB Value"}
                               :b "B value"}})
