@@ -2,17 +2,32 @@
 <html >
 <body>
   <section class="page" id="attachment">
-    <div class="container">
-<!--       <h1>Lis&auml;&auml; liite</h1>
-      <form id="attachmentUploadForm" action="/rest/upload" method="post" enctype="multipart/form-data">
-          <input id="test-new-attachment-name" name="type" data-bind="value: type" type="text" placeholder="Liitteen nimi" />
-          <input id="fileupload" type="file" name="upload" data-url="/rest/upload" >
-          <input type="hidden" name="attachmentId" data-bind="value: attachmentId" ><br>
-          <input type="hidden" name="applicationId" data-bind="value: application.id()" /><br>
-          <input type="submit">
-      </form> -->
-    <h1 data-bind="text: application.id"></h1>
-    <h1 data-bind="text: attachmentId"></h1>
+    <div class="container" data-bind="if: latestVersion">
+      <h1>
+        <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
+        <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
+        versio
+        <span data-bind="text: latestVersion().version.major">1</span>.<span data-bind="text: latestVersion().version.minor">0</span>
+        <span data-bind="text: filename">kuva.jpg</span>
+        Muokattu
+        <span data-bind="dateString: latestVersion().created">31.10.2012</span>
+        
+      </h1>
+      
+      <div class="file-preview" data-bind="visible: latestVersion().contentType.substring(0,6) == 'image/'">
+        <span data-bind="if: latestVersion().contentType.substring(0,6) == 'image/'">
+          <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></img>
+        </span>
+      </div>
+      
+      <div class="file-preview-links">
+        <span data-bind="if: latestVersion().contentType.substring(0,6) == 'image/'">
+        Näytä alkuperäinen kuva: <a data-bind="text: latestVersion().filename, attr: {href: '/rest/view/' + latestVersion().fileId}"></a>
+        <br/>
+        </span>
+        Lataa tiedosto: <a href="" data-bind="text: latestVersion().filename, attr: {href: '/rest/download/' + latestVersion().fileId}"></a>
+      </div>
+      
     </div>
   </section>
 </body>
