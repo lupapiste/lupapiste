@@ -18,8 +18,12 @@ var attachment = function() {
       filename:       ko.observable(),
       latestVersion:  ko.observable(),
       type:           ko.observable(),
-      isImage: function(contentType) {
-        return contentType.substring(0,6) == 'image/'; 
+      isImage: function() {
+        var contentType = this.latestVersion().contentType; 
+        return contentType && contentType.indexOf('image/') === 0;
+      },
+      isPdf: function() {
+        return this.latestVersion().contentType === "application/pdf"; 
       }
     };
   }
@@ -33,13 +37,17 @@ var attachment = function() {
     }
 
     model.latestVersion(attachment.latestVersion);
-    model.attachmentId(attachmentId);
     model.filename(attachment.filename);
     model.type(attachment.type);
     model.application.id(applicationId);
     model.application.title(application.title);
-    model.newFile(null);
   }
+
+  hub.subscribe({type: "page-change", pageId: "attachment"}, function(e) {
+    applicationId = e.pagePath[0];
+    attachmentId = e.pagePath[1];
+    repository.getApplication(applicationId, showAttachment);
+  });
 
   hub.subscribe("repository-application-reload", function(e) {
     if (applicationId === e.applicationId) {
@@ -60,12 +68,6 @@ var attachment = function() {
   }
 
   $(function() {
-    hub.subscribe({type: "page-change", pageId: "attachment"}, function(e) {
-      applicationId = e.pagePath[0];
-      attachmentId = e.pagePath[1];
-      repository.getApplication(applicationId, showAttachment);
-    });
-    
     model = createModel();
     ko.applyBindings(model, $("#attachment")[0]);
   });

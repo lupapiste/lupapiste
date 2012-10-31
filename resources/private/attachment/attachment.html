@@ -7,20 +7,24 @@
         <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
         <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
         versio
-        <span data-bind="text: latestVersion().version.major">1</span>.<span data-bind="text: latestVersion().version.minor">0</span>
+        <span data-bind="version: latestVersion().version">0.0</span>
         <span data-bind="text: filename">kuva.jpg</span>
         Muokattu
         <span data-bind="dateString: latestVersion().created">31.10.2012</span>
       </h1>
       
-      <div class="file-preview" data-bind="visible: isImage(latestVersion().contentType)">
-        <span data-bind="if: isImage(latestVersion().contentType)">
+      <!-- Preview images and pdf files only -->
+      <div class="file-preview" data-bind="visible: isImage() || isPdf()">
+        <div class="file-preview-image" data-bind="if: isImage()">
           <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></img>
-        </span>
+        </div>
+        <div class="file-preview-pdf" data-bind="if: isPdf()">
+          <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
+        </div>
       </div>
-      
+
       <div class="file-preview-links">
-        <span data-bind="if: isImage(latestVersion().contentType)">
+        <span data-bind="if: isImage()">
         Näytä alkuperäinen kuva: <a data-bind="text: latestVersion().filename, attr: {href: '/rest/view/' + latestVersion().fileId}"></a>
         <br/>
         </span>
