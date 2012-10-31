@@ -2,15 +2,41 @@
 <html >
 <body>
   <section class="page" id="attachment">
-    <div class="container">
-<!--       <h1>Lis&auml;&auml; liite</h1>
-      <form id="attachmentUploadForm" action="/rest/upload" method="post" enctype="multipart/form-data">
-          <input id="test-new-attachment-name" name="type" data-bind="value: type" type="text" placeholder="Liitteen nimi" />
-          <input id="fileupload" type="file" name="upload" data-url="/rest/upload" >
-          <input type="hidden" name="attachmentId" data-bind="value: attachmentId" ><br>
-          <input type="hidden" name="applicationId" data-bind="value: application.id()" /><br>
-          <input type="submit">
-      </form> -->
+    <div class="container" data-bind="if: latestVersion">
+      <h1>
+        <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
+        <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
+        versio
+        <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+        <span id="test-attachment-file-name" data-bind="text: filename">kuva.jpg</span>
+        Muokattu
+        <span data-bind="dateString: latestVersion().created">31.10.2012</span>
+        <span data-bind="text: latestVersion().filename">kuva.jpg</span>
+      </h1>
+      
+      <!-- Preview images and pdf files only -->
+      <div class="file-preview" data-bind="visible: isImage() || isPdf()">
+        <div class="file-preview-image" data-bind="if: isImage()">
+          <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
+            <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
+          </a>
+        </div>
+        <div class="file-preview-pdf" data-bind="if: isPdf()">
+          <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
+        </div>
+      </div>
+
+      <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
+        <p>Esikatselua ei saatavilla.</p>
+      </div>
+
+      <div class="file-preview-links">
+        <span data-bind="if: isImage()">
+        <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
+        <br/>
+        </span>
+      </div>
+      
     </div>
   </section>
 </body>

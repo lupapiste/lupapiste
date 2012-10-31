@@ -78,30 +78,20 @@
                     <b>Puh:</b> <span data-bind="text: hakija.puhelinnumero"></span><br/>
                     <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
                  </li>
-              </ul>
               <br/>
                 <div>
                   <h3>Valtuutetut</h3>
-                  <div data-bind="with: $root.applicationModel.data">
-                    <h4>Lukuoikeudet</h4>
-                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'reader'})">
+                  <div data-bind="with: $root.applicationModel">
+                    <ul data-bind="foreach: auth">
                       <li>
-                        <span data-bind="text: username"></span>
-                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                        (<span data-bind="text: username"></span>) 
+                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                         <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
                       </li>
                     </ul>
-                    <h4>Kirjoitusoikeudet</h4>
-                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'writer'})">
-                      <li>
-                        <span data-bind="text: username"></span>
-                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        <a class="remove-write" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
-                      </li>
-                    </ul>
-                    <!--  /ko -->
-                    <br/>
                   </div>
+                  <br/>
                 </div>
                 <h3>Kutsutut</h3>
 
@@ -434,14 +424,16 @@
                   <td data-bind="text: loc('attachmentState_' + state)"
                       class="attachment-state"></td>
                   <td data-bind="attr: {onclick: open}">
-                    <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
-                    <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i>
-                </span></td>
-                <td><span data-bind="if: $data.latestVersion.filename">
-                    <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
-                    <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
-                    <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
-                </span></td>
+                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
+                      <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
+                      <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
+                    </a>
+                  </td>
+								<td><span data-bind="if: $data.latestVersion.filename">
+								    <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
+								    <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
+								    <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
+								</span></td>
                   <td data-bind="if: $data.latestVersion"><span data-bind="version: latestVersion.version"></span></td>
                   <td data-bind="if: $data.modified">
                     <span data-bind="dateString: modified"></span>
