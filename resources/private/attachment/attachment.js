@@ -11,15 +11,16 @@ var attachment = function() {
   function createModel() {
     return {
       attachmentId:   ko.observable(),
-      filename:       ko.observable(),
-      latestVersion:  ko.observable(),
-      type:           ko.observable(),
       application: {
         id:     ko.observable(),
         title:  ko.observable()
       },
-      newFile:        ko.observable(),
-      toApplication: toApplication
+      filename:       ko.observable(),
+      latestVersion:  ko.observable(),
+      type:           ko.observable(),
+      isImage: function(contentType) {
+        return contentType.substring(0,6) == 'image/'; 
+      }
     };
   }
 

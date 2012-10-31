@@ -11,17 +11,16 @@
         <span data-bind="text: filename">kuva.jpg</span>
         Muokattu
         <span data-bind="dateString: latestVersion().created">31.10.2012</span>
-        
       </h1>
       
-      <div class="file-preview" data-bind="visible: latestVersion().contentType.substring(0,6) == 'image/'">
-        <span data-bind="if: latestVersion().contentType.substring(0,6) == 'image/'">
+      <div class="file-preview" data-bind="visible: isImage(latestVersion().contentType)">
+        <span data-bind="if: isImage(latestVersion().contentType)">
           <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></img>
         </span>
       </div>
       
       <div class="file-preview-links">
-        <span data-bind="if: latestVersion().contentType.substring(0,6) == 'image/'">
+        <span data-bind="if: isImage(latestVersion().contentType)">
         Näytä alkuperäinen kuva: <a data-bind="text: latestVersion().filename, attr: {href: '/rest/view/' + latestVersion().fileId}"></a>
         <br/>
         </span>
