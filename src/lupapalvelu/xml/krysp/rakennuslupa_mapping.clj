@@ -1,7 +1,8 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:use  [lupapalvelu.xml.emit]
-     [clojure.data.xml]
-     [clojure.java.io])
+  (:use  lupapalvelu.xml.emit
+     clojure.data.xml
+     clojure.java.io
+     lupapalvelu.xml.krysp.yhteiset)
   )
 
   
@@ -15,98 +16,7 @@
                        {:tag :aanestysalue}]}])
  
 ;YHTEISET
- (def piste [{:tag :piste 
-              :child [{:tag :Point 
-                       :child [{:tag :pos}]}]}])
-  
- (def postiosoite [{:tag :osoite 
-                   :child [{:tag :kunta}
-                           {:tag :osoitenimi 
-                            :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"} 
-                            :child [{:tag :teksti}]}
-                           {:tag :postinumero}
-                           {:tag :postitoimipaikannimi}]}])
- 
- (def sijantitieto [{:tag :sijaintitieto
-                        :child [{:tag :Sijainti
-                                 :child (conj postiosoite piste [{:tag :sijaintiepavarmuus}
-                                                                 {:tag :luontitapa}])}
-                                ]}])
- 
- (def rakennusoikeudet [:tag :rakennusoikeudet
-                        :child [{:tag :kayttotarkoitus
-                                 :child [{:tag :pintaAla}
-                                         {:tag :kayttotarkoitusKoodi}]}]])
 
- 
- 
- (def kiinteisto [{:tag :kiinteisto 
-                      :child (conj [{:tag :kiinteisto 
-                                :child [{:tag :kylanimi}
-                                        {:tag :tilannimi}
-                                        {:tag :kiinteistotunnus}
-                                        {:tag :maaraAlaTunnus}]}
-                              {:tag :palsta}
-                              {:tag :kokotilaKytkin}
-                              {:tag :hallintaperuste}
-                              {:tag :vuokraAluetunnus}
-                              {:tag :kaavanaste}
-                              {:tag :kerrosala}
-                              {:tag :tasosijainti}
-                              {:tag :rakennusoikeusYhteensa}
-                              {:tag :uusiKytkin}
-                              
-                              ]
-                                   postiosoite
-                                   sijantitieto
-                                   rakennusoikeudet
-                                   )}])
- 
- (def rakennus [{:tag :Rakennuspaikka :child [(conj [] 
-                                                    yksilointitieto
-                                                    kiinteisto)]}])
-
-  
-(def yksilointitieto [{:tag :yksilointitieto}
-                       {:tag :alkuHetki}
-                       {:tag :loppuHetki}]) 
-
- 
-  
- (def rakennuspaikka  (conj [{:tag :Rakennuspaikka}
-                       
-                       {:tag :kiinteisto 
-                        :child [{:tag :kiinteisto 
-                                 :child [{:tag :kylanimi}
-                                         {:tag :tilannimi}
-                                         {:tag :kiinteistotunnus}
-                                         {:tag :maaraAlaTunnus}]}
-                                         {:tag :palsta}
-                                         {:tag :kokotilaKytkin}
-                                         {:tag :hallintaperuste}
-                                         {:tag :vuokraAluetunnus}]}
-                       
-                       {:tag :kaavanaste}
-                       {:tag :kerrosala}
-                       {:tag :tasosijainti}
-                       {:tag :rakennusoikeudet 
-                        :child [{:tag :kayttotarkoitus 
-                                 :child [{:tag :pintaAla}
-                                         {:tag :kayttotarkoitusKoodi}]}]}
-                       {:tag :rakennusoikeusYhteensa}
-                       {:tag :uusiKytkin}
-                       
-                       
-                       
-                       ] yksilointitieto sijantitieto postiosoite))
- 
- (def rakennelma (conj [{:tag :kuvaus 
-                        :child [{:tag :kuvaus}]}
-                        ] 
-                       yksilointitieto
-                       sijantitieto
-                       tunnus
-                       ))
  
 
 (def rakennuslupa_to_krysp
