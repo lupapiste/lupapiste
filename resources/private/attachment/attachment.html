@@ -7,8 +7,8 @@
         <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
         <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
         versio
-        <span data-bind="version: latestVersion().version">0.0</span>
-        <span data-bind="text: filename">kuva.jpg</span>
+        <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+        <span id="test-attachment-file-name" data-bind="text: filename">kuva.jpg</span>
         Muokattu
         <span data-bind="dateString: latestVersion().created">31.10.2012</span>
         <span data-bind="text: latestVersion().filename">kuva.jpg</span>
