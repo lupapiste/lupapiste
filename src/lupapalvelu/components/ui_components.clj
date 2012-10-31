@@ -4,9 +4,10 @@
 
 (def ui-components
   {:jquery       {:css ["jquery.pnotify.default.css"]
-                  :js ["jquery-1.8.0.min.js" "jquery.ba-hashchange.js"
-                       "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
-
+                  :js ["jquery-1.8.0.min.js"
+                       "jquery-ui-1.9.0.custom.min.js"
+                       "jquery.ba-hashchange.js" "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
+   
    :oskari       {:depends [:jquery]
                   :js ["map.js"]
                   :css ["oskarimap.css"]
@@ -15,12 +16,12 @@
    :knockout     {:js ["knockout-2.1.0.debug.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
 
    :underscore   {:js ["underscore.js"]}
-
+   
    :common       {:depends [:oskari :jquery :knockout :underscore]
                   :js ["log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "nav.js" "combobox.js" "ko.init.js"  "dialog.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
-
+   
    :buildinfo    {:depends [:jquery]
                   :js ["buildinfo.js"]}
 
@@ -29,11 +30,15 @@
 
    :repository   {:depends [:common]
                   :js ["repository.js"]}
-
+   
+   :accordion    {:depends [:jquery]
+                  :js ["accordion.js"]
+                  :css ["accordion.css"]}
+   
    :application  {:depends [:common :repository]
                   :js ["application.js"]
                   :html ["application.html"]}
-
+   
    :applications-common {:depends [:invites]
                          :js ["applications.js" "lupapiste.tablesorter.js"]
                          :css ["tablesorter.css"]}
@@ -42,11 +47,11 @@
                   :js ["applications-config.js"]
                   :css ["applications.css"]
                   :html ["applications.html"]}
-
+   
    :authority_applications {:depends [:common :repository :applications-common]
                             :js ["applications-config.js"]
                             :html ["applications.html"]}
-
+   
    :attachment   {:depends [:common :repository]
                   :js ["attachment.js"]
                   :html ["attachment.html"]}
@@ -56,14 +61,18 @@
                   :js ["register.js"]
                   :html ["register.html" "register2.html"]}
 
+   :docgen       {:depends [:accordion :common]
+                  :js ["docgen.js"]
+                  :css ["docgen.css"]}
+   
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:common :application :applications :attachment :wizard :buildinfo]
-                  :js ["applicant.js" ]
+   :applicant    {:depends [:common :application :applications :attachment :wizard :buildinfo :docgen]
+                  :js ["applicant.js"]
                   :html ["index.html"]}
-
-   :authority    {:depends [:application :authority_applications :attachment :buildinfo]
+   
+   :authority    {:depends [:application :authority_applications :attachment :buildinfo :docgen]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -78,9 +87,8 @@
 ; Make sure that all resources are available:
 
 (doseq [c (keys ui-components)
-        r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-  (let [file      (c/path r)
-        resource (.getResourceAsStream (clojure.lang.RT/baseLoader) file)]
+        r (map c/path (mapcat #(c/component-resources ui-components % c) [:js :html :css]))]
+  (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) r)]
     (if resource
       (.close resource)
-      (throw (Exception. (str "Resource missing: " file))))))
+      (throw (Exception. (str "Resource missing: " r))))))
