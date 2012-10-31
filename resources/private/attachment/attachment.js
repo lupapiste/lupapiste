@@ -11,13 +11,20 @@ var attachment = function() {
   function createModel() {
     return {
       attachmentId:   ko.observable(),
-      type:           ko.observable(),
       application: {
         id:     ko.observable(),
         title:  ko.observable()
       },
-      newFile:        ko.observable(),
-      toApplication: toApplication
+      filename:       ko.observable(),
+      latestVersion:  ko.observable(),
+      type:           ko.observable(),
+      isImage: function() {
+        var contentType = this.latestVersion().contentType; 
+        return contentType && contentType.indexOf('image/') === 0;
+      },
+      isPdf: function() {
+        return this.latestVersion().contentType === "application/pdf"; 
+      }
     };
   }
 
@@ -29,11 +36,11 @@ var attachment = function() {
       return;
     }
 
-    model.attachmentId(attachmentId);
+    model.latestVersion(attachment.latestVersion);
+    model.filename(attachment.filename);
     model.type(attachment.type);
     model.application.id(applicationId);
     model.application.title(application.title);
-    model.newFile(null);
   }
 
   hub.subscribe({type: "page-change", pageId: "attachment"}, function(e) {
@@ -61,8 +68,8 @@ var attachment = function() {
   }
 
   $(function() {
-    //model = createModel();
-    //ko.applyBindings(model, $("#attachment")[0]);
+    model = createModel();
+    ko.applyBindings(model, $("#attachment")[0]);
   });
 
   function newAttachment(m) {
