@@ -25,6 +25,9 @@
 (defn from-json []
   (json/decode (slurp (:body (request/ring-request))) true))
 
+(defn from-query []
+  (keywordize-keys (:query-params (request/ring-request))))
+
 (defn current-user []
   "fetches the current user from 1) http-session 2) apikey from headers"
   (or (session/get :user) ((request/ring-request) :user)))
@@ -32,8 +35,14 @@
 (defn logged-in? []
   (not (nil? (current-user))))
 
-(defn logged-in-as-authority? []
-  (and logged-in? (= :authority (keyword (:role (current-user))))))
+(defn has-role [role]
+  (= role (keyword (:role (current-user)))))
+
+(defn authority? []
+  (and logged-in? (has-role :authority)))
+
+(defn admin? []
+  (and logged-in? (has-role :admin)))
 
 (defmacro defjson [path params & content]
   `(defpage ~path ~params
@@ -52,37 +61,15 @@
 ;; Commands
 ;;
 
-(defn create-action [name & args]
-  (apply core/create-action name (into args [(current-user) :user])))
-
-(defn- foreach-action []
-  (let [json (from-json)]
-    (map
-      #(create-action % :data json)
-      (keys (core/get-actions)))))
-
-(defn- validated [command]
-  {(:action command) (core/validate command)})
-
-(env/in-dev
-  (defjson "/rest/actions" []
-    (ok :commands (core/get-actions))))
-
-  (defjson [:post "/rest/actions/valid"] []
-    (ok :commands (into {} (map validated (foreach-action)))))
+(defn- with-user
+  ([m] (with-user m (current-user)))
+  ([m user] (merge m {:user user})))
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute
-    (create-action
-      name
-      :data (from-json))))
+  (core/execute (with-user (core/command name (from-json)))))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute
-    (create-action
-      name
-      :type :query
-      :data (keywordize-keys (:query-params (request/ring-request))))))
+  (core/execute (with-user (core/query name (from-query)))))
 
 ;;
 ;; Web UI:
@@ -94,24 +81,38 @@
                    :js   "application/javascript"
                    :css  "text/css"})
 
-(defpage "/welcome" []      (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
-(defpage "/welcome.js" []   (resp/content-type (:js content-type) (singlepage/compose :js :welcome)))
-(defpage "/welcome.css" []  (resp/content-type (:css content-type) (singlepage/compose :css :welcome)))
+(defpage "/welcome" []                         (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
+(defpage "/welcome.js" []                      (resp/content-type (:js content-type)   (singlepage/compose :js :welcome)))
+(defpage "/welcome.css" []                     (resp/content-type (:css content-type)  (singlepage/compose :css :welcome)))
 
 (defpage "/applicant" []      (if (logged-in?) (resp/content-type (:html content-type) (singlepage/compose :html :applicant)) (resp/redirect "/welcome#")))
 (defpage "/applicant.js" []   (if (logged-in?) (resp/content-type (:js content-type)   (singlepage/compose :js   :applicant)) (resp/status 401 "Unauthorized\r\n")))
 (defpage "/applicant.css" []  (if (logged-in?) (resp/content-type (:css content-type)  (singlepage/compose :css  :applicant)) (resp/status 401 "Unauthorized\r\n")))
 
-(defpage "/authority" []      (if (logged-in-as-authority?) (resp/content-type (:html content-type) (singlepage/compose :html :authority)) (resp/redirect "/welcome#")))
-(defpage "/authority.js" []   (if (logged-in-as-authority?) (resp/content-type (:js content-type)   (singlepage/compose :js   :authority)) (resp/status 401 "Unauthorized\r\n")))
-(defpage "/authority.css" []  (if (logged-in-as-authority?) (resp/content-type (:css content-type)  (singlepage/compose :css  :authority)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/authority" []      (if (authority?) (resp/content-type (:html content-type) (singlepage/compose :html :authority)) (resp/redirect "/welcome#")))
+(defpage "/authority.js" []   (if (authority?) (resp/content-type (:js content-type)   (singlepage/compose :js   :authority)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/authority.css" []  (if (authority?) (resp/content-type (:css content-type)  (singlepage/compose :css  :authority)) (resp/status 401 "Unauthorized\r\n")))
+
+(defpage "/admin" []          (if (admin?)     (resp/content-type (:html content-type) (singlepage/compose :html :admin)) (resp/redirect "/welcome#")))
+(defpage "/admin.js" []       (if (admin?)     (resp/content-type (:js content-type)   (singlepage/compose :js   :admin)) (resp/status 401 "Unauthorized\r\n")))
+(defpage "/admin.css" []      (if (admin?)     (resp/content-type (:css content-type)  (singlepage/compose :css  :admin)) (resp/status 401 "Unauthorized\r\n")))
+
+;
+; Oskari:
+;
+
+(defpage "/oskarimap.js" []
+  (->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
+    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
+    (resp/content-type (:js content-type))))
 
 ;;
 ;; Login/logout:
 ;;
 
 (def applicationpage-for {:applicant "/applicant"
-                          :authority "/authority"})
+                          :authority "/authority"
+                          :admin "/admin"})
 
 (defjson [:post "/rest/login"] {:keys [username password]}
   (if-let [user (security/login username password)]
@@ -152,13 +153,17 @@
 ;; File upload/download:
 ;;
 
-(defjson [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId name :name upload :upload}
-  (debug "upload: %s: %s" name (str upload))
-  (core/execute
-    (create-action "upload-attachment" :data (assoc upload
-                                  :id applicationId
-                                  :attachmentId attachmentId
-                                  :name (or name "")))))
+;; Content type must not be JSON. Damn you IE.
+(defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload :as data}
+  (debug "upload: %s: %s" data (str upload))
+
+  (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
+        result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
+    (if (:ok result)
+      (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
+      (json/generate-string result) ; TODO display error message
+      )
+    ))
 
 (def windows-filename-max-length 255)
 
@@ -196,12 +201,12 @@
 (defpage [:post "/ajaxProxy/:srv"] {srv :srv}
   (let [request (ring-request) body (slurp(:body request)) urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
     (client/post (get urls srv)
-	     {:body body
-	      :content-type :json
-	      :accept :json})))
+       {:body body
+        :content-type :json
+        :accept :json})))
 
 ;;
-;; Development thingies
+;; Development thingies.
 ;;
 
 (env/in-dev
@@ -215,10 +220,9 @@
 
   (defpage "/verdict" {:keys [id ok text]}
     (core/execute
-      (core/create-action
-        "give-application-verdict"
-        :user (security/login-with-apikey "505718b0aa24a1c901e6ba24")
-        :data {:id id :ok ok :text text}))
+      (with-user
+        (core/command "give-application-verdict" {:id id :ok ok :text text})
+        (security/login-with-apikey "505718b0aa24a1c901e6ba24")))
     (format "verdict is given for application %s" id))
 
   (def speed-bump (atom 0))

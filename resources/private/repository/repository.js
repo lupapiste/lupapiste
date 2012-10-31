@@ -15,6 +15,7 @@ var repository = function() {
 			var application = applications[n];
 			var id = application.id;
 			applicationsById[id] = application;
+			
 			hub.send("repository-application-reload", {applicationId: id});
 		}
 		hub.send("repository-reload");

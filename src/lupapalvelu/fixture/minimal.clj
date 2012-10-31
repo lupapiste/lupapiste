@@ -4,7 +4,18 @@
 
 (def users
   [
-   {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
+   {:id "777777777777777777000099" ;; admin
+    :email "admin@solita.fi"
+    :role :admin
+    :personId "solita123"
+    :firstName "Admin"
+    :lastName "Admin"
+    :phone "03030303"
+    :username "admin"
+    :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
+              :salt "$2a$10$WHPur/hjvaOTlm41VFjtju"
+              :apikey "5087ba34c2e667024fbd5992"}}
+    {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :email "veikko.viranomainen@tampere.fi"
     :role :authority
     :authority :tampere
@@ -36,18 +47,18 @@
    {:lastName "Nieminen", ;; Mikkos neighbour
     :firstName "Teppo",
     :postalCode "33200",
-    :city "Tampere",
     :username "teppo@example.com",
     :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe",
               :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"},
-    :street "Mutakatu 7",
     :phone "0505503171",
     :email "teppo@example.com",
     :personId "210281-0001",
     :role "applicant",
     :id "5073c0a1c2e6c470aef589a5",
-    :streetAddress "Mutakatu 7",
-    :postalPlace "Tampere"}
+    :street "Mutakatu 7"
+    :zip "33560"
+    :city "Tampere"
+     }
    {:id "777777777777777777000010", ;; Mikko Intonen
     :username "mikko@example.com",
     :role "applicant",
@@ -55,9 +66,9 @@
     :firstName "Mikko",
     :lastName "Intonen",
     :email "mikko@example.com",
-    :streetAddress "Rambokuja 6"
-    :postalCode "55550",
-    :postalPlace "sipoo"
+    :street "Rambokuja 6"
+    :zip "55550"
+    :city "sipoo"
     :phone "0505503171"
     :private {:password "$2a$10$zwb/nvYQu4b1oZGpxz8.QOqHEBx3vXw9brc3NqDexgMbDuU2pwL9q"
               :salt "$2a$10$zwb/nvYQu4b1oZGpxz8.QO"

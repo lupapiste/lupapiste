@@ -47,6 +47,10 @@
   (mc/update-by-id collection id data)
   nil)
 
+(defn update-by-query [collection query data]
+  "Updates data into collection. Returns the number of documents updated"
+  (.getN (mc/update collection query data)))
+
 (defn insert [collection data]
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
   (mc/insert collection (with-_id data))
@@ -60,7 +64,9 @@
   ([collection]
     (select collection {}))
   ([collection query]
-    (map with-id (mc/find-maps collection query))))
+    (select collection query {}))
+  ([collection query projection]
+    (map with-id (mc/find-maps collection query projection))))
 
 (defn select-one
   "returns one entry by matching the monger query"
@@ -71,10 +77,10 @@
   (.setId input id)
   input)
 
-(defn upload [applicationId attachmentId filename content-type tempfile timestamp]
+(defn upload [applicationId file-id filename content-type tempfile timestamp]
   (gfs/store-file
     (gfs/make-input-file tempfile)
-    (set-file-id attachmentId)
+    (set-file-id file-id)
     (gfs/filename filename)
     (gfs/content-type content-type)
     (gfs/metadata {:uploaded timestamp, :application applicationId})))
@@ -97,6 +103,7 @@
 
 (defn clear! []
   (warn "** Clearing DB **")
+  (gfs/remove-all)
   (dorun (map #(mc/remove %) collections))
   (mc/ensure-index "users" {:email 1} {:unique true})
   (mc/ensure-index "users" {:personId 1} {:unique true}))
