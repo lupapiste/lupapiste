@@ -10,7 +10,7 @@
                  [clj-http "0.5.6"]
                  [clj-time "0.4.4"]
                  [fi.sito.oskari/oskari "0.1"]
-                 [[org.clojure/data.xml "0.0.6"]] 
+                 [org.clojure/data.xml "0.0.6"]] 
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
                    :plugins [[lein-midje "2.0.0"]
                              [lein-buildid "0.1.0-SNAPSHOT"]]}}
