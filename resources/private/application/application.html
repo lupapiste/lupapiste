@@ -82,26 +82,17 @@
               <br/>
                 <div>
                   <h3>Valtuutetut</h3>
-                  <div data-bind="with: $root.applicationModel.data">
-                    <h4>Lukuoikeudet</h4>
-                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'reader'})">
+                  <div data-bind="with: $root.applicationModel">
+                    <ul data-bind="foreach: auth">
                       <li>
-                        <span data-bind="text: username"></span>
-                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
+                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                        (<span data-bind="text: username"></span>) 
+                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                         <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
                       </li>
                     </ul>
-                    <h4>Kirjoitusoikeudet</h4>
-                    <ul data-bind="foreach: _.filter(auth(),function(role) {return role.role() == 'writer'})">
-                      <li>
-                        <span data-bind="text: username"></span>
-                        (<span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>)
-                        <a class="remove-write" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
-                      </li>
-                    </ul>
-                    <!--  /ko -->
-                    <br/>
                   </div>
+                  <br/>
                 </div>
                 <h3>Kutsutut</h3>
 

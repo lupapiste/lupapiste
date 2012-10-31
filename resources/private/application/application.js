@@ -3,31 +3,59 @@
  */
 
 ;(function() {
+  
+  var applicationQueryModel;
+  var inviteCommandModel;
+  var commentCommandModel;
+  var authorizationCommandModel;
 
-//  function refreshMap() {
-//    // refresh map for applications
-//    hub.clearMapWithDelay(refreshMapPoints);
-//  }
+  hub.whenOskariMapIsReady(function() {
+    hub.moveOskariMapToDiv("application-map");
+    refreshMap();
+  });
+  
+  var icon = (function() {
+    var size = new OpenLayers.Size(21,25);
+    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
+  })();
 
-//  function refreshMapPoints() {
-//    // FIXME Hack: we'll have to wait 100ms
-//    setTimeout(function() {
-//      var mapPoints = [];
-//
-//      mapPoints.push({
-//        id: "markerFor" + application.id(),
-//        location: {x: application.location().lon(), y: application.location().lat()}
-//      });
-//
-//      hub.send("documents-map", {
-//        data : mapPoints
-//      });
-//    }, 99);
-//    
-//  }
+  function refreshMap() {
+    // refresh map for applications
+    hub.clearMapWithDelay(refreshMapPoints);
+  }
 
-  var applicationModel = {
-      data: ko.observable()
+  function refreshMapPoints() {
+    // FIXME Hack: we'll have to wait 100ms
+    setTimeout(function() {
+      var mapPoints = [];
+
+      mapPoints.push({
+        id: "markerFor" + application.id(),
+        location: {x: application.location().lon(), y: application.location().lat()}
+      });
+
+      hub.send("documents-map", {
+        data : mapPoints
+      });
+    }, 99);
+    
+  }
+
+  function ApplicationQueryModel() {
+    var self = this;
+    
+    self.data = ko.observable();
+    
+    self.auth = ko.computed(function() {
+      var value = [];
+      if(self.data() != undefined) {
+        var auth = ko.utils.unwrapObservable(self.data().auth());
+        var pimped = _.reduce(auth, function(r, i) { var a = r[i.id()] || (i.roles = [], i); a.roles.push(i.role()); r[i.id()] = a; return r;}, {});
+        value = _.values(pimped);
+      } 
+      return value;
+    },self);
   }
   
   var application = {
@@ -194,30 +222,16 @@
   
   var rh1 = ko.mapping.fromJS(emptyRh1);
   
-  var authorization = {
-    data: ko.observable({})
-  };
-
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
     return v;
   }
-  
-//  var applicationMap;
-//  var markers = new OpenLayers.Layer.Markers( "Markers" );
-//
-//  var marker;
-//  var icon = (function() {
-//    var size = new OpenLayers.Size(21,25);
-//    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-//    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
-//  })();
-
+ 
   function showApplication(data) {
     ajax.query("allowed-actions",{id: data.id})
       .success(function(d) {
-        authorization.data(d.actions);
+        authorizationCommandModel.data(d.actions);
         showApplicationPart2(data);
         hub.setPageReady("application");
       })
@@ -227,7 +241,7 @@
   function showApplicationPart2(data) {
     
     // new data mapping
-    applicationModel.data(ko.mapping.fromJS(data));
+    applicationQueryModel.data(ko.mapping.fromJS(data));
 
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
@@ -255,34 +269,47 @@
       });
     }
   });
-      
-  var comment = {
-    text: ko.observable(),
-    submit: function(model) {
-    var applicationId = application.id();
-      ajax.command("add-comment", { id: applicationId, text: model.text()})
-      .success(function(d) { 
-        repository.reloadAllApplications();
-          model.text("");
-        }).call();
-    return false;
-  }
-  };
 
-  comment.disabled = ko.computed( function() { return comment.text() == "" || comment.text() == null; });
+  function AuthorizationQueryModel() {
+    var self = this;
+    
+    self.data = ko.observable({})
+  }
+
+  function CommentCommandModel() {
+    var self = this;
+    
+    self.text = ko.observable();
+    
+    self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
+
+    self.submit = function(model) {
+      var applicationId = application.id();
+      ajax.command("add-comment", { id: applicationId, text: model.text()})
+        .success(function(d) { 
+          repository.reloadAllApplications();
+            model.text("");
+          })
+          .call();
+      return false;
+    }
+  };
   
-  var invite = {
-    email : ko.observable(),
-    title : ko.observable("uuden suunnittelijan lisääminen"),
-    text  : ko.observable(),
-    submit: function(model) {
+  function InviteCommandModel() {
+    var self = this;
+
+    self.email = ko.observable();
+    self.title = ko.observable("uuden suunnittelijan lisääminen");
+    self.text = ko.observable();
+
+    self.submit = function(model) {
       ajax.command("invite", { id: application.id(),
                                email: model.email(),
                                title: model.title(),
                                text: model.text()})
         .success(function(d) {
-          model.email(undefined);
-          model.text(undefined);
+          self.email(undefined);
+          self.text(undefined);
           repository.reloadAllApplications();
         })
         .error(function(d) {
@@ -293,23 +320,23 @@
     }
   }
 
-    var tab = {
-        tabClick: function(data, event) {
-           var self = event.target;
-           $("#tabs li").removeClass('active');
-           $(self).parent().addClass("active");
-           $(".tab_content").hide();
-           var selected_tab = $(self).attr("href");
-           $(selected_tab).fadeIn();
-        }
-    };
+  var tab = {
+      tabClick: function(data, event) {
+         var self = event.target;
+         $("#tabs li").removeClass('active');
+         $(self).parent().addClass("active");
+         $(".tab_content").hide();
+         var selected_tab = $(self).attr("href");
+         $(selected_tab).fadeIn();
+      }
+  };
 
-    var accordian = {
-        accordianClick: function(data, event) {
-           self = event.target;
-           $(self).next(".application_section_content").toggleClass('content_expanded');
-        }
-    };
+  var accordian = {
+      accordianClick: function(data, event) {
+         self = event.target;
+         $(self).next(".application_section_content").toggleClass('content_expanded');
+      }
+  };
       
   function onPageChange(e) {
     var id = e.pagePath[0];
@@ -320,11 +347,6 @@
       });
     }
     
-//    hub.whenOskariMapIsReady(function() {
-//      hub.moveOskariMapToDiv("application-map");
-//      refreshMap();
-//    });
-
   }
   
   $(function() {
@@ -332,14 +354,19 @@
       onPageChange(e);
     });
     
+    applicationQueryModel = new ApplicationQueryModel();
+    authorizationCommandModel = new AuthorizationQueryModel();
+    inviteCommandModel = new InviteCommandModel();
+    commentCommandModel = new CommentCommandModel();
+    
     var page = $("#application");
 
     ko.applyBindings({
       application : application,
-      applicationModel : applicationModel,
-      comment : comment,
-      invite : invite,
-      authorization : authorization,
+      applicationModel : applicationQueryModel,
+      comment : commentCommandModel,
+      invite : inviteCommandModel,
+      authorization : authorizationCommandModel,
       rh1 : rh1,
       tab : tab,
       accordian : accordian
