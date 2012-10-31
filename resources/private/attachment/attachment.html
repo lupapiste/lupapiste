@@ -16,19 +16,24 @@
       <!-- Preview images and pdf files only -->
       <div class="file-preview" data-bind="visible: isImage() || isPdf()">
         <div class="file-preview-image" data-bind="if: isImage()">
-          <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></img>
+          <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
+            <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
+          </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf()">
           <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
         </div>
       </div>
 
+      <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
+        <p>Esikatselua ei saatavilla.</p>
+      </div>
+
       <div class="file-preview-links">
         <span data-bind="if: isImage()">
-        Näytä alkuperäinen kuva: <a data-bind="text: latestVersion().filename, attr: {href: '/rest/view/' + latestVersion().fileId}"></a>
+        <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
         <br/>
         </span>
-        Lataa tiedosto: <a href="" data-bind="text: latestVersion().filename, attr: {href: '/rest/download/' + latestVersion().fileId}"></a>
       </div>
       
     </div>
