@@ -6,7 +6,7 @@
   {:jquery       {:css ["jquery.pnotify.default.css"]
                   :js ["jquery-1.8.0.min.js"
                        "jquery-ui-1.9.0.custom.min.js"
-                       "jquery.ba-hashchange.js" "jquery.filedrop.js" "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
+                       "jquery.ba-hashchange.js" "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
    
    :oskari       {:depends [:jquery]
                   :js ["map.js"]
