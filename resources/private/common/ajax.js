@@ -19,10 +19,8 @@ var ajax = function() {
 			cache:     false,
 			timeout:   60000,
 			success: function(e) {
-				//setTimeout(function(){ 
-					var handler = e.ok ? self.successHandler : self.errorHandler;
-					handler(e);
-				//}, 1000);
+				var handler = e.ok ? self.successHandler : self.errorHandler;
+				handler(e);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
 				self.failHandler(jqXHR, textStatus, errorThrown);
@@ -35,7 +33,7 @@ var ajax = function() {
 		
 		self.successHandler = function(e) { notify.error("rest",e); };
 		self.errorHandler = function(e) { notify.error("error",e); };
-		self.failHandler = function(jqXHR, textStatus, errorThrown) { console.log("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
+		self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
 		self.completeHandler = function(jqXHR, textStatus) { };
 		
 		self.dataType = function(dataType) {
@@ -121,6 +119,7 @@ var ajax = function() {
 	}
 	
 	function command(name, data) {
+		// TODO: Do we need this copy?
 		var message = {};
 		for (var k in data) message[k] = data[k];
 		return new Call("/rest/command/"+name, "POST").json(message);
@@ -133,11 +132,11 @@ var ajax = function() {
 	}
 
 	return {
-		post:   post,
-		postJson: postJson,
-		get:    get,
-		command: command,
-		query: query
+		post:      post,
+		postJson:  postJson,
+		get:       get,
+		command:   command,
+		query:     query
 	};
 	
 }();
