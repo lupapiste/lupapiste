@@ -10,7 +10,6 @@
             [noir.server :as server]
             [cheshire.core :as json]
             [lupapalvelu.env :as env]
-            [lupapalvelu.fixture :as fixture]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
@@ -188,13 +187,6 @@
 ;;
 
 (env/in-dev
-
-  (defpage "/fixture/:name" {name :name}
-    (fixture/apply-fixture name)
-    (format "fixture applied: %s" name))
-
-  (defjson "/fixture" []
-    (keys @fixture/fixtures))
 
   (defpage "/verdict" {:keys [id ok text]}
     (core/execute
