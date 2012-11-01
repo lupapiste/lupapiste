@@ -113,7 +113,6 @@
     },
 
     removeAuth : function(model) {
-      console.log(model);
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function(d) {
@@ -305,7 +304,7 @@
     var self = this;
 
     self.email = ko.observable();
-    self.title = ko.observable("uuden suunnittelijan lisääminen");
+    self.title = ko.observable("uuden suunnittelijan lis\u00E4\u00Eminen");
     self.text = ko.observable();
 
     self.submit = function(model) {
@@ -319,7 +318,7 @@
           repository.reloadAllApplications();
         })
         .error(function(d) {
-          notify.info("kutsun lähettäminen epäonnistui",d);
+          notify.info("kutsun l\u00Ehett\u00Eminen ep\u00Eonnistui",d);
         })
         .call();
       return false;
