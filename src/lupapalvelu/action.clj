@@ -5,7 +5,6 @@
         [lupapalvelu.env]
         [lupapalvelu.log]
         [lupapalvelu.domain]
-        [clojure.java.io :only [file]]
         [clojure.set :only [difference]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
@@ -58,7 +57,7 @@
                :state :open}}))))
 
 (defquery "invites"
-  {:authenticated true} 
+  {:authenticated true}
   [{{id :id} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
@@ -77,7 +76,7 @@
       (with-user email ;; allows invites only existing users
         (fn [invited]
           (mongo/update mongo/applications
-            {:_id application-id 
+            {:_id application-id
              :invites {$not {$elemMatch {:user.username email}}}}
             {$push {:invites {:title       title
                               :application application-id
@@ -107,7 +106,7 @@
         (fn [invited]
           (mongo/update-by-id mongo/applications application-id
             {$pull {:invites      {:user.username email}
-                    :auth         {$and [{:username email} 
+                    :auth         {$and [{:username email}
                                          {:type {$ne :owner}}]}}}))))))
 
 ;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
@@ -118,7 +117,7 @@
   (with-application command
     (fn [{application-id :id}]
       (mongo/update-by-id mongo/applications application-id
-        {$pull {:auth {$and [{:username email} 
+        {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
 
@@ -249,78 +248,4 @@
                                    :otsikko (str (:lastName user) ", " (:street data))}]}})
     (ok :id id)))
 
-(defn create-attachment [{{application-id :id} :data created :created}]
-  (let [attachment-id (mongo/create-id)
-        attachment-model {:id attachment-id
-                          :type nil
-                          :state :none
-                          :latestVersion   {:version {:major 0, :minor 0}}
-                          :versions []
-                          :comments []}]
-    (mongo/update-by-id mongo/applications application-id
-      {$set {:modified created, (str "attachments." attachment-id) attachment-model}})
-    (ok :applicationId application-id :attachmentId attachment-id)))
 
-;; TODO refactor?
-(defcommand "set-attachment-name"
-  {:parameters [:id :attachmentId :type]
-   :roles      [:applicant :authority]
-   :states     [:draft :open]}
-  [command]
-  (with-application command
-    (fn [application]
-  (mongo/update-by-id
-    mongo/applications (:id application)
-    {$set {:modified (:created command)
-           (str "attachments." (-> command :data :attachmentId) ".type") (-> command :data :type)}}))))
-
-(defn- next-attachment-version [current-version user]
-  (if (= (keyword (:role user)) :authority)
-    {:major (:major current-version), :minor (inc (:minor current-version))}
-    {:major (inc (:major current-version)), :minor 0}))
-
-(defn- set-attachment-version [application-id attachment-id file-id type filename content-type size now user]
-  (when-let [application (mongo/by-id mongo/applications application-id)]
-    (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
-          next-version (next-attachment-version latest-version user)
-          version-model {
-                  :version  next-version
-                  :fileId   file-id
-                  :created  now
-                  :accepted nil
-                  :user    (security/summary user)
-                  ; File name will be presented in ASCII when the file is downloaded.
-                  ; Conversion could be done here as well, but we don't want to lose information.
-                  :filename filename
-                  :contentType content-type
-                  :size size}]
-
-        ; TODO check return value and try again with new version number
-        (mongo/update-by-query
-          mongo/applications
-          {:_id application-id
-           (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
-           (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
-          {$set {:modified now
-                 (str "attachments." attachment-id ".modified") now
-                 (str "attachments." attachment-id ".type")  type ; TODO is it OK to update type? Should be set at first time and not thereafter
-                 (str "attachments." attachment-id ".state")  :added
-                 (str "attachments." attachment-id ".latestVersion") version-model}
-           $push {(str "attachments." attachment-id ".versions") version-model}}))))
-
-(defcommand "upload-attachment"
-  {:parameters [:id :attachmentId :type :filename :tempfile :content-type :size]
-   :roles      [:applicant :authority]
-   :states     [:draft :open]}
-  [{created :created
-    user    :user
-    {:keys [id attachmentId type filename tempfile content-type size]} :data}]
-  (debug "Create GridFS file: %s %s %s %s %s %s %d" id attachmentId type filename tempfile content-type size)
-  (let [file-id (mongo/create-id)]
-    (mongo/upload file-id file-id filename content-type tempfile created)
-    (set-attachment-version id attachmentId file-id type filename content-type size created user)
-    (.delete (file tempfile))))
-
-(defn get-attachment [attachmentId]
-  ;; FIXME access rights
-  (mongo/download attachmentId))
