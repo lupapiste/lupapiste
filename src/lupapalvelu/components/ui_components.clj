@@ -17,7 +17,7 @@
 
    :underscore   {:js ["underscore.js"]}
 
-   :common       {:depends [:oskari :jquery :knockout :underscore]
+   :common       {:depends [:jquery :knockout :underscore]
                   :js ["app.js" "log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "nav.js" "combobox.js" "ko.init.js"  "dialog.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
@@ -68,15 +68,15 @@
    :wizard       {:js ["application-create-wizard.js"]
                   :html (map (partial format "application-create-wizard-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:common :application :applications :attachment :wizard :buildinfo :docgen]
+   :applicant    {:depends [:common :oskari :application :applications :attachment :wizard :buildinfo :docgen]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:application :authority_applications :attachment :buildinfo :docgen]
+   :authority    {:depends [:common :oskari :application :authority_applications :attachment :buildinfo :docgen]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :admin        {:depends [:oskari :application :applications :attachment :wizard :buildinfo]
+   :admin        {:depends [:buildinfo :common]
                   :js ["admin.js"]
                   :html ["index.html" "admin.html"]}
 
