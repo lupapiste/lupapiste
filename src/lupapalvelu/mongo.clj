@@ -37,7 +37,7 @@
 ;; Database Api
 ;;
 
-(defn updat
+(defn update
   "Updates data into collection by query. Always returns nil."
    [collection query data]
   (mc/update collection query data)
