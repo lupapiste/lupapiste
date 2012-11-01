@@ -17,6 +17,7 @@ var attachment = function() {
       },
       filename:       ko.observable(),
       latestVersion:  ko.observable(),
+      versions:       ko.observable(),
       type:           ko.observable(),
       isImage: function() {
         var contentType = this.latestVersion().contentType; 
@@ -37,6 +38,7 @@ var attachment = function() {
     }
 
     model.latestVersion(attachment.latestVersion);
+    model.versions(attachment.versions);
     model.filename(attachment.filename);
     model.type(attachment.type);
     model.application.id(applicationId);
