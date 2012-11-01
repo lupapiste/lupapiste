@@ -4,8 +4,8 @@
   <section class="page" id="attachment">
     <div class="container" data-bind="if: latestVersion">
       <h1>
-        <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
-        <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
+
+        <span data-bind="if: type"><span data-bind="text: type"></span></span>
         versio
         <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
         Muokattu
@@ -14,7 +14,7 @@
       </h1>
       
       <!-- Preview images and pdf files only -->
-      <div class="file-preview" data-bind="visible: isImage() || isPdf()">
+      <div id="file-preview">
         <div class="file-preview-image" data-bind="if: isImage()">
           <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
             <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
@@ -23,10 +23,9 @@
         <div class="file-preview-pdf" data-bind="if: isPdf()">
           <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
         </div>
-      </div>
-
-      <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
-        <p>Esikatselua ei saatavilla.</p>
+        <div class="file-preview-unknown" data-bind="visible: !(isImage() || isPdf())">
+          <p>Esikatselua ei saatavilla.</p>
+        </div>
       </div>
 
       <div class="file-preview-links">
@@ -34,6 +33,25 @@
         <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
         <br/>
         </span>
+      </div>
+      
+      <div id="attachment-file-versions">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Tiedosto</th>
+              <th>Versio</th>
+              <th>Muokattu</th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: versions()">
+            <tr style="cursor: pointer;">
+              <td><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" /></td>
+              <td data-bind="version: version"></td>
+              <td data-bind="dateString: created">31.10.2012</span>
+            </tr>
+          </tbody>
+        </table>
       </div>
       
     </div>
