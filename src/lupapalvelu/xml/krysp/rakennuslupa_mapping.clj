@@ -2,7 +2,7 @@
   (:use  [lupapalvelu.xml.emit]
          [clojure.data.xml]
          [clojure.java.io]))
-  	
+
 ;RakVal
 (def tunnus [{:tag :tunnus 
               :child [{:tag :valtakunnallinenNumero}
