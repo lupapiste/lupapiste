@@ -12,10 +12,6 @@
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
-(in-dev
-  (defquery "users" {:roles [:admin]} [_]
-    (ok :users (map #(security/non-private %) (mongo/select mongo/users)))))
-
 (defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
 (defn- application-query-for [user]
