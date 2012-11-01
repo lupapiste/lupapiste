@@ -4,10 +4,10 @@
 
 ;(function() {
 
-  var applicationQueryModel;
-  var inviteCommandModel;
-  var commentCommandModel;
-  var authorizationCommandModel;
+  var applicationQueryModel = new ApplicationQueryModel();
+  var authorizationCommandModel = new AuthorizationQueryModel();
+  var inviteCommandModel = new InviteCommandModel();
+  var commentCommandModel = new CommentCommandModel();
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
@@ -355,14 +355,7 @@
   }
 
   $(function() {
-    hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
-      onPageChange(e);
-    });
-
-    applicationQueryModel = new ApplicationQueryModel();
-    authorizationCommandModel = new AuthorizationQueryModel();
-    inviteCommandModel = new InviteCommandModel();
-    commentCommandModel = new CommentCommandModel();
+    hub.subscribe({type: "page-change", pageId: "application"}, function(e) { onPageChange(e);});
 
     var page = $("#application");
 
