@@ -28,8 +28,9 @@
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
 
-(defn current-user []
+(defn current-user
   "fetches the current user from 1) http-session 2) apikey from headers"
+  []
   (or (session/get :user) ((request/ring-request) :user)))
 
 (defn logged-in? []

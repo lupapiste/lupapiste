@@ -37,22 +37,26 @@
 ;; Database Api
 ;;
 
-(defn update [collection query data]
+(defn updat
   "Updates data into collection by query. Always returns nil."
+   [collection query data]
   (mc/update collection query data)
   nil)
 
-(defn update-by-id [collection id data]
+(defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
+  [collection id data]
   (mc/update-by-id collection id data)
   nil)
 
-(defn update-by-query [collection query data]
+(defn update-by-query
   "Updates data into collection. Returns the number of documents updated"
+  [collection query data]
   (.getN (mc/update collection query data)))
 
-(defn insert [collection data]
+(defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
+  [collection data]
   (mc/insert collection (with-_id data))
   nil)
 
