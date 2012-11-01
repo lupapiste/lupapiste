@@ -241,6 +241,52 @@
 
   function showApplicationPart2(data) {
 
+  	// docgen:
+
+    var spec = {
+        info: { name: "fozzaa" },
+        body: [
+          { name: "date", type: "date" },
+          { name: "varusteet", type: "choice", body: [
+            { name: "sahko",  type: "checkbox" },
+            { name: "kaasu",  type: "checkbox" },
+            { name: "hissi",  type: "checkbox" },
+            { name: "muu",    type: "string", size: "s" }
+          ]},
+          { name: "materiaali", type: "select", body: [
+            { name: "puu"     },
+            { name: "purkka"  },
+            { name: "betoni"  }
+          ]},
+          { name: "story", type: "text" }
+        ]
+    };
+  	
+    var model = {
+        "bar": {
+          "bida": "Small",
+          "beda": "Medium",
+          "buda": "Large"
+        },
+        "varusteet": {
+          "kaasu": true
+        },
+        "materiaali": "purkka",
+        "story": "Story of my life"
+    };
+
+    var save = function(path, value, callback, data) {
+      debug("saving", path, value, data);
+      // Simulate saving with 1s network lattency:
+      setTimeout(function() {
+        callback(((value === "err") || (value === "warn")) ? value : "ok");
+      }, 1000);
+    };
+
+    var doc = docgen.build(spec, model, save, {name: "doc1"});
+
+  	$("#docgen").empty().append(doc.element);
+  	
     // new data mapping
     applicationQueryModel.data(ko.mapping.fromJS(data));
 
