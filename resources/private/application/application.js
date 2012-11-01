@@ -304,7 +304,7 @@
     var self = this;
 
     self.email = ko.observable();
-    self.title = ko.observable("uuden suunnittelijan lis\u00E4\u00Eminen");
+    self.title = ko.observable("uuden suunnittelijan lis\u00E4\u00E4minen");
     self.text = ko.observable();
 
     self.submit = function(model) {
@@ -318,7 +318,7 @@
           repository.reloadAllApplications();
         })
         .error(function(d) {
-          notify.info("kutsun l\u00Ehett\u00Eminen ep\u00Eonnistui",d);
+          notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
         })
         .call();
       return false;
