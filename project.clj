@@ -10,12 +10,21 @@
                  [clj-http "0.5.6"]
                  [clj-time "0.4.4"]
                  [org.clojure/data.xml "0.0.6"]
-                 [fi.sito.oskari/oskari "0.1"]] 
+                 [fi.sito.oskari/oskari "0.1"]]
+  
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
                    :plugins [[lein-midje "2.0.0"]
-                             [lein-buildid "0.1.0-SNAPSHOT"]]}}
+                             [lein-buildid "0.1.0-SNAPSHOT"]
+                             [lein-nitpicker "0.2.0-SNAPSHOT"]]}} 
+
+  :nitpicker {:exts ["clj" "js" "html" "css"]
+              :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]}
+
+  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+                                    :checksum :ignore}]]
+  :plugin-repositories ["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+                                          :checksum :ignore}]
+  
   :main lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
-  :min-lein-version "2.0.0"
-  :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]})
+  :min-lein-version "2.0.0")
