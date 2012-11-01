@@ -15,7 +15,7 @@
             [lupapalvelu.document.commands])
   (:gen-class))
 
-(defn -main [& args]
+(defn -main [& _]
   (info "Server starting: Running on %s %s %s (%s)"
         (System/getProperty "java.vm.vendor")
         (System/getProperty "java.vm.name")
