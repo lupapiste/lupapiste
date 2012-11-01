@@ -9,7 +9,7 @@
       <h1 id="admin-header">Pääkäyttäjän osio</h1>
       <h2>Fixtures</h2>
       <ul data-bind="foreach: fixtures.data">
-        <li><a href="#" data-bind="text: $data, click: $parent.apply"></a></li>
+        <li><a href="#" data-bind="text: $data, click: $root.fixtures.apply"></a></li>
       </ul>
     </div>
   </section>
