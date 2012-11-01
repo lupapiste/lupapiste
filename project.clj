@@ -18,4 +18,8 @@
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0"
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]})
+              :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]}
+  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+                                    :checksum :ignore}]]
+  :plugin-repositories ["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
+                                          :checksum :ignore}])
