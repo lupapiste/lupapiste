@@ -14,8 +14,8 @@
   
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
                    :plugins [[lein-midje "2.0.0"]
-                             [lein-buildid "0.1.0-SNAPSHOT"]
-                             [lein-nitpicker "0.2.0-SNAPSHOT"]]}} 
+                             [lein-buildid "0.1.0"]
+                             [lein-nitpicker "0.2.0"]]}} 
 
   :nitpicker {:exts ["clj" "js" "html" "css"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]}
