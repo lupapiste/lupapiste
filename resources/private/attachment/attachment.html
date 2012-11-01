@@ -13,28 +13,18 @@
       </h1>
       
       <!-- Preview images and pdf files only -->
-      <div id="file-preview">
-        <div class="file-preview-image" data-bind="if: isImage()">
-          <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
-            <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
-          </a>
-        </div>
-        <div class="file-preview-pdf" data-bind="if: isPdf()">
-          <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
-        </div>
-        <div class="file-preview-unknown" data-bind="visible: !(isImage() || isPdf())">
+      <div class="file-preview">
           <p>Esikatselua ei saatavilla.</p>
-        </div>
       </div>
 
-      <div class="file-preview-links">
+      <div class="file-preview-actions">
         <span data-bind="if: isImage()">
         <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
         <br/>
         </span>
       </div>
       
-      <div id="attachment-file-versions">
+      <div class="attachment-file-versions">
         <table class="table table-striped">
           <thead>
             <tr>
