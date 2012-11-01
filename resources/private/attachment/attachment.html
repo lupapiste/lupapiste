@@ -10,7 +10,6 @@
         <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
         Muokattu
         <span data-bind="dateString: latestVersion().created">31.10.2012</span>
-        <span id="test-attachment-file-name" data-bind="text: latestVersion().filename">kuva.jpg</span>
       </h1>
       
       <!-- Preview images and pdf files only -->
@@ -46,7 +45,7 @@
           </thead>
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
-              <td><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" /></td>
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" /></td>
               <td data-bind="version: version"></td>
               <td data-bind="dateString: created">31.10.2012</span>
             </tr>
