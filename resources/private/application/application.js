@@ -277,13 +277,15 @@
 
     var save = function(path, value, callback, data) {
       debug("saving", path, value, data);
-      // Simulate saving with 1s network lattency:
-      setTimeout(function() {
-        callback(((value === "err") || (value === "warn")) ? value : "ok");
-      }, 1000);
+      ajax
+      	.command("update-doc", {app: application.id(), doc: data.doc, updates: [[path, value]]})
+      	.success(function() { callback("ok"); })
+      	.error(function(e) { callback(e.status); })
+      	.fail(function(e) { callback("err"); })
+      	.call();
     };
 
-    var doc = docgen.build(spec, model, save, {name: "doc1"});
+    var doc = docgen.build(spec, model, save, {doc: "fozzaa"});
 
   	$("#docgen").empty().append(doc.element);
   	
