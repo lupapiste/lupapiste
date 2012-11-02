@@ -38,6 +38,9 @@
 (defn has-role [role]
   (= role (keyword (:role (current-user)))))
 
+(defn with-user [m] 
+  (merge m {:user (current-user)}))
+
 (defn authority? []
   (and logged-in? (has-role :authority)))
 
@@ -60,10 +63,6 @@
 ;;
 ;; Commands
 ;;
-
-(defn- with-user
-  ([m] (with-user m (current-user)))
-  ([m user] (merge m {:user user})))
 
 (defjson [:post "/rest/command/:name"] {name :name}
   (core/execute (with-user (core/command name (from-json)))))
@@ -158,7 +157,7 @@
 
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
         result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
-    (if (:ok result)
+    (if (:ok result) ; TODO: should test with (ok? result) ??
       (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
       (json/generate-string result) ; TODO display error message
       )
@@ -184,17 +183,10 @@
         :accept :json})))
 
 ;;
-;; Development thingies.
+;; Speed bump
 ;;
 
 (env/in-dev
-
-  (defpage "/verdict" {:keys [id ok text]}
-    (core/execute
-      (with-user
-        (core/command "give-application-verdict" {:id id :ok ok :text text})
-        (security/login-with-apikey "505718b0aa24a1c901e6ba24")))
-    (format "verdict is given for application %s" id))
 
   (def speed-bump (atom 0))
 
