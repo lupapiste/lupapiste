@@ -93,7 +93,7 @@
                     </ul>
                   </div>
                   <br/>
-                  <a href="#dialog-valtuutus" class="modal">Lisää valtuutus</a>
+                  <a href="#dialog-valtuutus" id="test-add-invite" class="modal" data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
                 </div>
                 <h3>Kutsutut</h3>
 
@@ -500,7 +500,7 @@
               <tr><td>Sähköpostiosoite</td><td><input id="invite-email" class="form_input text long" type="text" data-bind="value: email" /></td></tr>
               <tr><td>Viesti         </td><td><textarea id="invite-text" rows=5 class="form_input text long" data-bind="value: text"></textarea></td></tr>
             </table>
-            <button class="btn btn-primary close" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">Kutsu</button>
+            <button class="btn btn-primary close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
 
           </div>
           
