@@ -78,7 +78,7 @@
                     cancel:  "/welcome#!/register/cancel",
                     error:   "/welcome#!/register/error"},function(d) {
       $("#vetuma-register").html(d).find(":submit").addClass("btn btn-primary")
-                        .attr('value','Kirjaudu sis\u00E4\u00E4n')
+                        .attr('value','Tunnistaudu')
                         .attr("id", "vetuma-init");
     });
   });
