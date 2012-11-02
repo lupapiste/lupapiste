@@ -20,11 +20,11 @@ var attachment = function() {
       versions:       ko.observable(),
       type:           ko.observable(),
       isImage: function() {
-        var contentType = this.latestVersion().contentType; 
+        var contentType = this.latestVersion().contentType;
         return contentType && contentType.indexOf('image/') === 0;
       },
       isPdf: function() {
-        return this.latestVersion().contentType === "application/pdf"; 
+        return this.latestVersion().contentType === "application/pdf";
       }
     };
   }
@@ -60,20 +60,17 @@ var attachment = function() {
   function resetUploadIframe() {
     var originalUrl = $("#uploadFrame").attr("src");
     $("#uploadFrame").attr("src", originalUrl);
-    $("#uploadFrame").hide();
-    $("#add-attachment").show();
+    LUPAPISTE.ModalDialog.close();
   }
 
   hub.subscribe("upload-done", function(e) {
-    resetUploadIframe();
-    repository.reloadAllApplications();
+    repository.reloadAllApplications(resetUploadIframe);
   });
 
   hub.subscribe("upload-cancelled", function(e) {
-    resetUploadIframe();
     ajax.command("delete-empty-attachment", { id: e.applicationId, attachmentId: e.attachmentId})
     .success(function(d) {
-      repository.reloadAllApplications();
+      repository.reloadAllApplications(resetUploadIframe);
     })
     .call();
   });
@@ -94,8 +91,6 @@ var attachment = function() {
         var iframe = $("#uploadFrame").contents();
         iframe.find("#applicationId").val(d.applicationId);
         iframe.find("#attachmentId").val(d.attachmentId);
-        $("#uploadFrame").show();
-        $("#add-attachment").hide();
       });
     })
     .call();

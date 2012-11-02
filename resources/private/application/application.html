@@ -93,7 +93,9 @@
                     </ul>
                   </div>
                   <br/>
-                  <a href="#dialog-valtuutus" id="test-add-invite" class="modal" data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
+                  <a href=""  id="test-add-invite"
+                     data-window-id="dialog-valtuutus" class="modal"
+                     data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
                 </div>
                 <h3>Kutsutut</h3>
 
@@ -414,7 +416,7 @@
                 </tr>
               </thead>
               <tbody data-bind="foreach: attachments">
-              <tr style="cursor: pointer;">
+              <tr style="cursor: pointer;" data-bind="if: $data.type">
                   <td data-bind="text: loc('attachmentState_' + state)"
                       class="attachment-state"></td>
                   <td data-bind="attr: {onclick: open}">
@@ -428,10 +430,10 @@
                     <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
                     <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
                 </span></td>
-                  <td data-bind="if: $data.latestVersion"><span data-bind="version: latestVersion.version"></span></td>
-                  <td data-bind="if: $data.modified">
+                  <td data-bind="version: latestVersion.version"></td>
+                  <td>
                     <span data-bind="dateString: modified"></span>
-                    <span data-bind="if: $data.latestVersion"><span data-bind="fullName: latestVersion.user"></span></span>
+                    <span data-bind="fullName: latestVersion.user"></span>
                   </td>
                   <td></td>
               </tr>
@@ -440,17 +442,23 @@
             <div data-bind="ifnot: attachments && attachments().length">
               <i>Ei liitteitä</i>
             </div>
-            <button id="add-attachment" class="btn btn-success"
+            <button id="add-attachment"
+                    class="btn btn-success modal" data-window-id="upload-dialog"
                     data-bind="visible: $root.authorization.ok('create-attachment'),click: attachment.newAttachment"
             >Lisää liite</button>
 
-
-            <iframe id="uploadFrame"
-                    src="/html/pages/upload.html"
-                    style="height: 300px; width: 100%, min-width: 300px; display: none; border:0; overflow: hidden;"
-            ></iframe>
-
-          </div>
+            <div id="upload-dialog" class="window">
+              <div class="dialog-header">
+                <p>Tallenna tiedosto</p>
+                <p class="dialog-close close">X</p>
+              </div>
+              <div class="dialog-content">
+                <iframe id="uploadFrame"
+                        src="/html/pages/upload.html"
+                        style="height: 300px; width: 100%, min-width: 300px; border:0; overflow: hidden;"
+                ></iframe>
+              </div>
+            </div>
         </div>
         <div class="tab_content" id="conversation_tab">
           <div class="tab-wrapper">
@@ -492,7 +500,7 @@
        <div id="dialog-valtuutus" class="window">
         <div class="dialog-header">
            <p>Lisää valtuutus</p>
-           <p class="dialog-close close">X</p> 
+           <p class="dialog-close close">X</p>
          </div>
           <div class="dialog-content">
           <div data-bind="with: $root.invite">
@@ -503,11 +511,9 @@
             <button class="btn btn-primary close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
 
           </div>
-          
          </div>
-       </div>       
+       </div>      
      </div>
-     <div id="mask"></div>
   </section>
 </body>
 </html>
