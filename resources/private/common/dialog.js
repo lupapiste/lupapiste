@@ -25,9 +25,16 @@ LUPAPISTE.ModalDialog.open = function(selector) {
 }
 
 LUPAPISTE.ModalDialog.close = function(e) {
-  if (e) {
+  if (e && typeof e.preventDefault === "function") {
     e.preventDefault();
   }
+  $('.window').each(function() {
+    var dialog = $(this);
+    var dialogId = dialog.attr('id');
+    if (dialog.is(":visible")) {
+      hub.send("dialog-close", {id : dialogId});
+    }
+  });
   $('#mask, .window').hide();
 }
 

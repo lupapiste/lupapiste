@@ -60,19 +60,26 @@ var attachment = function() {
   function resetUploadIframe() {
     var originalUrl = $("#uploadFrame").attr("src");
     $("#uploadFrame").attr("src", originalUrl);
-    LUPAPISTE.ModalDialog.close();
   }
 
-  hub.subscribe("upload-done", function(e) {
-    repository.reloadAllApplications(resetUploadIframe);
-  });
+  hub.subscribe("upload-done", LUPAPISTE.ModalDialog.close);
+  hub.subscribe("upload-cancelled", LUPAPISTE.ModalDialog.close);
 
-  hub.subscribe("upload-cancelled", function(e) {
-    ajax.command("delete-empty-attachment", { id: e.applicationId, attachmentId: e.attachmentId})
-    .success(function(d) {
-      repository.reloadAllApplications(resetUploadIframe);
-    })
-    .call();
+  hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function(e) {
+    var iframe = $("#uploadFrame").contents();
+    var applicationId = iframe.find("#applicationId").val();
+    var attachmentId = iframe.find("#attachmentId").val();
+
+    if (applicationId) {
+      ajax.command("delete-empty-attachment", { id: applicationId, attachmentId: attachmentId})
+      .complete(function(d) {
+        repository.reloadAllApplications();
+      })
+      .call();
+    } else {
+      repository.reloadAllApplications();
+    }
+    resetUploadIframe();
   });
 
   function toApplication(){

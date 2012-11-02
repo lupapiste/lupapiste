@@ -416,7 +416,7 @@
                 </tr>
               </thead>
               <tbody data-bind="foreach: attachments">
-              <tr style="cursor: pointer;" data-bind="if: $data.type">
+              <tr style="cursor: pointer;" data-bind="if: $data.type || $data.modified">
                   <td data-bind="text: loc('attachmentState_' + state)"
                       class="attachment-state"></td>
                   <td data-bind="attr: {onclick: open}">
