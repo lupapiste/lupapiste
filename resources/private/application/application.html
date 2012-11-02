@@ -56,7 +56,7 @@
       </div>
       <div id="tabs_container">
         <ul id="tabs">
-          <li class="active"><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
+          <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
           <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#hearings_tab">Naapurien kuuleminen</a></li>
           <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#pleadings_tab">Lausunnot</a></li>
@@ -109,7 +109,7 @@
                   <table data-bind="visible: $root.authorization.ok('invite')">
                     <tr><td>sähköpostiosoite</td><td><input id="invite-email" class="form_input" type="text" data-bind="value: email" /></td></tr>
                     <tr><td>teksti          </td><td><textarea id="invite-text" rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
-                    <tr ><td>&nbsp;          </td><td><a href="#" id="test-invite" data-bind="click: submit">kutsu uusi suunnittelija</a></td></tr>
+                    <tr ><td>&nbsp;         </td><td><a href="#" id="test-invite" data-bind="click: submit">kutsu uusi suunnittelija</a></td></tr>
                   </table>
                 </div>
               </div>

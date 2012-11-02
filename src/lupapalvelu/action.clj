@@ -18,6 +18,7 @@
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
     :authority {:authority (:authority user)}
+    :admin     {}
     (do
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
@@ -27,19 +28,6 @@
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (ok :applications (mongo/select mongo/applications {$and [{:_id id} (application-query-for user)]})))
-
-(defcommand "give-application-verdict"
-  {:parameters [:id :ok :text]
-   :roles      [:admin]
-   :states     [:sent]}
-  [command]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        mongo/applications {:_id (:id application) :state :sent}
-        {$set {:modified (:created command)
-               :state :verdictGiven
-               :verdict {:text (-> command :data :text)}}}))))
 
 (defcommand "open-application"
   {:parameters [:id]
