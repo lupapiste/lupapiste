@@ -38,34 +38,34 @@
     :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
-              :apikey "5056e6d3aa24a1c901e6b9dd"}},
+              :apikey "5056e6d3aa24a1c901e6b9dd"}}
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :firstName "Judge"
     :lastName "Dread"
     :role :admin
-    :private {:apikey "505718b0aa24a1c901e6ba24"}},
-   {:lastName "Nieminen", ;; Mikkos neighbour
-    :firstName "Teppo",
-    :postalCode "33200",
-    :username "teppo@example.com",
-    :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe",
-              :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"},
-    :phone "0505503171",
-    :email "teppo@example.com",
-    :personId "210281-0001",
-    :role "applicant",
-    :id "5073c0a1c2e6c470aef589a5",
+    :private {:apikey "505718b0aa24a1c901e6ba24"}}
+   {:lastName "Nieminen" ;; Mikkos neighbour
+    :firstName "Teppo"
+    :postalCode "33200"
+    :username "teppo@example.com"
+    :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe"
+              :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"}
+    :phone "0505503171"
+    :email "teppo@example.com"
+    :personId "210281-0001"
+    :role "applicant"
+    :id "5073c0a1c2e6c470aef589a5"
     :street "Mutakatu 7"
     :zip "33560"
     :city "Tampere"
      }
-   {:id "777777777777777777000010", ;; Mikko Intonen
-    :username "mikko@example.com",
-    :role "applicant",
-    :personId "210281-0002",
-    :firstName "Mikko",
-    :lastName "Intonen",
-    :email "mikko@example.com",
+   {:id "777777777777777777000010" ;; Mikko Intonen
+    :username "mikko@example.com"
+    :role "applicant"
+    :personId "210281-0002"
+    :firstName "Mikko"
+    :lastName "Intonen"
+    :email "mikko@example.com"
     :street "Rambokuja 6"
     :zip "55550"
     :city "sipoo"
