@@ -93,6 +93,7 @@
                     </ul>
                   </div>
                   <br/>
+                  <a href="#dialog-valtuutus" class="modal">Lisää valtuutus</a>
                 </div>
                 <h3>Kutsutut</h3>
 
@@ -104,14 +105,6 @@
                     <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
                   </li>
                 </ul>
-
-                <div data-bind="with: $root.invite">
-                  <table data-bind="visible: $root.authorization.ok('invite')">
-                    <tr><td>sähköpostiosoite</td><td><input id="invite-email" class="form_input" type="text" data-bind="value: email" /></td></tr>
-                    <tr><td>teksti          </td><td><textarea id="invite-text" rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
-                    <tr ><td>&nbsp;         </td><td><a href="#" id="test-invite" data-bind="click: submit">kutsu uusi suunnittelija</a></td></tr>
-                  </table>
-                </div>
               </div>
             </div>
           <div class="application_section">
@@ -495,6 +488,26 @@
           </div>
         </div>
       </div>
+      <div id="boxes">  
+       <div id="dialog-valtuutus" class="window">
+        <div class="dialog-header">
+           <p>Lisää valtuutus</p>
+           <p class="dialog-close close">X</p> 
+         </div>
+          <div class="dialog-content">
+          <div data-bind="with: $root.invite">
+            <table>
+              <tr><td>Sähköpostiosoite</td><td><input id="invite-email" class="form_input text long" type="text" data-bind="value: email" /></td></tr>
+              <tr><td>Viesti         </td><td><textarea id="invite-text" rows=5 class="form_input text long" data-bind="value: text"></textarea></td></tr>
+            </table>
+            <button class="btn btn-primary close" id="test-ask-for-planner" data-bind="disable: !$root.authorization || $root.authorization.data()['ask-for-planner'] && !$root.authorization.data()['ask-for-planner'].ok, click: submit">Kutsu</button>
+
+          </div>
+          
+         </div>
+       </div>       
+     </div>
+     <div id="mask"></div>
   </section>
 </body>
 </html>
