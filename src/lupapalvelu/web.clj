@@ -157,7 +157,7 @@
 
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
         result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
-    (if (:ok result) ; TODO: should test with (ok? result) ??
+    (if (core/ok? result)
       (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
       (json/generate-string result) ; TODO display error message
       )

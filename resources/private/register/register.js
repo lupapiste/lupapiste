@@ -73,17 +73,17 @@
   model = ko.validatedObservable(model);
   model.isValid.subscribe(function(valid) { model().disabled(!valid); });
   
-  hub.subscribe({type: "page-change", pageId: "register"}, function() {
+  hub.onPageChange("register", function() {
     $.get("/vetuma", {success: "/welcome#!/register2",
                     cancel:  "/welcome#!/register/cancel",
                     error:   "/welcome#!/register/error"},function(d) {
       $("#vetuma-register").html(d).find(":submit").addClass("btn btn-primary")
-                        .attr('value','Kirjaudu sis\u00E4\u00E4n')
+                        .attr('value','Tunnistaudu')
                         .attr("id", "vetuma-init");
     });
   });
 
-  hub.subscribe({type: "page-change", pageId: "register2"}, function() {
+  hub.onPageChange("register2", function() {
     $.get("/vetuma/user", function(data) {
       model().personId(data.userid);
       model().firstName(data.firstName);

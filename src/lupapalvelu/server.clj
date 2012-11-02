@@ -6,7 +6,6 @@
             [lupapalvelu.vetuma]
             [lupapalvelu.env :as env]
             [lupapalvelu.fixture :as fixture]
-            [lupapalvelu.fixture.full]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.action]

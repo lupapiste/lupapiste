@@ -45,7 +45,7 @@ var attachment = function() {
     model.application.title(application.title);
   }
 
-  hub.subscribe({type: "page-change", pageId: "attachment"}, function(e) {
+  hub.onPageChange("attachment", function(e) {
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
     repository.getApplication(applicationId, showAttachment);
