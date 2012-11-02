@@ -1,55 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-	<section class="page" id="register2">
-		<div class="container">
-			<div class="row">
-				<div class="span10">
-					<form>
-						<h1>Rekisteröidy Lupapisteen käyttäjäksi Vaihe 2/2</h1>
-						<p>Syötä omat tietosi ja rekisteröidy palvelun käyttäjäksi.</p> 
+  <section class="page" id="register2">
+    <div class="container">
+      <div class="row">
+        <div class="span10">
+          <form>
+            <h1>Rekisteröidy Lupapisteen käyttäjäksi Vaihe 2/2</h1>
+            <p>Syötä omat tietosi ja rekisteröidy palvelun käyttäjäksi.</p> 
 
-						<span id="register-email-error" class="error-message">&nbsp;</span>
+            <span id="register-email-error" class="error-message">&nbsp;</span>
 
-						<label>Henkilötunnus</label>
-						<input id="test-register-personid" data-bind="value: personId" disabled></input>
+            <label>Henkilötunnus</label>
+            <input id="test-register-personid" data-bind="value: personId" disabled></input>
 
-						<label>Etunimi</label>
-						<input id="test-register-firstName" data-bind="value: firstName" type="text" disabled />
-						
-						<label>Sukunimi</label>
-						<input id="test-register-lastName" data-bind="value: lastName" type="text" disabled />
+            <label>Etunimi</label>
+            <input id="test-register-firstName" data-bind="value: firstName" type="text" disabled />
+            
+            <label>Sukunimi</label>
+            <input id="test-register-lastName" data-bind="value: lastName" type="text" disabled />
 
-						<label>Katuosoite</label>
-						<input id="test-register-street" data-bind="value: street, valueUpdate: 'afterkeydown'" type="text" />
-						
-						<label>Postinumero</label>
-						<input id="test-register-zip" data-bind="value: zip, valueUpdate: 'afterkeydown'" type="text" />
-						
-						<label>Postitoimipaikka</label>
-						<input id="test-register-city" data-bind="value: city, valueUpdate: 'afterkeydown'" type="text" />
-						
-						<label>Puhelinnumero</label>
-						<input id="test-register-phone" data-bind="value: phone, valueUpdate: 'afterkeydown'" type="text" />
-						
-						<label>Sähköpostiosoite (samalla <b>käyttäjätunnus</b>)</label>
-						<input id="test-register-email" data-bind="value: email, valueUpdate: 'afterkeydown'" type="email" required="required" autofocus="autofocus" />
-						
-						<label>Salasana</label>
-						<input id="test-register-password" data-bind="value: password, valueUpdate: 'afterkeydown'" type="password" required="required" />
-						
-						<label>Salasana uudelleen</label>
-						<input id="test-register-confirmPassword" data-bind="value: confirmPassword, valueUpdate: 'afterkeydown'" type="password" required="required" />
-												
-						<div>
-							<button id="test-register-submit" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Rekisteröidy</button>
-							<button data-bind="click: reset" type="button" class="btn">Peruuta</button>
-						</div>
-						
-					</form>
-				</div>
-			</div>
-		</div>
-	</section>
+            <label>Katuosoite</label>
+            <input id="test-register-street" data-bind="value: street, valueUpdate: 'afterkeydown'" type="text" />
+            
+            <label>Postinumero</label>
+            <input id="test-register-zip" data-bind="value: zip, valueUpdate: 'afterkeydown'" type="text" />
+            
+            <label>Postitoimipaikka</label>
+            <input id="test-register-city" data-bind="value: city, valueUpdate: 'afterkeydown'" type="text" />
+            
+            <label>Puhelinnumero</label>
+            <input id="test-register-phone" data-bind="value: phone, valueUpdate: 'afterkeydown'" type="text" />
+            
+            <label>Sähköpostiosoite (samalla <b>käyttäjätunnus</b>)</label>
+            <input id="test-register-email" data-bind="value: email, valueUpdate: 'afterkeydown'" type="email" required="required" autofocus="autofocus" />
+            
+            <label>Salasana</label>
+            <input id="test-register-password" data-bind="value: password, valueUpdate: 'afterkeydown'" type="password" required="required" />
+            
+            <label>Salasana uudelleen</label>
+            <input id="test-register-confirmPassword" data-bind="value: confirmPassword, valueUpdate: 'afterkeydown'" type="password" required="required" />
+                        
+            <div>
+              <button id="test-register-submit" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Rekisteröidy</button>
+              <button data-bind="click: reset" type="button" class="btn">Peruuta</button>
+            </div>
+            
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
 </body>
 </html>

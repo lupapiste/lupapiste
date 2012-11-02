@@ -10,7 +10,6 @@
             [noir.server :as server]
             [cheshire.core :as json]
             [lupapalvelu.env :as env]
-            [lupapalvelu.fixture :as fixture]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
@@ -28,8 +27,9 @@
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
 
-(defn current-user []
+(defn current-user
   "fetches the current user from 1) http-session 2) apikey from headers"
+  []
   (or (session/get :user) ((request/ring-request) :user)))
 
 (defn logged-in? []
@@ -37,6 +37,9 @@
 
 (defn has-role [role]
   (= role (keyword (:role (current-user)))))
+
+(defn with-user [m] 
+  (merge m {:user (current-user)}))
 
 (defn authority? []
   (and logged-in? (has-role :authority)))
@@ -60,10 +63,6 @@
 ;;
 ;; Commands
 ;;
-
-(defn- with-user
-  ([m] (with-user m (current-user)))
-  ([m user] (merge m {:user user})))
 
 (defjson [:post "/rest/command/:name"] {name :name}
   (core/execute (with-user (core/command name (from-json)))))
@@ -158,7 +157,7 @@
 
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
         result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
-    (if (:ok result)
+    (if (:ok result) ; TODO: should test with (ok? result) ??
       (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
       (json/generate-string result) ; TODO display error message
       )
@@ -184,24 +183,10 @@
         :accept :json})))
 
 ;;
-;; Development thingies.
+;; Speed bump
 ;;
 
 (env/in-dev
-
-  (defpage "/fixture/:name" {name :name}
-    (fixture/apply-fixture name)
-    (format "fixture applied: %s" name))
-
-  (defjson "/fixture" []
-    (keys @fixture/fixtures))
-
-  (defpage "/verdict" {:keys [id ok text]}
-    (core/execute
-      (with-user
-        (core/command "give-application-verdict" {:id id :ok ok :text text})
-        (security/login-with-apikey "505718b0aa24a1c901e6ba24")))
-    (format "verdict is given for application %s" id))
 
   (def speed-bump (atom 0))
 

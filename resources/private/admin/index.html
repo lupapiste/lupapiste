@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
+  <meta charset="utf-8" />
   </head>
   <body>
-        <nav>
-      <a class="brand" href="#!/admin"><img src="../img/logo.png" alt="Lupapiste.fi"></a>
-      <span class="connection-error" style="display: none;">Ei yhteyttä palvelimeen!</span>
+    <nav>
+      <a class="brand" href="#!/admin"><img src="../img/logo.png" alt="Lupapiste.fi"></a> <span class="connection-error" style="display: none;">Ei yhteyttä palvelimeen!</span>
       <ul class="user-menu">
         <li>
-          <p class="dropdown-toggle" data-toggle="dropdown"><span id="user-name"></span> (<span id="user-role"></span>)</p>
+          <p class="dropdown-toggle" data-toggle="dropdown">
+            <span id="user-name"></span> (<span id="user-role"></span>)
+          </p>
           <ul>
             <li><a href="#">Muokkaa profiilia</a></li>
             <li><a id="user-logout" href="welcome#!/login" class="logout">Kirjaudu ulos</a></li>
           </ul>
         </li>
       </ul>
-        </nav>
-    
+    </nav>
     <nav class="container" style="margin-top: 60px;">
       <div id="main-nav-bar" class="row">
         <div class="subnav">
           <ul id="nav" class="nav nav-pills">
-            <li id="nav-inforequest">   <a href="#!/inforequest">Tiedonhaku</a>     </li>
-            <li id="nav-applications">  <a href="#!/applications">Lupahakemukset</a>   </li>
-            <li id="nav-mypage">        <a href="#!/mypage">Omat tiedot</a>         </li>
-            <li id="nav-help">          <a href="#!/help">Ohjeet</a>                </li>
+            <li id="nav-inforequest"><a href="#!/inforequest">Tiedonhaku</a></li>
+            <li id="nav-applications"><a href="#!/applications">Lupahakemukset</a></li>
+            <li id="nav-mypage"><a href="#!/mypage">Omat tiedot</a></li>
+            <li id="nav-help"><a href="#!/help">Ohjeet</a></li>
             <li class="divider"></li>
             <li class="pull-right">
               <div>
@@ -36,25 +36,12 @@
         </div>
       </div>
     </nav>
-
     <footer>
-      <form>
-        <label class="checkbox">
-          <input type="checkbox" id="todo" checked="checked"> Näytä toteuttamattomat
-          </label>
-        <label class="checkbox">
-          <input type="checkbox" id="hidden"> Käännä piilotetut
-          </label>
-        <label class="checkbox">
-          <input type="checkbox" id="events"> Näytä eventit
-          </label>
-      </form>
       <div id="pageStatus"></div>
       <span id="buildinfo" style="font-style: italic; color: gray;"></span>
       <div id="contentMap" style="display: none;">
-        <div id="mapdiv"> </div>
+        <div id="mapdiv"></div>
       </div>
     </footer>
-        
   </body>
 </html>

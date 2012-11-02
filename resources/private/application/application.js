@@ -4,10 +4,10 @@
 
 ;(function() {
 
-  var applicationQueryModel;
-  var inviteCommandModel;
-  var commentCommandModel;
-  var authorizationCommandModel;
+  var applicationQueryModel = new ApplicationQueryModel();
+  var authorizationCommandModel = new AuthorizationQueryModel();
+  var inviteCommandModel = new InviteCommandModel();
+  var commentCommandModel = new CommentCommandModel();
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
@@ -113,7 +113,6 @@
     },
 
     removeAuth : function(model) {
-      console.log(model);
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function(d) {
@@ -305,21 +304,22 @@
     var self = this;
 
     self.email = ko.observable();
-    self.title = ko.observable("uuden suunnittelijan lisääminen");
     self.text = ko.observable();
 
     self.submit = function(model) {
+      var email = model.email();
+      var text = model.text();
       ajax.command("invite", { id: application.id(),
-                               email: model.email(),
-                               title: model.title(),
-                               text: model.text()})
+                               email: email,
+                               title: "uuden suunnittelijan lis\u00E4\u00E4minen",
+                               text: text})
         .success(function(d) {
           self.email(undefined);
           self.text(undefined);
           repository.reloadAllApplications();
         })
         .error(function(d) {
-          notify.info("kutsun lähettäminen epäonnistui",d);
+          notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
         })
         .call();
       return false;
@@ -356,14 +356,7 @@
   }
 
   $(function() {
-    hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
-      onPageChange(e);
-    });
-
-    applicationQueryModel = new ApplicationQueryModel();
-    authorizationCommandModel = new AuthorizationQueryModel();
-    inviteCommandModel = new InviteCommandModel();
-    commentCommandModel = new CommentCommandModel();
+    hub.subscribe({type: "page-change", pageId: "application"}, function(e) { onPageChange(e);});
 
     var page = $("#application");
 
