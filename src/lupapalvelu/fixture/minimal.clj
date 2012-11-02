@@ -73,6 +73,20 @@
     :private {:password "$2a$10$zwb/nvYQu4b1oZGpxz8.QOqHEBx3vXw9brc3NqDexgMbDuU2pwL9q"
               :salt "$2a$10$zwb/nvYQu4b1oZGpxz8.QO"
               :apikey "502cb9e58426c613c8b85abc"}}
+   {:id "777777777777777777000020" ;; pena
+    :username "pena"
+    :role "applicant"
+    :personId "010203-0405"
+    :firstName "Pena"
+    :lastName "Panaani"
+    :email "pena"
+    :street "Paapankuja 12"
+    :zip "010203"
+    :city "Piippola"
+    :phone "0102030405"
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
+              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
+              :apikey "602cb9e58426c613c8b85abc"}}
    ])
 
 (def schemas [{:id "uusi-rakennus"
