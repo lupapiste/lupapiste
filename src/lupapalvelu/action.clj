@@ -202,8 +202,9 @@
 (defcommand "create-application"
   {:parameters [:lat :lon :street :zip :city :categories]
    :roles      [:applicant]}
-  [{user :user data :data created :created :as command}]
-  (let [id    (mongo/create-id)
+  [command]
+  (let [{:keys [user created data]} command
+        id    (mongo/create-id)
         owner (role user :owner :type :owner)]
     (mongo/insert mongo/applications
       {:id id
@@ -228,7 +229,7 @@
                             :puhelinnumero (:phone user)
                             :sahkopostiosoite (:email user)}
                    :toimenpiteet [{:id (mongo/create-id)
-                                   :type (:categories data)
+                                   :type (first (:categories data))
                                    :otsikko (str (:lastName user) ", " (:street data))}]}})
     (ok :id id)))
 
