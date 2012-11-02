@@ -73,7 +73,7 @@
   model = ko.validatedObservable(model);
   model.isValid.subscribe(function(valid) { model().disabled(!valid); });
   
-  hub.subscribe({type: "page-change", pageId: "register"}, function() {
+  hub.onPageChange("register", function() {
     $.get("/vetuma", {success: "/welcome#!/register2",
                     cancel:  "/welcome#!/register/cancel",
                     error:   "/welcome#!/register/error"},function(d) {
@@ -83,7 +83,7 @@
     });
   });
 
-  hub.subscribe({type: "page-change", pageId: "register2"}, function() {
+  hub.onPageChange("register2", function() {
     $.get("/vetuma/user", function(data) {
       model().personId(data.userid);
       model().firstName(data.firstName);
