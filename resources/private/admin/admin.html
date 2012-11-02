@@ -11,6 +11,10 @@
       <ul data-bind="foreach: fixtures.data">
         <li><a href="#" data-bind="text: $data, click: $root.fixtures.apply"></a></li>
       </ul>
+      <h2>Applications</h2>
+      <ul data-bind="foreach: applications.data">
+        <li><a href="#" data-bind="text: id, click: $root.applications.giveVerdict"></a></li>
+      </ul>
     </div>
   </section>
 </body>

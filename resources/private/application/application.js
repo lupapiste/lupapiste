@@ -4,10 +4,10 @@
 
 ;(function() {
 
-  var applicationQueryModel;
-  var inviteCommandModel;
-  var commentCommandModel;
-  var authorizationCommandModel;
+  var applicationQueryModel = new ApplicationQueryModel();
+  var authorizationCommandModel = new AuthorizationQueryModel();
+  var inviteCommandModel = new InviteCommandModel();
+  var commentCommandModel = new CommentCommandModel();
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
@@ -352,14 +352,15 @@
     var self = this;
 
     self.email = ko.observable();
-    self.title = ko.observable("uuden suunnittelijan lis\u00E4\u00E4minen");
     self.text = ko.observable();
 
     self.submit = function(model) {
+      var email = model.email();
+      var text = model.text();
       ajax.command("invite", { id: application.id(),
-                               email: model.email(),
-                               title: model.title(),
-                               text: model.text()})
+                               email: email,
+                               title: "uuden suunnittelijan lis\u00E4\u00E4minen",
+                               text: text})
         .success(function(d) {
           self.email(undefined);
           self.text(undefined);
@@ -403,14 +404,7 @@
   }
 
   $(function() {
-    hub.subscribe({type: "page-change", pageId: "application"}, function(e) {
-      onPageChange(e);
-    });
-
-    applicationQueryModel = new ApplicationQueryModel();
-    authorizationCommandModel = new AuthorizationQueryModel();
-    inviteCommandModel = new InviteCommandModel();
-    commentCommandModel = new CommentCommandModel();
+    hub.subscribe({type: "page-change", pageId: "application"}, function(e) { onPageChange(e);});
 
     var page = $("#application");
 
