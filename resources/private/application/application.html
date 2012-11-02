@@ -26,13 +26,15 @@
             <span class="application_summary_text" data-bind="ltext: permitType()"></span>
           </div>
           <div>
+<!-- \/ \/ \/ \/ \/ -->
             <p>Toimenpiteet:</p>
-            <ul data-bind="with: documents">
-              <li><span data-bind="text: toimenpiteet()[0].otsikko" style="display: none;"></span>
-              <ul data-bind="foreach: toimenpiteet">
-                <li data-bind="text: otsikko" id="test-application-operation"></li>
-              </ul>
+            <ul data-bind="foreach: $root.documents">
+              <li>
+                <span data-bind="text: schema.info.name" id="test-application-operation"></span>
+                <i>(<span data-bind="text: created"></span>)</i>
+              </li>
             </ul>
+<!-- /\ /\ /\ /\ /\ -->
           </div>
           <div>
             <p>Hakemus luotu:</p>
@@ -67,14 +69,19 @@
       <div id="tab_content_container" class="container">
         <div class="tab_content" id="application_tab" style="display: block;">
           
+<!-- \/ \/ \/ \/ \/ -->
+        <div class="application_section">
           <div id="docgen">
             <!-- This is where generated document will be placed. -->
           </div>
+        </div>
+<!-- /\ /\ /\ /\ /\ -->
           
           <div class="application_section">
             <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
             <div class="application_section_content content_expanded">
               <h3>Hakija</h3>
+<!--
               <ul data-bind="with: documents">
                 <li><b>Nimi:</b> <span name="test-applicant-name" data-bind="text: hakija.nimi"></span><br/>
                     <b>Katuosoite:</b> <span name="test-applicant-street" data-bind="text: hakija.address.street"></span><br/>
@@ -83,7 +90,8 @@
                     <b>Puh:</b> <span data-bind="text: hakija.puhelinnumero"></span><br/>
                     <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
                  </li>
-                 </ul>
+              </ul>
+-->
               <br/>
                 <div>
                   <h3>Valtuutetut</h3>
@@ -119,296 +127,7 @@
                 </div>
               </div>
             </div>
-          <div class="application_section">
-            <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Rakennuspaikan tiedot</h2>
-            <div class="application_section_content content_expanded">
-              <div class="content-actions" data-bind="visible: $root.authorization.ok('approve-content')">
-                <button class="todo btn btn-small content-accept">Hyväksy</button>
-                <button class="todo btn btn-small content-reject">Hylkää</button>
-              </div>
-              <div data-bind="with: $root.rh1">
-                <form data-bind="with: rakennuspaikanTiedot">
-                  <label class="form-label" for="building_location">Rakennuksen sijaintikunta:</label>
-                                    <span class="form-error">Tallennus ei onnistunut</span>
-                                    <input class="form-input long" type="text" data-bind="value: building_location" />
-                                    <label class="form-label" for="borough">Kylä/kaupunginosa: </label>
-                                    <input class="form-input long" type="text" data-bind="value: borough" />
-                                    <label class="form-label" for="stead_number"> Tilan RN:</label>
-                                    <input class="form-input" type="text" data-bind="value: stead_number" />
-                                    <label class="form-label" for="stead_name"> Tilan nimi:</label>
-                                    <input class="form-input long" type="text" data-bind="value: stead_name" />
-                                    <label class="form-label" for="lot"> Kortteli ja tontti:</label>
-                                    <input class="form-input" type="text" data-bind="value: lot" />
-                                    <label class="form-label" for="building_address"> Rakennuksen lähiosoite:</label>
-                                    <input class="form-input" type="text" data-bind="value: building_address" />
-                                    <label class="form-label" for="building_address_second"> Rakennuksen toinen lähiosoite:</label>
-                                    <input class="form-input" type="text" data-bind="value: building_address_second" />
-                                    <label class="form-label" for="postal_code"> Postinumero:</label>
-                                    <input class="form-input" type="text" data-bind="value: postal_code" />
-                                    <label class="form-label" for="post_office"> Postitoimipaikka:</label>
-                                    <input class="form-input" type="text" data-bind="value: post_office" />
-                                    <label class="form-label" for="tenure"> Rakennuspaikan/tontin hallintaperuste:</label>
-                                    <input class="form-input radio" type="radio" data-bind="checked: tenure" value="owned"> Oma
-                                    <input class="form-input radio" type="radio" data-bind="checked: tenure" value="rented"> Vuokrattu
-                                    <label class="form-label" for="owner"> Rakennuksen omistajan(jien) henklötunnut / Y-tunnus</label>
-                                    <input class="form-input" type="text" data-bind="value: owner" />
-                                    <label class="form-label" for="plan_readiness">Kaavallinen valmiusaste: </label>
-                                    <select class="form-input combobox"
-                    data-bind="value: plan_readiness">
-                    <option value="building_plan">Rakennuskaava</option>
-                    <option value="shore_plan">Rantakaava</option>
-                    <option value="master_plan">Yleiskaava</option>
-                    <option value="no_plan">Ei kaavaa</option>
-                  </select>
-                                    <label class="form-label" for="exemption">Poikkeamislupa: </label>
-                                    <select class="form-input combobox" data-bind="value: exemption">
-                    <option value="no_selection">Ei poikkeuslupaa</option>
-                    <option value="building_ban">Rakennuskielto</option>
-                    <option value="other">Muu syy</option>
-                  </select>
-                </form>
-              </div>
-              <div class="content-actions" data-bind="visible: $root.authorization.ok('approve-content')">
-                <button class="todo btn btn-small content-accept">Hyväksy</button>
-                <button class="todo btn btn-small content-reject">Hylkää</button>
-              </div>
-            </div>
           </div>
-          <div class="application_section">
-            <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Rakennuksen tiedot</h2>
-            <div class="application_section_content content_expanded">
-              <div class="content-actions" data-bind="visible: $root.authorization.ok('approve-content')">
-                <button class="todo btn btn-small content-accept">Hyväksy</button>
-                <button class="todo btn btn-small content-reject">Hylkää</button>
-              </div>
-              <div data-bind="with: $root.rh1">
-                <form data-bind="with: rakennuksenTiedot">
-                  <label class="form-label" for="ownership">Omistajalaji: </label>
-                                    <select class="form-input combobox" data-bind="value: ownership">
-                    <option value="val1">Yksityinen maatalousyrittäjä</option>
-                    <option value="val2">Muu yksityinen henkilö tai perikunta</option>
-                    <option value="val3">Asunto-osakeyhtiö tai -osuuskunta</option>
-                    <option value="val4">Kiinteistöosakeyhtiö</option>
-                    <option value="val5">Yksityinen yritys</option>
-                    <option value="val6">Valtio- tai kuntaenemmistöinen yritys</option>
-                    <option value="val7">Kunnan liikelaitos</option>
-                    <option value="val8">Valtion liikelaitos</option>
-                    <option value="val9">Pankki tai vakuutuslaitos</option>
-                    <option value="val10">kunta tai kuntaliitto</option>
-                  </select>
-                                    <input class="form-input other" type="text" data-bind="value: ownership_other" />
-                                    <label class="form-label" for="builder">Rakennuksen pääasiallinen rakentaja: </label>
-                                    <select class="form-input combobox" data-bind="value: builder">
-                    <option value="val1">Liiketaloudellinen rakentaminen</option>
-                    <option value="val2">Muu rakentaminen</option>
-                  </select>
-                                    <label class="form-label" for="builder">Rakennustoimenpide: </label>
-                                    <select class="form-input combobox" data-bind="value: operation">
-                    <option value="val1">Perustusten ja kantavien rakenteiden muutos- ja korjaustyö</option>
-                    <option value="val2">Rakennuksen pääasiallinen käyttötarkoitusmuutos</option>
-                    <option value="val3">Muut muutostyös</option>
-                    <option value="val4">Perusparannusluonteinen muutostyö</option>
-                  </select>
-                                    <label class="form-label" for="main_use">Rakennuksen pääasiallinen käyttötarkoitus: </label>
-                                    <input class="form-input" type="text" data-bind="value: main_use" />
-                                    <label class="form-label" for="building_volume">Rakennuksen tilavuus: </label>
-                                    <input class="form-input" type="text" data-bind="value: building_volume" />
-                                    <label class="form-label" for="building_gross_floor_area">Rakennuksen kerrosala: </label>
-                                    <input class="form-input" type="text" data-bind="value: building_gross_floor_area" />
-                                    <label class="form-label" for="building_total_area">Rakennuksen kokonaisala: </label>
-                                    <input class="form-input" type="text" data-bind="value: building_total_area" />
-                                    <label class="form-label" for="floor_count">Kerrosluku: </label>
-                                    <input class="form-input" type="text" data-bind="value: floor_count" />
-                                    <label class="form-label" for="cellar_floor_area">Kellarin pintala: </label>
-                                    <input class="form-input" type="text" data-bind="value: cellar_floor_area" />
-                                    <label class="form-label" for="supporting_structure_material">Kantavien rakenteiden pääasiallinen rakennusaine: </label>
-                                    <select class="form-input combobox" data-bind="value: supporting_structure_material">
-                    <option value="val1">Betoni</option>
-                    <option value="val2">Tiili</option>
-                    <option value="val3">Teräs</option>
-                    <option value="val4">Puu</option>
-                    <option value="val5">Muu</option>
-                  </select>
-                                    <input class="form-input other" type="text" data-bind="value: supporting_structure_material_other" />
-                                    <label class="form-label" for="build_style">Rakennuksen pääasiallinen rakennustapa: </label>
-                                    <select class="form-input combobox" data-bind="value: build_style">
-                    <option value="val1">Elementtirakenteinen</option>
-                    <option value="val2">Paikalla tehty</option>
-                  </select> <label class="form-label" for="facade_material">Pääasiallinen julkisivumateriaali: </label>
-                                    <select class="form-input combobox" data-bind="value: facade_material">
-                    <option value="val1">Betoni</option>
-                    <option value="val2">Tiili</option>
-                    <option value="val3">Teräs</option>
-                    <option value="val4">Puu</option>
-                    <option value="val5">Lasi</option>
-                    <option value="val6">Muu</option>
-                  </select>
-                                    <input class="form-input other" type="text" data-bind="value: facade_material_other" />
-                                    <label class="form-label" for="network_interfaces">Liittymät verkostoihin: </label>
-                  <div class="form-group" data-bind="with: network_interfaces">
-                    <input class="form-input checkbox" type="checkbox" data-bind="checked: sewer">
-                                        <label class="form-label"> Viemäri</label>
-                                        <input class="form-input checkbox" type="checkbox" data-bind="checked: water">
-                                        <label class="form-label"> Vesijohto</label>
-                                        <input class="form-input checkbox" type="checkbox" data-bind="checked: electricity">
-                                        <label class="form-label"> Sähkö</label>
-                                        <input class="form-input checkbox" type="checkbox" data-bind="checked: gas">
-                                        <label class="form-label"> Maakaasu</label>
-                                        <input class="form-input checkbox" type="checkbox" data-bind="checked: cabel">
-                                        <label class="form-label"> Kaapeli</label>
-                  </div>
-                  <label class="form-label" for="heating">Pääasiallinen lämmitystapa: </label>
-                                    <select class="form-input combobox" data-bind="value: heating">
-                    <option value="val1">Vesikeskuslämmitys</option>
-                    <option value="val2">Ilmakeskuslämmitys</option>
-                    <option value="val3">Suora sähkölämmitys</option>
-                    <option value="val4">uunilämmitys</option>
-                    <option value="val5">Ei kiinteää lämmityslaitetta</option>
-                  </select>
-                                    <label class="form-label" for="heating_source">Polttoaine/lämmönlähde: </label>
-                                    <select class="form-input combobox" data-bind="value: heating_source">
-                    <option value="val1">Kauko- tai aluelämpö</option>
-                    <option value="val2">Kevyt polttoöljy</option>
-                    <option value="val3">Raksas polttoöljy</option>
-                    <option value="val4">Sähkö</option>
-                    <option value="val5">Kaasu</option>
-                    <option value="val6">Kivihiili, koksi tms.</option>
-                    <option value="val7">Puu</option>
-                    <option value="val8">Turve</option>
-                    <option value="val9">Maalämpö tms</option>
-                    <option value="val10">Muu</option>
-                  </select>
-                                    <input class="form-input_other" type="text" data-bind="value: heating_source_other" />
-                                    <label class="form-label" for="building_equipments">Rakennuksen varusteet: </label>
-                  <div class="form-group" data-bind="with: building_equipments">
-                                        <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: electricity">
-                                            <label class="form-label">Sähkö</label>
-                                        </div>
-                    <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: gas" value="gas">
-                                            <label class="form-label"> Kaasu</label>
-                                        </div>
-                    <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: sewer">
-                                            <label class="form-label"> Viemäri</label>
-                                        </div>
-                    <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: water">
-                                            <label class="form-label">Vesijohto</label>
-                                        </div>
-                    <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: warm_water">
-                                            <label class="form-label"> Lämmin vesi</label>
-                                        </div>
-                    <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: solar_panel">
-                                            <label class="form-label"> Aurinkopaneeli</label>
-                                        </div>
-                    <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: elevator">
-                                            <label class="form-label"> Hissi</label> <br>
-                                        </div>
-                    <div>
-                                            <input class="form-input checkbox" type="checkbox" data-bind="checked: air_conditioning">
-                        <label class="form-label"> Koneellinen ilmastointi</label>
-                                        </div>
-                    <div>
-                                            <label class="form-label"> Talokohtaisia saunoja</label>
-                                            <input class="form-input" type="text" data-bind="checked: saunas">
-                                        </div>
-                    <div>
-                                            <label class="form-label"> Uima-altaita</label>
-                                            <input class="form-input" type="text" data-bind="checked: swimming_pools">
-                                        </div>
-                    <div>
-                                            <label class="form-label"> Väestönsuoja</label>
-                                            <input class="form-input" type="text" data-bind="checked: shelter">
-                                        </div>
-                  </div>
-                  <table class="form-table" data-bind="with: aaa">
-                    <tr>
-                      <th>Tila</th>
-                      <th>Huoneistoala neliömetreinä</th>
-                    </tr>
-                    <tr>
-                      <td><p>Asuntotilaa (ei vapaa-ajan asunnosta)</p></td>
-                      <td><input type="text" data-bind="value: a1"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Myymälä- majoitus- ja ravitsemistilaa</p></td>
-                      <td><input type="text" data-bind="value: a2"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Hoitotilaa</p></td>
-                      <td><input type="text" data-bind="value: a3"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Toimisto- ja hallintotilaa</p></td>
-                      <td><input type="text" data-bind="value: a4"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Kokoontumistilaa</p></td>
-                      <td><input type="text" data-bind="value: a5"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Opetustilaa</p></td>
-                      <td><input type="text" data-bind="value: a6"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Tuotantotilaa (teollisuus)</p></td>
-                      <td><input type="text" data-bind="value: a7"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Varastotilaa</p></td>
-                      <td><input type="text" data-bind="value: a8"></td>
-                    </tr>
-                    <tr>
-                      <td><p>Muuta huoneistoalaan kuuluvaa tilaa</p></td>
-                      <td><input type="text" data-bind="value: a9"></td>
-                    </tr>
-                    <tr class="table-summary">
-                      <td><p>Huoneistoala yhteensä</p></td>
-                      <td><input type="text" data-bind="value: a10"></td>
-                    </tr>
-                  </table>
-                </form>
-                <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
-              </div>
-              <div class="content-actions" data-bind="visible: $root.authorization.ok('approve-content')">
-                <button class="todo btn btn-small content-accept">Hyväksy</button>
-                <button class="todo btn btn-small content-reject">Hylkää</button>
-              </div>
-            </div>
-          </div>
-          <div class="application_section">
-            <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Huoneiston tiedot</h2>
-            <div class="application_section_content content_expanded">
-              <div class="content-actions" data-bind="visible: $root.authorization.ok('approve-content')">
-                <button class="todo btn btn-small content-accept">Hyväksy</button>
-                <button class="todo btn btn-small content-reject">Hylkää</button>
-              </div>
-              <div data-bind="with: $root.rh1">
-                <form data-bind="with: huoneistonTiedot">
-                  <div class="input-group">
-                    <input type="radio" data-bind="checked: apartments" value="no_new_apartments"> Ei asuntoja rakennuksessa tai asuntoihin ei tehdä muutoksia  <input type="radio" data-bind="checked: apartments" value="one_new_apartment"> Yksi asunto uudessa rakennuksessa tai yksi uusi huoneisto  <input type="radio" data-bind="checked: apartments" value="new_apartments"> Useampia asuntoja uudessa rakennuksessa tai asuntoon tehdään muutoksia
-                  </div>
-                  <label class="form-label" for="apartment_id">Huoneiston tunniste (jos on käytössä): </label> <input class="form-input" type="text" data-bind="value: apartment_id" /> <label class="form-label" for="room_count">Huoneluku ilman keittiötä (kpl): </label> <input class="form-input" type="text" data-bind="value: room_count" /> <label class="form-label" for="kitchen_type">Keittiötyyppi: </label> <select class="form-input combobox" data-bind="value: kitchen_type">
-                    <option value="val1">Keittiö</option>
-                    <option value="val2">Keittokomero</option>
-                    <option value="val3">Keittotila</option>
-                    <option value="val3">Tupakeittiö</option>
-                  </select>  <label class="form-label" for="apartment_floor_area">Huoneistoala: </label> <input class="form-input" type="text" data-bind="value: apartment_floor_area" /> <label class="form-label" for="apartment_equipments">Huoneiston varusteet: </label>
-                  <div class="input-group" data-bind="with: apartment_equipments">
-                    <input class="form-input" type="checkbox" data-bind="checked: toilet"> <label class="group-label"> WC</label> <input class="form-input" type="checkbox" data-bind="checked: shower"> <label class="group-label"> Amme / Suihku</label> <input class="form-input" type="checkbox" data-bind="checked: sauna"> <label class="group-label"> Sauna</label> <input class="form-input" type="checkbox" data-bind="checked: balcony"> <label class="group-label"> Parveke / terassi</label> <input class="form-input" type="checkbox" data-bind="checked: warm_water"> <label class="group-label"> Lämmin vesi</label>
-                  </div>
-                  <label class="form-label" for="new_apartments">Uusia asuntoja yhteensä </label> <input class="form-input" type="text" data-bind="value: new_apartments" /> <label class="form-label" for="apartments_total_floor_area">Asuntojen pinta-ala yhteensä </label> <input class="form-input" type="text" name="apartments_total_floor_area" />
-                </form>
-                <button data-bind="click: save" type="submit" class="btn btn-success">Tallenna</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="tab_content" id="hearings_tab">TPD</div>
         <div class="tab_content" id="pleadings_tab">TPD</div>
         <div class="tab_content" id="attachments_tab">

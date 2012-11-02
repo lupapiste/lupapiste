@@ -199,8 +199,19 @@
         mongo/applications {:_id (:id application)}
           {$set {:state :submitted, :submitted (:created command) }}))))
 
+(defn create-document [schema-name]
+  (let [schema (mongo/by-id mongo/document-schemas schema-name)]
+    (if (nil? schema) (throw (Exception. (str "Unknown schema ID: [" schema-name "]"))))
+    {:id (mongo/create-id)
+     :created (now)
+     :schema schema
+     :body {}}))
+
+(defn to-map-by-id [docs] 
+  (into {} (for [doc docs] [(:id doc) doc])))
+
 (defcommand "create-application"
-  {:parameters [:lat :lon :street :zip :city :categories]
+  {:parameters [:lat :lon :street :zip :city :documentSchemas]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
@@ -221,16 +232,7 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents {:hakija {:id (mongo/create-id)
-                            :nimi (str (:firstName user) " " (:lastName user))
-                            :address {:street (:street user)
-                                      :zip (:zip user)
-                                      :city (:city user)}
-                            :puhelinnumero (:phone user)
-                            :sahkopostiosoite (:email user)}
-                   :toimenpiteet [{:id (mongo/create-id)
-                                   :type (first (:categories data))
-                                   :otsikko (str (:lastName user) ", " (:street data))}]}})
+       :documents (to-map-by-id (map create-document (:documentSchemas data)))})
     (ok :id id)))
 
 

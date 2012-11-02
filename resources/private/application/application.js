@@ -8,7 +8,8 @@
   var authorizationCommandModel = new AuthorizationQueryModel();
   var inviteCommandModel = new InviteCommandModel();
   var commentCommandModel = new CommentCommandModel();
-
+  var documents = ko.observableArray();
+  
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
     refreshMap();
@@ -125,104 +126,6 @@
 
   };
 
-  var emptyRh1 = {
-    rakennuspaikanTiedot: {
-      building_location: "",
-      borough: "",
-      stead_number: "",
-      stead_name: "",
-      lot: "",
-      building_address: "",
-      building_address_second: "",
-      postal_code: "",
-      post_office: "",
-      tenure: "",
-      owner: "",
-      plan_readiness: "",
-      exemption: ""
-    },
-    rakennuksenTiedot: {
-      ownership: "",
-      ownership_other: "",
-      builder: "",
-      operation: "",
-      main_use: "",
-      building_volume: "",
-      building_gross_floor_area: "",
-      building_total_area: "",
-      floor_count: 0,
-      cellar_floor_area: "",
-      supporting_structure_material: "",
-      supporting_structure_material_other: "",
-      build_style: "",
-      facade_material: "",
-      facade_material_other: "",
-      network_interfaces: {
-        sewer: false,
-        water: false,
-        electricity: false,
-        gas: false,
-        cabel: false
-      },
-      heating: "",
-      heating_source: "",
-      heating_source_other: "",
-      building_equipments: {
-                electricity: false,
-                gas: false,
-                sewer: false,
-                water: false,
-                warm_water: false,
-                solar_panel: false,
-                elevator: false,
-                air_conditioning: false,
-                saunas: false,
-                swimming_pools: false,
-                shelter: false
-      },
-      aaa: {
-        a1: "",
-        a2: "",
-        a3: "",
-        a4: "",
-        a5: "",
-        a6: "",
-        a7: "",
-        a8: "",
-        a9: "",
-        a10: ""
-      }
-    },
-    huoneistonTiedot: {
-      apartments: "",
-      apartment_id: "",
-      room_count: 0,
-      kitchen_type: "",
-      apartment_floor_area: "",
-      apartment_equipments: {
-        toilet: false,
-        shower: false,
-        sauna: false,
-        balcony: false,
-        warm_water: false
-      },
-      new_apartments: "",
-      apartments_total_floor_area: ""
-    },
-    save: function(m) {
-      var u = ko.mapping.toJS(m);
-      delete u.save;
-      ajax
-        .command("rh1-demo", {id: application.id(), data: u})
-        .success(function() { debug("RH1 save completed"); })
-        .error(function() { error("RH1 save failed"); })
-        .call();
-      return false;
-    }
-  };
-
-  var rh1 = ko.mapping.fromJS(emptyRh1);
-
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
@@ -241,59 +144,10 @@
 
   function showApplicationPart2(data) {
 
-  	// docgen:
-
-    var spec = {
-        info: { name: "fozzaa" },
-        body: [
-          { name: "date", type: "date" },
-          { name: "varusteet", type: "choice", body: [
-            { name: "sahko",  type: "checkbox" },
-            { name: "kaasu",  type: "checkbox" },
-            { name: "hissi",  type: "checkbox" },
-            { name: "muu",    type: "string", size: "s" }
-          ]},
-          { name: "materiaali", type: "select", body: [
-            { name: "puu"     },
-            { name: "purkka"  },
-            { name: "betoni"  }
-          ]},
-          { name: "story", type: "text" }
-        ]
-    };
-  	
-    var model = {
-        "bar": {
-          "bida": "Small",
-          "beda": "Medium",
-          "buda": "Large"
-        },
-        "varusteet": {
-          "kaasu": true
-        },
-        "materiaali": "purkka",
-        "story": "Story of my life"
-    };
-
-    var save = function(path, value, callback, data) {
-      debug("saving", path, value, data);
-      ajax
-      	.command("update-doc", {app: application.id(), doc: data.doc, updates: [[path, value]]})
-      	.success(function() { callback("ok"); })
-      	.error(function(e) { callback(e.status); })
-      	.fail(function(e) { callback("err"); })
-      	.call();
-    };
-
-    var doc = docgen.build(spec, model, save, {doc: "fozzaa"});
-
-  	$("#docgen").empty().append(doc.element);
-  	
     // new data mapping
     applicationQueryModel.data(ko.mapping.fromJS(data));
 
     ko.mapping.fromJS(data, {}, application);
-    ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 
     application.attachments.removeAll();
     var attachments = data.attachments;
@@ -304,6 +158,28 @@
         application.attachments.push(attachment);
       }
     }
+    
+  	// docgen:
+
+    documents.removeAll();
+  	$.each(data.documents, function(id, doc) {
+  		documents.push(doc);
+  	});
+  	
+    var save = function(path, value, callback, data) {
+      debug("saving", path, value, data);
+      ajax
+      	.command("update-doc", {app: application.id(), doc: data.doc, updates: [[path, value]]})
+      	.success(function() { callback("ok"); })
+      	.error(function(e) { callback(e.status); })
+      	.fail(function(e) { callback("err"); })
+      	.call();
+    };
+
+    //var doc = docgen.build(spec, model, save, {doc: "fozzaa"});
+  	//$("#docgen").empty().append(doc.element);
+  	
+    
   }
 
   function uploadCompleted(file, size, type, attachmentId) {
@@ -344,8 +220,8 @@
           model.text("");
           })
           .call();
-    return false;
-  }
+      return false;
+    }
   };
 
   function InviteCommandModel() {
@@ -374,23 +250,23 @@
     }
   }
 
-    var tab = {
-        tabClick: function(data, event) {
-           var self = event.target;
-           $("#tabs li").removeClass('active');
-           $(self).parent().addClass("active");
-           $(".tab_content").hide();
-           var selected_tab = $(self).attr("href");
-           $(selected_tab).fadeIn();
-        }
-    };
+  var tab = {
+      tabClick: function(data, event) {
+         var self = event.target;
+         $("#tabs li").removeClass('active');
+         $(self).parent().addClass("active");
+         $(".tab_content").hide();
+         var selected_tab = $(self).attr("href");
+         $(selected_tab).fadeIn();
+      }
+  };
 
-    var accordian = {
-        accordianClick: function(data, event) {
-           self = event.target;
-           $(self).next(".application_section_content").toggleClass('content_expanded');
-        }
-    };
+  var accordian = {
+      accordianClick: function(data, event) {
+         self = event.target;
+         $(self).next(".application_section_content").toggleClass('content_expanded');
+      }
+  };
 
   function onPageChange(e) {
     var id = e.pagePath[0];
@@ -409,14 +285,14 @@
     var page = $("#application");
 
     ko.applyBindings({
-      application : application,
-      applicationModel : applicationQueryModel,
-      comment : commentCommandModel,
-      invite : inviteCommandModel,
-      authorization : authorizationCommandModel,
-      rh1 : rh1,
-      tab : tab,
-      accordian : accordian
+      application: application,
+      applicationModel: applicationQueryModel,
+      comment: commentCommandModel,
+      invite: inviteCommandModel,
+      authorization: authorizationCommandModel,
+      tab: tab,
+      accordian: accordian,
+      documents: documents
     }, page[0]);
 
   });
