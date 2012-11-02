@@ -304,14 +304,15 @@
     var self = this;
 
     self.email = ko.observable();
-    self.title = ko.observable("uuden suunnittelijan lis\u00E4\u00E4minen");
     self.text = ko.observable();
 
     self.submit = function(model) {
+      var email = model.email();
+      var text = model.text();
       ajax.command("invite", { id: application.id(),
-                               email: model.email(),
-                               title: model.title(),
-                               text: model.text()})
+                               email: email,
+                               title: "uuden suunnittelijan lis\u00E4\u00E4minen",
+                               text: text})
         .success(function(d) {
           self.email(undefined);
           self.text(undefined);
