@@ -75,6 +75,21 @@
               :apikey "502cb9e58426c613c8b85abc"}}
    ])
 
+(def schemas [{:id "uusi-rakennus"
+               :info {:name "Uusi rakennus"}
+               :body [{:name "date" :type "date" }
+                      {:name "varusteet" :type "choice"
+                       :body [{:name "sahko"  :type "checkbox"}
+                              {:name "kaasu"  :type "checkbox"}
+                              {:name "hissi"  :type "checkbox"}
+                              {:name "muu"    :type "string" :size "s"}]}
+                      {:name "materiaali" :type "select"
+                       :body [{:name "puu"}
+                              {:name "purkka"}
+                              {:name "betoni"}]}
+                      {:name "story" :type "text"}]}])
+
 (deffixture "minimal" {}
   (mongo/clear!)
-  (dorun (map #(mongo/insert mongo/users %) users)))
+  (dorun (map #(mongo/insert mongo/users %) users))
+  (dorun (map #(mongo/insert mongo/document-schemas %) schemas)))
