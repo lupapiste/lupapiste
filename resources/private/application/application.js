@@ -246,14 +246,7 @@
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 
-    application.attachments.removeAll();
-    var attachments = data.attachments;
-    if (attachments) {
-      for (var attachmentId in attachments) {
-        var attachment = attachments[attachmentId];
-        application.attachments.push(attachment);
-      }
-    }
+    application.attachments(_.values(data.attachments)); 
   }
 
   function uploadCompleted(file, size, type, attachmentId) {
