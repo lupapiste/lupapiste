@@ -44,9 +44,11 @@ LUPAPISTE.ModalDialog.close = function(e) {
 LUPAPISTE.ModalDialog.init = function() {
 
   // Create mask element
-  maskDiv = document.createElement("div");
-  maskDiv.id = "mask";
-  document.body.appendChild(maskDiv);
+  if (!document.getElementById("mask")) {
+    maskDiv = document.createElement("div");
+    maskDiv.id = "mask";
+    document.body.appendChild(maskDiv);
+  }
 
   // Register default opener:
   // Click any element that has .modal class and data-windows-id that
