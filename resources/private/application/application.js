@@ -251,7 +251,6 @@
     if (attachments) {
       for (var attachmentId in attachments) {
         var attachment = attachments[attachmentId];
-        attachment.open = "window.location.hash = '!/attachment/" + data.id + "/" + attachment.id + "';";
         application.attachments.push(attachment);
       }
     }
