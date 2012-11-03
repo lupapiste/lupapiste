@@ -58,8 +58,6 @@
         <ul id="tabs">
           <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
-          <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#hearings_tab">Naapurien kuuleminen</a></li>
-          <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#pleadings_tab">Lausunnot</a></li>
           <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
           <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
         </ul>
@@ -397,8 +395,6 @@
             </div>
           </div>
         </div>
-        <div class="tab_content" id="hearings_tab">TPD</div>
-        <div class="tab_content" id="pleadings_tab">TPD</div>
         <div class="tab_content" id="attachments_tab">
           <div class="tab-wrapper">
             <table data-bind="if: attachments && attachments().length"
