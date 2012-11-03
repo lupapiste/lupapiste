@@ -38,7 +38,7 @@
 (defn has-role [role]
   (= role (keyword (:role (current-user)))))
 
-(defn with-user [m] 
+(defn with-user [m]
   (merge m {:user (current-user)}))
 
 (defn authority? []
@@ -163,11 +163,18 @@
       )
     ))
 
-(defpage "/rest/view/:attachmentId" {attachmentId :attachmentId}
-  (attachment/output-attachment attachmentId false))
+(defn- output-attachment [attachment-id download?]
+  (if (logged-in?)
+    (attachment/output-attachment attachment-id (current-user) download?)
+    {:status 403
+     :headers {"Content-Type" "text/plain"}
+     :body "403"}))
 
-(defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
-  (attachment/output-attachment attachmentId true))
+(defpage "/rest/view/:attachmentId" {attachment-id :attachmentId}
+  (output-attachment attachment-id false))
+
+(defpage "/rest/download/:attachmentId" {attachment-id :attachmentId}
+  (output-attachment attachment-id true))
 
 ;;
 ;; Oskari map ajax request proxy

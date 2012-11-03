@@ -2,6 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [lupapalvelu.log]
+        [lupapalvelu.action :only [get-application-as]]
         [clojure.java.io :only [reader file]]
         [clojure.string :only [split join trim]])
   (:require [lupapalvelu.mongo :as mongo]
@@ -131,7 +132,7 @@
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (allowed-file? sanitazed-filename)
       (let [content-type (mime-type sanitazed-filename)]
-        (mongo/upload file-id file-id sanitazed-filename content-type tempfile created)
+        (mongo/upload id file-id sanitazed-filename content-type tempfile created)
         (set-attachment-version id attachmentId file-id type sanitazed-filename content-type size created user)
         (.delete (file tempfile))
         (ok))
@@ -159,9 +160,10 @@
 ;; Download
 ;;
 
-(defn- get-attachment [attachmentId]
-  ;; FIXME access rights
-  (mongo/download attachmentId))
+(defn- get-attachment [attachment-id user]
+  (when-let [attachment (mongo/download attachment-id)]
+    (when-let [application (get-application-as (:application attachment) user)]
+      (when (seq application) attachment))))
 
 (def windows-filename-max-length 255)
 
@@ -174,16 +176,18 @@
         (strings/last-n windows-filename-max-length de-accented)
         #"[^a-zA-Z0-9\.\-_ ]" "-")))
 
-(defn output-attachment [attachmentId download]
-  (debug "file download: attachmentId=%s" attachmentId)
-  (if-let [attachment (get-attachment attachmentId)]
+(defn output-attachment [attachment-id user download?]
+  (debug "file download: attachment-id=%s" attachment-id)
+  (if-let [attachment (get-attachment attachment-id user)]
     (let [response
           {:status 200
            :body ((:content attachment))
            :headers {"Content-Type" (:content-type attachment)
                      "Content-Length" (str (:content-length attachment))}}]
-        (if download
+        (if download?
           (assoc-in response [:headers "Content-Disposition"]
             (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
           response))
-    {:status 404}))
+    {:status 404
+     :headers {"Content-Type" "text/plain"}
+     :body "404"}))
