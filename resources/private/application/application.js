@@ -21,7 +21,6 @@
   })();
 
   function refreshMap() {
-    // refresh map for applications
     hub.clearMapWithDelay(refreshMapPoints);
   }
 
