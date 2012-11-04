@@ -4,10 +4,10 @@
 
 ;(function() {
 
-  var applicationQueryModel = new ApplicationQueryModel();
-  var authorizationCommandModel = new AuthorizationQueryModel();
-  var inviteCommandModel = new InviteCommandModel();
-  var commentCommandModel = new CommentCommandModel();
+  var applicationModel = new ApplicationModel();
+  var authorizationModel = new AuthorizationModel();
+  var inviteModel = new InviteModel();
+  var commentModel = new CommentModel();
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");
@@ -21,7 +21,6 @@
   })();
 
   function refreshMap() {
-    // refresh map for applications
     hub.clearMapWithDelay(refreshMapPoints);
   }
 
@@ -44,7 +43,7 @@
 
   }
 
-  function ApplicationQueryModel() {
+  function ApplicationModel() {
     var self = this;
 
     self.data = ko.observable();
@@ -232,7 +231,7 @@
   function showApplication(data) {
     ajax.query("allowed-actions",{id: data.id})
       .success(function(d) {
-        authorizationCommandModel.data(d.actions);
+        authorizationModel.data(d.actions);
         showApplicationPart2(data);
         hub.setPageReady("application");
       })
@@ -242,20 +241,12 @@
   function showApplicationPart2(data) {
 
     // new data mapping
-    applicationQueryModel.data(ko.mapping.fromJS(data));
+    applicationModel.data(ko.mapping.fromJS(data));
 
     ko.mapping.fromJS(data, {}, application);
     ko.mapping.fromJS(data.rh1 || emptyRh1, rh1);
 
-    application.attachments.removeAll();
-    var attachments = data.attachments;
-    if (attachments) {
-      for (var attachmentId in attachments) {
-        var attachment = attachments[attachmentId];
-        attachment.open = "window.location.hash = '!/attachment/" + data.id + "/" + attachment.id + "';";
-        application.attachments.push(attachment);
-      }
-    }
+    application.attachments(_.values(data.attachments)); 
   }
 
   function uploadCompleted(file, size, type, attachmentId) {
@@ -271,7 +262,7 @@
     }
   });
 
-  function AuthorizationQueryModel() {
+  function AuthorizationModel() {
     var self = this;
 
     self.data = ko.observable({})
@@ -281,7 +272,7 @@
     }
   }
 
-  function CommentCommandModel() {
+  function CommentModel() {
     var self = this;
 
     self.text = ko.observable();
@@ -300,7 +291,7 @@
   }
   };
 
-  function InviteCommandModel() {
+  function InviteModel() {
     var self = this;
 
     self.email = ko.observable();
@@ -362,10 +353,10 @@
 
     ko.applyBindings({
       application : application,
-      applicationModel : applicationQueryModel,
-      comment : commentCommandModel,
-      invite : inviteCommandModel,
-      authorization : authorizationCommandModel,
+      applicationModel : applicationModel,
+      comment : commentModel,
+      invite : inviteModel,
+      authorization : authorizationModel,
       rh1 : rh1,
       tab : tab,
       accordian : accordian

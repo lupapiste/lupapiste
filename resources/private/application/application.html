@@ -58,8 +58,6 @@
         <ul id="tabs">
           <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
-          <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#hearings_tab">Naapurien kuuleminen</a></li>
-          <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#pleadings_tab">Lausunnot</a></li>
           <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
           <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
         </ul>
@@ -399,8 +397,6 @@
             </div>
           </div>
         </div>
-        <div class="tab_content" id="hearings_tab">TPD</div>
-        <div class="tab_content" id="pleadings_tab">TPD</div>
         <div class="tab_content" id="attachments_tab">
           <div class="tab-wrapper">
             <table data-bind="if: attachments && attachments().length"
@@ -419,7 +415,7 @@
               <tr style="cursor: pointer;" data-bind="if: $data.type || $data.modified">
                   <td data-bind="text: loc('attachmentState_' + state)"
                       class="attachment-state"></td>
-                  <td data-bind="attr: {onclick: open}">
+                  <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                     <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
                       <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
                       <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
@@ -453,12 +449,12 @@
                 <p class="dialog-close close">X</p>
               </div>
               <div class="dialog-content">
-                <iframe id="uploadFrame"
-                        src="/html/pages/upload.html"
+            <iframe id="uploadFrame"
+                    src="/html/pages/upload.html"
                         style="height: 300px; width: 100%, min-width: 300px; border:0; overflow: hidden;"
-                ></iframe>
-              </div>
-            </div>
+            ></iframe>
+          </div>
+        </div>
           </div>
         </div>
         <div class="tab_content" id="conversation_tab">
@@ -501,7 +497,7 @@
        <div id="dialog-valtuutus" class="window">
         <div class="dialog-header">
            <p>Lisää valtuutus</p>
-           <p class="dialog-close close">X</p>
+           <p class="dialog-close close">X</p> 
          </div>
           <div class="dialog-content">
           <div data-bind="with: $root.invite">
@@ -513,7 +509,7 @@
 
           </div>
          </div>
-       </div>      
+       </div>       
      </div>
   </section>
 </body>
