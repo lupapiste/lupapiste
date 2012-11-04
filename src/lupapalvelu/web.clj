@@ -47,6 +47,8 @@
 (defn admin? []
   (and logged-in? (has-role :admin)))
 
+(defn anyone [] true)
+
 (defmacro defjson [path params & content]
   `(defpage ~path ~params
      (resp/json (do ~@content))))
@@ -80,7 +82,8 @@
                    :js   "application/javascript"
                    :css  "text/css"})
 
-(def authz-methods {:welcome (fn [] true)
+(def authz-methods {:welcome anyone
+                    :iframe anyone
                     :applicant logged-in?
                     :authority authority?
                     :admin admin?})
