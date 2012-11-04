@@ -83,6 +83,7 @@
 (defpage "/welcome" []                         (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
 (defpage "/welcome.js" []                      (resp/content-type (:js content-type)   (singlepage/compose :js :welcome)))
 (defpage "/welcome.css" []                     (resp/content-type (:css content-type)  (singlepage/compose :css :welcome)))
+(defpage "/iframe.css" []                      (resp/content-type (:css content-type)  (singlepage/compose :css :iframe)))
 
 (defpage "/applicant" []      (if (logged-in?) (resp/content-type (:html content-type) (singlepage/compose :html :applicant)) (resp/redirect "/welcome#")))
 (defpage "/applicant.js" []   (if (logged-in?) (resp/content-type (:js content-type)   (singlepage/compose :js   :applicant)) (resp/status 401 "Unauthorized\r\n")))
