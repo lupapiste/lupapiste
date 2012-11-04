@@ -66,20 +66,26 @@
 ;;
 ;; Upload commands
 ;;
-(defcommand "create-attachment"
-  {:parameters [:id]
-   :roles      [:applicant :authority]
-   :states     [:draft :open]}
-  [{{application-id :id} :data created :created}]
+
+(defn- create-attachment [application-id attachement-type now]
   (let [attachment-id (mongo/create-id)
         attachment-model {:id attachment-id
-                          :type nil
+                          :type attachement-type
                           :state :none
                           :latestVersion   {:version default-version}
                           :versions []
                           :comments []}]
     (mongo/update-by-id mongo/applications application-id
-      {$set {:modified created, (str "attachments." attachment-id) attachment-model}})
+      {$set {:modified now, (str "attachments." attachment-id) attachment-model}})
+    attachment-id))
+
+;; Authority can set a placeholder for an attachment
+(defcommand "create-attachment"
+  {:parameters [:id :type]
+   :roles      [:authority]
+   :states     [:draft :open]}
+  [{{application-id :id type :type} :data created :created}]
+  (let [attachment-id (create-attachment application-id type created)]
     (ok :applicationId application-id :attachmentId attachment-id)))
 
 (defn- next-attachment-version [current-version user]
@@ -88,7 +94,7 @@
     {:major (inc (:major current-version)), :minor 0}))
 
 (defn- set-attachment-version
-  [application-id attachment-id file-id type filename content-type size now user]
+  [application-id attachment-id file-id filename content-type size now user]
   (when-let [application (mongo/by-id mongo/applications application-id)]
     (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
           next-version (next-attachment-version latest-version user)
@@ -103,7 +109,6 @@
                   :filename filename
                   :contentType content-type
                   :size size}
-          type-key (str "attachments." attachment-id ".type")
           attachment-model {:modified now
                  (str "attachments." attachment-id ".modified") now
                  (str "attachments." attachment-id ".state")  :added
@@ -115,9 +120,7 @@
           {:_id application-id
            (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
            (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
-          {$set (if (equal-versions? default-version latest-version)
-                  (assoc attachment-model type-key type)
-                  attachment-model)
+          {$set attachment-model
            $push {(str "attachments." attachment-id ".versions") version-model}}))))
 
 (defcommand "upload-attachment"
@@ -133,7 +136,10 @@
     (if (allowed-file? sanitazed-filename)
       (let [content-type (mime-type sanitazed-filename)]
         (mongo/upload id file-id sanitazed-filename content-type tempfile created)
-        (set-attachment-version id attachmentId file-id type sanitazed-filename content-type size created user)
+        (if (empty? attachmentId)
+          (let [attachment-id (create-attachment id type created)]
+            (set-attachment-version id attachment-id file-id sanitazed-filename content-type size created user))
+          (set-attachment-version id attachmentId file-id sanitazed-filename content-type size created user))
         (.delete (file tempfile))
         (ok))
       (fail "Illegal file type"))))
@@ -160,7 +166,9 @@
 ;; Download
 ;;
 
-(defn- get-attachment [attachment-id user]
+(defn- get-attachment
+  "Returns the attachment if user has access to application, otherwise nil."
+  [attachment-id user]
   (when-let [attachment (mongo/download attachment-id)]
     (when-let [application (get-application-as (:application attachment) user)]
       (when (seq application) attachment))))

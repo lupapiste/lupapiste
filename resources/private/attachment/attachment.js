@@ -66,20 +66,8 @@ var attachment = function() {
   hub.subscribe("upload-cancelled", LUPAPISTE.ModalDialog.close);
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function(e) {
-    var iframe = $("#uploadFrame").contents();
-    var applicationId = iframe.find("#applicationId").val();
-    var attachmentId = iframe.find("#attachmentId").val();
-
-    if (applicationId) {
-      ajax.command("delete-empty-attachment", { id: applicationId, attachmentId: attachmentId})
-      .complete(function(d) {
-        repository.reloadAllApplications();
-      })
-      .call();
-    } else {
-      repository.reloadAllApplications();
-    }
     resetUploadIframe();
+    repository.reloadAllApplications();
   });
 
   function toApplication(){
@@ -92,15 +80,9 @@ var attachment = function() {
   });
 
   function newAttachment(m) {
-    ajax.command("create-attachment", {id:  m.id()})
-    .success(function(d) {
-      repository.reloadAllApplications(function() {
-        var iframe = $("#uploadFrame").contents();
-        iframe.find("#applicationId").val(d.applicationId);
-        iframe.find("#attachmentId").val(d.attachmentId);
-      });
-    })
-    .call();
+    var iframe = $("#uploadFrame").contents();
+    iframe.find("#applicationId").val(m.id());
+    iframe.find("#attachmentId").val("");
   }
 
   return { newAttachment: newAttachment };
