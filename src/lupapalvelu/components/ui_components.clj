@@ -18,7 +18,7 @@
    :underscore   {:js ["underscore.js"]}
 
    :common       {:depends [:jquery :knockout :underscore]
-                  :js ["app.js" "log.js" "notify.js" "hub.js" "loc.js" "ajax.js" "nav.js" "combobox.js" "ko.init.js"  "dialog.js"]
+                  :js ["hub.js" "log.js" "mapintegration.js" "pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js" "ko.init.js"  "dialog.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 

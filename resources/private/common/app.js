@@ -71,7 +71,6 @@ LUPAPISTE.App = function(startPage) {
     trace("Jump to " + url);
     self.hashChangeEventEnabled = false;
     window.location = url;
-    throw hub.HaltEventProcessingException;
   }
 
   this.hashChanged = function() {

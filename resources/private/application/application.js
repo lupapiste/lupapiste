@@ -10,8 +10,8 @@
   var commentModel = new CommentModel();
   var documents = ko.observableArray();
 
-  hub.whenOskariMapIsReady(function() {
-    hub.moveOskariMapToDiv("application-map");
+  mapintegration.whenOskariMapIsReady(function() {
+  	mapintegration.moveOskariMapToDiv("application-map");
     refreshMap();
   });
 
@@ -22,7 +22,7 @@
   })();
 
   function refreshMap() {
-    hub.clearMapWithDelay(refreshMapPoints);
+  	mapintegration.clearMapWithDelay(refreshMapPoints);
   }
 
   function refreshMapPoints() {
@@ -41,7 +41,6 @@
         data : mapPoints
       });
     }, 99);
-
   }
 
   function ApplicationModel() {
@@ -136,7 +135,7 @@
       .success(function(d) {
         authorizationModel.data(d.actions);
         showApplicationPart2(data);
-        hub.setPageReady("application");
+        pageutil.setPageReady("application");
       })
       .call();
   }
