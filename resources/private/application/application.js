@@ -161,11 +161,6 @@
     
   	// docgen:
 
-    documents.removeAll();
-  	$.each(data.documents, function(id, doc) {
-  		documents.push(doc);
-  	});
-  	
     var save = function(path, value, callback, data) {
       debug("saving", path, value, data);
       ajax
@@ -176,10 +171,14 @@
       	.call();
     };
 
-    //var doc = docgen.build(spec, model, save, {doc: "fozzaa"});
-  	//$("#docgen").empty().append(doc.element);
-  	
-    
+    var docgenDiv = $("#docgen").empty();
+
+    documents.removeAll();
+  	$.each(data.documents, function(id, doc) {
+  		documents.push(doc);
+  		docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: "fozzaa"}).element));
+  	});
+
   }
 
   function uploadCompleted(file, size, type, attachmentId) {

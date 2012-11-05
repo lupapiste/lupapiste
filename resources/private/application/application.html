@@ -30,8 +30,8 @@
             <p>Toimenpiteet:</p>
             <ul data-bind="foreach: $root.documents">
               <li>
-                <span data-bind="text: schema.info.name" id="test-application-operation"></span>
-                <i>(<span data-bind="text: created"></span>)</i>
+                <span data-bind="ltext: schema.info.name" id="test-application-operation"></span>
+                <i>(<span data-bind="dateTimeString: created"></span>)</i>
               </li>
             </ul>
 <!-- /\ /\ /\ /\ /\ -->
@@ -70,64 +70,13 @@
         <div class="tab_content" id="application_tab" style="display: block;">
           
 <!-- \/ \/ \/ \/ \/ -->
-        <div class="application_section">
-          <div id="docgen">
-            <!-- This is where generated document will be placed. -->
-          </div>
-        </div>
-<!-- /\ /\ /\ /\ /\ -->
-          
           <div class="application_section">
-            <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
-            <div class="application_section_content content_expanded">
-              <h3>Hakija</h3>
-<!--
-              <ul data-bind="with: documents">
-                <li><b>Nimi:</b> <span name="test-applicant-name" data-bind="text: hakija.nimi"></span><br/>
-                    <b>Katuosoite:</b> <span name="test-applicant-street" data-bind="text: hakija.address.street"></span><br/>
-                    <b>Postinumero:</b> <span name="test-applicant-zip" data-bind="text: hakija.address.zip"></span><br/>
-                    <b>Postitoimipaikka:</b> <span name="test-applicant-city" data-bind="text: hakija.address.city"></span><br/>
-                    <b>Puh:</b> <span data-bind="text: hakija.puhelinnumero"></span><br/>
-                    <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
-                 </li>
-              </ul>
--->
-              <br/>
-                <div>
-                  <h3>Valtuutetut</h3>
-                  <div data-bind="with: $root.applicationModel">
-                    <ul data-bind="foreach: auth">
-                      <li>
-                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
-                        (<span data-bind="text: username"></span>)
-                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                        <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
-                      </li>
-                    </ul>
-                  </div>
-                  <br/>
-                </div>
-                <h3>Kutsutut</h3>
-
-                <ul data-bind="foreach: invites">
-                  <li class="user-invite">
-                    <span data-bind="text: user.username"></span>
-                    (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
-                    - <span data-bind="text: text"></span>
-                    <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
-                  </li>
-                </ul>
-
-                <div data-bind="with: $root.invite">
-                  <table data-bind="visible: $root.authorization.ok('invite')">
-                    <tr><td>sähköpostiosoite</td><td><input id="invite-email" class="form_input" type="text" data-bind="value: email" /></td></tr>
-                    <tr><td>teksti          </td><td><textarea id="invite-text" rows=5 class="form_input" data-bind="value: text"></textarea></td></tr>
-                    <tr ><td>&nbsp;         </td><td><a href="#" id="test-invite" data-bind="click: submit">kutsu uusi suunnittelija</a></td></tr>
-                  </table>
-                </div>
-              </div>
+            <div id="docgen">
+              <!-- This is where generated document will be placed. -->
             </div>
           </div>
+<!-- /\ /\ /\ /\ /\ -->
+          
         <div class="tab_content" id="hearings_tab">TPD</div>
         <div class="tab_content" id="pleadings_tab">TPD</div>
         <div class="tab_content" id="attachments_tab">
@@ -219,6 +168,7 @@
           </div>
         </div>
       </div>
+    </div>
   </section>
 </body>
 </html>
