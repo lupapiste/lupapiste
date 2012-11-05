@@ -11,7 +11,7 @@
   var documents = ko.observableArray();
 
   mapintegration.whenOskariMapIsReady(function() {
-  	mapintegration.moveOskariMapToDiv("application-map");
+    mapintegration.moveOskariMapToDiv("application-map");
     refreshMap();
   });
 
@@ -22,7 +22,7 @@
   })();
 
   function refreshMap() {
-  	mapintegration.clearMapWithDelay(refreshMapPoints);
+    mapintegration.clearMapWithDelay(refreshMapPoints);
   }
 
   function refreshMapPoints() {
@@ -147,27 +147,27 @@
 
     ko.mapping.fromJS(data, {}, application);
 
-  	// docgen:
+    // docgen:
 
     var save = function(path, value, callback, data) {
       debug("saving", path, value, data);
       ajax
-      	.command("update-doc", {app: application.id(), doc: data.doc, updates: [[path, value]]})
-      	.success(function() { callback("ok"); })
-      	.error(function(e) { callback(e.status); })
-      	.fail(function(e) { callback("err"); })
-      	.call();
+        .command("update-doc", {app: application.id(), doc: data.doc, updates: [[path, value]]})
+        .success(function() { callback("ok"); })
+        .error(function(e) { callback(e.status); })
+        .fail(function(e) { callback("err"); })
+        .call();
     };
 
     var docgenDiv = $("#docgen").empty();
 
     documents.removeAll();
-  	$.each(data.documents, function(id, doc) {
-  		documents.push(doc);
-  		docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: "fozzaa"}).element);
-  	});
+    $.each(data.documents, function(id, doc) {
+      documents.push(doc);
+      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: "fozzaa"}).element);
+    });
 
-		application.attachments(_.values(data.attachments)); 
+    application.attachments(_.values(data.attachments)); 
   }
 
   function uploadCompleted(file, size, type, attachmentId) {

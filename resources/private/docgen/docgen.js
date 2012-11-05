@@ -196,15 +196,15 @@ var docgen = (function() {
   }
 
   function removeClass(target, classNames) {
-  	var names = target.className.split(/\s+/);
-  	_.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names = _.without(names, className); });
-  	target.className = names.join(" ");
+    var names = target.className.split(/\s+/);
+    _.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names = _.without(names, className); });
+    target.className = names.join(" ");
   }
   
   function addClass(target, classNames) {
-  	var names = target.className.split(/\s+/);
-  	_.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names.push(className); });
-  	target.className = names.join(" ");
+    var names = target.className.split(/\s+/);
+    _.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names.push(className); });
+    target.className = names.join(" ");
   }
   
   function makeSaverDelegate(save, eventData) {
@@ -224,7 +224,7 @@ var docgen = (function() {
         label.removeChild(loader);
         removeClass(target, ["form-input-warn", "form-input-err"]);
         if (result === "ok") {
-        	// Nada.
+          // Nada.
         } else if (result === "warn") {
           addClass(target, "form-input-warn");
         } else if (result === "err") {

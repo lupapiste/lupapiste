@@ -9,7 +9,7 @@ var pageutil = function() {
   }
   
   function setPageNotReady() {
-  	$("#pageStatus").children().remove();
+    $("#pageStatus").children().remove();
   }
   
   return {
