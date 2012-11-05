@@ -1,8 +1,12 @@
 /**
  * Prototype for Lupapiste Single Page Apps
  */
-if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = new Object();}
 
+if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
+
+/**
+ * @param {String} startPage   ID of the landing page
+ */
 LUPAPISTE.App = function(startPage) {
 
   var self = this;
@@ -11,6 +15,31 @@ LUPAPISTE.App = function(startPage) {
   self.currentPage = undefined;
   self.session = undefined;
   self.hashChangeEventEnabled = true;
+
+  /**
+   * Complete the App initialization after DOM is loaded.
+   */
+  this.domReady = function() {
+    $(window).hashchange(self.hashChanged);
+    $(window).hashchange();
+    $(window).unload(self.unload);
+
+    self.connectionCheck();
+
+    if (typeof LUPAPISTE.ModalDialog != "undefined") {
+      LUPAPISTE.ModalDialog.init();
+    }
+
+    $(".logout-button").click(function() { hub.send("logout"); });
+  }
+  $(this.domReady);
+
+  /**
+   * Window unload event handler
+   */
+  this.unload = function() {
+    trace("window.unload");
+  }
 
   this.openPage = function(path) {
     var pageId = path[0];

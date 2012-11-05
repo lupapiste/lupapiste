@@ -38,7 +38,7 @@
 (defn has-role [role]
   (= role (keyword (:role (current-user)))))
 
-(defn with-user [m] 
+(defn with-user [m]
   (merge m {:user (current-user)}))
 
 (defn authority? []
@@ -46,6 +46,8 @@
 
 (defn admin? []
   (and logged-in? (has-role :admin)))
+
+(defn anyone [] true)
 
 (defmacro defjson [path params & content]
   `(defpage ~path ~params
@@ -80,27 +82,32 @@
                    :js   "application/javascript"
                    :css  "text/css"})
 
-(defpage "/welcome" []                         (resp/content-type (:html content-type) (singlepage/compose :html :welcome)))
-(defpage "/welcome.js" []                      (resp/content-type (:js content-type)   (singlepage/compose :js :welcome)))
-(defpage "/welcome.css" []                     (resp/content-type (:css content-type)  (singlepage/compose :css :welcome)))
+(def authz-methods {:welcome anyone
+                    :iframe anyone
+                    :applicant logged-in?
+                    :authority authority?
+                    :admin admin?})
 
-(defpage "/applicant" []      (if (logged-in?) (resp/content-type (:html content-type) (singlepage/compose :html :applicant)) (resp/redirect "/welcome#")))
-(defpage "/applicant.js" []   (if (logged-in?) (resp/content-type (:js content-type)   (singlepage/compose :js   :applicant)) (resp/status 401 "Unauthorized\r\n")))
-(defpage "/applicant.css" []  (if (logged-in?) (resp/content-type (:css content-type)  (singlepage/compose :css  :applicant)) (resp/status 401 "Unauthorized\r\n")))
+(defn- single-resource [resource-type app failure]
+  (if (and (contains? authz-methods app) ((authz-methods app)) )
+      (resp/content-type (resource-type content-type) (singlepage/compose resource-type app))
+      failure))
 
-(defpage "/authority" []      (if (authority?) (resp/content-type (:html content-type) (singlepage/compose :html :authority)) (resp/redirect "/welcome#")))
-(defpage "/authority.js" []   (if (authority?) (resp/content-type (:js content-type)   (singlepage/compose :js   :authority)) (resp/status 401 "Unauthorized\r\n")))
-(defpage "/authority.css" []  (if (authority?) (resp/content-type (:css content-type)  (singlepage/compose :css  :authority)) (resp/status 401 "Unauthorized\r\n")))
+;; CSS & JS
+(defpage [:get ["/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
+  (single-resource (keyword res-type) (keyword app) (resp/status 401 "Unauthorized\r\n")))
 
-(defpage "/admin" []          (if (admin?)     (resp/content-type (:html content-type) (singlepage/compose :html :admin)) (resp/redirect "/welcome#")))
-(defpage "/admin.js" []       (if (admin?)     (resp/content-type (:js content-type)   (singlepage/compose :js   :admin)) (resp/status 401 "Unauthorized\r\n")))
-(defpage "/admin.css" []      (if (admin?)     (resp/content-type (:css content-type)  (singlepage/compose :css  :admin)) (resp/status 401 "Unauthorized\r\n")))
+;; Single Page App HTML
+(def apps-pattern
+  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys authz-methods))) ")")))
+(defpage [:get ["/:app" :app apps-pattern]] {app :app}
+  (single-resource :html (keyword app) (resp/redirect "/welcome#")))
 
 ;
 ; Oskari:
 ;
 
-(defpage "/oskarimap.js" []
+(defpage "/js/oskarimap.js" []
   (->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
     (resp/set-headers {"Cache-Control" "public, max-age=86400"})
     (resp/content-type (:js content-type))))
@@ -154,20 +161,23 @@
 
 (defpage [:post "/rest/upload"] {applicationId :applicationId attachmentId :attachmentId type :type upload :upload :as data}
   (debug "upload: %s: %s" data (str upload))
-
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
         result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
       (json/generate-string result) ; TODO display error message
-      )
-    ))
+      )))
 
-(defpage "/rest/view/:attachmentId" {attachmentId :attachmentId}
-  (attachment/output-attachment attachmentId false))
+(defn- output-attachment [attachment-id download?]
+  (if (logged-in?)
+    (attachment/output-attachment attachment-id (current-user) download?)
+    (resp/status 401 "Unauthorized\r\n")))
 
-(defpage "/rest/download/:attachmentId" {attachmentId :attachmentId}
-  (attachment/output-attachment attachmentId true))
+(defpage "/rest/view/:attachmentId" {attachment-id :attachmentId}
+  (output-attachment attachment-id false))
+
+(defpage "/rest/download/:attachmentId" {attachment-id :attachmentId}
+  (output-attachment attachment-id true))
 
 ;;
 ;; Oskari map ajax request proxy

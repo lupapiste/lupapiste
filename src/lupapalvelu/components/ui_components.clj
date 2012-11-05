@@ -80,6 +80,9 @@
                   :js ["admin.js"]
                   :html ["index.html" "admin.html"]}
 
+   :iframe       {:depends [:common]
+                  :css ["iframe.css"]}
+
    :welcome      {:depends [:register :jquery :buildinfo]
                   :js ["login.js"]
                   :html ["login.html" "index.html"]}})
