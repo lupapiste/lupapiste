@@ -17,7 +17,7 @@
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.2.0"]]}} 
 
-  :nitpicker {:exts ["clj" "js" "html" "css"]
+  :nitpicker {:exts ["clj" "js" "html" "css" "scss"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]}
 
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
