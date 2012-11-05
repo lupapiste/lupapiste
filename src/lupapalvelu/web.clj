@@ -98,7 +98,9 @@
   (single-resource (keyword res-type) (keyword app) (resp/status 401 "Unauthorized\r\n")))
 
 ;; Single Page App HTML
-(defpage [:get ["/:app" :app #"[a-z]+"]] {app :app}
+(def apps-pattern
+  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys authz-methods))) ")")))
+(defpage [:get ["/:app" :app apps-pattern]] {app :app}
   (single-resource :html (keyword app) (resp/redirect "/welcome#")))
 
 ;
