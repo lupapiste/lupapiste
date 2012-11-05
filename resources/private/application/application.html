@@ -26,7 +26,6 @@
             <span class="application_summary_text" data-bind="ltext: permitType()"></span>
           </div>
           <div>
-<!-- \/ \/ \/ \/ \/ -->
             <p>Toimenpiteet:</p>
             <ul data-bind="foreach: $root.documents">
               <li>
@@ -34,7 +33,6 @@
                 <i>(<span data-bind="dateTimeString: created"></span>)</i>
               </li>
             </ul>
-<!-- /\ /\ /\ /\ /\ -->
           </div>
           <div>
             <p>Hakemus luotu:</p>
@@ -60,23 +58,53 @@
         <ul id="tabs">
           <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
-          <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#hearings_tab">Naapurien kuuleminen</a></li>
-          <li><a data-bind="click: $root.tab.tabClick, clickBubble: false" href="#pleadings_tab">Lausunnot</a></li>
           <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
           <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
         </ul>
       </div>
       <div id="tab_content_container" class="container">
+
+        <!-- docgen generated content: -->          
         <div class="tab_content" id="application_tab" style="display: block;">
-          
-<!-- \/ \/ \/ \/ \/ -->
           <div class="application_section">
             <div id="docgen">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
-<!-- /\ /\ /\ /\ /\ -->
+        </div>
           
+        <div class="application_section">
+          <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
+          <div class="application_section_content content_expanded">
+            <div>
+              <h3>Valtuutetut</h3>
+              <div data-bind="with: $root.applicationModel">
+                <ul data-bind="foreach: auth">
+                  <li>
+                    <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                    (<span data-bind="text: username"></span>)
+                    <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                    <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                  </li>
+                </ul>
+              </div>
+              <a href="#dialog-valtuutus" id="test-add-invite" class="modal" data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
+            </div>
+            <h3>Kutsutut</h3>
+              <ul data-bind="foreach: invites">
+                <li class="user-invite">
+                  <span data-bind="text: user.username"></span>
+                  (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                  - <span data-bind="text: text"></span>
+                  <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+
+
+
         <div class="tab_content" id="hearings_tab">TPD</div>
         <div class="tab_content" id="pleadings_tab">TPD</div>
         <div class="tab_content" id="attachments_tab">
@@ -97,7 +125,7 @@
               <tr style="cursor: pointer;">
                   <td data-bind="text: loc('attachmentState_' + state)"
                       class="attachment-state"></td>
-                  <td data-bind="attr: {onclick: open}">
+                  <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                     <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
                       <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
                       <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
@@ -168,7 +196,27 @@
           </div>
         </div>
       </div>
-    </div>
+
+     <div id="boxes">  
+       <div id="dialog-valtuutus" class="window">
+        <div class="dialog-header">
+           <p>Lisää valtuutus</p>
+           <p class="dialog-close close">X</p> 
+         </div>
+          <div class="dialog-content">
+          <div data-bind="with: $root.invite">
+            <table>
+              <tr><td>Sähköpostiosoite</td><td><input id="invite-email" class="form_input text long" type="text" data-bind="value: email" /></td></tr>
+              <tr><td>Viesti         </td><td><textarea id="invite-text" rows=5 class="form_input text long" data-bind="value: text"></textarea></td></tr>
+            </table>
+            <button class="btn btn-primary close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
+
+          </div>
+          
+         </div>
+       </div>       
+     </div>
+     <div id="mask"></div>
   </section>
 </body>
 </html>
