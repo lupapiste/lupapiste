@@ -194,6 +194,18 @@ var docgen = (function() {
     img.src = "/img/ajax-loader-12.gif";
     return img;
   }
+
+  function removeClass(target, classNames) {
+  	var names = target.className.split(/\s+/);
+  	_.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names = _.without(names, className); });
+  	target.className = names.join(" ");
+  }
+  
+  function addClass(target, classNames) {
+  	var names = target.className.split(/\s+/);
+  	_.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names.push(className); });
+  	target.className = names.join(" ");
+  }
   
   function makeSaverDelegate(save, eventData) {
     return function(e) {
@@ -210,12 +222,13 @@ var docgen = (function() {
       
       save(path, value, function(result) {
         label.removeChild(loader);
+        removeClass(target, ["form-input-warn", "form-input-err"]);
         if (result === "ok") {
-          target.className = "form-input";
+        	// Nada.
         } else if (result === "warn") {
-          target.className = "form-input form-input-warn";
+          addClass(target, "form-input-warn");
         } else if (result === "err") {
-          target.className = "form-input form-input-err";
+          addClass(target, "form-input-err");
         } else {
           error("Unknown result:", result, "path:", path);
         }
@@ -224,7 +237,7 @@ var docgen = (function() {
       return false;
     };
   }
-        
+  
   function buildElement(spec, model, save) {
     var section = document.createElement("section");
     section.className = "accordion";
