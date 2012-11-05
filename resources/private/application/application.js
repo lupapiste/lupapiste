@@ -135,7 +135,7 @@
       .success(function(d) {
         authorizationModel.data(d.actions);
         showApplicationPart2(data);
-        hub.setPageReady("application");
+        pageutil.setPageReady("application");
       })
       .call();
   }
