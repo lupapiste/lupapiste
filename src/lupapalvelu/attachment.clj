@@ -50,6 +50,7 @@
           (str "(application/("
                (join "|" [
                      "pdf" "postscript"
+                     "zip" "x-7z-compressed"
                      "rtf" "msword" "vnd\\.ms-excel" "vnd\\.ms-powerpoint"
                      "vnd\\.oasis\\.opendocument\\..+"
                      "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
