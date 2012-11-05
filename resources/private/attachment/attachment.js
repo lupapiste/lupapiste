@@ -20,11 +20,11 @@ var attachment = function() {
       versions:       ko.observable(),
       type:           ko.observable(),
       isImage: function() {
-        var contentType = this.latestVersion().contentType; 
+        var contentType = this.latestVersion().contentType;
         return contentType && contentType.indexOf('image/') === 0;
       },
       isPdf: function() {
-        return this.latestVersion().contentType === "application/pdf"; 
+        return this.latestVersion().contentType === "application/pdf";
       }
     };
   }
@@ -60,22 +60,14 @@ var attachment = function() {
   function resetUploadIframe() {
     var originalUrl = $("#uploadFrame").attr("src");
     $("#uploadFrame").attr("src", originalUrl);
-    $("#uploadFrame").hide();
-    $("#add-attachment").show();
   }
 
-  hub.subscribe("upload-done", function(e) {
+  hub.subscribe("upload-done", LUPAPISTE.ModalDialog.close);
+  hub.subscribe("upload-cancelled", LUPAPISTE.ModalDialog.close);
+
+  hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function(e) {
     resetUploadIframe();
     repository.reloadAllApplications();
-  });
-
-  hub.subscribe("upload-cancelled", function(e) {
-    resetUploadIframe();
-    ajax.command("delete-empty-attachment", { id: e.applicationId, attachmentId: e.attachmentId})
-    .success(function(d) {
-      repository.reloadAllApplications();
-    })
-    .call();
   });
 
   function toApplication(){
@@ -88,17 +80,9 @@ var attachment = function() {
   });
 
   function newAttachment(m) {
-    ajax.command("create-attachment", {id:  m.id()})
-    .success(function(d) {
-      repository.reloadAllApplications(function() {
-        var iframe = $("#uploadFrame").contents();
-        iframe.find("#applicationId").val(d.applicationId);
-        iframe.find("#attachmentId").val(d.attachmentId);
-        $("#uploadFrame").show();
-        $("#add-attachment").hide();
-      });
-    })
-    .call();
+    var iframe = $("#uploadFrame").contents();
+    iframe.find("#applicationId").val(m.id());
+    iframe.find("#attachmentId").val("");
   }
 
   return { newAttachment: newAttachment };

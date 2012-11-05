@@ -90,12 +90,13 @@
     (gfs/content-type content-type)
     (gfs/metadata {:uploaded timestamp, :application applicationId})))
 
-(defn download [attachmentId]
-  (if-let [attachment (gfs/find-one {:_id attachmentId})]
+(defn download [file-id]
+  (if-let [attachment (gfs/find-one {:_id file-id})]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
      :content-length (.getLength attachment)
-     :file-name (.getFilename attachment)}))
+     :file-name (.getFilename attachment)
+     :application (.getString (.getMetaData attachment) "application")}))
 
 ;;
 ;; Bootstrappin'

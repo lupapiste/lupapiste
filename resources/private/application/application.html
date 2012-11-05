@@ -63,7 +63,7 @@
         </ul>
       </div>
       <div id="tab_content_container" class="container">
-
+        
         <!-- docgen generated content: -->          
         <div class="tab_content" id="application_tab" style="display: block;">
           <div class="application_section">
@@ -72,94 +72,53 @@
             </div>
           </div>
         </div>
-          
-        <div class="application_section">
-          <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
-          <div class="application_section_content content_expanded">
-            <div>
-              <h3>Valtuutetut</h3>
-              <div data-bind="with: $root.applicationModel">
-                <ul data-bind="foreach: auth">
-                  <li>
-                    <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
-                    (<span data-bind="text: username"></span>)
-                    <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                    <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+        
+        <div class="tab_content" id="application_tab" style="display: block;">
+          <div class="application_section">
+            <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
+            <div class="application_section_content content_expanded">
+              <h3>Hakija</h3>
+              <ul data-bind="with: documents">
+                <li><b>Nimi:</b> <span name="test-applicant-name" data-bind="text: hakija.nimi"></span><br/>
+                    <b>Katuosoite:</b> <span name="test-applicant-street" data-bind="text: hakija.address.street"></span><br/>
+                    <b>Postinumero:</b> <span name="test-applicant-zip" data-bind="text: hakija.address.zip"></span><br/>
+                    <b>Postitoimipaikka:</b> <span name="test-applicant-city" data-bind="text: hakija.address.city"></span><br/>
+                    <b>Puh:</b> <span data-bind="text: hakija.puhelinnumero"></span><br/>
+                    <b>Sähköpostiosoite:</b> <span name="test-applicant-email" data-bind="text: hakija.sahkopostiosoite"></span><br/>
+                 </li>
+                 </ul>
+              <br/>
+                <div>
+                  <h3>Valtuutetut</h3>
+                  <div data-bind="with: $root.applicationModel">
+                    <ul data-bind="foreach: auth">
+                      <li>
+                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                        (<span data-bind="text: username"></span>)
+                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                        <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                      </li>
+                    </ul>
+                  </div>
+                  <br/>
+                  <a href=""  id="test-add-invite"
+                     data-window-id="dialog-valtuutus" class="modal"
+                     data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
+                </div>
+                <h3>Kutsutut</h3>
+
+                <ul data-bind="foreach: invites">
+                  <li class="user-invite">
+                    <span data-bind="text: user.username"></span>
+                    (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                    - <span data-bind="text: text"></span>
+                    <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
                   </li>
                 </ul>
               </div>
-              <a href="#dialog-valtuutus" id="test-add-invite" class="modal" data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
             </div>
-            <h3>Kutsutut</h3>
-              <ul data-bind="foreach: invites">
-                <li class="user-invite">
-                  <span data-bind="text: user.username"></span>
-                  (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
-                  - <span data-bind="text: text"></span>
-                  <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-
-
-
-        <div class="tab_content" id="hearings_tab">TPD</div>
-        <div class="tab_content" id="pleadings_tab">TPD</div>
-        <div class="tab_content" id="attachments_tab">
-          <div class="tab-wrapper">
-            <table data-bind="if: attachments && attachments().length"
-                   class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Tila</th>
-                  <th>Tyyppi</th>
-                  <th>Tiedosto</th>
-                  <th>Versio</th>
-                  <th>Muokattu</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody data-bind="foreach: attachments">
-              <tr style="cursor: pointer;">
-                  <td data-bind="text: loc('attachmentState_' + state)"
-                      class="attachment-state"></td>
-                  <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
-                    <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
-                      <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
-                      <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
-                    </a>
-                  </td>
-                <td><span data-bind="if: $data.latestVersion.filename">
-                    <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
-                    <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
-                    <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
-                </span></td>
-                  <td data-bind="if: $data.latestVersion"><span data-bind="version: latestVersion.version"></span></td>
-                  <td data-bind="if: $data.modified">
-                    <span data-bind="dateString: modified"></span>
-                    <span data-bind="if: $data.latestVersion"><span data-bind="fullName: latestVersion.user"></span></span>
-                  </td>
-                  <td></td>
-              </tr>
-              </tbody>
-            </table>
-            <div data-bind="ifnot: attachments && attachments().length">
-              <i>Ei liitteitä</i>
-            </div>
-            <button id="add-attachment" class="btn btn-success"
-                    data-bind="visible: $root.authorization.ok('create-attachment'),click: attachment.newAttachment"
-            >Lisää liite</button>
-
-
-            <iframe id="uploadFrame"
-                    src="/html/pages/upload.html"
-                    style="height: 300px; width: 100%, min-width: 300px; display: none; border:0; overflow: hidden;"
-            ></iframe>
-
-          </div>
         </div>
+        
         <div class="tab_content" id="conversation_tab">
           <div class="tab-wrapper">
                         <div class="span12">Keskustele hakemuksesta:</div>
@@ -188,6 +147,7 @@
             </form>
           </div>
         </div>
+        
         <div class="tab_content" id="decision_tab">
           <div class="tab-wrapper">
             <div class="row" data-bind="with: verdict">
@@ -196,8 +156,8 @@
           </div>
         </div>
       </div>
-
-     <div id="boxes">  
+      
+      <div id="boxes">  
        <div id="dialog-valtuutus" class="window">
         <div class="dialog-header">
            <p>Lisää valtuutus</p>
@@ -212,11 +172,10 @@
             <button class="btn btn-primary close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
 
           </div>
-          
          </div>
-       </div>       
+       </div>
+        
      </div>
-     <div id="mask"></div>
   </section>
 </body>
 </html>
