@@ -191,7 +191,7 @@ var docgen = (function() {
 
   function loaderImg() {
     var img = document.createElement("img");
-    img.src = "loader.gif";
+    img.src = "/img/ajax-loader-12.gif";
     return img;
   }
   
