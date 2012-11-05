@@ -164,10 +164,10 @@
     documents.removeAll();
   	$.each(data.documents, function(id, doc) {
   		documents.push(doc);
-  		docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: "fozzaa"}).element));
+  		docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: "fozzaa"}).element);
   	});
 
-    application.attachments(_.values(data.attachments)); 
+		application.attachments(_.values(data.attachments)); 
   }
 
   function uploadCompleted(file, size, type, attachmentId) {
@@ -278,7 +278,6 @@
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
-      rh1: rh1,
       tab: tab,
       accordian: accordian
     }, page[0]);
