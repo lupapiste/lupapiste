@@ -63,8 +63,42 @@
     </div>
     <div id="tab_content_container" class="container">
 
-      <!-- docgen generated content: -->
       <div class="tab_content" id="application_tab" style="display: block;">
+
+        <div class="application_section">
+          <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
+          <div class="application_section_content content_expanded">
+            <div>
+              <h3>Valtuutetut</h3>
+              <div data-bind="with: $root.applicationModel">
+                <ul data-bind="foreach: auth">
+                  <li>
+                    <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                    (<span data-bind="text: username"></span>)
+                    <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                    <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                  </li>
+                </ul>
+              </div>
+              <br/>
+              <a href=""  id="test-add-invite"
+                 data-window-id="dialog-valtuutus" class="modal"
+                 data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
+            </div>
+            <h3>Kutsutut</h3>
+
+            <ul data-bind="foreach: invites">
+              <li class="user-invite">
+                <span data-bind="text: user.username"></span>
+                (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                - <span data-bind="text: text"></span>
+                <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- docgen generated content: -->
         <div class="application_section">
           <div id="docgen">
             <!-- This is where generated document will be placed. -->
@@ -167,7 +201,7 @@
           </div>
         </div>
       </div>
-      
+
     </div>
 
     <div id="boxes">
