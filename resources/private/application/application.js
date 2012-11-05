@@ -8,6 +8,7 @@
   var authorizationModel = new AuthorizationModel();
   var inviteModel = new InviteModel();
   var commentModel = new CommentModel();
+  var documents = ko.observableArray();
 
   hub.whenOskariMapIsReady(function() {
     hub.moveOskariMapToDiv("application-map");

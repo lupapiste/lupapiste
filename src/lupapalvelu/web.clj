@@ -108,7 +108,10 @@
 ;
 
 (defpage "/js/oskarimap.js" []
-  (->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
+  (->> (clojure.lang.RT/resourceAsStream nil "mockoskarimap.js")
+    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
+    (resp/content-type (:js content-type)))
+  #_(->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
     (resp/set-headers {"Cache-Control" "public, max-age=86400"})
     (resp/content-type (:js content-type))))
 
