@@ -211,7 +211,7 @@
   (into {} (for [doc docs] [(:id doc) doc])))
 
 (defcommand "create-application"
-  {:parameters [:lat :lon :street :zip :city :documentSchemas]
+  {:parameters [:lat :lon :street :zip :city :schemas]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
@@ -232,7 +232,5 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents (to-map-by-id (map create-document (:documentSchemas data)))})
+       :documents (to-map-by-id (map create-document (:schemas data)))})
     (ok :id id)))
-
-
