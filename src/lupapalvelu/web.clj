@@ -100,6 +100,7 @@
 ;; Single Page App HTML
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys authz-methods))) ")")))
+
 (defpage [:get ["/:app" :app apps-pattern]] {app :app}
   (single-resource :html (keyword app) (resp/redirect "/welcome#")))
 
