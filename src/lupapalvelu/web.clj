@@ -107,12 +107,11 @@
 ; Oskari:
 ;
 
+(def mockoskari true)
+
 (defpage "/js/oskarimap.js" []
-  (->> (clojure.lang.RT/resourceAsStream nil "mockoskarimap.js")
-    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
-    (resp/content-type (:js content-type)))
-  #_(->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
-    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
+  (->> (clojure.lang.RT/resourceAsStream nil (if mockoskari "mockoskarimap.js" "private/oskari/oskarimap.js"))
+    (resp/set-headers {"Cache-Control" (if mockoskari "no-cache" "public, max-age=86400")})
     (resp/content-type (:js content-type))))
 
 ;;
