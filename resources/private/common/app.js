@@ -31,7 +31,7 @@ LUPAPISTE.App = function(startPage) {
     }
 
     $(".logout-button").click(function() { hub.send("logout"); });
-  }
+  };
   $(this.domReady);
 
   /**
@@ -39,7 +39,7 @@ LUPAPISTE.App = function(startPage) {
    */
   this.unload = function() {
     trace("window.unload");
-  }
+  };
 
   this.openPage = function(path) {
     var pageId = path[0];
@@ -65,16 +65,16 @@ LUPAPISTE.App = function(startPage) {
     }
 
     hub.send("page-change", {pageId: pageId, pagePath: pagePath});
-  }
+  };
 
   this.immediatePageJump = function(url) {
     trace("Jump to " + url);
     self.hashChangeEventEnabled = false;
     window.location = url;
-  }
+  };
 
   this.hashChanged = function() {
-    trace("hash changed")
+    trace("hash changed");
 
     if (!self.hashChangeEventEnabled) {
       return;
@@ -106,7 +106,7 @@ LUPAPISTE.App = function(startPage) {
     }
 
     self.openPage(self.session ? path : ["login"]);
-  }
+  };
 
   this.connectionCheck = function() {
     ajax.get("/rest/ping")
@@ -119,7 +119,7 @@ LUPAPISTE.App = function(startPage) {
         setTimeout(self.connectionCheck, 5000);
       })
       .call();
-  }
+  };
 
   hub.subscribe("connection-online", function() {
     $(".connection-error").hide();
@@ -140,4 +140,4 @@ LUPAPISTE.App = function(startPage) {
     self.immediatePageJump("/");
   });
 
-}
+};

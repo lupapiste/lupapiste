@@ -58,7 +58,7 @@
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
       var v = ko.utils.unwrapObservable(valueAccessor());
 
-      if (!v || v.length == 0) {
+      if (!v || v.length === 0) {
         $(element).text("");
         return;
       }

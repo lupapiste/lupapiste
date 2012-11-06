@@ -5,18 +5,18 @@
 ;(function() {
 
   var keys = ["stamp", "personId", "firstName", "lastName", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
-  
+
   function json(model) {
     var d = {};
     for (var i in keys) {
       var key = keys[i];
       d[key] = model[key]() || null;
     }
-    
+
     delete d.confirmPassword;
     return d;
   }
-  
+
   function reset(model) {
     for (var i in keys) {
       model[keys[i]]("");
@@ -24,7 +24,7 @@
     }
     return false;
   }
-  
+
   function submit(m) {
     ajax.command("register-user", json(m))
       .success(function(e) {
@@ -52,7 +52,7 @@
       .call();
     return false;
   }
-  
+
   var model = {
     personId: ko.observable(),
     firstName: ko.observable(),
@@ -68,11 +68,11 @@
     submit: submit,
     reset: reset
   };
-  
+
   model.confirmPassword = ko.observable().extend({equal: model.password});
   model = ko.validatedObservable(model);
   model.isValid.subscribe(function(valid) { model().disabled(!valid); });
-  
+
   hub.onPageChange("register", function() {
     $.get("/vetuma", {success: "/welcome#!/register2",
                     cancel:  "/welcome#!/register/cancel",
@@ -92,5 +92,5 @@
     });
 
     ko.applyBindings(model, $("#register2")[0]);
-  });  
+  });
 })();

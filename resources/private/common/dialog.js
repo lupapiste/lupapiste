@@ -22,7 +22,7 @@ LUPAPISTE.ModalDialog.open = function(selector) {
   $(selector).css('left', winWidth/2-$(selector).width()/2);
   $(selector).fadeIn(600);
   return false;
-}
+};
 
 LUPAPISTE.ModalDialog.close = function(e) {
   if (e && typeof e.preventDefault === "function") {
@@ -36,7 +36,7 @@ LUPAPISTE.ModalDialog.close = function(e) {
     }
   });
   $('#mask, .window').hide();
-}
+};
 
 /**
  * Initializes modal dialog elements
@@ -67,4 +67,4 @@ LUPAPISTE.ModalDialog.init = function() {
   // Register modal window closing handlers
   $('.window .close').click(LUPAPISTE.ModalDialog.close);
   $('#mask').click(LUPAPISTE.ModalDialog.close);
-}
+};
