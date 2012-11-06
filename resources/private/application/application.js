@@ -154,7 +154,7 @@
       ajax
         .command("update-doc", {doc: data.doc, app: data.app, updates: [[path, value]]})
         .success(function() { callback("ok"); })
-        .error(function(e) { callback(e.status); })
+        .error(function(e) { callback(e.status || "err"); })
         .fail(function(e) { callback("err"); })
         .call();
     };
