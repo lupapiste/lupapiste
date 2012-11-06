@@ -35,12 +35,13 @@
 ;; Ring has also some of the most common file extensions mapped, but is missing
 ;; docx and other MS Office formats.
 (def mime-types
-  (into {} (for [line (line-seq (reader (file "resources/private/mime.types")))
-                 :let [l (trim line)
-                       type-and-exts (split l #"\s+")
-                       mime-type (first type-and-exts)]
-                 :when (and (not (.isEmpty l)) (not (.startsWith l "#")))]
-             (into {} (for [ext (rest type-and-exts)] [ext mime-type])))))
+  (with-open [resource (clojure.lang.RT/resourceAsStream nil "private/mime.types")]
+    (into {} (for [line (line-seq (reader resource))
+                   :let [l (trim line)
+                         type-and-exts (split l #"\s+")
+                         mime-type (first type-and-exts)]
+                   :when (and (not (.isEmpty l)) (not (.startsWith l "#")))]
+               (into {} (for [ext (rest type-and-exts)] [ext mime-type]))))))
 
 (def mime-type-pattern
   (re-pattern

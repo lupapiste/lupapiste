@@ -4,9 +4,9 @@
 
 var repository = function() {
 
-  var applications = undefined;
-  var applicationsById = undefined;
-  
+  var applications;
+  var applicationsById;
+
   function loadApplications(data) {
     debug("reloading successful");
     applications = data.applications;
@@ -15,12 +15,12 @@ var repository = function() {
       var application = applications[n];
       var id = application.id;
       applicationsById[id] = application;
-      
+
       hub.send("repository-application-reload", {applicationId: id});
     }
     hub.send("repository-reload");
   }
-  
+
   function reloadAllApplications(callback) {
     debug("reloading started");
     applications = undefined;
@@ -48,7 +48,7 @@ var repository = function() {
       hub.subscribe("repository-reload", function() { callback(applications); }, true);
     }
   }
-  
+
   function getApplication(id, callback, error) {
     if (applicationsById) {
       var app = applicationsById[id];
@@ -68,11 +68,11 @@ var repository = function() {
       }, true);
     }
   }
-  
+
   return {
     getApplications:       getApplications,
     getApplication:        getApplication,
     reloadAllApplications: reloadAllApplications
   };
-  
+
 }();

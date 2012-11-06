@@ -8,7 +8,8 @@
         [clojure.set :only [difference]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.client :as client]))
+            [lupapalvelu.client :as client]
+            [lupapalvelu.document.schemas :as schemas]))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
@@ -202,11 +203,23 @@
         mongo/applications {:_id (:id application)}
           {$set {:state :submitted, :submitted (:created command) }}))))
 
+(defn create-document [schema-name]
+  (let [schema (get schemas/schemas schema-name)]
+    (if (nil? schema) (throw (Exception. (str "Unknown schema ID: [" schema-name "]"))))
+    {:id (mongo/create-id)
+     :created (now)
+     :schema schema
+     :body {}}))
+
+(defn to-map-by-id [docs doc]
+  (assoc docs (:id doc) doc))
+
 (defcommand "create-application"
-  {:parameters [:lat :lon :street :zip :city :categories]
+  {:parameters [:lat :lon :street :zip :city :schemas]
    :roles      [:applicant]}
-  [{user :user data :data created :created :as command}]
-  (let [id    (mongo/create-id)
+  [command]
+  (let [{:keys [user created data]} command
+        id    (mongo/create-id)
         owner (role user :owner :type :owner)]
     (mongo/insert mongo/applications
       {:id id
@@ -223,16 +236,5 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents {:hakija {:id (mongo/create-id)
-                            :nimi (str (:firstName user) " " (:lastName user))
-                            :address {:street (:street user)
-                                      :zip (:zip user)
-                                      :city (:city user)}
-                            :puhelinnumero (:phone user)
-                            :sahkopostiosoite (:email user)}
-                   :toimenpiteet [{:id (mongo/create-id)
-                                   :type (:categories data)
-                                   :otsikko (str (:lastName user) ", " (:street data))}]}})
+       :documents (reduce to-map-by-id {} (map create-document (:schemas data)))})
     (ok :id id)))
-
-

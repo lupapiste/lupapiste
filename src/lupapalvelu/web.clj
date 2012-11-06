@@ -100,6 +100,7 @@
 ;; Single Page App HTML
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys authz-methods))) ")")))
+
 (defpage [:get ["/:app" :app apps-pattern]] {app :app}
   (single-resource :html (keyword app) (resp/redirect "/welcome#")))
 
@@ -107,8 +108,15 @@
 ; Oskari:
 ;
 
+(def oskari (if (env/dev-mode?) "private/mockoskari/mockoskarimap.js" "private/oskari/oskarimap.js"))
+
 (defpage "/js/oskarimap.js" []
-  (->> (clojure.lang.RT/resourceAsStream nil "private/oskari/oskarimap.js")
+  (->> (clojure.lang.RT/resourceAsStream nil oskari)
+    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
+    (resp/content-type (:js content-type))))
+
+(defpage "/js/hub.js" []
+  (->> (clojure.lang.RT/resourceAsStream nil "private/common/hub.js")
     (resp/set-headers {"Cache-Control" "public, max-age=86400"})
     (resp/content-type (:js content-type))))
 
