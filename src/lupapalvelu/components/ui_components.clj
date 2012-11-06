@@ -10,7 +10,7 @@
              :name "oskari"})
 
 (def dummymap {:depends [:init :jquery]
-               :js ["map.js"]
+               :js ["openlayers.2.12.js" "gis.js" "map.js"]
                :name "dummymap"})
 
 (def ui-components
