@@ -32,22 +32,19 @@
   []
   (or (session/get :user) ((request/ring-request) :user)))
 
-(defn logged-in? []
-  (not (nil? (current-user))))
-
-(defn has-role [role]
-  (= role (keyword (:role (current-user)))))
-
 (defn with-user [m]
   (merge m {:user (current-user)}))
 
-(defn authority? []
-  (and logged-in? (has-role :authority)))
+(defn logged-in? []
+  (not (nil? (current-user))))
 
-(defn admin? []
-  (and logged-in? (has-role :admin)))
+(defn has-role? [role]
+  (= role (keyword (:role (current-user)))))
 
+(defn authority? [] (has-role? :authority))
+(defn admin? [] (has-role? :admin))
 (defn anyone [] true)
+(defn nobody [] false)
 
 (defmacro defjson [path params & content]
   `(defpage ~path ~params
@@ -82,16 +79,25 @@
                    :js   "application/javascript"
                    :css  "text/css"})
 
-(def authz-methods {:welcome anyone
+(def authz-methods {:init anyone
+                    :welcome anyone
                     :iframe anyone
                     :applicant logged-in?
                     :authority authority?
                     :admin admin?})
 
+(def headers
+  (if (env/dev-mode?)
+    {"Cache-Control" "no-cache"}
+    {"Cache-Control" "public, max-age=86400"}))
+
 (defn- single-resource [resource-type app failure]
-  (if (and (contains? authz-methods app) ((authz-methods app)) )
-      (resp/content-type (resource-type content-type) (singlepage/compose resource-type app))
-      failure))
+  (if ((authz-methods app nobody))
+    (->>
+      (singlepage/compose resource-type app)
+      (resp/content-type (resource-type content-type))
+      (resp/set-headers headers))
+    failure))
 
 ;; CSS & JS
 (defpage [:get ["/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
@@ -103,22 +109,6 @@
 
 (defpage [:get ["/:app" :app apps-pattern]] {app :app}
   (single-resource :html (keyword app) (resp/redirect "/welcome#")))
-
-;
-; Oskari:
-;
-
-(def oskari (if (env/dev-mode?) "private/mockoskari/mockoskarimap.js" "private/oskari/oskarimap.js"))
-
-(defpage "/js/oskarimap.js" []
-  (->> (clojure.lang.RT/resourceAsStream nil oskari)
-    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
-    (resp/content-type (:js content-type))))
-
-(defpage "/js/hub.js" []
-  (->> (clojure.lang.RT/resourceAsStream nil "private/common/hub.js")
-    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
-    (resp/content-type (:js content-type))))
 
 ;;
 ;; Login/logout:

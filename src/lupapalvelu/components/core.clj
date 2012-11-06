@@ -29,7 +29,8 @@
    each representing a resource of 'kind', where 'kind' is one of :js, :html or :css. Note that this
    does not include resources from dependencies."
   [components kind c]
-  (map (partial str (name c) \/) (kind (get-component components c))))
+  (let [path (or (:name (components c)) (name c))]
+    (map (partial str path \/) (kind (get-component components c)))))
 
 (defn get-resources
   "Returns a lazy-seq of resources names registered for specified component, including resources from

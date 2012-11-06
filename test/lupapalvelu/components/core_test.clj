@@ -7,7 +7,8 @@
    :c1    {:depends [:root]
            :js ["c1.js"]}
    :c2    {:depends [:root]
-           :js ["c2.js"]}
+           :js ["c2.js"]
+           :name "CC"}
    :main  {:depends [:c1 :c2]
            :js ["main.js" "other.js"]}})
 
@@ -29,11 +30,13 @@
 
 (facts
   (fact (component-resources test-components :js :root)  => ["root/root.js"])
+  (fact (component-resources test-components :js :c1)    => ["c1/c1.js"])
+  (fact (component-resources test-components :js :c2)    => ["CC/c2.js"])
   (fact (component-resources test-components :js :main)  => ["main/main.js" "main/other.js"])
   (fact (component-resources test-components :foo :main) => []))
 
 (facts
   (fact (get-resources test-components :js :root)  =>  ["root/root.js"])
   (fact (get-resources test-components :js :c1)    =>  ["root/root.js" "c1/c1.js"])
-  (fact (get-resources test-components :js :c2)    =>  ["root/root.js" "c2/c2.js"])
-  (fact (get-resources test-components :js :main)  =>  ["root/root.js" "c1/c1.js" "c2/c2.js" "main/main.js" "main/other.js"]))
+  (fact (get-resources test-components :js :c2)    =>  ["root/root.js" "CC/c2.js"])
+  (fact (get-resources test-components :js :main)  =>  ["root/root.js" "c1/c1.js" "CC/c2.js" "main/main.js" "main/other.js"]))
