@@ -65,10 +65,10 @@
                   :js ["docgen.js"]
                   :css ["docgen.css"]}
 
-   :wizard       {:js ["create-application.js"]
+   :create       {:js ["create-application.js"]
                   :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:common :oskari :application :applications :attachment :wizard :buildinfo :docgen]
+   :applicant    {:depends [:common :oskari :application :applications :attachment :create :buildinfo :docgen]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
