@@ -83,7 +83,7 @@
                    :css  "text/css"})
 
 (def authz-methods {:welcome anyone
-                    :iframe anyone
+                    :upload logged-in?
                     :applicant logged-in?
                     :authority authority?
                     :admin admin?})

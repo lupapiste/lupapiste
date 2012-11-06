@@ -80,9 +80,18 @@ var attachment = function() {
   });
 
   function newAttachment(m) {
-    var iframe = $("#uploadFrame").contents();
-    iframe.find("#applicationId").val(m.id());
-    iframe.find("#attachmentId").val("");
+    var iframeId = 'uploadFrame';
+    var iframe = document.getElementById(iframeId);
+    if (iframe) {
+      if (iframe.contentWindow.LUPAPISTE
+          && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
+        iframe.contentWindow.LUPAPISTE.Upload.init(m.id(), undefined);
+      } else {
+        error("LUPAPISTE.Upload.init is not a function");
+      }
+    } else {
+      error("IFrame not found ", iframeId);
+    }
   }
 
   return { newAttachment: newAttachment };

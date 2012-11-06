@@ -83,6 +83,9 @@
    :iframe       {:depends [:common]
                   :css ["iframe.css"]}
 
+   :upload       {:depends [:iframe]
+                  :js ["upload.js"]}
+
    :welcome      {:depends [:register :jquery :buildinfo]
                   :js ["login.js"]
                   :html ["login.html" "index.html"]}})
