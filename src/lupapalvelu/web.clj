@@ -115,6 +115,11 @@
     (resp/set-headers {"Cache-Control" "public, max-age=86400"})
     (resp/content-type (:js content-type))))
 
+(defpage "/js/hub.js" []
+  (->> (clojure.lang.RT/resourceAsStream nil "private/common/hub.js")
+    (resp/set-headers {"Cache-Control" "public, max-age=86400"})
+    (resp/content-type (:js content-type))))
+
 ;;
 ;; Login/logout:
 ;;
