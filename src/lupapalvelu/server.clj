@@ -14,12 +14,18 @@
             [lupapalvelu.document.commands])
   (:gen-class))
 
+
 (defn -main [& _]
-  (info "Server starting: Running on %s %s %s (%s)"
+  (info "Server starting")
+  (info "Running on Java %s %s %s (%s)"
         (System/getProperty "java.vm.vendor")
         (System/getProperty "java.vm.name")
         (System/getProperty "java.runtime.version")
         (System/getProperty "java.vm.info"))
+  (info "Running on Clojure %d.%d.%d"
+        (:major *clojure-version*)
+        (:minor *clojure-version*)
+        (:incremental *clojure-version*))
   (mongo/connect!)
   (env/in-dev
     (warn "*** Starting development services ***")
