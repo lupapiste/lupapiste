@@ -109,18 +109,6 @@
                              {:type {$ne :owner}}]}}}))))
 
 
-(defcommand "rh1-demo"
-  {:parameters [:id :data]
-   :roles      [:applicant]
-   :states     [:open :draft]}
-  [command]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        mongo/applications {:_id (:id application)}
-        {$set {:modified (:created command)
-               :rh1 (-> command :data :data)}}))))
-
 (defcommand "create-apikey"
   {:parameters [:username :password]}
   [command]
