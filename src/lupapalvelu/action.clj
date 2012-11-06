@@ -108,7 +108,6 @@
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
-
 (defcommand "create-apikey"
   {:parameters [:username :password]}
   [command]
@@ -189,7 +188,8 @@
     (fn [application]
       (mongo/update
         mongo/applications {:_id (:id application)}
-          {$set {:state :submitted, :submitted (:created command) }}))))
+          {$set {:state :submitted
+                 :submitted (:created command) }}))))
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
