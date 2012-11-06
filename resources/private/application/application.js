@@ -10,39 +10,6 @@
   var commentModel = new CommentModel();
   var documents = ko.observableArray();
 
-  mapintegration.whenOskariMapIsReady(function() {
-    mapintegration.moveOskariMapToDiv("application-map");
-    refreshMap();
-  });
-
-  var icon = (function() {
-    var size = new OpenLayers.Size(21,25);
-    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
-    return new OpenLayers.Icon('/img/marker-green.png', size, offset);
-  })();
-
-  function refreshMap() {
-    mapintegration.clearMapWithDelay(refreshMapPoints);
-  }
-
-  function refreshMapPoints() {
-    // FIXME Hack: we'll have to wait 100ms
-    setTimeout(function() {
-      var mapPoints = [];
-
-      if (application.id() && application.location()) {
-        mapPoints.push({
-          id: "markerFor" + application.id(),
-          location: {x: application.location().lon(), y: application.location().lat()}
-        });
-      }
-
-      hub.send("documents-map", {
-        data : mapPoints
-      });
-    }, 99);
-  }
-
   function ApplicationModel() {
     var self = this;
 
@@ -131,7 +98,7 @@
   }
 
   function showApplication(data) {
-    ajax.query("allowed-actions",{id: data.id})
+    ajax.query("allowed-actions", {id: data.id})
       .success(function(d) {
         authorizationModel.data(d.actions);
         showApplicationPart2(data);
@@ -141,10 +108,13 @@
   }
 
   function showApplicationPart2(data) {
+    // Update map:
+    var location = application.location();
+    var locations = location ? [{x: location.lon(), y: location.lat()}] : [];
+    hub.send("application-map", {locations: locations});
 
     // new data mapping
     applicationModel.data(ko.mapping.fromJS(data));
-
     ko.mapping.fromJS(data, {}, application);
 
     // docgen:
@@ -170,17 +140,8 @@
     application.attachments(_.values(data.attachments));
   }
 
-  function uploadCompleted(file, size, type, attachmentId) {
-    // if (attachments) attachments.push(new Attachment(file, type, size, attachmentId));
-  }
-
   hub.subscribe("repository-application-reload", function(e) {
-    if (application.id() === e.applicationId) {
-      repository.getApplication(e.applicationId, showApplication, function() {
-        // TODO: Show "No such application, or not permission"
-        error("No such application, or not permission");
-      });
-    }
+    if (application.id() === e.application.id) showApplication(e.application);
   });
 
   function AuthorizationModel() {
@@ -201,13 +162,13 @@
     self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
 
     self.submit = function(model) {
-    var applicationId = application.id();
+      var applicationId = application.id();
       ajax.command("add-comment", { id: applicationId, text: model.text()})
-      .success(function(d) {
-        repository.reloadAllApplications();
+        .success(function(d) {
+          repository.reloadAllApplications();
           model.text("");
-          })
-          .call();
+        })
+        .call();
       return false;
     }
   };
@@ -264,14 +225,12 @@
         error("No such application, or not permission");
       });
     }
-
   }
 
+  hub.onPageChange("application", onPageChange);
+  
   $(function() {
-    hub.onPageChange("application", function(e) { onPageChange(e);});
-
     var page = $("#application");
-
     ko.applyBindings({
       application: application,
       applicationModel: applicationModel,
@@ -281,7 +240,6 @@
       tab: tab,
       accordian: accordian
     }, page[0]);
-
   });
 
 })();
