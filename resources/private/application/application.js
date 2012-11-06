@@ -152,9 +152,9 @@
     var save = function(path, value, callback, data) {
       debug("saving", path, value, data);
       ajax
-        .command("update-doc", {app: application.id(), doc: data.doc, updates: [[path, value]]})
+        .command("update-doc", {doc: data.doc, app: data.app, updates: [[path, value]]})
         .success(function() { callback("ok"); })
-        .error(function(e) { callback(e.status); })
+        .error(function(e) { callback(e.status || "err"); })
         .fail(function(e) { callback("err"); })
         .call();
     };
@@ -164,7 +164,7 @@
     documents.removeAll();
     $.each(data.documents, function(id, doc) {
       documents.push(doc);
-      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: "fozzaa"}).element);
+      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: id, app: application.id()}).element);
     });
 
     application.attachments(_.values(data.attachments));
