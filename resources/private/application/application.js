@@ -50,7 +50,7 @@
 
     self.auth = ko.computed(function() {
       var value = [];
-      if(self.data() != undefined) {
+      if(self.data() !== undefined) {
         var auth = ko.utils.unwrapObservable(self.data().auth());
         var pimped = _.reduce(auth, function(r, i) { var a = r[i.id()] || (i.roles = [], i); a.roles.push(i.role()); r[i.id()] = a; return r;}, {});
         value = _.values(pimped);
@@ -167,7 +167,7 @@
       docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: "fozzaa"}).element);
     });
 
-    application.attachments(_.values(data.attachments)); 
+    application.attachments(_.values(data.attachments));
   }
 
   function uploadCompleted(file, size, type, attachmentId) {
