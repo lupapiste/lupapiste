@@ -167,7 +167,10 @@
 
 (defn pong [command] (ok :text "ping"))
 
-(defn add-comment [command]
+(defcommand "add-comment"
+  {:parameters [:id :text]
+   :roles      [:applicant :authority]}
+  [command]
   (with-application command
     (fn [application]
       (if (= "draft" (:state application))
@@ -180,23 +183,36 @@
                              :created (-> command :created)
                              :user    (security/summary user)}}})))))
 
-(defn assign-to-me [{{id :id} :data user :user :as command}]
+(defcommand "assign-to-me"
+  {:parameters [:id]
+   :roles      [:authority]}
+  [{{id :id} :data user :user :as command}]
   (with-application command
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-(defn approve-application [command]
+(defcommand "approve-application"
+  {:parameters [:id]
+   :roles      [:authority]
+   :authority  true
+   :states     [:submitted]}
+  [command]
   (with-application command
     (fn [application]
       (if (nil? (-> application :roles :authority))
-        (assign-to-me command))
+        (executed "assign-to-me" command))
       (mongo/update
         mongo/applications {:_id (:id application) :state :submitted}
         {$set {:state :sent}}))))
 
-(defn submit-application [command]
+(defcommand "submit-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
   (with-application command
     (fn [application]
       (mongo/update
