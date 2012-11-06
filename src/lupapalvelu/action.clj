@@ -8,7 +8,8 @@
         [clojure.set :only [difference]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.client :as client]))
+            [lupapalvelu.client :as client]
+            [lupapalvelu.document.schemas :as schemas]))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
@@ -203,15 +204,15 @@
           {$set {:state :submitted, :submitted (:created command) }}))))
 
 (defn create-document [schema-name]
-  (let [schema (mongo/by-id mongo/document-schemas schema-name)]
+  (let [schema (get schemas/schemas schema-name)]
     (if (nil? schema) (throw (Exception. (str "Unknown schema ID: [" schema-name "]"))))
     {:id (mongo/create-id)
      :created (now)
      :schema schema
      :body {}}))
 
-(defn to-map-by-id [docs] 
-  (into {} (for [doc docs] [(:id doc) doc])))
+(defn to-map-by-id [docs doc]
+  (assoc docs (:id doc) doc))
 
 (defcommand "create-application"
   {:parameters [:lat :lon :street :zip :city :schemas]
@@ -235,5 +236,5 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents (to-map-by-id (map create-document (:schemas data)))})
+       :documents (reduce to-map-by-id {} (map create-document (:schemas data)))})
     (ok :id id)))
