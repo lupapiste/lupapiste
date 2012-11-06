@@ -16,7 +16,7 @@
                                    {:name "purkka"}
                                    {:name "betoni"}]}
                            {:name "story" :type "text"}]}
-                   {:info {:name "hakijan-tiedot"}
+                   {:info {:name "hakija"}
                     :body [{:name "etunimi" :type "string"}
                            {:name "sukunimi" :type "string"}
                            {:name "osoite" :type "group"
@@ -25,7 +25,7 @@
                                    {:name "postitoimipaikka" :type "string"}]}
                            {:name "puhelin" :type "string"}
                            {:name "email" :type "string"}]}
-                   {:info {:name "paasuunnittelijan-tiedot"}
+                   {:info {:name "paasuunnittelija"}
                     :body [{:name "etunimi" :type "string"}
                            {:name "sukunimi" :type "string"}
                            {:name "email" :type "string"}
