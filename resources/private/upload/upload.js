@@ -1,21 +1,22 @@
 if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
 
 LUPAPISTE.Upload = {
-    applicationId: undefined,
-    attachmentId: undefined,
-    attachmentTypeGroups: undefined
+    applicationId: ko.observable(),
+    attachmentId: ko.observable(),
+    attachmentTypeGroups: ko.observableArray(),
+    selectedType: ko.observable()
 };
 
-LUPAPISTE.Upload.init = function(applicationId, attachmentId) {
-  LUPAPISTE.Upload.applicationId;
-  LUPAPISTE.Upload.attachmentId;
-  $("#applicationId").val(applicationId ? applicationId : "");
-  $("#attachmentId").val(attachmentId ? attachmentId : "");
+LUPAPISTE.Upload.init = function(applicationId, attachmentId, selectedType) {
+  LUPAPISTE.Upload.applicationId(applicationId);
+  LUPAPISTE.Upload.attachmentId(attachmentId);
+  LUPAPISTE.Upload.selectedType(selectedType);
 
   if (applicationId) {
     ajax.query("attachment-types",{id: applicationId})
     .success(function(d) {
-      LUPAPISTE.Upload.attachmentTypeGroups = d.typeGroups;
+      LUPAPISTE.Upload.attachmentTypeGroups(d.typeGroups);
+      ko.applyBindings(LUPAPISTE.Upload, $("#attachmentUploadForm")[0])
     })
     .call();
   }
