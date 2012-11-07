@@ -234,7 +234,8 @@
        :documents documents})
     (ok :id id)))
 
-(defcommand "user-to-document"
+; TODO: by-id or by-name (or both)
+#_(defcommand "user-to-document"
   {:parameters [:id :document-id]
    :authenticated true}
   [{{:keys [document-id]} :data user :user :as command}]
@@ -253,6 +254,30 @@
                  :documents.$.body.sukunimi (:lastName user)
                  :documents.$.body.email    (:email user)
                  :documents.$.body.puhelin  (:phone user)}})))))
+
+(defcommand "user-to-document"
+  {:parameters [:id :name]
+   :authenticated true}
+  [{{:keys [name]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (let [document       (get-document-by-name application name)
+            schema-name    (get-in document [:schema :info :name])
+            schema         (get schemas/schemas schema-name)
+            transformation {"etunimi" (:firstName user)}]
+        (if (nil? document)
+          (fail "document %s not found" name)
+          (do
+            (info "merging user %s with best effort into document %s" user name)
+            (mongo/update
+              mongo/applications
+              {:_id (:id application)
+               :documents {$elemMatch {:schema.info.name name}}}
+              {$set {:documents.$.body.etunimi  (:firstName user)
+                     :documents.$.body.sukunimi (:lastName user)
+                     :documents.$.body.email    (:email user)
+                     :documents.$.body.puhelin  (:phone user)}})))))))
+
 
 #_ (let [result (model/apply-updates {} schema transformation)]
      {:user     user
