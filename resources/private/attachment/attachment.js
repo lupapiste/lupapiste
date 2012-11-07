@@ -53,7 +53,7 @@ var attachment = function() {
   });
 
   function resetUploadIframe() {
-    var originalUrl = $("#uploadFrame").attr("src");
+    var originalUrl = $("#uploadFrame").attr("data-src");
     $("#uploadFrame").attr("src", originalUrl);
   }
 
@@ -71,6 +71,9 @@ var attachment = function() {
 
   $(function() {
     ko.applyBindings(model, $("#attachment")[0]);
+    // Iframe content must be loaded AFTER parent JS libraries are loaded.
+    // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using
+    resetUploadIframe();
   });
 
   function newAttachment(m) {
