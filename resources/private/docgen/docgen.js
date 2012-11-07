@@ -4,7 +4,7 @@ var docgen = (function() {
     var label = document.createElement("label");
     label.id = path.replace(/\./g, "-");
     label.className = "form-label form-label-" + type;
-    label.appendChild(document.createTextNode(loc(path)));
+    label.appendChild(document.createTextNode(loc(path))); // FIXME
     return label;
   }
 
@@ -45,7 +45,7 @@ var docgen = (function() {
     if (spec.unit) {
       var unit = document.createElement("span");
       unit.className = "form-string-unit";
-      unit.appendChild(document.createTextNode(loc(spec.unit)));
+      unit.appendChild(document.createTextNode(loc("unit." + spec.unit)));
       div.appendChild(unit);
     }
     return div;
@@ -106,7 +106,7 @@ var docgen = (function() {
       var name = o.name;
       var option = document.createElement("option");
       option.value = name;
-      option.appendChild(document.createTextNode(loc(name)));
+      option.appendChild(document.createTextNode(loc(name))); // FIXME
       if (selectedOption === name) option.selected = "selected";
       select.appendChild(option);
     });
