@@ -6,28 +6,25 @@ var attachment = function() {
 
   var applicationId;
   var attachmentId;
-  var model;
 
-  function createModel() {
-    return {
-      attachmentId:   ko.observable(),
-      application: {
-        id:     ko.observable(),
-        title:  ko.observable()
-      },
-      filename:       ko.observable(),
-      latestVersion:  ko.observable(),
-      versions:       ko.observable(),
-      type:           ko.observable(),
-      isImage: function() {
-        var contentType = this.latestVersion().contentType;
-        return contentType && contentType.indexOf('image/') === 0;
-      },
-      isPdf: function() {
-        return this.latestVersion().contentType === "application/pdf";
-      }
-    };
-  }
+  var model = {
+    attachmentId:   ko.observable(),
+    application: {
+      id:     ko.observable(),
+      title:  ko.observable()
+    },
+    filename:       ko.observable(),
+    latestVersion:  ko.observable(),
+    versions:       ko.observable(),
+    type:           ko.observable(),
+    isImage: function() {
+      var contentType = this.latestVersion().contentType;
+      return contentType && contentType.indexOf('image/') === 0;
+    },
+    isPdf: function() {
+      return this.latestVersion().contentType === "application/pdf";
+    }
+  };
 
   function showAttachment(application) {
     if (!applicationId || !attachmentId) return;
@@ -51,10 +48,8 @@ var attachment = function() {
     repository.getApplication(applicationId, showAttachment);
   });
 
-  hub.subscribe("repository-application-reload", function(e) {
-    if (applicationId === e.applicationId) {
-      repository.getApplication(applicationId, showAttachment);
-    }
+  hub.subscribe("repository-application-reload", function(app) {
+    if (applicationId === app.id) showAttachment(app);
   });
 
   function resetUploadIframe() {
@@ -71,11 +66,10 @@ var attachment = function() {
   });
 
   function toApplication(){
-    window.location.href="#!/application/"+ model.application.id();
+    window.location.href = "#!/application/" + model.application.id();
   }
 
   $(function() {
-    model = createModel();
     ko.applyBindings(model, $("#attachment")[0]);
   });
 

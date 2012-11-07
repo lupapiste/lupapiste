@@ -1,6 +1,17 @@
 (ns lupapalvelu.components.ui-components
   (:use [lupapalvelu.log])
-  (:require [lupapalvelu.components.core :as c]))
+  (:require [lupapalvelu.components.core :as c]
+            [lupapalvelu.env :as env]))
+
+(def oskari {:depends [:init :jquery]
+             :js ["oskarimap.js" "map.js"]
+             :css ["oskarimap.css"]
+             :html ["map.html"]
+             :name "oskari"})
+
+(def dummymap {:depends [:init :jquery]
+               :js ["openlayers.2.12.js" "gis.js" "map.js"]
+               :name "dummymap"})
 
 (def ui-components
   {:jquery       {:css ["jquery.pnotify.default.css"]
@@ -8,17 +19,14 @@
                        "jquery-ui-1.9.0.custom.min.js"
                        "jquery.ba-hashchange.js" "jquery.pnotify.min.js" "jquery.metadata-2.1.js" "jquery.tablesorter-2.0.5b.js"]}
 
-   :oskari       {:depends [:jquery]
-                  :js ["map.js"]
-                  :css ["oskarimap.css"]
-                  :html ["map.html"]}
-
    :knockout     {:js ["knockout-2.1.0.debug.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
-
    :underscore   {:js ["underscore.js"]}
+   :init         {:js ["hub.js" "log.js"]}
 
-   :common       {:depends [:jquery :knockout :underscore]
-                  :js ["log.js" "mapintegration.js" "pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js" "ko.init.js"  "dialog.js"]
+   :map          (if (env/dev-mode?) dummymap oskari)
+
+   :common       {:depends [:init :jquery :knockout :underscore]
+                  :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js" "ko.init.js" "dialog.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
@@ -48,7 +56,7 @@
                   :css ["applications.css"]
                   :html ["applications.html"]}
 
-   :authority_applications {:depends [:common :repository :applications-common]
+   :authority-applications {:depends [:common :repository :applications-common]
                             :js ["applications-config.js"]
                             :html ["applications.html"]}
 
@@ -68,15 +76,15 @@
    :create       {:js ["create-application.js"]
                   :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:common :oskari :application :applications :attachment :create :buildinfo :docgen]
+   :applicant    {:depends [:common :map :application :applications :attachment :create :buildinfo :docgen]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :oskari :application :authority_applications :attachment :buildinfo :docgen]
+   :authority    {:depends [:common :map :application :authority-applications :attachment :buildinfo :docgen]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :admin        {:depends [:buildinfo :common]
+   :admin        {:depends [:common :map :buildinfo]
                   :js ["admin.js"]
                   :html ["index.html" "admin.html"]}
 
@@ -87,7 +95,7 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :welcome      {:depends [:register :jquery :buildinfo]
+   :welcome      {:depends [:common :register :buildinfo]
                   :js ["login.js"]
                   :html ["login.html" "index.html"]}})
 
