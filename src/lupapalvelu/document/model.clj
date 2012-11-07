@@ -69,4 +69,3 @@
     []               ; path, for error reporting
     []               ; list of changes performed
     (seq updates)))  ; updates as a seq of key/value pairs
-
