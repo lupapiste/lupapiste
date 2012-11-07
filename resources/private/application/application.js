@@ -132,9 +132,9 @@
     var docgenDiv = $("#docgen").empty();
 
     documents.removeAll();
-    $.each(data.documents, function(id, doc) {
+    _.each(data.documents, function(doc) {
       documents.push(doc);
-      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: id, app: application.id()}).element);
+      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
     });
 
     application.attachments(_.values(data.attachments));
@@ -200,21 +200,21 @@
   }
 
   var tab = {
-      tabClick: function(data, event) {
-         var self = event.target;
-         $("#tabs li").removeClass('active');
-         $(self).parent().addClass("active");
-         $(".tab_content").hide();
-         var selected_tab = $(self).attr("href");
-         $(selected_tab).fadeIn();
-      }
+    tabClick: function(data, event) {
+     var self = event.target;
+     $("#tabs li").removeClass("active");
+     $(self).parent().addClass("active");
+     $(".tab_content").hide();
+     var selected_tab = $(self).attr("href");
+     $(selected_tab).fadeIn();
+    }
   };
 
   var accordian = {
-      accordianClick: function(data, event) {
-         self = event.target;
-         $(self).next(".application_section_content").toggleClass('content_expanded');
-      }
+    accordianClick: function(data, event) {
+     self = event.target;
+     $(self).next(".application_section_content").toggleClass('content_expanded');
+    }
   };
 
   function onPageChange(e) {
@@ -228,7 +228,7 @@
   }
 
   hub.onPageChange("application", onPageChange);
-  
+
   $(function() {
     var page = $("#application");
     ko.applyBindings({
