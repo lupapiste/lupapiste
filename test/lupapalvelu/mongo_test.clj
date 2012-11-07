@@ -7,11 +7,10 @@
 (def valid-id "502770568de2282ae6fbb0be")
 (def invalid-id "123")
 
-(deftest a-test
-  (testing "create-id returns string"
-           (is (string? (create-id)))))
+(facts "Facts about create-id"
+  (fact (create-id) => string?))
 
-(facts "Facts about with-objectid"
+(facts "Facts about with-_id"
   (fact (with-_id nil) => nil)
   (fact (with-_id {:data "data"}) => {:data "data"})
   (fact (with-_id {:id "foo" :data "data"}) => {:_id "foo" :data "data"}))
