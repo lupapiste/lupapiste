@@ -1,10 +1,10 @@
 var docgen = (function() {
 
-  function makeLabel(type, path) {
+  function makeLabel(type, path, specId) {
     var label = document.createElement("label");
     label.id = path.replace(/\./g, "-");
     label.className = "form-label form-label-" + type;
-    label.appendChild(document.createTextNode(loc(path))); // FIXME
+    label.appendChild(document.createTextNode(loc(specId + "." + path)));
     return label;
   }
 
@@ -22,16 +22,16 @@ var docgen = (function() {
     return input;
   }
 
-  function buildCheckbox(spec, model, path, save) {
+  function buildCheckbox(spec, model, path, save, specId) {
     var myPath = path.concat([spec.name]).join(".");
     var span = document.createElement("span");
     span.className = "form-entry";
     span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
-    span.appendChild(makeLabel("checkbox", myPath));
+    span.appendChild(makeLabel("checkbox", myPath, specId));
     return span;
   }
 
-  function buildString(spec, model, path, save, partOfChoice) {
+  function buildString(spec, model, path, save, specId, partOfChoice) {
     var myPath = path.concat([spec.name]).join(".");
     var div = document.createElement("span");
     var sizeClass = "";
@@ -40,7 +40,7 @@ var docgen = (function() {
       if (spec.size === "l") sizeClass = "form-string-large";
     }
     div.className = "form-entry";
-    div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
+    div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
     div.appendChild(makeInput("text", myPath, model[spec.name], save, sizeClass));
     if (spec.unit) {
       var unit = document.createElement("span");
@@ -51,7 +51,7 @@ var docgen = (function() {
     return div;
   }
 
-  function buildText(spec, model, path, save) {
+  function buildText(spec, model, path, save, specId) {
     var myPath = path.concat([spec.name]).join(".");
 
     var input = document.createElement("textarea");
@@ -64,12 +64,12 @@ var docgen = (function() {
 
     var div = document.createElement("span");
     div.className = "form-entry";
-    div.appendChild(makeLabel("text", myPath));
+    div.appendChild(makeLabel("text", myPath, specId));
     div.appendChild(input);
     return div;
   }
 
-  function buildDate(spec, model, path, save) {
+  function buildDate(spec, model, path, save, specId) {
     var myPath = path.concat([spec.name]).join(".");
 
     var input = document.createElement("input");
@@ -81,12 +81,12 @@ var docgen = (function() {
 
     var div = document.createElement("span");
     div.className = "form-entry";
-    div.appendChild(makeLabel("date", myPath));
+    div.appendChild(makeLabel("date", myPath, specId));
     div.appendChild(input);
     return div;
   }
 
-  function buildSelect(spec, model, path, save) {
+  function buildSelect(spec, model, path, save, specId) {
     var myPath = path.concat([spec.name]).join(".");
 
     var select = document.createElement("select");
@@ -106,19 +106,19 @@ var docgen = (function() {
       var name = o.name;
       var option = document.createElement("option");
       option.value = name;
-      option.appendChild(document.createTextNode(loc(name))); // FIXME
+      option.appendChild(document.createTextNode(loc(specId + "." + myPath)));
       if (selectedOption === name) option.selected = "selected";
       select.appendChild(option);
     });
 
     var div = document.createElement("span");
     div.className = "form-entry";
-    div.appendChild(makeLabel("select", myPath));
+    div.appendChild(makeLabel("select", myPath, specId));
     div.appendChild(select);
     return div;
   }
 
-  function buildChoice(spec, model, path, save) {
+  function buildChoice(spec, model, path, save, specId) {
     var name = spec.name;
     var choices = spec.body;
     var myModel = model[name] || {};
@@ -127,20 +127,20 @@ var docgen = (function() {
     var choicesDiv = document.createElement("div");
     $.each(choices, function(i, choice) {
       if (choice.type === "string") {
-        choicesDiv.appendChild(buildString(choice, myModel, myPath, save, true));
+        choicesDiv.appendChild(buildString(choice, myModel, myPath, save, specId, true));
       } else {
-        choicesDiv.appendChild(build(choice, myModel, myPath, save));
+        choicesDiv.appendChild(build(choice, myModel, myPath, save, specId));
       }
     })
 
     var div = document.createElement("div");
     div.className = "form-choice";
-    div.appendChild(makeLabel("choice", myPath.join(".")));
+    div.appendChild(makeLabel("choice", myPath.join("."), specId));
     div.appendChild(choicesDiv);
     return div;
   }
 
-  function buildGroup(spec, model, path, save) {
+  function buildGroup(spec, model, path, save, specId) {
     var name = spec.name;
     var parts = spec.body;
     var myModel = model[name] || {};
@@ -148,7 +148,7 @@ var docgen = (function() {
 
     var partsDiv = document.createElement("div");
     for (var i = 0; i < parts.length; i++) {
-      partsDiv.appendChild(build(parts[i], myModel, myPath, save));
+      partsDiv.appendChild(build(parts[i], myModel, myPath, save, specId));
     }
 
     var div = document.createElement("div");
@@ -158,7 +158,7 @@ var docgen = (function() {
     return div;
   }
 
-  function buildUnknown(spec, model, path, save) {
+  function buildUnknown(spec, model, path, save, specId) {
     error("Unknown element type:", spec.type, path);
     var div = document.createElement("div");
     div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
@@ -176,15 +176,15 @@ var docgen = (function() {
     unknown: buildUnknown
   };
 
-  function build(spec, model, path, save) {
+  function build(spec, model, path, save, specId) {
     var builder = builders[spec.type] || buildUnknown;
-    return builder(spec, model, path, save);
+    return builder(spec, model, path, save, specId);
   }
 
-  function appendElements(body, specs, model, path, save) {
+  function appendElements(body, specs, model, path, save, specId) {
     var l = specs.length;
     for (var i = 0; i < l; i++) {
-      body.appendChild(build(specs[i], model, path, save));
+      body.appendChild(build(specs[i], model, path, save, specId));
     }
     return body;
   }
@@ -238,16 +238,16 @@ var docgen = (function() {
     };
   }
 
-  function buildElement(spec, model, save) {
+  function buildElement(spec, model, save, specId) {
     var section = document.createElement("section");
     section.className = "accordion";
 
     var title = document.createElement("h2");
-    title.appendChild(document.createTextNode(loc(spec.info.name)));
+    title.appendChild(document.createTextNode(loc(specId)));
     title.onclick = accordion.toggle;
 
     var elements = document.createElement("article");
-    appendElements(elements, spec.body, model, [], save);
+    appendElements(elements, spec.body, model, [], save, specId);
 
     section.appendChild(title);
     section.appendChild(elements);
@@ -263,7 +263,7 @@ var docgen = (function() {
     self.callback = callback;
     self.eventData = eventData;
 
-    self.element = buildElement(self.spec, self.model, makeSaverDelegate(self.callback, self.eventData));
+    self.element = buildElement(self.spec, self.model, makeSaverDelegate(self.callback, self.eventData), self.spec.info.name);
 
     self.applyUpdates = function(updates) {
       // TODO: Implement me.
