@@ -27,14 +27,14 @@
              {:name "puhelin" :type "string"}
              {:name "email" :type "string"}]}
      {:info {:name "paasuunnittelija"}
-      :body [{:name "etunimi" :type "string"}
-             {:name "sukunimi" :type "string"}
-             {:name "email" :type "string"}
-             {:name "puhelin" :type "string"}
-             {:name "koulutus" :type "string"}
-             {:name "patevyysluokka" :type "select"
+      :body [{:name "etunimi" :type :string}
+             {:name "sukunimi" :type :string}
+             {:name "email" :type :string}
+             {:name "puhelin" :type :string}
+             {:name "koulutus" :type :string}
+             #_{:name "patevyysluokka" :type :select
               :body [{:name "aa"}
                      {:name "a"}
                      {:name "b"}
                      {:name "c"}]}
-             {:name "kokemus" :type "string"}]}]))
+             {:name "kokemus" :type :string}]}]))
