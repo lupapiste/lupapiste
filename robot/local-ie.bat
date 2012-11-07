@@ -4,4 +4,4 @@
 @set target=%1
 @if [%target%]==[] set target=tests
 
-pybot -d target --variable BROWSER:internetexplorer %target%
+pybot -d target --exclude integration --exclude fail --RunEmptySuite --variable BROWSER:internetexplorer %target%

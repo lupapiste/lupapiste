@@ -1,33 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-	</head>
-	<body>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
 
-		<header class="navbar navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container">
-					<div class="row">
-						<a class="brand" href="/">Lupapiste</a>
-					</div>
-				</div>
-			</div>
-		</header>
-		
-		<nav style="margin-top: 60px;">
-		</nav>
-
-		<footer class="container footer" style="margin-top: 60px;">
-			<div class="row">
-				<form>
-					<label class="checkbox">
-					    <input type="checkbox" id="todo" checked="checked"> Näytä toteuttamattomat
-  				    </label>
-				</form>
-				<span id="buildinfo" style="font-style: italic; color: gray;"></span>
-			</div>
-		</footer>
-		
-	</body>
+    <footer >
+      <form>
+        <label class="checkbox">
+          <input type="checkbox" id="todo" checked="checked"> Näytä toteuttamattomat
+          </label>
+        <label class="checkbox">
+          <input type="checkbox" id="hidden"> Käännä piilotetut
+          </label>
+        <label class="checkbox">
+          <input type="checkbox" id="events"> Näytä eventit
+          </label>
+      </form>
+      <div id="pageStatus"></div>
+      <span id="buildinfo" style="font-style: italic; color: gray;"></span>
+    </footer>
+    
+  </body>
 </html>

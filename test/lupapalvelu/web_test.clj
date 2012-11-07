@@ -11,3 +11,4 @@
     (security/login-with-apikey "123") => :apikey-user)
   (current-user {}) => :session-user
   (current-user {:apikey "123"}) => :apikey-user (provided (session/get :user) => nil))
+

@@ -6,4 +6,4 @@ if [ -z $target ] ; then
 	target="tests"
 fi
 
-pybot -d target $target
+pybot --exclude integration --exclude fail --RunEmptySuite -d target $target

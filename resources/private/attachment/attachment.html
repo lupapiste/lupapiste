@@ -1,45 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html >
 <body>
-	<section class="page" id="attachment">
+  <section class="page" id="attachment">
+    <div class="container" data-bind="if: latestVersion">
+      <h1>
 
-		<div class="container">
-			<div class="row">
-				<ul class="breadcrumb">
-					<li><a href="#!/applications">Lupahakemukset</a></li>
-					<li><span class="divider">/</span></li>
-					<li><a data-bind="text: application.title, attr: {href: '#!/application/' + application.id()}"></a></li>
-					<li><span class="divider">/</span></li>
-					<li class="active"><span data-bind="text: filename"></span></li>
-				</ul>
-			</div>
+        <span data-bind="if: type"><span data-bind="text: type"></span></span>
+        versio
+        <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+        Muokattu
+        <span data-bind="dateString: latestVersion().created">31.10.2012</span>
+      </h1>
+      
+      <!-- Preview images and pdf files only -->
+      <div class="file-preview">
+          <p>Esikatselua ei saatavilla.</p>
+      </div>
 
-			<h1>Liite</h1>			
-			<div class="row">
-				<div class="span4">
-					<div>Liitteen nimi: <input data-bind="value: name" type="text" placeholder="Liitteen nimi"></input></div>
-					<table style="margin-top: 15px;">
-						<tr><td>Tiedoston nimi:</td><td data-bind="text: filename"></td></tr>
-						<tr><td>Tyyppi:</td><td data-bind="ltext: contentType"></td></tr>
-						<tr><td>Koko:</td><td data-bind="size: size"></td></tr>
-						<!-- <tr><td>Tunniste:</td><td data-bind="text: attachmentId"></td></tr> -->
-					</table>
-				</div>
-				<div class="span8">
-					<form id="attachmentUploadForm">
-						<input type="file" multiple="multiple"></input>
-						<div class="droparea">
-							<span>Raahaa liite t&auml;h&auml;n</span>
-							<img src="/img/ajax-loader-32.gif" style="display: none;"></img>
-						</div>
-					</form>
-				</div>
-				<div class="span12">
-					<button class="btn" data-bind="click: save">Tallenna</button>
-					<button class="btn" data-bind="click: toApplication">Palaa</button>
-				</div>
-			</div>
-		</div>
-	</section>
+      <div class="file-preview-actions">
+        <span data-bind="if: isImage()">
+        <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
+        <br/>
+        </span>
+      </div>
+      
+      <div class="attachment-file-versions">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Tiedosto</th>
+              <th>Versio</th>
+              <th>Muokattu</th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: versions()">
+            <tr style="cursor: pointer;">
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" /></td>
+              <td data-bind="version: version"></td>
+              <td data-bind="dateString: created">31.10.2012</span>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+  </section>
 </body>
 </html>
