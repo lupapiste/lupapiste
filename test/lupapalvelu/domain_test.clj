@@ -12,5 +12,11 @@
 
 (facts
   (let [application {:documents [{:id 1 :data "jee"} {:id 2 :data "juu"} {:id 1 :data "hidden"}]}]
-    (fact (get-document application 1) => {:id 1 :data "jee"})
-    (fact (get-document application 2) => {:id 2 :data "juu"})))
+    (fact (get-document-by-id application 1) => {:id 1 :data "jee"})
+    (fact (get-document-by-id application 2) => {:id 2 :data "juu"})
+    (fact (get-document-by-id application -1) => nil)))
+
+(facts
+  (let [application {:documents [{:id 1 :data "jee" :schema {:info {:name "kukka"}}}]}]
+    (fact (get-document-by-name application "kukka") => {:id 1 :data "jee" :schema {:info {:name "kukka"}}})
+    (fact (get-document-by-name application "") => nil)))
