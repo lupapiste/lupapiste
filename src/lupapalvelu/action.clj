@@ -234,14 +234,15 @@
     (ok :id id)))
 
 (defcommand "user-to-document"
-  {:parameters [:id :document]
+  {:parameters [:id :document-id]
    :authenticated true}
-  [{{:keys [document]} :data user :user :as command}]
+  [{{:keys [document-id]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (info "merging user %s with best effort into document %s" user document)
-      {:document document
-       :firstName (:firstName user)
-       :lastName  (:lastName user)
-       :email     (:email user)
-       :phone     (:phone user)})))
+      (let [document (get-document application document-id)]
+        (info "merging user %s with best effort into document %s" user document-id)
+        {:firstName (:firstName user)
+         :lastName  (:lastName user)
+         :email     (:email user)
+         :document  document
+         :phone     (:phone user)}))))
