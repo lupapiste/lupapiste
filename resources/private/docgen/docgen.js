@@ -106,7 +106,7 @@ var docgen = (function() {
       var name = o.name;
       var option = document.createElement("option");
       option.value = name;
-      option.appendChild(document.createTextNode(loc(specId + "." + myPath)));
+      option.appendChild(document.createTextNode(loc(specId + "." + myPath + "." + name)));
       if (selectedOption === name) option.selected = "selected";
       select.appendChild(option);
     });
