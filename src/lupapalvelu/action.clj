@@ -207,9 +207,6 @@
      :schema schema
      :body {}}))
 
-(defn to-map-by-id [docs doc]
-  (assoc docs (:id doc) doc))
-
 (defcommand "create-application"
   {:parameters [:lat :lon :street :zip :city :schemas]
    :roles      [:applicant]}
@@ -233,8 +230,7 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documentz documents
-       :documents (reduce to-map-by-id {} documents)})
+       :documents documents})
     (ok :id id)))
 
 (defcommand "user-to-document"
