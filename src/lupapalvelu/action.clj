@@ -146,15 +146,10 @@
              :private       {:salt salt
                              :password (security/get-hash password salt)}))))
 
-;;
-;; Command functions
-;;
-
-(defn test-command [command])
-
-(defn pong [command] (ok :text "ping"))
-
-(defn add-comment [command]
+(defcommand "add-comment"
+  {:parameters [:id :text]
+   :roles      [:applicant :authority]}
+  [command]
   (with-application command
     (fn [application]
       (if (= "draft" (:state application))
@@ -167,23 +162,36 @@
                              :created (-> command :created)
                              :user    (security/summary user)}}})))))
 
-(defn assign-to-me [{{id :id} :data user :user :as command}]
+(defcommand "assign-to-me"
+  {:parameters [:id]
+   :roles      [:authority]}
+  [{{id :id} :data user :user :as command}]
   (with-application command
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-(defn approve-application [command]
+(defcommand "approve-application"
+  {:parameters [:id]
+   :roles      [:authority]
+   :authority  true
+   :states     [:submitted]}
+  [command]
   (with-application command
     (fn [application]
       (if (nil? (-> application :roles :authority))
-        (assign-to-me command))
+        (executed "assign-to-me" command))
       (mongo/update
         mongo/applications {:_id (:id application) :state :submitted}
         {$set {:state :sent}}))))
 
-(defn submit-application [command]
+(defcommand "submit-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
   (with-application command
     (fn [application]
       (mongo/update
@@ -199,16 +207,14 @@
      :schema schema
      :body {}}))
 
-(defn to-map-by-id [docs doc]
-  (assoc docs (:id doc) doc))
-
 (defcommand "create-application"
   {:parameters [:lat :lon :street :zip :city :schemas]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id    (mongo/create-id)
-        owner (role user :owner :type :owner)]
+        id        (mongo/create-id)
+        owner     (role user :owner :type :owner)
+        documents (map create-document (:schemas data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -224,5 +230,18 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents (reduce to-map-by-id {} (map create-document (:schemas data)))})
+       :documents documents})
     (ok :id id)))
+
+(defcommand "user-to-document"
+  {:parameters [:id :document]
+   :authenticated true}
+  [{{:keys [document]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (info "merging user %s with best effort into document %s" user document)
+      {:document document
+       :firstName (:firstName user)
+       :lastName  (:lastName user)
+       :email     (:email user)
+       :phone     (:phone user)})))
