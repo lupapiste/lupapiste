@@ -95,6 +95,7 @@
                 <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
               </li>
             </ul>
+            <button data-bind="disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">ole pääsuunnittelija</button>
           </div>
         </div>
 
