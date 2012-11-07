@@ -12,6 +12,7 @@ LUPAPISTE.Upload.init = function(applicationId, attachmentId, defaultType) {
   LUPAPISTE.Upload.applicationId(applicationId);
   LUPAPISTE.Upload.attachmentId(attachmentId);
   LUPAPISTE.Upload.selectedType(defaultType);
+  LUPAPISTE.Upload.defaultType(defaultType);
 
   if (applicationId) {
     ajax.query("attachment-types",{id: applicationId})
