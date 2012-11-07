@@ -161,11 +161,14 @@
     {:major (inc (:major current-version)), :minor 0}))
 
 (defn- set-attachment-version
-  [application-id attachment-id file-id filename content-type size now user]
-  (when-let [application (mongo/by-id mongo/applications application-id)]
-    (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
-          next-version (next-attachment-version latest-version user)
-          version-model {
+  ([application-id attachment-id file-id filename content-type size now user]
+    (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
+  ([application-id attachment-id file-id filename content-type size now user retry-limit]
+    (if (> retry-limit 0)
+      (when-let [application (mongo/by-id mongo/applications application-id)]
+        (let [latest-version (-> application :attachments (get (keyword attachment-id)) :latestVersion :version)
+              next-version (next-attachment-version latest-version user)
+              version-model {
                   :version  next-version
                   :fileId   file-id
                   :created  now
@@ -176,25 +179,34 @@
                   :filename filename
                   :contentType content-type
                   :size size}
-          attachment-model {:modified now
+              attachment-model {:modified now
                  (str "attachments." attachment-id ".modified") now
                  (str "attachments." attachment-id ".state")  :added
                  (str "attachments." attachment-id ".latestVersion") version-model}]
 
-        ; TODO check return value and try again with new version number
-        (mongo/update-by-query
-          mongo/applications
-          {:_id application-id
-           (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
-           (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
-          {$set attachment-model
-           $push {(str "attachments." attachment-id ".versions") version-model}}))))
+        ; Check return value and try again with new version number
+        (let [result-count (mongo/update-by-query mongo/applications
+            {:_id application-id
+             (str "attachments." attachment-id ".latestVersion.version.major") (:major latest-version)
+             (str "attachments." attachment-id ".latestVersion.version.minor") (:minor latest-version)}
+            {$set attachment-model
+             $push {(str "attachments." attachment-id ".versions") version-model}})]
+          (if (> result-count 0)
+            true
+            (set-attachment-version application-id attachment-id file-id filename content-type size now user (dec retry-limit))))))
+      (do
+        (error "Concurrancy issue: Could not save attachment version meta data.")
+        false))))
+
+(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user]
+  (if (empty? attachment-id)
+    (let [attachment-id (create-attachment id attachement-type created)]
+      (set-attachment-version id attachment-id file-id filename content-type size created user))
+    (set-attachment-version id attachment-id file-id filename content-type size created user)))
 
 (defn- allowed-attachment-type-for? [application-id type]
-  (some (fn [{types :types}]
-          (some (fn [{key :key}] (= key type)) types))
-        (attachment-types-for application-id))
-  )
+  (some (fn [{types :types}] (some (fn [{key :key}] (= key type)) types))
+        (attachment-types-for application-id)))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :size]
@@ -210,12 +222,10 @@
       (if (allowed-attachment-type-for? id (keyword type))
         (let [content-type (mime-type sanitazed-filename)]
           (mongo/upload id file-id sanitazed-filename content-type tempfile created)
-          (if (empty? attachmentId)
-            (let [attachment-id (create-attachment id type created)]
-              (set-attachment-version id attachment-id file-id sanitazed-filename content-type size created user))
-            (set-attachment-version id attachmentId file-id sanitazed-filename content-type size created user))
           (.delete (file tempfile))
-          (ok))
+          (if (update-or-create-attachment id attachmentId type file-id sanitazed-filename content-type size created user)
+            (ok)
+            (fail "Unknown error")))
         (fail "Illegal attachment type"))
       (fail "Illegal file type"))))
 
