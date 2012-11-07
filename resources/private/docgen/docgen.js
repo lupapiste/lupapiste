@@ -11,13 +11,6 @@ var docgen = (function() {
   function makeInput(type, path, value, save, extraClass) {
     var input = document.createElement("input");
     input.name = path;
-
-    var legalTypes = ["text", "password", "checkbox", "radio", "submit", "reset", "file", "hidden", "image", "button"];
-    if ($.inArray(type, legalTypes) == -1) {
-      warn("Invalid input type='" + type + "' for " + path + ", using 'text' instead");
-      type = "text";
-    }
-
     input.type = type;
     input.className = "form-input form-" + type + " " + (extraClass || "");
     input.onchange = save;
@@ -48,7 +41,7 @@ var docgen = (function() {
     }
     div.className = "form-entry";
     div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
-    div.appendChild(makeInput("string", myPath, model[spec.name], save, sizeClass));
+    div.appendChild(makeInput("text", myPath, model[spec.name], save, sizeClass));
     if (spec.unit) {
       var unit = document.createElement("span");
       unit.className = "form-string-unit";
