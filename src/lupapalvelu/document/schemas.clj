@@ -32,4 +32,9 @@
              {:name "email" :type "string"}
              {:name "puhelin" :type "string"}
              {:name "koulutus" :type "string"}
+             {:name "patevyysluokka" :type "select"
+              :body [{:name "aa"}
+                     {:name "a"}
+                     {:name "b"}
+                     {:name "c"}]}
              {:name "kokemus" :type "string"}]}]))
