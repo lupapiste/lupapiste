@@ -202,7 +202,7 @@
   var tab = {
     tabClick: function(data, event) {
      var self = event.target;
-     $("#tabs li").removeClass('active');
+     $("#tabs li").removeClass("active");
      $(self).parent().addClass("active");
      $(".tab_content").hide();
      var selected_tab = $(self).attr("href");
