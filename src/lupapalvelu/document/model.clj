@@ -24,8 +24,8 @@
 (defmethod validate :string [elem v]
   (cond
     (not= (type v) String) "illegal-value:not-a-string"
-    (and (:max-len elem) (> (.length v) (:max-len elem)) "illegal-value:too-long")
-    (and (:min-len elem) (< (.length v) (:min-len elem)) "illegal-value:too-short")))
+    (and (:max-len elem) (> (.length v) (:max-len elem))) "illegal-value:too-long"
+    (and (:min-len elem) (< (.length v) (:min-len elem))) "illegal-value:too-short"))
 
 (defmethod validate :boolean [elem v]
   (if (not= (type v) Boolean) "illegal-value:not-a-boolean"))
