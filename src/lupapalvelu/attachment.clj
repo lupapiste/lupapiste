@@ -83,7 +83,7 @@
       {:ordinal 230, :key :paloturvallisuusselvitys, :s "Paloturvallisuusselvitys"}
       {:ordinal 240, :key :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta, :s "Suunnitelma paloilmoitinj\u00e4rjestelmist\u00e4 ja koneellisesta savunpoistosta"}
       {:ordinal 250, :key :merkki_ja_turvavalaistussuunnitelma, :s "Merkki- ja turvavalaistussuunnitelma"}
-      {:ordinal 260, :key :sammutusautomatiikkasuunnitelma, :s "sammutusautomatiikkasuunnitelma"}
+      {:ordinal 260, :key :sammutusautomatiikkasuunnitelma, :s "Sammutusautomatiikkasuunnitelma"}
       {:ordinal 270, :key :rakennusautomaatiosuunnitelma, :s "Rakennusautomaatiosuunnitelma"}
       {:ordinal 280, :key :valaistussuunnitelma, :s "Valaistussuunnitelma"}
       {:ordinal 290, :key :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta, :s "Selvitys rakennusj\u00e4tteen m\u00e4\u00e4r\u00e4st\u00e4, laadusta ja lajittelusta"}
@@ -91,13 +91,16 @@
       {:ordinal 999, :key :muu, :s "Muu liite"}]}]
    })
 
+(defn attachment-types-for [application-id]
+  (if-let [permit-type (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))]
+    (attachment-types-for-permit-type (keyword permit-type))
+    []))
+
 (defquery "attachment-types"
   {:parameters [:id]
    :roles      [:applicant :authority]}
-  [command]
-  (with-application command
-    (fn [{permit-type :permitType}]
-      (ok :typeGroups (attachment-types-for-permit-type (keyword permit-type))))))
+  [{{application-id :id} :data}]
+  (ok :typeGroups (attachment-types-for application-id)))
 
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
@@ -193,25 +196,33 @@
           {$set attachment-model
            $push {(str "attachments." attachment-id ".versions") version-model}}))))
 
+(defn- allowed-attachment-type-for? [application-id type]
+  (some (fn [{types :types}]
+          (some (fn [{key :key}] (= key type)) types))
+        (lupapalvelu.attachment/attachment-types-for application-id))
+  )
+
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :size]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
   [{created :created
     user    :user
-    {:keys [id attachmentId type filename tempfile size]} :data}]
+    {:keys [id attachmentId type filename tempfile size comment]} :data}]
   (debug "Create GridFS file: %s %s %s %s %s %d" id attachmentId type filename tempfile size)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (allowed-file? sanitazed-filename)
-      (let [content-type (mime-type sanitazed-filename)]
-        (mongo/upload id file-id sanitazed-filename content-type tempfile created)
-        (if (empty? attachmentId)
-          (let [attachment-id (create-attachment id type created)]
-            (set-attachment-version id attachment-id file-id sanitazed-filename content-type size created user))
-          (set-attachment-version id attachmentId file-id sanitazed-filename content-type size created user))
-        (.delete (file tempfile))
-        (ok))
+      (if (allowed-attachment-type-for? id (keyword type))
+        (let [content-type (mime-type sanitazed-filename)]
+          (mongo/upload id file-id sanitazed-filename content-type tempfile created)
+          (if (empty? attachmentId)
+            (let [attachment-id (create-attachment id type created)]
+              (set-attachment-version id attachment-id file-id sanitazed-filename content-type size created user))
+            (set-attachment-version id attachmentId file-id sanitazed-filename content-type size created user))
+          (.delete (file tempfile))
+          (ok))
+        (fail "Illegal attachment type"))
       (fail "Illegal file type"))))
 
 ;;
