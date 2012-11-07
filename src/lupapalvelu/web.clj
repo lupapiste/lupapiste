@@ -162,8 +162,14 @@
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
         result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
-      (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
-      (json/generate-string result) ; TODO display error message
+      (resp/redirect "/html/pages/upload-ok.html")
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload.html"
+                                           {:applicationId applicationId
+                                            :attachmentId attachmentId
+                                            :type type
+                                            :defaultType type
+                                            :errorMessage (result :text)})))
+
       )))
 
 (defn- output-attachment [attachment-id download?]
