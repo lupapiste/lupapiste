@@ -132,9 +132,9 @@
     var docgenDiv = $("#docgen").empty();
 
     documents.removeAll();
-    $.each(data.documents, function(id, doc) {
+    _.each(data.documents, function(doc) {
       documents.push(doc);
-      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: id, app: application.id()}).element);
+      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
     });
 
     application.attachments(_.values(data.attachments));
@@ -228,7 +228,7 @@
   }
 
   hub.onPageChange("application", onPageChange);
-  
+
   $(function() {
     var page = $("#application");
     ko.applyBindings({

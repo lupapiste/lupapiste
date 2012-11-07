@@ -215,8 +215,9 @@
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id    (mongo/create-id)
-        owner (role user :owner :type :owner)]
+        id        (mongo/create-id)
+        owner     (role user :owner :type :owner)
+        documents (map create-document (:schemas data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -232,7 +233,8 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents (reduce to-map-by-id {} (map create-document (:schemas data)))})
+       :documentz documents
+       :documents (reduce to-map-by-id {} documents)})
     (ok :id id)))
 
 (defcommand "user-to-document"
