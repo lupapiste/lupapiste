@@ -9,6 +9,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
@@ -201,7 +202,7 @@
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema ID: [" schema-name "]"))))
+    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
     {:id (mongo/create-id)
      :created (now)
      :schema schema
@@ -239,10 +240,13 @@
   [{{:keys [document-id]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (let [document (get-document application document-id)]
+      (let [document       (get-document application document-id)
+            schema-name    (get-in document [:schema :info :name])
+            schema         (get schemas/schemas schema-name)
+            transformation {"etunimi" (:firstName user)}]
         (info "merging user %s with best effort into document %s" user document-id)
-        {:firstName (:firstName user)
-         :lastName  (:lastName user)
-         :email     (:email user)
-         :document  document
-         :phone     (:phone user)}))))
+        (let [result (model/apply-updates {} schema transformation)]
+          {:user     user
+           :trans    transformation
+           :result   result
+           :document document})))))
