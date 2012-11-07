@@ -159,14 +159,6 @@
              :private       {:salt salt
                              :password (security/get-hash password salt)}))))
 
-;;
-;; Command functions
-;;
-
-(defn test-command [command])
-
-(defn pong [command] (ok :text "ping"))
-
 (defcommand "add-comment"
   {:parameters [:id :text]
    :roles      [:applicant :authority]}
@@ -254,3 +246,16 @@
        :auth [owner]
        :documents (reduce to-map-by-id {} (map create-document (:schemas data)))})
     (ok :id id)))
+
+(defcommand "user-to-document"
+  {:parameters [:id :document]
+   :authenticated true}
+  [{{:keys [document]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (info "merging user %s with best effort into document %s" user document)
+      {:document document
+       :firstName (:firstName user)
+       :lastName  (:lastName user)
+       :email     (:email user)
+       :phone     (:phone user)})))
