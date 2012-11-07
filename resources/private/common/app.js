@@ -114,7 +114,7 @@ LUPAPISTE.App = function(startPage) {
         hub.send("connection-online");
         setTimeout(self.connectionCheck, 15000);
       })
-      .failEvent(function() {
+      .fail(function() {
         hub.send("connection-offline");
         setTimeout(self.connectionCheck, 5000);
       })

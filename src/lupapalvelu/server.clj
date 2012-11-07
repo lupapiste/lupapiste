@@ -14,6 +14,11 @@
             [lupapalvelu.document.commands])
   (:gen-class))
 
+(defn start-server [port mode]
+  (server/start port {:mode mode :ns 'lupapalvelu.web}))
+
+(defn stop-server [server]
+  (server/stop server))
 
 (defn -main [& _]
   (info "Server starting")
@@ -28,8 +33,9 @@
         (:incremental *clojure-version*))
   (mongo/connect!)
   (env/in-dev
-    (warn "*** Starting development services ***")
+    (warn "*** Applying test fixture")
     (fixture/apply-fixture "minimal")
+    (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
   (server/start env/port {:mode env/mode
                           :jetty-options {:ssl? true
