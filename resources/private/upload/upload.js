@@ -4,13 +4,14 @@ LUPAPISTE.Upload = {
     applicationId: ko.observable(),
     attachmentId: ko.observable(),
     attachmentTypeGroups: ko.observableArray(),
-    selectedType: ko.observable()
+    selectedType: ko.observable(),
+    defaultType: ko.observable()
 };
 
-LUPAPISTE.Upload.init = function(applicationId, attachmentId, selectedType) {
+LUPAPISTE.Upload.init = function(applicationId, attachmentId, defaultType) {
   LUPAPISTE.Upload.applicationId(applicationId);
   LUPAPISTE.Upload.attachmentId(attachmentId);
-  LUPAPISTE.Upload.selectedType(selectedType);
+  LUPAPISTE.Upload.selectedType(defaultType);
 
   if (applicationId) {
     ajax.query("attachment-types",{id: applicationId})
