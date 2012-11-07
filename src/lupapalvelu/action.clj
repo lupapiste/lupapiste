@@ -245,8 +245,17 @@
             schema         (get schemas/schemas schema-name)
             transformation {"etunimi" (:firstName user)}]
         (info "merging user %s with best effort into document %s" user document-id)
-        (let [result (model/apply-updates {} schema transformation)]
-          {:user     user
-           :trans    transformation
-           :result   result
-           :document document})))))
+        (mongo/update
+          mongo/applications
+          {:_id (:id application)
+           :documents {$elemMatch {:id document-id}}}
+          {$set {:documents.$.body.etunimi  (:firstName user)
+                 :documents.$.body.sukunimi (:lastName user)
+                 :documents.$.body.email    (:email user)
+                 :documents.$.body.puhelin  (:phone user)}})))))
+
+#_ (let [result (model/apply-updates {} schema transformation)]
+     {:user     user
+      :trans    transformation
+      :result   result
+      :document document})
