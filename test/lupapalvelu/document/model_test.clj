@@ -24,10 +24,16 @@
         (make-string "2-1" :min-len 2)
         (make-boolean "2-2")))))
 
-(facts
+(facts "with separate doc and schema"
   (fact (apply-updates {} m {"1" {"1-1" "foo"}})
         => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])
   (fact (apply-updates {} m {"1" {"xxx" "foo"}})
         => [{"1" {}} [["1.xxx" "foo" false "illegal-key"]]])
   (fact (apply-updates {} m {"1" "foo"})
         => [{} [["1" "foo" false "illegal-value:not-a-map"]]]))
+
+(facts "with full document"
+  (let [document {:body {} :schema m}]
+    (fact (apply-updates document {"1" {"1-1" "foo"}})
+          => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])))
+

@@ -34,8 +34,8 @@
 ;; Processing
 ;;
 
-(defn get-elem [model n]
-  (some #(if (= (:name %) n) %) model))
+(defn get-elem [schema n]
+  (some #(if (= (:name %) n) %) schema))
 
 (defn group? [elem]
   (= (:type elem) :group))
@@ -45,7 +45,7 @@
 
 (declare apply-update)
 
-(defn apply-single-update [doc model path changes k v elem]
+(defn apply-single-update [doc schema path changes k v elem]
   (let [name (s/join \. (reverse (cons k path)))
         error (if elem (validate elem v) "illegal-key")]
     (if error
@@ -55,17 +55,20 @@
           [(assoc doc k d) (concat changes c)])
         [(assoc doc k v) (cons [name v true] changes)]))))
 
-(defn apply-update [doc model path changes [[k v] & r]]
-  (let [elem (get-elem model k)
-        result (apply-single-update doc model path changes k v elem)]
+(defn apply-update [doc schema path changes [[k v] & r]]
+  (let [elem (get-elem schema k)
+        result (apply-single-update doc schema path changes k v elem)]
     (if (nil? r)
       result
-      (apply-update (first result) model path (second result) r))))
+      (apply-update (first result) schema path (second result) r))))
 
-(defn apply-updates [doc model updates]
+(defn apply-updates
+  "da public api."
+  ([{:keys [body schema]} updates] (apply-updates body schema updates))
+  ([doc schema updates]
   (apply-update
     doc              ; document to update
-    (:body model)    ; model to confirm against
+    (:body schema)    ; schema to confirm against
     []               ; path, for error reporting
     []               ; list of changes performed
-    (seq updates)))  ; updates as a seq of key/value pairs
+    (seq updates))))  ; updates as a seq of key/value pairs
