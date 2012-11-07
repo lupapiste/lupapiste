@@ -15,7 +15,7 @@
 
 ;; Validation tests:
 
-(def m
+(def schema
   (make-model "test-model" 1
     (make-group "1"
       (make-string "1-1")
@@ -25,15 +25,15 @@
         (make-boolean "2-2")))))
 
 (facts "with separate doc and schema"
-  (fact (apply-updates {} m {"1" {"1-1" "foo"}})
+  (fact (apply-updates {} schema {"1" {"1-1" "foo"}})
         => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])
-  (fact (apply-updates {} m {"1" {"xxx" "foo"}})
+  (fact (apply-updates {} schema {"1" {"xxx" "foo"}})
         => [{"1" {}} [["1.xxx" "foo" false "illegal-key"]]])
-  (fact (apply-updates {} m {"1" "foo"})
+  (fact (apply-updates {} schema {"1" "foo"})
         => [{} [["1" "foo" false "illegal-value:not-a-map"]]]))
 
 (facts "with full document"
-  (let [document {:body {} :schema m}]
+  (let [document {:body {} :schema schema}]
     (fact (apply-updates document {"1" {"1-1" "foo"}})
           => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])))
 
