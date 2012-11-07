@@ -15,13 +15,6 @@
 (def default-version {:major 0, :minor 0})
 
 ;;
-;; Helpers
-;;
-
-(defn equal-versions? [ver1 ver2]
-  (and ver1 ver2 (= (:major ver1) (:major ver2)) (= (:minor ver1) (:minor ver2))))
-
-;;
 ;; Metadata
 ;;
 
@@ -91,7 +84,7 @@
       {:ordinal 999, :key :muu, :s "Muu liite"}]}]
    })
 
-(defn attachment-types-for [application-id]
+(defn- attachment-types-for [application-id]
   (if-let [permit-type (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))]
     (attachment-types-for-permit-type (keyword permit-type))
     []))
@@ -158,8 +151,9 @@
    :roles      [:authority]
    :states     [:draft :open]}
   [{{application-id :id type :type} :data created :created}]
-  (let [attachment-id (create-attachment application-id type created)]
-    (ok :applicationId application-id :attachmentId attachment-id)))
+  (if-let [attachment-id (create-attachment application-id type created)]
+    (ok :applicationId application-id :attachmentId attachment-id)
+    (fail "Failed to create attachment placeholder")))
 
 (defn- next-attachment-version [current-version user]
   (if (= (keyword (:role user)) :authority)
@@ -199,7 +193,7 @@
 (defn- allowed-attachment-type-for? [application-id type]
   (some (fn [{types :types}]
           (some (fn [{key :key}] (= key type)) types))
-        (lupapalvelu.attachment/attachment-types-for application-id))
+        (attachment-types-for application-id))
   )
 
 (defcommand "upload-attachment"
@@ -224,24 +218,6 @@
           (ok))
         (fail "Illegal attachment type"))
       (fail "Illegal file type"))))
-
-;;
-;; Delete
-;;
-
-(defcommand "delete-empty-attachment"
-  {:parameters [:id :attachmentId]
-   :roles      [:applicant :authority]
-   :states     [:draft :open]}
-  [{{:keys [id attachmentId]} :data}]
-  (mongo/update-by-query
-          mongo/applications
-          {:_id id
-           (str "attachments." attachmentId ".latestVersion.version.major") (:major default-version)
-           (str "attachments." attachmentId ".latestVersion.version.minor") (:minor default-version)}
-          {$unset {(str "attachments." attachmentId) 1}})
-
-  (ok))
 
 ;;
 ;; Download

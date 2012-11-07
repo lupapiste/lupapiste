@@ -1,13 +1,7 @@
 (ns lupapalvelu.attachment-test
     (:use lupapalvelu.attachment
         clojure.test
-        midje.sweet)
-  )
-
-(facts "Test version equality"
-  (fact "Default is default" (equal-versions? default-version default-version) => truthy)
-  (fact "Default is not 9.9" (equal-versions? default-version {:major 9, :minor 9}) => falsey)
-  )
+        midje.sweet))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
