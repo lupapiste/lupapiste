@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.model-test
   (:use [lupapalvelu.document.model]
+        [lupapalvelu.document.schemas]
         [midje.sweet]))
 
 ;; DSL tests
@@ -37,3 +38,9 @@
     (fact (apply-updates document {"1" {"1-1" "foo"}})
           => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])))
 
+(facts "with real schemas"
+   (let [document {:body {} :schema (schemas "paasuunnittelija")}]
+     (fact
+       (apply-updates document {"etunimi" "Tauno"}) => [{"etunimi" "Tauno"} [["etunimi" "Tauno" true]]])
+     (fact
+       (apply-updates document {"etunimiz" "Tauno"}) => [{} [["etunimiz" "Tauno" false "illegal-key"]]])))
