@@ -148,9 +148,9 @@
                              :password (security/get-hash password salt)}))))
 
 (defcommand "add-comment"
-  {:parameters [:id :text]
+  {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
-  [{{:keys [text]} :data user :user :as command}]
+  [{{:keys [text target]} :data user :user :as command}]
   (with-application command
     (fn [application]
       (when (= "draft" (:state application))
@@ -160,6 +160,7 @@
         (:id application)
         {$set {:modified (:created command)}
          $push {:comments {:text    text
+                           :target  target
                            :created (-> command :created)
                            :user    (security/summary user)}}}))))
 

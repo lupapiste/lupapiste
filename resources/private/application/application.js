@@ -174,7 +174,7 @@
 
     self.submit = function(model) {
       var applicationId = application.id();
-      ajax.command("add-comment", { id: applicationId, text: model.text()})
+      ajax.command("add-comment", { id: applicationId, text: model.text(), target: { type: "application"}})
         .success(function(d) {
           repository.reloadAllApplications();
           model.text("");
