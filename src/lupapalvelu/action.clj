@@ -9,6 +9,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
@@ -147,20 +148,21 @@
                              :password (security/get-hash password salt)}))))
 
 (defcommand "add-comment"
-  {:parameters [:id :text]
+  {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
-  [command]
+  [{{:keys [text target]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (if (= "draft" (:state application))
+      (when (= "draft" (:state application))
         (executed "open-application" command))
-      (let [user (:user command)]
-        (mongo/update-by-id
-          mongo/applications (:id application)
-          {$set {:modified (:created command)}
-           $push {:comments {:text    (-> command :data :text)
-                             :created (-> command :created)
-                             :user    (security/summary user)}}})))))
+      (mongo/update-by-id
+        mongo/applications
+        (:id application)
+        {$set {:modified (:created command)}
+         $push {:comments {:text    text
+                           :target  target
+                           :created (-> command :created)
+                           :user    (security/summary user)}}}))))
 
 (defcommand "assign-to-me"
   {:parameters [:id]
@@ -201,7 +203,7 @@
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema ID: [" schema-name "]"))))
+    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
     {:id (mongo/create-id)
      :created (now)
      :schema schema
@@ -233,15 +235,53 @@
        :documents documents})
     (ok :id id)))
 
-(defcommand "user-to-document"
-  {:parameters [:id :document]
+; TODO: by-id or by-name (or both)
+#_(defcommand "user-to-document"
+  {:parameters [:id :document-id]
    :authenticated true}
-  [{{:keys [document]} :data user :user :as command}]
+  [{{:keys [document-id]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (info "merging user %s with best effort into document %s" user document)
-      {:document document
-       :firstName (:firstName user)
-       :lastName  (:lastName user)
-       :email     (:email user)
-       :phone     (:phone user)})))
+      (let [document       (get-document application document-id)
+            schema-name    (get-in document [:schema :info :name])
+            schema         (get schemas/schemas schema-name)
+            transformation {"etunimi" (:firstName user)}]
+        (info "merging user %s with best effort into document %s" user document-id)
+        (mongo/update
+          mongo/applications
+          {:_id (:id application)
+           :documents {$elemMatch {:id document-id}}}
+          {$set {:documents.$.body.etunimi  (:firstName user)
+                 :documents.$.body.sukunimi (:lastName user)
+                 :documents.$.body.email    (:email user)
+                 :documents.$.body.puhelin  (:phone user)}})))))
+
+(defcommand "user-to-document"
+  {:parameters [:id :name]
+   :authenticated true}
+  [{{:keys [name]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (let [document       (get-document-by-name application name)
+            schema-name    (get-in document [:schema :info :name])
+            schema         (get schemas/schemas schema-name)]
+        (if (nil? document)
+          (fail "document %s not found" name)
+          (do
+            (info "merging user %s with best effort into document %s" user name)
+            (mongo/update
+              mongo/applications
+              {:_id (:id application)
+               :documents {$elemMatch {:schema.info.name name}}}
+              {$set {:documents.$.body.etunimi  (:firstName user)
+                     :documents.$.body.sukunimi (:lastName user)
+                     :documents.$.body.email    (:email user)
+                     :documents.$.body.puhelin  (:phone user)
+                     :modified (:created command)}})))))))
+
+
+#_ (let [result (model/apply-updates {} schema transformation)]
+     {:user     user
+      :trans    transformation
+      :result   result
+      :document document})

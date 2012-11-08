@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.model-test
   (:use [lupapalvelu.document.model]
+        [lupapalvelu.document.schemas]
         [midje.sweet]))
 
 ;; DSL tests
@@ -15,7 +16,7 @@
 
 ;; Validation tests:
 
-(def m
+(def schema
   (make-model "test-model" 1
     (make-group "1"
       (make-string "1-1")
@@ -24,10 +25,22 @@
         (make-string "2-1" :min-len 2)
         (make-boolean "2-2")))))
 
-(facts
-  (fact (apply-updates {} m {"1" {"1-1" "foo"}})
+(facts "with separate doc and schema"
+  (fact (apply-updates {} schema {"1" {"1-1" "foo"}})
         => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])
-  (fact (apply-updates {} m {"1" {"xxx" "foo"}})
+  (fact (apply-updates {} schema {"1" {"xxx" "foo"}})
         => [{"1" {}} [["1.xxx" "foo" false "illegal-key"]]])
-  (fact (apply-updates {} m {"1" "foo"})
+  (fact (apply-updates {} schema {"1" "foo"})
         => [{} [["1" "foo" false "illegal-value:not-a-map"]]]))
+
+(facts "with full document"
+  (let [document {:body {} :schema schema}]
+    (fact (apply-updates document {"1" {"1-1" "foo"}})
+          => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])))
+
+(facts "with real schemas"
+   (let [document {:body {} :schema (schemas "paasuunnittelija")}]
+     (fact
+       (apply-updates document {"etunimi" "Tauno"}) => [{"etunimi" "Tauno"} [["etunimi" "Tauno" true]]])
+     (fact
+       (apply-updates document {"etunimiz" "Tauno"}) => [{} [["etunimiz" "Tauno" false "illegal-key"]]])))

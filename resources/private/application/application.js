@@ -56,6 +56,17 @@
       return false;
     },
 
+    setMeAsPaasuunnittelija: function(model) {
+      var applicationId = application.id();
+      ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
+      .success(function(d) {
+        notify.success("tiedot tallennettu",model);
+        repository.reloadAllApplications();
+      })
+      .call();
+      return false;
+    },
+
     approveApplication: function(model) {
       var applicationId = application.id();
       ajax.command("approve-application", { id: applicationId})
@@ -122,10 +133,10 @@
     var save = function(path, value, callback, data) {
       debug("saving", path, value, data);
       ajax
-        .command("update-doc", {doc: data.doc, app: data.app, updates: [[path, value]]})
+        .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
         .success(function() { callback("ok"); })
-        .error(function(e) { callback(e.status || "err"); })
-        .fail(function(e) { callback("err"); })
+        .error(function(e) { error(e); callback(e.status || "err"); })
+        .fail(function(e) { error(e); callback("err"); })
         .call();
     };
 
@@ -163,7 +174,7 @@
 
     self.submit = function(model) {
       var applicationId = application.id();
-      ajax.command("add-comment", { id: applicationId, text: model.text()})
+      ajax.command("add-comment", { id: applicationId, text: model.text(), target: { type: "application"}})
         .success(function(d) {
           repository.reloadAllApplications();
           model.text("");

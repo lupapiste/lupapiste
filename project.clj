@@ -19,7 +19,7 @@
              :itest {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
                                     [clj-webdriver "0.6.0-alpha11"]]
                      :test-paths ^:replace ["itest"]}}
-  
+
   :nitpicker {:exts ["clj" "js" "html" "css" "scss"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]}
 
