@@ -81,7 +81,7 @@
 
 (def authz-methods {:init anyone
                     :welcome anyone
-                    :iframe anyone
+                    :upload logged-in?
                     :applicant logged-in?
                     :authority authority?
                     :admin admin?})
@@ -97,7 +97,7 @@
       (singlepage/compose resource-type app)
       (resp/content-type (resource-type content-type))
       (resp/set-headers headers))
-    failure))
+      failure))
 
 ;; CSS & JS
 (defpage [:get ["/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
@@ -162,8 +162,14 @@
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""))
         result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
-      (resp/redirect (str "/html/pages/upload-ok.html?applicationId=" applicationId "&attachmentId=" attachmentId))
-      (json/generate-string result) ; TODO display error message
+      (resp/redirect "/html/pages/upload-ok.html")
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload.html"
+                                           {:applicationId applicationId
+                                            :attachmentId attachmentId
+                                            :type type
+                                            :defaultType type
+                                            :errorMessage (result :text)})))
+
       )))
 
 (defn- output-attachment [attachment-id download?]
