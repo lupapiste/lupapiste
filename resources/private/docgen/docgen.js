@@ -1,4 +1,4 @@
-var docgen = (function() {
+var docgen = (function () {
 
   function makeLabel(type, path, specId) {
     var label = document.createElement("label");
@@ -12,7 +12,7 @@ var docgen = (function() {
     var input = document.createElement("input");
     input.name = path;
     input.type = type;
-    input.className = "form-input form-" + type + " " + (extraClass || "");
+    input.className = "form-input " + type + " " + (extraClass || "");
     input.onchange = save;
     if (type === "checkbox") {
       if (value) input.checked = "checked";
@@ -36,7 +36,7 @@ var docgen = (function() {
     var div = document.createElement("span");
     var sizeClass = "";
     if (spec.size) {
-      if (spec.size === "s") sizeClass = "form-string-small";
+      if (spec.size === "s") sizeClass = "form-input small";
       if (spec.size === "l") sizeClass = "form-string-large";
     }
     div.className = "form-entry";
@@ -58,7 +58,7 @@ var docgen = (function() {
     input.name = myPath;
     input.setAttribute("rows", spec["rows"] || "10");
     input.setAttribute("cols", spec["cols"] || "40");
-    input.className = "form-input form-text";
+    input.className = "form-input textarea";
     input.onchange = save;
     input.value = model[spec.name] || "";
 
@@ -91,7 +91,7 @@ var docgen = (function() {
 
     var select = document.createElement("select");
     select.name = myPath;
-    select.className = "form-input form-select";
+    select.className = "form-input combobox";
     select.onchange = save;
 
     var selectedOption = model[spec.name] || "";
@@ -102,7 +102,7 @@ var docgen = (function() {
     if (selectedOption === "") option.selected = "selected";
     select.appendChild(option);
 
-    $.each(spec.body, function(i, o) {
+    $.each(spec.body, function (i, o) {
       var name = o.name;
       var option = document.createElement("option");
       option.value = name;
@@ -125,7 +125,7 @@ var docgen = (function() {
     var myPath = path.concat([name]);
 
     var choicesDiv = document.createElement("div");
-    $.each(choices, function(i, choice) {
+    $.each(choices, function (i, choice) {
       if (choice.type === "string") {
         choicesDiv.appendChild(buildString(choice, myModel, myPath, save, specId, true));
       } else {
@@ -197,18 +197,18 @@ var docgen = (function() {
 
   function removeClass(target, classNames) {
     var names = target.className.split(/\s+/);
-    _.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names = _.without(names, className); });
+    _.each((typeof classNames === "string") ? [classNames] : classNames, function (className) { names = _.without(names, className); });
     target.className = names.join(" ");
   }
 
   function addClass(target, classNames) {
     var names = target.className.split(/\s+/);
-    _.each((typeof classNames === "string") ? [classNames] : classNames, function(className) { names.push(className); });
+    _.each((typeof classNames === "string") ? [classNames] : classNames, function (className) { names.push(className); });
     target.className = names.join(" ");
   }
 
   function makeSaverDelegate(save, eventData) {
-    return function(e) {
+    return function (e) {
       e.preventDefault();
       e.stopPropagation();
 
@@ -220,7 +220,7 @@ var docgen = (function() {
       var label = document.getElementById(path.replace(/\./g, "-"));
       label.appendChild(loader);
 
-      save(path, value, function(result) {
+      save(path, value, function (result) {
         label.removeChild(loader);
         removeClass(target, ["form-input-warn", "form-input-err"]);
         if (result === "ok") {
@@ -246,11 +246,15 @@ var docgen = (function() {
     title.appendChild(document.createTextNode(loc(specId)));
     title.onclick = accordion.toggle;
 
+    var sectionContainer = document.createElement("div");
+    sectionContainer.className = "application_section_content content_expanded";
+
     var elements = document.createElement("article");
     appendElements(elements, spec.body, model, [], save, specId);
 
+    sectionContainer.appendChild(elements);
     section.appendChild(title);
-    section.appendChild(elements);
+    section.appendChild(sectionContainer);
 
     return section;
   }
@@ -265,9 +269,9 @@ var docgen = (function() {
 
     self.element = buildElement(self.spec, self.model, makeSaverDelegate(self.callback, self.eventData), self.spec.info.name);
 
-    self.applyUpdates = function(updates) {
+    self.applyUpdates = function (updates) {
       // TODO: Implement me.
-      $.each(updates, function(i, u) {
+      $.each(updates, function (i, u) {
         debug("update", u[0], u[1]);
       });
     };
