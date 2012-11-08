@@ -17,9 +17,9 @@
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.2.0"]]}
              :itest {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
-                                    [clj-webdriver "0.6.0-alpha11"]]
+                                    #_[clj-webdriver "0.6.0-alpha11"]]
                      :test-paths ^:replace ["itest"]}}
-  
+
   :nitpicker {:exts ["clj" "js" "html" "css" "scss"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]}
 
