@@ -38,9 +38,10 @@
     (fact (apply-updates document {"1" {"1-1" "foo"}})
           => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])))
 
-(facts "with real schemas"
+(facts "with real schemas - important field for paasuunnittelija"
    (let [document {:body {} :schema (schemas "paasuunnittelija")}]
-     (fact
-       (apply-updates document {"etunimi" "Tauno"}) => [{"etunimi" "Tauno"} [["etunimi" "Tauno" true]]])
-     (fact
-       (apply-updates document {"etunimiz" "Tauno"}) => [{} [["etunimiz" "Tauno" false "illegal-key"]]])))
+     (fact (apply-updates document {"etunimiz" "Tauno"}) =>     [{} [["etunimiz" "Tauno" false "illegal-key"]]])
+     (fact (apply-updates document {"etunimi" "Tauno"}) =>      [{"etunimi" "Tauno"} [["etunimi" "Tauno" true]]])
+     (fact (apply-updates document {"sukunimi" "Palo"}) =>      [{"sukunimi" "Palo"} [["sukunimi" "Palo" true]]])
+     (fact (apply-updates document {"email" "tauno@iki.fi"}) => [{"email" "tauno@iki.fi"} [["email" "tauno@iki.fi" true]]])
+     (fact (apply-updates document {"puhelin" "050"}) =>        [{"puhelin" "050"} [["puhelin" "050" true]]])))
