@@ -10,10 +10,10 @@ var attachment = function() {
 
   function CommentModel() {
     var self = this;
-    var target = {type: "application"};
 
+    self.target = {type: "application"};
+    self.applicationId;
     self.text = ko.observable();
-
     self.comments = ko.observableArray();
 
     self.setComments = function(comments) {
@@ -29,10 +29,16 @@ var attachment = function() {
       self.target = target;
     }
 
-    self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
+    self.setApplicationId = function(applicationId) {
+      self.applicationId = applicationId;
+    }
+
+    self.disabled = ko.computed(function() {
+      return _.isEmpty(self.text());
+    });
 
     self.submit = function(model) {
-      ajax.command("add-comment", { id: applicationId, text: model.text(), target: self.target})
+      ajax.command("add-comment", { id: self.applicationId, text: model.text(), target: self.target})
         .success(function(d) {
           repository.reloadAllApplications();
           model.text("");
@@ -41,7 +47,6 @@ var attachment = function() {
       return false;
     }
   };
-
 
   var model = {
     attachmentId:   ko.observable(),
@@ -77,6 +82,7 @@ var attachment = function() {
     model.application.id(applicationId);
     model.application.title(application.title);
 
+    commentModel.setApplicationId(application.id);
     commentModel.setTarget({type: "attachment", id: attachmentId});
     commentModel.setComments(application.comments);
   }
