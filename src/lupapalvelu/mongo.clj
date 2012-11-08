@@ -74,8 +74,10 @@
 
 (defn select-one
   "returns one entry by matching the monger query"
-  [collection query]
-  (with-id (mc/find-one-as-map collection query)))
+  ([collection query]
+    (with-id (mc/find-one-as-map collection query)))
+  ([collection query projection]
+    (with-id (mc/find-one-as-map collection query projection))))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
   (.setId input id)
