@@ -6,31 +6,7 @@ var attachment = function() {
 
   var applicationId;
   var attachmentId;
-  var commentModel = new CommentModel();
-
-  function CommentModel() {
-    var self = this;
-    var target = {type: "application"};
-
-    self.text = ko.observable();
-
-    self.setTarget = function(target) {
-      self.target = target;
-    }
-
-    self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
-
-    self.submit = function(model) {
-      ajax.command("add-comment", { id: applicationId, text: model.text(), target: self.target})
-        .success(function(d) {
-          repository.reloadAllApplications();
-          model.text("");
-        })
-        .call();
-      return false;
-    }
-  };
-
+  var commentModel = new comments.create();
 
   var model = {
     attachmentId:   ko.observable(),
@@ -42,7 +18,6 @@ var attachment = function() {
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
     type:           ko.observable(),
-    comments:       ko.observableArray(),
     isImage: function() {
       var contentType = this.latestVersion().contentType;
       return contentType && contentType.indexOf('image/') === 0;
@@ -66,9 +41,10 @@ var attachment = function() {
     model.type(attachment.type);
     model.application.id(applicationId);
     model.application.title(application.title);
-    model.comments(ko.mapping.fromJS(application.comments));
 
+    commentModel.setApplicationId(application.id);
     commentModel.setTarget({type: "attachment", id: attachmentId});
+    commentModel.setComments(application.comments);
   }
 
   hub.onPageChange("attachment", function(e) {
@@ -77,7 +53,8 @@ var attachment = function() {
     repository.getApplication(applicationId, showAttachment);
   });
 
-  hub.subscribe("repository-application-reload", function(app) {
+  hub.subscribe("repository-application-reload", function(data) {
+    var app = data.application;
     if (applicationId === app.id) showAttachment(app);
   });
 

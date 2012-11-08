@@ -20,27 +20,30 @@
               <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
             </span>
           </div>
-        </div>
-        
-        
-        <div class="attachment-file-versions">
-          <h3>Versiohistoria:</h3>
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Tiedosto</th>
-                <th>Versio</th>
-                <th>Muokattu</th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: versions()">
-              <tr style="cursor: pointer;">
-                <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" ></a></td>
-                <td data-bind="version: version"></td>
-                <td data-bind="dateString: created">31.10.2012</span>
-              </tr>
-            </tbody>
-          </table>
+      </div>
+      <div class="attachment-file-versions">
+        <h3>Versiohistoria:</h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Tiedosto</th>
+              <th>Versio</th>
+              <th>Muokattu</th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: versions()">
+            <tr style="cursor: pointer;">
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" /></td>
+              <td data-bind="version: version"></td>
+              <td data-bind="dateString: created">31.10.2012</span>
+            </tr>
+          </tbody>
+        </table>
+      </div>tddComment" data-bind="disable: disabled, click: su  data-bind="with: $root.comment"bmit" type="submit" class="add-comment btn btn-primary">Lähetä viesti</button>
+            </div>
+          </form>
+            </div>
+          </form>
         </div>
         <div class="attachment-file-conversation">
           <h3>Keskustele liitteestä:</h3>
@@ -50,14 +53,14 @@
                   <td class="commentParty">
                     <span class="date" data-bind="dateTimeString: created"></span><br />
                     <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
-                    <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
+                    <b>(<st: user.role"></span>)</b>
                   </td>
                   <td data-bind="text: text"></td>
                 </tr>
               </tbody>
             </table>
             <form data-bind="with: $root.comment">
-              <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+              <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'aftekeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
               <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
 
             </form>

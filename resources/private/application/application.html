@@ -107,7 +107,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="conversation_tab">
+      <div class="tab_content" id="conversation_tab" data-bind="with: $root.comment">
         <div class="tab-wrapper">
           <table class="table table-striped">
             <tbody data-bind="foreach: comments">
@@ -117,7 +117,7 @@
               </tr>
             </tbody>
           </table>
-          <form class="well" data-bind="with: $root.comment">
+          <form class="well">
               <div class="span12">Kirjoita viesti:</div>
             <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
             <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
