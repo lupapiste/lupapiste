@@ -35,7 +35,6 @@
     created: ko.observable(),
     documents: ko.observable(),
     attachments: ko.observableArray(),
-    comments: ko.observable(),
     address: ko.observable(),
     verdict: ko.observable(),
 
