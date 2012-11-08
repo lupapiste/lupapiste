@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html >
 <body>
-  <section class="page" id="attachment">
+  <section class="page" id="attachment" data-bind="with: attachment">
     <div class="container" data-bind="if: latestVersion">
       <h1>
 
@@ -11,7 +11,7 @@
         Muokattu
         <span data-bind="dateString: latestVersion().created">31.10.2012</span>
       </h1>
-      
+
       <!-- Preview images and pdf files only -->
       <div class="file-preview">
           <p>Esikatselua ei saatavilla.</p>
@@ -23,7 +23,7 @@
         <br/>
         </span>
       </div>
-      
+
       <div class="attachment-file-versions">
         <table class="table table-striped">
           <thead>
@@ -42,7 +42,24 @@
           </tbody>
         </table>
       </div>
-      
+      <div class="attachment-file-versions">
+        <hr/>
+        <div class="span12">Keskustele liitteestä:</div>
+          <table class="table table-striped">
+            <tbody data-bind="foreach: comments">
+              <tr class="comment">
+                <td class="commentParty">
+                  <span class="date" data-bind="dateTimeString: created"></span><br />
+                  <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
+                  <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
+                </td>
+                <td data-bind="text: text"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </section>
 </body>

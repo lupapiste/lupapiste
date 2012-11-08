@@ -6,6 +6,27 @@ var attachment = function() {
 
   var applicationId;
   var attachmentId;
+  var commentModel = new CommentModel();
+
+  function CommentModel() {
+    var self = this;
+
+    self.text = ko.observable();
+
+    self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
+
+    self.submit = function(model) {
+      var applicationId = application.id();
+      ajax.command("add-comment", { id: applicationId, text: model.text(), target: { type: "application"}})
+        .success(function(d) {
+          repository.reloadAllApplications();
+          model.text("");
+        })
+        .call();
+      return false;
+    }
+  };
+
 
   var model = {
     attachmentId:   ko.observable(),
@@ -17,6 +38,7 @@ var attachment = function() {
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
     type:           ko.observable(),
+    comments:       ko.observableArray(),
     isImage: function() {
       var contentType = this.latestVersion().contentType;
       return contentType && contentType.indexOf('image/') === 0;
@@ -40,6 +62,7 @@ var attachment = function() {
     model.type(attachment.type);
     model.application.id(applicationId);
     model.application.title(application.title);
+    model.comments(ko.mapping.fromJS(application.comments));
   }
 
   hub.onPageChange("attachment", function(e) {
@@ -70,7 +93,11 @@ var attachment = function() {
   }
 
   $(function() {
-    ko.applyBindings(model, $("#attachment")[0]);
+    ko.applyBindings({
+      attachment: model,
+      comment: commentModel
+    }, $("#attachment")[0]);
+
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using
     resetUploadIframe();
