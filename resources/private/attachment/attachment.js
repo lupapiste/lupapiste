@@ -16,7 +16,6 @@ var attachment = function() {
     self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
 
     self.submit = function(model) {
-      var applicationId = application.id();
       ajax.command("add-comment", { id: applicationId, text: model.text(), target: { type: "application"}})
         .success(function(d) {
           repository.reloadAllApplications();

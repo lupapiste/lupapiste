@@ -57,6 +57,16 @@
               </tr>
             </tbody>
           </table>
+          <form class="well" data-bind="with: $root.comment">
+            <div class="row">
+              <div class="span12">Keskustele hakemuksesta:</div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <textarea class="input-xlarge span5" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+            <div class="btn-toolbar">
+              <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="add-comment btn btn-primary">Lähetä viesti</button>
+            </div>
+          </form>
         </div>
       </div>
 
