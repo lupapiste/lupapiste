@@ -128,6 +128,10 @@
     applicationModel.data(ko.mapping.fromJS(data));
     ko.mapping.fromJS(data, {}, application);
 
+    // comments
+    commentModel.setApplicationId(data.id);
+    commentModel.setComments(data.comments);
+
     // docgen:
 
     var save = function(path, value, callback, data) {
@@ -167,14 +171,34 @@
 
   function CommentModel() {
     var self = this;
+    var target = {type: "application"};
+    var applicationId;
 
     self.text = ko.observable();
+
+    self.comments = ko.observableArray();
+
+    self.setComments = function(comments) {
+      var filteredComments =
+        _.filter(comments,
+            function(comment) {
+              return _.isEqual(commentModel.target,comment.target)
+            });
+      self.comments(ko.mapping.fromJS(filteredComments));
+    }
+
+    self.setTarget = function(target) {
+      self.target = target;
+    }
+
+    self.setApplicationId = function(applicationId) {
+      self.applicationId = applicationId;
+    }
 
     self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
 
     self.submit = function(model) {
-      var applicationId = application.id();
-      ajax.command("add-comment", { id: applicationId, text: model.text(), target: { type: "application"}})
+      ajax.command("add-comment", { id: applicationId, text: model.text(), target: self.target})
         .success(function(d) {
           repository.reloadAllApplications();
           model.text("");
