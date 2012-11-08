@@ -14,6 +14,17 @@ var attachment = function() {
 
     self.text = ko.observable();
 
+    self.comments = ko.observableArray();
+
+    self.setComments = function(comments) {
+      var filteredComments =
+        _.filter(comments,
+            function(comment) {
+              return _.isEqual(commentModel.target,comment.target)
+            });
+      self.comments(ko.mapping.fromJS(filteredComments));
+    }
+
     self.setTarget = function(target) {
       self.target = target;
     }
@@ -42,7 +53,6 @@ var attachment = function() {
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
     type:           ko.observable(),
-    comments:       ko.observableArray(),
     isImage: function() {
       var contentType = this.latestVersion().contentType;
       return contentType && contentType.indexOf('image/') === 0;
@@ -68,7 +78,7 @@ var attachment = function() {
     model.application.title(application.title);
 
     commentModel.setTarget({type: "attachment", id: attachmentId});
-    model.comments(ko.mapping.fromJS(_.filter(application.comments,function(comment) {return _.isEqual(commentModel.target,comment.target)})));
+    commentModel.setComments(application.comments);
   }
 
   hub.onPageChange("attachment", function(e) {
