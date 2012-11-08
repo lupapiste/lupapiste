@@ -83,7 +83,7 @@
               <br/>
               <a href=""  id="test-add-invite"
                  data-window-id="dialog-valtuutus" class="modal"
-                 data-bind="visible: $root.authorization && $root.authorization.ok('invite')">Lisää valtuutus</a>
+                 data-bind="visible: $root.authorization.ok('invite')">Lisää valtuutus</a>
             </div>
             <h3>Kutsutut</h3>
 
@@ -95,6 +95,7 @@
                 <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
               </li>
             </ul>
+            <button data-bind="disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">ole pääsuunnittelija</button>
           </div>
         </div>
 
