@@ -264,8 +264,7 @@
     (fn [application]
       (let [document       (get-document-by-name application name)
             schema-name    (get-in document [:schema :info :name])
-            schema         (get schemas/schemas schema-name)
-            transformation {"etunimi" (:firstName user)}]
+            schema         (get schemas/schemas schema-name)]
         (if (nil? document)
           (fail "document %s not found" name)
           (do
@@ -277,7 +276,8 @@
               {$set {:documents.$.body.etunimi  (:firstName user)
                      :documents.$.body.sukunimi (:lastName user)
                      :documents.$.body.email    (:email user)
-                     :documents.$.body.puhelin  (:phone user)}})))))))
+                     :documents.$.body.puhelin  (:phone user)
+                     :modified (:created command)}})))))))
 
 
 #_ (let [result (model/apply-updates {} schema transformation)]
