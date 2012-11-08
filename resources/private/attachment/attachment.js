@@ -66,9 +66,9 @@ var attachment = function() {
     model.type(attachment.type);
     model.application.id(applicationId);
     model.application.title(application.title);
-    model.comments(ko.mapping.fromJS(application.comments));
 
     commentModel.setTarget({type: "attachment", id: attachmentId});
+    model.comments(ko.mapping.fromJS(_.filter(application.comments,function(comment) {return _.isEqual(commentModel.target,comment.target)})));
   }
 
   hub.onPageChange("attachment", function(e) {
@@ -77,7 +77,8 @@ var attachment = function() {
     repository.getApplication(applicationId, showAttachment);
   });
 
-  hub.subscribe("repository-application-reload", function(app) {
+  hub.subscribe("repository-application-reload", function(data) {
+    var app = data.application;
     if (applicationId === app.id) showAttachment(app);
   });
 
