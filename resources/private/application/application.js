@@ -7,7 +7,7 @@
   var applicationModel = new ApplicationModel();
   var authorizationModel = new AuthorizationModel();
   var inviteModel = new InviteModel();
-  var commentModel = new CommentModel();
+  var commentModel = comments.create();
   var documents = ko.observableArray();
 
   function ApplicationModel() {
@@ -131,6 +131,7 @@
     // comments
     commentModel.setApplicationId(data.id);
     commentModel.setComments(data.comments);
+    console.log(commentModel.target);
 
     // docgen:
 
@@ -168,44 +169,6 @@
       return self.data && self.data()[command] && self.data()[command].ok;
     }
   }
-
-  function CommentModel() {
-    var self = this;
-
-    self.target = {type: "application"};
-    self.applicationId;
-    self.text = ko.observable();
-    self.comments = ko.observableArray();
-
-    self.setComments = function(comments) {
-      var filteredComments =
-        _.filter(comments,
-            function(comment) {
-              return _.isEqual(commentModel.target,comment.target)
-            });
-      self.comments(ko.mapping.fromJS(filteredComments));
-    }
-
-    self.setTarget = function(target) {
-      self.target = target;
-    }
-
-    self.setApplicationId = function(applicationId) {
-      self.applicationId = applicationId;
-    }
-
-    self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
-
-    self.submit = function(model) {
-      ajax.command("add-comment", { id: self.applicationId, text: model.text(), target: self.target})
-        .success(function(d) {
-          repository.reloadAllApplications();
-          model.text("");
-        })
-        .call();
-      return false;
-    }
-  };
 
   function InviteModel() {
     var self = this;

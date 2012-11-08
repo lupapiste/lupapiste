@@ -107,7 +107,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="conversation_tab">
+      <div class="tab_content" id="conversation_tab" data-bind="with: $root.comment">
         <div class="tab-wrapper">
           <div class="span12">Keskustele hakemuksesta:</div>
           <table class="table table-striped">
@@ -118,7 +118,7 @@
               </tr>
             </tbody>
           </table>
-          <form class="well" data-bind="with: $root.comment">
+          <form class="well">
             <div class="row">
               <div class="span12">Keskustele hakemuksesta:</div>
             </div>
