@@ -10,13 +10,18 @@ var attachment = function() {
 
   function CommentModel() {
     var self = this;
+    var target = {type: "application"};
 
     self.text = ko.observable();
+
+    self.setTarget = function(target) {
+      self.target = target;
+    }
 
     self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
 
     self.submit = function(model) {
-      ajax.command("add-comment", { id: applicationId, text: model.text(), target: { type: "application"}})
+      ajax.command("add-comment", { id: applicationId, text: model.text(), target: self.target})
         .success(function(d) {
           repository.reloadAllApplications();
           model.text("");
@@ -62,6 +67,8 @@ var attachment = function() {
     model.application.id(applicationId);
     model.application.title(application.title);
     model.comments(ko.mapping.fromJS(application.comments));
+
+    commentModel.setTarget({type: "attachment", id: attachmentId});
   }
 
   hub.onPageChange("attachment", function(e) {
