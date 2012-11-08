@@ -150,18 +150,18 @@
 (defcommand "add-comment"
   {:parameters [:id :text]
    :roles      [:applicant :authority]}
-  [command]
+  [{{:keys [text]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (if (= "draft" (:state application))
+      (when (= "draft" (:state application))
         (executed "open-application" command))
-      (let [user (:user command)]
-        (mongo/update-by-id
-          mongo/applications (:id application)
-          {$set {:modified (:created command)}
-           $push {:comments {:text    (-> command :data :text)
-                             :created (-> command :created)
-                             :user    (security/summary user)}}})))))
+      (mongo/update-by-id
+        mongo/applications
+        (:id application)
+        {$set {:modified (:created command)}
+         $push {:comments {:text    text
+                           :created (-> command :created)
+                           :user    (security/summary user)}}}))))
 
 (defcommand "assign-to-me"
   {:parameters [:id]
