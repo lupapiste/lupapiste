@@ -13,7 +13,7 @@
       </h1>
       <div class="attachment-info">
       <!-- Preview images and pdf files only -->
-        <div class="file-preview">
+      <div class="file-preview">
           <p>Esikatselua ei saatavilla.</p>
           <div class="file-preview-actions">
             <span data-bind="if: isImage()">
@@ -33,19 +33,15 @@
           </thead>
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
-              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" /></td>
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}"></a></td>
               <td data-bind="version: version"></td>
-              <td data-bind="dateString: created">31.10.2012</span>
+              <td data-bind="dateString: created">31.10.2012</td>
             </tr>
           </tbody>
         </table>
-      </div>tddComment" data-bind="disable: disabled, click: su  data-bind="with: $root.comment"bmit" type="submit" class="add-comment btn btn-primary">Lähetä viesti</button>
-            </div>
-          </form>
-            </div>
-          </form>
-        </div>
-        <div class="attachment-file-conversation">
+      </div>
+
+      <div class="attachment-file-conversation" data-bind="with: $root.comment">
           <h3>Keskustele liitteestä:</h3>
             <table class="table table-striped">
               <tbody data-bind="foreach: comments">
@@ -53,16 +49,15 @@
                   <td class="commentParty">
                     <span class="date" data-bind="dateTimeString: created"></span><br />
                     <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
-                    <b>(<st: user.role"></span>)</b>
+                    <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
                   </td>
                   <td data-bind="text: text"></td>
                 </tr>
               </tbody>
             </table>
-            <form data-bind="with: $root.comment">
-              <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'aftekeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+            <form >
+              <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
               <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
-
             </form>
           </div>
       </div>
