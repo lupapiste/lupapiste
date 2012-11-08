@@ -193,7 +193,11 @@
              $push {(str "attachments." attachment-id ".versions") version-model}})]
           (if (> result-count 0)
             true
-            (set-attachment-version application-id attachment-id file-id filename content-type size now user (dec retry-limit))))))
+            (do
+              (warn
+                "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
+                attachment-id retry-limit)
+              (set-attachment-version application-id attachment-id file-id filename content-type size now user (dec retry-limit)))))))
       (do
         (error "Concurrancy issue: Could not save attachment version meta data.")
         false))))
