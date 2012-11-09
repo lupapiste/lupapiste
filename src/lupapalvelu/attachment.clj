@@ -208,31 +208,31 @@
 
 (defcommand "approve-attachment"
   {:description "Authority can approve attachement, moves to ok"
-   :parameters  [:id :attachment-id]
+   :parameters  [:id :attachmentId]
    :roles       [:authority]
    :states      [:draft :open]}
-  [{{:keys [attachment-id]} :data created :created :as command}]
+  [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
       (mongo/update
         mongo/applications
         {:_id id}
         {$set {:modified (:created command)
-               (str "attachments." attachment-id ".state") :ok}}))))
+               (str "attachments." attachmentId ".state") :ok}}))))
 
 (defcommand "reject-attachment"
   {:description "Authority can reject attachement, requires user action."
-   :parameters  [:id :attachment-id]
+   :parameters  [:id :attachmentId]
    :roles       [:authority]
    :states      [:draft :open]}
-  [{{:keys [attachment-id]} :data created :created :as command}]
+  [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
       (mongo/update
         mongo/applications
         {:_id id}
         {$set {:modified (:created command)
-               (str "attachments." attachment-id ".state") :requires_user_action}}))))
+               (str "attachments." attachmentId ".state") :requires_user_action}}))))
 
 
 (defcommand "create-attachment"
