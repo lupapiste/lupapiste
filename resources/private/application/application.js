@@ -7,7 +7,7 @@
   var applicationModel = new ApplicationModel();
   var authorizationModel = new AuthorizationModel();
   var inviteModel = new InviteModel();
-  var commentModel = new CommentModel();
+  var commentModel = comments.create();
   var documents = ko.observableArray();
 
   function ApplicationModel() {
@@ -35,7 +35,6 @@
     created: ko.observable(),
     documents: ko.observable(),
     attachments: ko.observableArray(),
-    comments: ko.observable(),
     address: ko.observable(),
     verdict: ko.observable(),
 
@@ -128,6 +127,11 @@
     applicationModel.data(ko.mapping.fromJS(data));
     ko.mapping.fromJS(data, {}, application);
 
+    // comments
+    commentModel.setApplicationId(data.id);
+    commentModel.setComments(data.comments);
+    console.log(commentModel.target);
+
     // docgen:
 
     var save = function(path, value, callback, data) {
@@ -164,25 +168,6 @@
       return self.data && self.data()[command] && self.data()[command].ok;
     }
   }
-
-  function CommentModel() {
-    var self = this;
-
-    self.text = ko.observable();
-
-    self.disabled = ko.computed(function() { return _.isEmpty(self.text());});
-
-    self.submit = function(model) {
-      var applicationId = application.id();
-      ajax.command("add-comment", { id: applicationId, text: model.text(), target: { type: "application"}})
-        .success(function(d) {
-          repository.reloadAllApplications();
-          model.text("");
-        })
-        .call();
-      return false;
-    }
-  };
 
   function InviteModel() {
     var self = this;

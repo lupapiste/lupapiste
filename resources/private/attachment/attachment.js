@@ -6,6 +6,7 @@ var attachment = function() {
 
   var applicationId;
   var attachmentId;
+  var commentModel = new comments.create();
 
   var model = {
     attachmentId:   ko.observable(),
@@ -40,6 +41,10 @@ var attachment = function() {
     model.type(attachment.type);
     model.application.id(applicationId);
     model.application.title(application.title);
+
+    commentModel.setApplicationId(application.id);
+    commentModel.setTarget({type: "attachment", id: attachmentId});
+    commentModel.setComments(application.comments);
   }
 
   hub.onPageChange("attachment", function(e) {
@@ -48,7 +53,8 @@ var attachment = function() {
     repository.getApplication(applicationId, showAttachment);
   });
 
-  hub.subscribe("repository-application-reload", function(app) {
+  hub.subscribe("repository-application-reload", function(data) {
+    var app = data.application;
     if (applicationId === app.id) showAttachment(app);
   });
 
@@ -70,7 +76,11 @@ var attachment = function() {
   }
 
   $(function() {
-    ko.applyBindings(model, $("#attachment")[0]);
+    ko.applyBindings({
+      attachment: model,
+      comment: commentModel
+    }, $("#attachment")[0]);
+
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using
     resetUploadIframe();

@@ -107,27 +107,20 @@
         </div>
       </div>
 
-      <div class="tab_content" id="conversation_tab">
+      <div class="tab_content" id="conversation_tab" data-bind="with: $root.comment">
         <div class="tab-wrapper">
-          <div class="span12">Keskustele hakemuksesta:</div>
           <table class="table table-striped">
             <tbody data-bind="foreach: comments">
               <tr class="comment">
-                <td class="commentParty"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)
-                </b></td>
+                <td class="commentParty"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
                 <td data-bind="text: text"></td>
               </tr>
             </tbody>
           </table>
-          <form class="well" data-bind="with: $root.comment">
-            <div class="row">
-              <div class="span12">Keskustele hakemuksesta:</div>
-            </div>
-            <div class="row">&nbsp;</div>
-            <textarea class="input-xlarge span5" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
-            <div class="btn-toolbar">
-              <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="add-comment btn btn-primary">Lähetä viesti</button>
-            </div>
+          <form class="well">
+              <div class="span12">Kirjoita viesti:</div>
+            <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
           </form>
         </div>
       </div>
@@ -182,7 +175,7 @@
           </div>
           <button
               id="add-attachment"
-              class="btn btn-success modal"
+              class="btn btn-primary modal"
               data-window-id="upload-dialog"
               data-bind="visible: $root.authorization.ok('upload-attachment'),click: attachment.newAttachment">
             Lisää liite
@@ -198,7 +191,7 @@
               <iframe
                   id="uploadFrame"
                   data-src="/html/pages/upload.html"
-                  style="height: 260px; width: 100%, min-width: 300px; border:0; overflow: hidden;">
+                  class="attachment-iframe">
               </iframe>
             </div>
           </div>
@@ -218,18 +211,11 @@
         </div>
         <div class="dialog-content">
           <div data-bind="with: $root.invite">
-            <table>
-              <tr>
-                <td>Sähköpostiosoite</td>
-                <td><input id="invite-email" class="form_input text long" type="text" data-bind="value: email" /></td>
-              </tr>
-              <tr>
-                <td>Viesti</td>
-                <td><textarea id="invite-text" rows=5 class="form_input text long" data-bind="value: text"></textarea></td>
-              </tr>
-            </table>
-            <button class="btn btn-primary close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
-
+            <label class="form-label" for="invite-email">Sähköpostiosoite</label>
+            <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
+            <label class="form-label" for="invite-text">Viesti</label>
+            <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
+            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
           </div>
         </div>
       </div>

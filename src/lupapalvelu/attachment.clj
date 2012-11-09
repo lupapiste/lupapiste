@@ -43,7 +43,7 @@
       {:ordinal 10, :key :pohjapiirros, :s "Pohjapiirros"}
       {:ordinal 20, :key :leikkauspiirros, :s "Leikkauspiirros"}
       {:ordinal 30, :key :julkisivupiirros, :s "Julkisivupiirros"}]}
-    {:ordinal 40, :key :ennakkoluvat_ja_piirustukset, :s "Ennakkoluvat ja piirustukset", :types
+    {:ordinal 40, :key :ennakkoluvat_ja_lausunnot, :s "Ennakkoluvat ja lausunnot", :types
      [{:ordinal 0, :key :naapurien_suostumukset, :s "Naapurien suostumukset"}
       {:ordinal 10, :key :selvitys_naapurien_kuulemisesta, :s "Selvitys naapurien kuulemisesta"}
       {:ordinal 20, :key :elyn_tai_kunnan_poikkeamapaatos, :s "ELYn tai kunnan poikkeamap\u00e4\u00e4t\u00f6s"}
