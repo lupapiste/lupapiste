@@ -86,6 +86,8 @@ var attachment = function() {
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(application.id);
+
+    authorizationModel.refresh(application);
   }
 
   hub.onPageChange("attachment", function(e) {
