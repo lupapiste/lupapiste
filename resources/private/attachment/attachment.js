@@ -29,12 +29,17 @@ var attachment = function() {
       self.attachmentId = attachmentId;
     };
 
+    // todo: move this to domain-js?
+    self.stateIs = function(state) {
+      return self.application && self.application.attachments[self.attachmentId].state === state;
+    }
+
     self.isApprovable = function() {
-      return self.authorizationModel.ok('approve-attachment');
+      return self.authorizationModel.ok('approve-attachment') && !self.stateIs('ok');
     };
 
     self.isRejectable = function() {
-      return self.authorizationModel.ok('reject-attachment');
+      return self.authorizationModel.ok('reject-attachment') && !self.stateIs('requires_user_action');
     };
 
     self.rejectAttachment = function() {
