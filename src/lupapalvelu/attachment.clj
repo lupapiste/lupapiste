@@ -220,6 +220,20 @@
         {$set {:modified (:created command)
                (str "attachments." attachment-id ".state") :ok}}))))
 
+(defcommand "reject-attachment"
+  {:description "Authority can reject attachement, requires user action."
+   :parameters  [:id :attachment-id]
+   :roles       [:authority]
+   :states      [:draft :open]}
+  [{{:keys [attachment-id]} :data created :created :as command}]
+  (with-application command
+    (fn [{id :id}]
+      (mongo/update
+        mongo/applications
+        {:_id id}
+        {$set {:modified (:created command)
+               (str "attachments." attachment-id ".state") :requires_user_action}}))))
+
 
 (defcommand "create-attachment"
   {:description "Authority can set a placeholder for an attachment"
