@@ -24,8 +24,10 @@ var attachment = function() {
     // todo: move this to domain-js?
     self.stateIs = function(state) { return self.application && self.application.attachments[self.attachmentId].state === state; }
 
-    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment') && !self.stateIs('ok'); };
-    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment') && !self.stateIs('requires_user_action'); };
+    self.isNotOk = function() { return !self.stateIs('ok');}
+    self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');}
+    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment') && self.isNotOk(); };
+    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment') && self.doesNotRequireUserAction(); };
 
     self.rejectAttachment = function() {
       ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
