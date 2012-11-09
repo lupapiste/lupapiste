@@ -206,11 +206,11 @@
   [{{application-id :id} :data}]
   (ok :typeGroups (attachment-types-for application-id)))
 
-;; Authority can set a placeholder for an attachment
 (defcommand "create-attachment"
-  {:parameters [:id :type]
-   :roles      [:authority]
-   :states     [:draft :open]}
+  {:description "Authority can set a placeholder for an attachment"
+   :parameters  [:id :type]
+   :roles       [:authority]
+   :states      [:draft :open]}
   [{{application-id :id type :type} :data created :created}]
   (if-let [attachment-id (create-attachment application-id type created)]
     (ok :applicationId application-id :attachmentId attachment-id)
