@@ -108,50 +108,44 @@
   }
 
   function showApplication(data) {
-    ajax.query("allowed-actions", {id: data.id})
-      .success(function(d) {
-        authorizationModel.data(d.actions);
-        showApplicationPart2(data);
-        pageutil.setPageReady("application");
-      })
-      .call();
-  }
+    authorizationModel.refresh(data,function() {
+      // Update map:
+      var location = application.location();
+      var locations = location ? [{x: location.lon(), y: location.lat()}] : [];
+      hub.send("application-map", {locations: locations});
 
-  function showApplicationPart2(data) {
-    // Update map:
-    var location = application.location();
-    var locations = location ? [{x: location.lon(), y: location.lat()}] : [];
-    hub.send("application-map", {locations: locations});
+      // new data mapping
+      applicationModel.data(ko.mapping.fromJS(data));
+      ko.mapping.fromJS(data, {}, application);
 
-    // new data mapping
-    applicationModel.data(ko.mapping.fromJS(data));
-    ko.mapping.fromJS(data, {}, application);
+      // comments
+      commentModel.setApplicationId(data.id);
+      commentModel.setComments(data.comments);
 
-    // comments
-    commentModel.setApplicationId(data.id);
-    commentModel.setComments(data.comments);
+      // docgen:
 
-    // docgen:
+      var save = function(path, value, callback, data) {
+        debug("saving", path, value, data);
+        ajax
+          .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
+          .success(function() { callback("ok"); })
+          .error(function(e) { error(e); callback(e.status || "err"); })
+          .fail(function(e) { error(e); callback("err"); })
+          .call();
+      };
 
-    var save = function(path, value, callback, data) {
-      debug("saving", path, value, data);
-      ajax
-        .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-        .success(function() { callback("ok"); })
-        .error(function(e) { error(e); callback(e.status || "err"); })
-        .fail(function(e) { error(e); callback("err"); })
-        .call();
-    };
+      var docgenDiv = $("#docgen").empty();
 
-    var docgenDiv = $("#docgen").empty();
+      documents.removeAll();
+      _.each(data.documents, function(doc) {
+        documents.push(doc);
+        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+      });
 
-    documents.removeAll();
-    _.each(data.documents, function(doc) {
-      documents.push(doc);
-      docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+      application.attachments(_.values(data.attachments));
+
+      pageutil.setPageReady("application");
     });
-
-    application.attachments(_.values(data.attachments));
   }
 
   hub.subscribe("repository-application-reload", function(e) {
