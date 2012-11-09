@@ -131,7 +131,7 @@
   (let [attachment-id (mongo/create-id)
         attachment-model {:id attachment-id
                           :type attachement-type
-                          :state :none
+                          :state :requires_user_action
                           :latestVersion   {:version default-version}
                           :versions []
                           :comments []}]
@@ -165,7 +165,7 @@
                   :size size}
               attachment-model {:modified now
                  (str "attachments." attachment-id ".modified") now
-                 (str "attachments." attachment-id ".state")  :added
+                 (str "attachments." attachment-id ".state")  :requires_authority_action
                  (str "attachments." attachment-id ".latestVersion") version-model}]
 
         ; Check return value and try again with new version number
@@ -205,6 +205,21 @@
    :roles      [:applicant :authority]}
   [{{application-id :id} :data}]
   (ok :typeGroups (attachment-types-for application-id)))
+
+(defcommand "approve-attachment"
+  {:description "Authority can approve attachement, moves to ok"
+   :parameters  [:id :attachment-id]
+   :roles       [:authority]
+   :states      [:draft :open]}
+  [{{:keys [attachment-id]} :data created :created :as command}]
+  (with-application command
+    (fn [{id :id}]
+      (mongo/update
+        mongo/applications
+        {:_id id}
+        {$set {:modified (:created command)
+               (str "attachments." attachment-id ".state") :ok}}))))
+
 
 (defcommand "create-attachment"
   {:description "Authority can set a placeholder for an attachment"
