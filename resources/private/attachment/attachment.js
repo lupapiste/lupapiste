@@ -91,7 +91,7 @@ var attachment = function() {
     commentModel.setComments(application.comments);
 
     approveModel.setApplication(application);
-    approveModel.setAttachmentId(application.id);
+    approveModel.setAttachmentId(attachmentId);
 
     authorizationModel.refresh(application);
   }
