@@ -5,7 +5,7 @@
 ;(function() {
 
   var applicationModel = new ApplicationModel();
-  var authorizationModel = new AuthorizationModel();
+  var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
   var commentModel = comments.create();
   var documents = ko.observableArray();
@@ -157,16 +157,6 @@
   hub.subscribe("repository-application-reload", function(e) {
     if (application.id() === e.application.id) showApplication(e.application);
   });
-
-  function AuthorizationModel() {
-    var self = this;
-
-    self.data = ko.observable({})
-
-    self.ok = function(command) {
-      return self.data && self.data()[command] && self.data()[command].ok;
-    }
-  }
 
   function InviteModel() {
     var self = this;
