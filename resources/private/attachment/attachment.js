@@ -7,6 +7,48 @@ var attachment = function() {
   var applicationId;
   var attachmentId;
   var commentModel = new comments.create();
+  var authorizationModel = authorization.create();
+  var approveModel = new ApproveModel(authorizationModel);
+
+  function ApproveModel(authorizationModel) {
+    var self = this;
+
+    self.application;
+    self.authorizationModel = authorizationModel;
+    self.attachmentId;
+
+    self.setApplication = function(application) { self.application = application; };
+    self.setAuthorizationModel = function(authorizationModel) { self.authorizationModel = authorizationModel; };
+    self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
+
+    // todo: move this to domain-js?
+    self.stateIs = function(state) { return self.application && self.application.attachments[self.attachmentId].state === state; }
+
+    self.isNotOk = function() { return !self.stateIs('ok');}
+    self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');}
+    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment') };
+    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment') };
+
+    self.rejectAttachment = function() {
+      ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
+        .success(function(d) {
+          notify.success("liite hyl\u00E4tty",model);
+          repository.reloadAllApplications();
+        })
+        .call();
+      return false;
+    };
+
+    self.approveAttachment = function() {
+      ajax.command("approve-attachment", { id: self.application.id, attachmentId: self.attachmentId})
+        .success(function(d) {
+          notify.success("liite hyv\u00E4ksytty",model);
+          repository.reloadAllApplications();
+        })
+        .call();
+      return false;
+    };
+  }
 
   var model = {
     attachmentId:   ko.observable(),
@@ -18,10 +60,12 @@ var attachment = function() {
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
     type:           ko.observable(),
+
     isImage: function() {
       var contentType = this.latestVersion().contentType;
       return contentType && contentType.indexOf('image/') === 0;
     },
+
     isPdf: function() {
       return this.latestVersion().contentType === "application/pdf";
     }
@@ -45,6 +89,11 @@ var attachment = function() {
     commentModel.setApplicationId(application.id);
     commentModel.setTarget({type: "attachment", id: attachmentId});
     commentModel.setComments(application.comments);
+
+    approveModel.setApplication(application);
+    approveModel.setAttachmentId(attachmentId);
+
+    authorizationModel.refresh(application);
   }
 
   hub.onPageChange("attachment", function(e) {
@@ -78,6 +127,8 @@ var attachment = function() {
   $(function() {
     ko.applyBindings({
       attachment: model,
+      approve: approveModel,
+      authorization: authorizationModel,
       comment: commentModel
     }, $("#attachment")[0]);
 

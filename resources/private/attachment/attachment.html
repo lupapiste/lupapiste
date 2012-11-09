@@ -6,7 +6,6 @@
       <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications"><span data-bind="text: application.title"></a> / Liitteet</span>
     </div>
     <div data-bind="if: latestVersion">
-
       <div class="attachment-info">
         <h1>
           <span data-bind="if: type"><span data-bind="text: type"></span></span>
@@ -16,7 +15,7 @@
           <span data-bind="dateString: latestVersion().created">31.10.2012</span>
         </h1>
       </div>
-      
+
       <!-- Preview images and pdf files only -->
       <div class="file-preview" data-bind="visible: isImage() || isPdf()">
         <div class="file-preview-image" data-bind="if: isImage()">
@@ -28,12 +27,16 @@
           <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
         </div>
       </div>
-    
+
       <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
         <p>Esikatselua ei saatavilla.</p>
       </div>
 
       <div class="attachment-file-versions">
+        <div data-bind="with: $root.approve">
+          <button data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button data-bind="click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-primary">Tarkennettavaa</button>
+        </div>
         <h3>Versiohistoria:</h3>
         <table class="table table-striped">
           <thead>
@@ -52,7 +55,7 @@
           </tbody>
         </table>
       </div>
-      
+
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
           <h3>Keskustele liitteestä:</h3>
             <table class="table table-striped">
@@ -67,7 +70,7 @@
                 </tr>
               </tbody>
             </table>
-            <form >
+            <form>
               <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
               <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
             </form>
