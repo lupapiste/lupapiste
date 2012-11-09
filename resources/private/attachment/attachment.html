@@ -23,13 +23,18 @@
           <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
             <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
           </a>
+          <div class="file-preview-actions">
+            <span data-bind="if: isImage()">
+              <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
+            </span>
+          </div>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf()">
           <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
         </div>
       </div>
     
-      <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
+      <div id="test-txt-file-preview" class="file-preview" data-bind="visible: !(isImage() || isPdf())">
         <p>Esikatselua ei saatavilla.</p>
       </div>
 
@@ -51,6 +56,16 @@
             </tr>
           </tbody>
         </table>
+
+        <div data-bind="with:attachment">
+          <button
+              id="add-new-attachment-version"
+              class="btn btn-primary modal add-new-version"
+              data-window-id="upload-dialog"
+              data-bind="click: newAttachment">
+            Lisää liite
+          </button>
+        </div>
       </div>
       
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
