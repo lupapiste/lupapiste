@@ -7,6 +7,7 @@ var attachment = function() {
   var applicationId;
   var attachmentId;
   var commentModel = new comments.create();
+  var authorizationModel = authorization.create();
 
   var approveModel = new function() {
     var self = this;
@@ -119,6 +120,7 @@ var attachment = function() {
     ko.applyBindings({
       attachment: model,
       approve: approveModel,
+      authorization: authorizationModel,
       comment: commentModel
     }, $("#attachment")[0]);
 
