@@ -17,30 +17,15 @@ var attachment = function() {
     self.authorizationModel = authorizationModel;
     self.attachmentId;
 
-    self.setApplication = function(application) {
-      self.application = application;
-    };
-
-    self.setAuthorizationModel = function(authorizationModel) {
-      self.authorizationModel = authorizationModel;
-    };
-
-    self.setAttachmentId = function(attachmentId) {
-      self.attachmentId = attachmentId;
-    };
+    self.setApplication = function(application) { self.application = application; };
+    self.setAuthorizationModel = function(authorizationModel) { self.authorizationModel = authorizationModel; };
+    self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
 
     // todo: move this to domain-js?
-    self.stateIs = function(state) {
-      return self.application && self.application.attachments[self.attachmentId].state === state;
-    }
+    self.stateIs = function(state) { return self.application && self.application.attachments[self.attachmentId].state === state; }
 
-    self.isApprovable = function() {
-      return self.authorizationModel.ok('approve-attachment') && !self.stateIs('ok');
-    };
-
-    self.isRejectable = function() {
-      return self.authorizationModel.ok('reject-attachment') && !self.stateIs('requires_user_action');
-    };
+    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment') && !self.stateIs('ok'); };
+    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment') && !self.stateIs('requires_user_action'); };
 
     self.rejectAttachment = function() {
       ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
