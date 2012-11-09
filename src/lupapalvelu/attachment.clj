@@ -243,7 +243,7 @@
   [{{application-id :id type :type} :data created :created}]
   (if-let [attachment-id (create-attachment application-id type created)]
     (ok :applicationId application-id :attachmentId attachment-id)
-    (fail "Failed to create attachment placeholder")))
+    (fail "error.attachment-placeholder")))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :size]
@@ -262,9 +262,9 @@
           (.delete (file tempfile))
           (if (update-or-create-attachment id attachmentId type file-id sanitazed-filename content-type size created user)
             (ok)
-            (fail "Unknown error")))
-        (fail "Illegal attachment type"))
-      (fail "Illegal file type"))))
+            (fail "error.unknown")))
+        (fail "error.illegal-attachment-type"))
+      (fail "error.illegal-file-type"))))
 
 ;;
 ;; Download
