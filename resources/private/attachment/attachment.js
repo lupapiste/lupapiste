@@ -26,8 +26,8 @@ var attachment = function() {
 
     self.isNotOk = function() { return !self.stateIs('ok');}
     self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');}
-    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment') && self.isNotOk(); };
-    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment') && self.doesNotRequireUserAction(); };
+    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment') };
+    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment') };
 
     self.rejectAttachment = function() {
       ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
