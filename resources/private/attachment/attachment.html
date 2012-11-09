@@ -2,25 +2,37 @@
 <html >
 <body>
   <section class="page" id="attachment" data-bind="with: attachment">
+    <div class="breadcrumb">
+      <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <a data-bind="attr: {href: '#!/application/' + application.id }" id="test-applications"><span data-bind="text: application.title"></a> / Liitteet</span>
+    </div>
     <div data-bind="if: latestVersion">
-      <h1>
 
-        <span data-bind="if: type"><span data-bind="text: type"></span></span>
-        versio
-        <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-        Muokattu
-        <span data-bind="dateString: latestVersion().created">31.10.2012</span>
-      </h1>
       <div class="attachment-info">
-      <!-- Preview images and pdf files only -->
-      <div class="file-preview">
-          <p>Esikatselua ei saatavilla.</p>
-          <div class="file-preview-actions">
-            <span data-bind="if: isImage()">
-              <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
-            </span>
-          </div>
+        <h1>
+          <span data-bind="if: type"><span data-bind="text: type"></span></span>
+          versio
+          <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+          Muokattu
+          <span data-bind="dateString: latestVersion().created">31.10.2012</span>
+        </h1>
       </div>
+      
+      <!-- Preview images and pdf files only -->
+      <div class="file-preview" data-bind="visible: isImage() || isPdf()">
+        <div class="file-preview-image" data-bind="if: isImage()">
+          <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
+            <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
+          </a>
+        </div>
+        <div class="file-preview-pdf" data-bind="if: isPdf()">
+          <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
+        </div>
+      </div>
+    
+      <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
+        <p>Esikatselua ei saatavilla.</p>
+      </div>
+
       <div class="attachment-file-versions">
         <h3>Versiohistoria:</h3>
         <table class="table table-striped">
@@ -40,7 +52,7 @@
           </tbody>
         </table>
       </div>
-
+      
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
           <h3>Keskustele liitteestä:</h3>
             <table class="table table-striped">
