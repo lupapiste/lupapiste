@@ -8,20 +8,34 @@ var attachment = function() {
   var attachmentId;
   var commentModel = new comments.create();
   var authorizationModel = authorization.create();
+  var approveModel = new ApproveModel(authorizationModel);
 
-  var approveModel = new function() {
+  function ApproveModel(authorizationModel) {
     var self = this;
 
     self.application;
+    self.authorizationModel = authorizationModel;
     self.attachmentId;
 
     self.setApplication = function(application) {
       self.application = application;
-    }
+    };
+
+    self.setAuthorizationModel = function(authorizationModel) {
+      self.authorizationModel = authorizationModel;
+    };
 
     self.setAttachmentId = function(attachmentId) {
       self.attachmentId = attachmentId;
-    }
+    };
+
+    self.isApprovable = function() {
+      return self.authorizationModel.ok('approve-attachment');
+    };
+
+    self.isRejectable = function() {
+      return self.authorizationModel.ok('reject-attachment');
+    };
 
     self.rejectAttachment = function() {
       ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
