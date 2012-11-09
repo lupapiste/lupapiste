@@ -8,6 +8,41 @@ var attachment = function() {
   var attachmentId;
   var commentModel = new comments.create();
 
+  var approveModel = new function() {
+    var self = this;
+
+    self.applicationId;
+    self.attachmentId;
+
+    self.setApplicationId = function(applicationId) {
+      self.applicationId = applicationId;
+    }
+
+    self.setAttachmentId = function(attachmentId) {
+      self.attachmentId = attachmentId;
+    }
+
+    self.rejectAttachment = function() {
+      ajax.command("reject-attachment", { id: self.applicationId, attachmentId: self.attachmentId})
+        .success(function(d) {
+          notify.success("liite hyl\u00E4tty",model);
+          repository.reloadAllApplications();
+        })
+        .call();
+      return false;
+    };
+
+    self.approveAttachment = function() {
+      ajax.command("approve-attachment", { id: self.applicationId, attachmentId: self.attachmentId})
+        .success(function(d) {
+          notify.success("liite hyv\u00E4ksytty",model);
+          repository.reloadAllApplications();
+        })
+        .call();
+      return false;
+    };
+  }
+
   var model = {
     attachmentId:   ko.observable(),
     application: {
@@ -18,10 +53,12 @@ var attachment = function() {
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
     type:           ko.observable(),
+
     isImage: function() {
       var contentType = this.latestVersion().contentType;
       return contentType && contentType.indexOf('image/') === 0;
     },
+
     isPdf: function() {
       return this.latestVersion().contentType === "application/pdf";
     }
@@ -45,6 +82,9 @@ var attachment = function() {
     commentModel.setApplicationId(application.id);
     commentModel.setTarget({type: "attachment", id: attachmentId});
     commentModel.setComments(application.comments);
+
+    approveModel.setApplicationId(application.id);
+    approveModel.setAttachmentId(application.id);
   }
 
   hub.onPageChange("attachment", function(e) {
@@ -78,6 +118,7 @@ var attachment = function() {
   $(function() {
     ko.applyBindings({
       attachment: model,
+      approve: approveModel,
       comment: commentModel
     }, $("#attachment")[0]);
 
