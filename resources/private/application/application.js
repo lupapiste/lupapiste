@@ -216,8 +216,8 @@
     var id = e.pagePath[0];
     if (application.id() != id) {
       repository.getApplication(id, showApplication, function() {
-        // TODO: Show "No such application, or not permission"
-        error("No such application, or not permission");
+        error("No such application, or not permission: "+id);
+        window.location.href = "#!/applications/";
       });
     }
   }
