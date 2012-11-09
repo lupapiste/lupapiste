@@ -89,12 +89,6 @@
     (attachment-types-for-permit-type (keyword permit-type))
     []))
 
-(defquery "attachment-types"
-  {:parameters [:id]
-   :roles      [:applicant :authority]}
-  [{{application-id :id} :data}]
-  (ok :typeGroups (attachment-types-for application-id)))
-
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
 ;; docx and other MS Office formats.
@@ -130,7 +124,7 @@
       (re-matches mime-type-pattern type)))
 
 ;;
-;; Upload commands
+;; Upload
 ;;
 
 (defn- create-attachment [application-id attachement-type now]
@@ -144,16 +138,6 @@
     (mongo/update-by-id mongo/applications application-id
       {$set {:modified now, (str "attachments." attachment-id) attachment-model}})
     attachment-id))
-
-;; Authority can set a placeholder for an attachment
-(defcommand "create-attachment"
-  {:parameters [:id :type]
-   :roles      [:authority]
-   :states     [:draft :open]}
-  [{{application-id :id type :type} :data created :created}]
-  (if-let [attachment-id (create-attachment application-id type created)]
-    (ok :applicationId application-id :attachmentId attachment-id)
-    (fail "Failed to create attachment placeholder")))
 
 (defn- next-attachment-version [current-version user]
   (if (= (keyword (:role user)) :authority)
@@ -211,6 +195,26 @@
 (defn- allowed-attachment-type-for? [application-id type]
   (some (fn [{types :types}] (some (fn [{key :key}] (= key type)) types))
         (attachment-types-for application-id)))
+
+;;
+;; Actions
+;;
+
+(defquery "attachment-types"
+  {:parameters [:id]
+   :roles      [:applicant :authority]}
+  [{{application-id :id} :data}]
+  (ok :typeGroups (attachment-types-for application-id)))
+
+;; Authority can set a placeholder for an attachment
+(defcommand "create-attachment"
+  {:parameters [:id :type]
+   :roles      [:authority]
+   :states     [:draft :open]}
+  [{{application-id :id type :type} :data created :created}]
+  (if-let [attachment-id (create-attachment application-id type created)]
+    (ok :applicationId application-id :attachmentId attachment-id)
+    (fail "Failed to create attachment placeholder")))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :size]
