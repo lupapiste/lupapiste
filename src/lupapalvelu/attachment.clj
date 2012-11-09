@@ -20,68 +20,68 @@
 
 (def attachment-types-for-permit-type
   {:buildingPermit
-   [{:ordinal 0, :key :hakija, :s "Hakija", :types ; <optgroup>
-     [{:ordinal 0, :key :valtakirja, :s "Valtakirja"} ; <option>
-      {:ordinal 10, :key :ote_kauppa_ja_yhdistysrekisterista, :s "Ote kauppa- ja yhdistysrekisterist\u00e4"}
-      {:ordinal 20, :key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta, :s "Ote asunto-osakeyhti\u00f6n hallituksen kokouksen p\u00f6yt\u00e4kirjasta"}]}
-    {:ordinal 10, :key :rakennuspaikan_hallinta, :s "Rakennuspaikan hallinta", :types
-     [{:ordinal 0, :key :jaljennos_myonnetyista_lainhuudoista, :s "J\u00e4ljenn\u00f6s my\u00f6nnetyist\u00e4 lainhuudoista"}
-      {:ordinal 10, :key :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta, :s "J\u00e4ljenn\u00f6s kauppakirjasta tai muusta luovutuskirjasta"}
-      {:ordinal 20, :key :rasitustodistus, :s "Rasitustodistus"}
-      {:ordinal 30, :key :todistus_erityisoikeuden_kirjaamisesta, :s "Todistus erityisoikeuden kirjaamisesta"}
-      {:ordinal 40, :key :jaljennos_vuokrasopimuksesta, :s "J\u00e4ljenn\u00f6s vuokrasopimuksesta"}
-      {:ordinal 50, :key :jaljennos_perunkirjasta, :s "J\u00e4ljenn\u00f6s perunkirjasta"}]}
-    {:ordinal 20, :key :rakennuspaikka, :s "Rakennuspaikka", :types
-     [{:ordinal 0, :key :ote_alueen_peruskartasta, :s "Ote alueen peruskartasta"}
-      {:ordinal 10, :key :ote_asemakaavasta_jos_asemakaava_alueella, :s "Ote asemakaavasta (jos asemakaava-alueella)"}
-      {:ordinal 20, :key :ote_kiinteistorekisteristerista, :s "Ote kiinteist\u00f6rekisteristerist\u00e4"}
-      {:ordinal 30, :key :tonttikartta_tarvittaessa, :s "Tonttikartta (tarvittaessa)"}
-      {:ordinal 40, :key :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista, :s "Selvitys rakennuspaikan perustamis-  ja pohjaolosuhteista"}
-      {:ordinal 50, :key :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma, :s "Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnitelma"}]}
-    {:ordinal 30, :key :paapiirustus, :s "P\u00e4\u00e4piirustus", :types
-     [{:ordinal 0, :key :asemapiirros, :s "Asemapiirros"}
-      {:ordinal 10, :key :pohjapiirros, :s "Pohjapiirros"}
-      {:ordinal 20, :key :leikkauspiirros, :s "Leikkauspiirros"}
-      {:ordinal 30, :key :julkisivupiirros, :s "Julkisivupiirros"}]}
-    {:ordinal 40, :key :ennakkoluvat_ja_lausunnot, :s "Ennakkoluvat ja lausunnot", :types
-     [{:ordinal 0, :key :naapurien_suostumukset, :s "Naapurien suostumukset"}
-      {:ordinal 10, :key :selvitys_naapurien_kuulemisesta, :s "Selvitys naapurien kuulemisesta"}
-      {:ordinal 20, :key :elyn_tai_kunnan_poikkeamapaatos, :s "ELYn tai kunnan poikkeamap\u00e4\u00e4t\u00f6s"}
-      {:ordinal 30, :key :suunnittelutarveratkaisu, :s "Suunnittelutarveratkaisu"}
-      {:ordinal 40, :key :ymparistolupa, :s "Ymp\u00e4rist\u00f6lupa"}]}
-    {:ordinal 50, :key :muut, :s "Muut", :types
-     [{:ordinal 0, :key :selvitys_rakennuspaikan_terveellisyydesta, :s "Selvitys rakennuspaikan terveellisyydest\u00e4"}
-      {:ordinal 10, :key :selvitys_rakennuspaikan_korkeusasemasta, :s "Selvitys rakennuspaikan korkeusasemasta"}
-      {:ordinal 20, :key :selvitys_liittymisesta_ymparoivaan_rakennuskantaan, :s "Selvitys liittymisest\u00e4 ymp\u00e4r\u00f6iv\u00e4\u00e4n rakennuskantaan"}
-      {:ordinal 30, :key :julkisivujen_varityssuunnitelma, :s "Julkisivujen v\u00e4rityssuunnitelma"}
-      {:ordinal 40, :key :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta, :s "Selvitys tontin tai rakennuspaikan pintavesien k\u00e4sittelyst\u00e4"}
-      {:ordinal 50, :key :piha_tai_istutussuunnitelma, :s "Piha-  tai istutussuunnitelma"}
-      {:ordinal 60, :key :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta, :s "Selvitys rakenteiden kokonaisvakavuudesta ja lujuudesta"}
-      {:ordinal 70, :key :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta, :s "Selvitys rakennuksen kosteusteknisest\u00e4 toimivuudesta"}
-      {:ordinal 80, :key :selvitys_rakennuksen_aaniteknisesta_toimivuudesta, :s "Selvitys rakennuksen \u00e4\u00e4niteknisest\u00e4 toimivuudesta"}
-      {:ordinal 90, :key :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista, :s "Selvitys sis\u00e4ilmastotavoitteista ja niihin vaikuttavista tekij\u00f6ist\u00e4"}
-      {:ordinal 100, :key :energiataloudellinen_selvitys, :s "Energiataloudellinen selvitys"}
-      {:ordinal 110, :key :paloturvallisuussuunnitelma, :s "Paloturvallisuussuunnitelma"}
-      {:ordinal 120, :key :liikkumis_ja_esteettomyysselvitys, :s "Liikkumis-  ja esteett\u00f6myysselvitys"}
-      {:ordinal 130, :key :kerrosalaselvitys, :s "Kerrosalaselvitys"}
-      {:ordinal 140, :key :vaestonsuojasuunnitelma, :s "V\u00e4est\u00f6nsuojasuunnitelma"}
-      {:ordinal 150, :key :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo, :s "Rakennukseen tai sen osaan kohdistuva kuntotutkimus (jos korjaus-  tai muutosty\u00f6)"}
-      {:ordinal 160, :key :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo, :s "Selvitys rakennuksen rakennustaiteellisesta ja kulttuurihistoriallisesta arvosta (jos korjaus-  tai muutosty\u00f6)"}
-      {:ordinal 170, :key :selvitys_kiinteiston_jatehuollon_jarjestamisesta, :s "Selvitys kiinteist\u00f6n j\u00e4tehuollon j\u00e4rjest\u00e4misest\u00e4"}
-      {:ordinal 180, :key :rakennesuunnitelma, :s "Rakennesuunnitelma"}
-      {:ordinal 190, :key :ilmanvaihtosuunnitelma, :s "Ilmanvaihtosuunnitelma"}
-      {:ordinal 200, :key :lammityslaitesuunnitelma, :s "L\u00e4mmityslaitesuunnitelma"}
-      {:ordinal 210, :key :radontekninen_suunnitelma, :s "Radontekninen suunnitelma"}
-      {:ordinal 220, :key :kalliorakentamistekninen_suunnitelma, :s "Kalliorakentamistekninen suunnitelma"}
-      {:ordinal 230, :key :paloturvallisuusselvitys, :s "Paloturvallisuusselvitys"}
-      {:ordinal 240, :key :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta, :s "Suunnitelma paloilmoitinj\u00e4rjestelmist\u00e4 ja koneellisesta savunpoistosta"}
-      {:ordinal 250, :key :merkki_ja_turvavalaistussuunnitelma, :s "Merkki- ja turvavalaistussuunnitelma"}
-      {:ordinal 260, :key :sammutusautomatiikkasuunnitelma, :s "Sammutusautomatiikkasuunnitelma"}
-      {:ordinal 270, :key :rakennusautomaatiosuunnitelma, :s "Rakennusautomaatiosuunnitelma"}
-      {:ordinal 280, :key :valaistussuunnitelma, :s "Valaistussuunnitelma"}
-      {:ordinal 290, :key :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta, :s "Selvitys rakennusj\u00e4tteen m\u00e4\u00e4r\u00e4st\u00e4, laadusta ja lajittelusta"}
-      {:ordinal 300, :key :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta, :s "Selvitys purettavasta rakennusmateriaalista ja hyv\u00e4ksik\u00e4yt\u00f6st\u00e4"}
-      {:ordinal 999, :key :muu, :s "Muu liite"}]}]
+   [{:key :hakija, :text "Hakija", :types ; <optgroup>
+     [{:key :valtakirja, :text "Valtakirja"} ; <option>
+      {:key :ote_kauppa_ja_yhdistysrekisterista, :text "Ote kauppa- ja yhdistysrekisterist\u00e4"}
+      {:key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta, :text "Ote asunto-osakeyhti\u00f6n hallituksen kokouksen p\u00f6yt\u00e4kirjasta"}]}
+    {:key :rakennuspaikan_hallinta, :text "Rakennuspaikan hallinta", :types
+     [{:key :jaljennos_myonnetyista_lainhuudoista, :text "J\u00e4ljenn\u00f6s my\u00f6nnetyist\u00e4 lainhuudoista"}
+      {:key :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta, :text "J\u00e4ljenn\u00f6s kauppakirjasta tai muusta luovutuskirjasta"}
+      {:key :rasitustodistus, :text "Rasitustodistus"}
+      {:key :todistus_erityisoikeuden_kirjaamisesta, :text "Todistus erityisoikeuden kirjaamisesta"}
+      {:key :jaljennos_vuokrasopimuksesta, :text "J\u00e4ljenn\u00f6s vuokrasopimuksesta"}
+      {:key :jaljennos_perunkirjasta, :text "J\u00e4ljenn\u00f6s perunkirjasta"}]}
+    {:key :rakennuspaikka, :text "Rakennuspaikka", :types
+     [{:key :ote_alueen_peruskartasta, :text "Ote alueen peruskartasta"}
+      {:key :ote_asemakaavasta_jos_asemakaava_alueella, :text "Ote asemakaavasta (jos asemakaava-alueella)"}
+      {:key :ote_kiinteistorekisteristerista, :text "Ote kiinteist\u00f6rekisteristerist\u00e4"}
+      {:key :tonttikartta_tarvittaessa, :text "Tonttikartta (tarvittaessa)"}
+      {:key :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista, :text "Selvitys rakennuspaikan perustamis-  ja pohjaolosuhteista"}
+      {:key :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma, :text "Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnitelma"}]}
+    {:key :paapiirustus, :text "P\u00e4\u00e4piirustus", :types
+     [{:key :asemapiirros, :text "Asemapiirros"}
+      {:key :pohjapiirros, :text "Pohjapiirros"}
+      {:key :leikkauspiirros, :text "Leikkauspiirros"}
+      {:key :julkisivupiirros, :text "Julkisivupiirros"}]}
+    {:key :ennakkoluvat_ja_lausunnot, :text "Ennakkoluvat ja lausunnot", :types
+     [{:key :naapurien_suostumukset, :text "Naapurien suostumukset"}
+      {:key :selvitys_naapurien_kuulemisesta, :text "Selvitys naapurien kuulemisesta"}
+      {:key :elyn_tai_kunnan_poikkeamapaatos, :text "ELYn tai kunnan poikkeamap\u00e4\u00e4t\u00f6s"}
+      {:key :suunnittelutarveratkaisu, :text "Suunnittelutarveratkaisu"}
+      {:key :ymparistolupa, :text "Ymp\u00e4rist\u00f6lupa"}]}
+    {:key :muut, :text "Muut", :types
+     [{:key :selvitys_rakennuspaikan_terveellisyydesta, :text "Selvitys rakennuspaikan terveellisyydest\u00e4"}
+      {:key :selvitys_rakennuspaikan_korkeusasemasta, :text "Selvitys rakennuspaikan korkeusasemasta"}
+      {:key :selvitys_liittymisesta_ymparoivaan_rakennuskantaan, :text "Selvitys liittymisest\u00e4 ymp\u00e4r\u00f6iv\u00e4\u00e4n rakennuskantaan"}
+      {:key :julkisivujen_varityssuunnitelma, :text "Julkisivujen v\u00e4rityssuunnitelma"}
+      {:key :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta, :text "Selvitys tontin tai rakennuspaikan pintavesien k\u00e4sittelyst\u00e4"}
+      {:key :piha_tai_istutussuunnitelma, :text "Piha-  tai istutussuunnitelma"}
+      {:key :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta, :text "Selvitys rakenteiden kokonaisvakavuudesta ja lujuudesta"}
+      {:key :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta, :text "Selvitys rakennuksen kosteusteknisest\u00e4 toimivuudesta"}
+      {:key :selvitys_rakennuksen_aaniteknisesta_toimivuudesta, :text "Selvitys rakennuksen \u00e4\u00e4niteknisest\u00e4 toimivuudesta"}
+      {:key :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista, :text "Selvitys sis\u00e4ilmastotavoitteista ja niihin vaikuttavista tekij\u00f6ist\u00e4"}
+      {:key :energiataloudellinen_selvitys, :text "Energiataloudellinen selvitys"}
+      {:key :paloturvallisuussuunnitelma, :text "Paloturvallisuussuunnitelma"}
+      {:key :liikkumis_ja_esteettomyysselvitys, :text "Liikkumis-  ja esteett\u00f6myysselvitys"}
+      {:key :kerrosalaselvitys, :text "Kerrosalaselvitys"}
+      {:key :vaestonsuojasuunnitelma, :text "V\u00e4est\u00f6nsuojasuunnitelma"}
+      {:key :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo, :text "Rakennukseen tai sen osaan kohdistuva kuntotutkimus (jos korjaus-  tai muutosty\u00f6)"}
+      {:key :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo, :text "Selvitys rakennuksen rakennustaiteellisesta ja kulttuurihistoriallisesta arvosta (jos korjaus-  tai muutosty\u00f6)"}
+      {:key :selvitys_kiinteiston_jatehuollon_jarjestamisesta, :text "Selvitys kiinteist\u00f6n j\u00e4tehuollon j\u00e4rjest\u00e4misest\u00e4"}
+      {:key :rakennesuunnitelma, :text "Rakennesuunnitelma"}
+      {:key :ilmanvaihtosuunnitelma, :text "Ilmanvaihtosuunnitelma"}
+      {:key :lammityslaitesuunnitelma, :text "L\u00e4mmityslaitesuunnitelma"}
+      {:key :radontekninen_suunnitelma, :text "Radontekninen suunnitelma"}
+      {:key :kalliorakentamistekninen_suunnitelma, :text "Kalliorakentamistekninen suunnitelma"}
+      {:key :paloturvallisuusselvitys, :text "Paloturvallisuusselvitys"}
+      {:key :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta, :text "Suunnitelma paloilmoitinj\u00e4rjestelmist\u00e4 ja koneellisesta savunpoistosta"}
+      {:key :merkki_ja_turvavalaistussuunnitelma, :text "Merkki- ja turvavalaistussuunnitelma"}
+      {:key :sammutusautomatiikkasuunnitelma, :text "Sammutusautomatiikkasuunnitelma"}
+      {:key :rakennusautomaatiosuunnitelma, :text "Rakennusautomaatiosuunnitelma"}
+      {:key :valaistussuunnitelma, :text "Valaistussuunnitelma"}
+      {:key :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta, :text "Selvitys rakennusj\u00e4tteen m\u00e4\u00e4r\u00e4st\u00e4, laadusta ja lajittelusta"}
+      {:key :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta, :text "Selvitys purettavasta rakennusmateriaalista ja hyv\u00e4ksik\u00e4yt\u00f6st\u00e4"}
+      {:key :muu, :text "Muu liite"}]}]
    })
 
 (defn- attachment-types-for [application-id]
