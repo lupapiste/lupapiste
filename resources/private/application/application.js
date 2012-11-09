@@ -130,7 +130,6 @@
     // comments
     commentModel.setApplicationId(data.id);
     commentModel.setComments(data.comments);
-    console.log(commentModel.target);
 
     // docgen:
 
