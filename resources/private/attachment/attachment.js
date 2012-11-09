@@ -11,11 +11,11 @@ var attachment = function() {
   var approveModel = new function() {
     var self = this;
 
-    self.applicationId;
+    self.application;
     self.attachmentId;
 
-    self.setApplicationId = function(applicationId) {
-      self.applicationId = applicationId;
+    self.setApplication = function(application) {
+      self.application = application;
     }
 
     self.setAttachmentId = function(attachmentId) {
@@ -23,7 +23,7 @@ var attachment = function() {
     }
 
     self.rejectAttachment = function() {
-      ajax.command("reject-attachment", { id: self.applicationId, attachmentId: self.attachmentId})
+      ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
         .success(function(d) {
           notify.success("liite hyl\u00E4tty",model);
           repository.reloadAllApplications();
@@ -33,7 +33,7 @@ var attachment = function() {
     };
 
     self.approveAttachment = function() {
-      ajax.command("approve-attachment", { id: self.applicationId, attachmentId: self.attachmentId})
+      ajax.command("approve-attachment", { id: self.application.id, attachmentId: self.attachmentId})
         .success(function(d) {
           notify.success("liite hyv\u00E4ksytty",model);
           repository.reloadAllApplications();
@@ -83,7 +83,7 @@ var attachment = function() {
     commentModel.setTarget({type: "attachment", id: attachmentId});
     commentModel.setComments(application.comments);
 
-    approveModel.setApplicationId(application.id);
+    approveModel.setApplication(application);
     approveModel.setAttachmentId(application.id);
   }
 
