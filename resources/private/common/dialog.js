@@ -1,5 +1,6 @@
 /**
  * Lupapiste Modal Window module.
+ * The modal container element must have 'window' CSS class.
  */
 if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
 
@@ -7,74 +8,60 @@ if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
  * Modal window prototype.
  * @param {String}  Mask element ID. Mask will be created automatically.
  * @param {String}  Mask color: 'black' or 'white'
- * @param {String}  Modal window container jQuery selector
  */
-LUPAPISTE.Modal = function(maskId, maskColor, contentId) {
+LUPAPISTE.Modal = function(maskId, maskColor) {
+  var self = this;
   this.mask = undefined;
   this.maskId = maskId;
   this.maskColor = maskColor;
-  this.contentId = contentId;
 
   this.createMask = function() {
-    if (!this.mask) {
-      if (!document.getElementById(this.maskId)) {
-        maskDiv = document.createElement("div");
-        maskDiv.id = LUPAPISTE.ModalDialog.maskId;
-        maskDiv.className = "mask " + this.maskColor;
-        document.body.appendChild(maskDiv);
-      }
-      this.mask = $('#' + this.maskId);
+    if (!document.getElementById(self.maskId)) {
+      maskDiv = document.createElement("div");
+      maskDiv.id = LUPAPISTE.ModalDialog.maskId;
+      maskDiv.className = "mask " + self.maskColor;
+      document.body.appendChild(maskDiv);
     }
-  }
+    self.mask = $('#' + self.maskId);
+    self.mask.click(this.close);
+  };
 
-  this.getMask = function() {
-    if (!this.mask) {
-      this.createMask();
+  /**
+   * Opens a modal window.
+   * @param {String}  Modal window container jQuery selector
+   */
+  this.open = function(selector) {
+    var maskHeight = $(document).height();
+    var maskWidth = $(window).width();
+    self.mask.css({'width':maskWidth,'height':maskHeight});
+    self.mask.fadeIn(300);
+    self.mask.fadeTo("fast",0.8);
+
+    var winHeight = $(window).height();
+    var winWidth = $(window).width();
+    $(selector).css('top',  winHeight/2-$(selector).height()/2);
+    $(selector).css('left', winWidth/2-$(selector).width()/2);
+    $(selector).fadeIn(600);
+    return false;
+  };
+
+  this.close = function(e) {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
     }
-    return this.mask;
-  }
-
-
+    $('.window:visible').each(function() {
+      hub.send("dialog-close", {id : $(this).attr('id')});
+    });
+    $('#' + self.maskId + ', .window').hide();
+  };
 
 };
 
 /**
+ * Lupapiste Modal Dialog window.
  * Call LUPAPISTE.ModalDialog.init() to activate.
  */
-LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black", undefined);
-
-/**
- * Opens a modal window.
- * @param {String}  Modal window container jQuery selector
- */
-LUPAPISTE.ModalDialog.open = function(selector) {
-  var maskHeight = $(document).height();
-  var maskWidth = $(window).width();
-  var mask = LUPAPISTE.ModalDialog.getMask();
-  mask.css({'width':maskWidth,'height':maskHeight});
-  mask.fadeIn(300);
-  mask.fadeTo("fast",0.8);
-  var winHeight = $(window).height();
-  var winWidth = $(window).width();
-  $(selector).css('top',  winHeight/2-$(selector).height()/2);
-  $(selector).css('left', winWidth/2-$(selector).width()/2);
-  $(selector).fadeIn(600);
-  return false;
-};
-
-LUPAPISTE.ModalDialog.close = function(e) {
-  if (e && typeof e.preventDefault === "function") {
-    e.preventDefault();
-  }
-  $('.window').each(function() {
-    var dialog = $(this);
-    var dialogId = dialog.attr('id');
-    if (dialog.is(":visible")) {
-      hub.send("dialog-close", {id : dialogId});
-    }
-  });
-  $('#' + LUPAPISTE.ModalDialog.maskId + ', .window').hide();
-};
+LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
 
 /**
  * Initializes modal dialog elements
@@ -99,6 +86,7 @@ LUPAPISTE.ModalDialog.init = function() {
   });
 
   // Register modal window closing handlers
-  $('.window .close').click(LUPAPISTE.ModalDialog.close);
-  LUPAPISTE.ModalDialog.getMask().click(LUPAPISTE.ModalDialog.close);
+  $('.window .close').click(this.close);
+
 };
+
