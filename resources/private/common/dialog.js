@@ -17,14 +17,16 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
   this.createMask = function() {
     if (!document.getElementById(self.maskId)) {
-      maskDiv = document.createElement("div");
-      maskDiv.id = LUPAPISTE.ModalDialog.maskId;
+      var maskDiv = document.createElement("div");
+      maskDiv.id = self.maskId;
       maskDiv.className = "mask " + self.maskColor;
       document.body.appendChild(maskDiv);
     }
     self.mask = $('#' + self.maskId);
     self.mask.click(this.close);
   };
+
+  this.getMask = function() {return self.mask;};
 
   /**
    * Opens a modal window.
@@ -90,3 +92,34 @@ LUPAPISTE.ModalDialog.init = function() {
 
 };
 
+/**
+ * Lupapiste Modal Progress Bar window.
+ * Call LUPAPISTE.ModalProgress.show() to activate.
+ */
+LUPAPISTE.ModalProgress = new LUPAPISTE.Modal("ModalProgressMask", "white");
+
+LUPAPISTE.ModalProgress.show = function() {
+
+  // Create mask element
+  this.createMask();
+
+  this.progressBarId = "ModalProgressBar";
+
+  // Create progress bar
+  if (!document.getElementById(this.progressBarId)) {
+    var progressBarContainer = document.createElement("div");
+    progressBarContainer.id = this.progressBarId;
+    progressBarContainer.className = "window rounded";
+    progressBarContainer.style.textAlign = "center";
+    progressBarContainer.style.padding = "0";
+    progressBarContainer.style.lineHeight = "0";
+
+    var progressBarImg = document.createElement("img");
+    progressBarImg.src = "/img/loader-bar.gif";
+    progressBarImg.alt = "...";
+    progressBarContainer.appendChild(progressBarImg);
+    document.body.appendChild(progressBarContainer);
+  }
+  this.open("#" + this.progressBarId);
+  this.getMask().unbind('click');
+};
