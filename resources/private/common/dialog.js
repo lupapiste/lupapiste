@@ -1,13 +1,47 @@
 /**
  * Lupapiste Modal Window module.
- * Call LUPAPISTE.ModalDialog.init() to activate.
  */
 if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
 
-LUPAPISTE.ModalDialog = {
-    maskId: "ModalDialogMask",
-    getMask: function() {return $('#' + LUPAPISTE.ModalDialog.maskId);}
+/**
+ * Modal window prototype.
+ * @param {String}  Mask element ID. Mask will be created automatically.
+ * @param {String}  Mask color: 'black' or 'white'
+ * @param {String}  Modal window container jQuery selector
+ */
+LUPAPISTE.Modal = function(maskId, maskColor, contentId) {
+  this.mask = undefined;
+  this.maskId = maskId;
+  this.maskColor = maskColor;
+  this.contentId = contentId;
+
+  this.createMask = function() {
+    if (!this.mask) {
+      if (!document.getElementById(this.maskId)) {
+        maskDiv = document.createElement("div");
+        maskDiv.id = LUPAPISTE.ModalDialog.maskId;
+        maskDiv.className = "mask " + this.maskColor;
+        document.body.appendChild(maskDiv);
+      }
+      this.mask = $('#' + this.maskId);
+    }
+  }
+
+  this.getMask = function() {
+    if (!this.mask) {
+      this.createMask();
+    }
+    return this.mask;
+  }
+
+
+
 };
+
+/**
+ * Call LUPAPISTE.ModalDialog.init() to activate.
+ */
+LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black", undefined);
 
 /**
  * Opens a modal window.
@@ -48,12 +82,7 @@ LUPAPISTE.ModalDialog.close = function(e) {
 LUPAPISTE.ModalDialog.init = function() {
 
   // Create mask element
-  if (!document.getElementById(LUPAPISTE.ModalDialog.maskId)) {
-    maskDiv = document.createElement("div");
-    maskDiv.id = LUPAPISTE.ModalDialog.maskId;
-    maskDiv.className = "mask black"
-    document.body.appendChild(maskDiv);
-  }
+  this.createMask();
 
   // Register default opener:
   // Click any element that has .modal class and data-windows-id that
