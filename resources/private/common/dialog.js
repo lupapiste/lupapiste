@@ -4,7 +4,10 @@
  */
 if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
 
-LUPAPISTE.ModalDialog = {};
+LUPAPISTE.ModalDialog = {
+    maskId: "ModalDialogMask",
+    getMask: function() {return $('#' + LUPAPISTE.ModalDialog.maskId);}
+};
 
 /**
  * Opens a modal window.
@@ -13,9 +16,10 @@ LUPAPISTE.ModalDialog = {};
 LUPAPISTE.ModalDialog.open = function(selector) {
   var maskHeight = $(document).height();
   var maskWidth = $(window).width();
-  $('#mask').css({'width':maskWidth,'height':maskHeight});
-  $('#mask').fadeIn(300);
-  $('#mask').fadeTo("fast",0.8);
+  var mask = LUPAPISTE.ModalDialog.getMask();
+  mask.css({'width':maskWidth,'height':maskHeight});
+  mask.fadeIn(300);
+  mask.fadeTo("fast",0.8);
   var winHeight = $(window).height();
   var winWidth = $(window).width();
   $(selector).css('top',  winHeight/2-$(selector).height()/2);
@@ -35,7 +39,7 @@ LUPAPISTE.ModalDialog.close = function(e) {
       hub.send("dialog-close", {id : dialogId});
     }
   });
-  $('#mask, .window').hide();
+  $('#' + LUPAPISTE.ModalDialog.maskId + ', .window').hide();
 };
 
 /**
@@ -44,9 +48,10 @@ LUPAPISTE.ModalDialog.close = function(e) {
 LUPAPISTE.ModalDialog.init = function() {
 
   // Create mask element
-  if (!document.getElementById("mask")) {
+  if (!document.getElementById(LUPAPISTE.ModalDialog.maskId)) {
     maskDiv = document.createElement("div");
-    maskDiv.id = "mask";
+    maskDiv.id = LUPAPISTE.ModalDialog.maskId;
+    maskDiv.className = "mask black"
     document.body.appendChild(maskDiv);
   }
 
@@ -66,5 +71,5 @@ LUPAPISTE.ModalDialog.init = function() {
 
   // Register modal window closing handlers
   $('.window .close').click(LUPAPISTE.ModalDialog.close);
-  $('#mask').click(LUPAPISTE.ModalDialog.close);
+  LUPAPISTE.ModalDialog.getMask().click(LUPAPISTE.ModalDialog.close);
 };
