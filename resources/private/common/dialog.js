@@ -70,7 +70,6 @@ LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
  */
 LUPAPISTE.ModalDialog.init = function() {
 
-  // Create mask element
   this.createMask();
 
   // Register default opener:
@@ -94,21 +93,19 @@ LUPAPISTE.ModalDialog.init = function() {
 
 /**
  * Lupapiste Modal Progress Bar window.
- * Call LUPAPISTE.ModalProgress.show() to activate.
+ * Call LUPAPISTE.ModalProgress.init() to setup and show() to activate.
  */
 LUPAPISTE.ModalProgress = new LUPAPISTE.Modal("ModalProgressMask", "white");
+LUPAPISTE.ModalProgress.progressBarId = "ModalProgressBar";
 
-LUPAPISTE.ModalProgress.show = function() {
+LUPAPISTE.ModalProgress.init = function() {
 
-  // Create mask element
   this.createMask();
-
-  this.progressBarId = "ModalProgressBar";
 
   // Create progress bar
   if (!document.getElementById(this.progressBarId)) {
     var progressBarContainer = document.createElement("div");
-    progressBarContainer.id = this.progressBarId;
+    progressBarContainer.id = LUPAPISTE.ModalProgress.progressBarId;
     progressBarContainer.className = "window rounded";
     progressBarContainer.style.textAlign = "center";
     progressBarContainer.style.padding = "0";
@@ -122,6 +119,9 @@ LUPAPISTE.ModalProgress.show = function() {
     progressBarContainer.appendChild(progressBarImg);
     document.body.appendChild(progressBarContainer);
   }
-  this.open("#" + this.progressBarId);
+};
+
+LUPAPISTE.ModalProgress.show = function() {
+  this.open("#" + LUPAPISTE.ModalProgress.progressBarId);
   this.getMask().unbind('click');
 };
