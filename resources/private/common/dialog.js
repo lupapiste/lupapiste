@@ -117,6 +117,8 @@ LUPAPISTE.ModalProgress.show = function() {
     var progressBarImg = document.createElement("img");
     progressBarImg.src = "/img/loader-bar.gif";
     progressBarImg.alt = "...";
+    progressBarImg.width = 220;
+    progressBarImg.height = 19;
     progressBarContainer.appendChild(progressBarImg);
     document.body.appendChild(progressBarContainer);
   }
