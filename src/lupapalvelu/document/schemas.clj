@@ -1,7 +1,9 @@
 (ns lupapalvelu.document.schemas)
 
 (defn to-map-by-name [docs]
-  (into {} (for [doc docs] [(get-in doc [:info :name]) doc])))
+  (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc))
+          {}
+          docs))
 
 (def schemas
   (to-map-by-name
