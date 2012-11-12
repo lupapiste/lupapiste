@@ -22,7 +22,9 @@ var attachment = function() {
     self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
 
     // todo: move this to domain-js?
-    self.stateIs = function(state) { return self.application && self.application.attachments[self.attachmentId].state === state; }
+    self.stateIs = function(state) {
+      return self.application && _.filter(self.application.attachments, function(attachemnt) { return attachment.id === self.attachmentId;}).state === state;
+    }
 
     self.isNotOk = function() { return !self.stateIs('ok');}
     self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');}
