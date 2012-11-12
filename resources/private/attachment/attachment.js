@@ -21,9 +21,14 @@ var attachment = function() {
     self.setAuthorizationModel = function(authorizationModel) { self.authorizationModel = authorizationModel; };
     self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
 
-    // todo: move this to domain-js?
     self.stateIs = function(state) {
-      return self.application && _.filter(self.application.attachments, function(attachemnt) { return attachment.id === self.attachmentId;}).state === state;
+      var att = self.application &&
+        _.first(
+            _.filter(self.application.attachments,
+                function(attachment) {
+                  return attachment.id === self.attachmentId;
+            }));
+      return att.state === state;
     }
 
     self.isNotOk = function() { return !self.stateIs('ok');}
