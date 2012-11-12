@@ -18,7 +18,7 @@
       </div>
       
       <!-- Preview images and pdf files only -->
-      <div class="file-preview" data-bind="visible: isImage() || isPdf()">
+      <div id="test-file-preview" class="file-preview" data-bind="visible: isImage() || isPdf()">
         <div class="file-preview-image" data-bind="if: isImage()">
           <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
             <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
