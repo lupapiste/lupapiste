@@ -73,7 +73,7 @@ var attachment = function() {
 
   function showAttachment(application) {
     if (!applicationId || !attachmentId) return;
-    var attachment = application.attachments && application.attachments[attachmentId];
+    var attachment = _.filter(application.attachments, function(value) {return value.id === attachmentId})[0];
     if (!attachment) {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
       return;

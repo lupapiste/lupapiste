@@ -142,7 +142,7 @@
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
 
-      application.attachments(_.values(data.attachments));
+      application.attachments(data.attachments || []);
 
       pageutil.setPageReady("application");
     });

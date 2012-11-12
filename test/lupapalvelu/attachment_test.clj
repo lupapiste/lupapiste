@@ -55,3 +55,13 @@
 
   )
 
+(def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
+
+(facts
+  (fact "Latest version is found"
+        (attachment-latest-version test-attachments "1") => {:major 9, :minor 7})
+  (fact "No such version"
+        (attachment-latest-version test-attachments "none") => falsey)
+  )
+
+
