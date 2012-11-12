@@ -23,11 +23,10 @@ var attachment = function() {
 
     self.stateIs = function(state) {
       var att = self.application &&
-        _.first(
-            _.filter(self.application.attachments,
-                function(attachment) {
-                  return attachment.id === self.attachmentId;
-            }));
+        _.find(self.application.attachments,
+            function(attachment) {
+              return attachment.id === self.attachmentId;
+          });
       return att.state === state;
     }
 
