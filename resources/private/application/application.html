@@ -148,11 +148,11 @@
             </thead>
             <tbody data-bind="foreach: attachments">
             <tr style="cursor: pointer;" data-bind="if: $data.type || $data.modified">
-                <td data-bind="text: loc('attachmentState_' + state)"
+                <td id="test-attachement-status" data-bind="text: loc('attachmentState_' + state)"
                     class="attachment-state"></td>
                 <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                   <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
-                    <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
+                    <span data-bind="if: type != null && type.length > 0"><span data-bind="text: loc('attachmentType_' + type)"></span></span>
                     <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
                   </a>
                 </td>
@@ -180,7 +180,7 @@
               data-bind="visible: $root.authorization.ok('upload-attachment'),click: attachment.newAttachment">
             Lisää liite
           </button>
-          <div id="upload-dialog" class="window">
+          <div id="upload-dialog" class="window autosized">
             <div class="dialog-header">
               <p>Tallenna tiedosto</p>
               <p class="dialog-close close">X</p>
@@ -202,7 +202,7 @@
 
     <div id="boxes">
        
-      <div id="dialog-valtuutus" class="window">
+      <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
            
           <p>Lisää valtuutus</p>

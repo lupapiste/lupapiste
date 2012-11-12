@@ -28,11 +28,15 @@
         </div>
       </div>
 
-      <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
+      <div id="test-txt-file-preview" class="file-preview" data-bind="visible: !(isImage() || isPdf())">
         <p>Esikatselua ei saatavilla.</p>
       </div>
 
       <div class="attachment-file-versions">
+        <div data-bind="with: $root.approve">
+          <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button id="test-attachment-reject" data-bind="click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-primary">Tarkennettavaa</button>
+        </div>
         <h3>Versiohistoria:</h3>
         <table class="table table-striped">
           <thead>
