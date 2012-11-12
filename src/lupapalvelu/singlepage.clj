@@ -15,8 +15,10 @@
 (defn compose-resource [kind component]
   (let [out (ByteArrayOutputStream.)]
     (doseq [src (c/get-resources ui-components kind component)]
-      (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))]
-        (IOUtils/copy resource (write-header out src))))
+      (if (fn? src)
+        (.write (write-header out (str "fn: " 'src)) (.getBytes (src)))
+        (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))]
+          (IOUtils/copy resource (write-header out src)))))
     (.toByteArray out)))
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))

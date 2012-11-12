@@ -3,6 +3,11 @@
   (:require [lupapalvelu.components.core :as c]
             [lupapalvelu.env :as env]))
 
+(defn foo []
+  (if (env/dev-mode?)
+    (str "function dev() { console.log('This is dev'); return true; };")
+    (str "function dev() { console.log('This is dev'); return false; };")))
+
 (def oskari {:depends [:init :jquery]
              :js ["oskarimap.js" "map.js"]
              :css ["oskarimap.css"]
@@ -21,7 +26,7 @@
 
    :knockout     {:js ["knockout-2.1.0.debug.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    :underscore   {:js ["underscore.js"]}
-   :init         {:js ["hub.js" "log.js"]}
+   :init         {:js ["hub.js" "log.js" foo]}
 
    :map          (if (env/dev-mode?) dummymap oskari)
 
@@ -102,8 +107,9 @@
 ; Make sure that all resources are available:
 
 (doseq [c (keys ui-components)
-        r (map c/path (mapcat #(c/component-resources ui-components % c) [:js :html :css]))]
-  (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) r)]
-    (if resource
-      (.close resource)
-      (throw (Exception. (str "Resource missing: " r))))))
+        r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
+  (if (not (fn? r))
+    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path r))]
+      (if resource
+        (.close resource)
+        (throw (Exception. (str "Resource missing: " r)))))))
