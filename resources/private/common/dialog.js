@@ -1,54 +1,76 @@
 /**
  * Lupapiste Modal Window module.
- * Call LUPAPISTE.ModalDialog.init() to activate.
+ * The modal container element must have 'window' CSS class.
  */
 if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
 
-LUPAPISTE.ModalDialog = {};
+/**
+ * Modal window prototype.
+ * @param {String}  Mask element ID. Mask will be created automatically.
+ * @param {String}  Mask color: 'black' or 'white'
+ */
+LUPAPISTE.Modal = function(maskId, maskColor) {
+  var self = this;
+  this.mask = undefined;
+  this.maskId = maskId;
+  this.maskColor = maskColor;
+
+  this.createMask = function() {
+    if (!document.getElementById(self.maskId)) {
+      var maskDiv = document.createElement("div");
+      maskDiv.id = self.maskId;
+      maskDiv.className = "mask " + self.maskColor;
+      document.body.appendChild(maskDiv);
+    }
+    self.mask = $('#' + self.maskId);
+    self.mask.click(this.close);
+  };
+
+  this.getMask = function() {return self.mask;};
+
+  /**
+   * Opens a modal window.
+   * @param {String}  Modal window container jQuery selector
+   */
+  this.open = function(selector) {
+    var maskHeight = $(document).height();
+    var maskWidth = $(window).width();
+    self.mask.css({'width':maskWidth,'height':maskHeight});
+    self.mask.fadeIn(300);
+    self.mask.fadeTo("fast",0.8);
+
+    var winHeight = $(window).height();
+    var winWidth = $(window).width();
+    $(selector).css('top',  winHeight/2-$(selector).height()/2);
+    $(selector).css('left', winWidth/2-$(selector).width()/2);
+    $(selector).fadeIn(600);
+    return false;
+  };
+
+  this.close = function(e) {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
+    $('.window:visible').each(function() {
+      hub.send("dialog-close", {id : $(this).attr('id')});
+    });
+    $('#' + self.maskId + ', .window').hide();
+  };
+
+};
 
 /**
- * Opens a modal window.
- * @param {String}  Modal window container jQuery selector
+ * Lupapiste Modal Dialog window.
+ * Call LUPAPISTE.ModalDialog.init() to activate.
  */
-LUPAPISTE.ModalDialog.open = function(selector) {
-  var maskHeight = $(document).height();
-  var maskWidth = $(window).width();
-  $('#mask').css({'width':maskWidth,'height':maskHeight});
-  $('#mask').fadeIn(300);
-  $('#mask').fadeTo("fast",0.8);
-  var winHeight = $(window).height();
-  var winWidth = $(window).width();
-  $(selector).css('top',  winHeight/2-$(selector).height()/2);
-  $(selector).css('left', winWidth/2-$(selector).width()/2);
-  $(selector).fadeIn(600);
-  return false;
-};
-
-LUPAPISTE.ModalDialog.close = function(e) {
-  if (e && typeof e.preventDefault === "function") {
-    e.preventDefault();
-  }
-  $('.window').each(function() {
-    var dialog = $(this);
-    var dialogId = dialog.attr('id');
-    if (dialog.is(":visible")) {
-      hub.send("dialog-close", {id : dialogId});
-    }
-  });
-  $('#mask, .window').hide();
-};
+LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
 
 /**
  * Initializes modal dialog elements
  */
 LUPAPISTE.ModalDialog.init = function() {
 
-  // Create mask element
-  if (!document.getElementById("mask")) {
-    maskDiv = document.createElement("div");
-    maskDiv.id = "mask";
-    document.body.appendChild(maskDiv);
-  }
+  this.createMask();
 
   // Register default opener:
   // Click any element that has .modal class and data-windows-id that
@@ -65,6 +87,41 @@ LUPAPISTE.ModalDialog.init = function() {
   });
 
   // Register modal window closing handlers
-  $('.window .close').click(LUPAPISTE.ModalDialog.close);
-  $('#mask').click(LUPAPISTE.ModalDialog.close);
+  $('.window .close').click(this.close);
+
+};
+
+/**
+ * Lupapiste Modal Progress Bar window.
+ * Call LUPAPISTE.ModalProgress.init() to setup and show() to activate.
+ */
+LUPAPISTE.ModalProgress = new LUPAPISTE.Modal("ModalProgressMask", "white");
+LUPAPISTE.ModalProgress.progressBarId = "ModalProgressBar";
+
+LUPAPISTE.ModalProgress.init = function() {
+
+  this.createMask();
+
+  // Create progress bar
+  if (!document.getElementById(this.progressBarId)) {
+    var progressBarContainer = document.createElement("div");
+    progressBarContainer.id = LUPAPISTE.ModalProgress.progressBarId;
+    progressBarContainer.className = "window rounded";
+    progressBarContainer.style.textAlign = "center";
+    progressBarContainer.style.padding = "0";
+    progressBarContainer.style.lineHeight = "0";
+
+    var progressBarImg = document.createElement("img");
+    progressBarImg.src = "/img/loader-bar.gif";
+    progressBarImg.alt = "...";
+    progressBarImg.width = 220;
+    progressBarImg.height = 19;
+    progressBarContainer.appendChild(progressBarImg);
+    document.body.appendChild(progressBarContainer);
+  }
+};
+
+LUPAPISTE.ModalProgress.show = function() {
+  this.open("#" + LUPAPISTE.ModalProgress.progressBarId);
+  this.getMask().unbind('click');
 };

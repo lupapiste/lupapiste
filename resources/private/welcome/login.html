@@ -31,9 +31,10 @@
                 Voit tehdä hakemuksia ja ilmoituksia sähköisessä asiointijärjestelmässä.
                 Asiointijärjestelmän käyttö vaatii kirjautumisen. Käyttäjätunnuksena toimii sähköpostiosoitteesi.
               </p>
-              <input id="login-username" type="text" class="input-xlarge" placeholder="Käyttäjätunnus" name="username" autofocus="autofocus">
-              <input id="login-password" type="password" class="input-xlarge" placeholder="Salasana" name="password">
-              <br/>
+              <label class="form-label" for="login-username">Sähköpostiosoite</label>
+              <input class="form-input" id="login-username" type="text" placeholder="Käyttäjätunnus" name="username" autofocus="autofocus">
+              <label class="form-label" for="login-password">Salasana</label>
+              <input class="form-input" id="login-password" type="password" placeholder="Salasana" name="password">
               <button id="login-button" class="btn btn-primary">Kirjaudu</button>
               <span id="login-message" style="display: none; color: red"></span>
               <div style="margin-top: 30px;">

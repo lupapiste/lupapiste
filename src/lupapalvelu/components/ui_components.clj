@@ -26,7 +26,7 @@
    :map          (if (env/dev-mode?) dummymap oskari)
 
    :common       {:depends [:init :jquery :knockout :underscore]
-                  :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js" "ko.init.js" "dialog.js"]
+                  :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js" "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 

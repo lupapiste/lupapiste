@@ -1,30 +1,43 @@
 <!DOCTYPE html>
 <html >
 <body>
-  <section class="page" id="attachment">
-    <div class="container" data-bind="if: latestVersion">
-      <h1>
+  <section class="page" id="attachment" data-bind="with: attachment">
+    <div class="breadcrumb">
+      <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications"><span data-bind="text: application.title"></a> / Liitteet</span>
+    </div>
+    <div data-bind="if: latestVersion">
+      <div class="attachment-info">
+        <h1>
+          <span data-bind="if: type"><span data-bind="text: type"></span></span>
+          versio
+          <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+          Muokattu
+          <span data-bind="dateString: latestVersion().created">31.10.2012</span>
+        </h1>
+      </div>
 
-        <span data-bind="if: type"><span data-bind="text: type"></span></span>
-        versio
-        <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-        Muokattu
-        <span data-bind="dateString: latestVersion().created">31.10.2012</span>
-      </h1>
-      
       <!-- Preview images and pdf files only -->
-      <div class="file-preview">
-          <p>Esikatselua ei saatavilla.</p>
+      <div class="file-preview" data-bind="visible: isImage() || isPdf()">
+        <div class="file-preview-image" data-bind="if: isImage()">
+          <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
+            <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
+          </a>
+        </div>
+        <div class="file-preview-pdf" data-bind="if: isPdf()">
+          <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
+        </div>
       </div>
 
-      <div class="file-preview-actions">
-        <span data-bind="if: isImage()">
-        <a class="btn" data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">Suurenna</a>
-        <br/>
-        </span>
+      <div class="file-preview" data-bind="visible: !(isImage() || isPdf())">
+        <p>Esikatselua ei saatavilla.</p>
       </div>
-      
+
       <div class="attachment-file-versions">
+        <div data-bind="with: $root.approve">
+          <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button id="test-attachment-reject" data-bind="click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-primary">Tarkennettavaa</button>
+        </div>
+        <h3>Versiohistoria:</h3>
         <table class="table table-striped">
           <thead>
             <tr>
@@ -35,14 +48,45 @@
           </thead>
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
-              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}" /></td>
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}"></a></td>
               <td data-bind="version: version"></td>
-              <td data-bind="dateString: created">31.10.2012</span>
+              <td data-bind="dateString: created">31.10.2012</td>
             </tr>
           </tbody>
         </table>
+
+        <div data-bind="with:attachment">
+          <button
+              id="add-new-attachment-version"
+              class="btn btn-primary modal add-new-version"
+              data-window-id="upload-dialog"
+              data-bind="click: newAttachment">
+            Lisää liite
+          </button>
+        </div>
       </div>
-      
+
+      <div class="attachment-file-conversation" data-bind="with: $root.comment">
+          <h3>Keskustele liitteestä:</h3>
+            <table class="table table-striped">
+              <tbody data-bind="foreach: comments">
+                <tr class="comment">
+                  <td class="commentParty">
+                    <span class="date" data-bind="dateTimeString: created"></span><br />
+                    <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
+                    <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
+                  </td>
+                  <td data-bind="text: text"></td>
+                </tr>
+              </tbody>
+            </table>
+            <form>
+              <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+              <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
+            </form>
+          </div>
+      </div>
+
     </div>
   </section>
 </body>
