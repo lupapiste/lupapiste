@@ -152,7 +152,7 @@
                     class="attachment-state"></td>
                 <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                   <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
-                    <span data-bind="if: type != null && type.length > 0"><span data-bind="text: type"></span></span>
+                    <span data-bind="if: type != null && type.length > 0"><span data-bind="text: loc('attachmentType_' + type)"></span></span>
                     <span data-bind="if: type == null || type.length == 0"> <i>Nimetön</i></span>
                   </a>
                 </td>
