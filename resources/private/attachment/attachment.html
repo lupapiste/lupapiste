@@ -54,6 +54,16 @@
             </tr>
           </tbody>
         </table>
+
+        <div data-bind="with:attachment">
+          <button
+              id="add-new-attachment-version"
+              class="btn btn-primary modal add-new-version"
+              data-window-id="upload-dialog"
+              data-bind="click: newAttachment">
+            Lisää liite
+          </button>
+        </div>
       </div>
 
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
