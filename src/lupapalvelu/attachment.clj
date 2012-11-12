@@ -166,18 +166,18 @@
                   :contentType content-type
                   :size size}
               attachment-model {:modified now
-                 (str "attachments.$.modified") now
-                 (str "attachments.$.state")  :requires_authority_action
-                 (str "attachments.$.latestVersion") version-model}]
+                 :attachments.$.modified now
+                 :attachments.$.state  :requires_authority_action
+                 :attachments.$.latestVersion version-model}]
 
         ; Check return value and try again with new version number
         (let [result-count (mongo/update-by-query mongo/applications
             {:_id application-id
              :attachments {$elemMatch {
-             (str "latestVersion.version.major") (:major latest-version)
-             (str "latestVersion.version.minor") (:minor latest-version)}}}
+             :latestVersion.version.major (:major latest-version)
+             :latestVersion.version.minor (:minor latest-version)}}}
             {$set attachment-model
-             $push {(str "attachments.$.versions") version-model}})]
+             $push {:attachments.$.versions version-model}})]
           (if (> result-count 0)
             true
             (do
@@ -221,7 +221,7 @@
         mongo/applications
         {:_id id, :attachments {$elemMatch {:id attachmentId}}}
         {$set {:modified (:created command)
-               (str "attachments.$.state") :ok}}))))
+               :attachments.$.state :ok}}))))
 
 (defcommand "reject-attachment"
   {:description "Authority can reject attachement, requires user action."
@@ -235,7 +235,7 @@
         mongo/applications
         {:_id id, :attachments {$elemMatch {:id attachmentId}}}
         {$set {:modified (:created command)
-               (str "attachments.$.state") :requires_user_action}}))))
+               :attachments.$.state :requires_user_action}}))))
 
 
 (defcommand "create-attachment"
