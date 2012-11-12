@@ -5,8 +5,8 @@
 
 (defn foo []
   (if (env/dev-mode?)
-    (str "function dev() { console.log('This is dev'); return true; };")
-    (str "function dev() { console.log('This is dev'); return false; };")))
+    (str "function dev() { warn('This is dev'); return true; };")
+    (str "function dev() { warn('This is dev'); return false; };")))
 
 (def oskari {:depends [:init :jquery]
              :js ["oskarimap.js" "map.js"]
