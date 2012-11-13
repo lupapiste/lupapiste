@@ -70,6 +70,21 @@ var attachment = function() {
 
     isPdf: function() {
       return this.latestVersion().contentType === "application/pdf";
+    },
+    
+    newAttachmentVersion: function() {
+      var applicationId = this.application.id();
+      var attachmentId = this.attachmentId();
+      var attachmentType = this.type();
+      
+      debug("Init file upload for application " + applicationId + " attachment " +
+          attachmentId + " of type " + attachmentType);
+      
+      initFileUpload(applicationId, attachmentId, attachmentType);
+      
+      // TODO Upload dialog is opened manually here, because click event binding to
+      // dynamic content rendered by Knockout is not possible
+      LUPAPISTE.ModalDialog.open("#upload-dialog");
     }
   };
 
@@ -87,6 +102,7 @@ var attachment = function() {
     model.type(attachment.type);
     model.application.id(applicationId);
     model.application.title(application.title);
+    model.attachmentId(attachmentId);
 
     commentModel.setApplicationId(application.id);
     commentModel.setTarget({type: "attachment", id: attachmentId});
@@ -140,12 +156,16 @@ var attachment = function() {
   });
 
   function newAttachment(m) {
+    initFileUpload(m.id());
+  }
+
+  function initFileUpload(applicationId, attachmentId, attachmentType) {
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
     if (iframe) {
       if (iframe.contentWindow.LUPAPISTE
           && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
-        iframe.contentWindow.LUPAPISTE.Upload.init(m.id(), undefined);
+        iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType);
       } else {
         error("LUPAPISTE.Upload.init is not a function");
       }
@@ -153,7 +173,7 @@ var attachment = function() {
       error("IFrame not found ", iframeId);
     }
   }
-
+  
   return { newAttachment: newAttachment };
 
 }();

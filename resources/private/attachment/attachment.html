@@ -3,7 +3,8 @@
 <body>
   <section class="page" id="attachment" data-bind="with: attachment">
     <div class="breadcrumb">
-      <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications"><span data-bind="text: application.title"></a> / Liitteet</span>
+      <a href="#!/applications" id="test-applications">Lupahakemukset</a> / 
+      <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications"><span data-bind="text: application.title"> / Liitteet</span></a>
     </div>
     <div data-bind="if: latestVersion">
       <div class="attachment-info">
@@ -34,7 +35,7 @@
 
       <div class="attachment-file-versions">
         <div data-bind="with: $root.approve">
-          <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">HyvÃ¤ksy</button>
           <button id="test-attachment-reject" data-bind="click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-primary">Tarkennettavaa</button>
         </div>
         <h3>Versiohistoria:</h3>
@@ -55,15 +56,13 @@
           </tbody>
         </table>
 
-        <div data-bind="with:attachment">
-          <button
-              id="add-new-attachment-version"
-              class="btn btn-primary modal add-new-version"
-              data-window-id="upload-dialog"
-              data-bind="click: newAttachment">
-            Lisää liite
-          </button>
-        </div>
+         <button
+             id="add-new-attachment-version"
+             class="btn btn-primary modal add-new-version"
+             data-window-id="upload-dialog"
+             data-bind="click: newAttachmentVersion">
+           Lisää uusi versio
+         </button>
       </div>
 
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
@@ -87,7 +86,6 @@
           </div>
       </div>
 
-    </div>
   </section>
 </body>
 </html>
