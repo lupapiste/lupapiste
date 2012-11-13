@@ -19,6 +19,7 @@
       var value = [];
       if(self.data() !== undefined) {
         var auth = ko.utils.unwrapObservable(self.data().auth());
+        // FIXME: Too complex for jshint, refactor me please:
         var pimped = _.reduce(auth, function(r, i) { var a = r[i.id()] || (i.roles = [], i); a.roles.push(i.role()); r[i.id()] = a; return r;}, {});
         value = _.values(pimped);
       }
@@ -188,7 +189,7 @@
         })
         .call();
       return false;
-    }
+    };
   }
 
   var tab = {

@@ -55,7 +55,7 @@ var hub = function() {
       unsubscribe(i);
     }
 
-    if (count == 0) warn("No subscribers for message with type:", type);
+    if (count === 0) warn("No subscribers for message with type:", type);
     
     return count;
   }
