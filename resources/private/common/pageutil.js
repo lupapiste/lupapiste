@@ -17,7 +17,7 @@ var pageutil = function() {
    */
   function getURLParameter(name) {
     if (location.search) {
-      var value = (location.search.match(RegExp("[?|&]"+name+'=([^&]*)(&|$)'))||[,null])[1];
+      var value = (location.search.match(RegExp("[?|&]" + name + "=([^&]*)(&|$)")) || [null])[1];
       if (value !== null) {
         return decodeURIComponent(value).replace(/\+/g, " ");
       }

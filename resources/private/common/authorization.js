@@ -7,11 +7,11 @@ var authorization = function() {
   function AuthorizationModel() {
     var self = this;
 
-    self.data = ko.observable({})
+    self.data = ko.observable({});
 
     self.ok = function(command) {
       return self.data && self.data()[command] && self.data()[command].ok;
-    }
+    };
 
     self.refresh = function(application, callback) {
       ajax.query("allowed-actions", {id: application.id})
@@ -20,7 +20,7 @@ var authorization = function() {
           if (callback) callback();
         })
         .call();
-    }
+    };
   }
 
   return {
