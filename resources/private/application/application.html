@@ -45,13 +45,12 @@
       <div class="application_actions">
         <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
         <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
-        <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
-        <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
-        <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Poista hakemus</button>
+        <button class="todo btn action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
+        <button class="todo btn action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
+        <button class="todo btn action-bar-button" data-bind="enable:false">Poista hakemus</button>
       </div>
     </div>
     <div class="sidebar">
-      <button class="todo btn btn-large btn-success action-bar-button" style="display: none">Tallenna</button>
       <aside class="instructions">
         <h3>Ohje</h3>
         <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
@@ -70,7 +69,7 @@
       <div class="tab_content" id="application_tab" style="display: block;">
 
         <div class="application_section">
-          <h2 class="application_section_header new" data-icon="&#10003;" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
+          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick, clickBubble: false"> <span class="font-icon icon-expanded"></span> Hakemuksen perustiedot</h2>
           <div class="application_section_content content_expanded">
             <div>
               <h3>Valtuutetut</h3>
