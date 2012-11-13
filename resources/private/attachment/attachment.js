@@ -13,23 +13,25 @@ var attachment = function() {
   function ApproveModel(authorizationModel) {
     var self = this;
 
-    self.application;
     self.authorizationModel = authorizationModel;
-    self.attachmentId;
 
     self.setApplication = function(application) { self.application = application; };
     self.setAuthorizationModel = function(authorizationModel) { self.authorizationModel = authorizationModel; };
     self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
 
-    // todo: move this to domain-js?
     self.stateIs = function(state) {
-      return self.application && _.filter(self.application.attachments, function(attachemnt) { return attachment.id === self.attachmentId;}).state === state;
-    }
+      var att = self.application &&
+        _.find(self.application.attachments,
+            function(attachment) {
+              return attachment.id === self.attachmentId;
+          });
+      return att.state === state;
+    };
 
-    self.isNotOk = function() { return !self.stateIs('ok');}
-    self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');}
-    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment') };
-    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment') };
+    self.isNotOk = function() { return !self.stateIs('ok');};
+    self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');};
+    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment'); };
+    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment'); };
 
     self.rejectAttachment = function() {
       ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
@@ -75,7 +77,7 @@ var attachment = function() {
 
   function showAttachment(application) {
     if (!applicationId || !attachmentId) return;
-    var attachment = _.filter(application.attachments, function(value) {return value.id === attachmentId})[0];
+    var attachment = _.filter(application.attachments, function(value) {return value.id === attachmentId;})[0];
     if (!attachment) {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
       return;
@@ -143,8 +145,7 @@ var attachment = function() {
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
     if (iframe) {
-      if (iframe.contentWindow.LUPAPISTE
-          && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
+      if (iframe.contentWindow.LUPAPISTE && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
         iframe.contentWindow.LUPAPISTE.Upload.init(m.id(), undefined);
       } else {
         error("LUPAPISTE.Upload.init is not a function");
