@@ -5,7 +5,7 @@ var log = function() {
   var getCallerName = function(caller) {
     var callerName;
 
-    if (typeof caller === "undefined" || caller == null) {
+    if (typeof caller === "undefined" || caller === null) {
       callerName = "<root>";
     } else if (typeof caller.name !== "undefined") {
       callerName = caller.name;
