@@ -13,7 +13,7 @@
 
       <div class="application_summary_info">
         <div>
-          <p>Lupatunnus:</p>
+          <p>Käsittelytunnus:</p>
           <span class="application_summary_text" data-bind-test-id="application-id" data-bind="text: id()"></span>
         </div>
         <div>
@@ -32,10 +32,6 @@
               <i>(<span data-bind="dateTimeString: created"></span>)</i>
             </li>
           </ul>
-        </div>
-        <div>
-          <p>Hakemus luotu:</p>
-          <span class="application_summary_text" data-bind="dateString: created"></span>
         </div>
         <div data-bind="with: $root.applicationModel.data">
           <p>Hakemus jätetty:</p>
@@ -112,11 +108,11 @@
 
       <div class="tab_content" id="conversation_tab" data-bind="with: $root.comment">
         <div class="tab-wrapper">
-          <table class="table table-striped">
+          <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
               <tr class="comment">
-                <td class="commentParty"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
-                <td data-bind="text: text"></td>
+                <td class="commentParty commenttd"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
+                <td class="commenttd" data-bind="text: text"></td>
               </tr>
             </tbody>
           </table>
@@ -160,8 +156,7 @@
                   </a>
                 </td>
               <td><span data-bind="if: $data.latestVersion.filename">
-                  <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
-                  <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
+                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
                   <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
               </span></td>
                 <td data-bind="version: latestVersion.version"></td>
