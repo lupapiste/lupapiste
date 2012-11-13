@@ -121,9 +121,9 @@
               </tr>
             </tbody>
           </table>
-          <form class="well">
-              <div class="span12">Kirjoita viesti:</div>
-            <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+          <form>
+            <h3>Kirjoita viesti:</h3>
+            <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
             <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
           </form>
         </div>
