@@ -101,6 +101,8 @@
 
   };
 
+  var attachments = ko.observableArray([]);
+
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
@@ -142,7 +144,18 @@
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
 
-      application.attachments(data.attachments || []);
+      var statuses = {
+        requires_user_action: {statusName: "missing"},
+        requires_authority_action: {statusName: "new"},
+        ok:{statusName: "ok"}
+      };
+
+      attachments.removeAll();
+      _.each(data.attachments || [], function(a) {
+        var s = statuses[a.state] || {statusName: "foo"};
+        a.statusName = s.statusName;
+        attachments.push(a);
+      });
 
       pageutil.setPageReady("application");
     });
@@ -212,6 +225,7 @@
     var page = $("#application");
     ko.applyBindings({
       application: application,
+      attachments: attachments,
       applicationModel: applicationModel,
       comment: commentModel,
       invite: inviteModel,
