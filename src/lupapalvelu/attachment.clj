@@ -173,7 +173,8 @@
         ; Check return value and try again with new version number
         (let [result-count (mongo/update-by-query mongo/applications
             {:_id application-id
-             :attachments {$elemMatch {:latestVersion.version.major (:major latest-version)
+             :attachments {$elemMatch {:id attachment-id
+                                       :latestVersion.version.major (:major latest-version)
                                        :latestVersion.version.minor (:minor latest-version)}}}
             {$set attachment-model
              $push {:attachments.$.versions version-model}})]
