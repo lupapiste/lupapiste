@@ -37,6 +37,10 @@
           <p>Hakemus luotu:</p>
           <span class="application_summary_text" data-bind="dateString: created"></span>
         </div>
+        <div data-bind="with: $root.applicationModel.data">
+          <p>Hakemus jätetty:</p>
+          <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
+        </div>
       </div>
       <div class="application_actions">
         <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
