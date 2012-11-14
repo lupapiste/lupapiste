@@ -63,7 +63,7 @@
     {:keys [id email title text]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (let [invited (security/get-user-by-email email)]
+      (let [invited (security/get-or-create-user-by-email email)]
         (mongo/update mongo/applications
           {:_id application-id
            :invites {$not {$elemMatch {:user.username email}}}}
