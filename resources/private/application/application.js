@@ -110,11 +110,6 @@
 
   function showApplication(data) {
     authorizationModel.refresh(data,function() {
-      // Update map:
-      var location = application.location();
-      var locations = location ? [{x: location.lon(), y: location.lat()}] : [];
-      hub.send("application-map", {locations: locations});
-
       // new data mapping
       applicationModel.data(ko.mapping.fromJS(data));
       ko.mapping.fromJS(data, {}, application);
@@ -145,6 +140,10 @@
 
       application.attachments(data.attachments || []);
 
+      // Update map:
+      var location = application.location();
+      hub.send("application-map", {locations: location ? [{x: location.lon(), y: location.lat()}] : []});
+      
       pageutil.setPageReady("application");
     });
   }
