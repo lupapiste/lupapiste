@@ -127,7 +127,8 @@
   [{data :data}]
   (let [from-vetuma (client/json-get (str "/vetuma/stamp/" (:stamp data)))]
     (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) from-vetuma)
-    (security/create-user (merge data from-vetuma))))
+    (security/create-user (merge data from-vetuma {:role :applicant}))
+    nil))
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
