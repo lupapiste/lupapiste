@@ -60,7 +60,7 @@
     (if (= "dummy" (:role old-user))
       (do
         (info "rewriting over dummy user: %s" (:id old-user))
-        (mongo/update-by-id mongo/users (:id user) new-user))
+        (mongo/update-by-id mongo/users (:id old-user) new-user))
       (do
         (info "creating new user")
         (mongo/insert mongo/users new-user)))
