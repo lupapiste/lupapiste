@@ -1,4 +1,4 @@
-var accordion = (function() {
+var accordion = (function () {
 
   var animationTime = 400;
   var animationEasing = "easeInOutCubic";
@@ -24,7 +24,7 @@ var accordion = (function() {
 
     content
       .attr("data-accordion-state", state)
-      .animate({height: height}, animationTime, animationEasing);
+      .animate({ height: height }, animationTime, animationEasing);
 
     e.preventDefault();
     return false;

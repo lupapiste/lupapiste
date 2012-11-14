@@ -30,7 +30,7 @@
    {:id "777777777777777777000023" ;; Sonja Sibbo - Sipoon lupa-arkkitehti
     :email "sonja.sibbo@sipoo.fi"
     :role :authority
-    :authority :sipoo
+    :authority :Sipoo
     :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -68,7 +68,7 @@
     :email "mikko@example.com"
     :street "Rambokuja 6"
     :zip "55550"
-    :city "sipoo"
+    :city "Sipoo"
     :phone "0505503171"
     :private {:password "$2a$10$zwb/nvYQu4b1oZGpxz8.QOqHEBx3vXw9brc3NqDexgMbDuU2pwL9q"
               :salt "$2a$10$zwb/nvYQu4b1oZGpxz8.QO"
