@@ -72,8 +72,8 @@
                             :text        text
                             :created     created
                             :email       email
-                            :user        (security/summary invited)}
-                            :inviter     (security/summary user)
+                            :user        (security/summary invited)
+                            :inviter     (security/summary user)}
                   :auth (role invited :reader)}})))))
 
 (defcommand "approve-invite"
