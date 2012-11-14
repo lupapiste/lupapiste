@@ -28,11 +28,18 @@
     }
   };
 
+  function withLeadinngZero(n) {
+    return (n < 10) ? "0" + n : n;
+  }
+
   ko.bindingHandlers.dateTimeString = {
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var date = new Date(value);
-      $(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes());
+      var hours = withLeadinngZero(date.getHours());
+      var mins = withLeadinngZero(date.getMinutes());
+
+      $(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + hours + ":" + mins);
     }
   };
 
