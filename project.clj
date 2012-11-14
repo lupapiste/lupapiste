@@ -21,7 +21,7 @@
                      :test-paths ^:replace ["itest"]}}
 
   :nitpicker {:exts ["clj" "js" "html" "css" "scss"]
-              :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/"]}
+              :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers"]}
 
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
