@@ -31,10 +31,10 @@
 (defn login-with-apikey
   "returns non-private information of first user with the apikey"
   [apikey]
-  (and apikey (non-private (first (mongo/select mongo/users {"private.apikey" apikey})))))
+  (and apikey (non-private (first (mongo/select mongo/users {:private.apikey apikey})))))
 
 (defn get-user-by-email [email]
-  (and email (non-private (first (mongo/select mongo/users {"email" email})))))
+  (and email (non-private (first (mongo/select mongo/users {:email email})))))
 
 (defn- random-password []
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
