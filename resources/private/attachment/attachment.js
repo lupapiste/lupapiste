@@ -15,9 +15,9 @@ var attachment = function() {
 
     self.authorizationModel = authorizationModel;
 
-    self.setApplication = function(application) { self.application = application; };
-    self.setAuthorizationModel = function(authorizationModel) { self.authorizationModel = authorizationModel; };
-    self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
+    self.setApplication = function(application) { self.application = application; };
+    self.setAuthorizationModel = function(authorizationModel) { self.authorizationModel = authorizationModel; };
+    self.setAttachmentId = function(attachmentId) { self.attachmentId = attachmentId; };
 
     self.stateIs = function(state) {
       var att = self.application &&
@@ -73,14 +73,14 @@ var attachment = function() {
     isPdf: function() {
       return this.latestVersion().contentType === "application/pdf";
     },
-    
+
     newAttachmentVersion: function() {
       var applicationId = this.application.id();
       var attachmentId = this.attachmentId();
       var attachmentType = this.type();
-      
+
       initFileUpload(applicationId, attachmentId, attachmentType);
-      
+
       // Upload dialog is opened manually here, because click event binding to
       // dynamic content rendered by Knockout is not possible
       LUPAPISTE.ModalDialog.open("#upload-dialog");
@@ -171,7 +171,7 @@ var attachment = function() {
       error("IFrame not found ", iframeId);
     }
   }
-  
+
   return { newAttachment: newAttachment };
 
 }();
