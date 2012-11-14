@@ -45,6 +45,7 @@
               <th>Tiedosto</th>
               <th>Versio</th>
               <th>Muokattu</th>
+              <th>Muokkaaja</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: versions()">
@@ -52,6 +53,10 @@
               <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}"></a></td>
               <td data-bind="version: version"></td>
               <td data-bind="dateString: created">31.10.2012</td>
+              <td>
+                <span data-bind="fullName: user"></span>
+                (<span data-bind="ltext: user.role"></span>)
+              </td>
             </tr>
           </tbody>
         </table>
