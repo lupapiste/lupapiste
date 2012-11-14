@@ -120,7 +120,7 @@
         {:username (:username user)}
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey))
-    (fail "error.unauthorized")))
+    (fail :error.unauthorized)))
 
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
@@ -267,7 +267,7 @@
             schema-name    (get-in document [:schema :info :name])
             schema         (get schemas/schemas schema-name)]
         (if (nil? document)
-          (fail "error.document-not-found")
+          (fail :error.document-not-found)
           (do
             (info "merging user %s with best effort into document %s" user name)
             (mongo/update
