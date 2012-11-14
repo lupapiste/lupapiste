@@ -4,7 +4,7 @@
 
 ;(function() {
 
-  var keys = ["stamp", "personId", "firstName", "lastName", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
+  var keys = ["stamp", "personId", "firstname", "lastname", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
 
   function json(model) {
     var d = {};
@@ -55,8 +55,8 @@
 
   var model = {
     personId: ko.observable(),
-    firstName: ko.observable(),
-    lastName: ko.observable(),
+    firstname: ko.observable(),
+    lastname: ko.observable(),
     stamp: ko.observable(),
     street: ko.observable().extend({required: true}),
     city: ko.observable().extend({required: true}),
@@ -86,8 +86,8 @@
   hub.onPageChange("register2", function() {
     $.get("/vetuma/user", function(data) {
       model().personId(data.userid);
-      model().firstName(data.firstName);
-      model().lastName(data.lastName);
+      model().firstname(data.firstname);
+      model().lastname(data.lastname);
       model().stamp(data.stamp);
     });
 

@@ -1,5 +1,6 @@
 (ns lupapalvelu.security
   (:use monger.operators)
+  (:use lupapalvelu.log)
   (:require [lupapalvelu.mongo :as mongo])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
@@ -31,6 +32,25 @@
   "returns non-private information of first user with the apikey"
   [apikey]
   (and apikey (non-private (first (mongo/select mongo/users {"private.apikey" apikey})))))
+
+(defn create-user [{:keys [email password userid firstname lastname phone address] :as user}]
+  (let [salt              (dispense-salt)
+        hashed-password   (get-hash password salt)
+        id                (mongo/create-id)]
+    (info "Registering new user: %s" (dissoc user :password))
+    (mongo/insert
+      mongo/users
+      {:id         id
+       :username   email
+       :email      email
+       :role       :applicant
+       :personId   userid
+       :firstName  firstname
+       :lastName   lastname
+       :phone      phone
+       :address    address
+       :private    {:salt salt
+                    :password hashed-password}})))
 
 (defn get-user-by-email [email]
   (and email (non-private (first (mongo/select mongo/users {"email" email})))))
