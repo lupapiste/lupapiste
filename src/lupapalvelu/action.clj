@@ -133,7 +133,7 @@
     (info "Registering new user: %s - details from vetuma: %s" (str data) (str user))
     (mongo/insert mongo/users
       (assoc data
-             :id (mongo/create-id)
+             :id            (mongo/create-id)
              :username      (:email data)
              :role          :applicant
              :personId      (:userid user)
