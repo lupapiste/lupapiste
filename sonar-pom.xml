@@ -13,14 +13,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.host.url>http://sonar.solita.fi/</sonar.host.url>
     <sonar.language>js</sonar.language>
-	<sonar.sources>resources/private/common</sonar.sources>
+	<sonar.sources>resources</sonar.sources>
 	<!--
     <sonar.exclusions>public/lib/html5shiv*,private/jquery/*,private/underscore/*,private/knockout/*,private/dummymap/openlayers.2.12.js</sonar.exclusions>
 	-->
   </properties>
-  
+  <!--
   <build>
     <sourceDirectory>resources/private/common</sourceDirectory>
   </build>
-  
+  -->
 </project>
