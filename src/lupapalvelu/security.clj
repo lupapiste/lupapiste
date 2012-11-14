@@ -12,13 +12,13 @@
 (defn create-apikey [] (apply str (take 40 (repeatedly #(rand-int 10)))))
 
 (defn summary
-  "returns common information about the user"
+  "returns common information about the user or nil"
   [user]
-  {:id        (:id user)
-   :username  (:username user)
-   :firstName (:firstName user)
-   :lastName  (:lastName user)
-   :role      (:role user)})
+  (and user {:id        (:id user)
+             :username  (:username user)
+             :firstName (:firstName user)
+             :lastName  (:lastName user)
+             :role      (:role user)}))
 
 (defn login
   "returns non-private information of first user with the username and password"
@@ -31,3 +31,6 @@
   "returns non-private information of first user with the apikey"
   [apikey]
   (and apikey (non-private (first (mongo/select mongo/users {"private.apikey" apikey})))))
+
+(defn get-user-by-email [email]
+  (and email (non-private (first (mongo/select mongo/users {"email" email})))))
