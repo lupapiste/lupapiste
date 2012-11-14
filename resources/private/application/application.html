@@ -107,6 +107,7 @@
       </div>
 
       <div class="tab_content" id="conversation_tab" data-bind="with: $root.comment">
+        <p class="tab-info"> Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.</p>
         <div class="tab-wrapper">
           <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
@@ -133,6 +134,7 @@
       </div>
 
       <div class="tab_content" id="attachments_tab">
+        <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <table data-bind="if: attachments && attachments().length" class="table table-striped">
             <thead>
