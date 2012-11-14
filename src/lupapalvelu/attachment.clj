@@ -19,6 +19,8 @@
 ;;
 
 (def attachment-types-for-permit-type
+  ;  NOTE: :text is here as documentation only. Actual UI label for each :key
+  ;        is defined in loc.js.
   {:buildingPermit
    [{:key :hakija, :text "Hakija", :types ; <optgroup>
      [{:key :valtakirja, :text "Valtakirja"} ; <option>
