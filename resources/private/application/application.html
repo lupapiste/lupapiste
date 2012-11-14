@@ -6,11 +6,11 @@
     <div class="breadcrumb" data-bind="with: application">
       <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <span data-bind="text: title"></span>
     </div>
-    
+
     <div class="application_summary">
-    
+
       <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
-    
+
       <div data-bind="with: application">
         <h1 data-bind="with: address">
           <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
@@ -48,7 +48,7 @@
           <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
         </div>
       </div>
-      
+
       <div class="application_actions" data-bind="with: application">
         <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
         <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
@@ -56,9 +56,9 @@
         <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
         <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Poista hakemus</button>
       </div>
-      
+
     </div>
-    
+
     <div class="sidebar">
       <button class="todo btn btn-large btn-success action-bar-button" style="display: none">Tallenna</button>
       <aside class="instructions">
@@ -66,7 +66,7 @@
         <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
       </aside>
     </div>
-    
+
     <div id="tabs_container">
       <ul id="tabs">
         <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
@@ -75,7 +75,7 @@
         <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
       </ul>
     </div>
-    
+
     <div id="tab_content_container" class="container" data-bind="with: application">
 
       <div class="tab_content" id="application_tab" style="display: block;">
@@ -187,7 +187,7 @@
           </table>
           <div data-bind="ifnot: attachments && attachments().length">
             <i>Ei liitteitä</i>
-          </div> 
+          </div>
           <button
               id="add-attachment"
               class="btn btn-primary modal"
