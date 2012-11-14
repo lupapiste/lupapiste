@@ -18,18 +18,18 @@
       </div>
 
       <!-- Preview images and pdf files only -->
-      <div class="file-preview" data-bind="visible: isImage() || isPdf()">
+      <div class="file-preview" data-bind="visible: hasPreview()">
         <div class="file-preview-image" data-bind="if: isImage()">
           <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
             <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
           </a>
         </div>
-        <div class="file-preview-pdf" data-bind="if: isPdf()">
-          <iframe data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
+        <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
+          <iframe id="file-preview-iframe" data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
         </div>
       </div>
 
-      <div id="test-txt-file-preview" class="file-preview" data-bind="visible: !(isImage() || isPdf())">
+      <div id="test-txt-file-preview" class="file-preview" data-bind="visible: !hasPreview()">
         <p>Esikatselua ei saatavilla.</p>
       </div>
 
