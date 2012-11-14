@@ -63,4 +63,6 @@
   (and email (non-private (first (mongo/select mongo/users {"email" email})))))
 
 (defn get-or-create-user-by-email [email]
-  (or (get-user-by-email email) (create-user {:email email})))
+  (or
+    (get-user-by-email email)
+    (create-user {:email email})))
