@@ -41,22 +41,19 @@ var hub = function() {
   function send(type, data) {
     var count = 0;
     var event = makeEvent(type, data || {});
-    var remove = [];
 
     for (var id in subscriptions) {
       var s = subscriptions[id];
       if (s.deliver(event)) {
-        if (s.oneshot) remove.push(id);
+        if (s.oneshot) {
+          unsubscribe(id);
+        }
         count++;
       }
     }
 
-    for (var i in remove) {
-      unsubscribe(i);
-    }
-
     if (count === 0) warn("No subscribers for message with type:", type);
-    
+
     return count;
   }
 
