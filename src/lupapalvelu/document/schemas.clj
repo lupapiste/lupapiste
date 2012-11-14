@@ -6,7 +6,7 @@
 (def schemas
   (to-map-by-name
     [{:info {:name "uusi-rakennus"}
-      :body [{:name :date :type :date }
+      :body [{:name "date" :type :date }
              {:name "varusteet" :type :choice
               :body [{:name "sahko"  :type :checkbox}
                      {:name "kaasu"  :type :checkbox}
@@ -16,11 +16,11 @@
               :body [{:name "puu"}
                      {:name "purkka"}
                      {:name "betoni"}]}
-             {:name "story" :type "text"}]}
+             {:name "story" :type :text}]}
      {:info {:name "hakija"}
       :body [{:name "etunimi" :type :string}
              {:name "sukunimi" :type :string}
-             {:name "osoite" :type "group"
+             {:name "osoite" :type :group
               :body [{:name "katu" :type :string}
                      {:name "postinumeto" :type :string}
                      {:name "postitoimipaikka" :type :string}]}
