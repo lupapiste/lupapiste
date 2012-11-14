@@ -14,7 +14,7 @@
             [lupapalvelu.document.commands])
   (:gen-class))
 
-(def custom-content-type {".ttf" "application/x-font-truetype"})
+(def custom-content-type {".ttf" "font/ttf"})
 
 (defn apply-custom-content-types
   "Ring middleware.
