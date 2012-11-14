@@ -63,18 +63,18 @@
     {:keys [id email title text]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user email ;; allows invites only existing users
-        (fn [invited]
-          (mongo/update mongo/applications
-            {:_id application-id
-             :invites {$not {$elemMatch {:user.username email}}}}
-            {$push {:invites {:title       title
-                              :application application-id
-                              :text        text
-                              :created     created
-                              :inviter     (security/summary user)
-                                :user  (security/summary invited)}
-                      :auth (role invited :reader)}}))))))
+      (let [invited (security/get-user-by-email email)]
+        (mongo/update mongo/applications
+          {:_id application-id
+           :invites {$not {$elemMatch {:user.username email}}}}
+          {$push {:invites {:title       title
+                            :application application-id
+                            :text        text
+                            :created     created
+                            :email       email
+                            :user        (security/summary invited)}
+                            :inviter     (security/summary user)
+                  :auth (role invited :reader)}})))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
