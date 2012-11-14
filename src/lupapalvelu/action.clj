@@ -128,6 +128,7 @@
   (let [password (-> command :data :password)
         data     (dissoc (:data command) :password)
         salt     (security/dispense-salt)
+        pwhash   (security/get-hash password salt)
         user     (client/json-get (str "/vetuma/stamp/" (-> command :data :stamp)))] ;; loose coupling
     (info "Registering new user: %s - details from vetuma: %s" (str data) (str user))
     (mongo/insert mongo/users
@@ -139,14 +140,12 @@
              :firstName     (:firstName user)
              :lastName      (:lastName user)
              :email         (:email data)
-             :address      {
-                            :street (:street data)
+             :address      {:street (:street data)
                             :zip    (:zip data)
-                            :city   (:city data)
-                            }
+                            :city   (:city data)}
              :phone         (:phone data)
              :private       {:salt salt
-                             :password (security/get-hash password salt)}))))
+                             :password pwhash}))))
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
