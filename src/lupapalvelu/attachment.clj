@@ -251,7 +251,7 @@
   [{{application-id :id type :type} :data created :created}]
   (if-let [attachment-id (create-attachment application-id type created)]
     (ok :applicationId application-id :attachmentId attachment-id)
-    (fail "error.attachment-placeholder")))
+    (fail :error.attachment-placeholder)))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :size]
@@ -274,9 +274,9 @@
                                         {:id id, :text text, :target {:type :attachment, :id attachment-id}})
                                :user user ))
               (ok))
-            (fail "error.unknown")))
-        (fail "error.illegal-attachment-type"))
-      (fail "error.illegal-file-type"))))
+            (fail :error.unknown)))
+        (fail :error.illegal-attachment-type))
+      (fail :error.illegal-file-type))))
 
 ;;
 ;; Download

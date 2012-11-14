@@ -12,7 +12,7 @@
             [noir.session :as session]
             [clj-time.core :as time]
             [clj-time.format :as format]))
-                     
+
 ;;
 ;; Configuration
 ;;
@@ -23,7 +23,7 @@
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
-(def constants 
+(def constants
   {:url       "https://testitunnistus.suomi.fi/VETUMALogin/app"
    :rcvid     "***REMOVED***1"
    :appid     "VETUMA-APP2"
@@ -56,13 +56,11 @@
 
 (defn- logged [m] (info "%s" (str m)) m)
 
-
 ;;
 ;; Mac
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-
 (defn- mac [data]  (-> data digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
@@ -74,11 +72,8 @@
     (->> (join "&"))
     mac))
 
-(defn- with-mac [m]
-  (merge m {:mac (mac-of m request-mac-keys)}))
-
-(defn- mac-verified [m]
-  (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
+(defn- with-mac [m] (merge m {:mac (mac-of m request-mac-keys)}))
+(defn- mac-verified [m] (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
 
 ;;
 ;; response parsing
@@ -90,10 +85,10 @@
     (->> (map #(split % #"=")))
     (->> (into {}))
     keys-as-keywords
-    (rename-keys {:etunimi :firstName})
-    (rename-keys {:sukunimi :lastName})))
+    (rename-keys {:etunimi :firstname})
+    (rename-keys {:sukunimi :lastname})))
 
-(defn- extract-userid [{s :extradata}] 
+(defn- extract-userid [{s :extradata}]
   {:userid (last (split s #"="))})
 
 (defn- extract-request-id [{id :trid}]
@@ -130,7 +125,7 @@
 (defonce mem (atom {}))
 
 ;;
-;; Web stuff 
+;; Web stuff
 ;;
 
 (defn- field [[k v]]
