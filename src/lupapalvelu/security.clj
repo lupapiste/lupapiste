@@ -40,24 +40,30 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
-(defn create-user [{:keys [email password userid firstname lastname phone address] :or {firstname "" lastname "" password (random-password)} :as user}]
+(defn create-user [{:keys [email password userid role firstname lastname phone address] :or {firstname "" lastname "" password (random-password) role :dummy} :as user}]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
-        id                (mongo/create-id)]
-    (info "Registering new user: %s" (dissoc user :password))
-    (mongo/insert
-      mongo/users
-      {:id         id
-       :username   email
-       :email      email
-       :role       :applicant
-       :personId   userid
-       :firstName  firstname
-       :lastName   lastname
-       :phone      phone
-       :address    address
-       :private    {:salt salt
-                    :password hashed-password}})
+        id                (mongo/create-id)
+        old-user          (get-user-by-email email)
+        new-user          {:id         id
+                           :username   email
+                           :email      email
+                           :role       role
+                           :personId   userid
+                           :firstName  firstname
+                           :lastName   lastname
+                           :phone      phone
+                           :address    address
+                           :private    {:salt salt
+                                        :password hashed-password}}]
+    (info "register user: %s" (dissoc user :password))
+    (if (= "dummy" (:role old-user))
+      (do
+        (info "rewriting over dummy user: %s" (:id old-user))
+        (mongo/update-by-id mongo/users (:id user) new-user))
+      (do
+        (info "creating new user")
+        (mongo/insert mongo/users new-user)))
     (get-user-by-email email)))
 
 (defn get-or-create-user-by-email [email]
