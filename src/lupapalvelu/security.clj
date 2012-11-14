@@ -33,11 +33,12 @@
   [apikey]
   (and apikey (non-private (first (mongo/select mongo/users {"private.apikey" apikey})))))
 
-(defn random-string [length]
-  (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
-    (apply str (repeatedly length #(char (rand-nth ascii-codes))))))
+(defn get-user-by-email [email]
+  (and email (non-private (first (mongo/select mongo/users {"email" email})))))
 
-(defn- random-password [] (random-string 40))
+(defn- random-password []
+  (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
+    (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
 (defn create-user [{:keys [email password userid firstname lastname phone address] :or {firstname "" lastname "" password (random-password)} :as user}]
   (let [salt              (dispense-salt)
@@ -58,9 +59,6 @@
        :private    {:salt salt
                     :password hashed-password}})
     (get-user-by-email email)))
-
-(defn get-user-by-email [email]
-  (and email (non-private (first (mongo/select mongo/users {"email" email})))))
 
 (defn get-or-create-user-by-email [email]
   (or
