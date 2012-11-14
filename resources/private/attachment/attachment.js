@@ -65,6 +65,10 @@ var attachment = function() {
     versions:       ko.observable(),
     type:           ko.observable(),
 
+    hasPreview: function() {
+      return this.isImage() || this.isPdf() || this.isPlainText();
+    },
+
     isImage: function() {
       var contentType = this.latestVersion().contentType;
       return contentType && contentType.indexOf('image/') === 0;
@@ -72,6 +76,10 @@ var attachment = function() {
 
     isPdf: function() {
       return this.latestVersion().contentType === "application/pdf";
+    },
+
+    isPlainText: function() {
+      return this.latestVersion().contentType === "text/plain";
     },
 
     newAttachmentVersion: function() {
