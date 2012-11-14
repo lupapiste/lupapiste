@@ -14,8 +14,25 @@
             [lupapalvelu.document.commands])
   (:gen-class))
 
+(def custom-content-type {".ttf" "application/x-font-truetype"})
+
+(defn apply-custom-content-types
+  "Ring middleware.
+   If response does not have content-type header, and request uri ends to one of the
+   keys in custom-content-type map, set content-type to value from custom-content-type."
+  [handler]
+  (fn [request]
+    (let [resp (handler request)
+          ct (get-in resp [:headers "Content-Type"])
+          ext (re-find #"\.[^.]+$" (:uri request))
+          neue-ct (get custom-content-type ext)]
+      (if (and (nil? ct) (not (nil? neue-ct)))
+        (assoc-in resp [:headers "Content-Type"] neue-ct)
+        resp))))
+
 (defn start-server [port mode]
-  (server/start port {:mode mode :ns 'lupapalvelu.web}))
+  (server/start port {:mode mode :ns 'lupapalvelu.web})
+  (server/add-middleware apply-custom-content-types))
 
 (defn stop-server [server]
   (server/stop server))
@@ -37,6 +54,7 @@
     (fixture/apply-fixture "minimal")
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
+  (server/add-middleware apply-custom-content-types)
   (server/start env/port {:mode env/mode
                           :jetty-options {:ssl? true
                                           :ssl-port 8443
