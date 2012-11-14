@@ -40,10 +40,10 @@
       })
       .error(function(e) {
         // FIXME: DIRTY HACKS
-        if (e.text.indexOf("lupapalvelu.users.$email_1") != -1) {
+        if (e.text.indexOf("lupapalvelu.users.$email_1") !== -1) {
           $("#register-email-error").html("sahkopostiosoite on jo varattu.");
         }
-        if (e.text.indexOf("duplicate key error index: lupapalvelu.users.$personId_1") != -1) {
+        if (e.text.indexOf("duplicate key error index: lupapalvelu.users.$personId_1") !== -1) {
           $("#register-email-error").html("hetu on jo varattu.");
         }
         error(e.text);
@@ -71,7 +71,9 @@
 
   model.confirmPassword = ko.observable().extend({equal: model.password});
   model = ko.validatedObservable(model);
-  model.isValid.subscribe(function(valid) { model().disabled(!valid); });
+  model.isValid.subscribe(function(valid) {
+    model().disabled(!valid);
+  });
 
   hub.onPageChange("register", function() {
     $.get("/vetuma", {success: "/welcome#!/register2",

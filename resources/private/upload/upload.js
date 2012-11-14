@@ -1,4 +1,6 @@
-if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
+if (typeof LUPAPISTE === "undefined") {
+  var LUPAPISTE = {};
+}
 
 LUPAPISTE.Upload = {
     applicationId: ko.observable(),

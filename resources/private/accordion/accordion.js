@@ -15,7 +15,7 @@ var accordion = (function () {
       content.attr("data-accordion-height", height).css("height", height);
     }
 
-    if (state != "closed") {
+    if (state !== "closed") {
       state = "closed";
       height = "0px";
     } else {

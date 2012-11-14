@@ -156,13 +156,15 @@
       // Update map:
       var location = application.location();
       hub.send("application-map", {locations: location ? [{x: location.lon(), y: location.lat()}] : []});
-      
+
       pageutil.setPageReady("application");
     });
   }
 
   hub.subscribe("repository-application-reload", function(e) {
-    if (application.id() === e.application.id) showApplication(e.application);
+    if (application.id() === e.application.id) {
+      showApplication(e.application);
+    }
   });
 
   function InviteModel() {
@@ -213,7 +215,7 @@
 
   function onPageChange(e) {
     var id = e.pagePath[0];
-    if (application.id() != id) {
+    if (application.id() !== id) {
       repository.getApplication(id, showApplication, function() {
         error("No such application, or not permission: "+id);
         window.location.href = "#!/applications/";

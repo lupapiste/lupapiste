@@ -2,7 +2,9 @@
  * Prototype for Lupapiste Single Page Apps
  */
 
-if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
+if (typeof LUPAPISTE === "undefined") {
+  var LUPAPISTE = {};
+}
 
 /**
  * @param {String} startPage   ID of the landing page
@@ -26,7 +28,7 @@ LUPAPISTE.App = function(startPage) {
 
     self.connectionCheck();
 
-    if (typeof LUPAPISTE.ModalDialog != "undefined") {
+    if (typeof LUPAPISTE.ModalDialog !== "undefined") {
       LUPAPISTE.ModalDialog.init();
     }
 
@@ -47,7 +49,7 @@ LUPAPISTE.App = function(startPage) {
 
     trace("pageId", pageId, "pagePath", pagePath);
 
-    if (pageId != self.currentPage) {
+    if (pageId !== self.currentPage) {
 
       $(".page").removeClass("visible");
 
