@@ -197,19 +197,3 @@
         :content-type :json
         :accept :json})))
 
-;;
-;; Speed bump
-;;
-
-(env/in-dev
-
-  (def speed-bump (atom 0))
-
-  (server/add-middleware
-    (fn [handler]
-      (fn [request]
-        (let [bump @speed-bump]
-          (when (> bump 0)
-            (warn "Hit speed bump %d ms: %s" bump (:uri request))
-            (Thread/sleep bump)))
-        (handler request)))))
