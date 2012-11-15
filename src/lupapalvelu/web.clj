@@ -15,7 +15,8 @@
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
             [lupapalvelu.attachment :as attachment]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [lupapalvelu.proxy-services :as proxy-services]))
 
 ;;
 ;; Helpers
@@ -32,8 +33,13 @@
   []
   (or (session/get :user) ((request/ring-request) :user)))
 
-(defn with-user [m]
-  (merge m {:user (current-user)}))
+(defn host []
+  (let [request (ring-request)]
+    (str (name (:scheme request)) "://" (get-in request [:headers "host"]) "/")))
+
+(defn enriched [m]
+  (merge m {:user    (current-user)
+            :host    (host)}))
 
 (defn logged-in? []
   (not (nil? (current-user))))
@@ -64,10 +70,10 @@
 ;;
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute (with-user (core/command name (from-json)))))
+  (core/execute (enriched (core/command name (from-json)))))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute (with-user (core/query name (from-query)))))
+  (core/execute (enriched (core/query name (from-query)))))
 
 ;;
 ;; Web UI:
@@ -165,7 +171,7 @@
   {applicationId :applicationId attachmentId :attachmentId type :type text :text upload :upload :as data}
   (debug "upload: %s: %s" data (str upload))
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""), :text text)
-        result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
+        result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload.html"
@@ -173,9 +179,7 @@
                                             :attachmentId attachmentId
                                             :type type
                                             :defaultType type
-                                            :errorMessage (result :text)})))
-
-      )))
+                                            :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
   (if (logged-in?)
@@ -189,31 +193,18 @@
   (output-attachment attachment-id true))
 
 ;;
-;; Oskari map ajax request proxy
+;; Proxy
 ;;
 
-(defpage [:post "/ajaxProxy/:srv"] {srv :srv}
-  (let [request (ring-request)
-        body (slurp (:body request))
-        urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
-    (client/post (get urls srv)
-       {:body body
-        :content-type :json
-        :accept :json})))
+(defpage [:any "/proxy/:srv"] {srv :srv}
+  (if (logged-in?)
+    ((proxy-services/services srv (constantly {:status 404})) (ring-request))
+    {:status 401}))
 
 ;;
-;; Speed bump
+;; dev utils:
 ;;
 
 (env/in-dev
-
-  (def speed-bump (atom 0))
-
-  (server/add-middleware
-    (fn [handler]
-      (fn [request]
-        (let [bump @speed-bump]
-          (when (> bump 0)
-            (warn "Hit speed bump %d ms: %s" bump (:uri request))
-            (Thread/sleep bump)))
-        (handler request)))))
+  (defjson "/rest/spy" []
+    (dissoc (ring-request) :body)))
