@@ -203,6 +203,9 @@
 
 (env/in-dev
 
+  (defjson "/rest/spy" []
+    (dissoc (ring-request) :body))
+
   (def speed-bump (atom 0))
 
   (server/add-middleware
