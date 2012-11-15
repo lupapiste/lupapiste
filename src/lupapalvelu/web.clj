@@ -166,7 +166,7 @@
   {applicationId :applicationId attachmentId :attachmentId type :type text :text upload :upload :as data}
   (debug "upload: %s: %s" data (str upload))
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""), :text text)
-        result (core/execute (with-user (core/command "upload-attachment" upload-data)))]
+        result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload.html"
