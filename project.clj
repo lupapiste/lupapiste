@@ -20,7 +20,7 @@
                                     [clj-webdriver "0.6.0-alpha11" :exclusions [cheshire/cheshire]]]
                      :test-paths ^:replace ["itest"]}}
 
-  :nitpicker {:exts ["clj" "js" "html" "css" "scss"]
+  :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers"]}
 
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
