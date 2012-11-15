@@ -15,7 +15,8 @@
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
             [lupapalvelu.attachment :as attachment]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [lupapalvelu.proxy-services :as proxy-services]))
 
 ;;
 ;; Helpers
@@ -185,15 +186,10 @@
   (output-attachment attachment-id true))
 
 ;;
-;; Oskari map ajax request proxy
+;; Proxy
 ;;
 
-(defpage [:post "/ajaxProxy/:srv"] {srv :srv}
-  (let [request (ring-request)
-        body (slurp (:body request))
-        urls {"Kunta" "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"}]
-    (client/post (get urls srv)
-       {:body body
-        :content-type :json
-        :accept :json})))
-
+(defpage [:any "/proxy/:srv"] {srv :srv}
+  (if (logged-in?)
+    ((proxy-services/services srv (constantly {:status 404})) (ring-request))
+    {:status 401}))
