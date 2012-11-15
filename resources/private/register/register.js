@@ -4,7 +4,7 @@
 
 ;(function() {
 
-  var keys = ["stamp", "personId", "firstName", "lastName", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
+  var keys = ["stamp", "personId", "firstname", "lastname", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
 
   function json(model) {
     var d = {};
@@ -40,10 +40,10 @@
       })
       .error(function(e) {
         // FIXME: DIRTY HACKS
-        if (e.text.indexOf("lupapalvelu.users.$email_1") != -1) {
+        if (e.text.indexOf("lupapalvelu.users.$email_1") !== -1) {
           $("#register-email-error").html("sahkopostiosoite on jo varattu.");
         }
-        if (e.text.indexOf("duplicate key error index: lupapalvelu.users.$personId_1") != -1) {
+        if (e.text.indexOf("duplicate key error index: lupapalvelu.users.$personId_1") !== -1) {
           $("#register-email-error").html("hetu on jo varattu.");
         }
         error(e.text);
@@ -55,8 +55,8 @@
 
   var model = {
     personId: ko.observable(),
-    firstName: ko.observable(),
-    lastName: ko.observable(),
+    firstname: ko.observable(),
+    lastname: ko.observable(),
     stamp: ko.observable(),
     street: ko.observable().extend({required: true}),
     city: ko.observable().extend({required: true}),
@@ -71,7 +71,9 @@
 
   model.confirmPassword = ko.observable().extend({equal: model.password});
   model = ko.validatedObservable(model);
-  model.isValid.subscribe(function(valid) { model().disabled(!valid); });
+  model.isValid.subscribe(function(valid) {
+    model().disabled(!valid);
+  });
 
   hub.onPageChange("register", function() {
     $.get("/vetuma", {success: "/welcome#!/register2",
@@ -86,8 +88,8 @@
   hub.onPageChange("register2", function() {
     $.get("/vetuma/user", function(data) {
       model().personId(data.userid);
-      model().firstName(data.firstName);
-      model().lastName(data.lastName);
+      model().firstname(data.firstname);
+      model().lastname(data.lastname);
       model().stamp(data.stamp);
     });
 

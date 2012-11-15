@@ -5,7 +5,7 @@ var log = function() {
   var getCallerName = function(caller) {
     var callerName;
 
-    if (typeof caller === "undefined" || caller == null) {
+    if (typeof caller === "undefined" || caller === null) {
       callerName = "<root>";
     } else if (typeof caller.name !== "undefined") {
       callerName = caller.name;
@@ -21,8 +21,10 @@ var log = function() {
     return callerName;
   };
 
-  var logv = (typeof console == "undefined") ? function() {} : function (level, caller, args) {
-    if (level < log.limit) return;
+  var logv = (typeof console === "undefined") ? function() {} : function (level, caller, args) {
+    if (level < log.limit) {
+      return;
+    }
     console.log(levelName[level], getCallerName(caller), args);
   };
 

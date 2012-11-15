@@ -115,5 +115,6 @@
   (warn "** Clearing DB **")
   (gfs/remove-all)
   (dorun (map #(mc/remove %) collections))
+  (mc/drop-indexes "users")
   (mc/ensure-index "users" {:email 1} {:unique true})
-  (mc/ensure-index "users" {:personId 1} {:unique true}))
+  #_(mc/ensure-index "users" {:personId 1} {:unique true}))

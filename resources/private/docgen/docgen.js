@@ -56,8 +56,8 @@ var docgen = (function () {
 
     var input = document.createElement("textarea");
     input.name = myPath;
-    input.setAttribute("rows", spec["rows"] || "10");
-    input.setAttribute("cols", spec["cols"] || "40");
+    input.setAttribute("rows", spec.rows || "10");
+    input.setAttribute("cols", spec.cols || "40");
     input.className = "form-input textarea";
     input.onchange = save;
     input.value = model[spec.name] || "";
@@ -131,7 +131,7 @@ var docgen = (function () {
       } else {
         choicesDiv.appendChild(build(choice, myModel, myPath, save, specId));
       }
-    })
+    });
 
     var div = document.createElement("div");
     div.className = "form-choice";

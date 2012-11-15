@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-  <section class="page" id="application" data-bind="with: application">
-    <div class="breadcrumb">
+  <section class="page" id="application">
+
+    <div class="breadcrumb" data-bind="with: application">
       <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <span data-bind="text: title"></span>
     </div>
-    <div class="application_summary">
-      <div id="application-map" class="todo map" style="width: 280px; height: 220px;"></div>
-      <h1 data-bind="with: address">
-        <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
-      </h1>
 
-      <div class="application_summary_info">
+    <div class="application_summary">
+
+      <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
+
+      <div data-bind="with: application">
+        <h1 data-bind="with: address">
+          <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
+        </h1>
+      </div>
+
+      <div class="application_summary_info" data-bind="with: application">
         <div>
-          <p>Lupatunnus:</p>
+          <p>Käsittelytunnus:</p>
           <span class="application_summary_text" data-bind-test-id="application-id" data-bind="text: id()"></span>
         </div>
         <div>
@@ -33,40 +39,44 @@
             </li>
           </ul>
         </div>
-        <div>
-          <p>Hakemus luotu:</p>
-          <span class="application_summary_text" data-bind="dateString: created"></span>
+        <div data-bind="with: $root.applicationModel.data">
+          <p>Hakemus jätetty:</p>
+          <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
         </div>
       </div>
-      <div class="application_actions">
+
+      <div class="application_actions" data-bind="with: application">
         <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
         <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
-        <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
-        <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
-        <button class="todo btn btn-large action-bar-button" data-bind="enable:false">Poista hakemus</button>
+        <button class="todo btn action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
+        <button class="todo btn action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
+        <button class="todo btn action-bar-button" data-bind="enable:false">Poista hakemus</button>
       </div>
+
     </div>
+
     <div class="sidebar">
-      <button class="todo btn btn-large btn-success action-bar-button" style="display: none">Tallenna</button>
       <aside class="instructions">
         <h3>Ohje</h3>
         <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
       </aside>
     </div>
+
     <div id="tabs_container">
       <ul id="tabs">
         <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
-        <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitteet</a></li>
+        <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
         <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
         <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
       </ul>
     </div>
-    <div id="tab_content_container" class="container">
+
+    <div id="tab_content_container" class="container" data-bind="with: application">
 
       <div class="tab_content" id="application_tab" style="display: block;">
 
         <div class="application_section">
-          <h2 class="application_section_header" data-bind="click: $root.accordian.accordianClick, clickBubble: false">Hakemuksen perustiedot</h2>
+          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick, clickBubble: false"> <span class="font-icon icon-expanded"></span> Hakemuksen perustiedot</h2>
           <div class="application_section_content content_expanded">
             <div>
               <h3>Valtuutetut</h3>
@@ -108,18 +118,19 @@
       </div>
 
       <div class="tab_content" id="conversation_tab" data-bind="with: $root.comment">
+        <p class="tab-info"> Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.</p>
         <div class="tab-wrapper">
-          <table class="table table-striped">
+          <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
               <tr class="comment">
-                <td class="commentParty"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
-                <td data-bind="text: text"></td>
+                <td class="commentParty commenttd"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
+                <td class="commenttd" data-bind="text: text"></td>
               </tr>
             </tbody>
           </table>
-          <form class="well">
-              <div class="span12">Kirjoita viesti:</div>
-            <textarea class="conversation-input" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+          <form>
+            <h3>Kirjoita viesti:</h3>
+            <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
             <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
           </form>
         </div>
@@ -134,6 +145,7 @@
       </div>
 
       <div class="tab_content" id="attachments_tab">
+        <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <table data-bind="if: attachments && attachments().length" class="table table-striped">
             <thead>
@@ -146,9 +158,10 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody data-bind="foreach: attachments">
+            <tbody data-bind="foreach: $root.attachments">
             <tr style="cursor: pointer;" data-bind="if: $data.type || $data.modified">
-                <td id="test-attachement-status" data-bind="text: loc('attachmentState_' + state)"
+                <td id="test-attachement-status"
+                    data-bind="attr: {class: statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state}"
                     class="attachment-state"></td>
                 <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                   <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
@@ -157,8 +170,7 @@
                   </a>
                 </td>
               <td><span data-bind="if: $data.latestVersion.filename">
-                  <a href="" data-bind="text: loc('view') + ' ' + latestVersion.filename, attr: {href: '/rest/view/' + latestVersion.fileId}" target="_blank"></a> -
-                  <a href="" data-bind="text: loc('download') + ' ' + latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
+                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
                   <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
               </span></td>
                 <td data-bind="version: latestVersion.version"></td>
@@ -180,21 +192,6 @@
               data-bind="visible: $root.authorization.ok('upload-attachment'),click: attachment.newAttachment">
             Lisää liite
           </button>
-          <div id="upload-dialog" class="window autosized">
-            <div class="dialog-header">
-              <p>Tallenna tiedosto</p>
-              <p class="dialog-close close">X</p>
-            </div>
-            <div class="dialog-content">
-              <!-- No scr attribute: content must be loaded AFTER this parent
-                   document and all the JS libs are loaded. -->
-              <iframe
-                  id="uploadFrame"
-                  data-src="/html/pages/upload.html"
-                  class="attachment-iframe">
-              </iframe>
-            </div>
-          </div>
         </div>
       </div>
 

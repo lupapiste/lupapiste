@@ -19,6 +19,8 @@
 ;;
 
 (def attachment-types-for-permit-type
+  ;  NOTE: :text is here as documentation only. Actual UI label for each :key
+  ;        is defined in loc.js.
   {:buildingPermit
    [{:key :hakija, :text "Hakija", :types ; <optgroup>
      [{:key :valtakirja, :text "Valtakirja"} ; <option>
@@ -173,9 +175,9 @@
         ; Check return value and try again with new version number
         (let [result-count (mongo/update-by-query mongo/applications
             {:_id application-id
-             :attachments {$elemMatch {
-             :latestVersion.version.major (:major latest-version)
-             :latestVersion.version.minor (:minor latest-version)}}}
+             :attachments {$elemMatch {:id attachment-id
+                                       :latestVersion.version.major (:major latest-version)
+                                       :latestVersion.version.minor (:minor latest-version)}}}
             {$set attachment-model
              $push {:attachments.$.versions version-model}})]
           (if (> result-count 0)
@@ -192,8 +194,11 @@
 (defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user]
   (if (empty? attachment-id)
     (let [attachment-id (create-attachment id attachement-type created)]
-      (set-attachment-version id attachment-id file-id filename content-type size created user))
-    (set-attachment-version id attachment-id file-id filename content-type size created user)))
+      (set-attachment-version id attachment-id file-id filename content-type size created user)
+      attachment-id)
+    (do
+      (set-attachment-version id attachment-id file-id filename content-type size created user)
+      attachment-id)))
 
 (defn- allowed-attachment-type-for? [application-id type]
   (some (fn [{types :types}] (some (fn [{key :key}] (= key type)) types))
@@ -246,7 +251,7 @@
   [{{application-id :id type :type} :data created :created}]
   (if-let [attachment-id (create-attachment application-id type created)]
     (ok :applicationId application-id :attachmentId attachment-id)
-    (fail "error.attachment-placeholder")))
+    (fail :error.attachment-placeholder)))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :type :filename :tempfile :size]
@@ -254,8 +259,8 @@
    :states     [:draft :open]}
   [{created :created
     user    :user
-    {:keys [id attachmentId type filename tempfile size comment]} :data}]
-  (debug "Create GridFS file: %s %s %s %s %s %d" id attachmentId type filename tempfile size)
+    {:keys [id attachmentId type filename tempfile size text]} :data}]
+  (debug "Create GridFS file: %s %s %s %s %s %d (%s)" id attachmentId type filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (allowed-file? sanitazed-filename)
@@ -263,11 +268,15 @@
         (let [content-type (mime-type sanitazed-filename)]
           (mongo/upload id file-id sanitazed-filename content-type tempfile created)
           (.delete (file tempfile))
-          (if (update-or-create-attachment id attachmentId type file-id sanitazed-filename content-type size created user)
-            (ok)
-            (fail "error.unknown")))
-        (fail "error.illegal-attachment-type"))
-      (fail "error.illegal-file-type"))))
+          (if-let [attachment-id (update-or-create-attachment id attachmentId type file-id sanitazed-filename content-type size created user)]
+            (if (seq text)
+              (executed (assoc (command "add-comment"
+                                        {:id id, :text text, :target {:type :attachment, :id attachment-id}})
+                               :user user ))
+              (ok))
+            (fail :error.unknown)))
+        (fail :error.illegal-attachment-type))
+      (fail :error.illegal-file-type))))
 
 ;;
 ;; Download

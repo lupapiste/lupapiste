@@ -1,4 +1,6 @@
-if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
+if (typeof LUPAPISTE === "undefined") {
+  var LUPAPISTE = {};
+}
 
 LUPAPISTE.Upload = {
     applicationId: ko.observable(),
@@ -16,7 +18,7 @@ LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, selectedType, 
   LUPAPISTE.Upload.defaultType(defaultType ? defaultType : undefined); // Empty string -> undefined
   LUPAPISTE.Upload.errorMessage(errorMessage);
   debug(applicationId, attachmentId, selectedType, defaultType, errorMessage);
-}
+};
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
   if (applicationId) {
@@ -27,10 +29,10 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
     })
     .call();
   }
-}
+};
 
 LUPAPISTE.Upload.init = function(applicationId, attachmentId, defaultType) {
-  LUPAPISTE.Upload.setModel(applicationId, attachmentId, defaultType, defaultType)
+  LUPAPISTE.Upload.setModel(applicationId, attachmentId, defaultType, defaultType);
   LUPAPISTE.Upload.loadTypes(applicationId);
 };
 
@@ -45,6 +47,6 @@ LUPAPISTE.Upload.initFromURLParams = function() {
 
     LUPAPISTE.Upload.loadTypes(applicationId);
   }
-}
+};
 
 $(LUPAPISTE.Upload.initFromURLParams);

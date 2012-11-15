@@ -12,6 +12,16 @@
   (fact ".. but not non-recursively"
     (non-private {:name "tommi" :child {:private {:secret "1234"}}}) => {:name "tommi" :child {:private {:secret "1234"}}}))
 
+(let [user {:id "1"
+            :firstName "Simo"
+            :username  "simo@salminen.com"
+            :lastName "Salminen"
+            :role "comedian"
+            :private "SECRET"}]
+  (facts "summary"
+    (fact (summary nil) => nil)
+    (fact (summary user) => (just (dissoc user :private)))))
+
 #_(facts
   (against-background
     (session/get :user) => :session-user
@@ -25,7 +35,7 @@
            (is nil? (login "tommi" "<<hacked>>")))
   (testing "can login with right credentials"
            (is not (nil? (login "tommi" "abba")))))
-  
+
 #_(deftest apikey-tests
   (testing "can't login with bad apikey"
            (is nil? (login-with-apikey "<<hacked>>")))
