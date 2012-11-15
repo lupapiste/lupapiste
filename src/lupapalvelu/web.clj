@@ -32,8 +32,13 @@
   []
   (or (session/get :user) ((request/ring-request) :user)))
 
-(defn with-user [m]
-  (merge m {:user (current-user)}))
+(defn host []
+  (let [request (ring-request)]
+    (str (name (:scheme request)) "://" (get-in request [:headers "host"]) "/")))
+
+(defn enriched [m]
+  (merge m {:user    (current-user)
+            :host    (host)}))
 
 (defn logged-in? []
   (not (nil? (current-user))))
@@ -64,10 +69,10 @@
 ;;
 
 (defjson [:post "/rest/command/:name"] {name :name}
-  (core/execute (with-user (core/command name (from-json)))))
+  (core/execute (enriched (core/command name (from-json)))))
 
 (defjson "/rest/query/:name" {name :name}
-  (core/execute (with-user (core/query name (from-query)))))
+  (core/execute (enriched (core/query name (from-query)))))
 
 ;;
 ;; Web UI:
