@@ -31,7 +31,9 @@
   (fact (apply-updates {} schema {"1" {"xxx" "foo"}})
         => [{"1" {}} [["1.xxx" "foo" false "illegal-key"]]])
   (fact (apply-updates {} schema {"1" "foo"})
-        => [{} [["1" "foo" false "illegal-value:not-a-map"]]]))
+        => [{} [["1" "foo" false "illegal-value:not-a-map"]]])
+  (fact (apply-updates {} schema {"1" {"1-1" (apply str (repeat (inc default-max-len) "x"))}})
+        => [{"1" {}} [["1.1-1" (apply str (repeat (inc default-max-len) "x")) false "illegal-value:too-long"]]]))
 
 (facts "with full document"
   (let [document {:body {} :schema schema}]
@@ -39,9 +41,11 @@
           => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])))
 
 (facts "with real schemas - important field for paasuunnittelija"
-   (let [document {:body {} :schema (schemas "paasuunnittelija")}]
-     (fact (apply-updates document {"etunimiz" "Tauno"}) =>     [{} [["etunimiz" "Tauno" false "illegal-key"]]])
-     (fact (apply-updates document {"etunimi" "Tauno"}) =>      [{"etunimi" "Tauno"} [["etunimi" "Tauno" true]]])
-     (fact (apply-updates document {"sukunimi" "Palo"}) =>      [{"sukunimi" "Palo"} [["sukunimi" "Palo" true]]])
-     (fact (apply-updates document {"email" "tauno@iki.fi"}) => [{"email" "tauno@iki.fi"} [["email" "tauno@iki.fi" true]]])
-     (fact (apply-updates document {"puhelin" "050"}) =>        [{"puhelin" "050"} [["puhelin" "050" true]]])))
+  (let [document {:body {} :schema (schemas "paasuunnittelija")}]
+    (fact (apply-updates document {"etunimiz" "Tauno"}) =>     [{} [["etunimiz" "Tauno" false "illegal-key"]]])
+    (fact (apply-updates document {"etunimi" "Tauno"}) =>      [{"etunimi" "Tauno"} [["etunimi" "Tauno" true]]])
+    (fact (apply-updates document {"sukunimi" "Palo"}) =>      [{"sukunimi" "Palo"} [["sukunimi" "Palo" true]]])
+    (fact (apply-updates document {"etunimi" "Tauno" "sukunimi" "Palo"}) => [{"etunimi" "Tauno" "sukunimi" "Palo"} [["etunimi" "Tauno" true] ["sukunimi" "Palo" true]]])
+    (fact (apply-updates document {"etunimi" "Tauno" "sukunimiz" "Palo"}) => [{"etunimi" "Tauno"} [["etunimi" "Tauno" true] ["sukunimiz" "Palo" false "illegal-key"]]])
+    (fact (apply-updates document {"email" "tauno@iki.fi"}) => [{"email" "tauno@iki.fi"} [["email" "tauno@iki.fi" true]]])
+    (fact (apply-updates document {"puhelin" "050"}) =>        [{"puhelin" "050"} [["puhelin" "050" true]]])))
