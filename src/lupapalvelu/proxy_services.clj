@@ -13,6 +13,16 @@
      :as :stream}))
 
 ;;
+;; Sito "tepa":
+;;
+
+(defn tepa [request]
+  (client/post "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"
+    {:body (:body request)
+     :content-type :json
+     :accept :json}))
+
+;;
 ;; Proxy services by name:
 ;;
 
