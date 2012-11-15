@@ -6,7 +6,7 @@
                  [enlive "1.0.1" :exclusions [org.clojure/clojure]]
                  [org.clojure/tools.nrepl "0.2.0-beta10"]
                  [org.mindrot/jbcrypt "0.3m"]
-                 [clj-http "0.5.6"]
+                 [clj-http "0.5.7"]
                  [digest "1.4.0"]
                  [clj-time "0.4.4"]
                  [org.clojure/data.xml "0.0.6"]
