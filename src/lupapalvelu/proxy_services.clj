@@ -5,14 +5,12 @@
 ;; NLS:
 ;;
 
-(def nsl-auth ["***REMOVED***" "***REMOVED***"])
-(def nsl-url "https://ws.nls.fi/rasteriaineistot/image")
-
 (defn nls [request]
-  (client/get nsl-url {:query-params (:query-params request)
-                       :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-                       :basic-auth nsl-auth
-                       :as :stream}))
+  (client/get "https://ws.nls.fi/rasteriaineistot/image"
+    {:query-params (:query-params request)
+     :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+     :basic-auth ["***REMOVED***" "***REMOVED***"]
+     :as :stream}))
 
 ;;
 ;; Proxy services by name:
