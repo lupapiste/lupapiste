@@ -133,6 +133,10 @@
   (session/clear!)
   (ok))
 
+(defpage "/logout" []
+  (session/clear!)
+  (resp/redirect "/"))
+
 ;;
 ;; Apikey-authentication
 ;;
