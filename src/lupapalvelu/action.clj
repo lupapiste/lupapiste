@@ -56,23 +56,24 @@
         invites    (flatten (map (comp :invites) data))]
     (ok :invites invites)))
 
-(defn invite-body [application user]
+(defn invite-body [user id host]
   (format
     (str
       "Tervehdys,\n\n %s %s lisäsi teidät suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyväksyäksesi rooli ja nähdäksesi hakemuksen tiedot avaa linkki http://localhost:8000/applicant#!/application/%s\n\n"
+      "Hyväksyäksesi rooli ja nähdäksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
       "Ystävällisin terveisin,\n\n"
       "Lupapiste.fi")
     (:firstName user)
     (:lastName user)
-    (:id application)))
+    host
+    id))
 
 (defcommand "invite"
   {:parameters [:id :email :title :text]
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text]} :data :as command}]
+    {:keys [id email title text]} :data host :host :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
@@ -89,7 +90,7 @@
                   :auth (role invited :reader)}})
         (future
           (info "sending email to %s" email)
-          (if (email/send email (:title application) (invite-body application user))
+          (if (email/send email (:title application) (invite-body user application-id host))
             (info "email was sent successfully")
             (error "email could not be delivered.")))
         nil))))
