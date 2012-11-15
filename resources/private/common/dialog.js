@@ -2,7 +2,9 @@
  * Lupapiste Modal Window module.
  * The modal container element must have 'window' CSS class.
  */
-if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
+if (typeof LUPAPISTE === "undefined") {
+  var LUPAPISTE = {};
+}
 
 /**
  * Modal window prototype.
@@ -26,7 +28,9 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
     self.mask.click(this.close);
   };
 
-  this.getMask = function() {return self.mask;};
+  this.getMask = function() {
+    return self.mask;
+  };
 
   /**
    * Opens a modal window.

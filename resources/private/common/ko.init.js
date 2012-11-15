@@ -91,7 +91,7 @@
         unit = "TB"; // Future proof?
       }
 
-      if (unit != "B") {
+      if (unit !== "B") {
         value = value.toFixed(1);
       }
 

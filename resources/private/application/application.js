@@ -102,6 +102,8 @@
 
   };
 
+  var attachments = ko.observableArray([]);
+
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
@@ -110,11 +112,6 @@
 
   function showApplication(data) {
     authorizationModel.refresh(data,function() {
-      // Update map:
-      var location = application.location();
-      var locations = location ? [{x: location.lon(), y: location.lat()}] : [];
-      hub.send("application-map", {locations: locations});
-
       // new data mapping
       applicationModel.data(ko.mapping.fromJS(data));
       ko.mapping.fromJS(data, {}, application);
@@ -143,14 +140,31 @@
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
 
-      application.attachments(data.attachments || []);
+      var statuses = {
+        requires_user_action: {statusName: "missing"},
+        requires_authority_action: {statusName: "new"},
+        ok:{statusName: "ok"}
+      };
+
+      attachments.removeAll();
+      _.each(data.attachments || [], function(a) {
+        var s = statuses[a.state] || {statusName: "foo"};
+        a.statusName = s.statusName;
+        attachments.push(a);
+      });
+
+      // Update map:
+      var location = application.location();
+      hub.send("application-map", {locations: location ? [{x: location.lon(), y: location.lat()}] : []});
 
       pageutil.setPageReady("application");
     });
   }
 
   hub.subscribe("repository-application-reload", function(e) {
-    if (application.id() === e.application.id) showApplication(e.application);
+    if (application.id() === e.application.id) {
+      showApplication(e.application);
+    }
   });
 
   function InviteModel() {
@@ -193,13 +207,15 @@
   var accordian = {
     accordianClick: function(data, event) {
      self = event.target;
+     $(self).children(".font-icon").toggleClass("icon-collapsed");
+     $(self).children(".font-icon").toggleClass("icon-expanded");
      $(self).next(".application_section_content").toggleClass('content_expanded');
     }
   };
 
   function onPageChange(e) {
     var id = e.pagePath[0];
-    if (application.id() != id) {
+    if (application.id() !== id) {
       repository.getApplication(id, showApplication, function() {
         error("No such application, or not permission: "+id);
         window.location.href = "#!/applications/";
@@ -213,6 +229,7 @@
     var page = $("#application");
     ko.applyBindings({
       application: application,
+      attachments: attachments,
       applicationModel: applicationModel,
       comment: commentModel,
       invite: inviteModel,

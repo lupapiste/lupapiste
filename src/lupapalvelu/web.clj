@@ -127,7 +127,7 @@
         (ok :user user :applicationpage (userrole applicationpage-for))))
     (do
       (info "login: failed: username=%s" username)
-      (fail "error.login"))))
+      (fail :error.login))))
 
 (defjson [:post "/rest/logout"] []
   (session/clear!)

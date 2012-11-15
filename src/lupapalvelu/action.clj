@@ -63,18 +63,18 @@
     {:keys [id email title text]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user email ;; allows invites only existing users
-        (fn [invited]
-          (mongo/update mongo/applications
-            {:_id application-id
-             :invites {$not {$elemMatch {:user.username email}}}}
-            {$push {:invites {:title       title
-                              :application application-id
-                              :text        text
-                              :created     created
-                              :inviter     (security/summary user)
-                                :user  (security/summary invited)}
-                      :auth (role invited :reader)}}))))))
+      (let [invited (security/get-or-create-user-by-email email)]
+        (mongo/update mongo/applications
+          {:_id application-id
+           :invites {$not {$elemMatch {:user.username email}}}}
+          {$push {:invites {:title       title
+                            :application application-id
+                            :text        text
+                            :created     created
+                            :email       email
+                            :user        (security/summary invited)
+                            :inviter     (security/summary user)}
+                  :auth (role invited :reader)}})))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -120,33 +120,15 @@
         {:username (:username user)}
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey))
-    (fail "error.unauthorized")))
+    (fail :error.unauthorized)))
 
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
-  [command]
-  (let [password (-> command :data :password)
-        data     (dissoc (:data command) :password)
-        salt     (security/dispense-salt)
-        user     (client/json-get (str "/vetuma/stamp/" (-> command :data :stamp)))] ;; loose coupling
-    (info "Registering new user: %s - details from vetuma: %s" (str data) (str user))
-    (mongo/insert mongo/users
-      (assoc data
-             :id (mongo/create-id)
-             :username      (:email data)
-             :role          :applicant
-             :personId      (:userid user)
-             :firstName     (:firstName user)
-             :lastName      (:lastName user)
-             :email         (:email data)
-             :address      {
-                            :street (:street data)
-                            :zip    (:zip data)
-                            :city   (:city data)
-                            }
-             :phone         (:phone data)
-             :private       {:salt salt
-                             :password (security/get-hash password salt)}))))
+  [{data :data}]
+  (let [from-vetuma (client/json-get (str "/vetuma/stamp/" (:stamp data)))]
+    (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) from-vetuma)
+    (security/create-user (merge data from-vetuma {:role :applicant}))
+    nil))
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
@@ -267,7 +249,7 @@
             schema-name    (get-in document [:schema :info :name])
             schema         (get schemas/schemas schema-name)]
         (if (nil? document)
-          (fail "error.document-not-found")
+          (fail :error.document-not-found)
           (do
             (info "merging user %s with best effort into document %s" user name)
             (mongo/update

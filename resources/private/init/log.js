@@ -21,8 +21,10 @@ var log = function() {
     return callerName;
   };
 
-  var logv = (typeof console == "undefined") ? function() {} : function (level, caller, args) {
-    if (level < log.limit) return;
+  var logv = (typeof console === "undefined") ? function() {} : function (level, caller, args) {
+    if (level < log.limit) {
+      return;
+    }
     console.log(levelName[level], getCallerName(caller), args);
   };
 
