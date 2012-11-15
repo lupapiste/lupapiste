@@ -4,21 +4,21 @@
   (into {} (for [doc docs] [(get-in doc [:info :name]) doc])))
 
 (def simple-osoite {:name "osoite" :type :group
-              :body [{:name "katu" :type :string}
-                     {:name "postinumero" :type :string}
-                     {:name "postitoimipaikka" :type :string}]})
+                    :body [{:name "katu" :type :string}
+                           {:name "postinumero" :type :string}
+                           {:name "postitoimipaikka" :type :string}]})
 
 (def full-osoite-body [{:name "kunta" :type :string}
-                     {:name "lahiosoite" :type :string}
-                     {:name "osoitenumero" :type :string}
-                     {:name "osoitenumero2" :type :string}
-                     {:name "jakokirjain" :type :string}
-                     {:name "jakokirjain2" :type :string}
-                     {:name "porras" :type :string}
-                     {:name "huoneisto" :type :string}
-                     {:name "postinumero" :type :string}
-                     {:name "postitoimipaikka" :type :string}
-                     {:name "pistesijanti" :type :string}])
+                       {:name "lahiosoite" :type :string}
+                       {:name "osoitenumero" :type :string}
+                       {:name "osoitenumero2" :type :string}
+                       {:name "jakokirjain" :type :string}
+                       {:name "jakokirjain2" :type :string}
+                       {:name "porras" :type :string}
+                       {:name "huoneisto" :type :string}
+                       {:name "postinumero" :type :string}
+                       {:name "postitoimipaikka" :type :string}
+                       {:name "pistesijanti" :type :string}])
 
 (def schemas
   (to-map-by-name
@@ -39,7 +39,7 @@
              {:name "kantavarakennusaine" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
-                     {:name "teräs" :type :checkbox}
+                     {:name "ter\u00F6s" :type :checkbox}
                      {:name "eitiedossa" :type :checkbox}
                      {:name "muurakennusaine" :type :string :size "s"}]}                  
              {:name "julkisivu" :type :choice
@@ -61,7 +61,7 @@
              {:name "lammitystapa" :type :choice
               :body [{:name "vesikeskus" :type :checkbox}
                      {:name "ilamkeskus" :type :checkbox}
-                     {:name "suorasähkö" :type :checkbox}
+                     {:name "suoras\u00E4hk\u00F6" :type :checkbox}
                      {:name "uuni" :type :checkbox}
                      {:name "eiLammitysta" :type :checkbox}
                      {:name "eiTiedossa" :type :checkbox}]}
