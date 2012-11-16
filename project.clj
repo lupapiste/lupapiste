@@ -9,6 +9,7 @@
                  [clj-http "0.5.7"]
                  [digest "1.4.0"]
                  [clj-time "0.4.4"]
+                 [com.draines/postal "1.9.0"]
                  [org.clojure/data.xml "0.0.6"]
                  [fi.sito/oskari "0.9.2"]]
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
