@@ -27,11 +27,11 @@
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
 
-(defn get-application-as [application-id user]
-  (mongo/select-one mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
-
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
+
+(defn get-application-as [application-id user]
+  (mongo/select-one mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
