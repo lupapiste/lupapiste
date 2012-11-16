@@ -34,7 +34,9 @@
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (ok :applications (get-application-as id user)))
+  (if-let [app (get-application-as id user)]
+    (ok :application app)
+    (fail :error.not-found)))
 
 (defcommand "open-application"
   {:parameters [:id]
