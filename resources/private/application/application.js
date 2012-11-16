@@ -50,7 +50,7 @@
       ajax.command("submit-application", { id: applicationId})
       .success(function(d) {
         notify.success("hakemus j\u00E4tetty",model);
-        repository.reloadAllApplications();
+        repository.reloadApplication(applicationId);
       })
       .call();
       return false;
@@ -61,7 +61,7 @@
       ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
       .success(function(d) {
         notify.success("tiedot tallennettu",model);
-        repository.reloadAllApplications();
+        repository.reloadApplication(applicationId);
       })
       .call();
       return false;
@@ -72,7 +72,7 @@
       ajax.command("approve-application", { id: applicationId})
         .success(function(d) {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -83,7 +83,7 @@
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function(d) {
           notify.success("kutsu poistettu", model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -94,7 +94,7 @@
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function(d) {
           notify.success("oikeus poistettu", model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -152,7 +152,6 @@
       var docgenDiv = $("#docgen").empty();
 
       _.each(data.documents, function(doc) {
-        console.log("FOO:", doc);
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
 
@@ -175,14 +174,15 @@
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
-      ajax.command("invite", { id: application.id(),
+      var id = application.id();
+      ajax.command("invite", { id: id,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
         .success(function(d) {
           self.email(undefined);
           self.text(undefined);
-          repository.reloadAllApplications();
+          repository.reloadApplication(id);
         })
         .error(function(d) {
           notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
