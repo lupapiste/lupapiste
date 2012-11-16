@@ -32,12 +32,6 @@ var repository = function() {
 
   hub.subscribe("login", function() { reloadAllApplications(); });
 
-  hub.subscribe("logout", function() {
-    applications = {};
-    applicationsById = {};
-    hub.send("repository-reload", {applications: applications});
-  });
-
   function getApplications(callback, error) {
     if (applications) {
       callback(applications);
