@@ -4,19 +4,19 @@
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]])
-  (:require [noir.request :as request]
-            [noir.response :as resp]
-            [noir.session :as session]
-            [noir.server :as server]
+  (:require (noir  [request :as request]
+                   [response :as resp]
+                   [session :as session]
+                   [server :as server])
+            (lupapalvelu [env :as env]
+                         [core :as core]
+                         [action :as action]
+                         [singlepage :as singlepage]
+                         [security :as security]
+                         [attachment :as attachment]
+                         [proxy-services :as proxy-services])
             [cheshire.core :as json]
-            [lupapalvelu.env :as env]
-            [lupapalvelu.core :as core]
-            [lupapalvelu.action :as action]
-            [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.security :as security]
-            [lupapalvelu.attachment :as attachment]
-            [clj-http.client :as client]
-            [lupapalvelu.proxy-services :as proxy-services]))
+            [clj-http.client :as client]))
 
 ;;
 ;; Helpers
