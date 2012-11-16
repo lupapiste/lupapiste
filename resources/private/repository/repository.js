@@ -23,7 +23,7 @@ var repository = function() {
   });
 
   return {
-    reloadApplication: function(id, callback) { hub.send("load-application", {id: id}); if (callback) callback(); }
+    reloadApplication: function(id, callback) { hub.send("load-application", {id: id}); if (callback) callback(); },
     reloadAllApplications: function(callback) { hub.send("load-all-applications"); if (callback) callback(); }
   }
 }();
