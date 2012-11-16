@@ -49,7 +49,7 @@
 
 (defquery "invites"
   {:authenticated true}
-  [{{id :id} :user}]
+  [{{:keys [id]} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select mongo/applications filter projection)
