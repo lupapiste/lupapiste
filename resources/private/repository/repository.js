@@ -5,9 +5,9 @@ var repository = function() {
       .query("applications")
       .success(function(data) {
         _.each(data.applications, function(application) {
-          hub.send("repository-application-reload", {application: application});
+          hub.send("application-loaded", {application: application});
         });
-        hub.send("repository-reload", {applications: data.applications});
+        hub.send("all-applications-loaded", {applications: data.applications});
       })
       .call();
   });
@@ -16,13 +16,14 @@ var repository = function() {
     ajax
       .query("application", {id: e.id})
       .success(function(data) {
-        hub.send("repository-application-reload", {application: data.application});
+        hub.send("application-loaded", {application: data.application});
       })
       .error(function() { window.location.hash = "!/404"; })
       .call();
   });
 
   return {
+    reloadApplication: function(id, callback) { hub.send("load-application", {id: id}); if (callback) callback(); }
     reloadAllApplications: function(callback) { hub.send("load-all-applications"); if (callback) callback(); }
   }
 }();

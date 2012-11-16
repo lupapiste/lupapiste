@@ -160,7 +160,7 @@
     });
   }
 
-  hub.subscribe("repository-application-reload", function(e) {
+  hub.subscribe("application-loaded", function(e) {
     if (!currentId || (currentId === e.application.id)) {
       showApplication(e.application);
     }

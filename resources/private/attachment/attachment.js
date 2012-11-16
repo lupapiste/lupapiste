@@ -127,7 +127,7 @@ var attachment = function() {
     hub.send("load-application", {id: applicationId});
   });
 
-  hub.subscribe("repository-application-reload", function(data) {
+  hub.subscribe("application-loaded", function(data) {
     var app = data.application;
     if (applicationId === app.id) showAttachment(app);
   });
