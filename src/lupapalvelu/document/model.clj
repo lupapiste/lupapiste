@@ -16,6 +16,8 @@
 ;; Validation:
 ;;
 
+(def default-max-len 64)
+
 (defmulti validate (fn [elem v] (:type elem)))
 
 (defmethod validate :group [elem v]
@@ -24,11 +26,23 @@
 (defmethod validate :string [elem v]
   (cond
     (not= (type v) String) "illegal-value:not-a-string"
-    (and (:max-len elem) (> (.length v) (:max-len elem))) "illegal-value:too-long"
-    (and (:min-len elem) (< (.length v) (:min-len elem))) "illegal-value:too-short"))
+    (> (.length v) (or (:max-len elem) default-max-len)) "illegal-value:too-long"
+    (< (.length v) (or (:min-len elem) 0)) "illegal-value:too-short"))
+
+(defmethod validate :text [elem v]
+  (cond
+    (not= (type v) String) "illegal-value:not-a-string"
+    (> (.length v) (or (:max-len elem) default-max-len)) "illegal-value:too-long"
+    (< (.length v) (or (:min-len elem) 0)) "illegal-value:too-short"))
 
 (defmethod validate :boolean [elem v]
   (if (not= (type v) Boolean) "illegal-value:not-a-boolean"))
+
+(defmethod validate nil [elem v]
+  "illegal-type:type-missing")
+
+(defmethod validate :default [elem v]
+  "illegal-type:unknown-type")
 
 ;;
 ;; Processing
@@ -64,11 +78,12 @@
 
 (defn apply-updates
   "da public api."
-  ([{:keys [body schema]} updates] (apply-updates body schema updates))
-  ([doc schema updates]
-  (apply-update
-    doc              ; document to update
-    (:body schema)    ; schema to confirm against
-    []               ; path, for error reporting
-    []               ; list of changes performed
-    (seq updates))))  ; updates as a seq of key/value pairs
+  ([{:keys [body schema]} updates]
+    (apply-updates body schema updates))
+  ([body schema updates]
+    (apply-update
+      body             ; document to update
+      (:body schema)   ; schema to confirm against
+      []               ; path, for error reporting
+      []               ; list of changes performed
+      (seq updates)))) ; updates as a seq of key/value pairs

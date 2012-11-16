@@ -1,7 +1,9 @@
 (ns lupapalvelu.document.schemas)
 
 (defn to-map-by-name [docs]
-  (into {} (for [doc docs] [(get-in doc [:info :name]) doc])))
+  (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc))
+          {}
+          docs))
 
 (def simple-osoite {:name "osoite" :type :group
                     :body [{:name "katu" :type :string}
