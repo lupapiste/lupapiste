@@ -49,7 +49,7 @@
 
 (defquery "invites"
   {:authenticated true}
-  [{{id :id} :user}]
+  [{{:keys [id]} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select mongo/applications filter projection)
@@ -90,7 +90,7 @@
                   :auth (role invited :reader)}})
         (future
           (info "sending email to %s" email)
-          (if (email/send email (:title application) (invite-body user application-id host))
+          (if (email/send-email email (:title application) (invite-body user application-id host))
             (info "email was sent successfully")
             (error "email could not be delivered.")))
         nil))))
