@@ -8,7 +8,6 @@
   var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
   var commentModel = comments.create();
-  var documents = ko.observableArray();
 
   function ApplicationModel() {
     var self = this;
@@ -120,26 +119,6 @@
       commentModel.setApplicationId(data.id);
       commentModel.setComments(data.comments);
 
-      // docgen:
-
-      var save = function(path, value, callback, data) {
-        debug("saving", path, value, data);
-        ajax
-          .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-          .success(function() { callback("ok"); })
-          .error(function(e) { error(e); callback(e.status || "err"); })
-          .fail(function(e) { error(e); callback("err"); })
-          .call();
-      };
-
-      var docgenDiv = $("#docgen").empty();
-
-      documents.removeAll();
-      _.each(data.documents, function(doc) {
-        documents.push(doc);
-        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
-      });
-
       var statuses = {
         requires_user_action: {statusName: "missing"},
         requires_authority_action: {statusName: "new"},
@@ -156,6 +135,25 @@
       // Update map:
       var location = application.location();
       hub.send("application-map", {locations: location ? [{x: location.lon(), y: location.lat()}] : []});
+
+      // docgen:
+
+      var save = function(path, value, callback, data) {
+        debug("saving", path, value, data);
+        ajax
+          .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
+          .success(function() { callback("ok"); })
+          .error(function(e) { error(e); callback(e.status || "err"); })
+          .fail(function(e) { error(e); callback("err"); })
+          .call();
+      };
+
+      var docgenDiv = $("#docgen").empty();
+
+      _.each(data.documents, function(doc) {
+        console.log("FOO:", doc);
+        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+      });
 
       pageutil.setPageReady("application");
     });
@@ -213,17 +211,15 @@
     }
   };
 
-  function onPageChange(e) {
-    var id = e.pagePath[0];
-    if (application.id() !== id) {
-      repository.getApplication(id, showApplication, function() {
-        error("No such application, or not permission: "+id);
-        window.location.href = "#!/applications/";
-      });
-    }
-  }
+  
 
-  hub.onPageChange("application", onPageChange);
+  hub.onPageChange("application", function(e) {
+    var id = e.pagePath[0];
+    repository.getApplication(id, showApplication, function() {
+      error("No such application, or not permission: "+id);
+      window.location.href = "#!/applications/";
+    });
+  });
 
   $(function() {
     var page = $("#application");
