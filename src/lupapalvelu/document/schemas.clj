@@ -32,14 +32,13 @@
              {:name "kerrosluku" :type :string}
              {:name "kerrosala" :type :string}
              {:name "rakentamistapa" :type :select
-              :body [{:name "Elementti" :type :checkbox}
-                     {:name "Paikkalla" :type :checkbox}
-                     {:name "Ei tiedossa" :type :checkbox}
-                     ]}
+              :body [{:name "alementti" :type :checkbox}
+                     {:name "paikkalla" :type :checkbox}
+                     {:name "eiTiedossa" :type :checkbox}]}
              {:name "kantavarakennusaine" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
-                     {:name "ter\u00F6s" :type :checkbox}
+                     {:name "teras" :type :checkbox}
                      {:name "eitiedossa" :type :checkbox}
                      {:name "muurakennusaine" :type :string :size "s"}]}                  
              {:name "julkisivu" :type :choice
@@ -61,7 +60,7 @@
              {:name "lammitystapa" :type :choice
               :body [{:name "vesikeskus" :type :checkbox}
                      {:name "ilamkeskus" :type :checkbox}
-                     {:name "suoras\u00E4hk\u00F6" :type :checkbox}
+                     {:name "suorasahko" :type :checkbox}
                      {:name "uuni" :type :checkbox}
                      {:name "eiLammitysta" :type :checkbox}
                      {:name "eiTiedossa" :type :checkbox}]}
@@ -71,7 +70,7 @@
                      {:name "raskaspolttooljy" :type :checkbox}
                      {:name "sahko" :type :checkbox}
                      {:name "kaasu" :type :checkbox}
-                     {:name "kivihiilikoksitms." :type :checkbox}
+                     {:name "kivihiilikoksitms" :type :checkbox}
                      {:name "turve" :type :checkbox}
                      {:name "maalampo" :type :checkbox}
                      {:name "puu" :type :checkbox}
