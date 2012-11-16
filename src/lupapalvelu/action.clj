@@ -59,9 +59,9 @@
 (defn invite-body [user id host]
   (format
     (str
-      "Tervehdys,\n\n %s %s lisäsi teidät suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyväksyäksesi rooli ja nähdäksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
-      "Ystävällisin terveisin,\n\n"
+      "Tervehdys,\n\n %s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
+      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
+      "Yst\u00E4v\u00E4llisin terveisin,\n\n"
       "Lupapiste.fi")
     (:firstName user)
     (:lastName user)
