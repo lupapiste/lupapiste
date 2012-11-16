@@ -27,14 +27,16 @@
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
 
-(defn get-application-as [application-id user]
-  (mongo/select mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
-
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
+(defn get-application-as [application-id user]
+  (mongo/select-one mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
+
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (ok :applications (get-application-as id user)))
+  (if-let [app (get-application-as id user)]
+    (ok :application app)
+    (fail :error.not-found)))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -59,9 +61,9 @@
 (defn invite-body [user id host]
   (format
     (str
-      "Tervehdys,\n\n %s %s lisäsi teidät suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyväksyäksesi rooli ja nähdäksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
-      "Ystävällisin terveisin,\n\n"
+      "Tervehdys,\n\n %s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
+      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
+      "Yst\u00E4v\u00E4llisin terveisin,\n\n"
       "Lupapiste.fi")
     (:firstName user)
     (:lastName user)

@@ -119,16 +119,11 @@ var ajax = function() {
   }
 
   function command(name, data) {
-    // TODO: Do we need this copy?
-    var message = {};
-    for (var k in data) message[k] = data[k];
-    return new Call("/api/command/"+name, "POST").json(message);
+    return new Call("/api/command/" + name, "POST").json(data);
   }
 
   function query(name, data) {
-    var message = {};
-    for (var k in data) message[k] = data[k];
-    return new Call("/api/query/"+name, "GET").params(message);
+    return new Call("/api/query/" + name, "GET").params(data);
   }
 
   return {

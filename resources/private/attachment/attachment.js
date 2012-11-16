@@ -34,20 +34,22 @@ var attachment = function() {
     self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment'); };
 
     self.rejectAttachment = function() {
-      ajax.command("reject-attachment", { id: self.application.id, attachmentId: self.attachmentId})
+      var id = self.application.id;
+      ajax.command("reject-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function(d) {
           notify.success("liite hyl\u00E4tty",model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(id);
         })
         .call();
       return false;
     };
 
     self.approveAttachment = function() {
-      ajax.command("approve-attachment", { id: self.application.id, attachmentId: self.attachmentId})
+      var id = self.application.id;
+      ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function(d) {
           notify.success("liite hyv\u00E4ksytty",model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(id);
         })
         .call();
       return false;
@@ -124,10 +126,10 @@ var attachment = function() {
   hub.onPageChange("attachment", function(e) {
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
-    repository.getApplication(applicationId, showAttachment);
+    hub.send("load-application", {id: applicationId});
   });
 
-  hub.subscribe("repository-application-reload", function(data) {
+  hub.subscribe("application-loaded", function(data) {
     var app = data.application;
     if (applicationId === app.id) showAttachment(app);
   });
@@ -142,7 +144,7 @@ var attachment = function() {
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function(e) {
     resetUploadIframe();
-    repository.reloadAllApplications();
+    repository.reloadApplication(applicationId);
   });
 
   function toApplication(){

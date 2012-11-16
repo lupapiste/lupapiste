@@ -4,11 +4,11 @@
 
 ;(function() {
 
+  var currentId;
   var applicationModel = new ApplicationModel();
   var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
   var commentModel = comments.create();
-  var documents = ko.observableArray();
 
   function ApplicationModel() {
     var self = this;
@@ -50,7 +50,7 @@
       ajax.command("submit-application", { id: applicationId})
       .success(function(d) {
         notify.success("hakemus j\u00E4tetty",model);
-        repository.reloadAllApplications();
+        repository.reloadApplication(applicationId);
       })
       .call();
       return false;
@@ -61,7 +61,7 @@
       ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
       .success(function(d) {
         notify.success("tiedot tallennettu",model);
-        repository.reloadAllApplications();
+        repository.reloadApplication(applicationId);
       })
       .call();
       return false;
@@ -72,7 +72,7 @@
       ajax.command("approve-application", { id: applicationId})
         .success(function(d) {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -83,7 +83,7 @@
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function(d) {
           notify.success("kutsu poistettu", model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -94,7 +94,7 @@
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function(d) {
           notify.success("oikeus poistettu", model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -120,26 +120,6 @@
       commentModel.setApplicationId(data.id);
       commentModel.setComments(data.comments);
 
-      // docgen:
-
-      var save = function(path, value, callback, data) {
-        debug("saving", path, value, data);
-        ajax
-          .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-          .success(function() { callback("ok"); })
-          .error(function(e) { error(e); callback(e.status || "err"); })
-          .fail(function(e) { error(e); callback("err"); })
-          .call();
-      };
-
-      var docgenDiv = $("#docgen").empty();
-
-      documents.removeAll();
-      _.each(data.documents, function(doc) {
-        documents.push(doc);
-        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
-      });
-
       var statuses = {
         requires_user_action: {statusName: "missing"},
         requires_authority_action: {statusName: "new"},
@@ -157,12 +137,30 @@
       var location = application.location();
       hub.send("application-map", {locations: location ? [{x: location.lon(), y: location.lat()}] : []});
 
+      // docgen:
+
+      var save = function(path, value, callback, data) {
+        debug("saving", path, value, data);
+        ajax
+          .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
+          .success(function() { callback("ok"); })
+          .error(function(e) { error(e); callback(e.status || "err"); })
+          .fail(function(e) { error(e); callback("err"); })
+          .call();
+      };
+
+      var docgenDiv = $("#docgen").empty();
+
+      _.each(data.documents, function(doc) {
+        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+      });
+
       pageutil.setPageReady("application");
     });
   }
 
-  hub.subscribe("repository-application-reload", function(e) {
-    if (application.id() === e.application.id) {
+  hub.subscribe("application-loaded", function(e) {
+    if (!currentId || (currentId === e.application.id)) {
       showApplication(e.application);
     }
   });
@@ -176,14 +174,15 @@
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
-      ajax.command("invite", { id: application.id(),
+      var id = application.id();
+      ajax.command("invite", { id: id,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
         .success(function(d) {
           self.email(undefined);
           self.text(undefined);
-          repository.reloadAllApplications();
+          repository.reloadApplication(id);
         })
         .error(function(d) {
           notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
@@ -213,17 +212,10 @@
     }
   };
 
-  function onPageChange(e) {
-    var id = e.pagePath[0];
-    if (application.id() !== id) {
-      repository.getApplication(id, showApplication, function() {
-        error("No such application, or not permission: "+id);
-        window.location.href = "#!/applications/";
-      });
-    }
-  }
-
-  hub.onPageChange("application", onPageChange);
+  hub.onPageChange("application", function(e) {
+    currentId = e.pagePath[0];
+    hub.send("load-application", {id: currentId});
+  });
 
   $(function() {
     var page = $("#application");
