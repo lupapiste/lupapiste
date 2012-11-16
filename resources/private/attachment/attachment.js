@@ -124,7 +124,7 @@ var attachment = function() {
   hub.onPageChange("attachment", function(e) {
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
-    repository.getApplication(applicationId, showAttachment);
+    hub.send("load-application", {id: applicationId});
   });
 
   hub.subscribe("repository-application-reload", function(data) {

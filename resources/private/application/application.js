@@ -4,6 +4,7 @@
 
 ;(function() {
 
+  var currentId;
   var applicationModel = new ApplicationModel();
   var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
@@ -160,7 +161,7 @@
   }
 
   hub.subscribe("repository-application-reload", function(e) {
-    if (application.id() === e.application.id) {
+    if (!currentId || (currentId === e.application.id)) {
       showApplication(e.application);
     }
   });
@@ -211,14 +212,9 @@
     }
   };
 
-  
-
   hub.onPageChange("application", function(e) {
-    var id = e.pagePath[0];
-    repository.getApplication(id, showApplication, function() {
-      error("No such application, or not permission: "+id);
-      window.location.href = "#!/applications/";
-    });
+    currentId = e.pagePath[0];
+    hub.send("load-application", {id: currentId});
   });
 
   $(function() {
