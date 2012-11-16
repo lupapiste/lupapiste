@@ -111,7 +111,7 @@ LUPAPISTE.App = function(startPage) {
   };
 
   this.connectionCheck = function() {
-    ajax.get("/rest/ping")
+    ajax.get("/api/ping")
       .success(function() {
         hub.send("connection-online");
         setTimeout(self.connectionCheck, 15000);
