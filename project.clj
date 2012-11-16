@@ -6,7 +6,7 @@
                  [enlive "1.0.1" :exclusions [org.clojure/clojure]]
                  [org.clojure/tools.nrepl "0.2.0-beta10"]
                  [org.mindrot/jbcrypt "0.3m"]
-                 [clj-http "0.5.6"]
+                 [clj-http "0.5.7"]
                  [digest "1.4.0"]
                  [clj-time "0.4.4"]
                  [com.draines/postal "1.9.0"]
@@ -21,7 +21,7 @@
                                     [clj-webdriver "0.6.0-alpha11" :exclusions [cheshire/cheshire]]]
                      :test-paths ^:replace ["itest"]}}
 
-  :nitpicker {:exts ["clj" "js" "html" "css" "scss"]
+  :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers"]}
 
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
