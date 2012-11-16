@@ -20,12 +20,12 @@
       <!-- Preview images and pdf files only -->
       <div class="file-preview" data-bind="visible: hasPreview()">
         <div class="file-preview-image" data-bind="if: isImage()">
-          <a data-bind="attr: {href: '/rest/view/' + latestVersion().fileId}">
-            <img data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}" />
+          <a data-bind="attr: {href: '/api/view/' + latestVersion().fileId}">
+            <img data-bind="attr: {src: '/api/view/' + latestVersion().fileId}" />
           </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
-          <iframe id="file-preview-iframe" data-bind="attr: {src: '/rest/view/' + latestVersion().fileId}"></iframe>
+          <iframe id="file-preview-iframe" data-bind="attr: {src: '/api/view/' + latestVersion().fileId}"></iframe>
         </div>
       </div>
 
@@ -50,7 +50,7 @@
           </thead>
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
-              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/rest/download/' + $data.fileId}"></a></td>
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/download/' + $data.fileId}"></a></td>
               <td data-bind="version: version"></td>
               <td data-bind="dateString: created">31.10.2012</td>
               <td>

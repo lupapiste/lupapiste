@@ -170,7 +170,7 @@
                   </a>
                 </td>
               <td><span data-bind="if: $data.latestVersion.filename">
-                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
+                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
                   <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
               </span></td>
                 <td data-bind="version: latestVersion.version"></td>

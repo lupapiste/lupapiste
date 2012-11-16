@@ -32,7 +32,7 @@
         var login = model().email();
         var password = model().password();
         reset(model());
-        ajax.post("/rest/login")
+        ajax.post("/api/login")
           .param("username", login)
           .param("password", password)
           .success(function(e) { window.location = "/applicant"; })

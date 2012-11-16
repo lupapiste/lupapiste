@@ -4,19 +4,19 @@
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]])
-  (:require [noir.request :as request]
-            [noir.response :as resp]
-            [noir.session :as session]
-            [noir.server :as server]
+  (:require (noir  [request :as request]
+                   [response :as resp]
+                   [session :as session]
+                   [server :as server])
+            (lupapalvelu [env :as env]
+                         [core :as core]
+                         [action :as action]
+                         [singlepage :as singlepage]
+                         [security :as security]
+                         [attachment :as attachment]
+                         [proxy-services :as proxy-services])
             [cheshire.core :as json]
-            [lupapalvelu.env :as env]
-            [lupapalvelu.core :as core]
-            [lupapalvelu.action :as action]
-            [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.security :as security]
-            [lupapalvelu.attachment :as attachment]
-            [clj-http.client :as client]
-            [lupapalvelu.proxy-services :as proxy-services]))
+            [clj-http.client :as client]))
 
 ;;
 ;; Helpers
@@ -33,13 +33,24 @@
   []
   (or (session/get :user) ((request/ring-request) :user)))
 
-(defn host []
+(defn host [request]
+  (str (name (:scheme request)) "://" (get-in request [:headers "host"]) "/"))
+
+(defn user-agent [request]
+  (str (get-in request [:headers "user-agent"])))
+
+(defn client-ip [request]
+  (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
+
+(defn web-stuff []
   (let [request (ring-request)]
-    (str (name (:scheme request)) "://" (get-in request [:headers "host"]) "/")))
+    {:user-agent (user-agent request)
+     :client-ip  (client-ip request)
+     :host       (host request)}))
 
 (defn enriched [m]
-  (merge m {:user    (current-user)
-            :host    (host)}))
+  (merge m {:user (current-user)
+            :web  (web-stuff)}))
 
 (defn logged-in? []
   (not (nil? (current-user))))
@@ -57,22 +68,22 @@
      (resp/json (do ~@content))))
 
 ;;
-;; REST API:
+;; API:
 ;;
 
-(defjson "/rest/buildinfo" []
+(defjson "/api/buildinfo" []
   (ok :data (assoc (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj"))) :server-mode env/mode)))
 
-(defjson "/rest/ping" [] (ok))
+(defjson "/api/ping" [] (ok))
 
 ;;
 ;; Commands
 ;;
 
-(defjson [:post "/rest/command/:name"] {name :name}
+(defjson [:post "/api/command/:name"] {name :name}
   (core/execute (enriched (core/command name (from-json)))))
 
-(defjson "/rest/query/:name" {name :name}
+(defjson "/api/query/:name" {name :name}
   (core/execute (enriched (core/query name (from-query)))))
 
 ;;
@@ -124,7 +135,7 @@
                           :authority "/authority"
                           :admin "/admin"})
 
-(defjson [:post "/rest/login"] {:keys [username password]}
+(defjson [:post "/api/login"] {:keys [username password]}
   (if-let [user (security/login username password)]
     (do
       (info "login: successful: username=%s" username)
@@ -135,7 +146,7 @@
       (info "login: failed: username=%s" username)
       (fail :error.login))))
 
-(defjson [:post "/rest/logout"] []
+(defjson [:post "/api/logout"] []
   (session/clear!)
   (ok))
 
@@ -154,7 +165,7 @@
 
 (defn apikey-authentication
   "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
-   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/rest/application"
+   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
   [handler]
   (fn [request]
     (let [authorization (get-in request [:headers "authorization"])
@@ -167,7 +178,7 @@
 ;; File upload/download:
 ;;
 
-(defpage [:post "/rest/upload"]
+(defpage [:post "/api/upload"]
   {applicationId :applicationId attachmentId :attachmentId type :type text :text upload :upload :as data}
   (debug "upload: %s: %s" data (str upload))
   (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""), :text text)
@@ -186,10 +197,10 @@
     (attachment/output-attachment attachment-id (current-user) download?)
     (resp/status 401 "Unauthorized\r\n")))
 
-(defpage "/rest/view/:attachmentId" {attachment-id :attachmentId}
+(defpage "/api/view/:attachmentId" {attachment-id :attachmentId}
   (output-attachment attachment-id false))
 
-(defpage "/rest/download/:attachmentId" {attachment-id :attachmentId}
+(defpage "/api/download/:attachmentId" {attachment-id :attachmentId}
   (output-attachment attachment-id true))
 
 ;;
@@ -206,5 +217,5 @@
 ;;
 
 (env/in-dev
-  (defjson "/rest/spy" []
+  (defjson "/api/spy" []
     (dissoc (ring-request) :body)))

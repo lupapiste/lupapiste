@@ -6,21 +6,21 @@
           docs))
 
 (def simple-osoite {:name "osoite" :type :group
-              :body [{:name "katu" :type :string}
-                     {:name "postinumero" :type :string}
-                     {:name "postitoimipaikka" :type :string}]})
+                    :body [{:name "katu" :type :string}
+                           {:name "postinumero" :type :string}
+                           {:name "postitoimipaikka" :type :string}]})
 
 (def full-osoite-body [{:name "kunta" :type :string}
-                     {:name "lahiosoite" :type :string}
-                     {:name "osoitenumero" :type :string}
-                     {:name "osoitenumero2" :type :string}
-                     {:name "jakokirjain" :type :string}
-                     {:name "jakokirjain2" :type :string}
-                     {:name "porras" :type :string}
-                     {:name "huoneisto" :type :string}
-                     {:name "postinumero" :type :string}
-                     {:name "postitoimipaikka" :type :string}
-                     {:name "pistesijanti" :type :string}])
+                       {:name "lahiosoite" :type :string}
+                       {:name "osoitenumero" :type :string}
+                       {:name "osoitenumero2" :type :string}
+                       {:name "jakokirjain" :type :string}
+                       {:name "jakokirjain2" :type :string}
+                       {:name "porras" :type :string}
+                       {:name "huoneisto" :type :string}
+                       {:name "postinumero" :type :string}
+                       {:name "postitoimipaikka" :type :string}
+                       {:name "pistesijanti" :type :string}])
 
 (def schemas
   (to-map-by-name
@@ -34,14 +34,13 @@
              {:name "kerrosluku" :type :string}
              {:name "kerrosala" :type :string}
              {:name "rakentamistapa" :type :select
-              :body [{:name "Elementti" :type :checkbox}
-                     {:name "Paikkalla" :type :checkbox}
-                     {:name "Ei tiedossa" :type :checkbox}
-                     ]}
+              :body [{:name "alementti" :type :checkbox}
+                     {:name "paikkalla" :type :checkbox}
+                     {:name "eiTiedossa" :type :checkbox}]}
              {:name "kantavarakennusaine" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
-                     {:name "teräs" :type :checkbox}
+                     {:name "teras" :type :checkbox}
                      {:name "eitiedossa" :type :checkbox}
                      {:name "muurakennusaine" :type :string :size "s"}]}                  
              {:name "julkisivu" :type :choice
@@ -63,7 +62,7 @@
              {:name "lammitystapa" :type :choice
               :body [{:name "vesikeskus" :type :checkbox}
                      {:name "ilamkeskus" :type :checkbox}
-                     {:name "suorasähkö" :type :checkbox}
+                     {:name "suorasahko" :type :checkbox}
                      {:name "uuni" :type :checkbox}
                      {:name "eiLammitysta" :type :checkbox}
                      {:name "eiTiedossa" :type :checkbox}]}
@@ -73,7 +72,7 @@
                      {:name "raskaspolttooljy" :type :checkbox}
                      {:name "sahko" :type :checkbox}
                      {:name "kaasu" :type :checkbox}
-                     {:name "kivihiilikoksitms." :type :checkbox}
+                     {:name "kivihiilikoksitms" :type :checkbox}
                      {:name "turve" :type :checkbox}
                      {:name "maalampo" :type :checkbox}
                      {:name "puu" :type :checkbox}

@@ -9,6 +9,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
+            [lupapalvelu.email :as email]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]))
 
@@ -48,21 +49,33 @@
 
 (defquery "invites"
   {:authenticated true}
-  [{{id :id} :user}]
+  [{{:keys [id]} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select mongo/applications filter projection)
         invites    (flatten (map (comp :invites) data))]
     (ok :invites invites)))
 
+(defn invite-body [user id host]
+  (format
+    (str
+      "Tervehdys,\n\n %s %s lisäsi teidät suunnittelijaksi lupahakemukselleen.\n\n"
+      "Hyväksyäksesi rooli ja nähdäksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
+      "Ystävällisin terveisin,\n\n"
+      "Lupapiste.fi")
+    (:firstName user)
+    (:lastName user)
+    host
+    id))
+
 (defcommand "invite"
   {:parameters [:id :email :title :text]
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text]} :data :as command}]
+    {:keys [id email title text]} :data host :host :as command}]
   (with-application command
-    (fn [{application-id :id}]
+    (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
         (mongo/update mongo/applications
           {:_id application-id
@@ -74,7 +87,13 @@
                             :email       email
                             :user        (security/summary invited)
                             :inviter     (security/summary user)}
-                  :auth (role invited :reader)}})))))
+                  :auth (role invited :reader)}})
+        (future
+          (info "sending email to %s" email)
+          (if (email/send-email email (:title application) (invite-body user application-id host))
+            (info "email was sent successfully")
+            (error "email could not be delivered.")))
+        nil))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
