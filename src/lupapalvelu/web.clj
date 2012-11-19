@@ -22,6 +22,10 @@
 ;; Helpers
 ;;
 
+(defmacro defjson [path params & content]
+  `(defpage ~path ~params
+     (resp/json (do ~@content))))
+
 (defn from-json []
   (json/decode (slurp (:body (request/ring-request))) true))
 
@@ -62,10 +66,6 @@
 (defn admin? [] (has-role? :admin))
 (defn anyone [] true)
 (defn nobody [] false)
-
-(defmacro defjson [path params & content]
-  `(defpage ~path ~params
-     (resp/json (do ~@content))))
 
 ;;
 ;; API:
