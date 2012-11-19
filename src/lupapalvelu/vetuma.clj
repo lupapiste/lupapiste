@@ -1,6 +1,5 @@
 (ns lupapalvelu.vetuma
-  (:use [clojure.string :only [join split]]
-        [clojure.set :only [rename-keys]]
+  (:use [clojure.set :only [rename-keys]]
         [noir.core :only [defpage]]
         [noir.response :only [redirect status json]]
         [hiccup.core :only [html]]
@@ -8,6 +7,7 @@
         [hiccup.form]
         [lupapalvelu.log])
   (:require [digest]
+            [clojure.string :as string]
             [noir.request :as request]
             [noir.session :as session]
             [clj-time.core :as time]
@@ -32,9 +32,9 @@
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "https://localhost:8443/vetuma"
-   :canurl    "https://localhost:8443/vetuma/cancel"
-   :errurl    "https://localhost:8443/vetuma/error"
+   :returl    "{host}vetuma"
+   :canurl    "{host}vetuma/cancel"
+   :errurl    "{host}vetuma/error"
    :ap        "***REMOVED***"
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
@@ -56,6 +56,17 @@
 
 (defn- logged [m] (info "%s" (str m)) m)
 
+(defn apply-template
+  "changes all variables in braces {} with keywords with same name.
+   for example (apply-template \"hi {name}\" {:name \"Teppo\"}) returns \"hi Teppo\""
+  [v m]
+  (string/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
+
+(defn apply-templates
+  "runs apply-template on all values, using the map as input"
+  [m]
+  (into {} (for [[k v] m] [k (apply-template v m)])))
+
 ;;
 ;; Mac
 ;;
@@ -69,7 +80,7 @@
     vec
     (conj (secret m))
     (conj "")
-    (->> (join "&"))
+    (->> (string/join "&"))
     mac))
 
 (defn- with-mac [m] (merge m {:mac (mac-of m request-mac-keys)}))
@@ -81,15 +92,15 @@
 
 (defn- extract-subjectdata [{s :subjectdata}]
   (-> s
-    (split #", ")
-    (->> (map #(split % #"=")))
+    (string/split #", ")
+    (->> (map #(string/split % #"=")))
     (->> (into {}))
     keys-as-keywords
     (rename-keys {:etunimi :firstname})
     (rename-keys {:sukunimi :lastname})))
 
 (defn- extract-userid [{s :extradata}]
-  {:userid (last (split s #"="))})
+  {:userid (last (string/split s #"="))})
 
 (defn- extract-request-id [{id :trid}]
   {:stamp id})
@@ -103,10 +114,12 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn- request-data []
+(defn- request-data [host]
   (-> constants
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
+    (assoc :host  host)
+    apply-templates
     with-mac
     (dissoc :key)
     keys-as-strings))
@@ -133,6 +146,10 @@
 
 (defn- non-local? [& rest] (some #(not= -1 (.indexOf % ":")) rest))
 
+(defn host []
+  (let [request (request/ring-request)]
+    (str (name (:scheme request)) "://" (get-in request [:headers "host"]) "/")))
+
 ; TODO: does not strip unneeded parameters
 (defpage "/vetuma" {:keys [success cancel error] :as paths}
   (if (non-local? success cancel error)
@@ -141,7 +158,7 @@
       (session/put! *path-session-key* paths)
       (html
         (form-to [:post (:url constants)]
-          (map field (request-data))
+          (map field (request-data (host)))
           (submit-button "submit"))))))
 
 (defpage [:post "/vetuma"] []
