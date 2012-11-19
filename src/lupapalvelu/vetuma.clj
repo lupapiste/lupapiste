@@ -117,7 +117,6 @@
     (assoc :timestmp (timestamp))
     (assoc :host  host)
     apply-templates
-    logged
     with-mac
     (dissoc :key)
     keys-as-strings))
