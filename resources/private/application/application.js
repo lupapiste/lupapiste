@@ -143,7 +143,7 @@
         debug("saving", path, value, data);
         ajax
           .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-          .success(function() { callback("ok"); })
+          .success(function(e) { callback("ok"); debug("RESULT:", e); }) // TODO: Error reporting
           .error(function(e) { error(e); callback(e.status || "err"); })
           .fail(function(e) { error(e); callback("err"); })
           .call();
