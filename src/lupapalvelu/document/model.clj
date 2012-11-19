@@ -61,3 +61,13 @@
   warning or error message."
   [schema updates]
   (reduce (partial validate-update (:body schema)) [] updates))
+
+(defn validation-status
+  "Accepts validation results (as defined in 'validate-updates' function) and returns either :ok
+  (when results is empty), :warn (when results contains only warnings) or :err (when results
+  contains one or more errors)."
+  [results]
+  (cond
+    (empty? results) :ok
+    (some #(= (second %) :err) results) :err
+    :else :warn))
