@@ -215,14 +215,14 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:lat :lon :street :zip :city :schemas]
+  {:parameters [:x :y :street :zip :city :schemas]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
         documents (map create-document (:schemas data))
-        municipalityId (tepa/get-municipality-id-by-location (:lat data) (:lon data))]
+        municipalityId (tepa/get-municipality-id-by-location (:x data) (:y data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -230,8 +230,8 @@
        :state :draft
        :permitType :buildingPermit
        :municipalityId municipalityId
-       :location {:lat (:lat data)
-                  :lon (:lon data)}
+       :location {:x (:x data)
+                  :y (:y data)}
        :address {:street (:street data)
                  :zip (:zip data)
                  :city (:city data)}
