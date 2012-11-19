@@ -1,4 +1,6 @@
 (ns lupapalvelu.document.model
+  (:use [lupapalvelu.log]
+        [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]))
 
 ;;
@@ -7,7 +9,7 @@
 
 (def default-max-len 64)
 
-(defmulti validate (fn [elem v] (:type elem)))
+(defmulti validate (fn [elem v] (keyword (:type elem))))
 
 (defmethod validate :group [elem v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
@@ -31,6 +33,7 @@
   [:err "illegal-key"])
 
 (defmethod validate :default [elem v]
+  (warn "Unknown schema type: elem=[%s]" elem)
   [:err "unknown-type"])
 
 ;;
@@ -45,7 +48,7 @@
 
 (defn- validate-update [body results [k v]]
   (let [elem (find-by-name body (s/split k #"\."))
-        result (validate elem v)]
+        result (validate (keywordize-keys elem) v)]
     (if (nil? result)
       results
       (conj results (cons k result)))))
