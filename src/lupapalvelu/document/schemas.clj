@@ -84,7 +84,7 @@
                      {:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
                      {:name "hissiKytkin" :type :checkbox}
-                     {:name "koneellinenilmanstointiKytkin"  :type :checkbox}
+                     {:name "koneellinenilmanstointiKytkin" :type :checkbox}
                      {:name "saunoja" :type :string}
                      {:name "uimala-ataita" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
