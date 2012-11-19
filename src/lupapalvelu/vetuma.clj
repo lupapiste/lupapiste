@@ -56,12 +56,15 @@
 
 (defn- logged [m] (info "%s" (str m)) m)
 
-(defn- apply-template [v m]
-  (string/replace v #"\{(\w+)\}"
-                  (fn [[_ word]]
-                    (or (m (keyword word)) ""))))
+(defn apply-template
+  "changes all variables in braces {} with keywords with same name.
+   for example (apply-template \"hi {name}\" {:name \"Teppo\"}) returns \"hi Teppo\""
+  [v m]
+  (string/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
 
-(defn- apply-templates [m]
+(defn apply-templates
+  "runs apply-template on all values, using the map as input"
+  [m]
   (into {} (for [[k v] m] [k (apply-template v m)])))
 
 ;;

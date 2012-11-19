@@ -37,4 +37,3 @@
     (apply-templates {:a "eka{b}" :b "toka"}) => {:a "ekatoka" :b "toka"})
   (fact "missing placeholders are ignored"
     (apply-templates {:a "eka{c}" :b "toka"}) => {:a "eka" :b "toka"}))
-
