@@ -59,4 +59,8 @@
   (fact "No such version"
     (attachment-latest-version test-attachments "none") => nil?))
 
+(def next-attachment-version @#'lupapalvelu.attachment/next-attachment-version)
 
+(facts "Facts about next-attachment-version"
+  (fact (next-attachment-version {:major 1 :minor 1} {:role :authority}) => {:major 1 :minor 2})
+  (fact (next-attachment-version {:major 1 :minor 1} {:role :dude}) => {:major 2 :minor 0}))

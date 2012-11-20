@@ -140,10 +140,10 @@
       {$set {:modified now} $push {:attachments attachment-model}})
     attachment-id))
 
-(defn- next-attachment-version [current-version user]
+(defn- next-attachment-version [{major :major minor :minor} user]
   (if (= (keyword (:role user)) :authority)
-    {:major (:major current-version), :minor (inc (:minor current-version))}
-    {:major (inc (:major current-version)), :minor 0}))
+    {:major major, :minor (inc minor)}
+    {:major (inc major), :minor 0}))
 
 (defn attachment-latest-version [attachments attachment-id]
   (:version (:latestVersion (some #(when (= attachment-id (:id %)) %) attachments))))
