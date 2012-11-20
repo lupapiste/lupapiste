@@ -25,14 +25,12 @@
   (fact "Tabs are removed"
      (encode-filename "12345\t678\t90") => (just ascii-pattern))
   (fact "Newlines are removed"
-     (encode-filename "12345\n678\r\n90") => (just ascii-pattern))
-  )
+     (encode-filename "12345\n678\r\n90") => (just ascii-pattern)))
 
 (facts "Test mime.types parser"
   (fact "Contains PDF" (get mime-types "pdf") => "application/pdf")
   (fact "Contains jpeg" (get mime-types "jpeg") => "image/jpeg")
-  (fact "Contains jpg" (get mime-types "jpg") => "image/jpeg")
-  )
+  (fact "Contains jpg" (get mime-types "jpg") => "image/jpeg"))
 
 (facts "Test allowd file types"
   (fact "foo.pdf" (allowed-file? "foo.pdf") => truthy)
@@ -51,17 +49,14 @@
   (fact "virus.sh" (allowed-file? "virus.sh") => falsey)
   (fact "none" (allowed-file? "virus.") => falsey)
   (fact "empty" (allowed-file? "") => falsey)
-  (fact "nil" (allowed-file? nil) => falsey)
-
-  )
+  (fact "nil" (allowed-file? nil) => falsey))
 
 (def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
 
 (facts
   (fact "Latest version is found"
-        (attachment-latest-version test-attachments "1") => {:major 9, :minor 7})
+    (attachment-latest-version test-attachments "1") => {:major 9, :minor 7})
   (fact "No such version"
-        (attachment-latest-version test-attachments "none") => falsey)
-  )
+    (attachment-latest-version test-attachments "none") => nil?))
 
 
