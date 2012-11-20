@@ -222,7 +222,7 @@
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
         documents (map create-document (:schemas data))
-        municipalityId (tepa/get-municipality-id-by-location (:x data) (:y data))]
+        municipalityId (:result (executed "get-municipality-id-by-location" command))]
     (mongo/insert mongo/applications
       {:id id
        :created created
