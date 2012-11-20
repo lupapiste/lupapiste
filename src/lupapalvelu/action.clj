@@ -9,6 +9,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
+            [lupapalvelu.tepa :as tepa]
             [lupapalvelu.email :as email]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]))
@@ -214,21 +215,23 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:lat :lon :street :zip :city :schemas]
+  {:parameters [:x :y :street :zip :city :schemas]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
-        documents (map create-document (:schemas data))]
+        documents (map create-document (:schemas data))
+        municipalityId (tepa/get-municipality-id-by-location (:x data) (:y data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
        :state :draft
        :permitType :buildingPermit
-       :location {:lat (:lat data)
-                  :lon (:lon data)}
+       :municipalityId municipalityId
+       :location {:x (:x data)
+                  :y (:y data)}
        :address {:street (:street data)
                  :zip (:zip data)
                  :city (:city data)}
