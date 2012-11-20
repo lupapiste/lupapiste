@@ -139,12 +139,10 @@ var attachment = function() {
     $("#uploadFrame").attr("src", originalUrl);
   }
 
-  hub.subscribe("upload-done", LUPAPISTE.ModalDialog.close);
   hub.subscribe("upload-cancelled", LUPAPISTE.ModalDialog.close);
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function(e) {
     resetUploadIframe();
-    repository.reloadApplication(applicationId);
   });
 
   function toApplication(){
@@ -164,7 +162,17 @@ var attachment = function() {
     resetUploadIframe();
   });
 
+  function uploadDone(applicationId) {
+    repository.reloadApplication(applicationId);
+    LUPAPISTE.ModalDialog.close();
+  }
+
   function newAttachment(m) {
+    var applicationId = m.id();
+    hub.subscribe("upload-done", function(e) {
+      uploadDone(applicationId);
+    });
+
     initFileUpload(m.id());
   }
 

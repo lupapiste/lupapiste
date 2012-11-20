@@ -135,7 +135,7 @@
 
       // Update map:
       var location = application.location();
-      hub.send("application-map", {locations: location ? [{x: location.lon(), y: location.lat()}] : []});
+      hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
 
       // docgen:
 
