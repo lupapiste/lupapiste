@@ -222,14 +222,14 @@
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
         documents (map create-document (:schemas data))
-        municipalityId (:result (executed "get-municipality-id-by-location" command))]
+        municipality (:result (executed "municipality-by-location" command))]
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
        :state :draft
        :permitType :buildingPermit
-       :municipalityId municipalityId
+       :municipality municipality
        :location {:x (:x data)
                   :y (:y data)}
        :address {:street (:street data)
