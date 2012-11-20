@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.model-text
+(ns lupapalvelu.document.model-test
   (:use [lupapalvelu.document.model]
         [lupapalvelu.document.schemas]
         [midje.sweet]))
