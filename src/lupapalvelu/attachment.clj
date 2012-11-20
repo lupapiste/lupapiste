@@ -86,10 +86,11 @@
       {:key :muu, :text "Muu liite"}]}]
    })
 
-(defn- attachment-types-for [application-id]
-  (if-let [permit-type (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))]
-    (attachment-types-for-permit-type (keyword permit-type))
-    []))
+(defn- get-permit-type [application-id]
+  (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType])))
+
+(defn- attachment-types-for [permit-type]
+  (attachment-types-for-permit-type (keyword permit-type)))
 
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
@@ -202,7 +203,7 @@
 
 (defn- allowed-attachment-type-for? [application-id type]
   (some (fn [{types :types}] (some (fn [{key :key}] (= key type)) types))
-        (attachment-types-for application-id)))
+        (attachment-types-for (get-permit-type application-id))))
 
 ;;
 ;; Actions
@@ -212,7 +213,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [{{application-id :id} :data}]
-  (ok :typeGroups (attachment-types-for application-id)))
+  (ok :typeGroups (attachment-types-for (get-permit-type application-id))))
 
 (defcommand "approve-attachment"
   {:description "Authority can approve attachement, moves to ok"
