@@ -12,16 +12,6 @@
      :basic-auth ["***REMOVED***" "***REMOVED***"]
      :as :stream}))
 
-;;
-;; Sito "tepa":
-;;
-
-(defn tepa [request]
-  (client/post "http://tepa.sito.fi/sade/lupapiste/karttaintegraatio/Kunta.asmx/Hae"
-    {:body (:body request)
-     :content-type :json
-     :accept :json}))
-
 ;
 ; Utils:
 ;
@@ -39,5 +29,4 @@
 ;; Proxy services by name:
 ;;
 
-(def services {"nls" (secure nls)
-               "tepa" (secure tepa)})
+(def services {"nls" (secure nls)})
