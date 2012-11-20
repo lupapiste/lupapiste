@@ -100,7 +100,7 @@
              {:name "sukunimi" :type :string}
              simple-osoite
              {:name "puhelin" :type :string}
-             {:name "email" :type :string}]}
+             {:name "email" :type :string :subtype :email}]}
      {:info {:name "paasuunnittelija"}
       :body [{:name "etunimi" :type :string}
              {:name "sukunimi" :type :string}
