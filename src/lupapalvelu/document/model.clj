@@ -1,7 +1,8 @@
 (ns lupapalvelu.document.model
   (:use [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]])
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [lupapalvelu.document.subtype :as subtype]))
 
 ;;
 ;; Validation:
@@ -18,7 +19,8 @@
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
-    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
+    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]
+    :else (subtype/subtype-validation elem v)))
 
 (defmethod validate :text [elem v]
   (cond
