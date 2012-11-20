@@ -41,7 +41,8 @@ var docgen = (function () {
     }
     div.className = "form-entry";
     div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
-    div.appendChild(makeInput("text", myPath, model[spec.name], save, sizeClass));
+    var type = (spec.subtype === "email") ? "email" : "text";
+    div.appendChild(makeInput(type, myPath, model[spec.name], save, sizeClass));
     if (spec.unit) {
       var unit = document.createElement("span");
       unit.className = "form-string-unit";
@@ -220,14 +221,14 @@ var docgen = (function () {
       var label = document.getElementById(path.replace(/\./g, "-"));
       label.appendChild(loader);
 
-      save(path, value, function (result) {
+      save(path, value, function (status) {
         label.removeChild(loader);
         removeClass(target, ["form-input-warn", "form-input-err"]);
-        if (result === "ok") {
+        if (status === "ok") {
           // Nada.
-        } else if (result === "warn") {
+        } else if (status === "warn") {
           addClass(target, "form-input-warn");
-        } else if (result === "err") {
+        } else if (status === "err") {
           addClass(target, "form-input-err");
         } else {
           error("Unknown result:", result, "path:", path);
