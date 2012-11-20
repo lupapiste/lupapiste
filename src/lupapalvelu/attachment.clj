@@ -83,10 +83,10 @@
                              {:key :muu}]}]})
 
 (defn- get-permit-type [application-id]
-  (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType])))
+  (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
 
 (defn- attachment-types-for [permit-type]
-  (attachment-types-for-permit-type (keyword permit-type)))
+  (attachment-types-for-permit-type permit-type))
 
 ;; Reads mime.types file provided by Apache project.
 ;; Ring has also some of the most common file extensions mapped, but is missing
