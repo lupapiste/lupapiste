@@ -16,7 +16,6 @@ LUPAPISTE.App = function(startPage) {
   self.startPage = startPage;
   self.currentPage = undefined;
   self.session = undefined;
-  self.hashChangeEventEnabled = true;
 
   /**
    * Complete the App initialization after DOM is loaded.
@@ -69,18 +68,8 @@ LUPAPISTE.App = function(startPage) {
     hub.send("page-change", {pageId: pageId, pagePath: pagePath});
   };
 
-  this.immediatePageJump = function(url) {
-    trace("Jump to " + url);
-    self.hashChangeEventEnabled = false;
-    window.location = url;
-  };
-
   this.hashChanged = function() {
     trace("hash changed");
-
-    if (!self.hashChangeEventEnabled) {
-      return;
-    }
 
     var hash = (location.hash || "").substr(3);
 
@@ -111,7 +100,7 @@ LUPAPISTE.App = function(startPage) {
   };
 
   this.connectionCheck = function() {
-    ajax.get("/rest/ping")
+    ajax.get("/api/ping")
       .success(function() {
         hub.send("connection-online");
         setTimeout(self.connectionCheck, 15000);
@@ -139,7 +128,7 @@ LUPAPISTE.App = function(startPage) {
   });
 
   hub.subscribe("logout", function() {
-    self.immediatePageJump("/");
+    window.location = "/logout";
   });
 
 };

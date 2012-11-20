@@ -30,7 +30,7 @@
    does not include resources from dependencies."
   [components kind c]
   (let [path (or (:name (components c)) (name c))]
-    (map (partial str path \/) (kind (get-component components c)))))
+    (map #(if (fn? %) % (str path \/ %)) (kind (get-component components c)))))
 
 (defn get-resources
   "Returns a lazy-seq of resources names registered for specified component, including resources from

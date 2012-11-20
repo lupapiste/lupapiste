@@ -9,6 +9,8 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
+            [lupapalvelu.tepa :as tepa]
+            [lupapalvelu.email :as email]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]))
 
@@ -26,14 +28,16 @@
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
 
-(defn get-application-as [application-id user]
-  (mongo/select mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
-
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
+(defn get-application-as [application-id user]
+  (mongo/select-one mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
+
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (ok :applications (get-application-as id user)))
+  (if-let [app (get-application-as id user)]
+    (ok :application app)
+    (fail :error.not-found)))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -48,21 +52,33 @@
 
 (defquery "invites"
   {:authenticated true}
-  [{{id :id} :user}]
+  [{{:keys [id]} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select mongo/applications filter projection)
         invites    (flatten (map (comp :invites) data))]
     (ok :invites invites)))
 
+(defn invite-body [user id host]
+  (format
+    (str
+      "Tervehdys,\n\n %s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
+      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
+      "Yst\u00E4v\u00E4llisin terveisin,\n\n"
+      "Lupapiste.fi")
+    (:firstName user)
+    (:lastName user)
+    host
+    id))
+
 (defcommand "invite"
   {:parameters [:id :email :title :text]
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text]} :data :as command}]
+    {:keys [id email title text]} :data host :host :as command}]
   (with-application command
-    (fn [{application-id :id}]
+    (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
         (mongo/update mongo/applications
           {:_id application-id
@@ -74,7 +90,13 @@
                             :email       email
                             :user        (security/summary invited)
                             :inviter     (security/summary user)}
-                  :auth (role invited :reader)}})))))
+                  :auth (role invited :reader)}})
+        (future
+          (info "sending email to %s" email)
+          (if (email/send-email email (:title application) (invite-body user application-id host))
+            (info "email was sent successfully")
+            (error "email could not be delivered.")))
+        nil))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -193,21 +215,23 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:lat :lon :street :zip :city :schemas]
+  {:parameters [:x :y :street :zip :city :schemas]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
-        documents (map create-document (:schemas data))]
+        documents (map create-document (:schemas data))
+        municipalityId (tepa/get-municipality-id-by-location (:x data) (:y data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
        :state :draft
        :permitType :buildingPermit
-       :location {:lat (:lat data)
-                  :lon (:lon data)}
+       :municipalityId municipalityId
+       :location {:x (:x data)
+                  :y (:y data)}
        :address {:street (:street data)
                  :zip (:zip data)
                  :city (:city data)}

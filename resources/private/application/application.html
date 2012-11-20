@@ -9,7 +9,7 @@
 
     <div class="application_summary">
 
-      <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
+      <div id="application-map" class="map map-large" style="width: 280px; height: 252px;"></div>
 
       <div data-bind="with: application">
         <h1 data-bind="with: address">
@@ -20,7 +20,7 @@
       <div class="application_summary_info" data-bind="with: application">
         <div>
           <p>Käsittelytunnus:</p>
-          <span class="application_summary_text" data-bind-test-id="application-id" data-bind="text: id()"></span>
+          <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
         </div>
         <div>
           <p>Tila:</p>
@@ -71,11 +71,11 @@
       </ul>
     </div>
 
-    <div id="tab_content_container" class="container" data-bind="with: application">
+    <div id="tab_content_container" class="container">
 
       <div class="tab_content" id="application_tab" style="display: block;">
 
-        <div class="application_section">
+        <div class="application_section" data-bind="with: application">
           <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick, clickBubble: false"> <span class="font-icon icon-expanded"></span> Hakemuksen perustiedot</h2>
           <div class="application_section_content content_expanded">
             <div>
@@ -136,7 +136,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="decision_tab">
+      <div class="tab_content" id="decision_tab" data-bind="with: application">
         <div class="tab-wrapper">
           <div class="row" data-bind="with: verdict">
             <span id="test-application-verdict" data-bind="text: text"></span>
@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="attachments_tab">
+      <div class="tab_content" id="attachments_tab" data-bind="with: application">
         <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <table data-bind="if: attachments && attachments().length" class="table table-striped">
@@ -170,7 +170,7 @@
                   </a>
                 </td>
               <td><span data-bind="if: $data.latestVersion.filename">
-                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/rest/download/' + latestVersion.fileId}"></a>
+                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
                   <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
               </span></td>
                 <td data-bind="version: latestVersion.version"></td>
