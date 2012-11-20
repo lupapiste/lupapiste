@@ -32,9 +32,9 @@
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "{host}vetuma"
-   :canurl    "{host}vetuma/cancel"
-   :errurl    "{host}vetuma/error"
+   :returl    "{host}/vetuma"
+   :canurl    "{host}/vetuma/cancel"
+   :errurl    "{host}/vetuma/error"
    :ap        "***REMOVED***"
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
@@ -146,9 +146,20 @@
 
 (defn- non-local? [& rest] (some #(not= -1 (.indexOf % ":")) rest))
 
-(defn host []
-  (let [request (request/ring-request)]
-    (str (name (:scheme request)) "://" (get-in request [:headers "host"]) "/")))
+(defn host-and-ssl-port [host]
+  (string/replace host #":8000" ":8443"))
+
+(defn host
+  ([] (host :current))
+  ([mode]
+    (let [request (request/ring-request)
+          scheme  (name (:scheme request))
+          host    (get-in request [:headers "host"])]
+      (case mode
+        :current (str scheme "://" host)
+        :secure  (if (= scheme "https")
+                   (host :current)
+                   (str "https://" (host-and-ssl-port host)))))))
 
 ; TODO: does not strip unneeded parameters
 (defpage "/vetuma" {:keys [success cancel error] :as paths}
@@ -158,7 +169,7 @@
       (session/put! *path-session-key* paths)
       (html
         (form-to [:post (:url constants)]
-          (map field (request-data (host)))
+          (map field (request-data (host :secure)))
           (submit-button "submit"))))))
 
 (defpage [:post "/vetuma"] []
