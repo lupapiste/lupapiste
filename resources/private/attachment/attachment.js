@@ -145,7 +145,7 @@ var attachment = function() {
     resetUploadIframe();
   });
 
-  function toApplication(){
+  function toApplication() {
     window.location.href = "#!/application/" + model.application.id();
   }
 
