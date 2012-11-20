@@ -22,6 +22,12 @@
     (re-matches #"^\+?[\d\s-]+" v) nil
     :else [:warn "illegal-tel"]))
 
+(defmethod subtype-validation :number [elem v]
+  (cond
+    (blank? v) nil
+    (re-matches #"\d+" v) nil
+    :else [:warn "illegal-number"]))
+
 (defmethod subtype-validation nil [elem v]
   nil)
 

@@ -34,7 +34,7 @@
              {:name "osoite" :type :group :body full-osoite-body}
              {:name "rinnakkaisosoite" :type :group :body full-osoite-body}
              {:name "kerrosluku" :type :string}
-             {:name "kerrosala" :type :string}
+             {:name "kerrosala" :type :string :unit "m2" :subtype :number}
              {:name "rakentamistapa" :type :select
               :body [{:name "alementti" :type :checkbox}
                      {:name "paikkalla" :type :checkbox}

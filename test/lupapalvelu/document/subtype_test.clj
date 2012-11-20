@@ -19,3 +19,8 @@
   (fact (subtype-validation {:subtype :tel} "1") => nil?)
   (fact (subtype-validation {:subtype :tel} "123-456") => nil?)
   (fact (subtype-validation {:subtype :tel} "+358-123 456") => nil?))
+
+(facts "Facts about number validation"
+  (fact (subtype-validation {:subtype :number} "123") => nil?)
+  (fact (subtype-validation {:subtype :number} "abc") => [:warn "illegal-number"])
+  (fact (subtype-validation {:subtype :number} " 123 ") => [:warn "illegal-number"]))
