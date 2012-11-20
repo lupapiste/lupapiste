@@ -140,11 +140,15 @@
       // docgen:
 
       var save = function(path, value, callback, data) {
-        debug("saving", path, value, data);
         ajax
           .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-          .success(function() { callback("ok"); })
-          .error(function(e) { error(e); callback(e.status || "err"); })
+          // Server returns empty array (all ok), or array containing an array with three
+          // elements: [key status message]. Here we use just the status.
+          .success(function(e) {
+            var status = (e.results.length == 0) ? "ok" : e.results[0][1]; 
+            callback(status);
+          })
+          .error(function(e) { error(e); callback("err"); })
           .fail(function(e) { error(e); callback("err"); })
           .call();
       };

@@ -3,49 +3,49 @@
         [lupapalvelu.document.schemas]
         [midje.sweet]))
 
-;; DSL tests
+;; Simple test schema:
 
-(facts "creating groups"
-  (fact (make-group "foo") => (contains {:type :group :name "foo" :body []}))
-  (fact (make-group "foo" 1 2 3) => (contains {:type :group :name "foo" :body [1 2 3]})))
+(def schema {:info
+             {:name "test-model"
+              :version 1}
+             :body [{:type :group
+                     :name "1"
+                     :body [{:name "11" :type :string}
+                            {:name "12" :type :string :min-len 2 :max-len 3}
+                            {:name "2" :type :group
+                             :body [{:name "21" :type :string :min-len 2}
+                                    {:name "22" :type :boolean}]}]}]})
 
-(facts "adding meta-data"
-  (fact (make-string "foo") => (contains {:type :string :name "foo" :min-len 0 :max-len 32}))
-  (fact (make-string "foo" :min-len 5) => (contains {:type :string :name "foo" :min-len 5 :max-len 32}))
-  (fact (make-string "foo" :min-len 5 :foo "bar") => (contains {:type :string :name "foo" :min-len 5 :max-len 32 :foo "bar"})))
+;; Tests for internals:
+
+(def find-by-name @#'lupapalvelu.document.model/find-by-name)
+
+(facts "Facts about internals"
+  (fact (find-by-name (:body schema) ["1"]) => (-> schema :body first))
+  (fact (find-by-name (:body schema) ["1" "11"]) => {:name "11" :type :string})
+  (fact (find-by-name (:body schema) ["1" "2" "22"]) => {:name "22" :type :boolean})
+  (fact (find-by-name (:body schema) ["1" "2" "23"]) => nil))
 
 ;; Validation tests:
 
-(def schema
-  (make-model "test-model" 1
-    (make-group "1"
-      (make-string "1-1")
-      (make-string "1-2" :min-len 2 :max-len 3)
-      (make-group "2"
-        (make-string "2-1" :min-len 2)
-        (make-boolean "2-2")))))
-
-(facts "with separate doc and schema"
-  (fact (apply-updates {} schema {"1" {"1-1" "foo"}})
-        => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])
-  (fact (apply-updates {} schema {"1" {"xxx" "foo"}})
-        => [{"1" {}} [["1.xxx" "foo" false "illegal-key"]]])
-  (fact (apply-updates {} schema {"1" "foo"})
-        => [{} [["1" "foo" false "illegal-value:not-a-map"]]])
-  (fact (apply-updates {} schema {"1" {"1-1" (apply str (repeat (inc default-max-len) "x"))}})
-        => [{"1" {}} [["1.1-1" (apply str (repeat (inc default-max-len) "x")) false "illegal-value:too-long"]]]))
-
-(facts "with full document"
-  (let [document {:body {} :schema schema}]
-    (fact (apply-updates document {"1" {"1-1" "foo"}})
-          => [{"1" {"1-1" "foo"}} [["1.1-1" "foo" true]]])))
+(facts "Simple validations"
+  (fact (validate-updates schema [["1.12" "foo"]]) => [])
+  (fact (validate-updates schema [["1.12" "f"]]) => [["1.12" :warn "illegal-value:too-short"]])
+  (fact (validate-updates schema [["1.12" "foooo"]]) => [["1.12" :err "illegal-value:too-long"]])
+  (fact (validate-updates schema [["1.12" "f"] ["1.12" "foooo"]]) => [["1.12" :warn "illegal-value:too-short"] ["1.12" :err "illegal-value:too-long"]]))
 
 (facts "with real schemas - important field for paasuunnittelija"
-  (let [document {:body {} :schema (schemas "paasuunnittelija")}]
-    (fact (apply-updates document {"etunimiz" "Tauno"}) =>     [{} [["etunimiz" "Tauno" false "illegal-key"]]])
-    (fact (apply-updates document {"etunimi" "Tauno"}) =>      [{"etunimi" "Tauno"} [["etunimi" "Tauno" true]]])
-    (fact (apply-updates document {"sukunimi" "Palo"}) =>      [{"sukunimi" "Palo"} [["sukunimi" "Palo" true]]])
-    (fact (apply-updates document {"etunimi" "Tauno" "sukunimi" "Palo"}) => [{"etunimi" "Tauno" "sukunimi" "Palo"} [["etunimi" "Tauno" true] ["sukunimi" "Palo" true]]])
-    (fact (apply-updates document {"etunimi" "Tauno" "sukunimiz" "Palo"}) => [{"etunimi" "Tauno"} [["etunimi" "Tauno" true] ["sukunimiz" "Palo" false "illegal-key"]]])
-    (fact (apply-updates document {"email" "tauno@iki.fi"}) => [{"email" "tauno@iki.fi"} [["email" "tauno@iki.fi" true]]])
-    (fact (apply-updates document {"puhelin" "050"}) =>        [{"puhelin" "050"} [["puhelin" "050" true]]])))
+  (let [schema (schemas "paasuunnittelija")]
+    (fact (validate-updates schema [["etunimi" "Tauno"]])   => [])
+    (fact (validate-updates schema [["etunimiz" "Tauno"]])  => [["etunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["sukunimi" "Palo"]])   => [])
+    (fact (validate-updates schema [["etunimi" "Tauno"] ["sukunimi"  "Palo"]])  => [])
+    (fact (validate-updates schema [["etunimi" "Tauno"] ["sukunimiz" "Palo"]])  => [["sukunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["email" "tauno@iki.fi"]]) => [])
+    (fact (validate-updates schema [["puhelin" "050"]]) =>        [])))
+
+(facts "Facts about validation-status"
+ (fact (validation-status []) => :ok)
+ (fact (validation-status [["foo" :warn "bar"]]) => :warn)
+ (fact (validation-status [["foo" :warn "bar"] ["foo2" :warn "bar2"]]) => :warn)
+ (fact (validation-status [["foo" :warn "bar"] ["foo2" :err "bar2"]]) => :err))

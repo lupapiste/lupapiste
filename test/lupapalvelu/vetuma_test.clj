@@ -14,9 +14,9 @@
 
   (fact "request-data can be generated"
     (request-data) => truthy)
-  
+
   (fact "request-data does not contain (secret) key"
-    (contains? (request-data) "KEY") => falsey) 
+    (contains? (request-data) "KEY") => falsey)
 
   (fact "response-data can be parsed"
     (parsed valid-response) => (contains {:userid "210281-9988"}))
@@ -26,7 +26,14 @@
 
   (fact "parsing response just works"
     (-> valid-response parsed user-extracted) => (contains {:userid "210281-9988" :firstName "PORTAALIA" :lastName "TESTAA"}))
-  
+
   (fact "with invalid data, empty map is returned"
     (parsed invalid-response) => (just {})))
 
+(facts "template parsing"
+  (fact "without placeholders input is returned"
+    (apply-templates {:a "eka" :b "toka"}) => {:a "eka" :b "toka"})
+  (fact "placeholders are changed"
+    (apply-templates {:a "eka{b}" :b "toka"}) => {:a "ekatoka" :b "toka"})
+  (fact "missing placeholders are ignored"
+    (apply-templates {:a "eka{c}" :b "toka"}) => {:a "eka" :b "toka"}))

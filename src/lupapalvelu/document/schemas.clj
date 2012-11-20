@@ -1,6 +1,8 @@
 (ns lupapalvelu.document.schemas)
 
-(defn to-map-by-name [docs]
+(defn to-map-by-name
+  "Take list of schema maps, return a map of schemas keyed by :name under :info"
+  [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc))
           {}
           docs))
@@ -84,7 +86,7 @@
                      {:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
                      {:name "hissiKytkin" :type :checkbox}
-                     {:name "koneellinenilmanstointiKytkin"  :type :checkbox}
+                     {:name "koneellinenilmanstointiKytkin" :type :checkbox}
                      {:name "saunoja" :type :string}
                      {:name "uimala-ataita" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
