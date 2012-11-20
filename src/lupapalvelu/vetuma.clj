@@ -146,7 +146,9 @@
 
 (defn- non-local? [& rest] (some #(not= -1 (.indexOf % ":")) rest))
 
-(defn host-and-ssl-port [host]
+(defn host-and-ssl-port
+  "returns host with port changed from 8000 to 8443. Shitty crap."
+  [host]
   (string/replace host #":8000" ":8443"))
 
 (defn host
