@@ -76,7 +76,7 @@
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text]} :data host :host :as command}]
+    {:keys [id email title text]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
