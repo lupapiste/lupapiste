@@ -128,11 +128,7 @@
                              ; Conversion could be done here as well, but we don't want to lose information.
                              :filename filename
                              :contentType content-type
-                             :size size}
-              attachment-model {:modified now
-                                :attachments.$.modified now
-                                :attachments.$.state  :requires_authority_action
-                                :attachments.$.latestVersion version-model}]
+                             :size size}]
         ; Check return value and try again with new version number
         (let [result-count (mongo/update-by-query
                              mongo/applications
@@ -140,7 +136,10 @@
                               :attachments {$elemMatch {:id attachment-id
                                                         :latestVersion.version.major (:major latest-version)
                                                         :latestVersion.version.minor (:minor latest-version)}}}
-                             {$set attachment-model
+                             {$set {:modified now
+                                    :attachments.$.modified now
+                                    :attachments.$.state  :requires_authority_action
+                                    :attachments.$.latestVersion version-model}
                               $push {:attachments.$.versions version-model}})]
           (if (> result-count 0)
             true
@@ -160,11 +159,12 @@
     (set-attachment-version id attachment-id file-id filename content-type size created user)
     attachment-id))
 
-(defn- allowed-attachment-type-for? [permit-type attachmentType]
-  (let [[group id] (map keyword (drop 1 (re-find #"(.*)\.(.*)" attachmentType)))
-        [group id] (->> attachmentType (re-find #"(.*)\.(.*)") (drop 1) (map keyword))
-        permits (get-in attachment-types-for-permit-type [permit-type group])]
-    (some (partial = id) permits)))
+(defn parse-attachment-type [attachment-type]
+  (->> attachment-type (re-find #"(.*)\.(.*)") (drop 1) (map keyword)))
+
+(defn- allowed-attachment-type-for? [permit-type {:keys [type-group type-id]}]
+  (let [permits (get-in attachment-types-for-permit-type [permit-type (keyword type-group)])]
+    (some (partial = (keyword type-id)) permits)))
 
 ;;
 ;; Actions
@@ -210,8 +210,8 @@
    :parameters  [:id :attachmentType]
    :roles       [:authority]
    :states      [:draft :open]}
-  [{{application-id :id t :attachmentType} :data created :created}]
-  (if-let [attachment-id (create-attachment application-id t created)]
+  [{{application-id :id attachmentType :attachmentType} :data created :created}]
+  (if-let [attachment-id (create-attachment application-id attachmentType created)]
     (ok :applicationId application-id :attachmentId attachment-id)
     (fail :error.attachment-placeholder)))
 

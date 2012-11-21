@@ -184,10 +184,11 @@
 (defpage [:post "/api/upload"]
   {applicationId :applicationId attachmentId :attachmentId attachmentType :attachmentType text :text upload :upload :as data}
   (debug "upload: %s: %s" data (str upload))
-  (let [upload-data (assoc upload
+  (let [[type-group type-id] (attachment/parse-attachment-type attachmentType) 
+        upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
-                           :attachmentType (or attachmentType "")
+                           :attachmentType {:type-group type-group :type-id type-id}
                            :text text)
         result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
