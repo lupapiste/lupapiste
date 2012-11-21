@@ -112,8 +112,13 @@
   }
 
   function getAttachmentsByGroup(attachments) {
-    return [{group: "Hakija", attachments: [{name: "foo", type: "bar"}]},
-            {group: "Muu", attachments: [{name: "foozza", type: "barzza"}]}];
+    var grouped = _.groupBy(attachments, function(attachment) {
+      return attachment.type['type-group'];
+    });
+    var result = _.map(grouped, function(value, key) {
+      return {group: key, attachments: value};
+    });
+    return result;
   }
   
   function showApplication(data) {
