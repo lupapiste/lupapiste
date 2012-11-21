@@ -63,6 +63,7 @@
   (= role (keyword (:role (current-user)))))
 
 (defn authority? [] (has-role? :authority))
+(defn authority-admin? [] (has-role? :authority-admin))
 (defn admin? [] (has-role? :admin))
 (defn anyone [] true)
 (defn nobody [] false)
@@ -101,6 +102,7 @@
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
+                   :authority_admin authority-admin?
                    :admin admin?})
 
 (def headers
@@ -133,6 +135,7 @@
 
 (def applicationpage-for {:applicant "/applicant"
                           :authority "/authority"
+                          :authority-admin "/authority-admin"
                           :admin "/admin"})
 
 (defjson [:post "/api/login"] {:keys [username password]}

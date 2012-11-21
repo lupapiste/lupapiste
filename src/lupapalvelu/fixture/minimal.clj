@@ -39,6 +39,16 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
+   {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
+    :email "admin@sipoo.fi"
+    :role :authority-admin
+    :authority :Sipoo
+    :firstName "Simo"
+    :lastName "Suurvisiiri"
+    :username "sipoo"
+    :private {:salt "$2a$10$VFcksPILCd9ykyl.1FIhwO",
+              :password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"}
+              :apikey "50ac788ec2e6c2ea6e73f83f"}
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :firstName "Judge"
     :lastName "Dread"
