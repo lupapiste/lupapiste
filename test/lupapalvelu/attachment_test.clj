@@ -38,3 +38,13 @@
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
   (fact (next-attachment-version {:major 1 :minor 1} {:role :dude})       => {:major 2 :minor 0}))
+
+(def attachment-types-for #'lupapalvelu.attachment/attachment-types-for)
+
+(facts "Facts about attachment-types-for"
+  (fact (attachment-types-for :buildingPermit) => vector?)
+  (fact (first (attachment-types-for :buildingPermit)) => associative?)
+  (fact (first (attachment-types-for :buildingPermit)) => {:key :hakija
+                                                           :types [{:key :valtakirja}
+                                                                   {:key :ote_kauppa_ja_yhdistysrekisterista}
+                                                                   {:key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta}]}))
