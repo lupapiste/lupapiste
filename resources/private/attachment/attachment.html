@@ -9,10 +9,12 @@
     <div data-bind="if: latestVersion">
       <div class="attachment-info">
         <h1>
-          <span data-bind="if: type"><span data-bind="text: loc('attachmentType_' + type())"></span></span>
-          versio
+          <span data-bind="if: type">
+            <span data-bind="text: loc('attachmentType.' + type()['type-group'] + '.' + type()['type-id'])"></span>
+          </span>
+          <span>versio</span>
           <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
-          muokattu
+          <span>muokattu</span>
           <span data-bind="dateTimeString: latestVersion().created"></span>
         </h1>
       </div>
