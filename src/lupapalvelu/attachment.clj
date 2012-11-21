@@ -99,7 +99,8 @@
                           :latestVersion   {:version default-version}
                           :versions []}]
     (mongo/update-by-id mongo/applications application-id
-      {$set {:modified now} $push {:attachments attachment-model}})
+      {$set {:modified now}
+       $push {:attachments attachment-model}})
     attachment-id))
 
 (defn- next-attachment-version [{major :major minor :minor} user]
@@ -118,30 +119,29 @@
       (when-let [application (mongo/by-id mongo/applications application-id)]
         (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
               next-version (next-attachment-version latest-version user)
-              version-model {
-                  :version  next-version
-                  :fileId   file-id
-                  :created  now
-                  :accepted nil
-                  :user    (security/summary user)
-                  ; File name will be presented in ASCII when the file is downloaded.
-                  ; Conversion could be done here as well, but we don't want to lose information.
-                  :filename filename
-                  :contentType content-type
-                  :size size}
+              version-model {:version  next-version
+                             :fileId   file-id
+                             :created  now
+                             :accepted nil
+                             :user    (security/summary user)
+                             ; File name will be presented in ASCII when the file is downloaded.
+                             ; Conversion could be done here as well, but we don't want to lose information.
+                             :filename filename
+                             :contentType content-type
+                             :size size}
               attachment-model {:modified now
-                 :attachments.$.modified now
-                 :attachments.$.state  :requires_authority_action
-                 :attachments.$.latestVersion version-model}]
-
+                                :attachments.$.modified now
+                                :attachments.$.state  :requires_authority_action
+                                :attachments.$.latestVersion version-model}]
         ; Check return value and try again with new version number
-        (let [result-count (mongo/update-by-query mongo/applications
-            {:_id application-id
-             :attachments {$elemMatch {:id attachment-id
-                                       :latestVersion.version.major (:major latest-version)
-                                       :latestVersion.version.minor (:minor latest-version)}}}
-            {$set attachment-model
-             $push {:attachments.$.versions version-model}})]
+        (let [result-count (mongo/update-by-query
+                             mongo/applications
+                             {:_id application-id
+                              :attachments {$elemMatch {:id attachment-id
+                                                        :latestVersion.version.major (:major latest-version)
+                                                        :latestVersion.version.minor (:minor latest-version)}}}
+                             {$set attachment-model
+                              $push {:attachments.$.versions version-model}})]
           (if (> result-count 0)
             true
             (do
@@ -154,7 +154,9 @@
         false))))
 
 (defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user]
-  (let [attachment-id (if (empty? attachment-id) (create-attachment id attachement-type created) attachment-id)]
+  (let [attachment-id (if (empty? attachment-id)
+                        (create-attachment id attachement-type created)
+                        attachment-id)]
     (set-attachment-version id attachment-id file-id filename content-type size created user)
     attachment-id))
 
