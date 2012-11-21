@@ -1,7 +1,8 @@
 (ns lupapalvelu.attachment-test
-    (:use lupapalvelu.attachment
-        clojure.test
-        midje.sweet))
+  (:use [lupapalvelu.attachment]
+        [clojure.test]
+        [midje.sweet])
+  (:require [clojure.string :as s]))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -11,11 +12,11 @@
   (fact "Short US-ASCII string is returned as is"
     (encode-filename "foo.txt")     => "foo.txt")
   (fact "Over 255 chars are truncated (Windows file limit)"
-    (encode-filename (clojure.string/join (repeat 256 "x"))) => (clojure.string/join (repeat 255 "x")))
+    (encode-filename (s/join (repeat 256 "x"))) => (s/join (repeat 255 "x")))
   (fact "255 chars are not truncated (Windows file limit)"
-    (encode-filename (clojure.string/join (repeat 255 "y"))) => (clojure.string/join (repeat 255 "y")))
+    (encode-filename (s/join (repeat 255 "y"))) => (s/join (repeat 255 "y")))
   (fact "File extension is not truncated"
-    (encode-filename (str (clojure.string/join (repeat 256 "y")) ".txt")) => (contains ".txt"))
+    (encode-filename (str (s/join (repeat 256 "y")) ".txt")) => (contains ".txt"))
   (fact "Non-ascii letters are removed"
      (encode-filename "\u00c4\u00e4kk\u00f6si\u00e4") => (just ascii-pattern))
   (fact "Unix path separators are removed"
@@ -63,8 +64,8 @@
 (facts "The result of attachment-types-for has very strict format that is required by upload.html"
   (fact (attachment-types-for :buildingPermit) => sequential?)
   (fact (first (attachment-types-for :buildingPermit)) => associative?)
-  (fact (:key (first (attachment-types-for :buildingPermit))) => keyword?)
+  (fact (:group (first (attachment-types-for :buildingPermit))) => keyword?)
   (fact (:types (first (attachment-types-for :buildingPermit))) => sequential?)
   (fact (first (:types (first (attachment-types-for :buildingPermit)))) => associative?)
-  (fact (:key (first (:types (first (attachment-types-for :buildingPermit))))) => keyword?))
+  (fact (:name (first (:types (first (attachment-types-for :buildingPermit))))) => keyword?))
 
