@@ -41,7 +41,7 @@
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
     :email "admin@sipoo.fi"
-    :role :authority-admin
+    :role :authorityAdmin
     :authority :Sipoo
     :firstName "Simo"
     :lastName "Suurvisiiri"

@@ -63,7 +63,7 @@
   (= role (keyword (:role (current-user)))))
 
 (defn authority? [] (has-role? :authority))
-(defn authority-admin? [] (has-role? :authority-admin))
+(defn authority-admin? [] (has-role? :authorityAdmin))
 (defn admin? [] (has-role? :admin))
 (defn anyone [] true)
 (defn nobody [] false)
@@ -135,7 +135,7 @@
 
 (def applicationpage-for {:applicant "/applicant"
                           :authority "/authority"
-                          :authority-admin "/authority-admin"
+                          :authorityAdmin "/authority-admin"
                           :admin "/admin"})
 
 (defjson [:post "/api/login"] {:keys [username password]}
