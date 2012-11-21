@@ -102,7 +102,7 @@
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
-                   :authority_admin authority-admin?
+                   :authority-admin authority-admin?
                    :admin admin?})
 
 (def headers
