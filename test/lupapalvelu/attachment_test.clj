@@ -42,7 +42,10 @@
 (def allowed-attachment-type-for? #'lupapalvelu.attachment/allowed-attachment-type-for?)
 
 (facts "Facts about allowed-attachment-type-for?"
-  (fact (allowed-attachment-type-for? :buildingPermit "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta") => truthy))
+  (fact (allowed-attachment-type-for? :buildingPermit "hakija.valtakirja")          => truthy)
+  (fact (allowed-attachment-type-for? :buildingPermit "paapiirustus.asemapiirros")  => truthy)
+  (fact (allowed-attachment-type-for? :buildingPermit "hakija.asemapiirros")        => falsey)
+  (fact (allowed-attachment-type-for? :buildingPermit "")                           => falsey))
 
 ; The result of attachment-types-for has very strict format that is required by upload.html. The
 ; structure should be a vector that looks like this:

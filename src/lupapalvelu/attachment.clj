@@ -162,11 +162,11 @@
       (set-attachment-version id attachment-id file-id filename content-type size created user)
       attachment-id)))
 
-(defn- allowed-attachment-type-for? [permit-type t]
-  (some
-    (fn [{types :types}]
-      (some (fn [{key :key}] (= key t)) types))
-    (attachment-types-for permit-type)))
+(defn- allowed-attachment-type-for? [permit-type attachmentType]
+  (when attachmentType
+    (let [[group id] (map keyword (drop 1 (re-find #"(.*)\.(.*)" attachmentType)))
+          permits (get-in attachment-types-for-permit-type [permit-type group])]
+      (some (partial = id) permits))))
 
 ;;
 ;; Actions
@@ -239,7 +239,7 @@
                                          :text text
                                          :target {:type :attachment
                                                   :id attachment-id}})
-                               :user user ))
+                               :user user))
               (ok))
             (fail :error.unknown)))
         (fail :error.illegal-attachment-type))
