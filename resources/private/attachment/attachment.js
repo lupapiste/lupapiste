@@ -162,21 +162,24 @@ var attachment = function() {
     resetUploadIframe();
   });
 
-  function uploadDone(applicationId) {
-    repository.reloadApplication(applicationId);
-    LUPAPISTE.ModalDialog.close();
+  var uploadingApplicationId;
+  
+  function uploadDone() {
+    if (uploadingApplicationId) {
+      repository.reloadApplication(uploadingApplicationId);
+      LUPAPISTE.ModalDialog.close();
+      uploadingApplicationId = null;
+    }
   }
 
-  function newAttachment(m) {
-    var applicationId = m.id();
-    hub.subscribe("upload-done", function(e) {
-      uploadDone(applicationId);
-    });
+  hub.subscribe("upload-done", uploadDone);
 
-    initFileUpload(m.id());
+  function newAttachment(m) {
+    initFileUpload(m.application.id());
   }
 
   function initFileUpload(applicationId, attachmentId, attachmentType) {
+    uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
     if (iframe) {
