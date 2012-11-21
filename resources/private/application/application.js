@@ -103,13 +103,19 @@
   };
 
   var attachments = ko.observableArray([]);
-
+  var attachmentsByGroup = ko.observableArray();
+  
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
     return v;
   }
 
+  function getAttachmentsByGroup(attachments) {
+    return [{group: "Hakija", attachments: [{name: "foo", type: "bar"}]},
+            {group: "Muu", attachments: [{name: "foozza", type: "barzza"}]}];
+  }
+  
   function showApplication(data) {
     authorizationModel.refresh(data,function() {
       // new data mapping
@@ -132,7 +138,9 @@
         a.statusName = s.statusName;
         attachments.push(a);
       });
-
+      
+      attachmentsByGroup(getAttachmentsByGroup(data.attachments));
+      
       // Update map:
       var location = application.location();
       hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
@@ -226,6 +234,7 @@
     ko.applyBindings({
       application: application,
       attachments: attachments,
+      attachmentsByGroup: attachmentsByGroup,
       applicationModel: applicationModel,
       comment: commentModel,
       invite: inviteModel,
