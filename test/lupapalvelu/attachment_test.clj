@@ -33,12 +33,16 @@
   (fact (attachment-latest-version test-attachments "1") => {:major 9, :minor 7})
   (fact (attachment-latest-version test-attachments "none") => nil?))
 
-(def next-attachment-version @#'lupapalvelu.attachment/next-attachment-version)
+(def next-attachment-version #'lupapalvelu.attachment/next-attachment-version)
 
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
   (fact (next-attachment-version {:major 1 :minor 1} {:role :dude})       => {:major 2 :minor 0}))
 
+(def allowed-attachment-type-for? #'lupapalvelu.attachment/allowed-attachment-type-for?)
+
+(facts "Facts about allowed-attachment-type-for?"
+  (fact (allowed-attachment-type-for? :buildingPermit "jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta") => truthy))
 
 ; The result of attachment-types-for has very strict format that is required by upload.html. The
 ; structure should be a vector that looks like this:

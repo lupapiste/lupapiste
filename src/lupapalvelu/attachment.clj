@@ -82,7 +82,7 @@
   (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
 
 (defn- to-key-types-vec [r [k v]]
-  (conj r {:key k :types (map (fn [v] {:key v}) v)}))
+  (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
 (defn- attachment-types-for [permit-type]
   (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type)))
@@ -162,9 +162,11 @@
       (set-attachment-version id attachment-id file-id filename content-type size created user)
       attachment-id)))
 
-(defn- allowed-attachment-type-for? [application-id type]
-  (some (fn [{types :types}] (some (fn [{key :key}] (= key type)) types))
-        (attachment-types-for (get-permit-type application-id))))
+(defn- allowed-attachment-type-for? [permit-type t]
+  (some
+    (fn [{types :types}]
+      (some (fn [{key :key}] (= key t)) types))
+    (attachment-types-for permit-type)))
 
 ;;
 ;; Actions
@@ -207,33 +209,36 @@
 
 (defcommand "create-attachment"
   {:description "Authority can set a placeholder for an attachment"
-   :parameters  [:id :type]
+   :parameters  [:id :attachmentType]
    :roles       [:authority]
    :states      [:draft :open]}
-  [{{application-id :id type :type} :data created :created}]
-  (if-let [attachment-id (create-attachment application-id type created)]
+  [{{application-id :id t :attachmentType} :data created :created}]
+  (if-let [attachment-id (create-attachment application-id t created)]
     (ok :applicationId application-id :attachmentId attachment-id)
     (fail :error.attachment-placeholder)))
 
 (defcommand "upload-attachment"
-  {:parameters [:id :attachmentId :type :filename :tempfile :size]
+  {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
   [{created :created
     user    :user
-    {:keys [id attachmentId type filename tempfile size text]} :data}]
-  (debug "Create GridFS file: %s %s %s %s %s %d (%s)" id attachmentId type filename tempfile size text)
+    {:keys [id attachmentId attachmentType filename tempfile size text]} :data}]
+  (debug "Create GridFS file: %s %s %s %s %s %d (%s)" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
-      (if (allowed-attachment-type-for? id (keyword type))
+      (if (allowed-attachment-type-for? (get-permit-type id) attachmentType)
         (let [content-type (mime/mime-type sanitazed-filename)]
           (mongo/upload id file-id sanitazed-filename content-type tempfile created)
           (.delete (file tempfile))
-          (if-let [attachment-id (update-or-create-attachment id attachmentId type file-id sanitazed-filename content-type size created user)]
+          (if-let [attachment-id (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
             (if (seq text)
               (executed (assoc (command "add-comment"
-                                        {:id id, :text text, :target {:type :attachment, :id attachment-id}})
+                                        {:id id
+                                         :text text
+                                         :target {:type :attachment
+                                                  :id attachment-id}})
                                :user user ))
               (ok))
             (fail :error.unknown)))
