@@ -123,7 +123,7 @@
           <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
               <tr class="comment">
-                <td class="commentParty commenttd"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
+                <td class="comment-party commenttd"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
                 <td class="commenttd" data-bind="text: text"></td>
               </tr>
             </tbody>

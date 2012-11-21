@@ -269,10 +269,9 @@
           (mongo/upload id file-id sanitazed-filename content-type tempfile created)
           (.delete (file tempfile))
           (if-let [attachment-id (update-or-create-attachment id attachmentId type file-id sanitazed-filename content-type size created user)]
-            (if (seq text)
-              (executed (assoc (command "add-comment"
-                                        {:id id, :text text, :target {:type :attachment, :id attachment-id}})
-                               :user user ))
+            ((executed (assoc (command "add-comment"
+                                       {:id id, :text text, :target {:type :attachment, :id attachment-id} :category :newAttachmentVersion})
+                              :user user ))
               (ok))
             (fail :error.unknown)))
         (fail :error.illegal-attachment-type))

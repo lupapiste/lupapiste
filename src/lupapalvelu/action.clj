@@ -153,9 +153,9 @@
     nil))
 
 (defcommand "add-comment"
-  {:parameters [:id :text :target]
+  {:parameters [:id :text :target :category]
    :roles      [:applicant :authority]}
-  [{{:keys [text target]} :data user :user :as command}]
+  [{{:keys [text target category]} :data user :user :as command}]
   (with-application command
     (fn [application]
       (when (= "draft" (:state application))
@@ -166,6 +166,7 @@
         {$set {:modified (:created command)}
          $push {:comments {:text    text
                            :target  target
+                           :category category
                            :created (-> command :created)
                            :user    (security/summary user)}}}))))
 
