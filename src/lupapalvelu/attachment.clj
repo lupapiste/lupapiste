@@ -21,74 +21,71 @@
 ;;
 
 (def attachment-types-for-permit-type
-  {:buildingPermit [{:key :hakija
-                     :types [{:key :valtakirja}
-                             {:key :ote_kauppa_ja_yhdistysrekisterista}
-                             {:key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta}]}
-                    {:key :rakennuspaikan_hallinta
-                     :types [{:key :jaljennos_myonnetyista_lainhuudoista}
-                             {:key :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta}
-                             {:key :rasitustodistus}
-                             {:key :todistus_erityisoikeuden_kirjaamisesta}
-                             {:key :jaljennos_vuokrasopimuksesta}
-                             {:key :jaljennos_perunkirjasta}]}
-                    {:key :rakennuspaikka
-                     :types [{:key :ote_alueen_peruskartasta}
-                             {:key :ote_asemakaavasta_jos_asemakaava_alueella}
-                             {:key :ote_kiinteistorekisteristerista}
-                             {:key :tonttikartta_tarvittaessa}
-                             {:key :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista}
-                             {:key :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma}]}
-                    {:key :paapiirustus
-                     :types [{:key :asemapiirros}
-                             {:key :pohjapiirros}
-                             {:key :leikkauspiirros}
-                             {:key :julkisivupiirros}]}
-                    {:key :ennakkoluvat_ja_lausunnot
-                     :types [{:key :naapurien_suostumukset}
-                             {:key :selvitys_naapurien_kuulemisesta}
-                             {:key :elyn_tai_kunnan_poikkeamapaatos}
-                             {:key :suunnittelutarveratkaisu}
-                             {:key :ymparistolupa}]}
-                    {:key :muut
-                     :types [{:key :selvitys_rakennuspaikan_terveellisyydesta}
-                             {:key :selvitys_rakennuspaikan_korkeusasemasta}
-                             {:key :selvitys_liittymisesta_ymparoivaan_rakennuskantaan}
-                             {:key :julkisivujen_varityssuunnitelma}
-                             {:key :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta}
-                             {:key :piha_tai_istutussuunnitelma}
-                             {:key :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta}
-                             {:key :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta}
-                             {:key :selvitys_rakennuksen_aaniteknisesta_toimivuudesta}
-                             {:key :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista}
-                             {:key :energiataloudellinen_selvitys}
-                             {:key :paloturvallisuussuunnitelma}
-                             {:key :liikkumis_ja_esteettomyysselvitys}
-                             {:key :kerrosalaselvitys}
-                             {:key :vaestonsuojasuunnitelma}
-                             {:key :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo}
-                             {:key :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo}
-                             {:key :selvitys_kiinteiston_jatehuollon_jarjestamisesta}
-                             {:key :rakennesuunnitelma}
-                             {:key :ilmanvaihtosuunnitelma}
-                             {:key :lammityslaitesuunnitelma}
-                             {:key :radontekninen_suunnitelma}
-                             {:key :kalliorakentamistekninen_suunnitelma}
-                             {:key :paloturvallisuusselvitys}
-                             {:key :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta}
-                             {:key :merkki_ja_turvavalaistussuunnitelma}
-                             {:key :sammutusautomatiikkasuunnitelma}
-                             {:key :rakennusautomaatiosuunnitelma}
-                             {:key :valaistussuunnitelma}
-                             {:key :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta}
-                             {:key :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta}
-                             {:key :muu}]}]})
-
+  {:buildingPermit {:hakija [:valtakirja
+                             :ote_kauppa_ja_yhdistysrekisterista
+                             :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
+                    :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
+                                              :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
+                                              :rasitustodistus
+                                              :todistus_erityisoikeuden_kirjaamisesta
+                                              :jaljennos_vuokrasopimuksesta
+                                              :jaljennos_perunkirjasta]
+                    :rakennuspaikka [:ote_alueen_peruskartasta
+                                     :ote_asemakaavasta_jos_asemakaava_alueella
+                                     :ote_kiinteistorekisteristerista
+                                     :tonttikartta_tarvittaessa
+                                     :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
+                                     :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
+                    :paapiirustus [:asemapiirros
+                                   :pohjapiirros
+                                   :leikkauspiirros
+                                   :julkisivupiirros]
+                    :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
+                                                :selvitys_naapurien_kuulemisesta
+                                                :elyn_tai_kunnan_poikkeamapaatos
+                                                :suunnittelutarveratkaisu
+                                                :ymparistolupa]
+                    :muut [:selvitys_rakennuspaikan_terveellisyydesta
+                           :selvitys_rakennuspaikan_korkeusasemasta
+                           :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
+                           :julkisivujen_varityssuunnitelma
+                           :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+                           :piha_tai_istutussuunnitelma
+                           :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
+                           :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
+                           :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
+                           :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
+                           :energiataloudellinen_selvitys
+                           :paloturvallisuussuunnitelma
+                           :liikkumis_ja_esteettomyysselvitys
+                           :kerrosalaselvitys
+                           :vaestonsuojasuunnitelma
+                           :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
+                           :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
+                           :selvitys_kiinteiston_jatehuollon_jarjestamisesta
+                           :rakennesuunnitelma
+                           :ilmanvaihtosuunnitelma
+                           :lammityslaitesuunnitelma
+                           :radontekninen_suunnitelma
+                           :kalliorakentamistekninen_suunnitelma
+                           :paloturvallisuusselvitys
+                           :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
+                           :merkki_ja_turvavalaistussuunnitelma
+                           :sammutusautomatiikkasuunnitelma
+                           :rakennusautomaatiosuunnitelma
+                           :valaistussuunnitelma
+                           :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+                           :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
+                           :muu]}})
+   
 (defn- get-permit-type [application-id]
   (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
 
+(defn- to-key-types-vec [r [k v]]
+  (conj r {:key k :types (map (fn [v] {:key v}) v)}))
+
 (defn- attachment-types-for [permit-type]
-  (attachment-types-for-permit-type permit-type))
+  (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type)))
 
 ;;
 ;; Upload
