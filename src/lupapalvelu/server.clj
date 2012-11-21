@@ -9,7 +9,8 @@
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.action]
-            [lupapalvelu.admin] 
+            [lupapalvelu.admin]
+            [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands])
   (:gen-class))

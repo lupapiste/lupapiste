@@ -63,6 +63,7 @@
   (= role (keyword (:role (current-user)))))
 
 (defn authority? [] (has-role? :authority))
+(defn authority-admin? [] (has-role? :authorityAdmin))
 (defn admin? [] (has-role? :admin))
 (defn anyone [] true)
 (defn nobody [] false)
@@ -96,12 +97,13 @@
                    :js   "application/javascript"
                    :css  "text/css"})
 
-(def authz-methods {:init anyone
-                    :welcome anyone
-                    :upload logged-in?
-                    :applicant logged-in?
-                    :authority authority?
-                    :admin admin?})
+(def auth-methods {:init anyone
+                   :welcome anyone
+                   :upload logged-in?
+                   :applicant logged-in?
+                   :authority authority?
+                   :authority-admin authority-admin?
+                   :admin admin?})
 
 (def headers
   (if (env/dev-mode?)
@@ -109,7 +111,7 @@
     {"Cache-Control" "public, max-age=86400"}))
 
 (defn- single-resource [resource-type app failure]
-  (if ((authz-methods app nobody))
+  (if ((auth-methods app nobody))
     (->>
       (singlepage/compose resource-type app)
       (resp/content-type (resource-type content-type))
@@ -122,7 +124,7 @@
 
 ;; Single Page App HTML
 (def apps-pattern
-  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys authz-methods))) ")")))
+  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
 (defpage [:get ["/:app" :app apps-pattern]] {app :app}
   (single-resource :html (keyword app) (resp/redirect "/welcome#")))
@@ -133,6 +135,7 @@
 
 (def applicationpage-for {:applicant "/applicant"
                           :authority "/authority"
+                          :authorityAdmin "/authority-admin"
                           :admin "/admin"})
 
 (defjson [:post "/api/login"] {:keys [username password]}
