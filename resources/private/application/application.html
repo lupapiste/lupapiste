@@ -159,27 +159,36 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: $root.attachments">
-            <tr style="cursor: pointer;" data-bind="if: $data.type || $data.modified">
+              <tr style="cursor: pointer;" data-bind="if: $data.type || $data.modified">
                 <td id="test-attachement-status"
                     data-bind="attr: {class: statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state}"
-                    class="attachment-state"></td>
+                    class="attachment-state">
+                </td>
                 <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                   <a id="test-attachment-type-link" data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id }">
-                    <span data-bind="if: type != null"><span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span></span>
-                    <span data-bind="if: type == null"> <i>Nimetön</i></span>
+                    <span data-bind="if: type != null">
+                      <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                    </span>
+                    <span data-bind="if: type == null">
+                      <i>Nimet&ouml;n</i>
+                    </span>
                   </a>
                 </td>
-              <td><span data-bind="if: $data.latestVersion.filename">
-                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
-                  <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
-              </span></td>
-                <td data-bind="version: latestVersion.version"></td>
+                <td>
+                  <span data-bind="if: $data.latestVersion.filename">
+                    <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
+                    <i data-bind="ltext: latestVersion.contentType"></i> <i data-bind="size: latestVersion.size"></i>
+                  </span>
+                </td>
+                <td data-bind="version: latestVersion.version">
+                </td>
                 <td>
                   <span data-bind="dateString: modified"></span>
                   <span data-bind="fullName: latestVersion.user"></span>
                 </td>
-                <td></td>
-            </tr>
+                <td>
+                </td>
+              </tr>
             </tbody>
           </table>
           <div data-bind="ifnot: attachments && attachments().length">
