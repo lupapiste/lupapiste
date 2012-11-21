@@ -154,19 +154,15 @@
         false))))
 
 (defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user]
-  (if (empty? attachment-id)
-    (let [attachment-id (create-attachment id attachement-type created)]
-      (set-attachment-version id attachment-id file-id filename content-type size created user)
-      attachment-id)
-    (do
-      (set-attachment-version id attachment-id file-id filename content-type size created user)
-      attachment-id)))
+  (let [attachment-id (if (empty? attachment-id) (create-attachment id attachement-type created) attachment-id)]
+    (set-attachment-version id attachment-id file-id filename content-type size created user)
+    attachment-id))
 
 (defn- allowed-attachment-type-for? [permit-type attachmentType]
-  (when attachmentType
-    (let [[group id] (map keyword (drop 1 (re-find #"(.*)\.(.*)" attachmentType)))
-          permits (get-in attachment-types-for-permit-type [permit-type group])]
-      (some (partial = id) permits))))
+  (let [[group id] (map keyword (drop 1 (re-find #"(.*)\.(.*)" attachmentType)))
+        [group id] (->> attachmentType (re-find #"(.*)\.(.*)") (drop 1) (map keyword))
+        permits (get-in attachment-types-for-permit-type [permit-type group])]
+    (some (partial = id) permits)))
 
 ;;
 ;; Actions
