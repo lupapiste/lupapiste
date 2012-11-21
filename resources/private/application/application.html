@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="attachments_tab" data-bind="with: application">
+      <div class="tab_content" id="attachments_tab">
         <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <table data-bind="if: attachments && attachments().length" class="table table-striped">
@@ -198,7 +198,7 @@
               id="add-attachment"
               class="btn btn-primary modal"
               data-window-id="upload-dialog"
-              data-bind="visible: $root.authorization.ok('upload-attachment'),click: attachment.newAttachment">
+              data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
             Lisää liite
           </button>
         </div>
