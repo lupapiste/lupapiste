@@ -66,6 +66,7 @@ var attachment = function() {
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
     type:           ko.observable(),
+    name:           ko.observable(),
 
     hasPreview: function() {
       return this.isImage() || this.isPdf() || this.isPlainText();
@@ -109,6 +110,7 @@ var attachment = function() {
     model.versions(attachment.versions);
     model.filename(attachment.filename);
     model.type(attachment.type);
+    model.name("attachmentType." + attachment.type["type-group"] + "." + attachment.type["type-id"]);
     model.application.id(applicationId);
     model.application.title(application.title);
     model.attachmentId(attachmentId);
