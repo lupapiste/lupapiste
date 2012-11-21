@@ -7,7 +7,8 @@
         [clojure.string :only [split join trim]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.strings :as strings]))
+            [lupapalvelu.strings :as strings]
+            [lupapalvelu.mime :as mime]))
 
 ;;
 ;; Constants
@@ -87,40 +88,6 @@
 
 (defn- attachment-types-for [permit-type]
   (attachment-types-for-permit-type permit-type))
-
-;; Reads mime.types file provided by Apache project.
-;; Ring has also some of the most common file extensions mapped, but is missing
-;; docx and other MS Office formats.
-(def mime-types
-  (with-open [resource (clojure.lang.RT/resourceAsStream nil "private/mime.types")]
-    (into {} (for [line (line-seq (reader resource))
-                   :let [l (trim line)
-                         type-and-exts (split l #"\s+")
-                         mime-type (first type-and-exts)]
-                   :when (and (not (.isEmpty l)) (not (.startsWith l "#")))]
-               (into {} (for [ext (rest type-and-exts)] [ext mime-type]))))))
-
-(def mime-type-pattern
-  (re-pattern
-    (join "|" [
-          "(image/.+)"
-          "(text/(plain|rtf))"
-          (str "(application/("
-               (join "|" [
-                     "pdf" "postscript"
-                     "zip" "x-7z-compressed"
-                     "rtf" "msword" "vnd\\.ms-excel" "vnd\\.ms-powerpoint"
-                     "vnd\\.oasis\\.opendocument\\..+"
-                     "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
-
-
-(defn mime-type [filename]
-  (when filename
-    (get mime-types (.toLowerCase (strings/suffix filename ".")))))
-
-(defn allowed-file? [filename]
-  (when-let [type (mime-type filename)]
-      (re-matches mime-type-pattern type)))
 
 ;;
 ;; Upload
@@ -260,9 +227,9 @@
   (debug "Create GridFS file: %s %s %s %s %s %d (%s)" id attachmentId type filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
-    (if (allowed-file? sanitazed-filename)
+    (if (mime/allowed-file? sanitazed-filename)
       (if (allowed-attachment-type-for? id (keyword type))
-        (let [content-type (mime-type sanitazed-filename)]
+        (let [content-type (mime/mime-type sanitazed-filename)]
           (mongo/upload id file-id sanitazed-filename content-type tempfile created)
           (.delete (file tempfile))
           (if-let [attachment-id (update-or-create-attachment id attachmentId type file-id sanitazed-filename content-type size created user)]
