@@ -39,12 +39,25 @@
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
   (fact (next-attachment-version {:major 1 :minor 1} {:role :dude})       => {:major 2 :minor 0}))
 
+
+; The result of attachment-types-for has very strict format that is required by upload.html. The
+; structure should be a vector that looks like this:
+;
+; [{:key :hakija
+;   :types [{:key :valtakirja}
+;           {:key :ote_kauppa_ja_yhdistysrekisterista}
+;           {:key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta}]}
+;  {:key :rakennuspaikan_hallinta
+;   :types [{:key :jaljennos_myonnetyista_lainhuudoista}
+;           ...
+
 (def attachment-types-for #'lupapalvelu.attachment/attachment-types-for)
 
-(facts "Facts about attachment-types-for"
-  (fact (attachment-types-for :buildingPermit) => vector?)
+(facts "The result of attachment-types-for has very strict format that is required by upload.html"
+  (fact (attachment-types-for :buildingPermit) => sequential?)
   (fact (first (attachment-types-for :buildingPermit)) => associative?)
-  (fact (first (attachment-types-for :buildingPermit)) => {:key :hakija
-                                                           :types [{:key :valtakirja}
-                                                                   {:key :ote_kauppa_ja_yhdistysrekisterista}
-                                                                   {:key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta}]}))
+  (fact (:key (first (attachment-types-for :buildingPermit))) => keyword?)
+  (fact (:types (first (attachment-types-for :buildingPermit))) => sequential?)
+  (fact (first (:types (first (attachment-types-for :buildingPermit)))) => associative?)
+  (fact (:key (first (:types (first (attachment-types-for :buildingPermit))))) => keyword?))
+
