@@ -89,7 +89,7 @@
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :map :buildinfo]
+   :authority-admin {:depends [:common :buildinfo]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
