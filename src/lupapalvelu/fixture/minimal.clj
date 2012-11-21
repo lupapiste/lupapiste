@@ -18,7 +18,7 @@
     {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :email "veikko.viranomainen@tampere.fi"
     :role :authority
-    :authority :tampere
+    :authority :Tampere
     :personId "kunta 122"
     :firstName "Veikko"
     :lastName "Viranomainen"
