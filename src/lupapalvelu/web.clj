@@ -38,7 +38,7 @@
   (or (session/get :user) ((request/ring-request) :user)))
 
 (defn host [request]
-  (str (name (:scheme request)) "://" (get-in request [:headers "host"]) "/"))
+  (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
 
 (defn user-agent [request]
   (str (get-in request [:headers "user-agent"])))

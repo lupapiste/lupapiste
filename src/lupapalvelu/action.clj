@@ -62,7 +62,7 @@
 (defn invite-body [user id host]
   (format
     (str
-      "Tervehdys,\n\n %s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
+      "Tervehdys,\n\n%s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
       "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/applicant#!/application/%s\n\n"
       "Yst\u00E4v\u00E4llisin terveisin,\n\n"
       "Lupapiste.fi")
@@ -76,7 +76,7 @@
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text]} :data host :host :as command}]
+    {:keys [id email title text]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
