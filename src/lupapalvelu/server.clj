@@ -2,17 +2,17 @@
   (:use lupapalvelu.log)
   (:require [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
-            [lupapalvelu.web]
-            [lupapalvelu.vetuma]
-            [lupapalvelu.env :as env]
-            [lupapalvelu.fixture :as fixture]
-            [lupapalvelu.fixture.kind]
-            [lupapalvelu.fixture.minimal]
-            [lupapalvelu.action]
-            [lupapalvelu.admin]
-            [lupapalvelu.authority-admin]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.commands])
+            (lupapalvelu [web]
+                         [vetuma]
+                         [env :as env]
+                         [fixture :as fixture]
+                         [fixture.kind]
+                         [fixture.minimal]
+                         [action]
+                         [admin]
+                         [authority-admin]
+                         [mongo :as mongo]
+                         [document.commands]))
   (:gen-class))
 
 (def custom-content-type {".ttf" "font/ttf"})
