@@ -40,7 +40,7 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
-(defn create-user [{:keys [email password userid role firstname lastname phone address] :or {firstname "" lastname "" password (random-password) role :dummy} :as user}]
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone address authority] :or {firstname "" lastname "" password (random-password) role :dummy} :as user}]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
         id                (mongo/create-id)
@@ -54,6 +54,7 @@
                            :lastName   lastname
                            :phone      phone
                            :address    address
+                           :authority  authority
                            :private    {:salt salt
                                         :password hashed-password}}]
     (info "register user: %s" (dissoc user :password))
@@ -65,6 +66,12 @@
         (info "creating new user")
         (mongo/insert mongo/users new-user)))
     (get-user-by-email email)))
+
+(defn create-user [user]
+  (create-any-user (merge user {:role :user})))
+
+(defn create-authority [user]
+  (create-any-user (merge user {:role :authority})))
 
 (defn get-or-create-user-by-email [email]
   (or
