@@ -7,10 +7,9 @@
           {}
           docs))
 
-(def simple-osoite {:name "osoite" :type :group
-                    :body [{:name "katu" :type :string}
+(def simple-osoite-body [{:name "katu" :type :string}
                            {:name "postinumero" :type :string}
-                           {:name "postitoimipaikka" :type :string}]})
+                           {:name "postitoimipaikka" :type :string}])
 
 (def full-osoite-body [{:name "kunta" :type :string}
                        {:name "lahiosoite" :type :string}
@@ -95,15 +94,22 @@
                      {:name "purkka"}
                      {:name "betoni"}]}
              {:name "story" :type :text}]}
-     {:info {:name "hakija"}
+     
+     {:info {:name "hakija"} ;TODO yritys
       :body [{:name "etunimi" :type :string}
              {:name "sukunimi" :type :string}
-             simple-osoite
+             {:name "osoite" :type :group :body simple-osoite-body}
              {:name "puhelin" :type :string :subtype :tel}
-             {:name "email" :type :string :subtype :email}]}
+             {:name "email" :type :string :subtype :email}
+             {:name "fax" :type :string}
+             {:name "hetu" :type :string}]}
+     
+     
      {:info {:name "paasuunnittelija"}
       :body [{:name "etunimi" :type :string}
              {:name "sukunimi" :type :string}
+             {:name "henkilotunnus" :type :string}
+             {:name "osoite" :type :group :body simple-osoite-body}
              {:name "email" :type :string}
              {:name "puhelin" :type :string}
              {:name "koulutus" :type :string}
@@ -112,4 +118,5 @@
                      {:name "a"}
                      {:name "b"}
                      {:name "c"}]}
-             {:name "kokemus" :type :string}]}]))
+             {:name "kokemus" :type :string}
+             {:name "Liiteet" :type :string}]}]))
