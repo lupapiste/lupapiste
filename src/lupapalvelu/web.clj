@@ -184,20 +184,22 @@
 (defpage [:post "/api/upload"]
   {applicationId :applicationId attachmentId :attachmentId attachmentType :attachmentType text :text upload :upload :as data}
   (debug "upload: %s: %s type=[%s]" data (str upload) (str attachmentType))
-  (let [[type-group type-id] (attachment/parse-attachment-type attachmentType) 
-        upload-data (assoc upload
+  (let [upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
-                           :attachmentType {:type-group type-group :type-id type-id}
                            :text text)
+        [type-group type-id] (attachment/parse-attachment-type attachmentType)
+        upload-data (if (and type-group type-id)
+                      (assoc upload-data :attachmentType {:type-group type-group :type-id type-id})
+                      upload-data)
         result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload.html"
                                            {:applicationId applicationId
                                             :attachmentId attachmentId
-                                            :attachmentType attachmentType
-                                            :defaultType attachmentType
+                                            :attachmentType (or attachmentType "")
+                                            :defaultType (or attachmentType "")
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
