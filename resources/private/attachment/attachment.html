@@ -81,13 +81,18 @@
           <h3>Keskustele liitteestä:</h3>
             <table class="table table-striped">
               <tbody data-bind="foreach: comments">
-                <tr class="comment">
+                <tr class="comment" data-bind="attr: {class: 'comment ' + $parent.category($data)}">
                   <td class="commentParty">
                     <span class="date" data-bind="dateTimeString: created"></span><br />
                     <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
                     <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
                   </td>
-                  <td data-bind="text: text"></td>
+                  <td class="comment-text">
+                    <span data-bind="if: $parent.category($data) == 'category-new-attachment-version'" class="new-attachment-version-details">
+                       <span data-bind="ltext: 'newAttachmentVersion'"></span> <span data-bind="version: target.version"></span>: <a data-bind="text: target.filename, attr: {href: '/api/download/' + target.fileId()}"></a>
+                    </span>
+                    <span data-bind="text: text"></span>
+                  </td>
                 </tr>
               </tbody>
             </table>

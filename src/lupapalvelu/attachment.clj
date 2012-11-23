@@ -142,7 +142,7 @@
                                     :attachments.$.latestVersion version-model}
                               $push {:attachments.$.versions version-model}})]
           (if (> result-count 0)
-            true
+            (assoc version-model :id attachment-id)
             (do
               (warn
                 "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
@@ -150,14 +150,13 @@
               (set-attachment-version application-id attachment-id file-id filename content-type size now user (dec retry-limit)))))))
       (do
         (error "Concurrancy issue: Could not save attachment version meta data.")
-        false))))
+        nil))))
 
 (defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user]
   (let [attachment-id (if (empty? attachment-id)
                         (create-attachment id attachement-type created)
                         attachment-id)]
-    (set-attachment-version id attachment-id file-id filename content-type size created user)
-    attachment-id))
+    (set-attachment-version id attachment-id file-id filename content-type size created user)))
 
 (defn parse-attachment-type [attachment-type]
   (->> attachment-type (re-find #"(.*)\.(.*)") (drop 1) (map keyword)))
@@ -204,7 +203,6 @@
         {$set {:modified (:created command)
                :attachments.$.state :requires_user_action}}))))
 
-
 (defcommand "create-attachment"
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentType]
@@ -230,15 +228,16 @@
         (let [content-type (mime/mime-type sanitazed-filename)]
           (mongo/upload id file-id sanitazed-filename content-type tempfile created)
           (.delete (file tempfile))
-          (if-let [attachment-id (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
-            (if (seq text)
-              (executed (assoc (command "add-comment"
-                                        {:id id
-                                         :text text
-                                         :target {:type :attachment
-                                                  :id attachment-id}})
-                               :user user))
-              (ok))
+          (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
+            (executed (assoc (command "add-comment"
+                                      {:id id
+                                       :text text, 
+                                       :target {:type :attachment
+                                                :id (:id attachment-version)
+                                                :version (:version attachment-version)
+                                                :filename (:filename attachment-version)
+                                                :fileId (:fileId attachment-version)}})
+                             :user user))
             (fail :error.unknown)))
         (fail :error.illegal-attachment-type))
       (fail :error.illegal-file-type))))
@@ -249,8 +248,8 @@
 
 (defn- get-attachment
   "Returns the attachment if user has access to application, otherwise nil."
-  [attachment-id user]
-  (when-let [attachment (mongo/download attachment-id)]
+  [file-id user]
+  (when-let [attachment (mongo/download file-id)]
     (when-let [application (get-application-as (:application attachment) user)]
       (when (seq application) attachment))))
 
