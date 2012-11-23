@@ -22,7 +22,7 @@
              :role      (:role user)}))
 
 (defn login
-  "returns non-private information of first user with the username and password"
+  "returns non-private information of first enabled user with the username and password"
   [username password]
   (if-let [user (mongo/select-one mongo/users {:username username})]
     (and
@@ -31,9 +31,11 @@
       (non-private user))))
 
 (defn login-with-apikey
-  "returns non-private information of first user with the apikey"
+  "returns non-private information of first enabled user with the apikey"
   [apikey]
-  (and apikey (non-private (first (mongo/select mongo/users {:private.apikey apikey})))))
+  (when apikey
+    (let [user (non-private (first (mongo/select mongo/users {:private.apikey apikey})))]
+      (when (:enabled user) user))))
 
 (defn get-user-by-email [email]
   (and email (non-private (first (mongo/select mongo/users {:email email})))))
