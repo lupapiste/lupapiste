@@ -9,22 +9,22 @@
 (facts "Test file name encoding"
   (fact (encode-filename nil)                                 => nil)
   (fact (encode-filename "foo.txt")                           => "foo.txt")
-  (fact (encode-filename (apply str (repeat 255 \y)))         => (apply str (repeat 255 \y)))
+  (fact (encode-filename (apply str (repeat 255 \x)))         => (apply str (repeat 255 \x)))
   (fact (encode-filename (apply str (repeat 256 \x)))         => (apply str (repeat 255 \x)))
-  (fact (encode-filename (apply str (repeat 256 \y) ".txt"))  => (has-suffix ".txt"))
+  (fact (encode-filename (apply str (repeat 256 \x) ".txt"))  => (has-suffix ".txt"))
   (fact (encode-filename "\u00c4\u00e4kk\u00f6si\u00e4")      => (just ascii-pattern))
   (fact (encode-filename "/root/secret")                      => (just ascii-pattern))
   (fact (encode-filename "\\Windows\\cmd.exe")                => (just ascii-pattern))
   (fact (encode-filename "12345\t678\t90")                    => (just ascii-pattern))
   (fact (encode-filename "12345\n678\r\n90")                  => (just ascii-pattern)))
 
-(def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
-
 (facts "Test parse-attachment-type"
   (fact (parse-attachment-type "foo.bar")  => [:foo :bar])
   (fact (parse-attachment-type "foo.")     => nil)
   (fact (parse-attachment-type "")         => nil)
   (fact (parse-attachment-type nil)        => nil))
+
+(def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
 
 (facts "Test attachment-latest-version"
   (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
