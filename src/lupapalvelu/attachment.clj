@@ -15,6 +15,7 @@
 ;;
 
 (def default-version {:major 0, :minor 0})
+(def default-type {:type-group :muut, :type-id :muu})
 
 ;;
 ;; Metadata
@@ -94,7 +95,7 @@
 (defn- create-attachment [application-id attachement-type now]
   (let [attachment-id (mongo/create-id)
         attachment-model {:id attachment-id
-                          :type attachement-type
+                          :type (or attachement-type default-type)
                           :state :requires_user_action
                           :latestVersion   {:version default-version}
                           :versions []}]
@@ -159,7 +160,8 @@
     (set-attachment-version id attachment-id file-id filename content-type size created user)))
 
 (defn parse-attachment-type [attachment-type]
-  (->> attachment-type (re-find #"(.*)\.(.*)") (drop 1) (map keyword)))
+  (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
+    (->> match (drop 1) (map keyword))))
 
 (defn- allowed-attachment-type-for? [permit-type {:keys [type-group type-id]}]
   (let [permits (get-in attachment-types-for-permit-type [permit-type (keyword type-group)])]
@@ -224,7 +226,7 @@
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
-      (if (allowed-attachment-type-for? (get-permit-type id) attachmentType)
+      (if (and attachmentType (allowed-attachment-type-for? (get-permit-type id) attachmentType))
         (let [content-type (mime/mime-type sanitazed-filename)]
           (mongo/upload id file-id sanitazed-filename content-type tempfile created)
           (.delete (file tempfile))

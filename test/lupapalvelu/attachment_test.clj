@@ -30,6 +30,12 @@
 
 (def test-attachments [{:id "1", :latestVersion {:version {:major 9, :minor 7}}}])
 
+(facts "Test parse-attachment-type"
+  (fact (parse-attachment-type "foo.bar") => [:foo :bar])
+  (fact (parse-attachment-type "foo.") => nil)
+  (fact (parse-attachment-type "") => nil)
+  (fact (parse-attachment-type nil) => nil))
+
 (facts "Test attachment-latest-version"
   (fact (attachment-latest-version test-attachments "1") => {:major 9, :minor 7})
   (fact (attachment-latest-version test-attachments "none") => nil?))
