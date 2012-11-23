@@ -23,15 +23,58 @@
                        {:name "postitoimipaikka" :type :string}
                        {:name "pistesijanti" :type :string}])
 
+(def suunnittelia-body [{:name "etunimi" :type :string}
+             {:name "sukunimi" :type :string}
+             {:name "henkilotunnus" :type :string}
+             {:name "osoite" :type :group :body simple-osoite-body}
+             {:name "email" :type :string}
+             {:name "puhelin" :type :string}
+             {:name "koulutus" :type :string}
+             {:name "patevyysluokka" :type :select
+              :body [{:name "aa"}
+                     {:name "a"}
+                     {:name "b"}
+                     {:name "c"}]}
+             {:name "kokemus" :type :string}
+             {:name "Liiteet" :type :string}])
+
+(def henkilo-body [{:name "etunimi" :type :string}
+             {:name "sukunimi" :type :string}
+             {:name "osoite" :type :group :body simple-osoite-body}
+             {:name "puhelin" :type :string :subtype :tel}
+             {:name "email" :type :string :subtype :email}
+             {:name "fax" :type :string}
+             {:name "hetu" :type :string}])
+
+(def huoneisto-body [{:name "osoite" :type :group 
+                       :body full-osoite-body}
+                      {:name "huoneluku" :type :string}
+                      {:name "keittionTyyppi" :type :select
+                       :body [{:name "keittio"}
+                              {:name "keittoKomero"}
+                              {:name "keittoTila"}
+                              {:name "tupakeittio"}
+                              {:name "ei tiedossa"}]}
+                      {:name "huoneistoala" :type :string}
+                      {:name "huoneistoTyyppi" :type :string}
+                      {:name "huoneistoTunnus" :type :string}])
+
 (def schemas
   (to-map-by-name
     [{:info {:name "uusi-rakennus"}
-      :body [{:name "kayttotarkoitus" :type :string}
+      :body [
+             {:name "rakennuksenOmistajat" :body henkilo-body} ;TODO yritys ja monta
+              {:name "rakentajaTyyppi" :type "select"
+              :body [{:name "liiketaloudellinen"}
+                     {:name "muu"}
+                     {:name "eiTiedossa"}]}
+             
+             {:name "kayttotarkoitus" :type :string}
              {:name "tilavuus" :type :string}
              {:name "kokonaisala" :type :string}
              {:name "kellaripinta-ala" :type :string}
-             {:name "osoite" :type :group :body full-osoite-body}
-             {:name "rinnakkaisosoite" :type :group :body full-osoite-body}
+             {:name "osoite" :type :group :body full-osoite-body};TODO rakennuspaikan osoitteista(mahdollisuus lisätä porras jne)
+             {:name "rinnakkaisosoite" :type :group :body full-osoite-body};TODO rakennuspaikan osoitteista(mahdollisuus lisätä porras jne)
              {:name "kerrosluku" :type :string}
              {:name "kerrosala" :type :string :unit "m2" :subtype :number}
              {:name "rakentamistapa" :type :select
@@ -89,34 +132,41 @@
                      {:name "saunoja" :type :string}
                      {:name "uimala-ataita" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
-             {:name "materiaali" :type "select"
-              :body [{:name "puu"}
-                     {:name "purkka"}
-                     {:name "betoni"}]}
-             {:name "story" :type :text}]}
+             {:name "huoneistot" 
+              :body huoneistot-body}]};Mahdollisuus moneen
      
-     {:info {:name "hakija"} ;TODO yritys
-      :body [{:name "etunimi" :type :string}
-             {:name "sukunimi" :type :string}
-             {:name "osoite" :type :group :body simple-osoite-body}
-             {:name "puhelin" :type :string :subtype :tel}
-             {:name "email" :type :string :subtype :email}
-             {:name "fax" :type :string}
-             {:name "hetu" :type :string}]}
+     {:info {:name "hakijat"} ;TODO yritys + mahdollisuus moneen
+      :body henkilo-body}
      
      
      {:info {:name "paasuunnittelija"}
-      :body [{:name "etunimi" :type :string}
-             {:name "sukunimi" :type :string}
-             {:name "henkilotunnus" :type :string}
-             {:name "osoite" :type :group :body simple-osoite-body}
-             {:name "email" :type :string}
-             {:name "puhelin" :type :string}
-             {:name "koulutus" :type :string}
-             {:name "patevyysluokka" :type :select
-              :body [{:name "aa"}
-                     {:name "a"}
-                     {:name "b"}
-                     {:name "c"}]}
-             {:name "kokemus" :type :string}
-             {:name "Liiteet" :type :string}]}]))
+      :body suunnittelia-body}
+     
+     {:info {:name "suunnitelijat"} ;TODO mahdollisuus moneen
+      :body suunnittelia-body}
+     
+     {:info {:name "maksaja"} ;TODO yritys
+      :body henkilo-body}
+     
+     {:info {:name "rakennuspaikka"};TODO sijainti(kios?/ jo kartalta osositettu)
+      :body [{:name "kiinteistotunnus" :type :string}
+             {:name "maaraalaTunnus" :type :string}
+             {:name "kylaNimi" :type :string}
+             {:name "tilanNimi" :type :string}
+             {:name "kokoTilaKytkin" :type :checkbox}
+             {:name "hallintaperuste" :type "select"
+              :body [{:name "oma"}
+                     {:name "vuokra"}
+                     {:name "eiTiedossa"}]}
+             {:name "osoite"} ;TODO mahdollisuus moneen (4 * suomeksi ja 4 * ruotisksi maks)
+             {:name "materiaali" :type "select"
+              :body [{:name "asema"}
+                     {:name "ranta"}
+                     {:name "rakennus"}
+                     {:name "yleis"}
+                     {:name "eiKaavaa"}
+                     {:name "eiTiedossa"}]} 
+             ]}
+     ]))
+
+
