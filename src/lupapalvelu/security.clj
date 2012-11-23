@@ -25,7 +25,9 @@
   "returns non-private information of first user with the username and password"
   [username password]
   (if-let [user (mongo/select-one mongo/users {:username username})]
-    (if (check-password password (-> user :private :password))
+    (and
+      (:enabled user)
+      (check-password password (-> user :private :password))
       (non-private user))))
 
 (defn login-with-apikey
@@ -55,6 +57,7 @@
                            :phone      phone
                            :address    address
                            :authority  authority
+                           :enabled    true
                            :private    {:salt salt
                                         :password hashed-password}}]
     (info "register user: %s" (dissoc user :password))
