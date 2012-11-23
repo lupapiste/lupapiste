@@ -5,18 +5,15 @@
   </head>
   <body>
     <nav>
-      <a class="brand" href="#!/admin"><img src="../img/logo.png" alt="Lupapiste.fi"></a> <span class="connection-error" style="display: none;">Ei yhteyttä palvelimeen!</span>
+      <a class="brand" href="#!/applications"><img src="../img/logo.png" alt="Lupapiste.fi"></a>
+      <span class="connection-error" style="display: none;">Ei yhteyttä palvelimeen!</span>
       <ul class="user-menu">
         <li>
-          <p class="dropdown-toggle" data-toggle="dropdown">
-            <span id="user-name"></span> (<span id="user-role"></span>)
-          </p>
-          <ul>
-            <li><a href="#">Muokkaa profiilia</a></li>
-            <li><a id="user-logout" href="logout" class="logout">Kirjaudu ulos</a></li>
-          </ul>
+          <p class="dropdown-toggle" data-toggle="dropdown"><span id="user-name"></span> (<span id="user-role"></span>)</p>
         </li>
       </ul>
+      <br>
+      <a id="user-logout" href="/logout" class="logout">Kirjaudu ulos</a>
     </nav>
     <nav class="container" style="margin-top: 60px;">
       <div id="main-nav-bar" class="row">

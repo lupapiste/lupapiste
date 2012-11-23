@@ -22,16 +22,20 @@
              :role      (:role user)}))
 
 (defn login
-  "returns non-private information of first user with the username and password"
+  "returns non-private information of first enabled user with the username and password"
   [username password]
   (if-let [user (mongo/select-one mongo/users {:username username})]
-    (if (check-password password (-> user :private :password))
+    (and
+      (:enabled user)
+      (check-password password (-> user :private :password))
       (non-private user))))
 
 (defn login-with-apikey
-  "returns non-private information of first user with the apikey"
+  "returns non-private information of first enabled user with the apikey"
   [apikey]
-  (and apikey (non-private (first (mongo/select mongo/users {:private.apikey apikey})))))
+  (when apikey
+    (let [user (non-private (first (mongo/select mongo/users {:private.apikey apikey})))]
+      (when (:enabled user) user))))
 
 (defn get-user-by-email [email]
   (and email (non-private (first (mongo/select mongo/users {:email email})))))
@@ -55,6 +59,7 @@
                            :phone      phone
                            :address    address
                            :authority  authority
+                           :enabled    true
                            :private    {:salt salt
                                         :password hashed-password}}]
     (info "register user: %s" (dissoc user :password))
@@ -72,6 +77,15 @@
 
 (defn create-authority [user]
   (create-any-user (merge user {:role :authority})))
+
+(defn update-user [email data]
+  (mongo/update mongo/users {:email email} {$set data}))
+
+(defn change-password [email password]
+  (let [salt              (dispense-salt)
+        hashed-password   (get-hash password salt)]
+    (mongo/update mongo/users {:email email} {$set {:private.salt  salt
+                                                    :private.password hashed-password}})))
 
 (defn get-or-create-user-by-email [email]
   (or
