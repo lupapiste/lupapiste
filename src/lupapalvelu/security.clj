@@ -73,6 +73,9 @@
 (defn create-authority [user]
   (create-any-user (merge user {:role :authority})))
 
+(defn update-user [email data]
+  (mongo/update mongo/users {:email email} {$set data}))
+
 (defn get-or-create-user-by-email [email]
   (or
     (get-user-by-email email)
