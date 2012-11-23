@@ -274,7 +274,9 @@
                     :headers {"Content-Type" (:content-type attachment)
                               "Content-Length" (str (:content-length attachment))}}]
       (if download?
-        (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
+        (assoc-in response
+                  [:headers "Content-Disposition"]
+                  (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
         response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
