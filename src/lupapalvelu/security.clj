@@ -76,6 +76,12 @@
 (defn update-user [email data]
   (mongo/update mongo/users {:email email} {$set data}))
 
+(defn change-password [email password]
+  (let [salt              (dispense-salt)
+        hashed-password   (get-hash password salt)]
+    (mongo/update mongo/users {:email email} {$set {:private.salt  salt
+                                                    :private.password hashed-password}})))
+
 (defn get-or-create-user-by-email [email]
   (or
     (get-user-by-email email)
