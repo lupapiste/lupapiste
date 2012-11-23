@@ -13,11 +13,11 @@ if (typeof LUPAPISTE === "undefined") {
  */
 LUPAPISTE.Modal = function(maskId, maskColor) {
   var self = this;
-  this.mask = undefined;
-  this.maskId = maskId;
-  this.maskColor = maskColor;
+  self.mask = undefined;
+  self.maskId = maskId;
+  self.maskColor = maskColor;
 
-  this.createMask = function() {
+  self.createMask = function() {
     if (!document.getElementById(self.maskId)) {
       var maskDiv = document.createElement("div");
       maskDiv.id = self.maskId;
@@ -25,10 +25,10 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
       document.body.appendChild(maskDiv);
     }
     self.mask = $('#' + self.maskId);
-    self.mask.click(this.close);
+    self.mask.click(self.close);
   };
 
-  this.getMask = function() {
+  self.getMask = function() {
     return self.mask;
   };
 
@@ -36,7 +36,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
    * Opens a modal window.
    * @param {String}  Modal window container jQuery selector
    */
-  this.open = function(selector) {
+  self.open = function(selector) {
     var maskHeight = $(document).height();
     var maskWidth = $(window).width();
     self.mask.css({'width':maskWidth,'height':maskHeight});
@@ -51,7 +51,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
     return false;
   };
 
-  this.close = function(e) {
+  self.close = function(e) {
     if (e && typeof e.preventDefault === "function") {
       e.preventDefault();
     }
