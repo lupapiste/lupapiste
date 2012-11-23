@@ -268,15 +268,13 @@
 (defn output-attachment [attachment-id user download?]
   (debug "file download: attachment-id=%s" attachment-id)
   (if-let [attachment (get-attachment attachment-id user)]
-    (let [response
-          {:status 200
-           :body ((:content attachment))
-           :headers {"Content-Type" (:content-type attachment)
-                     "Content-Length" (str (:content-length attachment))}}]
-        (if download?
-          (assoc-in response [:headers "Content-Disposition"]
-            (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
-          response))
+    (let [response {:status 200
+                    :body ((:content attachment))
+                    :headers {"Content-Type" (:content-type attachment)
+                              "Content-Length" (str (:content-length attachment))}}]
+      (if download?
+        (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
+        response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
