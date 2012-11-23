@@ -3,8 +3,7 @@
   (:require [lupapalvelu.mongo :as mongo]))
 
 (def users
-  [
-   {:id "777777777777777777000099" ;; admin
+  [{:id "777777777777777777000099" ;; admin
     :email "admin@solita.fi"
     :enabled true
     :role :admin
