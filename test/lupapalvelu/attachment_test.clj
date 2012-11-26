@@ -2,7 +2,10 @@
   (:use [lupapalvelu.attachment]
         [clojure.test]
         [midje.sweet])
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [monger.core :as monger]
+            [lupapalvelu.core :as core]
+            [lupapalvelu.mongo :as mongo]))
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -65,3 +68,81 @@
   (fact (first (:types (first (attachment-types-for :buildingPermit)))) => associative?)
   (fact (:name (first (:types (first (attachment-types-for :buildingPermit))))) => keyword?))
 
+;;
+;; Integration tests:
+;; - these require running MongoDB in localhost:27017
+;; - these tests will close the monger clobal connection! 
+;; - these should be in different file and run on different cycle:
+;;
+
+(def pena {:id "777777777777777777000020" ;; pena
+           :username "pena"
+           :enabled true
+           :role "applicant"
+           :personId "010203-0405"
+           :firstName "Pena"
+           :lastName "Panaani"
+           :email "pena"
+           :street "Paapankuja 12"
+           :zip "010203"
+           :city "Piippola"
+           :phone "0102030405"
+           :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
+                     :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
+                     :apikey "602cb9e58426c613c8b85abc"}})
+
+(defn db-init []
+  (monger/connect!)
+  (monger/use-db! (str "test-" (System/currentTimeMillis)))
+  (mongo/insert mongo/users pena))
+
+(defn db-clean []
+  (monger/command {:dropDatabase 1})
+  (.close monger/*mongodb-connection*))
+
+(defn with-db []
+  (fn [f]
+    (try
+      (db-init)
+      (f)
+    (finally
+      (db-clean)))))
+
+(use-fixtures :once (with-db))
+
+(defn execute-as-pena [command-name command-data]
+  (core/execute
+    (assoc (core/command command-name command-data) :user pena)))
+
+(defn create-doc []
+  (execute-as-pena "create-application"
+    {:x 12
+     :y 34
+     :street "s"
+     :zip "z"
+     :city "c"
+     :schemas []}))
+
+(defn add-attachment [doc-id]
+  (update-or-create-attachment
+    doc-id
+    nil
+    {:type-group "tg" :type-id "tid"}
+    "file-id"
+    "filename"
+    "content-type"
+    1111 ; size
+    2222 ; created
+    pena))
+
+(deftest foo
+  (let [doc-id (:id (create-doc))]
+    (let [doc (mongo/by-id mongo/applications doc-id)]
+      (is (not (nil? (:attachments doc))))
+      (is (empty? (:attachments doc))))
+    (let [att-id (add-attachment doc-id)
+          doc (mongo/by-id mongo/applications doc-id)]
+      (is (not (empty? (:attachments doc)))))))
+
+(if false
+  (run-tests))
