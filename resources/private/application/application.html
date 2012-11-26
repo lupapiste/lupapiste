@@ -62,8 +62,8 @@
       </aside>
     </div>
 
-    <div id="tabs_container">
-      <ul id="tabs">
+    <div class="tabs-container">
+      <ul class="tabs" id="application-tabs">
         <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
         <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
         <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
@@ -71,9 +71,9 @@
       </ul>
     </div>
 
-    <div id="tab_content_container" class="container">
+    <div class="tab-content-container container">
 
-      <div class="tab_content" id="application_tab" style="display: block;">
+      <div class="tab-content" id="application_tab" style="display: block;">
 
         <div class="application_section" data-bind="with: application">
           <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick, clickBubble: false"> <span class="font-icon icon-expanded"></span> Hakemuksen perustiedot</h2>
