@@ -31,22 +31,24 @@
         (assoc-in resp [:headers "Content-Type"] neue-ct)
         resp))))
 
-(def server (atom nil))
+(def server-instance (atom nil))
 
 (defn start-server []
-  (when (nil? @server)
+  (when (nil? @server-instance)
+    (mongo/connect!)
     (server/add-middleware apply-custom-content-types)
-    (reset! server (server/start env/port {:mode env/mode
-                                           :jetty-options {:ssl? true
-                                                           :ssl-port 8443
-                                                           :keystore "./keystore"
-                                                           :key-password "lupapiste"}
-                                           :ns 'lupapalvelu.web}))))
+    (reset! server-instance (server/start env/port {:mode env/mode
+                                                    :jetty-options {:ssl? true
+                                                                    :ssl-port 8443
+                                                                    :keystore "./keystore"
+                                                                    :key-password "lupapiste"}
+                                                    :ns 'lupapalvelu.web}))))
 
 (defn stop-server []
-  (when-not (nil? @server)
-    (server/stop @server)
-    (reset! server nil)))
+  (when-not (nil? @server-instance)
+    (info "Shuting down server")
+    (server/stop @server-instance)
+    (reset! server-instance nil)))
 
 (defn -main [& _]
   (info "Server starting")
@@ -59,11 +61,10 @@
     (:major *clojure-version*)
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
-  (mongo/connect!)
+  (start-server)
+  (info "Server running")
   (env/in-dev
     (warn "*** Applying test fixture")
     (fixture/apply-fixture "minimal")
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9000))
-  (start-server)
-  (info "Server running"))
+    (nrepl/start-server :port 9000)))
