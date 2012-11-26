@@ -221,15 +221,14 @@
   (let [{:keys [user created data]} command
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
-        documents (map create-document (:schemas data))
-        municipality (:result (executed "municipality-by-location" command))]
+        documents (map create-document (:schemas data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
        :state :draft
        :permitType :buildingPermit
-       :municipality municipality
+       :municipality {}
        :location {:x (:x data)
                   :y (:y data)}
        :address {:street (:street data)
@@ -241,6 +240,10 @@
        :auth [owner]
        :documents documents
        :attachments []})
+    ; TODO: Should use agent with error handling:
+    (future
+      (if-let [municipality (:result (executed "municipality-by-location" command))]
+        (mongo/update-by-id mongo/applications id {$set {:municipality municipality}})))
     (ok :id id)))
 
 ; TODO: by-id or by-name (or both)
