@@ -54,16 +54,27 @@
                               {:name "keittoKomero"}
                               {:name "keittoTila"}
                               {:name "tupakeittio"}
-                              {:name "ei tiedossa"}]}
+                              {:name "eiTiedossa"}]}
                       {:name "huoneistoala" :type :string}
-                      {:name "huoneistoTyyppi" :type :string}
-                      {:name "huoneistoTunnus" :type :string}])
+                      {:name "huoneistoTyyppi" :type :select
+                       :body [{:name "asuinhuoneisto"}
+                              {:name "toimitila"}
+                              {:name "eiTiedossa"}]}
+                      {:name "huoneistoTunnus" :type :string}
+                      {:name "varusteet" :type :choice 
+                       :body [{:name "wc" :type :checkbox}
+                              {:name "ammeTaiSuihku" :type :checkbox}
+                              {:name "sauna" :type :checkbox}
+                              {:name "parvekeTaiTerassi" :type :checkbox}]}])
 
 (def schemas
   (to-map-by-name
-    [{:info {:name "uusi-rakennus"}
+    [{:info {:name "uusiRakennus"}
       :body [
-             {:name "rakennuksenOmistajat" :body henkilo-body} ;TODO yritys ja monta
+             
+             {:name "rakennuksenOmistajat" 
+              :type :group 
+              :body henkilo-body} ;TODO yritys ja monta
               {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
@@ -132,8 +143,9 @@
                      {:name "saunoja" :type :string}
                      {:name "uimala-ataita" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
-             {:name "huoneistot" 
-              :body huoneistot-body}]};Mahdollisuus moneen
+             {:name "huoneistot" :type :group
+              :body huoneisto-body}
+             {:name "poikeamiset" :type :string}]};Mahdollisuus moneen
      
      {:info {:name "hakijat"} ;TODO yritys + mahdollisuus moneen
       :body henkilo-body}
@@ -154,11 +166,12 @@
              {:name "kylaNimi" :type :string}
              {:name "tilanNimi" :type :string}
              {:name "kokoTilaKytkin" :type :checkbox}
-             {:name "hallintaperuste" :type "select"
+             {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
                      {:name "eiTiedossa"}]}
-             {:name "osoite"} ;TODO mahdollisuus moneen (4 * suomeksi ja 4 * ruotisksi maks)
+             {:name "osoite" :type :group 
+                       :body full-osoite-body} ;TODO mahdollisuus moneen (4 * suomeksi ja 4 * ruotisksi maks)
              {:name "materiaali" :type "select"
               :body [{:name "asema"}
                      {:name "ranta"}
@@ -167,6 +180,9 @@
                      {:name "eiKaavaa"}
                      {:name "eiTiedossa"}]} 
              ]}
+     
+     {:info {:name "lisatiedot"}
+      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
      ]))
 
 
