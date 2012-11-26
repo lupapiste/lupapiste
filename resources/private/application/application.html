@@ -53,6 +53,14 @@
         <button class="todo btn action-bar-button" data-bind="enable:false">Poista hakemus</button>
       </div>
 
+      <div class="tabs-container">
+        <ul class="tabs" id="applicationTabs">
+          <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
+          <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
+          <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
+          <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
+        </ul>
+      </div>
     </div>
 
     <div class="sidebar">
@@ -60,15 +68,6 @@
         <h3>Ohje</h3>
         <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
       </aside>
-    </div>
-
-    <div class="tabs-container">
-      <ul class="tabs" id="application-tabs">
-        <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
-        <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
-        <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
-        <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
-      </ul>
     </div>
 
     <div class="tab-content-container container">
@@ -117,7 +116,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="conversation_tab" data-bind="with: $root.comment">
+      <div class="tab-content" id="conversation_tab" data-bind="with: $root.comment">
         <p class="tab-info"> Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.</p>
         <div class="tab-wrapper">
           <table class="table table-striped conversation">
@@ -136,7 +135,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="decision_tab" data-bind="with: application">
+      <div class="tab-content" id="decision_tab" data-bind="with: application">
         <div class="tab-wrapper">
           <div class="row" data-bind="with: verdict">
             <span id="test-application-verdict" data-bind="text: text"></span>
@@ -144,7 +143,7 @@
         </div>
       </div>
 
-      <div class="tab_content" id="attachments_tab" data-bind="with: application">
+      <div class="tab-content" id="attachments_tab" data-bind="with: application">
         <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <table data-bind="if: attachments && attachments().length" class="table table-striped">

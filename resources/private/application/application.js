@@ -199,9 +199,9 @@
   var tab = {
     tabClick: function(data, event) {
      var self = event.target;
-     $("#application-tabs li").removeClass("active");
+     $("#applicationTabs li").removeClass("active");
      $(self).parent().addClass("active");
-     $(".tab_content").hide();
+     $(".tab-content").hide();
      var selected_tab = $(self).attr("href");
      $(selected_tab).fadeIn();
     }
