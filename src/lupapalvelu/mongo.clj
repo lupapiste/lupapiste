@@ -107,9 +107,10 @@
   ([]
     (connect! mongouri))
   ([uri]
-    (debug "Connecting to DB: %s" uri)
-    (m/connect-via-uri! uri)
-    (debug "DB is \"%s\"" (str (m/get-db)))))
+    (when (nil? m/*mongodb-connection*)
+      (debug "Connecting to DB: %s" uri)
+      (m/connect-via-uri! uri)
+      (debug "DB is \"%s\"" (str (m/get-db))))))
 
 (defn clear! []
   (warn "** Clearing DB **")
