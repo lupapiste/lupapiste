@@ -239,7 +239,8 @@
        :authority (:city data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents documents})
+       :documents documents
+       :attachments []})
     (ok :id id)))
 
 ; TODO: by-id or by-name (or both)
