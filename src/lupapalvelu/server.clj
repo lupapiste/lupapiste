@@ -31,24 +31,22 @@
         (assoc-in resp [:headers "Content-Type"] neue-ct)
         resp))))
 
-(def server (ref nil))
+(def server (atom nil))
 
 (defn start-server []
-  (dosync
-    (when (nil? @server)
-      (server/add-middleware apply-custom-content-types)
-      (ref-set server (server/start env/port {:mode env/mode
-                                              :jetty-options {:ssl? true
-                                                              :ssl-port 8443
-                                                              :keystore "./keystore"
-                                                              :key-password "lupapiste"}
-                                              :ns 'lupapalvelu.web})))))
+  (when (nil? @server)
+    (server/add-middleware apply-custom-content-types)
+    (reset! server (server/start env/port {:mode env/mode
+                                           :jetty-options {:ssl? true
+                                                           :ssl-port 8443
+                                                           :keystore "./keystore"
+                                                           :key-password "lupapiste"}
+                                           :ns 'lupapalvelu.web}))))
 
 (defn stop-server []
-  (dosync
-    (when (not (nil? @server))
-      (server/stop @server)
-      (ref-set server nil))))
+  (when-not (nil? @server)
+    (server/stop @server)
+    (reset! server nil)))
 
 (defn -main [& _]
   (info "Server starting")

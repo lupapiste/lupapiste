@@ -103,13 +103,16 @@
 ;; Bootstrappin'
 ;;
 
+(def connected (atom false))
+
 (defn connect!
   ([]
     (connect! mongouri))
   ([uri]
-    (when (nil? m/*mongodb-connection*)
+    (when-not @connected
       (debug "Connecting to DB: %s" uri)
       (m/connect-via-uri! uri)
+      (reset! connected true)
       (debug "DB is \"%s\"" (str (m/get-db))))))
 
 (defn clear! []
