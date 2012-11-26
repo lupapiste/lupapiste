@@ -17,7 +17,8 @@
                    :plugins [[lein-midje "2.0.0"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.2.0"]]}
-             :itest {:test-paths ["itest"]}}
+             :itest {:test-paths ["itest"]}
+             :ftest {:test-paths ["ftest"]}}
 
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers"]}
