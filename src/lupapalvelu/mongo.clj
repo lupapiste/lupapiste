@@ -115,6 +115,12 @@
       (reset! connected true)
       (debug "DB is \"%s\"" (str (m/get-db))))))
 
+(defn disconnect! []
+  (when @connected
+    (debug "Disconnecting from DB")
+    (m/disconnect!)
+    (reset! connected false)))
+
 (defn clear! []
   (warn "** Clearing DB **")
   (gfs/remove-all)
