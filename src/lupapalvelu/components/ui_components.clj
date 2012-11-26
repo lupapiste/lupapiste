@@ -78,10 +78,10 @@
                   :js ["docgen.js"]
                   :css ["docgen.css"]}
 
-   :create       {:js ["create-application.js"]
-                  :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
+   :create-application  {:js ["create-application.js"]
+                         :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
 
-   :applicant    {:depends [:common :map :application :applications :attachment :create :buildinfo :docgen]
+   :applicant    {:depends [:common :map :application :applications :attachment :create-application :buildinfo :docgen]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
