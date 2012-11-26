@@ -163,7 +163,7 @@
 (defn- parse [key value]
   (let [value-string (str value)]
     (if (.startsWith value-string key)
-      (.trim (.substring value-string (.length key))))))
+      (.trim (.substring value-string (inc (.length key)))))))
 
 (defn apikey-authentication
   "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
