@@ -31,12 +31,24 @@
         (assoc-in resp [:headers "Content-Type"] neue-ct)
         resp))))
 
-(defn start-server [port mode]
-  (server/start port {:mode mode :ns 'lupapalvelu.web})
-  (server/add-middleware apply-custom-content-types))
+(def server (ref nil))
 
-(defn stop-server [server]
-  (server/stop server))
+(defn start-server []
+  (dosync
+    (when (nil? @server)
+      (server/add-middleware apply-custom-content-types)
+      (ref-set server (server/start env/port {:mode env/mode
+                                              :jetty-options {:ssl? true
+                                                              :ssl-port 8443
+                                                              :keystore "./keystore"
+                                                              :key-password "lupapiste"}
+                                              :ns 'lupapalvelu.web})))))
+
+(defn stop-server []
+  (dosync
+    (when (not (nil? @server))
+      (server/stop @server)
+      (ref-set server nil))))
 
 (defn -main [& _]
   (info "Server starting")
@@ -55,11 +67,5 @@
     (fixture/apply-fixture "minimal")
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
-  (server/add-middleware apply-custom-content-types)
-  (server/start env/port {:mode env/mode
-                          :jetty-options {:ssl? true
-                                          :ssl-port 8443
-                                          :keystore "./keystore"
-                                          :key-password "lupapiste"}
-                          :ns 'lupapalvelu.web})
+  (start-server)
   (info "Server running"))
