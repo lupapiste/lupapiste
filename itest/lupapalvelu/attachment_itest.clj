@@ -38,20 +38,22 @@
 
 
 (fact
-  (let [application-id (:id (command :create-application :x 12 :y 34 :street "s" :city "c" :zip "z" :schemas ["hakija"]))
-        application (:application (query :application :id "50b35e18e508563e19b54460"))]
+  (let [resp (command pena :create-application :x 408048 :y 6693225 :street "s" :city "c" :zip "z" :schemas ["hakija"])
+        application-id (:id resp)
+        application (:application (query pena :application :id application-id))]
     (nil? (:attachments application)) => falsey
-    (empty? (:attachments application)) => truthy))
-
-#_(defn add-attachment [doc-id]
-  (update-or-create-attachment
-    doc-id
-    nil
-    {:type-group "tg" :type-id "tid"}
-    "file-id"
-    "filename"
-    "content-type"
-    1111 ; size
-    2222 ; created
-    pena))
-
+    (empty? (:attachments application)) => truthy
+    (let [resp (command veikko :create-attachment
+                 :id application-id
+                 :attachmentType {:type-group "tg"
+                                  :type-id "tid"})
+          attachment-id (:attachmentId resp)
+          application (:application (query pena :application :id application-id))]
+      (nil? attachment-id) => falsey
+      (count (:attachments application)) => 1
+      (first (:attachments application)) => (contains
+                                              {:type {:type-group "tg"
+                                                      :type-id "tid"}
+                                               :state "requires_user_action"
+                                               :latestVersion {:version {:minor 0 :major 0}}
+                                               :versions []}))))
