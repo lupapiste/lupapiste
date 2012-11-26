@@ -1,6 +1,5 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [noir.request]
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]])
@@ -47,7 +46,7 @@
   (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
 
 (defn web-stuff []
-  (let [request (ring-request)]
+  (let [request (request/ring-request)]
     {:user-agent (user-agent request)
      :client-ip  (client-ip request)
      :host       (host request)}))
@@ -183,7 +182,7 @@
 
 (defpage [:post "/api/upload"]
   {applicationId :applicationId attachmentId :attachmentId attachmentType :attachmentType text :text upload :upload :as data}
-  (debug "upload: %s: %s type=[%s]" data (str upload) (str attachmentType))
+  (debug "upload: %s: %s type=[%s]" data upload attachmentType)
   (let [upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
@@ -219,7 +218,7 @@
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
-    ((proxy-services/services srv (constantly {:status 404})) (ring-request))
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
     {:status 401}))
 
 ;;
@@ -228,4 +227,4 @@
 
 (env/in-dev
   (defjson "/api/spy" []
-    (dissoc (ring-request) :body)))
+    (dissoc (request/ring-request) :body)))
