@@ -2,9 +2,9 @@
   (:require [clj-http.client :as client]
             [noir.response :as resp]
             [clojure.xml :as xml]
-            [clojure.zip :as zip])
-  (:use [clojure.data.zip.xml]
-        [clojure.string :only [split]]))
+            [clojure.zip :as zip]
+            [clojure.string :as string])
+  (:use [clojure.data.zip.xml]))
 ;;
 ;; NLS:
 ;;  
@@ -28,36 +28,36 @@
 						  <ogc:Filter>
                <ogc:And>
                 <ogc:Or>
-                 <ogc:PropertyIsEqualTo>
+                 <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
                   <ogc:PropertyName>oso:kuntanimiFin</ogc:PropertyName>
-                  <ogc:Literal>%s</ogc:Literal>
-                 </ogc:PropertyIsEqualTo>
-                 <ogc:PropertyIsEqualTo>
+                  <ogc:Literal>%s*</ogc:Literal>
+                 </ogc:PropertyIsLike>
+                 <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
                   <ogc:PropertyName>oso:kuntanimiSwe</ogc:PropertyName>
-                  <ogc:Literal>%s</ogc:Literal>
-                 </ogc:PropertyIsEqualTo>
+                  <ogc:Literal>%s*</ogc:Literal>
+                 </ogc:PropertyIsLike>
                 </ogc:Or>
-                <ogc:PropertyIsEqualTo>
+                <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
                  <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
-                 <ogc:Literal>%s</ogc:Literal>
-                </ogc:PropertyIsEqualTo>
-                <ogc:PropertyIsEqualTo>
+                 <ogc:Literal>%s*</ogc:Literal>
+                </ogc:PropertyIsLike>
+                <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
                  <ogc:PropertyName>oso:katunumero</ogc:PropertyName>
-                 <ogc:Literal>%s</ogc:Literal>
-                </ogc:PropertyIsEqualTo>
+                 <ogc:Literal>%s*</ogc:Literal>
+                </ogc:PropertyIsLike>
                </ogc:And>
               </ogc:Filter>						
 						 </wfs:Query>
 						</wfs:GetFeature>" kunta kunta katunimi katunumero)
 	   :basic-auth auth}))
-        features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes input-xml))))]
+        features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (string/replace input-xml "UTF-8" "ISO-8859-1")))))]
       (resp/json (->> (xml-> features :gml:featureMember)
                    (map (fn [feature] { :katunimi (first (xml-> feature :oso:Osoitenimi :oso:katunimi text))
                                         :katunumero (first (xml-> feature :oso:Osoitenimi :oso:katunumero text))
                                         :kuntanimiFin (first (xml-> feature :oso:Osoitenimi :oso:kuntanimiFin text))
                                         :kuntanimiSwe (first (xml-> feature :oso:Osoitenimi :oso:kuntanimiSwe text))
-                                        :x (first (split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))
-                                        :y (second (split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))}))))))
+                                        :x (first (string/split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))
+                                        :y (second (string/split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))}))))))
 
 (defn nls [request]
   (client/get "https://ws.nls.fi/rasteriaineistot/image"
