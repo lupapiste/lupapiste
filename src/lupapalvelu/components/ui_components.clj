@@ -81,7 +81,8 @@
    :create-application  {:js ["create-application.js"]
                          :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
 
-   :create-inforequest  {:depends [:common]
+   :create-inforequest  {:js ["create-inforequest.js"]
+                         :depends [:common]
                          :html ["create-inforequest.html"]}
 
    :inforequests  {:depends [:common]
