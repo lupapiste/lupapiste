@@ -11,7 +11,14 @@ var docgen = (function () {
   function makeInput(type, path, value, save, extraClass) {
     var input = document.createElement("input");
     input.name = path;
-    input.type = type;
+
+    try {
+      input.type = type;
+    } catch (e) {
+      // IE does not support HTML5 input types such as email
+      input.type = "text";
+    }
+
     input.className = "form-input " + type + " " + (extraClass || "");
     input.onchange = save;
     if (type === "checkbox") {
