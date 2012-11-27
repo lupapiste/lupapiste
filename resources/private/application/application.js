@@ -158,7 +158,7 @@
           // Server returns empty array (all ok), or array containing an array with three
           // elements: [key status message]. Here we use just the status.
           .success(function(e) {
-            var status = (e.results.length == 0) ? "ok" : e.results[0][1]; 
+            var status = (e.results.length == 0) ? "ok" : e.results[0][1];
             callback(status);
           })
           .error(function(e) { error(e); callback("err"); })
@@ -212,9 +212,9 @@
   var tab = {
     tabClick: function(data, event) {
      var self = event.target;
-     $("#tabs li").removeClass("active");
+     $("#applicationTabs li").removeClass("active");
      $(self).parent().addClass("active");
-     $(".tab_content").hide();
+     $(".tab-content").hide();
      var selected_tab = $(self).attr("href");
      $(selected_tab).fadeIn();
     }
