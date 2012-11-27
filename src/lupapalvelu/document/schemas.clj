@@ -23,7 +23,7 @@
                        {:name "postitoimipaikka" :type :string}
                        {:name "pistesijanti" :type :string}])
 
-(def suunnittelia-body [{:name "etunimi" :type :string}
+(def suunnittelia-body [{:name "etunimi" :type :string};TODO refakturoi henkilö/yritys
              {:name "sukunimi" :type :string}
              {:name "henkilotunnus" :type :string}
              {:name "osoite" :type :group :body simple-osoite-body}
@@ -36,7 +36,7 @@
                      {:name "b"}
                      {:name "c"}]}
              {:name "kokemus" :type :string}
-             {:name "Liiteet" :type :string}])
+             {:name "Liiteet" :type :string}]);TODO miten liitteet hanskataan
 
 (def henkilo-body [{:name "etunimi" :type :string}
              {:name "sukunimi" :type :string}
@@ -71,7 +71,6 @@
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
       :body [
-             
              {:name "rakennuksenOmistajat" 
               :type :group 
               :body henkilo-body} ;TODO yritys ja monta
@@ -157,7 +156,7 @@
      {:info {:name "suunnitelijat"} ;TODO mahdollisuus moneen
       :body suunnittelia-body}
      
-     {:info {:name "maksaja"} ;TODO yritys
+     {:info {:name "maksaja"} ;TODO yritys mahdollisuus moneen ja suunnitelijatyypin valinta
       :body henkilo-body}
      
      {:info {:name "rakennuspaikka"};TODO sijainti(kios?/ jo kartalta osositettu)
@@ -165,14 +164,14 @@
              {:name "maaraalaTunnus" :type :string}
              {:name "kylaNimi" :type :string}
              {:name "tilanNimi" :type :string}
-             {:name "kokoTilaKytkin" :type :checkbox}
+             {:name "kokotilaKytkin" :type :checkbox} ;todo jos määräala tunnus kokotilakytkin pitäisi olla false. Tarvitaanko ollenkaan?
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
                      {:name "eiTiedossa"}]}
              {:name "osoite" :type :group 
                        :body full-osoite-body} ;TODO mahdollisuus moneen (4 * suomeksi ja 4 * ruotisksi maks)
-             {:name "materiaali" :type "select"
+             {:name "kaavanaste" :type "select"
               :body [{:name "asema"}
                      {:name "ranta"}
                      {:name "rakennus"}
