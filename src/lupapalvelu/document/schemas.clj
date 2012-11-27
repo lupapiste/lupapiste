@@ -23,21 +23,6 @@
                        {:name "postitoimipaikka" :type :string}
                        {:name "pistesijanti" :type :string}])
 
-(def suunnittelia-body [{:name "etunimi" :type :string} ; TODO refakturoi henkilo/yritys
-                        {:name "sukunimi" :type :string}
-                        {:name "henkilotunnus" :type :string}
-                        {:name "osoite" :type :group :body simple-osoite-body}
-                        {:name "email" :type :string}
-                        {:name "puhelin" :type :string}
-                        {:name "koulutus" :type :string}
-                        {:name "patevyysluokka" :type :select
-                         :body [{:name "aa"}
-                                {:name "a"}
-                                {:name "b"}
-                                {:name "c"}]}
-                        {:name "kokemus" :type :string}
-                        {:name "Liiteet" :type :string}]) ; TODO miten liitteet hanskataan
-
 (def henkilo-body [{:name "etunimi" :type :string}
                    {:name "sukunimi" :type :string}
                    {:name "osoite" :type :group :body simple-osoite-body}
@@ -46,26 +31,17 @@
                    {:name "fax" :type :string}
                    {:name "hetu" :type :string}])
 
-(def huoneisto-body [{:name "osoite" :type :group 
-                       :body full-osoite-body}
-                     {:name "huoneluku" :type :string}
-                     {:name "keittionTyyppi" :type :select
-                      :body [{:name "keittio"}
-                             {:name "keittoKomero"}
-                             {:name "keittoTila"}
-                             {:name "tupakeittio"}
-                             {:name "eiTiedossa"}]}
-                     {:name "huoneistoala" :type :string}
-                     {:name "huoneistoTyyppi" :type :select
-                      :body [{:name "asuinhuoneisto"}
-                             {:name "toimitila"}
-                             {:name "eiTiedossa"}]}
-                     {:name "huoneistoTunnus" :type :string}
-                     {:name "varusteet" :type :choice 
-                      :body [{:name "wc" :type :checkbox}
-                             {:name "ammeTaiSuihku" :type :checkbox}
-                             {:name "sauna" :type :checkbox}
-                             {:name "parvekeTaiTerassi" :type :checkbox}]}])
+; TODO: Yritys?
+(def suunnittelia-body (concat
+                         henkilo-body
+                         [{:name "koulutus" :type :string}
+                          {:name "patevyysluokka" :type :select
+                           :body [{:name "aa"}
+                                  {:name "a"}
+                                  {:name "b"}
+                                  {:name "c"}]}
+                          {:name "kokemus" :type :string}
+                          {:name "Liiteet" :type :string}])) ; TODO miten liitteet hanskataan
 
 (def schemas
   (to-map-by-name
@@ -142,9 +118,29 @@
                      {:name "saunoja" :type :string}
                      {:name "uimala-ataita" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
-             {:name "huoneistot" :type :group
-              :body huoneisto-body} ; TODO Mahdollisuus moneen
              {:name "poikeamiset" :type :string}]}
+     
+     {:info {:name "huoneisto"}
+      :body [{:name "osoite" :type :group 
+              :body full-osoite-body}
+             {:name "huoneluku" :type :string}
+             {:name "keittionTyyppi" :type :select
+              :body [{:name "keittio"}
+                     {:name "keittoKomero"}
+                     {:name "keittoTila"}
+                     {:name "tupakeittio"}
+                     {:name "eiTiedossa"}]}
+             {:name "huoneistoala" :type :string}
+             {:name "huoneistoTyyppi" :type :select
+              :body [{:name "asuinhuoneisto"}
+                     {:name "toimitila"}
+                     {:name "eiTiedossa"}]}
+             {:name "huoneistoTunnus" :type :string}
+             {:name "varusteet" :type :choice 
+              :body [{:name "wc" :type :checkbox}
+                     {:name "ammeTaiSuihku" :type :checkbox}
+                     {:name "sauna" :type :checkbox}
+                     {:name "parvekeTaiTerassi" :type :checkbox}]}]}
      
      {:info {:name "hakija"} ; TODO yritys
       :body henkilo-body}
@@ -168,8 +164,6 @@
               :body [{:name "oma"}
                      {:name "vuokra"}
                      {:name "eiTiedossa"}]}
-             {:name "osoite" :type :group 
-                       :body full-osoite-body} ; TODO mahdollisuus moneen (4 * suomeksi ja 4 * ruotisksi maks)
              {:name "kaavanaste" :type "select"
               :body [{:name "asema"}
                      {:name "ranta"}
@@ -177,6 +171,10 @@
                      {:name "yleis"}
                      {:name "eiKaavaa"}
                      {:name "eiTiedossa"}]}]}
+     
+     {:info {:name "osoite"}
+      :body [{:name "osoite" :type :group 
+              :body full-osoite-body}]}
      
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
