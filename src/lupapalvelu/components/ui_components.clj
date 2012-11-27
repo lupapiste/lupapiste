@@ -83,7 +83,7 @@
 
    :create-inforequest  {:js ["create-inforequest.js"]
                          :depends [:common]
-                         :html ["create-inforequest.html"]}
+                         :html ["create-inforequest-01.html"]}
 
    :inforequests  {:depends [:common]
                   :html ["inforequests.html"]}

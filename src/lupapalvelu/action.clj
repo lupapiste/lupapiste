@@ -215,7 +215,7 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:x :y :street :zip :city :schemas]
+  {:parameters [:permitType :x :y :street :zip :city :schemas]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
@@ -228,7 +228,7 @@
        :created created
        :modified created
        :state :draft
-       :permitType :buildingPermit
+       :permitType (:permitType data)
        :municipality municipality
        :location {:x (:x data)
                   :y (:y data)}
