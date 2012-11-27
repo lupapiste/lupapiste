@@ -146,7 +146,7 @@
               :body huoneisto-body}
              {:name "poikeamiset" :type :string}]};Mahdollisuus moneen
      
-     {:info {:name "hakijat"} ; TODO yritys
+     {:info {:name "hakija"} ; TODO yritys
       :body henkilo-body}
      
      
