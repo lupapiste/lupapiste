@@ -154,7 +154,7 @@ var docgen = (function () {
 
     var div = document.createElement("div");
     div.className = "form-group";
-    div.appendChild(makeLabel("group", myPath.join(".")));
+    div.appendChild(makeLabel("group", myPath.join("."), specId));
     div.appendChild(partsDiv);
     return div;
   }

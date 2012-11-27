@@ -31,12 +31,24 @@
         (assoc-in resp [:headers "Content-Type"] neue-ct)
         resp))))
 
-(defn start-server [port mode]
-  (server/start port {:mode mode :ns 'lupapalvelu.web})
-  (server/add-middleware apply-custom-content-types))
+(def server-instance (atom nil))
 
-(defn stop-server [server]
-  (server/stop server))
+(defn start-server []
+  (when (nil? @server-instance)
+    (mongo/connect!)
+    (server/add-middleware apply-custom-content-types)
+    (reset! server-instance (server/start env/port {:mode env/mode
+                                                    :jetty-options {:ssl? true
+                                                                    :ssl-port 8443
+                                                                    :keystore "./keystore"
+                                                                    :key-password "lupapiste"}
+                                                    :ns 'lupapalvelu.web}))))
+
+(defn stop-server []
+  (when-not (nil? @server-instance)
+    (info "Shuting down server")
+    (server/stop @server-instance)
+    (reset! server-instance nil)))
 
 (defn -main [& _]
   (info "Server starting")
@@ -49,17 +61,12 @@
     (:major *clojure-version*)
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
-  (mongo/connect!)
+  (start-server)
+  (info "Server running")
   (env/in-dev
     (warn "*** Applying test fixture")
     (fixture/apply-fixture "minimal")
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
-  (server/add-middleware apply-custom-content-types)
-  (server/start env/port {:mode env/mode
-                          :jetty-options {:ssl? true
-                                          :ssl-port 8443
-                                          :keystore "./keystore"
-                                          :key-password "lupapiste"}
-                          :ns 'lupapalvelu.web})
-  (info "Server running"))
+  ; Sensible return value for -main for repl use.
+  "ready")
