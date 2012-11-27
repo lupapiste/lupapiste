@@ -143,12 +143,11 @@
                      {:name "uimala-ataita" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
              {:name "huoneistot" :type :group
-              :body huoneisto-body}
-             {:name "poikeamiset" :type :string}]};Mahdollisuus moneen
+              :body huoneisto-body} ; TODO Mahdollisuus moneen
+             {:name "poikeamiset" :type :string}]}
      
      {:info {:name "hakija"} ; TODO yritys
       :body henkilo-body}
-     
      
      {:info {:name "paasuunnittelija"}
       :body suunnittelia-body}
@@ -156,7 +155,7 @@
      {:info {:name "suunnitelija"}
       :body suunnittelia-body}
      
-     {:info {:name "maksaja"} ;TODO yritys ja suunnitelijatyypin valinta
+     {:info {:name "maksaja"} ; TODO yritys ja suunnitelijatyypin valinta
       :body henkilo-body}
      
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
@@ -177,11 +176,7 @@
                      {:name "rakennus"}
                      {:name "yleis"}
                      {:name "eiKaavaa"}
-                     {:name "eiTiedossa"}]} 
-             ]}
+                     {:name "eiTiedossa"}]}]}
      
      {:info {:name "lisatiedot"}
-      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
-     ]))
-
-
+      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
