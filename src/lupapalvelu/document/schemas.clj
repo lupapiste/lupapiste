@@ -173,8 +173,7 @@
                      {:name "eiTiedossa"}]}]}
      
      {:info {:name "osoite"}
-      :body [{:name "osoite" :type :group 
-              :body full-osoite-body}]}
+      :body full-osoite-body}
      
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
