@@ -1,6 +1,5 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [noir.request]
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]])
@@ -47,7 +46,7 @@
   (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
 
 (defn web-stuff []
-  (let [request (ring-request)]
+  (let [request (request/ring-request)]
     {:user-agent (user-agent request)
      :client-ip  (client-ip request)
      :host       (host request)}))
@@ -164,7 +163,7 @@
 (defn- parse [key value]
   (let [value-string (str value)]
     (if (.startsWith value-string key)
-      (.trim (.substring value-string (.length key))))))
+      (.trim (.substring value-string (inc (.length key)))))))
 
 (defn apikey-authentication
   "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
@@ -182,17 +181,24 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {applicationId :applicationId attachmentId :attachmentId type :type text :text upload :upload :as data}
-  (debug "upload: %s: %s" data (str upload))
-  (let [upload-data (assoc upload :id applicationId, :attachmentId attachmentId, :type (or type ""), :text text)
+  {applicationId :applicationId attachmentId :attachmentId attachmentType :attachmentType text :text upload :upload :as data}
+  (debug "upload: %s: %s type=[%s]" data upload attachmentType)
+  (let [upload-data (assoc upload
+                           :id applicationId
+                           :attachmentId attachmentId
+                           :text text)
+        [type-group type-id] (attachment/parse-attachment-type attachmentType)
+        upload-data (if (and type-group type-id)
+                      (assoc upload-data :attachmentType {:type-group type-group :type-id type-id})
+                      upload-data)
         result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload.html"
                                            {:applicationId applicationId
                                             :attachmentId attachmentId
-                                            :type type
-                                            :defaultType type
+                                            :attachmentType (or attachmentType "")
+                                            :defaultType (or attachmentType "")
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
@@ -212,7 +218,7 @@
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
-    ((proxy-services/services srv (constantly {:status 404})) (ring-request))
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
     {:status 401}))
 
 ;;
@@ -221,4 +227,4 @@
 
 (env/in-dev
   (defjson "/api/spy" []
-    (dissoc (ring-request) :body)))
+    (dissoc (request/ring-request) :body)))

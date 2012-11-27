@@ -3,16 +3,23 @@
 <body>
   <section class="page" id="attachment" data-bind="with: attachment">
     <div class="breadcrumb">
-      <a href="#!/applications" id="test-applications">Lupahakemukset</a> /
-      <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications"><span data-bind="text: application.title"> / Liitteet</span></a>
+      <a href="#!/applications" id="test-applications">Lupahakemukset</a>
+      /
+      <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications">
+        <span data-bind="text: application.title"></span>
+      </a>
+      /
+      <span data-bind="text: loc(name())"></span>
     </div>
     <div data-bind="if: latestVersion">
       <div class="attachment-info">
         <h1>
-          <span data-bind="if: type"><span data-bind="text: loc('attachmentType_' + type())"></span></span>
-          versio
+          <span data-bind="if: type">
+            <span data-bind="text: loc(name())"></span>
+          </span>
+          <span>versio</span>
           <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
-          muokattu
+          <span>muokattu</span>
           <span data-bind="dateTimeString: latestVersion().created"></span>
         </h1>
       </div>

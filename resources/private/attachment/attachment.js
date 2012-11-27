@@ -66,6 +66,7 @@ var attachment = function() {
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
     type:           ko.observable(),
+    name:           ko.observable(),
 
     hasPreview: function() {
       return this.isImage() || this.isPdf() || this.isPlainText();
@@ -109,6 +110,7 @@ var attachment = function() {
     model.versions(attachment.versions);
     model.filename(attachment.filename);
     model.type(attachment.type);
+    model.name("attachmentType." + attachment.type["type-group"] + "." + attachment.type["type-id"]);
     model.application.id(applicationId);
     model.application.title(application.title);
     model.attachmentId(attachmentId);
@@ -145,7 +147,7 @@ var attachment = function() {
     resetUploadIframe();
   });
 
-  function toApplication(){
+  function toApplication() {
     window.location.href = "#!/application/" + model.application.id();
   }
 
@@ -162,21 +164,24 @@ var attachment = function() {
     resetUploadIframe();
   });
 
-  function uploadDone(applicationId) {
-    repository.reloadApplication(applicationId);
-    LUPAPISTE.ModalDialog.close();
+  var uploadingApplicationId;
+  
+  function uploadDone() {
+    if (uploadingApplicationId) {
+      repository.reloadApplication(uploadingApplicationId);
+      LUPAPISTE.ModalDialog.close();
+      uploadingApplicationId = null;
+    }
   }
 
-  function newAttachment(m) {
-    var applicationId = m.id();
-    hub.subscribe("upload-done", function(e) {
-      uploadDone(applicationId);
-    });
+  hub.subscribe("upload-done", uploadDone);
 
-    initFileUpload(m.id());
+  function newAttachment(m) {
+    initFileUpload(m.application.id());
   }
 
   function initFileUpload(applicationId, attachmentId, attachmentType) {
+    uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
     if (iframe) {
