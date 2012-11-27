@@ -31,24 +31,6 @@
         (assoc-in resp [:headers "Content-Type"] neue-ct)
         resp))))
 
-(def server-instance (atom nil))
-
-(defn start-server []
-  (when (nil? @server-instance)
-    (mongo/connect!)
-    (server/add-middleware apply-custom-content-types)
-    (reset! server-instance (server/start env/port {:mode env/mode
-                                                    :jetty-options {:ssl? true
-                                                                    :ssl-port 8443
-                                                                    :keystore "./keystore"
-                                                                    :key-password "lupapiste"}
-                                                    :ns 'lupapalvelu.web}))))
-
-(defn stop-server []
-  (when-not (nil? @server-instance)
-    (info "Shuting down server")
-    (server/stop @server-instance)
-    (reset! server-instance nil)))
 
 (defn -main [& _]
   (info "Server starting")
@@ -61,7 +43,14 @@
     (:major *clojure-version*)
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
-  (start-server)
+  (mongo/connect!)
+  (server/add-middleware apply-custom-content-types)
+  (server/start env/port {:mode env/mode
+                          :jetty-options {:ssl? true
+                                          :ssl-port 8443
+                                          :keystore "./keystore"
+                                          :key-password "lupapiste"}
+                          :ns 'lupapalvelu.web})
   (info "Server running")
   (env/in-dev
     (warn "*** Applying test fixture")
