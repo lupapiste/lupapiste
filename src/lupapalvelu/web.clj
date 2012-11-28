@@ -160,10 +160,9 @@
 ;; Apikey-authentication
 ;;
 
-(defn- parse [key value]
-  (let [value-string (str value)]
-    (if (.startsWith value-string key)
-      (.trim (.substring value-string (inc (.length key)))))))
+(defn- parse [k value]
+  (when (and k value (.startsWith value k) (> (.length value) (.length k)))
+    (.trim (.substring value (inc (.length k))))))
 
 (defn apikey-authentication
   "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
