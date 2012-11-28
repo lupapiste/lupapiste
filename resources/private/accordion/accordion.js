@@ -18,8 +18,14 @@ var accordion = (function () {
     if (state !== "closed") {
       state = "closed";
       height = "0px";
+      content.removeClass("content_expanded");
+      $(e.target).children().removeClass("icon-expanded");
+      $(e.target).children().addClass("icon-collapsed");
     } else {
       state = "open";
+      content.addClass("content_expanded");
+      $(e.target).children().removeClass("icon-collapsed");
+      $(e.target).children().addClass("icon-expanded");
     }
 
     content
