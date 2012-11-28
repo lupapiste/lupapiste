@@ -1,14 +1,15 @@
 (ns lupapalvelu.web-test
   (:use lupapalvelu.web
-        clojure.test
-        midje.sweet)
-  (:require [noir.session :as session]
-            [lupapalvelu.security :as security]))
+        midje.sweet))
 
-#_(facts
-  (against-background
-    (session/get :user) => :session-user
-    (security/login-with-apikey "123") => :apikey-user)
-  (current-user {}) => :session-user
-  (current-user {:apikey "123"}) => :apikey-user (provided (session/get :user) => nil))
+(def parse #'lupapalvelu.web/parse)
 
+(facts
+  (fact (parse "apikey" "apikey foo") => "foo")
+  (fact (parse "apikey" "apikey  foo ") => "foo")
+  (fact (parse "apikey" "apikey=foo") => "foo")
+  (fact (parse "apikey" "apikey= foo ") => "foo")
+  (fact (parse "apikey" "apikey") => nil)
+  (fact (parse "apikey" "baz boz") => nil)
+  (fact (parse "apikey" "") => nil)
+  (fact (parse "apikey" nil) => nil))
