@@ -32,7 +32,7 @@
                    {:name "hetu" :type :string}])
 
 ; TODO: Yritys?
-(def suunnittelia-body (concat
+(def suunnittelija-body (concat
                          henkilo-body
                          [{:name "koulutus" :type :string}
                           {:name "patevyysluokka" :type :select
@@ -146,12 +146,12 @@
       :body henkilo-body}
      
      {:info {:name "paasuunnittelija"}
-      :body suunnittelia-body}
+      :body suunnittelija-body}
      
-     {:info {:name "suunnitelija"}
-      :body suunnittelia-body}
+     {:info {:name "suunnittelija"}
+      :body suunnittelija-body}
      
-     {:info {:name "maksaja"} ; TODO yritys ja suunnitelijatyypin valinta
+     {:info {:name "maksaja"} ; TODO yritys ja suunnittelijatyypin valinta
       :body henkilo-body}
      
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
