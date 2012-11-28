@@ -119,7 +119,7 @@
                      {:name "koneellinenilmastointiKytkin" :type :checkbox}
                      {:name "saunoja" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
-             {:name "poikeamiset" :type :string}]}
+             {:name "poikkeamiset" :type :string}]}
      
      {:info {:name "huoneisto"}
       :body [{:name "osoite" :type :group 
