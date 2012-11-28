@@ -2,7 +2,8 @@
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
-        [clojure.walk :only [keywordize-keys]])
+        [clojure.walk :only [keywordize-keys]]
+        [clojure.string :only [blank?]])
   (:require (noir  [request :as request]
                    [response :as resp]
                    [session :as session]
@@ -160,9 +161,10 @@
 ;; Apikey-authentication
 ;;
 
-(defn- parse [k value]
-  (when (and k value (.startsWith value k) (> (.length value) (.length k)))
-    (.trim (.substring value (inc (.length k))))))
+(defn- parse [required-key header-value]
+  (when (and required-key header-value)
+    (if-let [[_ k v] (re-find #"(\w+)\s*[ :=]\s*(\w+)" header-value)]
+      (if (= k required-key) v))))
 
 (defn apikey-authentication
   "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
