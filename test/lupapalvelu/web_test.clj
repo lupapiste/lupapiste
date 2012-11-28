@@ -10,6 +10,8 @@
   (fact (parse "apikey" "apikey=foo") => "foo")
   (fact (parse "apikey" "apikey= foo ") => "foo")
   (fact (parse "apikey" "apikey") => nil)
+  (fact (parse "apikey" "apikeyfoo") => nil)
+  (fact (parse "apikey" "apikey ") => nil)
   (fact (parse "apikey" "baz boz") => nil)
   (fact (parse "apikey" "") => nil)
   (fact (parse "apikey" nil) => nil))
