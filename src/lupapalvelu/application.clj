@@ -99,6 +99,7 @@
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
+       :allowedAttahmentTypes {}
        :attachments []})
     (future ; TODO: Should use agent with error handling:
       (if-let [municipality (:result (executed "municipality-by-location" command))]
