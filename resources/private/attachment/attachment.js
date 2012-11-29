@@ -68,6 +68,7 @@ var attachment = function() {
     name:           ko.observable(),
     type:           ko.observable(),
     attachmentType: ko.observable(),
+    allowedAttahmentTypes: ko.observableArray(),
     
     hasPreview: function() {
       return this.isImage() || this.isPdf() || this.isPlainText();
@@ -100,6 +101,10 @@ var attachment = function() {
       LUPAPISTE.ModalDialog.open("#upload-dialog");
     }
   };
+  
+  model.attachmentType.subscribe(function(e) {
+    console.log("ATTACHMENT TYPE:", e);
+  });
 
   function showAttachment(application) {
     if (!applicationId || !attachmentId) return;
@@ -117,7 +122,8 @@ var attachment = function() {
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
     model.name("attachmentType." + type);
-
+    model.allowedAttahmentTypes(application.allowedAttahmentTypes);
+        
     model.application.id(applicationId);
     model.application.title(application.title);
     model.attachmentId(attachmentId);
