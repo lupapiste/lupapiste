@@ -73,16 +73,22 @@ var attachment = function() {
     },
 
     isImage: function() {
-      var contentType = this.latestVersion().contentType;
+      var version = this.latestVersion();
+      if (!version) return false;
+      var contentType = version.contentType;
       return contentType && contentType.indexOf('image/') === 0;
     },
 
     isPdf: function() {
-      return this.latestVersion().contentType === "application/pdf";
+      var version = this.latestVersion();
+      if (!version) return false;
+      return version.contentType === "application/pdf";
     },
 
     isPlainText: function() {
-      return this.latestVersion().contentType === "text/plain";
+      var version = this.latestVersion();
+      if (!version) return false;
+      return version.contentType === "text/plain";
     },
 
     newAttachmentVersion: function() {
