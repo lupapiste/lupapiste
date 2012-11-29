@@ -92,11 +92,10 @@ var attachment = function() {
     },
 
     newAttachmentVersion: function() {
-      var applicationId = this.application.id();
-      var attachmentId = this.attachmentId();
-      var attachmentType = this.type();
-
-      initFileUpload(applicationId, attachmentId, attachmentType);
+      var type = this.type();
+      var attachmentType = type["type-group"] + "." + type["type-id"];
+      console.log("TYPE:", attachmentType);
+      initFileUpload(this.application.id(), this.attachmentId(), attachmentType, false);
 
       // Upload dialog is opened manually here, because click event binding to
       // dynamic content rendered by Knockout is not possible
@@ -183,16 +182,16 @@ var attachment = function() {
   hub.subscribe("upload-done", uploadDone);
 
   function newAttachment(m) {
-    initFileUpload(m.application.id());
+    initFileUpload(m.application.id(), null, null, true);
   }
 
-  function initFileUpload(applicationId, attachmentId, attachmentType) {
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
     if (iframe) {
       if (iframe.contentWindow.LUPAPISTE && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
-        iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType);
+        iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
       } else {
         error("LUPAPISTE.Upload.init is not a function");
       }
