@@ -97,7 +97,7 @@
         attachment-model {:id attachment-id
                           :type (or attachement-type default-type)
                           :state :requires_user_action
-                          :latestVersion {:version default-version}
+                          :modified now
                           :versions []}]
     (mongo/update-by-id mongo/applications application-id
       {$set {:modified now}
