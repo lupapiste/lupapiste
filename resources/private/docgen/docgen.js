@@ -248,10 +248,15 @@ var docgen = (function () {
 
   function buildElement(spec, model, save, specId) {
     var section = document.createElement("section");
-    section.className = "accordion";
+    section.className = "application_section_header";
 
+    var icon = document.createElement("span");
+    icon.className = "font-icon icon-expanded";
     var title = document.createElement("h2");
+    title.className = "application_section_header";
+    title.appendChild(icon);
     title.appendChild(document.createTextNode(loc(specId)));
+
     title.onclick = accordion.toggle;
 
     var sectionContainer = document.createElement("div");
