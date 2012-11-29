@@ -179,6 +179,13 @@
   [{{application-id :id} :data}]
   (ok :typeGroups (attachment-types-for (get-permit-type application-id))))
 
+(defcommand "set-attachment-type"
+  {:parameters [:id :attachmentId :attachmentType]
+   :roles      [:applicant :authority]
+   :states     [:draft :open]}
+  [{{:keys [id attachmentId attachmentType]} :data}]
+  (ok :message (str id ", " attachmentId ", " attachmentType)))
+
 (defcommand "approve-attachment"
   {:description "Authority can approve attachement, moves to ok"
    :parameters  [:id :attachmentId]

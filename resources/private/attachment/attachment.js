@@ -102,8 +102,20 @@ var attachment = function() {
     }
   };
   
-  model.attachmentType.subscribe(function(e) {
-    console.log("ATTACHMENT TYPE:", e);
+  model.attachmentType.subscribe(function(attachmentType) {
+    var type = model.type();
+    var prevAttachmentType = type["type-group"] + "." + type["type-id"];
+    if (prevAttachmentType != attachmentType) {
+      ajax
+        .command("set-attachment-type",
+          {id:              model.application.id(),
+           attachmentId:    model.attachmentId(),
+           attachmentType:  attachmentType})
+        .success(function(e) {
+          debug("Updated attachmentType:", e);
+        })
+        .call();
+    }
   });
 
   function showAttachment(application) {
