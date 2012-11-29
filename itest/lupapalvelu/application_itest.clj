@@ -3,6 +3,8 @@
         [midje.sweet]
         [clojure.pprint :only [pprint]]))
 
+(defn- not-empty? [m] (not (empty? m)))
+
 (fact
   (let [resp            (command pena :create-application :x 444444 :y 6666666 :street "s" :city "c" :zip "z")
         application-id  (:id resp)
@@ -18,4 +20,4 @@
                                       :lastName "Panaani"
                                       :type "owner"
                                       :role "owner"})
-    (:allowedAttahmentTypes application) => map?))
+    (:allowedAttahmentTypes application) => not-empty?))
