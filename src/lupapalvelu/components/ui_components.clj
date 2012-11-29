@@ -18,6 +18,10 @@
                :js ["openlayers.2.12.js" "gis.js" "map.js"]
                :name "dummymap"})
 
+(def debugjs {:depends [:init :jquery]
+              :js ["debug.js"]
+              :name "common"})
+
 (def ui-components
   {:jquery       {:css ["jquery.pnotify.default.css"]
                   :js ["jquery-1.8.0.min.js"
@@ -30,7 +34,9 @@
 
    :map          (if (env/dev-mode?) dummymap oskari)
 
-   :common       {:depends [:init :jquery :knockout :underscore]
+   :debug        (if (env/dev-mode?) debugjs {})
+
+   :common       {:depends [:init :jquery :knockout :underscore :debug]
                   :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js" "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
