@@ -85,7 +85,7 @@
 (defn- to-key-types-vec [r [k v]]
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
-(defn- attachment-types-for [permit-type]
+(defn attachment-types-for [permit-type]
   (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type)))
 
 ;;
@@ -178,6 +178,27 @@
    :roles      [:applicant :authority]}
   [{{application-id :id} :data}]
   (ok :typeGroups (attachment-types-for (get-permit-type application-id))))
+
+(defcommand "set-attachment-type"
+  {:parameters [:id :attachmentId :attachmentType]
+   :roles      [:applicant :authority]
+   :states     [:draft :open]}
+  [{{:keys [id attachmentId attachmentType]} :data :as command}]
+  (with-application command
+    (fn [application]
+      (let [[type-group type-id] (parse-attachment-type attachmentType)
+            attachment-type {:type-group type-group :type-id type-id}]
+        (if (allowed-attachment-type-for? (keyword (:permitType application)) attachment-type)
+          (do
+            (mongo/update
+              mongo/applications
+              {:_id (:id application)
+               :attachments {$elemMatch {:id attachmentId}}}
+              {$set {:attachments.$.type attachment-type}})
+            (ok))
+          (do
+            (error "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
+            (fail :error.attachmentTypeNotAllowed)))))))
 
 (defcommand "approve-attachment"
   {:description "Authority can approve attachement, moves to ok"

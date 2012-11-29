@@ -3,7 +3,7 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.attachment :only [create-attachment]])
+        [lupapalvelu.attachment :only [create-attachment attachment-types-for]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
@@ -87,7 +87,6 @@
        :created created
        :modified created
        :state :draft
-       :permitType :buildingPermit
        :municipality {}
        :location {:x (:x data)
                   :y (:y data)}
@@ -99,6 +98,8 @@
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
+       :permitType :buildingPermit
+       :allowedAttahmentTypes (attachment-types-for :buildingPermit)
        :attachments []})
     (future ; TODO: Should use agent with error handling:
       (if-let [municipality (:result (executed "municipality-by-location" command))]
