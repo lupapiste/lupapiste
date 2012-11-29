@@ -3,10 +3,6 @@
         [lupapalvelu.itest-util]
         [midje.sweet]))
 
-;;
-;; Integration tests:
-;;
-
 (fact
   (let [resp            (command pena :create-application :x 408048 :y 6693225 :street "s" :city "c" :zip "z")
         application-id  (:id resp)
