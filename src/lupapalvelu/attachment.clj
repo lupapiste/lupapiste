@@ -105,9 +105,11 @@
     attachment-id))
 
 (defn- next-attachment-version [{major :major minor :minor} user]
-  (if (= (keyword (:role user)) :authority)
-    {:major major, :minor (inc minor)}
-    {:major (inc major), :minor 0}))
+  (let [major (or major 0)
+        minor (or minor 0)]
+    (if (= (keyword (:role user)) :authority)
+      {:major (inc major), :minor 0}
+      {:major major, :minor (inc minor)})))
 
 (defn attachment-latest-version [attachments attachment-id]
   (:version (:latestVersion (some #(when (= attachment-id (:id %)) %) attachments))))

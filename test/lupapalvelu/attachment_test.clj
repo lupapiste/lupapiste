@@ -36,8 +36,10 @@
 (def next-attachment-version #'lupapalvelu.attachment/next-attachment-version)
 
 (facts "Facts about next-attachment-version"
-  (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
-  (fact (next-attachment-version {:major 1 :minor 1} {:role :dude})       => {:major 2 :minor 0}))
+  (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 2 :minor 0})
+  (fact (next-attachment-version {:major 1 :minor 1} {:role :dude})       => {:major 1 :minor 2})
+  (fact (next-attachment-version nil {:role :authority})  => {:major 1 :minor 0})
+  (fact (next-attachment-version nil {:role :dude})       => {:major 0 :minor 1}))
 
 (def allowed-attachment-type-for? #'lupapalvelu.attachment/allowed-attachment-type-for?)
 
