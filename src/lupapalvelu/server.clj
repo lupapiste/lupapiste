@@ -10,6 +10,7 @@
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.action]
             [lupapalvelu.admin]
+            [lupapalvelu.application]
             [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands])
