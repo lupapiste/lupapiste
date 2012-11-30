@@ -16,17 +16,17 @@
         katunimi (get (:query-params request) "katunimi")
         katunumero (get (:query-params request) "katunumero")
         input-xml (:body (client/post "https://ws.nls.fi/maasto/wfs"
-	  {:body (format "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-						<wfs:GetFeature version=\"1.1.0\"
-						xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
-						xmlns:wfs=\"http://www.opengis.net/wfs\"
-						xmlns:gml=\"http://www.opengis.net/gml\"
-						xmlns:ogc=\"http://www.opengis.net/ogc\"
-						xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-						xsi:schemaLocation=\"http://www.opengis.net/wfs
-						http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-						 <wfs:Query typeName=\"oso:Osoitenimi\">
-						  <ogc:Filter>
+    {:body (format "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+            <wfs:GetFeature version=\"1.1.0\"
+            xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
+            xmlns:wfs=\"http://www.opengis.net/wfs\"
+            xmlns:gml=\"http://www.opengis.net/gml\"
+            xmlns:ogc=\"http://www.opengis.net/ogc\"
+            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+            xsi:schemaLocation=\"http://www.opengis.net/wfs
+            http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+             <wfs:Query typeName=\"oso:Osoitenimi\">
+              <ogc:Filter>
                <ogc:And>
                 <ogc:Or>
                  <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
@@ -47,10 +47,10 @@
                  <ogc:Literal>%s*</ogc:Literal>
                 </ogc:PropertyIsLike>
                </ogc:And>
-              </ogc:Filter>						
-						 </wfs:Query>
-						</wfs:GetFeature>" kunta kunta katunimi katunumero)
-	   :basic-auth auth}))
+              </ogc:Filter>            
+             </wfs:Query>
+            </wfs:GetFeature>" kunta kunta katunimi katunumero)
+     :basic-auth auth}))
         features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (string/replace input-xml "UTF-8" "ISO-8859-1")))))]
       (resp/json (->> (xml-> features :gml:featureMember)
                    (map (fn [feature] { :katunimi (first (xml-> feature :oso:Osoitenimi :oso:katunimi text))
@@ -60,12 +60,12 @@
                                         :x (first (string/split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))
                                         :y (second (string/split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))}))))))
 
-		
-	
+    
+  
 (defn pointbykiinteistotunnus [request]
   (let [kiinteistotunnus (get (:query-params request) "kiinteistotunnus")
         input-xml (:body (client/post "https://ws.nls.fi/ktjkii/wfs/wfs"
-	  {:body (format "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    {:body (format "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <wfs:GetFeature version=\"1.1.0\"
   xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\" xmlns:wfs=\"http://www.opengis.net/wfs\"
   xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\"
@@ -84,18 +84,18 @@
        </ogc:Filter>
   </wfs:Query>
 </wfs:GetFeature>" kiinteistotunnus)
-	   :basic-auth auth}))
+     :basic-auth auth}))
         features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (string/replace input-xml "UTF-8" "ISO-8859-1")))))]
        (resp/json (->> (xml-> features :gml:featureMember)
                    (map (fn [feature] { :x (first (string/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" "))
                                         :y (second (string/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" "))}))))))
-					
-			
+          
+      
 (defn kiinteistotunnusbypoint [request]
   (let [x (get (:query-params request) "x")
         y (get (:query-params request) "y")
         input-xml (:body (client/post "https://ws.nls.fi/ktjkii/wfs/wfs"
-	  {:body (format "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    {:body (format "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <wfs:GetFeature version=\"1.1.0\" xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\"
   xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\"
   xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"  
@@ -113,7 +113,7 @@
        </ogc:Filter>
   </wfs:Query>
 </wfs:GetFeature>" x y)
-	   :basic-auth auth}))
+     :basic-auth auth}))
         features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (string/replace input-xml "UTF-8" "ISO-8859-1")))))]
       (resp/json (->> (xml-> features :gml:featureMember)
                    (map (fn [feature] { :kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))))))
