@@ -60,8 +60,6 @@
 ;   :types [{:key :jaljennos_myonnetyista_lainhuudoista}
 ;           ...
 
-(def attachment-types-for #'lupapalvelu.attachment/attachment-types-for)
-
 (facts "The result of attachment-types-for has very strict format that is required by upload.html"
   (fact (attachment-types-for :buildingPermit) => sequential?)
   (fact (first (attachment-types-for :buildingPermit)) => associative?)
