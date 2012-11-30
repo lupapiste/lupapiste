@@ -10,6 +10,7 @@
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.action]
             [lupapalvelu.admin]
+            [lupapalvelu.application]
             [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands])
@@ -31,12 +32,6 @@
         (assoc-in resp [:headers "Content-Type"] neue-ct)
         resp))))
 
-(defn start-server [port mode]
-  (server/start port {:mode mode :ns 'lupapalvelu.web})
-  (server/add-middleware apply-custom-content-types))
-
-(defn stop-server [server]
-  (server/stop server))
 
 (defn -main [& _]
   (info "Server starting")
@@ -50,11 +45,6 @@
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
   (mongo/connect!)
-  (env/in-dev
-    (warn "*** Applying test fixture")
-    (fixture/apply-fixture "minimal")
-    (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9000))
   (server/add-middleware apply-custom-content-types)
   (server/start env/port {:mode env/mode
                           :jetty-options {:ssl? true
@@ -62,4 +52,11 @@
                                           :keystore "./keystore"
                                           :key-password "lupapiste"}
                           :ns 'lupapalvelu.web})
-  (info "Server running"))
+  (info "Server running")
+  (env/in-dev
+    (warn "*** Applying test fixture")
+    (fixture/apply-fixture "minimal")
+    (warn "*** Starting nrepl")
+    (nrepl/start-server :port 9000))
+  ; Sensible return value for -main for repl use.
+  "ready")

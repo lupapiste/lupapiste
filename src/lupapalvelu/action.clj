@@ -1,24 +1,19 @@
 (ns lupapalvelu.action
   (:use [monger.operators]
-        [clojure.string :only [join]]
-        [lupapalvelu.core]
-        [lupapalvelu.env]
         [lupapalvelu.log]
-        [lupapalvelu.domain]
-        [clojure.set :only [difference]])
+        [lupapalvelu.core])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
-            [lupapalvelu.tepa :as tepa]
             [lupapalvelu.email :as email]
-            [lupapalvelu.document.model :as model]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
 (defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
 
-(defn- application-query-for [user]
+(defn application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
     :authority {:authority (:authority user)
@@ -28,27 +23,8 @@
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
 
-(defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (mongo/select mongo/applications (application-query-for user))))
-
 (defn get-application-as [application-id user]
   (mongo/select-one mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
-
-(defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (if-let [app (get-application-as id user)]
-    (ok :application app)
-    (fail :error.not-found)))
-
-(defcommand "open-application"
-  {:parameters [:id]
-   :roles      [:applicant]
-   :states     [:draft]}
-  [command]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update-by-id mongo/applications id
-        {$set {:modified (:created command)
-               :state :open}}))))
 
 (defquery "invites"
   {:authenticated true}
@@ -179,6 +155,49 @@
         mongo/applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
+(defcommand "submit-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [application]
+      (mongo/update
+        mongo/applications {:_id (:id application)}
+          {$set {:state :submitted
+                 :submitted (:created command) }}))))
+
+(defn create-document [schema-name]
+  (let [schema (get schemas/schemas schema-name)]
+    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
+    {:id (mongo/create-id)
+     :created (now)
+     :schema schema
+     :body {}}))
+
+
+; TODO: by-id or by-name (or both)
+#_(defcommand "user-to-document"
+  {:parameters [:id :document-id]
+   :authenticated true}
+  [{{:keys [document-id]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (let [document       (get-document application document-id)
+            schema-name    (get-in document [:schema :info :name])
+            schema         (get schemas/schemas schema-name)
+            transformation {"etunimi" (:firstName user)}]
+        (info "merging user %s with best effort into document %s" user document-id)
+        (mongo/update
+          mongo/applications
+          {:_id (:id application)
+           :documents {$elemMatch {:id document-id}}}
+          {$set {:documents.$.body.etunimi  (:firstName user)
+                 :documents.$.body.sukunimi (:lastName user)
+                 :documents.$.body.email    (:email user)
+                 :documents.$.body.puhelin  (:phone user)}})))))
+
 (defcommand "approve-application"
   {:parameters [:id]
    :roles      [:authority]
@@ -269,7 +288,7 @@
   [{{:keys [name]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (let [document       (get-document-by-name application name)
+      (let [document       (domain/get-document-by-name application name)
             schema-name    (get-in document [:schema :info :name])
             schema         (get schemas/schemas schema-name)]
         (if (nil? document)
@@ -286,9 +305,3 @@
                      :documents.$.body.puhelin  (:phone user)
                      :modified (:created command)}})))))))
 
-
-#_ (let [result (model/apply-updates {} schema transformation)]
-     {:user     user
-      :trans    transformation
-      :result   result
-      :document document})
