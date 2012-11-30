@@ -224,22 +224,22 @@
         documents (map create-document (:schemas data))
         municipality (:result (executed "municipality-by-location" command))]
     (mongo/insert mongo/applications
-      {:id id
-       :created created
-       :modified created
-       :state :draft
-       :permitType (:permitType data)
-       :municipality municipality
-       :location {:x (:x data)
-                  :y (:y data)}
-       :address {:street (:street data)
-                 :zip (:zip data)
-                 :city (:city data)}
-       :title (:street data)
-       :authority (:city data)
-       :roles {:applicant owner}
-       :auth [owner]
-       :documents documents})
+                  {:id id
+                   :created created
+                   :modified created
+                   :state :draft
+                   :permitType (:permitType data)
+                   :municipality municipality
+                   :location {:x (:x data)
+                              :y (:y data)}
+                   :address {:street (:street data)
+                             :zip (:zip data)
+                             :city (:city data)}
+                   :title (:street data)
+                   :authority (:city data)
+                   :roles {:applicant owner}
+                   :auth [owner]
+                   :documents documents})
     (ok :id id)))
 
 ; TODO: by-id or by-name (or both)
