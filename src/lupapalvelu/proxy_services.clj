@@ -12,58 +12,71 @@
 
 (def auth ["***REMOVED***" "***REMOVED***"])
 
+(def osoite-template
+  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+   <wfs:GetFeature version=\"1.1.0\"
+       xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
+       xmlns:wfs=\"http://www.opengis.net/wfs\"
+       xmlns:gml=\"http://www.opengis.net/gml\"
+       xmlns:ogc=\"http://www.opengis.net/ogc\"
+       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+       xsi:schemaLocation=\"http://www.opengis.net/wfs
+       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+     <wfs:Query typeName=\"oso:Osoitenimi\">
+       <ogc:Filter>
+         <ogc:And>
+           <ogc:Or>
+             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+               <ogc:PropertyName>oso:kuntanimiFin</ogc:PropertyName>
+               <ogc:Literal>%s*</ogc:Literal>
+             </ogc:PropertyIsLike>
+             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+               <ogc:PropertyName>oso:kuntanimiSwe</ogc:PropertyName>
+               <ogc:Literal>%s*</ogc:Literal>
+             </ogc:PropertyIsLike>
+           </ogc:Or>
+           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+             <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
+             <ogc:Literal>%s*</ogc:Literal>
+           </ogc:PropertyIsLike>
+           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+             <ogc:PropertyName>oso:katunumero</ogc:PropertyName>
+             <ogc:Literal>%s*</ogc:Literal>
+           </ogc:PropertyIsLike>
+         </ogc:And>
+       </ogc:Filter>            
+     </wfs:Query>
+   </wfs:GetFeature>")
 
-(defn osoite [request]
-  (let [kunta (get (:query-params request) "kunta")
-        katunimi (get (:query-params request) "katunimi")
-        katunumero (get (:query-params request) "katunumero")
-        input-xml (:body (client/post "https://ws.nls.fi/maasto/wfs"
-    {:body (format "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-            <wfs:GetFeature version=\"1.1.0\"
-            xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
-            xmlns:wfs=\"http://www.opengis.net/wfs\"
-            xmlns:gml=\"http://www.opengis.net/gml\"
-            xmlns:ogc=\"http://www.opengis.net/ogc\"
-            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-            xsi:schemaLocation=\"http://www.opengis.net/wfs
-            http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-             <wfs:Query typeName=\"oso:Osoitenimi\">
-              <ogc:Filter>
-               <ogc:And>
-                <ogc:Or>
-                 <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-                  <ogc:PropertyName>oso:kuntanimiFin</ogc:PropertyName>
-                  <ogc:Literal>%s*</ogc:Literal>
-                 </ogc:PropertyIsLike>
-                 <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-                  <ogc:PropertyName>oso:kuntanimiSwe</ogc:PropertyName>
-                  <ogc:Literal>%s*</ogc:Literal>
-                 </ogc:PropertyIsLike>
-                </ogc:Or>
-                <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-                 <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
-                 <ogc:Literal>%s*</ogc:Literal>
-                </ogc:PropertyIsLike>
-                <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-                 <ogc:PropertyName>oso:katunumero</ogc:PropertyName>
-                 <ogc:Literal>%s*</ogc:Literal>
-                </ogc:PropertyIsLike>
-               </ogc:And>
-              </ogc:Filter>            
-             </wfs:Query>
-            </wfs:GetFeature>" kunta kunta katunimi katunumero)
-     :basic-auth auth}))
-        features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (string/replace input-xml "UTF-8" "ISO-8859-1")))))]
-      (resp/json (->> (xml-> features :gml:featureMember)
-                   (map (fn [feature] { :katunimi (first (xml-> feature :oso:Osoitenimi :oso:katunimi text))
-                                        :katunumero (first (xml-> feature :oso:Osoitenimi :oso:katunumero text))
-                                        :kuntanimiFin (first (xml-> feature :oso:Osoitenimi :oso:kuntanimiFin text))
-                                        :kuntanimiSwe (first (xml-> feature :oso:Osoitenimi :oso:kuntanimiSwe text))
-                                        :x (first (string/split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))
-                                        :y (second (string/split (first (xml-> feature :oso:Osoitenimi :oso:sijainti text)) #" "))}))))))
+(defn- address-part [feature part]
+  (first (xml-> feature :oso:Osoitenimi part text)))
 
-    
-  
+(defn- feature-to-address [feature]
+  (let [[x y] (string/split (address-part feature :oso:sijainti) #" ")]
+    {:katunimi (address-part feature :oso:katunimi)
+     :katunumero (address-part feature :oso:katunumero)
+     :kuntanimiFin (address-part feature :oso:kuntanimiFin)
+     :kuntanimiSwe (address-part feature :oso:kuntanimiSwe)
+     :x x
+     :y y}))
+
+(defn osoite
+  ([{query-params :query-params}]
+    (apply osoite (map query-params ["kunta" "katunimi" "katunumero"])))
+  ([kunta katunimi katunumero]
+    (let [request (format osoite-template kunta kunta katunimi katunumero)
+          response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth})
+          input-xml (:body response)
+          features (-> input-xml
+                     (string/replace "UTF-8" "ISO-8859-1")
+                     .getBytes
+                     java.io.ByteArrayInputStream.
+                     xml/parse
+                     zip/xml-zip)
+          feature-members (xml-> features :gml:featureMember)
+          result (map feature-to-address feature-members)]
+      (resp/json result))))
+
 (defn pointbykiinteistotunnus [request]
   (let [kiinteistotunnus (get (:query-params request) "kiinteistotunnus")
         input-xml (:body (client/post "https://ws.nls.fi/ktjkii/wfs/wfs"
