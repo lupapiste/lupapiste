@@ -17,7 +17,7 @@
                                   [clj-webdriver "0.6.0-beta2" :exclusions [cheshire/cheshire]]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
-                             [lein-nitpicker "0.2.0"]]}
+                             [lein-nitpicker "0.3.0"]]}
              :itest {:test-paths ^:replace ["itest"]}
              :ftest {:test-paths ^:replace ["ftest"]}}
 
