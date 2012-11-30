@@ -9,6 +9,7 @@
                  [clj-http "0.5.8"]
                  [digest "1.4.2"]
                  [clj-time "0.4.4"]
+                 [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.9.1"]
                  [org.clojure/data.xml "0.0.6"]
                  [fi.sito/oskari "0.9.2"]]
@@ -16,7 +17,7 @@
                                   [clj-webdriver "0.6.0-beta2" :exclusions [cheshire/cheshire]]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
-                             [lein-nitpicker "0.2.0"]]}
+                             [lein-nitpicker "0.3.0"]]}
              :itest {:test-paths ^:replace ["itest"]}
              :ftest {:test-paths ^:replace ["ftest"]}}
 
