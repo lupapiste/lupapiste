@@ -65,38 +65,58 @@ var attachment = function() {
     filename:       ko.observable(),
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
-    type:           ko.observable(),
     name:           ko.observable(),
-
+    type:           ko.observable(),
+    attachmentType: ko.observable(),
+    allowedAttahmentTypes: ko.observableArray(),
+    
     hasPreview: function() {
       return this.isImage() || this.isPdf() || this.isPlainText();
     },
 
     isImage: function() {
-      var contentType = this.latestVersion().contentType;
+      var version = this.latestVersion();
+      if (!version) return false;
+      var contentType = version.contentType;
       return contentType && contentType.indexOf('image/') === 0;
     },
 
     isPdf: function() {
-      return this.latestVersion().contentType === "application/pdf";
+      var version = this.latestVersion();
+      if (!version) return false;
+      return version.contentType === "application/pdf";
     },
 
     isPlainText: function() {
-      return this.latestVersion().contentType === "text/plain";
+      var version = this.latestVersion();
+      if (!version) return false;
+      return version.contentType === "text/plain";
     },
 
     newAttachmentVersion: function() {
-      var applicationId = this.application.id();
-      var attachmentId = this.attachmentId();
-      var attachmentType = this.type();
-
-      initFileUpload(applicationId, attachmentId, attachmentType);
+      initFileUpload(this.application.id(), this.attachmentId(), this.attachmentType(), false);
 
       // Upload dialog is opened manually here, because click event binding to
       // dynamic content rendered by Knockout is not possible
       LUPAPISTE.ModalDialog.open("#upload-dialog");
     }
   };
+  
+  model.attachmentType.subscribe(function(attachmentType) {
+    var type = model.type();
+    var prevAttachmentType = type["type-group"] + "." + type["type-id"];
+    if (prevAttachmentType != attachmentType) {
+      ajax
+        .command("set-attachment-type",
+          {id:              model.application.id(),
+           attachmentId:    model.attachmentId(),
+           attachmentType:  attachmentType})
+        .success(function(e) {
+          debug("Updated attachmentType:", e);
+        })
+        .call();
+    }
+  });
 
   function showAttachment(application) {
     if (!applicationId || !attachmentId) return;
@@ -110,7 +130,12 @@ var attachment = function() {
     model.versions(attachment.versions);
     model.filename(attachment.filename);
     model.type(attachment.type);
-    model.name("attachmentType." + attachment.type["type-group"] + "." + attachment.type["type-id"]);
+    
+    var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
+    model.attachmentType(type);
+    model.name("attachmentType." + type);
+    model.allowedAttahmentTypes(application.allowedAttahmentTypes);
+        
     model.application.id(applicationId);
     model.application.title(application.title);
     model.attachmentId(attachmentId);
@@ -177,16 +202,16 @@ var attachment = function() {
   hub.subscribe("upload-done", uploadDone);
 
   function newAttachment(m) {
-    initFileUpload(m.application.id());
+    initFileUpload(m.application.id(), null, null, true);
   }
 
-  function initFileUpload(applicationId, attachmentId, attachmentType) {
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
     if (iframe) {
       if (iframe.contentWindow.LUPAPISTE && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
-        iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType);
+        iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
       } else {
         error("LUPAPISTE.Upload.init is not a function");
       }

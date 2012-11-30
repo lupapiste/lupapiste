@@ -182,8 +182,8 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {applicationId :applicationId attachmentId :attachmentId attachmentType :attachmentType text :text upload :upload :as data}
-  (debug "upload: %s: %s type=[%s]" data upload attachmentType)
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector] :as data}
+  (debug "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
   (let [upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
@@ -199,7 +199,7 @@
                                            {:applicationId applicationId
                                             :attachmentId attachmentId
                                             :attachmentType (or attachmentType "")
-                                            :defaultType (or attachmentType "")
+                                            :typeSelector typeSelector
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
