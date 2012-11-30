@@ -163,7 +163,7 @@
               </tr>
               <!-- ko foreach: attachments -->
               <tr style="cursor: pointer;">
-                <td data-bind="attr: {class: statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state}" class="attachment-state"></td>
+                <td data-bind="attr: {class: statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
                 <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                   <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                     <span data-bind="if: type != null">
