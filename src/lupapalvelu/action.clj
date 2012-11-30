@@ -11,7 +11,7 @@
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
-(defcommand "create-id" {:authenticated true} [command] (ok :id (mongo/create-id)))
+(defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
 
 (defn application-query-for [user]
   (case (keyword (:role user))
@@ -91,7 +91,7 @@
   (with-application command
     (fn [{application-id :id}]
       (with-user email
-        (fn [invited]
+        (fn [_]
           (mongo/update-by-id mongo/applications application-id
             {$pull {:invites      {:user.username email}
                     :auth         {$and [{:username email}

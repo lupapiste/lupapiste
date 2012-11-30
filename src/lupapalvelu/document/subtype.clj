@@ -2,35 +2,29 @@
   (:use [clojure.string :only [blank?]] 
         [lupapalvelu.log]))
 
-(defn- not-blank? [v]
-  (not (blank? v)))
+(defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
 
-(defn- not-match? [re v]
-  (nil? (re-matches #".+@.+\..+" v)))
-
-(defmulti subtype-validation (fn [elem v] (keyword (:subtype elem))))
-
-(defmethod subtype-validation :email [elem v]
+(defmethod subtype-validation :email [_ v]
   (cond
     (blank? v) nil
     (re-matches #".+@.+\..+" v) nil
     :else [:warn "illegal-email"]))
 
-(defmethod subtype-validation :tel [elem v]
+(defmethod subtype-validation :tel [_ v]
   (cond
     (blank? v) nil
     (re-matches #"^\+?[\d\s-]+" v) nil
     :else [:warn "illegal-tel"]))
 
-(defmethod subtype-validation :number [elem v]
+(defmethod subtype-validation :number [_ v]
   (cond
     (blank? v) nil
     (re-matches #"\d+" v) nil
     :else [:warn "illegal-number"]))
 
-(defmethod subtype-validation nil [elem v]
+(defmethod subtype-validation nil [_ _]
   nil)
 
-(defmethod subtype-validation :default [elem v]
+(defmethod subtype-validation :default [elem _]
   (error "Unknown subtype: elem=[%s]" elem)
   [:err "illegal-subtype"])
