@@ -50,8 +50,6 @@
              {:name "rakennuksenOmistajat" 
               :type :group 
               :body henkilo-body} ;TODO yritys ja monta
-             {:name "osoite" :type :group :body full-osoite-body} ; TODO rakennuspaikan osoitteista(mahdollisuus lisata porras jne)
-             {:name "rinnakkaisosoite" :type :group :body full-osoite-body} ; TODO rakennuspaikan osoitteista(mahdollisuus lisata porras jne)
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
@@ -122,9 +120,7 @@
              {:name "poikkeamiset" :type :string}]}
      
      {:info {:name "huoneisto"}
-      :body [{:name "osoite" :type :group 
-              :body full-osoite-body}
-             {:name "huoneluku" :type :string}
+      :body [{:name "huoneluku" :type :string}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
                      {:name "keittoKomero"}
