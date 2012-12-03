@@ -78,7 +78,7 @@
                            :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
                            :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
                            :muu]}})
-   
+
 (defn- get-permit-type [application-id]
   (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
 
@@ -108,8 +108,8 @@
   (let [major (or major 0)
         minor (or minor 0)]
     (if (= (keyword (:role user)) :authority)
-      {:major (inc major), :minor 0}
-      {:major major, :minor (inc minor)})))
+      {:major major, :minor (inc minor)}
+      {:major (inc major), :minor 0})))
 
 (defn attachment-latest-version [attachments attachment-id]
   (:version (:latestVersion (some #(when (= attachment-id (:id %)) %) attachments))))
@@ -256,7 +256,7 @@
           (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
             (executed (assoc (command "add-comment"
                                       {:id id
-                                       :text text, 
+                                       :text text,
                                        :target {:type :attachment
                                                 :id (:id attachment-version)
                                                 :version (:version attachment-version)
