@@ -104,7 +104,7 @@
 
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
-  
+
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
@@ -120,7 +120,7 @@
     });
     return result;
   }
-  
+
   function showApplication(data) {
     authorizationModel.refresh(data,function() {
       // new data mapping
@@ -143,9 +143,9 @@
         a.statusName = s.statusName;
         attachments.push(a);
       });
-      
+
       attachmentsByGroup(getAttachmentsByGroup(data.attachments));
-      
+
       // Update map:
       var location = application.location();
       hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
@@ -158,7 +158,7 @@
           // Server returns empty array (all ok), or array containing an array with three
           // elements: [key status message]. Here we use just the status.
           .success(function(e) {
-            var status = (e.results.length == 0) ? "ok" : e.results[0][1];
+            var status = (e.results.length === 0) ? "ok" : e.results[0][1];
             callback(status);
           })
           .error(function(e) { error(e); callback("err"); })
