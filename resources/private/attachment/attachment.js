@@ -69,7 +69,7 @@ var attachment = function() {
     type:           ko.observable(),
     attachmentType: ko.observable(),
     allowedAttahmentTypes: ko.observableArray(),
-    
+
     hasPreview: function() {
       return this.isImage() || this.isPdf() || this.isPlainText();
     },
@@ -101,7 +101,7 @@ var attachment = function() {
       LUPAPISTE.ModalDialog.open("#upload-dialog");
     }
   };
-  
+
   model.attachmentType.subscribe(function(attachmentType) {
     var type = model.type();
     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
@@ -130,12 +130,12 @@ var attachment = function() {
     model.versions(attachment.versions);
     model.filename(attachment.filename);
     model.type(attachment.type);
-    
+
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
     model.name("attachmentType." + type);
     model.allowedAttahmentTypes(application.allowedAttahmentTypes);
-        
+
     model.application.id(applicationId);
     model.application.title(application.title);
     model.attachmentId(attachmentId);
@@ -190,7 +190,7 @@ var attachment = function() {
   });
 
   var uploadingApplicationId;
-  
+
   function uploadDone() {
     if (uploadingApplicationId) {
       repository.reloadApplication(uploadingApplicationId);
