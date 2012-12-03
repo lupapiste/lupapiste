@@ -2,7 +2,8 @@
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail]]
         [lupapalvelu.log]
-        [clojure.walk :only [keywordize-keys]])
+        [clojure.walk :only [keywordize-keys]]
+        [clojure.string :only [blank?]])
   (:require (noir  [request :as request]
                    [response :as resp]
                    [session :as session]
@@ -160,10 +161,10 @@
 ;; Apikey-authentication
 ;;
 
-(defn- parse [key value]
-  (let [value-string (str value)]
-    (if (.startsWith value-string key)
-      (.trim (.substring value-string (inc (.length key)))))))
+(defn- parse [required-key header-value]
+  (when (and required-key header-value)
+    (if-let [[_ k v] (re-find #"(\w+)\s*[ :=]\s*(\w+)" header-value)]
+      (if (= k required-key) v))))
 
 (defn apikey-authentication
   "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
@@ -181,8 +182,8 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {applicationId :applicationId attachmentId :attachmentId attachmentType :attachmentType text :text upload :upload :as data}
-  (debug "upload: %s: %s type=[%s]" data upload attachmentType)
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector] :as data}
+  (debug "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
   (let [upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
@@ -198,7 +199,7 @@
                                            {:applicationId applicationId
                                             :attachmentId attachmentId
                                             :attachmentType (or attachmentType "")
-                                            :defaultType (or attachmentType "")
+                                            :typeSelector typeSelector
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
