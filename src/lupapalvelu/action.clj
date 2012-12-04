@@ -155,19 +155,6 @@
         mongo/applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-(defcommand "submit-application"
-  {:parameters [:id]
-   :roles      [:applicant]
-   :roles-in   [:applicant]
-   :states     [:draft :open]}
-  [command]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        mongo/applications {:_id (:id application)}
-          {$set {:state :submitted
-                 :submitted (:created command) }}))))
-
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
     (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
@@ -175,112 +162,6 @@
      :created (now)
      :schema schema
      :body {}}))
-
-
-; TODO: by-id or by-name (or both)
-#_(defcommand "user-to-document"
-  {:parameters [:id :document-id]
-   :authenticated true}
-  [{{:keys [document-id]} :data user :user :as command}]
-  (with-application command
-    (fn [application]
-      (let [document       (get-document application document-id)
-            schema-name    (get-in document [:schema :info :name])
-            schema         (get schemas/schemas schema-name)
-            transformation {"etunimi" (:firstName user)}]
-        (info "merging user %s with best effort into document %s" user document-id)
-        (mongo/update
-          mongo/applications
-          {:_id (:id application)
-           :documents {$elemMatch {:id document-id}}}
-          {$set {:documents.$.body.etunimi  (:firstName user)
-                 :documents.$.body.sukunimi (:lastName user)
-                 :documents.$.body.email    (:email user)
-                 :documents.$.body.puhelin  (:phone user)}})))))
-
-(defcommand "approve-application"
-  {:parameters [:id]
-   :roles      [:authority]
-   :authority  true
-   :states     [:submitted]}
-  [command]
-  (with-application command
-    (fn [application]
-      (if (nil? (-> application :roles :authority))
-        (executed "assign-to-me" command))
-      (mongo/update
-        mongo/applications {:_id (:id application) :state :submitted}
-        {$set {:state :sent}}))))
-
-(defcommand "submit-application"
-  {:parameters [:id]
-   :roles      [:applicant]
-   :roles-in   [:applicant]
-   :states     [:draft :open]}
-  [command]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        mongo/applications {:_id (:id application)}
-          {$set {:state :submitted
-                 :submitted (:created command) }}))))
-
-(defn create-document [schema-name]
-  (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
-    {:id (mongo/create-id)
-     :created (now)
-     :schema schema
-     :body {}}))
-
-(defcommand "create-application"
-  {:parameters [:permitType :x :y :street :zip :city :schemas]
-   :roles      [:applicant]}
-  [command]
-  (let [{:keys [user created data]} command
-        id        (mongo/create-id)
-        owner     (role user :owner :type :owner)
-        documents (map create-document (:schemas data))
-        municipality (:result (executed "municipality-by-location" command))]
-    (mongo/insert mongo/applications
-                  {:id id
-                   :created created
-                   :modified created
-                   :state :draft
-                   :permitType (:permitType data)
-                   :municipality municipality
-                   :location {:x (:x data)
-                              :y (:y data)}
-                   :address {:street (:street data)
-                             :zip (:zip data)
-                             :city (:city data)}
-                   :title (:street data)
-                   :authority (:city data)
-                   :roles {:applicant owner}
-                   :auth [owner]
-                   :documents documents})
-    (ok :id id)))
-
-; TODO: by-id or by-name (or both)
-#_(defcommand "user-to-document"
-  {:parameters [:id :document-id]
-   :authenticated true}
-  [{{:keys [document-id]} :data user :user :as command}]
-  (with-application command
-    (fn [application]
-      (let [document       (get-document application document-id)
-            schema-name    (get-in document [:schema :info :name])
-            schema         (get schemas/schemas schema-name)
-            transformation {"etunimi" (:firstName user)}]
-        (info "merging user %s with best effort into document %s" user document-id)
-        (mongo/update
-          mongo/applications
-          {:_id (:id application)
-           :documents {$elemMatch {:id document-id}}}
-          {$set {:documents.$.body.etunimi  (:firstName user)
-                 :documents.$.body.sukunimi (:lastName user)
-                 :documents.$.body.email    (:email user)
-                 :documents.$.body.puhelin  (:phone user)}})))))
 
 (defcommand "user-to-document"
   {:parameters [:id :name]
