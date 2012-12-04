@@ -32,7 +32,6 @@
         (assoc-in resp [:headers "Content-Type"] neue-ct)
         resp))))
 
-
 (defn -main [& _]
   (info "Server starting")
   (info "Running on Java %s %s %s (%s)"

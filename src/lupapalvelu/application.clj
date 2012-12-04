@@ -75,7 +75,7 @@
                                ["muut" "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"]]))
 
 (defcommand "create-application"
-  {:parameters [:x :y :street :zip :city]
+  {:parameters [:permitType :x :y :street :zip :city]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
@@ -98,7 +98,7 @@
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
-       :permitType :buildingPermit
+       :permitType (:permitType data)
        :allowedAttahmentTypes (attachment-types-for :buildingPermit)
        :attachments []})
     (future ; TODO: Should use agent with error handling:
