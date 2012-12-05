@@ -68,7 +68,14 @@
 
       <div class="tabs-container">
         <ul class="tabs" id="applicationTabs">
-          <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
+          <li class="active">
+            <!-- ko if: $root.application.permitType() === 'infoRequest' -->
+              <a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'infoRequest_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a>
+            <!-- /ko -->
+            <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+              <a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a>
+            <!-- /ko -->
+          </li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
           <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
             <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
