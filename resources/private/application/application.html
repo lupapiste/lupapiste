@@ -4,7 +4,13 @@
   <section class="page" id="application">
 
     <div class="breadcrumb" data-bind="with: application">
-      <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <span data-bind="text: title"></span>
+      <!-- ko if: permitType() === 'infoRequest' -->
+        <a href="#!/inforequests" id="test-inforequests" data-bind="ltext: 'infoRequests'">Neuvontapyynnöt</a>
+      <!-- /ko -->
+      <!-- ko if: permitType() !== 'infoRequest' -->
+        <a href="#!/applications" id="test-applications" data-bind="ltext: 'permitApplications'">Lupahakemukset</a>
+      <!-- /ko -->
+       / <span data-bind="text: title"></span>
     </div>
 
     <div class="application_summary">
@@ -26,10 +32,12 @@
           <p>Tila:</p>
           <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
         </div>
-        <div>
-          <p>Lupatyyppi:</p>
-          <span class="application_summary_text" data-bind="ltext: permitType()"></span>
-        </div>
+        <!-- ko if: permitType() !== 'infoRequest' -->
+          <div>
+            <p>Lupatyyppi:</p>
+            <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+          </div>
+        <!-- /ko -->
         <div>
           <p>Toimenpiteet:</p>
           <ul data-bind="foreach: $root.documents">
@@ -43,6 +51,11 @@
           <p>Hakemus jätetty:</p>
           <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
         </div>
+        <!-- ko if: permitType() === 'infoRequest' -->
+          <div>
+            <p>&nbsp;</p>
+          </div>
+        <!-- /ko -->
       </div>
 
       <div class="application_actions" data-bind="with: application">
@@ -55,10 +68,19 @@
 
       <div class="tabs-container">
         <ul class="tabs" id="applicationTabs">
-          <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
+          <li class="active">
+            <!-- ko if: $root.application.permitType() === 'infoRequest' -->
+              <a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'infoRequest_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a>
+            <!-- /ko -->
+            <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+              <a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a>
+            <!-- /ko -->
+          </li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
+          <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+            <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
+          <!-- /ko -->
           <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
-          <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
         </ul>
     </div>
     </div>
