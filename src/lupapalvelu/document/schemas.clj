@@ -31,6 +31,14 @@
                    {:name "fax" :type :string}
                    {:name "hetu" :type :string}])
 
+(def yritys-body [{:name "yritysnimi" :type :string}
+                   {:name "liikeJaYhteisoTunnus" :type :string}
+                   {:name "osoite" :type :group :body simple-osoite-body}
+                   {:name "puhelin" :type :string :subtype :tel}
+                   {:name "email" :type :string :subtype :email}
+                   {:name "fax" :type :string}])
+
+
 ; TODO: Yritys?
 (def suunnittelija-body (concat
                          henkilo-body
@@ -139,8 +147,9 @@
                      {:name "sauna" :type :checkbox}
                      {:name "parvekeTaiTerassi" :type :checkbox}]}]}
      
-     {:info {:name "hakija"} ; TODO yritys
-      :body henkilo-body}
+     {:info {:name "hakija"} 
+      :body [{:name "henkilo" :type :group :body henkilo-body}
+             {:name "yritys" :type :group :body yritys-body}]}
      
      {:info {:name "paasuunnittelija"}
       :body suunnittelija-body}
