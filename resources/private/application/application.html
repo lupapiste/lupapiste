@@ -4,7 +4,13 @@
   <section class="page" id="application">
 
     <div class="breadcrumb" data-bind="with: application">
-      <a href="#!/applications" id="test-applications">Lupahakemukset</a> / <span data-bind="text: title"></span>
+      <!-- ko if: permitType() === 'infoRequest' -->
+        <a href="#!/inforequests" id="test-applications" data-bind="ltext: 'infoRequests'">Neuvontapyynnöt</a>
+      <!-- /ko -->
+      <!-- ko if: permitType() !== 'infoRequest' -->
+        <a href="#!/applications" id="test-applications" data-bind="ltext: 'permitApplications'">Lupahakemukset</a>
+      <!-- /ko -->
+       / <span data-bind="text: title"></span>
     </div>
 
     <div class="application_summary">
