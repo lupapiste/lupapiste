@@ -50,6 +50,23 @@
             </div>
           </div>
         <!-- /ko -->
+        
+        <!-- ko if: permitType() === 'infoRequest' -->
+          <div class="application_summary_info">
+            <div>
+              <p>Käsittelytunnus:</p>
+              <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
+            </div>
+            <div>
+              <p>Tila:</p>
+              <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+            </div>
+            <div data-bind="with: $root.applicationModel.data">
+              <p>Luotu:</p>
+              <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
+            </div>
+          </div>
+        <!-- /ko -->
 
       </div>
     </div>
@@ -70,23 +87,25 @@
           <li><a class="active-as-default" id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a></li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
           <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
-          <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
+          <li><a id="test-conversation-tab" id="test-conversation-tab"  data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
         </ul>
       <!-- /ko -->
       
       <!-- ko if: $root.application.permitType() === 'infoRequest' -->
         <ul class="tabs" id="applicationTabs">
-          <li><a class="active-as-default" id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
-          <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
+          <li><a class="active-as-default" id="test-inforequest-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
+          <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitetiedostot</a></li>
         </ul>
       <!-- /ko -->
     </div>
 
     <div class="sidebar">
-      <aside class="instructions">
-        <h3>Ohje</h3>
-        <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
-      </aside>
+      <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+        <aside class="instructions">
+            <h3>Ohje</h3>
+            <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
+        </aside>
+      <!-- /ko -->
     </div>
 
     <div class="tab-content-container container">
@@ -136,7 +155,9 @@
       </div>
 
       <div class="tab-content" id="conversation_tab" data-bind="with: $root.comment">
-        <p class="tab-info"> Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.</p>
+        <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+          <p class="tab-info"> Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.</p>
+        <!-- /ko -->
         <div class="tab-wrapper">
           <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">

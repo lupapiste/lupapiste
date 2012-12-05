@@ -173,7 +173,9 @@
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
 
-      setSelectedTab('#applicationTabs', $('.active-as-default'));
+      if(! isTabSelected('#applicationTabs')) {
+        selectDefaultTab('#applicationTabs');
+      }
 
       pageutil.setPageReady("application");
     });
@@ -218,9 +220,16 @@
      setSelectedTab('#applicationTabs', self);
     }
   };
+
+  function isTabSelected(id) {
+    return $(id + ' > li').hasClass("active");
+  }
   
+  function selectDefaultTab(id) {
+    setSelectedTab(id, $('.active-as-default'));
+  }
+
   function setSelectedTab(id, element) {
-    debug("set selected:"+element.href);
     $(id + " li").removeClass("active");
     $(element).parent().addClass("active");
     $(".tab-content").hide();
