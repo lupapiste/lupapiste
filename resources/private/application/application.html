@@ -32,10 +32,12 @@
           <p>Tila:</p>
           <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
         </div>
-        <div>
-          <p>Lupatyyppi:</p>
-          <span class="application_summary_text" data-bind="ltext: permitType()"></span>
-        </div>
+        <!-- ko if: permitType() !== 'infoRequest' -->
+          <div>
+            <p>Lupatyyppi:</p>
+            <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+          </div>
+        <!-- /ko -->
         <div>
           <p>Toimenpiteet:</p>
           <ul data-bind="foreach: $root.documents">
@@ -49,6 +51,11 @@
           <p>Hakemus jätetty:</p>
           <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
         </div>
+        <!-- ko if: permitType() === 'infoRequest' -->
+          <div>
+            <p>&nbsp;</p>
+          </div>
+        <!-- /ko -->
       </div>
 
       <div class="application_actions" data-bind="with: application">
@@ -63,8 +70,10 @@
         <ul class="tabs" id="applicationTabs">
           <li class="active"><a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#application_tab">Hakemuksen tiedot</a></li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
+          <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+            <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
+          <!-- /ko -->
           <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
-          <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
         </ul>
     </div>
     </div>
