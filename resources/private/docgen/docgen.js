@@ -11,7 +11,14 @@ var docgen = (function () {
   function makeInput(type, path, value, save, extraClass) {
     var input = document.createElement("input");
     input.name = path;
-    input.type = type;
+
+    try {
+      input.type = type;
+    } catch (e) {
+      // IE does not support HTML5 input types such as email
+      input.type = "text";
+    }
+
     input.className = "form-input " + type + " " + (extraClass || "");
     input.onchange = save;
     if (type === "checkbox") {
@@ -154,7 +161,7 @@ var docgen = (function () {
 
     var div = document.createElement("div");
     div.className = "form-group";
-    div.appendChild(makeLabel("group", myPath.join(".")));
+    div.appendChild(makeLabel("group", myPath.join("."), specId));
     div.appendChild(partsDiv);
     return div;
   }
@@ -241,10 +248,15 @@ var docgen = (function () {
 
   function buildElement(spec, model, save, specId) {
     var section = document.createElement("section");
-    section.className = "accordion";
+    section.className = "application_section_header";
 
+    var icon = document.createElement("span");
+    icon.className = "font-icon icon-expanded";
     var title = document.createElement("h2");
+    title.className = "application_section_header";
+    title.appendChild(icon);
     title.appendChild(document.createTextNode(loc(specId)));
+
     title.onclick = accordion.toggle;
 
     var sectionContainer = document.createElement("div");

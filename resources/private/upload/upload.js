@@ -5,34 +5,34 @@ if (typeof LUPAPISTE === "undefined") {
 LUPAPISTE.Upload = {
     applicationId: ko.observable(),
     attachmentId: ko.observable(),
+    attachmentType: ko.observable(),
     attachmentTypeGroups: ko.observableArray(),
-    selectedType: ko.observable(),
-    defaultType: ko.observable(),
+    typeSelector: ko.observable(false),
     errorMessage: ko.observable()
 };
 
-LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, selectedType, defaultType, errorMessage) {
+LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage) {
   LUPAPISTE.Upload.applicationId(applicationId);
   LUPAPISTE.Upload.attachmentId(attachmentId);
-  LUPAPISTE.Upload.selectedType(selectedType);
-  LUPAPISTE.Upload.defaultType(defaultType ? defaultType : undefined); // Empty string -> undefined
+  LUPAPISTE.Upload.attachmentType(attachmentType);
+  LUPAPISTE.Upload.typeSelector(typeSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(errorMessage);
-  debug(applicationId, attachmentId, selectedType, defaultType, errorMessage);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
   if (applicationId) {
-    ajax.query("attachment-types",{id: applicationId})
-    .success(function(d) {
-      LUPAPISTE.Upload.attachmentTypeGroups(d.typeGroups);
-      ko.applyBindings(LUPAPISTE.Upload, $("#attachmentUploadForm")[0]);
-    })
-    .call();
+    ajax
+      .query("attachment-types",{id: applicationId})
+      .success(function(d) {
+        LUPAPISTE.Upload.attachmentTypeGroups(d.typeGroups);
+        ko.applyBindings(LUPAPISTE.Upload, $("#attachmentUploadForm")[0]);
+      })
+      .call();
   }
 };
 
-LUPAPISTE.Upload.init = function(applicationId, attachmentId, defaultType) {
-  LUPAPISTE.Upload.setModel(applicationId, attachmentId, defaultType, defaultType);
+LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector) {
+  LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null);
   LUPAPISTE.Upload.loadTypes(applicationId);
 };
 
@@ -41,10 +41,9 @@ LUPAPISTE.Upload.initFromURLParams = function() {
     var applicationId = pageutil.getURLParameter("applicationId");
     LUPAPISTE.Upload.setModel(applicationId,
       pageutil.getURLParameter("attachmentId"),
-      pageutil.getURLParameter("type"),
-      pageutil.getURLParameter("defaultType"),
+      pageutil.getURLParameter("attachmentType"),
+      pageutil.getURLParameter("typeSelector"),
       pageutil.getURLParameter("errorMessage"));
-
     LUPAPISTE.Upload.loadTypes(applicationId);
   }
 };

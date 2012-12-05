@@ -103,11 +103,22 @@
   };
 
   var attachments = ko.observableArray([]);
+  var attachmentsByGroup = ko.observableArray();
 
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
     return v;
+  }
+
+  function getAttachmentsByGroup(attachments) {
+    var grouped = _.groupBy(attachments, function(attachment) {
+      return attachment.type['type-group'];
+    });
+    var result = _.map(grouped, function(value, key) {
+      return {group: key, attachments: value};
+    });
+    return result;
   }
 
   function showApplication(data) {
@@ -133,6 +144,8 @@
         attachments.push(a);
       });
 
+      attachmentsByGroup(getAttachmentsByGroup(data.attachments));
+
       // Update map:
       var location = application.location();
       hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
@@ -145,7 +158,7 @@
           // Server returns empty array (all ok), or array containing an array with three
           // elements: [key status message]. Here we use just the status.
           .success(function(e) {
-            var status = (e.results.length == 0) ? "ok" : e.results[0][1]; 
+            var status = (e.results.length === 0) ? "ok" : e.results[0][1];
             callback(status);
           })
           .error(function(e) { error(e); callback("err"); })
@@ -199,9 +212,9 @@
   var tab = {
     tabClick: function(data, event) {
      var self = event.target;
-     $("#tabs li").removeClass("active");
+     $("#applicationTabs li").removeClass("active");
      $(self).parent().addClass("active");
-     $(".tab_content").hide();
+     $(".tab-content").hide();
      var selected_tab = $(self).attr("href");
      $(selected_tab).fadeIn();
     }
@@ -226,6 +239,7 @@
     ko.applyBindings({
       application: application,
       attachments: attachments,
+      attachmentsByGroup: attachmentsByGroup,
       applicationModel: applicationModel,
       comment: commentModel,
       invite: inviteModel,

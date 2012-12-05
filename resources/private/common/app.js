@@ -123,7 +123,8 @@ LUPAPISTE.App = function(startPage) {
   hub.subscribe("login", function(e) {
     trace("login", e);
     $("#user-name").html(e.user.firstName + " " + e.user.lastName);
-    $("#user-role").html(e.user.role);
+    $("#user-role").attr("data-test-id", e.user.role); // for testing purposes
+    $("#user-role").html(loc(e.user.role));
     $("#user-menu").show();
   });
 

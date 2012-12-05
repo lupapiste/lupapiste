@@ -10,9 +10,9 @@
 
 (def default-max-len 64)
 
-(defmulti validate (fn [elem v] (keyword (:type elem))))
+(defmulti validate (fn [elem _] (keyword (:type elem))))
 
-(defmethod validate :group [elem v]
+(defmethod validate :group [_ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
 (defmethod validate :string [elem v]
@@ -28,13 +28,13 @@
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
 
-(defmethod validate :boolean [elem v]
+(defmethod validate :boolean [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-(defmethod validate nil [elem v]
+(defmethod validate nil [_ _]
   [:err "illegal-key"])
 
-(defmethod validate :default [elem v]
+(defmethod validate :default [elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
   [:err "unknown-type"])
 

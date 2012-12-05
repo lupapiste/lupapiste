@@ -27,5 +27,5 @@ var repository = function() {
   return {
     reloadApplication: function(id) { hub.send("load-application", {id: id}); },
     reloadAllApplications: function() { hub.send("load-all-applications"); }
-  }
+  };
 }();
