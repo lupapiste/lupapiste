@@ -33,6 +33,7 @@
 
 (defn inject-content [t {:keys [header nav page footer]} component]
   (enlive/emit* (-> t
+                  (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
                   (enlive/transform [:header] (constantly (first header)))
                   (enlive/transform [:nav] (constantly (first nav)))
                   (enlive/transform [:section] (enlive/content page))
