@@ -64,15 +64,18 @@
      :body {}}))
 
 ; TODO: Figure out where these should come from?
-(def default-schemas ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"])
-(def default-attachments (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
+(def default-schemas {:infoRequest []
+                      :buildingPermit 
+                      ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
+(def default-attachments {:infoRequest []
+                          :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
                               [["hakija" "valtakirja"]
                                ["hakija" "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]
                                ["rakennuspaikka" "tonttikartta_tarvittaessa"]
                                ["muut" "piha_tai_istutussuunnitelma"]
                                ["muut" "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"]
                                ["muut" "liikkumis_ja_esteettomyysselvitys"]
-                               ["muut" "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"]]))
+                               ["muut" "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"]])})
 
 (defcommand "create-application"
   {:parameters [:permitType :x :y :street :zip :city]
@@ -81,7 +84,8 @@
   (let [{:keys [user created data]} command
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
-        documents (map create-document default-schemas)]
+        permitType (:permitType data)
+        documents (map create-document ((keyword permitType) default-schemas))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -98,8 +102,8 @@
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
-       :permitType (:permitType data)
-       :allowedAttahmentTypes (attachment-types-for :buildingPermit)
+       :permitType permitType 
+       :allowedAttahmentTypes (attachment-types-for (keyword permitType))
        :attachments []})
     (future ; TODO: Should use agent with error handling:
       (if-let [municipality (:result (executed "municipality-by-location" command))]
