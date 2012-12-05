@@ -14,75 +14,72 @@
     </div>
 
     <div class="application_summary">
-
-      <div id="application-map" class="map map-large" style="width: 280px; height: 252px;"></div>
+      <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
 
       <div data-bind="with: application">
         <h1 data-bind="with: address">
           <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
         </h1>
-      </div>
 
-      <div class="application_summary_info" data-bind="with: application">
-        <div>
-          <p>Käsittelytunnus:</p>
-          <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
-        </div>
-        <div>
-          <p>Tila:</p>
-          <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
-        </div>
         <!-- ko if: permitType() !== 'infoRequest' -->
-          <div>
-            <p>Lupatyyppi:</p>
-            <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+          <div class="application_summary_info">
+            <div>
+              <p>Käsittelytunnus:</p>
+              <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
+            </div>
+            <div>
+              <p>Tila:</p>
+              <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+            </div>
+              <div>
+                <p>Lupatyyppi:</p>
+                <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+              </div>
+            <div>
+              <p>Toimenpiteet:</p>
+              <ul data-bind="foreach: $root.documents">
+                <li>
+                  <span data-bind="ltext: schema.info.name" id="test-application-operation"></span>
+                  <i>(<span data-bind="dateTimeString: created"></span>)</i>
+                </li>
+              </ul>
+            </div>
+            <div data-bind="with: $root.applicationModel.data">
+              <p>Hakemus jätetty:</p>
+              <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
+            </div>
           </div>
         <!-- /ko -->
-        <div>
-          <p>Toimenpiteet:</p>
-          <ul data-bind="foreach: $root.documents">
-            <li>
-              <span data-bind="ltext: schema.info.name" id="test-application-operation"></span>
-              <i>(<span data-bind="dateTimeString: created"></span>)</i>
-            </li>
-          </ul>
-        </div>
-        <div data-bind="with: $root.applicationModel.data">
-          <p>Hakemus jätetty:</p>
-          <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
-        </div>
-        <!-- ko if: permitType() === 'infoRequest' -->
-          <div>
-            <p>&nbsp;</p>
-          </div>
-        <!-- /ko -->
-      </div>
 
-      <div class="application_actions" data-bind="with: application">
+      </div>
+    </div>
+    
+    <div class="application_actions" data-bind="with: application">
+      <!-- ko if: permitType() !== 'infoRequest' -->
         <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
         <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
         <button class="todo btn action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
         <button class="todo btn action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
         <button class="todo btn action-bar-button" data-bind="enable:false">Poista hakemus</button>
-      </div>
+      <!-- /ko -->
+    </div>
 
-      <div class="tabs-container">
+    <div class="tabs-container">
+      <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
         <ul class="tabs" id="applicationTabs">
-          <li class="active">
-            <!-- ko if: $root.application.permitType() === 'infoRequest' -->
-              <a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'infoRequest_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a>
-            <!-- /ko -->
-            <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
-              <a id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a>
-            <!-- /ko -->
-          </li>
+          <li><a class="active-as-default" id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a></li>
           <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
-          <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
-            <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
-          <!-- /ko -->
+          <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
           <li><a id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
         </ul>
-    </div>
+      <!-- /ko -->
+      
+      <!-- ko if: $root.application.permitType() === 'infoRequest' -->
+        <ul class="tabs" id="applicationTabs">
+          <li><a class="active-as-default" id="test-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
+          <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
+        </ul>
+      <!-- /ko -->
     </div>
 
     <div class="sidebar">
