@@ -60,11 +60,31 @@
      :x x
      :y y}))
 
+(defn- haku-kunta [search]
+  (let [terms (string/split search #",")]
+    (if (= 2 (count terms))
+      (string/trim (second terms))
+      "")))
+
+(defn- haku-katunumero [search]
+  (let [katunumero (read-string (string/trim (last (string/split (first (string/split search #",")) #"\s"))))]
+    (if (number? katunumero)
+      katunumero
+      "")))
+
+(defn- haku-katunimi [search]  
+  (let [parts (string/split (first (string/split search #",")) #"\s")]  
+    (if (number? (haku-katunumero search))  
+      (string/trim (string/join " " (take (- (count parts) 1) parts)))  
+      (string/trim (string/join " " parts)))))
+
 (defn osoite
-  ([{query-params :query-params}]
-    (apply osoite (map query-params ["kunta" "katunimi" "katunumero"])))
-  ([kunta katunimi katunumero]
-    (let [request (format osoite-template kunta kunta katunimi katunumero)
+  ([request]
+    (let [haku (get (:query-params request) "haku")
+          kunta (haku-kunta haku)
+          katunimi (haku-katunimi haku)
+          katunumero (haku-katunumero haku)
+          request (format osoite-template kunta kunta katunimi katunumero)
           response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth})
           input-xml (:body response)
           features (-> input-xml
