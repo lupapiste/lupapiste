@@ -184,7 +184,12 @@
       </div>
 
       <div class="tab-content" id="attachments_tab">
-        <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
+        <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+          <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
+        <!-- /ko -->
+        <!-- ko if: $root.application.permitType() === 'infoRequest' -->
+          <p class="tab-info">Voit lisätä neuvontapyyntöösi liitetiedostoja.</p>
+        <!-- /ko -->
         <div class="tab-wrapper">
           <div data-bind="if: attachmentsByGroup().length">
 
