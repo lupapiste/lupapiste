@@ -108,7 +108,7 @@
     (future ; TODO: Should use agent with error handling:
       (if-let [municipality (:result (executed "municipality-by-location" command))]
         (mongo/update-by-id mongo/applications id {$set {:municipality municipality}})))
-    (doseq [attachment-type default-attachments]
+    (doseq [attachment-type (default-attachments (keyword permitType))]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
