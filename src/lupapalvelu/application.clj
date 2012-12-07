@@ -69,13 +69,13 @@
                       ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
-                              [["hakija" "valtakirja"]
-                               ["hakija" "ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta"]
-                               ["rakennuspaikka" "tonttikartta_tarvittaessa"]
-                               ["muut" "piha_tai_istutussuunnitelma"]
-                               ["muut" "selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista"]
-                               ["muut" "liikkumis_ja_esteettomyysselvitys"]
-                               ["muut" "selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo"]])})
+                              [["paapiirustus" "asemapiirros"]
+                               ["paapiirustus" "pohjapiirros"]
+                               ["paapiirustus" "leikkauspiirros"]
+                               ["paapiirustus" "julkisivupiirros"]
+                               ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
+                               ["muut" "energiataloudellinen_selvitys"]])})
+
 
 (defcommand "create-application"
   {:parameters [:permitType :x :y :street :zip :city]

@@ -181,6 +181,7 @@ var docgen = (function () {
     checkbox: buildCheckbox,
     select: buildSelect,
     date: buildDate,
+    element: buildElement,
     unknown: buildUnknown
   };
 
