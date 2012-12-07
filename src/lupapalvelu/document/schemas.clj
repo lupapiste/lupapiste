@@ -31,6 +31,14 @@
                    {:name "fax" :type :string}
                    {:name "hetu" :type :string}])
 
+(def yritys-body [{:name "yritysnimi" :type :string}
+                   {:name "liikeJaYhteisoTunnus" :type :string}
+                   {:name "osoite" :type :group :body simple-osoite-body}
+                   {:name "puhelin" :type :string :subtype :tel}
+                   {:name "email" :type :string :subtype :email}
+                   {:name "fax" :type :string}])
+
+
 ; TODO: Yritys?
 (def suunnittelija-body (concat
                          henkilo-body
@@ -50,8 +58,6 @@
              {:name "rakennuksenOmistajat" 
               :type :group 
               :body henkilo-body} ;TODO yritys ja monta
-             {:name "osoite" :type :group :body full-osoite-body} ; TODO rakennuspaikan osoitteista(mahdollisuus lisata porras jne)
-             {:name "rinnakkaisosoite" :type :group :body full-osoite-body} ; TODO rakennuspaikan osoitteista(mahdollisuus lisata porras jne)
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
@@ -122,9 +128,7 @@
              {:name "poikkeamiset" :type :string}]}
      
      {:info {:name "huoneisto"}
-      :body [{:name "osoite" :type :group 
-              :body full-osoite-body}
-             {:name "huoneluku" :type :string}
+      :body [{:name "huoneluku" :type :string}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
                      {:name "keittoKomero"}
@@ -143,8 +147,9 @@
                      {:name "sauna" :type :checkbox}
                      {:name "parvekeTaiTerassi" :type :checkbox}]}]}
      
-     {:info {:name "hakija"} ; TODO yritys
-      :body henkilo-body}
+     {:info {:name "hakija"} 
+      :body [{:name "henkilo" :type :group :body henkilo-body}
+             {:name "yritys" :type :group :body yritys-body}]}
      
      {:info {:name "paasuunnittelija"}
       :body suunnittelija-body}
@@ -174,8 +179,7 @@
                      {:name "eiTiedossa"}]}]}
      
      {:info {:name "osoite"}
-      :body [{:name "osoite" :type :group 
-              :body full-osoite-body}]}
+      :body full-osoite-body}
      
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
