@@ -193,53 +193,53 @@
         <div class="tab-wrapper">
           <div data-bind="if: attachmentsByGroup().length">
 
-            <table class="table table-striped">
+            <table class="table">
               <tbody data-bind="foreach: attachmentsByGroup()">
-                <tr>
+                <tr class="attachment-group-header">
                   <td data-bind="text: loc('attachmentType.' + group)" colspan="6"></td>
                 </tr>
-              <tr>
-                <th>Tila</th>
-                <th>Tyyppi</th>
-                <th>Tiedosto</th>
-                <th>Versio</th>
-                <th>Muokattu</th>
-                <th></th>
-              </tr>
-              <!-- ko foreach: attachments -->
-              <tr style="cursor: pointer;">
-                <td data-bind="attr: {class: statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
-                <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
-                  <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
-                    <span data-bind="if: type != null">
-                      <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                <tr>
+                  <th>Tila</th>
+                  <th>Tyyppi</th>
+                  <th>Tiedosto</th>
+                  <th>Versio</th>
+                  <th>Muokattu</th>
+                  <th></th>
+                </tr>
+                <!-- ko foreach: attachments -->
+                <tr style="cursor: pointer;">
+                  <td data-bind="attr: {class: statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
+                  <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
+                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
+                      <span data-bind="if: type != null">
+                        <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                      </span>
+                      <span data-bind="if: type == null">
+                        <i>Nimet&ouml;n</i>
+                      </span>
+                    </a>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
+                      <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
+                      <i data-bind="ltext: latestVersion.contentType"></i>
+                      <i data-bind="size: latestVersion.size"></i>
                     </span>
-                    <span data-bind="if: type == null">
-                      <i>Nimet&ouml;n</i>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion">
+                      <span data-bind="version: latestVersion.version"></span>
                     </span>
-                  </a>
-                </td>
-                <td>
-                  <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
-                    <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
-                    <i data-bind="ltext: latestVersion.contentType"></i>
-                    <i data-bind="size: latestVersion.size"></i>
-                  </span>
-                </td>
-                <td>
-                  <span data-bind="if: $data.latestVersion">
-                    <span data-bind="version: latestVersion.version"></span>
-                  </span>
-                </td>
-                <td>
-                  <span data-bind="dateString: modified"></span>
-                  <span data-bind="if: $data.latestVersion">
-                    <span data-bind="fullName: latestVersion.user"></span>
-                  </span>
-                </td>
-                <td>
-                </td>
-              </tr>
+                  </td>
+                  <td>
+                    <span data-bind="dateString: modified"></span>
+                    <span data-bind="if: $data.latestVersion">
+                      <span data-bind="fullName: latestVersion.user"></span>
+                    </span>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
               <!-- /ko -->
               </tbody>
             </table>
