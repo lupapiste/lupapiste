@@ -19,7 +19,9 @@
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]]}
              :itest {:test-paths ^:replace ["itest"]}
-             :ftest {:test-paths ^:replace ["ftest"]}}
+             :ftest {:test-paths ^:replace ["ftest"]}
+             :lupadev {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
+             :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
 
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers"]}

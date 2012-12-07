@@ -148,6 +148,7 @@
 
       // Update map:
       var location = application.location();
+      
       hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
 
       // docgen:
@@ -171,6 +172,10 @@
       _.each(data.documents, function(doc) {
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
+
+      if(! isTabSelected('#applicationTabs')) {
+        selectDefaultTab('#applicationTabs');
+      }
 
       pageutil.setPageReady("application");
     });
@@ -212,13 +217,25 @@
   var tab = {
     tabClick: function(data, event) {
      var self = event.target;
-     $("#applicationTabs li").removeClass("active");
-     $(self).parent().addClass("active");
-     $(".tab-content").hide();
-     var selected_tab = $(self).attr("href");
-     $(selected_tab).fadeIn();
+     setSelectedTab('#applicationTabs', self);
     }
   };
+
+  function isTabSelected(id) {
+    return $(id + ' > li').hasClass("active");
+  }
+  
+  function selectDefaultTab(id) {
+    setSelectedTab(id, $('.active-as-default'));
+  }
+
+  function setSelectedTab(id, element) {
+    $(id + " li").removeClass("active");
+    $(element).parent().addClass("active");
+    $(".tab-content").hide();
+    var selected_tab = $(element).attr("href");
+    $(selected_tab).fadeIn();
+  }
 
   var accordian = {
     accordianClick: function(data, event) {
