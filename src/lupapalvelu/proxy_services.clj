@@ -84,6 +84,7 @@
       (string/trim (string/join " " parts)))))
 
 (defn osoite [request]
+  (debug "resolving address: query='%s'" (get (:query-params request) "query"))
   (let [query (get (:query-params request) "query")
         request (format osoite-template query)
         response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false})]
@@ -91,8 +92,8 @@
       (do
         (let [input-xml (:body response)
               features (-> input-xml
-                         (string/replace "UTF-8" "ISO-8859-1")
-                         .getBytes
+                         #_(string/replace "UTF-8" "ISO-8859-1")
+                         (.getBytes "UTF-8")
                          java.io.ByteArrayInputStream.
                          xml/parse
                          zip/xml-zip)
