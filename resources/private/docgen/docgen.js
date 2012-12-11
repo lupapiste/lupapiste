@@ -43,8 +43,8 @@ var docgen = (function () {
     var div = document.createElement("span");
     var sizeClass = "";
     if (spec.size) {
-      if (spec.size === "s") sizeClass = "form-input small";
-      if (spec.size === "l") sizeClass = "form-string-large";
+      if (spec.size === "s") sizeClass = "form-input short";
+      if (spec.size === "m") sizeClass = "form-input medium";
     }
     div.className = "form-entry";
     div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
@@ -181,6 +181,7 @@ var docgen = (function () {
     checkbox: buildCheckbox,
     select: buildSelect,
     date: buildDate,
+    element: buildElement,
     unknown: buildUnknown
   };
 
