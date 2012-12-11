@@ -1,5 +1,6 @@
 (ns lupapalvelu.perf-mon
-  (:require [clojure.string :refer [join]]))
+  (:require [clojure.string :refer [join]]
+            [lupapalvelu.env :refer [dev-mode?]]))
 
 (defn now [] (System/nanoTime))
 
@@ -17,9 +18,11 @@
             (swap! context conj [f-name args (- end start) @sub-context]))
           result)))))
 
-(defn perf-mon-instrument-ns [n]
-  (doseq [[k v] (filter (comp fn? deref val) (ns-publics n))]
-    (alter-var-root v wrap-perf (str n \/ k))))
+(defn perf-mon-instrument-ns [& namespaces]
+  (when (dev-mode?)
+    (doseq [n namespaces
+            [k v] (filter (comp fn? deref val) (ns-publics n))]
+      (alter-var-root v wrap-perf (str n \/ k)))))
 
 (defn perf-logger
   ([context]
@@ -31,8 +34,10 @@
     (when r (perf-logger r indent))))
 
 (defmacro with-perf-mon [& statements]
-  `(let [context# (atom [])]
-     (binding [*perf-context* context#]
-       (let [result# (do ~@statements)]
-         (perf-logger (deref context#))
-         result#))))
+  (if (dev-mode?)
+    `(let [context# (atom [])]
+       (binding [*perf-context* context#]
+         (let [result# (do ~@statements)]
+           (perf-logger (deref context#))
+           result#)))
+    `(do ~@statements)))
