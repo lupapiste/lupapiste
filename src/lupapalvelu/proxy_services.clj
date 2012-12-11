@@ -4,7 +4,8 @@
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.string :as string])
-  (:use [clojure.data.zip.xml]))
+  (:use [clojure.data.zip.xml]
+        [lupapalvelu.log]))
 
 ;;
 ;; NLS:
@@ -78,24 +79,27 @@
       (string/trim (string/join " " (take (- (count parts) 1) parts)))  
       (string/trim (string/join " " parts)))))
 
-(defn osoite
-  ([request]
-    (let [haku (get (:query-params request) "haku")
-          kunta (haku-kunta haku)
-          katunimi (haku-katunimi haku)
-          katunumero (haku-katunumero haku)
-          request (format osoite-template kunta kunta katunimi katunumero)
-          response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth})
-          input-xml (:body response)
-          features (-> input-xml
-                     (string/replace "UTF-8" "ISO-8859-1")
-                     .getBytes
-                     java.io.ByteArrayInputStream.
-                     xml/parse
-                     zip/xml-zip)
-          feature-members (xml-> features :gml:featureMember)
-          result (map feature-to-address feature-members)]
-      (resp/json result))))
+(defn osoite [request]
+  (let [haku (get (:query-params request) "haku")
+        kunta (haku-kunta haku)
+        katunimi (haku-katunimi haku)
+        katunumero (haku-katunumero haku)
+        request (format osoite-template kunta kunta katunimi katunumero)
+        response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false})]
+    (if (= (:status response) 200)
+      (let [input-xml (:body response)
+            features (-> input-xml
+                       (string/replace "UTF-8" "ISO-8859-1")
+                       .getBytes
+                       java.io.ByteArrayInputStream.
+                       xml/parse
+                       zip/xml-zip)
+            feature-members (xml-> features :gml:featureMember)
+            result (map feature-to-address feature-members)]
+        (resp/json {:ok true :result result}))
+      (do
+        (error "Address query failed: status=%s response=%s" (:status response) (str response))
+        (resp/json {:ok false :error "address-query-failed"})))))
 
 (def pointbykiinteistotunnus-template
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
