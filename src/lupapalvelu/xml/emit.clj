@@ -1,6 +1,8 @@
 (ns lupapalvelu.xml.emit
   (:use [clojure.data.xml]))
 
+(declare element-to-xml)
+
 (defn- create-element-hierarcy [data model]
   (element (:tag model) (:attr model)
            (if (:child model)
