@@ -24,26 +24,26 @@
        xsi:schemaLocation=\"http://www.opengis.net/wfs
        http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
      <wfs:Query typeName=\"oso:Osoitenimi\">
+       <ogc:SortBy>    
+         <ogc:SortProperty>
+           <ogc:PropertyName>
+             oso:kuntanimiFin
+           </ogc:PropertyName>
+         </ogc:SortProperty>             
+         <ogc:SortOrder>
+           DESC
+         </ogc:SortOrder> 
+       </ogc:SortBy>
        <ogc:Filter>
          <ogc:And>
-           <ogc:Or>
-             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-               <ogc:PropertyName>oso:kuntanimiFin</ogc:PropertyName>
-               <ogc:Literal>%s*</ogc:Literal>
-             </ogc:PropertyIsLike>
-             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-               <ogc:PropertyName>oso:kuntanimiSwe</ogc:PropertyName>
-               <ogc:Literal>%s*</ogc:Literal>
-             </ogc:PropertyIsLike>
-           </ogc:Or>
            <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
              <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
              <ogc:Literal>%s*</ogc:Literal>
-           </ogc:PropertyIsLike>
-           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-             <ogc:PropertyName>oso:katunumero</ogc:PropertyName>
-             <ogc:Literal>%s*</ogc:Literal>
-           </ogc:PropertyIsLike>
+           </ogc:PropertyIsLike>   
+           <ogc:PropertyIsEqualTo>
+             <ogc:PropertyName>oso:jarjestysnumero</ogc:PropertyName>
+             <ogc:Literal>1</ogc:Literal>
+           </ogc:PropertyIsEqualTo>                     
          </ogc:And>
        </ogc:Filter>            
      </wfs:Query>
@@ -80,11 +80,14 @@
       (string/trim (string/join " " parts)))))
 
 (defn osoite [request]
-  (let [haku (get (:query-params request) "haku")
+  (let [query (get (:query-params request) "query")]
+    (resp/json {:query query :suggestions ["foo" "foozzaa" "foozoo"] :data ["FO" "FU" "FI"]}))
+  
+  #_(let [haku (get (:query-params request) "query")
         kunta (haku-kunta haku)
         katunimi (haku-katunimi haku)
         katunumero (haku-katunumero haku)
-        request (format osoite-template kunta kunta katunimi katunumero)
+        request (format osoite-template #_kunta #_kunta katunimi #_katunumero)
         response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false})]
     (if (= (:status response) 200)
       (let [input-xml (:body response)
