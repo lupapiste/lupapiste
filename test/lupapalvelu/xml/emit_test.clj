@@ -7,10 +7,6 @@
 (def simple-model  {:tag :test})
 (def simple-result #clojure.data.xml.Element{:tag :test, :attrs {}, :content ("Test")})
 
-(def simple-model-with-custom-key  {:tag :eri :attr {:a "a" :b "b"} :key :test})
-(def result-with-custom-key #clojure.data.xml.Element{:tag :eri, :attrs {:a "a", :b "b"}, :content ("")})
-
-
 (def model-with-childs {:tag :main
                        :child [{:tag :a :attr{:a "a"}
                                 :child[{:tag :ab}
@@ -27,7 +23,7 @@
                                    :ad {:level3 [{:level4 ["2. L4-1a" "2. L4-1b"]} {:level4 "2. L4-2"}]}
                                    :ac "2nd AB Value3"}
                                  ]
-                              :b "B value"}})
+                              :b "B value 2"}})
 
 (def result-with-childs-str "<?xml version='1.0' encoding='UTF-8'?>
 <main>
@@ -58,19 +54,17 @@
       </level3>
     </ad>
   </a>
-  <b>B value</b>
+  <b>B value 2</b>
 </main>
 ")
 
 (def result-with-childs (emit-str (parse-str result-with-childs-str)))
 
 (facts
-  (fact  (element-to-xml simple-data [] simple-model) => simple-result)
-  (fact  (element-to-xml simple-data [] simple-model-with-custom-key) => result-with-custom-key)
+  (fact  (element-to-xml simple-data simple-model) => simple-result)
   (fact "data-with-childs, sring comparison"
-    (emit-str (element-to-xml data-with-childs [] model-with-childs)) => result-with-childs)
+    (emit-str (element-to-xml data-with-childs model-with-childs)) => result-with-childs)
   )
 
-
-
+;(println (indent-str (element-to-xml data-with-childs model-with-childs)))
 

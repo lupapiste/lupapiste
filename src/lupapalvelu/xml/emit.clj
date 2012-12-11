@@ -1,19 +1,15 @@
 (ns lupapalvelu.xml.emit
   (:use [clojure.data.xml]))
 
-(defn- create-element-hierarcy [data key content model]
+(defn- create-element-hierarcy [data model]
   (element (:tag model) (:attr model)
            (if (:child model)
-             (map #(element-to-xml data key %) (:child model))
-             (str content))))
+             (map #(element-to-xml data %) (:child model))
+             (str data))))
 
-(defn element-to-xml [data k model]
-  (let [current-key (:tag model)
-        key (conj k current-key)
-        current-data (get-in data key)]
-
+(defn element-to-xml [data model]
+  (let [current-data ((:tag model) data)]
     (if (sequential? current-data)
       (for [item current-data]
-        (create-element-hierarcy item [] item model))
-      (create-element-hierarcy data key current-data model)))
-  )
+        (create-element-hierarcy item model))
+      (create-element-hierarcy current-data model))))
