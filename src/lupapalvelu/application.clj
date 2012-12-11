@@ -26,7 +26,8 @@
     (fn [{id :id}]
       (mongo/update-by-id mongo/applications id
         {$set {:modified (:created command)
-               :state :open}}))))
+               :state :open
+               :opened (:created command)}}))))
 
 (defcommand "approve-application"
   {:parameters [:id]
@@ -65,7 +66,7 @@
 
 ; TODO: Figure out where these should come from?
 (def default-schemas {:infoRequest []
-                      :buildingPermit 
+                      :buildingPermit
                       ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
@@ -102,7 +103,7 @@
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
-       :permitType permitType 
+       :permitType permitType
        :allowedAttahmentTypes (attachment-types-for (keyword permitType))
        :attachments []})
     (future ; TODO: Should use agent with error handling:
