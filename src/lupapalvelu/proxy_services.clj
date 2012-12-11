@@ -61,6 +61,10 @@
      :x x
      :y y}))
 
+(defn- feature-to-address-string [feature]
+  (let [address (feature-to-address feature)]
+    (str (:katunimi address) ", " (:kuntanimiFin address))))
+
 (defn- haku-kunta [search]
   (let [terms (string/split search #",")]
     (if (= 2 (count terms))
@@ -80,29 +84,31 @@
       (string/trim (string/join " " parts)))))
 
 (defn osoite [request]
-  (let [query (get (:query-params request) "query")]
-    (resp/json {:query query :suggestions ["foo" "foozzaa" "foozoo"] :data ["FO" "FU" "FI"]}))
-  
-  #_(let [haku (get (:query-params request) "query")
-        kunta (haku-kunta haku)
-        katunimi (haku-katunimi haku)
-        katunumero (haku-katunumero haku)
-        request (format osoite-template #_kunta #_kunta katunimi #_katunumero)
+  (let [query (get (:query-params request) "query")
+        request (format osoite-template query)
         response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false})]
     (if (= (:status response) 200)
-      (let [input-xml (:body response)
-            features (-> input-xml
-                       (string/replace "UTF-8" "ISO-8859-1")
-                       .getBytes
-                       java.io.ByteArrayInputStream.
-                       xml/parse
-                       zip/xml-zip)
-            feature-members (xml-> features :gml:featureMember)
-            result (map feature-to-address feature-members)]
-        (resp/json {:ok true :result result}))
+      (do
+        (let [input-xml (:body response)
+              features (-> input-xml
+                         (string/replace "UTF-8" "ISO-8859-1")
+                         .getBytes
+                         java.io.ByteArrayInputStream.
+                         xml/parse
+                         zip/xml-zip)
+              feature-members (xml-> features :gml:featureMember)
+              feature-count (count feature-members)]
+          (debug "Received %d addresses" feature-count)
+          (if (> feature-count 30)
+            (resp/json {:query query
+                        :suggestions []
+                        :data []})
+            (resp/json {:query query
+                        :suggestions (map feature-to-address-string feature-members)
+                        :data (map feature-to-address feature-members)}))))
       (do
         (error "Address query failed: status=%s response=%s" (:status response) (str response))
-        (resp/json {:ok false :error "address-query-failed"})))))
+        (resp/status 500)))))
 
 (def pointbykiinteistotunnus-template
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
