@@ -18,7 +18,7 @@
             (swap! context conj [f-name args (- end start) @sub-context]))
           result)))))
 
-(defn perf-mon-instrument-ns [& namespaces]
+(defn instrument-ns [& namespaces]
   (when (dev-mode?)
     (doseq [n namespaces
             [k v] (filter (comp fn? deref val) (ns-publics n))]

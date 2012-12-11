@@ -6,7 +6,7 @@
   
   ; Instrument public fn's from namespace like this:
   
-  (perf-mon-instrument-ns 'lupapalvelu.perf-test)
+  (instrument-ns 'lupapalvelu.perf-test)
 
   ; Run like this:
   
