@@ -13,7 +13,8 @@
             [lupapalvelu.application]
             [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.commands])
+            [lupapalvelu.document.commands]
+            [lupapalvelu.perf-mon :as perf-mon])
   (:gen-class))
 
 (def custom-content-type {".ttf" "font/ttf"})
@@ -53,9 +54,23 @@
                           :ns 'lupapalvelu.web})
   (info "Server running")
   (env/in-dev
+    (warn "*** Instrumenting performance monitoring")
+    (perf-mon/instrument-ns
+      'lupapalvelu.action
+      'lupapalvelu.application
+      'lupapalvelu.attachment
+      'lupapalvelu.authority-admin
+      'lupapalvelu.core
+      'lupapalvelu.mongo
+      'lupapalvelu.security
+      'lupapalvelu.tepa)
     (warn "*** Applying test fixture")
     (fixture/apply-fixture "minimal")
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
   ; Sensible return value for -main for repl use.
   "ready")
+
+(comment
+  (-main))
+
