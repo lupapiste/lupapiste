@@ -39,14 +39,7 @@
                                                 :child [{:tag :Osapuoli
                                                          :child [{:tag :kuntaRooliKoodi}
                                                                  {:tag :VRKrooliKoodi}
-                                                                 {:tag :henkilo
-                                                                  :child [{:tag :nimi :child [{:tag :etunimi}, {:tag :sukunimi}]}
-                                                                          postiosoite
-                                                                          {:tag :sahkopostiosoite}
-                                                                          {:tag :faksinumero}
-                                                                          {:tag :puhelin}
-                                                                          {:tag :henkilotunnus}]
-                                                                  }]
+                                                                 henkilo]
                                                          }]}]}]}]
                      }]}]
     })
