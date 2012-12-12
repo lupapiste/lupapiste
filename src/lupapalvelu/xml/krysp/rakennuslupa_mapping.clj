@@ -20,8 +20,8 @@
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta :attr {:xmlns:xs "http://www.w3.org/2001/XMLSchema"
                                   :xmlns "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-                                  :xmlns:gml "http://www.opengis.net/gml"
-                                  :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+                                  ;:xmlns:gml "http://www.opengis.net/gml"
+                                  ;:xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
                                   ; XXX not in schema:
                                   ; :elementFormDefault "qualified"
                                   ; :attributeFormDefault "unqualified"
