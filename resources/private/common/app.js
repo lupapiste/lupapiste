@@ -100,6 +100,7 @@ LUPAPISTE.App = function(startPage) {
   };
 
   this.connectionCheck = function() {
+    /*
     ajax.get("/api/ping")
       .success(function() {
         hub.send("connection-online");
@@ -110,6 +111,7 @@ LUPAPISTE.App = function(startPage) {
         setTimeout(self.connectionCheck, 5000);
       })
       .call();
+    */
   };
 
   hub.subscribe("connection-online", function() {
