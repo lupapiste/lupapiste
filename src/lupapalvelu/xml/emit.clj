@@ -10,7 +10,7 @@
              (str data))))
 
 (defn element-to-xml [data model]
-  (let [current-data ((:tag model) data)]
+  (when-let [current-data ((:tag model) data)]
     (if (sequential? current-data)
       (for [item current-data]
         (create-element-hierarcy item model))
