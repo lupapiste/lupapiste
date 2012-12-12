@@ -33,15 +33,42 @@
                                  {:tag :kerrosala}
                                  {:tag :rakentamistapa :child []}
                                  {:tag :kantavaRakennusaine :child []}
-                                 {:tag :julkisivu :child []}
+                                 {:tag :julkisivu
+                                  :child [{:tag :muuMateriaali}
+                                          {:tag :julkisivumateriaali}]}
                                  {:tag :verkostoliittymat :child []}
                                  {:tag :energialuokka}
                                  {:tag :paloluokka}
                                  {:tag :lammitystapa :child []}
                                  {:tag :lammonlahde :child []}
-                                 {:tag :varusteet :child []}
+                                 {:tag :varusteet
+                                  :child [{:tag :sahkoKytkin}
+                                          {:tag :kaasuKytkin}
+                                          {:tag :viemariKytkin}
+                                          {:tag :vesijohtoKytkin}
+                                          {:tag :lamminvesiKytkin}
+                                          {:tag :aurinkopaneeliKytkin}
+                                          {:tag :hissiKytkin}
+                                          {:tag :koneellinenilmastointiKytkin}
+                                          {:tag :saunoja}
+                                          {:tag :uima-altaita}
+                                          {:tag :vaestonsuoja}]}
                                  {:tag :jaahdytysmuoto}
-                                 {:tag :asuinhuoneistot :child []}
+                                 {:tag :asuinhuoneistot
+                                  :child [{:tag :huoneisto
+                                           :child [osoite
+                                                   {:tag :muutostapa}
+                                                   {:tag :huoneluku}
+                                                   {:tag :keittionTyyppi}
+                                                   {:tag :huoneistoala}
+                                                   {:tag :varusteet
+                                                    :child []}
+                                                   {:tag :huoneistonTyyppi}
+                                                   {:tag :huoneistotunnus :child [
+                                                                                  {:tag :porras}
+                                                                                  {:tag :huoneistonumero}
+                                                                                  {:tag :jakokirjain}
+                                                                                  ]}]}]}
                                  ]}]}])
 
 
