@@ -164,7 +164,7 @@
         exact (Boolean/parseBoolean (get (:query-params request) "exact" "false"))
         address (parse-address query)
         request (get-address-request address exact)
-        _ (debug "REQUEST: %s" request)
+        ; _ (debug "REQUEST: %s" request)
         task (future (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false}))
         response (deref task 3000 {:status 408 :body "timeout"})]
     (case (:status response)
