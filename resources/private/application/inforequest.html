@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <section class="page" id="inforequest">
+
+    <div class="breadcrumb" data-bind="with: application">
+        <a href="#!/inforequests" id="test-inforequests" data-bind="ltext: 'infoRequests'">Neuvontapyynnöt</a>
+       / <span data-bind="text: title"></span>
+    </div>
+
+    <div class="application_summary">
+      <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
+
+      <div data-bind="with: application">
+        <h1 data-bind="with: address">
+          <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
+        </h1>
+
+        <div class="application_summary_info">
+          <div>
+            <p>Käsittelytunnus:</p>
+            <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
+          </div>
+          <div>
+            <p>Tila:</p>
+            <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+          </div>
+          <div data-bind="with: $root.applicationModel.data">
+            <p>Luotu:</p>
+            <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <aside class="instructions">
+          <h3>Ohje</h3>
+          <p>Tässä näkymässä voit käsitellä neuvontapyynnön tietoja.</p>
+      </aside>
+    </div>
+
+  </section>
+</body>
+</html>
