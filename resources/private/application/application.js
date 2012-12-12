@@ -245,11 +245,23 @@
      $(self).next(".application_section_content").toggleClass('content_expanded');
     }
   };
-
-  hub.onPageChange("application", function(e) {
+  
+  var initApplication = function(e) {
     currentId = e.pagePath[0];
     hub.send("load-application", {id: currentId});
+  };
+
+  hub.onPageChange("application", function(e) {
+    alert(e);
+    initApplication(e);
   });
+
+  hub.onPageChange("inforequest", function(e) {
+    alert(e);
+    initApplication(e);
+  });
+
+
 
   $(function() {
     var page = $("#application");

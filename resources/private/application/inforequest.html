@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <section class="page" id="inforequest">
+
+    <div class="breadcrumb" data-bind="with: application">
+      <!-- ko if: permitType() === 'infoRequest' -->
+        <a href="#!/inforequests" id="test-inforequests" data-bind="ltext: 'infoRequests'">Neuvontapyynnöt</a>
+      <!-- /ko -->
+      <!-- ko if: permitType() !== 'infoRequest' -->
+        <a href="#!/applications" id="test-applications" data-bind="ltext: 'permitApplications'">Lupahakemukset</a>
+      <!-- /ko -->
+       / <span data-bind="text: title"></span>
+    </div>
+
+    <div class="application_summary">
+      <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
+
+      <div data-bind="with: application">
+        <h1 data-bind="with: address">
+          <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
+        </h1>
+
+        <!-- ko if: permitType() !== 'infoRequest' -->
+          <div class="application_summary_info">
+            <div>
+              <p>Käsittelytunnus:</p>
+              <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
+            </div>
+            <div>
+              <p>Tila:</p>
+              <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+            </div>
+              <div>
+                <p>Lupatyyppi:</p>
+                <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+              </div>
+            <div>
+              <p>Toimenpiteet:</p>
+              <ul data-bind="foreach: $root.documents">
+                <li>
+                  <span data-bind="ltext: schema.info.name" id="test-application-operation"></span>
+                  <i>(<span data-bind="dateTimeString: created"></span>)</i>
+                </li>
+              </ul>
+            </div>
+            <div data-bind="with: $root.applicationModel.data">
+              <p>Hakemus jätetty:</p>
+              <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
+            </div>
+          </div>
+          <div class="application_actions">
+            <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
+            <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
+            <button class="todo btn action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
+            <button class="todo btn action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
+            <button class="todo btn action-bar-button" data-bind="enable:false">Poista hakemus</button>
+          </div>
+          <div class="tabs-container">
+            <ul class="tabs" id="applicationTabs">
+              <li><a class="active-as-default" id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a></li>
+              <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
+              <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
+              <li><a id="test-conversation-tab" id="test-conversation-tab"  data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
+            </ul>
+          </div>
+        <!-- /ko -->
+          
+        
+        <!-- ko if: permitType() === 'infoRequest' -->
+          <div class="application_summary_info">
+            <div>
+              <p>Käsittelytunnus:</p>
+              <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
+            </div>
+            <div>
+              <p>Tila:</p>
+              <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+            </div>
+            <div data-bind="with: $root.applicationModel.data">
+              <p>Luotu:</p>
+              <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
+            </div>
+          </div>
+          <div class="tabs-container">
+            <ul class="tabs" id="applicationTabs">
+              <li><a class="active-as-default" id="test-inforequest-conversation-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
+              <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Liitetiedostot</a></li>
+            </ul>
+          </div>
+        <!-- /ko -->
+      </div>
+    </div>
+    <div class="sidebar">
+      <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+        <aside class="instructions">
+            <h3>Ohje</h3>
+            <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
+        </aside>
+      <!-- /ko -->
+    </div>
+
+    <div class="tab-content-container container">
+
+      <div class="tab-content" id="application_tab" style="display: block;">
+
+        <div class="application_section" data-bind="with: application">
+          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick, clickBubble: false"> <span class="font-icon icon-expanded"></span> Hakemuksen perustiedot</h2>
+          <div class="application_section_content content_expanded">
+            <div>
+              <h3>Valtuutetut</h3>
+              <div data-bind="with: $root.applicationModel">
+                <ul data-bind="foreach: auth">
+                  <li>
+                    <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                    (<span data-bind="text: username"></span>)
+                    <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                    <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                  </li>
+                </ul>
+              </div>
+              <br/>
+              <a href=""  id="test-add-invite"
+                 data-window-id="dialog-valtuutus" class="modal"
+                 data-bind="visible: $root.authorization.ok('invite')">Lisää valtuutus</a>
+            </div>
+            <h3>Kutsutut</h3>
+
+            <ul data-bind="foreach: invites">
+              <li class="user-invite">
+                <span data-bind="text: user.username"></span>
+                (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                - <span data-bind="text: text"></span>
+                <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
+              </li>
+            </ul>
+            <button data-bind="disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">ole pääsuunnittelija</button>
+          </div>
+        </div>
+
+        <!-- docgen generated content: -->
+        <div class="application_section">
+          <div id="docgen">
+            <!-- This is where generated document will be placed. -->
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="conversation_tab" data-bind="with: $root.comment">
+        <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+          <p class="tab-info"> Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.</p>
+        <!-- /ko -->
+        <div class="tab-wrapper">
+          <table class="table table-striped conversation">
+            <tbody data-bind="foreach: comments">
+              <tr class="comment">
+                <td class="comment-party commenttd"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
+                <td class="commenttd" data-bind="text: text"></td>
+              </tr>
+            </tbody>
+          </table>
+          <form>
+            <h3>Kirjoita viesti:</h3>
+            <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="tab-content" id="decision_tab" data-bind="with: application">
+        <div class="tab-wrapper">
+          <div class="row" data-bind="with: verdict">
+            <span id="test-application-verdict" data-bind="text: text"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="attachments_tab">
+        <!-- ko if: $root.application.permitType() !== 'infoRequest' -->
+          <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
+        <!-- /ko -->
+        <!-- ko if: $root.application.permitType() === 'infoRequest' -->
+          <p class="tab-info">Voit lisätä neuvontapyyntöösi liitetiedostoja.</p>
+        <!-- /ko -->
+        <div class="tab-wrapper">
+          <div data-bind="if: attachmentsByGroup().length">
+
+            <table class="table">
+              <tbody data-bind="foreach: attachmentsByGroup()">
+                <tr class="attachment-group-header">
+                  <td data-bind="text: loc('attachmentType.' + group)" colspan="6"></td>
+                </tr>
+                <tr>
+                  <th>Tila</th>
+                  <th>Tyyppi</th>
+                  <th>Tiedosto</th>
+                  <th>Versio</th>
+                  <th>Muokattu</th>
+                  <th></th>
+                </tr>
+                <!-- ko foreach: attachments -->
+                <tr style="cursor: pointer;">
+                  <td data-bind="attr: {class: statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
+                  <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
+                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
+                      <span data-bind="if: type != null">
+                        <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                      </span>
+                      <span data-bind="if: type == null">
+                        <i>Nimet&ouml;n</i>
+                      </span>
+                    </a>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
+                      <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
+                      <i data-bind="ltext: latestVersion.contentType"></i>
+                      <i data-bind="size: latestVersion.size"></i>
+                    </span>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion">
+                      <span data-bind="version: latestVersion.version"></span>
+                    </span>
+                  </td>
+                  <td>
+                    <span data-bind="dateString: modified"></span>
+                    <span data-bind="if: $data.latestVersion">
+                      <span data-bind="fullName: latestVersion.user"></span>
+                    </span>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
+              <!-- /ko -->
+              </tbody>
+            </table>
+
+          </div>
+          <div data-bind="ifnot: attachmentsByGroup.length">
+            <i>Ei liitteitä</i>
+          </div>
+          <button
+              id="add-attachment"
+              class="btn btn-primary modal"
+              data-window-id="upload-dialog"
+              data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
+            Lisää liite
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="boxes">
+       
+      <div id="dialog-valtuutus" class="window autosized">
+        <div class="dialog-header">
+           
+          <p>Lisää valtuutus</p>
+           
+          <p class="dialog-close close">X</p>
+        </div>
+        <div class="dialog-content">
+          <div data-bind="with: $root.invite">
+            <label class="form-label" for="invite-email">Sähköpostiosoite</label>
+            <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
+            <label class="form-label" for="invite-text">Viesti</label>
+            <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
+            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</body>
+</html>
