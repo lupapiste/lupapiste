@@ -76,6 +76,10 @@
              <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
              <ogc:Literal>%s</ogc:Literal>
            </ogc:PropertyIsLike>
+           <ogc:PropertyIsEqualTo>
+             <ogc:PropertyName>oso:jarjestysnumero</ogc:PropertyName>
+             <ogc:Literal>1</ogc:Literal>
+           </ogc:PropertyIsEqualTo>                     
          </ogc:And>
        </ogc:Filter>            
      </wfs:Query>
