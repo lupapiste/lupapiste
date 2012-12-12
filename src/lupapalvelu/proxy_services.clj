@@ -3,7 +3,7 @@
             [noir.response :as resp]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.string :as string])
+            [clojure.string :as s])
   (:use [clojure.data.zip.xml]
         [lupapalvelu.log]))
 
@@ -53,7 +53,7 @@
   (first (xml-> feature :oso:Osoitenimi part text)))
 
 (defn- feature-to-address [feature]
-  (let [[x y] (string/split (address-part feature :oso:sijainti) #" ")]
+  (let [[x y] (s/split (address-part feature :oso:sijainti) #" ")]
     {:katunimi (address-part feature :oso:katunimi)
      :katunumero (address-part feature :oso:katunumero)
      :kuntanimiFin (address-part feature :oso:kuntanimiFin)
@@ -66,34 +66,51 @@
     (str (:katunimi address) ", " (:kuntanimiFin address))))
 
 (defn- haku-kunta [search]
-  (let [terms (string/split search #",")]
+  (let [terms (s/split search #",")]
     (if (= 2 (count terms))
-      (string/trim (second terms))
+      (s/trim (second terms))
       "")))
 
 (defn- haku-katunumero [search]
-  (let [katunumero (read-string (string/trim (last (string/split (first (string/split search #",")) #"\s"))))]
+  (let [katunumero (read-string (s/trim (last (s/split (first (s/split search #",")) #"\s"))))]
     (if (number? katunumero)
       katunumero
       "")))
 
 (defn- haku-katunimi [search]  
-  (let [parts (string/split (first (string/split search #",")) #"\s")]  
+  (let [parts (s/split (first (s/split search #",")) #"\s")]  
     (if (number? (haku-katunumero search))  
-      (string/trim (string/join " " (take (- (count parts) 1) parts)))  
-      (string/trim (string/join " " parts)))))
+      (s/trim (s/join " " (take (- (count parts) 1) parts)))  
+      (s/trim (s/join " " parts)))))
+
+(defn parse-address [query]
+  (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*([\w ]+))?" query)
+        street (if street (s/trim street))
+        city (if (s/blank? city) nil (s/trim city))]
+    {:street street
+     :number number
+     :city city}))
+
+(defn not-blank? [& s]
+  (every? (complement s/blank?) s))
+
+(defn get-address-request [{street :street number :number city :city}]
+  (if (not-blank? street city)
+    (format osoite-template street) ; TODO
+    (format osoite-template street)))
 
 (defn osoite [request]
   (debug "resolving address: query='%s'" (get (:query-params request) "query"))
   (let [query (get (:query-params request) "query")
-        request (format osoite-template query)
+        address (parse-address query)
+        request (get-address-request address)
         task (future (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false}))
         response (deref task 3000 {:status 408 :body "timeout"})]
     (case (:status response)
       200 (do
             (let [input-xml (:body response)
                   features (-> input-xml
-                             (string/replace "UTF-8" "ISO-8859-1")
+                             (s/replace "UTF-8" "ISO-8859-1")
                              (.getBytes "ISO-8859-1")
                              java.io.ByteArrayInputStream.
                              xml/parse
@@ -132,13 +149,13 @@
    </wfs:GetFeature>")
 
 (defn- feature-to-position [feature]
-  (let [[x y] (string/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
+  (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
     {:x x :y y}))
 
 (defn pointbykiinteistotunnus [request]
   (let [kiinteistotunnus (get (:query-params request) "kiinteistotunnus")
         input-xml (:body (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body (format pointbykiinteistotunnus-template kiinteistotunnus) :basic-auth auth}))
-        features (-> input-xml (string/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
+        features (-> input-xml (s/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
         result (map feature-to-position (xml-> features :gml:featureMember))]
     (resp/json result)))
 
@@ -172,7 +189,7 @@
     (let [request-body (format kiinteistotunnusbypoint-template x y)
           response (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body request-body :basic-auth auth})
           input-xml (:body response)
-          features (-> input-xml (string/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
+          features (-> input-xml (s/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
           result (map feature-to-kiinteistotunnus (xml-> features :gml:featureMember))]
       (resp/json result))))
 
