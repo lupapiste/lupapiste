@@ -32,6 +32,10 @@
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
                      :child [{:tag :kasittelynTilatieto :child [tilamuutos]}
+                             {:tag :luvanTunnisteTiedot
+                              :child [{:tag :LupaTunnus
+                                       :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}
+                                       :child [{:tag :muuTunnus} {:tag :saapumisPvm}]}]}
                              {:tag :osapuolettieto
                               :child [{:tag :Osapuolet
                                        :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}
