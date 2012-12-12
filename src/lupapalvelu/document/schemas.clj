@@ -43,8 +43,15 @@
 ; TODO: Yritys?
 (def suunnittelija-body (conj
                          henkilo-body
-                         {:name "patevyys" :type :group 
+                         {:name "patevyys" :type :group
                           :body [
+                            {:name "SuunnittelijaRoolikoodiType" :type :select
+                          :body [{:name "GEO-suunnittelija"}
+                                  {:name "LVI-suunnittelija"}
+                                  {:name "pääsuunnittelija"}
+                                  {:name "RAK-rakennesuunnittelija"}
+                                  {:name "ARK-rakennussuunnittelija"}
+                                  {:name  "Ei tiedossa"}]}
                             {:name "koulutus" :type :string}
                             {:name "patevyysluokka" :type :select
                             :body [{:name "aa"}
@@ -60,14 +67,14 @@
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
       :body [
-             {:name "rakennuksenOmistajat" 
-              :type :group 
+             {:name "rakennuksenOmistajat"
+              :type :group
               :body henkilo-body} ;TODO yritys ja monta
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
                      {:name "eiTiedossa"}]}
-             
+
              {:name "kayttotarkoitus" :type :string}
              {:name "tilavuus" :type :string}
              {:name "kokonaisala" :type :string}
@@ -84,7 +91,7 @@
                      {:name "teras" :type :checkbox}
                      {:name "puu" :type :checkbox}
                      {:name "muurakennusaine" :type :string :size "s"}
-                     {:name "eiTiedossa" :type :checkbox}]} 
+                     {:name "eiTiedossa" :type :checkbox}]}
              {:name "julkisivu" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
@@ -131,7 +138,7 @@
                      {:name "saunoja" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
              {:name "poikkeamiset" :type :string}]}
-     
+
      {:info {:name "huoneisto"}
       :body [{:name "huoneluku" :type :string}
              {:name "keittionTyyppi" :type :select
@@ -146,25 +153,25 @@
                      {:name "toimitila"}
                      {:name "eiTiedossa"}]}
              {:name "huoneistoTunnus" :type :string}
-             {:name "varusteet" :type :choice 
+             {:name "varusteet" :type :choice
               :body [{:name "wc" :type :checkbox}
                      {:name "ammeTaiSuihku" :type :checkbox}
                      {:name "sauna" :type :checkbox}
                      {:name "parvekeTaiTerassi" :type :checkbox}]}]}
-     
-     {:info {:name "hakija"} 
+
+     {:info {:name "hakija"}
       :body [{:name "henkilo" :type :group :body henkilo-body}
              {:name "yritys" :type :group :body yritys-body}]}
-     
+
      {:info {:name "paasuunnittelija"}
       :body suunnittelija-body}
-     
+
      {:info {:name "suunnittelija"}
       :body suunnittelija-body}
-     
+
      {:info {:name "maksaja"} ; TODO yritys ja suunnittelijatyypin valinta
       :body henkilo-body}
-     
+
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
       :body [{:name "kiinteistotunnus" :type :string}
              {:name "maaraalaTunnus" :type :string}
@@ -182,9 +189,9 @@
                      {:name "yleis"}
                      {:name "eiKaavaa"}
                      {:name "eiTiedossa"}]}]}
-     
+
      {:info {:name "osoite"}
       :body full-osoite-body}
-     
+
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
