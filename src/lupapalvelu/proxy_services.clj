@@ -135,10 +135,10 @@
 
 (defn- feature-to-address-string [feature]
   (let [address (feature-to-address feature)]
-    (str (:katunimi address) " " (:katunumero address) ", " (:kuntanimiFin address))))
+    (str (:katunimi address) ", " (:kuntanimiFin address))))
 
 (defn parse-address [query]
-  (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*([\w ]+))?" query)
+  (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*(.+))?" query)
         street (if street (s/trim street))
         city (if (s/blank? city) nil (s/trim city))]
     {:street street
