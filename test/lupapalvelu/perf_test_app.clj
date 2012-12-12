@@ -10,6 +10,5 @@
 
   ; Run like this:
   
-  (with-perf-mon
-    (lupapalvelu.perf-test/d)
-    (lupapalvelu.perf-test/c)))
+  (lupapalvelu.perf-test/d)
+  (lupapalvelu.perf-test/c))
