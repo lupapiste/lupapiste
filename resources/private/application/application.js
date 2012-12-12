@@ -252,20 +252,15 @@
   };
 
   hub.onPageChange("application", function(e) {
-    alert(e);
     initApplication(e);
   });
 
   hub.onPageChange("inforequest", function(e) {
-    alert(e);
     initApplication(e);
   });
 
-
-
   $(function() {
-    var page = $("#application");
-    ko.applyBindings({
+    var bindings = {
       application: application,
       attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
@@ -275,7 +270,10 @@
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian
-    }, page[0]);
+    };
+    
+    ko.applyBindings(bindings, $("#application")[0]);
+    ko.applyBindings(bindings, $("#inforequest")[0]);
   });
 
 })();
