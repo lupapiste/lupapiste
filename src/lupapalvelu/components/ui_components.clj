@@ -59,7 +59,7 @@
 
    :application  {:depends [:common :repository]
                   :js ["application.js"]
-                  :html ["application.html"]}
+                  :html ["application.html" "inforequest.html"]}
 
    :tablesorter  {:depends [:jquery]
                   :js ["jquery.tablesorter-2.0.5b.js" "lupapiste.tablesorter.js"]
