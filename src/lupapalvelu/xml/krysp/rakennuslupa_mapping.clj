@@ -62,13 +62,17 @@
                                                    {:tag :keittionTyyppi}
                                                    {:tag :huoneistoala}
                                                    {:tag :varusteet
-                                                    :child []}
+                                                    :child [{:tag :WCKytkin}
+                                                            {:tag :ammeTaiSuihkuKytkin}
+                                                            {:tag :saunaKytkin}
+                                                            {:tag :parvekeTaiTerassiKytkin}
+                                                            {:tag :lamminvesiKytkin}]}
                                                    {:tag :huoneistonTyyppi}
-                                                   {:tag :huoneistotunnus :child [
-                                                                                  {:tag :porras}
-                                                                                  {:tag :huoneistonumero}
-                                                                                  {:tag :jakokirjain}
-                                                                                  ]}]}]}
+                                                   {:tag :huoneistotunnus
+                                                    :child [{:tag :porras}
+                                                            {:tag :huoneistonumero}
+                                                            {:tag :jakokirjain}
+                                                            ]}]}]}
                                  ]}]}])
 
 
