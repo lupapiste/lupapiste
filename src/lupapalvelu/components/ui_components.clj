@@ -66,12 +66,13 @@
                   :css ["tablesorter.css"]}
 
    :applications-common {:depends [:tablesorter :invites]
-                         :js ["applications.js"]}
+                         :html ["inforequests.html"]
+                         :js ["applications.js" "inforequests-config.js"]}
 
    :applications {:depends [:common :repository :applications-common]
                   :js ["applications-config.js"]
                   :css ["applications.css"]
-                  :html ["applications.html"]}
+                  :html ["applications.html" "all-applications.html"]}
 
    :authority-applications {:depends [:common :repository :applications-common]
                             :js ["applications-config.js"]
@@ -97,13 +98,9 @@
                          :depends [:common]
                          :html ["create-inforequest.html"]}
 
-   :inforequests  {:depends [:common :tablesorter]
-                   :js ["inforequests-config.js" "inforequests.js"]
-                   :html ["inforequests.html"]}
-
    :applicant    {:depends [:common :map :applications
                             :application :attachment :create-application :docgen
-                            :inforequests :create-inforequest :buildinfo]
+                            :create-inforequest :buildinfo]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
