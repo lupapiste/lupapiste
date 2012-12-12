@@ -16,9 +16,9 @@
           <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
         </h1>
 
-        <div class="application_summary_info">
+        <div class="application_summary_info" draggable="auto">
           <div>
-            <p>Käsittelytunnus:</p>
+            <p>K&auml;sittelytunnus:</p>
             <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
           </div>
           <div>
@@ -39,22 +39,22 @@
             </ul>
           </div>
           <div data-bind="with: $root.applicationModel.data">
-            <p>Hakemus jätetty:</p>
+            <p>Hakemus j&auml;tetty:</p>
             <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
           </div>
         </div>
         <div class="application_actions">
-          <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">Jätä hakemus käsiteltäväksi</button>
-          <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirrä kuntarekisteriin</button>
+          <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">J&auml;t&auml; hakemus k&auml;sitelt&auml;v&auml;ksi</button>
+          <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirr&auml; kuntarekisteriin</button>
           <button class="todo btn action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
-          <button class="todo btn action-bar-button" data-bind="enable:false">Lisää toimenpide</button>
+          <button class="todo btn action-bar-button" data-bind="enable:false">Lis&auml;&auml; toimenpide</button>
           <button class="todo btn action-bar-button" data-bind="enable:false">Poista hakemus</button>
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
             <li><a class="active-as-default" id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a></li>
             <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
-            <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">Päätös</a></li>
+            <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">P&auml;&auml;t&ouml;s</a></li>
             <li><a id="test-conversation-tab" id="test-conversation-tab"  data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
           </ul>
         </div>
@@ -63,7 +63,7 @@
     <div class="sidebar">
       <aside class="instructions">
           <h3>Ohje</h3>
-          <p>Tässä näkymässä voit käsitellä hakemuksen tietoja. Voit kysyä tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit jättää valmiin hakemuksen käsittelyyn painamalla "Jätä hakemus" nappia. Tällöin rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen käsittelyyn. Tehtyään päätöksen rakennusviranomainen siirtää hakemuksen tilaan hyväksytty tai evätty. Varsinaisen päätöspöytäkirjan löydät "Päätös"-välilehdeltä</p>
+          <p>T&auml;ss&auml; n&auml;kym&auml;ss&auml; voit k&auml;sitell&auml; hakemuksen tietoja. Voit kysy&auml; tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit j&auml;tt&auml;&auml; valmiin hakemuksen k&auml;sittelyyn painamalla "J&auml;t&auml; hakemus" nappia. T&auml;ll&auml;in rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen k&auml;sittelyyn. Tehty&auml;&auml;n p&auml;&auml;t&auml;ksen rakennusviranomainen siirt&auml;&auml; hakemuksen tilaan hyv&auml;ksytty tai ev&auml;tty. Varsinaisen p&auml;&auml;t&auml;sp&auml;yt&auml;kirjan l&auml;yd&auml;t "P&auml;&auml;t&auml;s"-v&auml;lilehdelt&auml;</p>
       </aside>
     </div>
 
@@ -89,7 +89,7 @@
               <br/>
               <a href=""  id="test-add-invite"
                  data-window-id="dialog-valtuutus" class="modal"
-                 data-bind="visible: $root.authorization.ok('invite')">Lisää valtuutus</a>
+                 data-bind="visible: $root.authorization.ok('invite')">Lis&auml;&auml; valtuutus</a>
             </div>
             <h3>Kutsutut</h3>
 
@@ -101,7 +101,7 @@
                 <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
               </li>
             </ul>
-            <button data-bind="disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">ole pääsuunnittelija</button>
+            <button data-bind="disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">ole p&auml;&auml;suunnittelija</button>
           </div>
         </div>
 
@@ -114,7 +114,7 @@
       </div>
 
       <div class="tab-content" id="conversation_tab" data-bind="with: $root.comment">
-        <p class="tab-info"> Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.</p>
+        <p class="tab-info"> T&auml;&auml;ll&auml; voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen n&auml;kee hakemuksesi ja voi vastata esitt&auml;miisi kysymyksiin. N&auml;in voitte yhdess&auml; valmistella hakemusta ennen sen j&auml;tt&auml;mist&auml;.</p>
         <div class="tab-wrapper">
           <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
@@ -127,7 +127,7 @@
           <form>
             <h3>Kirjoita viesti:</h3>
             <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
-            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">Lähetä viesti</button>
+            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
           </form>
         </div>
       </div>
@@ -141,7 +141,7 @@
       </div>
 
       <div class="tab-content" id="attachments_tab">
-        <p class="tab-info">Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt merkitään taulukossa punaisella lipulla.</p>
+        <p class="tab-info">T&auml;nne voit lis&auml;t&auml; hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&auml;s pyyt&auml;&auml; sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&auml;t merkit&auml;&auml;n taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <div data-bind="if: attachmentsByGroup().length">
 
@@ -198,14 +198,14 @@
 
           </div>
           <div data-bind="ifnot: attachmentsByGroup.length">
-            <i>Ei liitteitä</i>
+            <i>Ei liitteit&auml;</i>
           </div>
           <button
               id="add-attachment"
               class="btn btn-primary modal"
               data-window-id="upload-dialog"
               data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
-            Lisää liite
+            Lis&auml;&auml; liite
           </button>
         </div>
       </div>
@@ -213,17 +213,17 @@
     </div>
 
     <div id="boxes">
-       
+      &auml;
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
-           
-          <p>Lisää valtuutus</p>
-           
+          &auml;
+          <p>Lis&auml;&auml; valtuutus</p>
+          &auml;
           <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content">
           <div data-bind="with: $root.invite">
-            <label class="form-label" for="invite-email">Sähköpostiosoite</label>
+            <label class="form-label" for="invite-email">S&auml;hk&ouml;postiosoite</label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
             <label class="form-label" for="invite-text">Viesti</label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
