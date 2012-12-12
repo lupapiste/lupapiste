@@ -36,13 +36,13 @@
 
 (facts "with real schemas - important field for paasuunnittelija"
   (let [schema (schemas "paasuunnittelija")]
-    (fact (validate-updates schema [["etunimi" "Tauno"]])   => [])
-    (fact (validate-updates schema [["etunimiz" "Tauno"]])  => [["etunimiz" :err "illegal-key"]])
-    (fact (validate-updates schema [["sukunimi" "Palo"]])   => [])
-    (fact (validate-updates schema [["etunimi" "Tauno"] ["sukunimi"  "Palo"]])  => [])
-    (fact (validate-updates schema [["etunimi" "Tauno"] ["sukunimiz" "Palo"]])  => [["sukunimiz" :err "illegal-key"]])
-    (fact (validate-updates schema [["email" "tauno@iki.fi"]]) => [])
-    (fact (validate-updates schema [["puhelin" "050"]]) =>        [])))
+    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"]])   => [])
+    (fact (validate-updates schema [["henkilotiedot.etunimiz" "Tauno"]])  => [["henkilotiedot.etunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["henkilotiedot.sukunimi" "Palo"]])   => [])
+    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimi"  "Palo"]])  => [])
+    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimiz" "Palo"]])  => [["henkilotiedot.sukunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["yhteystiedot.email" "tauno@iki.fi"]]) => [])
+    (fact (validate-updates schema [["yhteystiedot.puhelin" "050"]]) =>        [])))
 
 (facts "Facts about validation-status"
  (fact (validation-status []) => :ok)

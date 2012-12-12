@@ -22,7 +22,8 @@
 ;;
 
 (def attachment-types-for-permit-type
-  {:buildingPermit {:hakija [:valtakirja
+  {:infoRequest {:muut [:muu]}
+   :buildingPermit {:hakija [:valtakirja
                              :ote_kauppa_ja_yhdistysrekisterista
                              :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
                     :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista

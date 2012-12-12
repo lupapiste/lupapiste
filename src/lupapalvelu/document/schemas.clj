@@ -8,40 +8,53 @@
           docs))
 
 (def simple-osoite-body [{:name "katu" :type :string}
-                         {:name "postinumero" :type :string}
-                         {:name "postitoimipaikka" :type :string}])
+                         {:name "postinumero" :type :string :size "s"}
+                         {:name "postitoimipaikka" :type :string :size "m"}])
 
 (def full-osoite-body [{:name "kunta" :type :string}
                        {:name "lahiosoite" :type :string}
                        {:name "osoitenumero" :type :string}
                        {:name "osoitenumero2" :type :string}
-                       {:name "jakokirjain" :type :string}
-                       {:name "jakokirjain2" :type :string}
-                       {:name "porras" :type :string}
-                       {:name "huoneisto" :type :string}
-                       {:name "postinumero" :type :string}
-                       {:name "postitoimipaikka" :type :string}
+                       {:name "jakokirjain" :type :string :size "s"}
+                       {:name "jakokirjain2" :type :string :size "s"}
+                       {:name "porras" :type :string :size "s"}
+                       {:name "huoneisto" :type :string :size "s"}
+                       {:name "postinumero" :type :string :size "s"}
+                       {:name "postitoimipaikka" :type :string :size "m"}
                        {:name "pistesijanti" :type :string}])
 
-(def henkilo-body [{:name "etunimi" :type :string}
-                   {:name "sukunimi" :type :string}
+(def yhteystiedot-body [{:name "puhelin" :type :string :subtype :tel}
+                        {:name "email" :type :string :subtype :email}
+                        {:name "fax" :type :string}])
+
+(def henkilotiedot-body [{:name "etunimi" :type :string}
+                         {:name "sukunimi" :type :string}
+                         {:name "hetu" :type :string}])
+
+(def henkilo-body [{:name "henkilotiedot" :type :group :body henkilotiedot-body}
                    {:name "osoite" :type :group :body simple-osoite-body}
-                   {:name "puhelin" :type :string :subtype :tel}
-                   {:name "email" :type :string :subtype :email}
-                   {:name "fax" :type :string}
-                   {:name "hetu" :type :string}])
+                   {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
+
+(def yritys-body [{:name "yritysnimi" :type :string}
+                   {:name "liikeJaYhteisoTunnus" :type :string}
+                   {:name "osoite" :type :group :body simple-osoite-body}
+                   {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
 
 ; TODO: Yritys?
-(def suunnittelija-body (concat
+(def suunnittelija-body (conj
                          henkilo-body
-                         [{:name "koulutus" :type :string}
-                          {:name "patevyysluokka" :type :select
-                           :body [{:name "aa"}
-                                  {:name "a"}
-                                  {:name "b"}
-                                  {:name "c"}]}
-                          {:name "kokemus" :type :string}
-                          {:name "Liiteet" :type :string}])) ; TODO miten liitteet hanskataan
+                         {:name "patevyys" :type :group 
+                          :body [
+                            {:name "koulutus" :type :string}
+                            {:name "patevyysluokka" :type :select
+                            :body [{:name "aa"}
+                                    {:name "a"}
+                                    {:name "b"}
+                                    {:name "c"}]}
+                            {:name "kokemus" :type :string}
+                            {:name "Liiteet" :type :string}
+                            ]
+                            })) ; TODO miten liitteet hanskataan
 
 (def schemas
   (to-map-by-name
@@ -50,8 +63,6 @@
              {:name "rakennuksenOmistajat" 
               :type :group 
               :body henkilo-body} ;TODO yritys ja monta
-             {:name "osoite" :type :group :body full-osoite-body} ; TODO rakennuspaikan osoitteista(mahdollisuus lisata porras jne)
-             {:name "rinnakkaisosoite" :type :group :body full-osoite-body} ; TODO rakennuspaikan osoitteista(mahdollisuus lisata porras jne)
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
@@ -122,9 +133,7 @@
              {:name "poikkeamiset" :type :string}]}
      
      {:info {:name "huoneisto"}
-      :body [{:name "osoite" :type :group 
-              :body full-osoite-body}
-             {:name "huoneluku" :type :string}
+      :body [{:name "huoneluku" :type :string}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
                      {:name "keittoKomero"}
@@ -143,8 +152,9 @@
                      {:name "sauna" :type :checkbox}
                      {:name "parvekeTaiTerassi" :type :checkbox}]}]}
      
-     {:info {:name "hakija"} ; TODO yritys
-      :body henkilo-body}
+     {:info {:name "hakija"} 
+      :body [{:name "henkilo" :type :group :body henkilo-body}
+             {:name "yritys" :type :group :body yritys-body}]}
      
      {:info {:name "paasuunnittelija"}
       :body suunnittelija-body}
@@ -174,8 +184,7 @@
                      {:name "eiTiedossa"}]}]}
      
      {:info {:name "osoite"}
-      :body [{:name "osoite" :type :group 
-              :body full-osoite-body}]}
+      :body full-osoite-body}
      
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))

@@ -12,14 +12,16 @@
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.9.1"]
                  [org.clojure/data.xml "0.0.6"]
-                 [fi.sito/oskari "0.9.2"]]
+                 [fi.sito/oskari "0.9.4"]]
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
                                   [clj-webdriver "0.6.0-beta2" :exclusions [cheshire/cheshire]]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]]}
              :itest {:test-paths ^:replace ["itest"]}
-             :ftest {:test-paths ^:replace ["ftest"]}}
+             :ftest {:test-paths ^:replace ["ftest"]}
+             :lupadev {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
+             :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
 
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"\/jquery\/" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers"]}
