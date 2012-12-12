@@ -44,7 +44,7 @@
     (:major *clojure-version*)
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
-  (if (env/perf-mon-on)
+  (if env/perf-mon-on
     (do
       (warn "*** Instrumenting performance monitoring")
       (perf-mon/instrument-ns
