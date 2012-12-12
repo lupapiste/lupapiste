@@ -13,7 +13,7 @@
 
 (def auth ["***REMOVED***" "***REMOVED***"])
 
-(def osoite-template
+(def osoite-template-simple
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
    <wfs:GetFeature version=\"1.1.0\"
        xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
@@ -49,6 +49,42 @@
      </wfs:Query>
    </wfs:GetFeature>")
 
+(def osoite-template-full
+  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+   <wfs:GetFeature version=\"1.1.0\"
+       xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
+       xmlns:wfs=\"http://www.opengis.net/wfs\"
+       xmlns:gml=\"http://www.opengis.net/gml\"
+       xmlns:ogc=\"http://www.opengis.net/ogc\"
+       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+       xsi:schemaLocation=\"http://www.opengis.net/wfs
+       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+     <wfs:Query typeName=\"oso:Osoitenimi\">
+       <ogc:Filter>
+         <ogc:And>
+           <ogc:Or>
+             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+               <ogc:PropertyName>oso:kuntanimiFin</ogc:PropertyName>
+               <ogc:Literal>%s*</ogc:Literal>
+             </ogc:PropertyIsLike>
+             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+               <ogc:PropertyName>oso:kuntanimiSwe</ogc:PropertyName>
+               <ogc:Literal>%s*</ogc:Literal>
+             </ogc:PropertyIsLike>
+           </ogc:Or>
+           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+             <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
+             <ogc:Literal>%s*</ogc:Literal>
+           </ogc:PropertyIsLike>
+           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
+             <ogc:PropertyName>oso:katunumero</ogc:PropertyName>
+             <ogc:Literal>%s*</ogc:Literal>
+           </ogc:PropertyIsLike>
+         </ogc:And>
+       </ogc:Filter>            
+     </wfs:Query>
+   </wfs:GetFeature>")
+
 (defn- address-part [feature part]
   (first (xml-> feature :oso:Osoitenimi part text)))
 
@@ -79,7 +115,7 @@
 (defn get-address-request [{street :street number :number city :city}]
   (if (not-blank? street city)
     (format osoite-template street) ; TODO
-    (format osoite-template street)))
+    (format osoite-template-simple city city street number)))
 
 (defn osoite [request]
   (debug "resolving address: query='%s'" (get (:query-params request) "query"))
