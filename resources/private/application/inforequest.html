@@ -29,10 +29,6 @@
             <p>Luotu:</p>
             <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
           </div>
-          <div data-bind="with: $root.applicationModel.data">
-            <p>Kysyjä:</p>
-            <span data-bind="if: $data.auth"><span class="application_summary_text" id="test-application-applicant" data-bind="fullName: $data.roles.applicant()"></span></span>
-          </div>
         </div>
       </div>
     </div>
