@@ -177,7 +177,7 @@
              {:name "maaraalaTunnus" :type :string}
              {:name "kylaNimi" :type :string}
              {:name "tilanNimi" :type :string}
-             {:name "kokotilaKytkin" :type :checkbox} ; TODO jos maara-ala tunnus kokotilakytkin pitaisi olla false. Tarvitaanko ollenkaan?
+             {:name "kokotilaKytkin" :type :checkbox}
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
