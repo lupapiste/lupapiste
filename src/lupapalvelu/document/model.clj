@@ -31,6 +31,14 @@
 (defmethod validate :boolean [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
+;; FIXME
+(defmethod validate :checkbox [elem v]
+  nil)
+
+;; FIXME
+(defmethod validate :select [elem v]
+  nil)
+
 (defmethod validate nil [_ _]
   [:err "illegal-key"])
 
