@@ -65,24 +65,6 @@
   (let [address (feature-to-address feature)]
     (str (:katunimi address) ", " (:kuntanimiFin address))))
 
-(defn- haku-kunta [search]
-  (let [terms (s/split search #",")]
-    (if (= 2 (count terms))
-      (s/trim (second terms))
-      "")))
-
-(defn- haku-katunumero [search]
-  (let [katunumero (read-string (s/trim (last (s/split (first (s/split search #",")) #"\s"))))]
-    (if (number? katunumero)
-      katunumero
-      "")))
-
-(defn- haku-katunimi [search]  
-  (let [parts (s/split (first (s/split search #",")) #"\s")]  
-    (if (number? (haku-katunumero search))  
-      (s/trim (s/join " " (take (- (count parts) 1) parts)))  
-      (s/trim (s/join " " parts)))))
-
 (defn parse-address [query]
   (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*([\w ]+))?" query)
         street (if street (s/trim street))
