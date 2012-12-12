@@ -245,15 +245,22 @@
      $(self).next(".application_section_content").toggleClass('content_expanded');
     }
   };
-
-  hub.onPageChange("application", function(e) {
+  
+  var initApplication = function(e) {
     currentId = e.pagePath[0];
     hub.send("load-application", {id: currentId});
+  };
+
+  hub.onPageChange("application", function(e) {
+    initApplication(e);
+  });
+
+  hub.onPageChange("inforequest", function(e) {
+    initApplication(e);
   });
 
   $(function() {
-    var page = $("#application");
-    ko.applyBindings({
+    var bindings = {
       application: application,
       attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
@@ -263,7 +270,10 @@
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian
-    }, page[0]);
+    };
+    
+    ko.applyBindings(bindings, $("#application")[0]);
+    ko.applyBindings(bindings, $("#inforequest")[0]);
   });
 
 })();
