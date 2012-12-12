@@ -87,29 +87,29 @@
   (debug "resolving address: query='%s'" (get (:query-params request) "query"))
   (let [query (get (:query-params request) "query")
         request (format osoite-template query)
-        response (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false})]
-    (if (= (:status response) 200)
-      (do
-        (let [input-xml (:body response)
-              features (-> input-xml
-                         #_(string/replace "UTF-8" "ISO-8859-1")
-                         (.getBytes "UTF-8")
-                         java.io.ByteArrayInputStream.
-                         xml/parse
-                         zip/xml-zip)
-              feature-members (xml-> features :gml:featureMember)
-              feature-count (count feature-members)]
-          (debug "Received %d addresses" feature-count)
-          (if (> feature-count 30)
-            (resp/json {:query query
-                        :suggestions []
-                        :data []})
-            (resp/json {:query query
-                        :suggestions (map feature-to-address-string feature-members)
-                        :data (map feature-to-address feature-members)}))))
+        task (future (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false}))
+        response (deref task 3000 {:status 408 :body "timeout"})]
+    (case (:status response)
+      200 (do
+            (let [input-xml (:body response)
+                  features (-> input-xml
+                             (string/replace "UTF-8" "ISO-8859-1")
+                             (.getBytes "ISO-8859-1")
+                             java.io.ByteArrayInputStream.
+                             xml/parse
+                             zip/xml-zip)
+                  feature-members (xml-> features :gml:featureMember)
+                  feature-count (count feature-members)]
+              (debug "Received %d addresses" feature-count)
+              (if (> feature-count 15)
+                {:status 413 :body "too-many"}
+                (resp/json {:query query
+                            :suggestions (map feature-to-address-string feature-members)
+                            :data (map feature-to-address feature-members)}))))
+      408 response
       (do
         (error "Address query failed: status=%s response=%s" (:status response) (str response))
-        (resp/status 500)))))
+        (resp/status 500 "ups")))))
 
 (def pointbykiinteistotunnus-template
   "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -138,7 +138,7 @@
 (defn pointbykiinteistotunnus [request]
   (let [kiinteistotunnus (get (:query-params request) "kiinteistotunnus")
         input-xml (:body (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body (format pointbykiinteistotunnus-template kiinteistotunnus) :basic-auth auth}))
-        features (-> input-xml (string/replace "UTF-8" "ISO-8859-1") .getBytes java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
+        features (-> input-xml (string/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
         result (map feature-to-position (xml-> features :gml:featureMember))]
     (resp/json result)))
 
@@ -172,7 +172,7 @@
     (let [request-body (format kiinteistotunnusbypoint-template x y)
           response (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body request-body :basic-auth auth})
           input-xml (:body response)
-          features (-> input-xml (string/replace "UTF-8" "ISO-8859-1") .getBytes java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
+          features (-> input-xml (string/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
           result (map feature-to-kiinteistotunnus (xml-> features :gml:featureMember))]
       (resp/json result))))
 
