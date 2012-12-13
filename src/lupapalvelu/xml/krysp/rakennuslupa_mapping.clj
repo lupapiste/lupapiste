@@ -98,7 +98,8 @@
                                                 :child [{:tag :Osapuoli
                                                          :child [{:tag :kuntaRooliKoodi}
                                                                  {:tag :VRKrooliKoodi}
-                                                                 henkilo]
+                                                                 henkilo
+                                                                 yritys]
                                                          }]}]}]}
                              {:tag :rakennuspaikkatieto}
                              {:tag :toimenpidetieto
