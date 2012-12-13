@@ -45,7 +45,7 @@
                          henkilo-body
                          {:name "patevyys" :type :group
                           :body [
-                            {:name "SuunnittelijaRoolikoodiType" :type :select
+                            {:name "kuntaRoolikoodiType" :type :select
                           :body [{:name "GEO-suunnittelija"}
                                   {:name "LVI-suunnittelija"}
                                   {:name "pääsuunnittelija"}
@@ -58,7 +58,7 @@
                                     {:name "a"}
                                     {:name "b"}
                                     {:name "c"}]}
-                            {:name "kokemus" :type :string}
+                            {:name "kokemus" :type :string};TODO vaih patevyysvatimusluokaksi
                             {:name "Liiteet" :type :string}
                             ]
                             })) ; TODO miten liitteet hanskataan
