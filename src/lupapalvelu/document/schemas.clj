@@ -73,7 +73,7 @@
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
-                     {:name "eiTiedossa"}]}
+                     {:name "ei tiedossa"}]}
 
              {:name "kayttotarkoitus" :type :string}
              {:name "tilavuus" :type :string}
@@ -84,14 +84,14 @@
              {:name "rakentamistapa" :type :select
               :body [{:name "elementti" :type :checkbox}
                      {:name "paikalla" :type :checkbox}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "kantavarakennusaine" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
                      {:name "teras" :type :checkbox}
                      {:name "puu" :type :checkbox}
                      {:name "muurakennusaine" :type :string :size "s"}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "julkisivu" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
@@ -100,7 +100,7 @@
                      {:name "puu" :type :checkbox}
                      {:name "lasi" :type :checkbox}
                      {:name "muumateriaali" :type :string :size "s"}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "verkostoliittymat" :type :choice
               :body [{:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
@@ -115,7 +115,7 @@
                      {:name "suorasahko" :type :checkbox}
                      {:name "uuni" :type :checkbox}
                      {:name "eiLammitysta" :type :checkbox}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "lammonlahde" :type :select
               :body [{:name "kaukotaialuelampo" :type :checkbox}
                      {:name "kevytpolttooljy" :type :checkbox}
@@ -127,7 +127,7 @@
                      {:name "maalampo" :type :checkbox}
                      {:name "puu" :type :checkbox}
                      {:name "muu" :type :string :size "s"}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "varusteet" :type :choice
               :body [{:name "sahkoKytkin" :type :checkbox}
                      {:name "kaasuKytkin" :type :checkbox}
@@ -143,15 +143,15 @@
       :body [{:name "huoneluku" :type :string}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
-                     {:name "keittoKomero"}
-                     {:name "keittoTila"}
+                     {:name "keittokomero"}
+                     {:name "keittotila"}
                      {:name "tupakeittio"}
-                     {:name "eiTiedossa"}]}
+                     {:name "ei tiedossa"}]}
              {:name "huoneistoala" :type :string}
              {:name "huoneistoTyyppi" :type :select
               :body [{:name "asuinhuoneisto"}
                      {:name "toimitila"}
-                     {:name "eiTiedossa"}]}
+                     {:name "ei tiedossa"}]}
              {:name "huoneistoTunnus" :type :string}
              {:name "varusteet" :type :choice
               :body [{:name "wc" :type :checkbox}
@@ -181,14 +181,14 @@
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
-                     {:name "eiTiedossa"}]}
+                     {:name "ei tiedossa"}]}
              {:name "kaavanaste" :type "select"
               :body [{:name "asema"}
                      {:name "ranta"}
                      {:name "rakennus"}
                      {:name "yleis"}
                      {:name "eiKaavaa"}
-                     {:name "eiTiedossa"}]}]}
+                     {:name "ei tiedossa"}]}]}
 
      {:info {:name "osoite"}
       :body full-osoite-body}
