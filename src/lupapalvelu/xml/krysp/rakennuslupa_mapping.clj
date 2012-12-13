@@ -16,7 +16,7 @@
                       sijantitieto
                       {:tag :tunnus :child tunnus-children}))
 
-(def rakennus [{:tag :Rakennus
+(def rakennus {:tag :Rakennus
                 :child [sijantitieto
                         {:tag :rakennuksenTiedot
                          :child [{:tag :rakennustunnus :child tunnus-children}
@@ -25,10 +25,6 @@
                                  {:tag :kokonaisala}
                                  {:tag :kellarinpinta-ala}
                                  {:tag :BIM :child []}
-                                 osoite
-                                 {:tag :rinnakkaisosoite
-                                  :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}
-                                  :child postiosoite-children}
                                  {:tag :kerrosluku}
                                  {:tag :kerrosala}
                                  {:tag :rakentamistapa :child []}
@@ -56,8 +52,7 @@
                                  {:tag :jaahdytysmuoto}
                                  {:tag :asuinhuoneistot
                                   :child [{:tag :huoneisto
-                                           :child [osoite
-                                                   {:tag :muutostapa}
+                                           :child [{:tag :muutostapa}
                                                    {:tag :huoneluku}
                                                    {:tag :keittionTyyppi}
                                                    {:tag :huoneistoala}
@@ -73,7 +68,7 @@
                                                             {:tag :huoneistonumero}
                                                             {:tag :jakokirjain}
                                                             ]}]}]}
-                                 ]}]}])
+                                 ]}]})
 
 
 (def rakennuslupa_to_krysp
@@ -117,7 +112,7 @@
                                                {:tag :kaupunkikuvaToimenpide}
                                                {:tag :katselmustieto}
                                                {:tag :rakennustieto
-                                                :child []}
+                                                :child [rakennus]}
                                                {:tag :rakennelmatieto}]}]
                               }]}
                     ]
