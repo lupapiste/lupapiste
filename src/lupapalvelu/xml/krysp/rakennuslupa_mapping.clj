@@ -17,7 +17,9 @@
                       {:tag :tunnus :child tunnus-children}))
 
 (def rakennus {:tag :Rakennus
-                :child [sijantitieto
+                :child [{:tag :yksilointitieto :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
+                        {:tag :alkuHetki :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
+                        sijantitieto
                         {:tag :rakennuksenTiedot
                          :child [{:tag :rakennustunnus :child tunnus-children}
                                  {:tag :kayttotarkoitus}
