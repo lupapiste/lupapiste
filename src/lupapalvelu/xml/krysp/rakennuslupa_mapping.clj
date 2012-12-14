@@ -99,7 +99,8 @@
                                                          :child [{:tag :kuntaRooliKoodi}
                                                                  {:tag :VRKrooliKoodi}
                                                                  henkilo
-                                                                 yritys]
+                                                                 yritys
+                                                                 ]
                                                          }]}]}]}
                              {:tag :rakennuspaikkatieto}
                              {:tag :toimenpidetieto
