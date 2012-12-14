@@ -4,7 +4,8 @@
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip])
-  (:use [clojure.data.zip.xml :only [xml-> text]]))
+  (:use [clojure.data.zip.xml :only [xml-> text]]
+        [lupapalvelu.util :only [starts-with-i]]))
 
 (def ^:private auth ["***REMOVED***" "***REMOVED***"])
 
@@ -93,16 +94,23 @@
      :x x
      :y y}))
 
+(defn feature-to-address-string [[street number city]]
+  (if (s/blank? city)
+    (fn [feature]
+      (let [{:keys [katunimi kuntanimiFin]} (feature-to-address feature)]
+        (str katunimi ", " kuntanimiFin)))
+    (fn [feature]
+      (let [{:keys [katunimi katunumero kuntanimiFin kuntanimiSwe]} (feature-to-address feature)
+            kuntanimi (if (starts-with-i kuntanimiFin city) kuntanimiFin kuntanimiSwe)]
+        (println "FOO:" city (starts-with-i kuntanimiFin city) kuntanimiFin kuntanimiSwe)
+        (str katunimi " " katunumero ", " kuntanimi)))))
+
 (defn feature-to-position [feature]
   (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
     {:x x :y y}))
 
 (defn feature-to-kiinteistotunnus [feature]
   {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))})
-
-(defn feature-to-address-string [feature]
-  (let [address (feature-to-address feature)]
-    (str (:katunimi address) ", " (:kuntanimiFin address))))
 
 (defn response->features [response]
   (let [input-xml (:body response)

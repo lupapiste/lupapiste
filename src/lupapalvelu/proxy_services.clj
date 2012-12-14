@@ -41,7 +41,7 @@
     (if (= status :ok)
       (let [features (take 10 response)]
         (resp/json {:query query
-                    :suggestions (map wfs/feature-to-address-string features)
+                    :suggestions (map wfs/feature-to-street-number-city features)
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable"))))
 
@@ -68,8 +68,7 @@
                               (wfs/property-is-like "oso:katunimi" (str street "*"))
                               (wfs/or
                                 (wfs/property-is-like "oso:kuntanimiFin" (str city "*"))
-                                (wfs/property-is-like "oso:kuntanimiSwe" (str city "*")))
-                              (wfs/property-is-equal "oso:jarjestysnumero" "1"))))
+                                (wfs/property-is-like "oso:kuntanimiSwe" (str city "*"))))))
       :else (wfs/query {"typeName" "oso:Osoitenimi"}
               (wfs/sort-by "oso:katunumero")
               (wfs/filter
@@ -83,11 +82,12 @@
 (defn find-addresses-proxy [request]
   (let [query (get (:query-params request) "query")
         address (parse-address query)
-        [status response] (find-addresses address)]
+        [status response] (find-addresses address)
+        feature->string (wfs/feature-to-address-string address)]
     (if (= status :ok)
       (let [features (take 10 response)]
         (resp/json {:query query
-                    :suggestions (map wfs/feature-to-address-string features)
+                    :suggestions (map feature->string features)
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable"))))
 
@@ -144,5 +144,6 @@
 
 (def services {"nls" (secure wfs/raster-images)
                "pointbykiinteistotunnus" (secure point-by-kiinteistotunnus-proxy)
-               ; "kiinteistotunnusbypoint" (secure wfs/kiinteistotunnus-by-point)
-               "osoite" (secure find-addresses)})
+               "kiinteistotunnusbypoint" (secure kiinteistotunnus-by-point-proxy)
+               "find-address" (secure find-addresses-proxy)
+               "get-address" (secure get-addresses-proxy)})
