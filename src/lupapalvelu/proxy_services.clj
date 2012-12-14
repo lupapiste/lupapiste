@@ -7,7 +7,7 @@
             [lupapalvelu.wfs :as wfs])
   (:use [clojure.data.zip.xml]
         [lupapalvelu.log]
-        [lupapalvelu.util :only [dissoc-in]]))
+        [lupapalvelu.util :only [dissoc-in select]]))
 
 ;;
 ;; NLS:
@@ -23,7 +23,7 @@
     [street number city]))
 
 (defn get-addresses [[street number city]]
-  (wfs/execute
+  (wfs/execute wfs/maasto
     (wfs/query {"typeName" "oso:Osoitenimi"}
       (wfs/sort-by "oso:katunumero")
       (wfs/filter
@@ -34,8 +34,19 @@
             (wfs/property-is-like "oso:kuntanimiFin" city)
             (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
+(defn get-addresses-proxy [request]
+  (let [query (get (:query-params request) "query")
+        address (parse-address query)
+        [status response] (get-addresses address)]
+    (if (= status :ok)
+      (let [features (take 10 response)]
+        (resp/json {:query query
+                    :suggestions (map wfs/feature-to-address-string features)
+                    :data (map wfs/feature-to-address features)}))
+      (resp/status 503 "Service temporarily unavailable"))))
+
 (defn find-addresses [[street number city]]
-  (wfs/execute
+  (wfs/execute wfs/maasto
     (cond
       (and (s/blank? number) (s/blank? city)) (wfs/query {"typeName" "oso:Osoitenimi"}
                                                 (wfs/sort-by "oso:kuntanimiFin")
@@ -69,17 +80,6 @@
                     (wfs/property-is-like "oso:kuntanimiFin" (str city "*"))
                     (wfs/property-is-like "oso:kuntanimiSwe" (str city "*")))))))))
 
-(defn get-addresses-proxy [request]
-  (let [query (get (:query-params request) "query")
-        address (parse-address query)
-        [status response] (get-addresses address)]
-    (if (= status :ok)
-      (let [features (take 10 response)]
-        (resp/json {:query query
-                    :suggestions (map wfs/feature-to-address-string features)
-                    :data (map wfs/feature-to-address features)}))
-      (resp/status 503 "Service temporarily unavailable"))))
-
 (defn find-addresses-proxy [request]
   (let [query (get (:query-params request) "query")
         address (parse-address query)
@@ -91,38 +91,40 @@
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable"))))
 
-(def pointbykiinteistotunnus-template
-  "<?xml version='1.0' encoding='UTF-8'?>
-   <wfs:GetFeature version='1.1.0'
-       xmlns:ktjkiiwfs='http://xml.nls.fi/ktjkiiwfs/2010/02' xmlns:wfs='http://www.opengis.net/wfs'
-       xmlns:gml='http://www.opengis.net/gml' xmlns:ogc='http://www.opengis.net/ogc'
-       xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-       xsi:schemaLocation='http://www.opengis.net/wfs
-       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd'>
-     <wfs:Query typeName='ktjkiiwfs:PalstanTietoja' srsName='EPSG:3067'>
-       <wfs:PropertyName>ktjkiiwfs:rekisteriyksikonKiinteistotunnus</wfs:PropertyName>
-       <wfs:PropertyName>ktjkiiwfs:tunnuspisteSijainti</wfs:PropertyName>
-       <ogc:Filter>
-         <ogc:PropertyIsEqualTo>
-           <ogc:PropertyName>ktjkiiwfs:rekisteriyksikonKiinteistotunnus</ogc:PropertyName>
-           <ogc:Literal>%s</ogc:Literal>
-         </ogc:PropertyIsEqualTo>
-       </ogc:Filter>
-     </wfs:Query>
-   </wfs:GetFeature>")
+(defn- point-by-kiinteistotunnus [kiinteistotunnus]
+  (wfs/execute wfs/ktjkii
+    (wfs/query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (wfs/property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (wfs/property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs/filter
+        (wfs/property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" kiinteistotunnus)))))
 
-(defn- feature-to-position [feature]
-  (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
-    {:x x :y y}))
+; TODO: Error handling
+(defn point-by-kiinteistotunnus-proxy [request]
+  (let [[status features] (-> request (:query-params) (get "kiinteistotunnus") (point-by-kiinteistotunnus))]
+    (if (= status :ok)
+      (resp/json (map wfs/feature-to-position features))
+      (do
+        (error "Failed to get point by 'kiinteistotunnus': %s" features)
+        (resp/status 503 "Service temporarily unavailable")))))
 
+(defn- kiinteistotunnus-by-point [[x y]]
+  (wfs/execute wfs/ktjkii
+    (wfs/query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (wfs/property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (wfs/property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs/filter
+        (wfs/intersects
+          (wfs/property-name "ktjkiiwfs:sijainti")
+          (wfs/point x y))))))
 
-
-(defn nls [request]
-  (client/get "https://ws.nls.fi/rasteriaineistot/image"
-    {:query-params (:query-params request)
-     :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-     :basic-auth ["***REMOVED***" "***REMOVED***"]
-     :as :stream}))
+(defn kiinteistotunnus-by-point-proxy [request]
+  (let [[status features] (-> request (:query-params) (select ["x" "y"]) (kiinteistotunnus-by-point))]
+    (if (= status :ok)
+      (resp/json (map wfs/feature-to-kiinteistotunnus features))
+      (do
+        (error "Failed to get 'kiinteistotunnus' by popint: %s" features)
+        (resp/status 503 "Service temporarily unavailable")))))
 
 ;
 ; Utils:
@@ -140,7 +142,7 @@
 ;; Proxy services by name:
 ;;
 
-(def services {"nls" (secure nls)
-               ; "pointbykiinteistotunnus" (secure pointbykiinteistotunnus)
-               ; "kiinteistotunnusbypoint" (secure kiinteistotunnusbypoint)
+(def services {"nls" (secure wfs/raster-images)
+               "pointbykiinteistotunnus" (secure point-by-kiinteistotunnus-proxy)
+               ; "kiinteistotunnusbypoint" (secure wfs/kiinteistotunnus-by-point)
                "osoite" (secure find-addresses)})
