@@ -9,7 +9,7 @@
     </div>
 
     <div class="application_summary">
-      <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
+      <div id="inforequest-map" class="map map-large" style="width: 280px; height: 280px;"></div>
 
       <div data-bind="with: application">
         <h1 data-bind="with: address">
@@ -38,7 +38,24 @@
           <p>Tässä näkymässä voit käsitellä neuvontapyynnön tietoja.</p>
       </aside>
     </div>
-
+    <div class="container" data-bind="with: $root.comment">
+        <p class="tab-info"> Kysymys ja keskustelu.</p>
+        <div class="tab-wrapper">
+          <table class="table table-striped conversation">
+            <tbody data-bind="foreach: comments">
+              <tr class="comment">
+                <td class="comment-party commenttd"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
+                <td class="commenttd" data-bind="text: text"></td>
+              </tr>
+            </tbody>
+          </table>
+          <form>
+            <h3>Kirjoita viesti:</h3>
+            <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
+          </form>
+        </div>
+      </div>
   </section>
 </body>
 </html>
