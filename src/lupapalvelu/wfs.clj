@@ -14,6 +14,7 @@
   (str "<?xml version='1.0' encoding='UTF-8'?>
         <wfs:GetFeature version='1.1.0'
             xmlns:oso='http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02'
+            xmlns:ktjkiiwfs='http://xml.nls.fi/ktjkiiwfs/2010/02'
             xmlns:wfs='http://www.opengis.net/wfs'
             xmlns:gml='http://www.opengis.net/gml'
             xmlns:ogc='http://www.opengis.net/ogc'
@@ -43,6 +44,15 @@
 
 (defn or [& e]
   (str "<ogc:Or>" (apply str e) "</ogc:Or>"))
+
+(defn intersects [& e]
+  (str "<ogc:Intersects>" (apply str e) "</ogc:Intersects>"))
+
+(defn point [x y]
+  (format "<gml:Point><gml:pos>%s %s</gml:pos></gml:Point>" x y))
+
+(defn property-name [n]
+  (str "<wfs:PropertyName>" n "</wfs:PropertyName>"))
 
 (defn property-filter [filter-name property-name property-value]
   (str
@@ -83,6 +93,13 @@
      :x x
      :y y}))
 
+(defn feature-to-position [feature]
+  (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
+    {:x x :y y}))
+
+(defn feature-to-kiinteistotunnus [feature]
+  {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))})
+
 (defn feature-to-address-string [feature]
   (let [address (feature-to-address feature)]
     (str (:katunimi address) ", " (:kuntanimiFin address))))
@@ -97,17 +114,20 @@
                   zip/xml-zip)]
     (xml-> features :gml:featureMember)))
 
+(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
+(def maasto "https://ws.nls.fi/maasto/wfs")
+
 (defn execute
   "Takes a query (in XML) and returns a vector. If the first element of that
    vector is :ok, then the next element is a list of features that match the
    query. If the first element is :error, the next element is the HTTP response.
    Finally, in case of time-out, a vector [:timeout] is returned."
-  [q]
+  [url q]
   (deref
     (future
-      (let [response (client/post "https://ws.nls.fi/maasto/wfs" {:body q :basic-auth auth :throw-exceptions false})]
+      (let [response (client/post url {:body q :basic-auth auth :throw-exceptions false})]
         (if (= (:status response) 200)
-          [:ok    (response->features response)]
+          [:ok (response->features response)]
           [:error response])))
     timeout
     [:timeout]))
@@ -116,14 +136,34 @@
 ;; TODO:
 ;;
 
-(comment
-  (defn pointbykiinteistotunnus [request]
-  (let [kiinteistotunnus (get (:query-params request) "kiinteistotunnus")
-        input-xml (:body (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body (format pointbykiinteistotunnus-template kiinteistotunnus) :basic-auth auth}))
-        features (-> input-xml (s/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
-        result (map feature-to-position (xml-> features :gml:featureMember))]
-    (resp/json result)))
 
+ 
+
+(comment
+
+  (let [q
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<wfs:GetFeature version=\"1.1.0\"
+  xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\" xmlns:wfs=\"http://www.opengis.net/wfs\"
+  xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\"
+  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+  xsi:schemaLocation=\"http://www.opengis.net/wfs
+  http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
+  <wfs:Query typeName=\"ktjkiiwfs:PalstanTietoja\" srsName=\"EPSG:3067\">
+       <wfs:PropertyName>ktjkiiwfs:rekisteriyksikonKiinteistotunnus</wfs:PropertyName>
+       <wfs:PropertyName>ktjkiiwfs:tunnuspisteSijainti</wfs:PropertyName>
+       <ogc:Filter>
+              <ogc:PropertyIsEqualTo>
+                     <ogc:PropertyName>ktjkiiwfs:rekisteriyksikonKiinteistotunnus
+                     </ogc:PropertyName>
+                     <ogc:Literal>09100200990013</ogc:Literal>
+              </ogc:PropertyIsEqualTo>
+       </ogc:Filter>
+  </wfs:Query>
+</wfs:GetFeature>"]
+  (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body q :basic-auth auth :throw-exceptions false}))
+  
+  
 (def kiinteistotunnusbypoint-template
   "<?xml version='1.0' encoding='UTF-8'?>
    <wfs:GetFeature version='1.1.0' xmlns:ktjkiiwfs='http://xml.nls.fi/ktjkiiwfs/2010/02'
@@ -144,8 +184,6 @@
      </wfs:Query>
    </wfs:GetFeature>")
 
-(defn- feature-to-kiinteistotunnus [feature]
-  {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))})
 
 (defn kiinteistotunnusbypoint
   ([{query-params :query-params}]
@@ -157,3 +195,15 @@
           features (-> input-xml (s/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
           result (map feature-to-kiinteistotunnus (xml-> features :gml:featureMember))]
       (resp/json result)))))
+
+;;
+;; Raster images:
+;;
+
+(defn raster-images [request]
+  (client/get "https://ws.nls.fi/rasteriaineistot/image"
+    {:query-params (:query-params request)
+     :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+     :basic-auth ["***REMOVED***" "***REMOVED***"]
+     :as :stream}))
+
