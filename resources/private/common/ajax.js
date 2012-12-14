@@ -37,8 +37,8 @@ var ajax = function() {
     self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
     self.completeHandler = function(jqXHR, textStatus) { };
 
-    self.raw = function() {
-      self.rawData = true;
+    self.raw = function(v) {
+      self.rawData = (v === undefined) ? true : v;
       return self;
     }
     
