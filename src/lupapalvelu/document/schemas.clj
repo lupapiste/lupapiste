@@ -76,10 +76,10 @@
                      {:name "ei tiedossa"}]}
 
              {:name "kayttotarkoitus" :type :string}
-             {:name "tilavuus" :type :string}
-             {:name "kokonaisala" :type :string}
-             {:name "kellaripinta-ala" :type :string}
-             {:name "kerrosluku" :type :string}
+             {:name "tilavuus" :type :string :unit "m3" :subtype :number}
+             {:name "kokonaisala" :type :string :unit "m2" :subtype :number}
+             {:name "kellaripinta-ala" :type :string :unit "m2" :subtype :number}
+             {:name "kerrosluku" :type :string :subtype :number}
              {:name "kerrosala" :type :string :unit "m2" :subtype :number}
              {:name "rakentamistapa" :type :select
               :body [{:name "elementti" :type :checkbox}
@@ -140,14 +140,14 @@
              {:name "poikkeamiset" :type :string}]}
 
      {:info {:name "huoneisto"}
-      :body [{:name "huoneluku" :type :string}
+      :body [{:name "huoneluku" :type :string :subtype :number}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
                      {:name "keittokomero"}
                      {:name "keittotila"}
                      {:name "tupakeittio"}
                      {:name "ei tiedossa"}]}
-             {:name "huoneistoala" :type :string}
+             {:name "huoneistoala" :type :string :unit "m2" :subtype :number}
              {:name "huoneistoTyyppi" :type :select
               :body [{:name "asuinhuoneisto"}
                      {:name "toimitila"}
