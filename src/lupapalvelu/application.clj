@@ -65,7 +65,8 @@
     (fn [application]
       (mongo/update
         mongo/applications {:_id (:id application)}
-          {$set {:state :answered}}))))
+          {$set {:state :answered
+                 :modified (:created command)}}))))
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
