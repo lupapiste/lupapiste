@@ -94,6 +94,10 @@
      :x x
      :y y}))
 
+(defn feature-to-address-string [feature]
+  (let [{:keys [katunimi katunumero kuntanimiFin]} (feature-to-address feature)]
+    (str katunimi " " katunumero ", " kuntanimiFin)))
+
 (defn feature-to-address-string [[street number city]]
   (if (s/blank? city)
     (fn [feature]
@@ -102,7 +106,6 @@
     (fn [feature]
       (let [{:keys [katunimi katunumero kuntanimiFin kuntanimiSwe]} (feature-to-address feature)
             kuntanimi (if (starts-with-i kuntanimiFin city) kuntanimiFin kuntanimiSwe)]
-        (println "FOO:" city (starts-with-i kuntanimiFin city) kuntanimiFin kuntanimiSwe)
         (str katunimi " " katunumero ", " kuntanimi)))))
 
 (defn feature-to-position [feature]
