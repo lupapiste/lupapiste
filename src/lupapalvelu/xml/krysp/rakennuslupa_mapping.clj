@@ -92,16 +92,7 @@
                                        :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}
                                        :child [{:tag :muuTunnus} {:tag :saapumisPvm}]}]}
                              {:tag :osapuolettieto
-                              :child [{:tag :Osapuolet
-                                       :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}
-                                       :child [{:tag :osapuolitieto
-                                                :child [{:tag :Osapuoli
-                                                         :child [{:tag :kuntaRooliKoodi}
-                                                                 {:tag :VRKrooliKoodi}
-                                                                 henkilo
-                                                                 yritys
-                                                                 ]
-                                                         }]}]}]}
+                              :child [osapuolet]}
                              {:tag :rakennuspaikkatieto}
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide

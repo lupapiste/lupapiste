@@ -25,7 +25,7 @@
 
 (def yhteystiedot-body [{:name "puhelin" :type :string :subtype :tel}
                         {:name "email" :type :string :subtype :email}
-                        {:name "fax" :type :string}])
+                        {:name "fax" :type :string :subtype :tel}])
 
 (def henkilotiedot-body [{:name "etunimi" :type :string}
                          {:name "sukunimi" :type :string}
@@ -54,10 +54,12 @@
                                   {:name  "Ei tiedossa"}]}
                             {:name "koulutus" :type :string}
                             {:name "patevyysluokka" :type :select
-                            :body [{:name "aa"}
-                                    {:name "a"}
-                                    {:name "b"}
-                                    {:name "c"}]}
+                            :body [{:name "AA"}
+                                    {:name "A"}
+                                    {:name "B"}
+                                    {:name "C"}
+                                    {:name "ei tiedossa"}
+                                    ]}
                             {:name "kokemus" :type :string};TODO vaih patevyysvatimusluokaksi
                             {:name "Liiteet" :type :string}
                             ]
