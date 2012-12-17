@@ -18,8 +18,9 @@ var ajax = function() {
       data:      {},
       cache:     false,
       timeout:   60000,
+      rawData:   false,
       success: function(e) {
-        var handler = e.ok ? self.successHandler : self.errorHandler;
+        var handler = (self.rawData || e.ok) ? self.successHandler : self.errorHandler;
         handler(e);
       },
       error: function(jqXHR, textStatus, errorThrown) {
@@ -36,6 +37,11 @@ var ajax = function() {
     self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
     self.completeHandler = function(jqXHR, textStatus) { };
 
+    self.raw = function(v) {
+      self.rawData = (v === undefined) ? true : v;
+      return self;
+    }
+    
     self.dataType = function(dataType) {
       self.request.dataType = dataType;
       return self;
@@ -107,15 +113,15 @@ var ajax = function() {
   }
 
   function get(url) {
-    return new Call(url, "GET");
+    return new Call(url, "GET").raw();
   }
 
   function post(url) {
-    return new Call(url, "POST");
+    return new Call(url, "POST").raw();
   }
 
   function postJson(url, data) {
-    return new Call(url, "POST").json(data);
+    return new Call(url, "POST").raw().json(data);
   }
 
   function command(name, data) {
