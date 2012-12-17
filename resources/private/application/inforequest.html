@@ -23,12 +23,15 @@
           </div>
           <div>
             <p>Tila:</p>
-            <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+            <span id="test-application-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
           </div>
           <div data-bind="with: $root.applicationModel.data">
             <p>Luotu:</p>
             <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
           </div>
+        </div>
+        <div class="inforequest_actions">
+          <button id="test-mark-inforequest-answered" data-bind="enable: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" type="submit" class="btn btn-primary">Merkitse vastatuksi</button>
         </div>
       </div>
     </div>
