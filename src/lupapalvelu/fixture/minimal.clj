@@ -3,9 +3,9 @@
   (:require [lupapalvelu.mongo :as mongo]))
 
 (def users
-  [
-   {:id "777777777777777777000099" ;; admin
+  [{:id "777777777777777777000099" ;; admin
     :email "admin@solita.fi"
+    :enabled true
     :role :admin
     :personId "solita123"
     :firstName "Admin"
@@ -17,8 +17,9 @@
               :apikey "5087ba34c2e667024fbd5992"}}
     {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :email "veikko.viranomainen@tampere.fi"
+    :enabled true
     :role :authority
-    :authority :tampere
+    :authority :Tampere
     :personId "kunta 122"
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -29,8 +30,9 @@
               :apikey "5051ba0caa2480f374dcfeff"}}
    {:id "777777777777777777000023" ;; Sonja Sibbo - Sipoon lupa-arkkitehti
     :email "sonja.sibbo@sipoo.fi"
+    :enabled true
     :role :authority
-    :authority :sipoo
+    :authority :Sipoo
     :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -39,13 +41,26 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
+   {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
+    :email "admin@sipoo.fi"
+    :enabled true
+    :role :authorityAdmin
+    :authority :Sipoo
+    :firstName "Simo"
+    :lastName "Suurvisiiri"
+    :username "sipoo"
+    :private {:salt "$2a$10$VFcksPILCd9ykyl.1FIhwO",
+              :password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
+              :apikey "50ac788ec2e6c2ea6e73f83f"}}
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
+    :enabled true
     :firstName "Judge"
     :lastName "Dread"
     :role :admin
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
    {:lastName "Nieminen" ;; Mikkos neighbour
     :firstName "Teppo"
+    :enabled true
     :postalCode "33200"
     :username "teppo@example.com"
     :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe"
@@ -61,6 +76,7 @@
      }
    {:id "777777777777777777000010" ;; Mikko Intonen
     :username "mikko@example.com"
+    :enabled true
     :role "applicant"
     :personId "210281-0002"
     :firstName "Mikko"
@@ -68,13 +84,14 @@
     :email "mikko@example.com"
     :street "Rambokuja 6"
     :zip "55550"
-    :city "sipoo"
+    :city "Sipoo"
     :phone "0505503171"
     :private {:password "$2a$10$zwb/nvYQu4b1oZGpxz8.QOqHEBx3vXw9brc3NqDexgMbDuU2pwL9q"
               :salt "$2a$10$zwb/nvYQu4b1oZGpxz8.QO"
               :apikey "502cb9e58426c613c8b85abc"}}
    {:id "777777777777777777000020" ;; pena
     :username "pena"
+    :enabled true
     :role "applicant"
     :personId "010203-0405"
     :firstName "Pena"

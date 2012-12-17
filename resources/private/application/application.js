@@ -4,11 +4,11 @@
 
 ;(function() {
 
+  var currentId;
   var applicationModel = new ApplicationModel();
   var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
   var commentModel = comments.create();
-  var documents = ko.observableArray();
 
   function ApplicationModel() {
     var self = this;
@@ -50,7 +50,7 @@
       ajax.command("submit-application", { id: applicationId})
       .success(function(d) {
         notify.success("hakemus j\u00E4tetty",model);
-        repository.reloadAllApplications();
+        repository.reloadApplication(applicationId);
       })
       .call();
       return false;
@@ -61,7 +61,7 @@
       ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
       .success(function(d) {
         notify.success("tiedot tallennettu",model);
-        repository.reloadAllApplications();
+        repository.reloadApplication(applicationId);
       })
       .call();
       return false;
@@ -72,7 +72,7 @@
       ajax.command("approve-application", { id: applicationId})
         .success(function(d) {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -83,7 +83,7 @@
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function(d) {
           notify.success("kutsu poistettu", model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -94,7 +94,7 @@
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function(d) {
           notify.success("oikeus poistettu", model);
-          repository.reloadAllApplications();
+          repository.reloadApplication(applicationId);
         })
         .call();
       return false;
@@ -102,19 +102,27 @@
 
   };
 
+  var attachments = ko.observableArray([]);
+  var attachmentsByGroup = ko.observableArray();
+
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
     v.subscribe(listener);
     return v;
   }
 
+  function getAttachmentsByGroup(attachments) {
+    var grouped = _.groupBy(attachments, function(attachment) {
+      return attachment.type['type-group'];
+    });
+    var result = _.map(grouped, function(value, key) {
+      return {group: key, attachments: value};
+    });
+    return result;
+  }
+
   function showApplication(data) {
     authorizationModel.refresh(data,function() {
-      // Update map:
-      var location = application.location();
-      var locations = location ? [{x: location.lon(), y: location.lat()}] : [];
-      hub.send("application-map", {locations: locations});
-
       // new data mapping
       applicationModel.data(ko.mapping.fromJS(data));
       ko.mapping.fromJS(data, {}, application);
@@ -123,34 +131,60 @@
       commentModel.setApplicationId(data.id);
       commentModel.setComments(data.comments);
 
+      var statuses = {
+        requires_user_action: {statusName: "missing"},
+        requires_authority_action: {statusName: "new"},
+        ok:{statusName: "ok"}
+      };
+
+      attachments.removeAll();
+      _.each(data.attachments || [], function(a) {
+        var s = statuses[a.state] || {statusName: "foo"};
+        a.statusName = s.statusName;
+        attachments.push(a);
+      });
+
+      attachmentsByGroup(getAttachmentsByGroup(data.attachments));
+
+      // Update map:
+      var location = application.location();
+      
+      hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
+
       // docgen:
 
       var save = function(path, value, callback, data) {
-        debug("saving", path, value, data);
         ajax
           .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-          .success(function() { callback("ok"); })
-          .error(function(e) { error(e); callback(e.status || "err"); })
+          // Server returns empty array (all ok), or array containing an array with three
+          // elements: [key status message]. Here we use just the status.
+          .success(function(e) {
+            var status = (e.results.length === 0) ? "ok" : e.results[0][1];
+            callback(status);
+          })
+          .error(function(e) { error(e); callback("err"); })
           .fail(function(e) { error(e); callback("err"); })
           .call();
       };
 
       var docgenDiv = $("#docgen").empty();
 
-      documents.removeAll();
       _.each(data.documents, function(doc) {
-        documents.push(doc);
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
 
-      application.attachments(data.attachments || []);
+      if(! isTabSelected('#applicationTabs')) {
+        selectDefaultTab('#applicationTabs');
+      }
 
       pageutil.setPageReady("application");
     });
   }
 
-  hub.subscribe("repository-application-reload", function(e) {
-    if (application.id() === e.application.id) showApplication(e.application);
+  hub.subscribe("application-loaded", function(e) {
+    if (!currentId || (currentId === e.application.id)) {
+      showApplication(e.application);
+    }
   });
 
   function InviteModel() {
@@ -162,14 +196,15 @@
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
-      ajax.command("invite", { id: application.id(),
+      var id = application.id();
+      ajax.command("invite", { id: id,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
         .success(function(d) {
           self.email(undefined);
           self.text(undefined);
-          repository.reloadAllApplications();
+          repository.reloadApplication(id);
         })
         .error(function(d) {
           notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
@@ -182,44 +217,63 @@
   var tab = {
     tabClick: function(data, event) {
      var self = event.target;
-     $("#tabs li").removeClass("active");
-     $(self).parent().addClass("active");
-     $(".tab_content").hide();
-     var selected_tab = $(self).attr("href");
-     $(selected_tab).fadeIn();
+     setSelectedTab('#applicationTabs', self);
     }
   };
+
+  function isTabSelected(id) {
+    return $(id + ' > li').hasClass("active");
+  }
+  
+  function selectDefaultTab(id) {
+    setSelectedTab(id, $('.active-as-default'));
+  }
+
+  function setSelectedTab(id, element) {
+    $(id + " li").removeClass("active");
+    $(element).parent().addClass("active");
+    $(".tab-content").hide();
+    var selected_tab = $(element).attr("href");
+    $(selected_tab).fadeIn();
+  }
 
   var accordian = {
     accordianClick: function(data, event) {
      self = event.target;
+     $(self).children(".font-icon").toggleClass("icon-collapsed");
+     $(self).children(".font-icon").toggleClass("icon-expanded");
      $(self).next(".application_section_content").toggleClass('content_expanded');
     }
   };
+  
+  var initApplication = function(e) {
+    currentId = e.pagePath[0];
+    hub.send("load-application", {id: currentId});
+  };
 
-  function onPageChange(e) {
-    var id = e.pagePath[0];
-    if (application.id() != id) {
-      repository.getApplication(id, showApplication, function() {
-        error("No such application, or not permission: "+id);
-        window.location.href = "#!/applications/";
-      });
-    }
-  }
+  hub.onPageChange("application", function(e) {
+    initApplication(e);
+  });
 
-  hub.onPageChange("application", onPageChange);
+  hub.onPageChange("inforequest", function(e) {
+    initApplication(e);
+  });
 
   $(function() {
-    var page = $("#application");
-    ko.applyBindings({
+    var bindings = {
       application: application,
+      attachments: attachments,
+      attachmentsByGroup: attachmentsByGroup,
       applicationModel: applicationModel,
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian
-    }, page[0]);
+    };
+    
+    ko.applyBindings(bindings, $("#application")[0]);
+    ko.applyBindings(bindings, $("#inforequest")[0]);
   });
 
 })();

@@ -7,7 +7,7 @@
 (defn- strip-plus [s] (string/replace s #"\+" " "))
 (defn- content [t] (-> t first :content first))
 (defn- select [d & path] (-> d (enlive/select path) content))
-(defn- parse [s] (-> s (url-decode "ISO-8859-1") strip-ns strip-plus enlive/html-snippet))
+(defn- parse [s] (-> s (url-decode "ISO-8859-1") strip-ns strip-plus enlive/xml-resource))
 
 (defn extract [s m]
   (let [parsed (parse s)]

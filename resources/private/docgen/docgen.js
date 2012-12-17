@@ -11,7 +11,14 @@ var docgen = (function () {
   function makeInput(type, path, value, save, extraClass) {
     var input = document.createElement("input");
     input.name = path;
-    input.type = type;
+
+    try {
+      input.type = type;
+    } catch (e) {
+      // IE does not support HTML5 input types such as email
+      input.type = "text";
+    }
+
     input.className = "form-input " + type + " " + (extraClass || "");
     input.onchange = save;
     if (type === "checkbox") {
@@ -36,12 +43,13 @@ var docgen = (function () {
     var div = document.createElement("span");
     var sizeClass = "";
     if (spec.size) {
-      if (spec.size === "s") sizeClass = "form-input small";
-      if (spec.size === "l") sizeClass = "form-string-large";
+      if (spec.size === "s") sizeClass = "form-input short";
+      if (spec.size === "m") sizeClass = "form-input medium";
     }
     div.className = "form-entry";
     div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
-    div.appendChild(makeInput("text", myPath, model[spec.name], save, sizeClass));
+    var type = (spec.subtype === "email") ? "email" : "text";
+    div.appendChild(makeInput(type, myPath, model[spec.name], save, sizeClass));
     if (spec.unit) {
       var unit = document.createElement("span");
       unit.className = "form-string-unit";
@@ -153,7 +161,7 @@ var docgen = (function () {
 
     var div = document.createElement("div");
     div.className = "form-group";
-    div.appendChild(makeLabel("group", myPath.join(".")));
+    div.appendChild(makeLabel("group", myPath.join("."), specId));
     div.appendChild(partsDiv);
     return div;
   }
@@ -173,6 +181,7 @@ var docgen = (function () {
     checkbox: buildCheckbox,
     select: buildSelect,
     date: buildDate,
+    element: buildElement,
     unknown: buildUnknown
   };
 
@@ -220,14 +229,14 @@ var docgen = (function () {
       var label = document.getElementById(path.replace(/\./g, "-"));
       label.appendChild(loader);
 
-      save(path, value, function (result) {
+      save(path, value, function (status) {
         label.removeChild(loader);
         removeClass(target, ["form-input-warn", "form-input-err"]);
-        if (result === "ok") {
+        if (status === "ok") {
           // Nada.
-        } else if (result === "warn") {
+        } else if (status === "warn") {
           addClass(target, "form-input-warn");
-        } else if (result === "err") {
+        } else if (status === "err") {
           addClass(target, "form-input-err");
         } else {
           error("Unknown result:", result, "path:", path);
@@ -240,10 +249,15 @@ var docgen = (function () {
 
   function buildElement(spec, model, save, specId) {
     var section = document.createElement("section");
-    section.className = "accordion";
+    section.className = "application_section_header";
 
+    var icon = document.createElement("span");
+    icon.className = "font-icon icon-expanded";
     var title = document.createElement("h2");
+    title.className = "application_section_header";
+    title.appendChild(icon);
     title.appendChild(document.createTextNode(loc(specId)));
+
     title.onclick = accordion.toggle;
 
     var sectionContainer = document.createElement("div");

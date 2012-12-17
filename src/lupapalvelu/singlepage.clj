@@ -15,8 +15,10 @@
 (defn compose-resource [kind component]
   (let [out (ByteArrayOutputStream.)]
     (doseq [src (c/get-resources ui-components kind component)]
-      (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))]
-        (IOUtils/copy resource (write-header out src))))
+      (if (fn? src)
+        (.write (write-header out (str "fn: " 'src)) (.getBytes (src)))
+        (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))]
+          (IOUtils/copy resource (write-header out src)))))
     (.toByteArray out)))
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
@@ -31,6 +33,7 @@
 
 (defn inject-content [t {:keys [header nav page footer]} component]
   (enlive/emit* (-> t
+                  (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
                   (enlive/transform [:header] (constantly (first header)))
                   (enlive/transform [:nav] (constantly (first nav)))
                   (enlive/transform [:section] (enlive/content page))

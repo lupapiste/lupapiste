@@ -1,4 +1,4 @@
-var accordion = (function() {
+var accordion = (function () {
 
   var animationTime = 400;
   var animationEasing = "easeInOutCubic";
@@ -15,16 +15,22 @@ var accordion = (function() {
       content.attr("data-accordion-height", height).css("height", height);
     }
 
-    if (state != "closed") {
+    if (state !== "closed") {
       state = "closed";
       height = "0px";
+      content.removeClass("content_expanded");
+      $(e.target).children().removeClass("icon-expanded");
+      $(e.target).children().addClass("icon-collapsed");
     } else {
       state = "open";
+      content.addClass("content_expanded");
+      $(e.target).children().removeClass("icon-collapsed");
+      $(e.target).children().addClass("icon-expanded");
     }
 
     content
       .attr("data-accordion-state", state)
-      .animate({height: height}, animationTime, animationEasing);
+      .animate({ height: height }, animationTime, animationEasing);
 
     e.preventDefault();
     return false;

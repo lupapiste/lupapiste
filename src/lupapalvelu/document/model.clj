@@ -1,74 +1,86 @@
 (ns lupapalvelu.document.model
-  (:require [clojure.string :as s]))
-
-;;
-;; Document Model DSL
-;;
-
-(defn make-model   [name version & body] {:info {:name name :version version} :body body})
-(defn make-elem    [name type & args]    (apply hash-map :name name :type type args))
-(defn make-string  [name & args]         (merge (make-elem name :string :min-len 0 :max-len 32) (apply hash-map args)))
-(defn make-text    [name & args]         (merge (make-elem name :text :min-len 0 :max-len 256) (apply hash-map args)))
-(defn make-boolean [name & args]         (merge (make-elem name :boolean) (apply hash-map args)))
-(defn make-group   [name & body]         {:type :group :name name :body (or body [])})
+  (:use [lupapalvelu.log]
+        [clojure.walk :only [keywordize-keys]])
+  (:require [clojure.string :as s]
+            [lupapalvelu.document.subtype :as subtype]))
 
 ;;
 ;; Validation:
 ;;
 
-(defmulti validate (fn [elem v] (:type elem)))
+(def default-max-len 64)
 
-(defmethod validate :group [elem v]
-  (if (not (map? v)) "illegal-value:not-a-map"))
+(defmulti validate (fn [elem _] (keyword (:type elem))))
+
+(defmethod validate :group [_ v]
+  (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
 (defmethod validate :string [elem v]
   (cond
-    (not= (type v) String) "illegal-value:not-a-string"
-    (and (:max-len elem) (> (.length v) (:max-len elem))) "illegal-value:too-long"
-    (and (:min-len elem) (< (.length v) (:min-len elem))) "illegal-value:too-short"))
+    (not= (type v) String) [:err "illegal-value:not-a-string"]
+    (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
+    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]
+    :else (subtype/subtype-validation elem v)))
 
-(defmethod validate :boolean [elem v]
-  (if (not= (type v) Boolean) "illegal-value:not-a-boolean"))
+(defmethod validate :text [elem v]
+  (cond
+    (not= (type v) String) [:err "illegal-value:not-a-string"]
+    (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
+    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
+
+(defmethod validate :boolean [_ v]
+  (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
+
+;; FIXME
+(defmethod validate :checkbox [elem v]
+  nil)
+
+;; FIXME
+(defmethod validate :select [elem v]
+  nil)
+
+(defmethod validate nil [_ _]
+  [:err "illegal-key"])
+
+(defmethod validate :default [elem _]
+  (warn "Unknown schema type: elem=[%s]" elem)
+  [:err "unknown-type"])
 
 ;;
-;; Processing
+;; Neue api:
 ;;
 
-(defn get-elem [schema n]
-  (some #(if (= (:name %) n) %) schema))
+(defn- find-by-name [body [k & ks]]
+  (when-let [elem (some #(if (= (:name %) k) %) body)]
+    (if (nil? ks)
+      elem
+      (find-by-name (:body elem) ks))))
 
-(defn group? [elem]
-  (= (:type elem) :group))
+(defn- validate-update [body results [k v]]
+  (let [elem (find-by-name body (s/split k #"\."))
+        result (validate (keywordize-keys elem) v)]
+    (if (nil? result)
+      results
+      (conj results (cons k result)))))
 
-(defn xor [a b]
-  (or (and a (not b)) (and (not a) b)))
+(defn validate-updates
+  "Validate updates against schema.
 
-(declare apply-update)
+  Updates is expected to be a seq of updates, where each update is a key/value seq. Key is name of
+  the element to update, and the value is a new value for element. Key should be dot separated path.
 
-(defn apply-single-update [doc schema path changes k v elem]
-  (let [name (s/join \. (reverse (cons k path)))
-        error (if elem (validate elem v) "illegal-key")]
-    (if error
-      [doc (cons [name v false error] changes)]
-      (if (group? elem)
-        (let [[d c] (apply-update (get doc k {}) (:body elem) (cons k path) [] (seq v))]
-          [(assoc doc k d) (concat changes c)])
-        [(assoc doc k v) (cons [name v true] changes)]))))
+  Returns a seq of validation failures. Each failure is a seq of three elements. First element is the
+  name of the element. Second element is either :warn or :err and finally, the last element is the
+  warning or error message."
+  [schema updates]
+  (reduce (partial validate-update (:body schema)) [] updates))
 
-(defn apply-update [doc schema path changes [[k v] & r]]
-  (let [elem (get-elem schema k)
-        result (apply-single-update doc schema path changes k v elem)]
-    (if (nil? r)
-      result
-      (apply-update (first result) schema path (second result) r))))
-
-(defn apply-updates
-  "da public api."
-  ([{:keys [body schema]} updates] (apply-updates body schema updates))
-  ([doc schema updates]
-  (apply-update
-    doc              ; document to update
-    (:body schema)    ; schema to confirm against
-    []               ; path, for error reporting
-    []               ; list of changes performed
-    (seq updates))))  ; updates as a seq of key/value pairs
+(defn validation-status
+  "Accepts validation results (as defined in 'validate-updates' function) and returns either :ok
+  (when results is empty), :warn (when results contains only warnings) or :err (when results
+  contains one or more errors)."
+  [results]
+  (cond
+    (empty? results) :ok
+    (some #(= (second %) :err) results) :err
+    :else :warn))

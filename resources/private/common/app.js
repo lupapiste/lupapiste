@@ -2,7 +2,9 @@
  * Prototype for Lupapiste Single Page Apps
  */
 
-if (typeof LUPAPISTE == "undefined") {var LUPAPISTE = {};}
+if (typeof LUPAPISTE === "undefined") {
+  var LUPAPISTE = {};
+}
 
 /**
  * @param {String} startPage   ID of the landing page
@@ -14,7 +16,6 @@ LUPAPISTE.App = function(startPage) {
   self.startPage = startPage;
   self.currentPage = undefined;
   self.session = undefined;
-  self.hashChangeEventEnabled = true;
 
   /**
    * Complete the App initialization after DOM is loaded.
@@ -26,7 +27,7 @@ LUPAPISTE.App = function(startPage) {
 
     self.connectionCheck();
 
-    if (typeof LUPAPISTE.ModalDialog != "undefined") {
+    if (typeof LUPAPISTE.ModalDialog !== "undefined") {
       LUPAPISTE.ModalDialog.init();
     }
 
@@ -47,7 +48,7 @@ LUPAPISTE.App = function(startPage) {
 
     trace("pageId", pageId, "pagePath", pagePath);
 
-    if (pageId != self.currentPage) {
+    if (pageId !== self.currentPage) {
 
       $(".page").removeClass("visible");
 
@@ -67,18 +68,8 @@ LUPAPISTE.App = function(startPage) {
     hub.send("page-change", {pageId: pageId, pagePath: pagePath});
   };
 
-  this.immediatePageJump = function(url) {
-    trace("Jump to " + url);
-    self.hashChangeEventEnabled = false;
-    window.location = url;
-  };
-
   this.hashChanged = function() {
     trace("hash changed");
-
-    if (!self.hashChangeEventEnabled) {
-      return;
-    }
 
     var hash = (location.hash || "").substr(3);
 
@@ -109,7 +100,8 @@ LUPAPISTE.App = function(startPage) {
   };
 
   this.connectionCheck = function() {
-    ajax.get("/rest/ping")
+    /*
+    ajax.get("/api/ping")
       .success(function() {
         hub.send("connection-online");
         setTimeout(self.connectionCheck, 15000);
@@ -119,6 +111,7 @@ LUPAPISTE.App = function(startPage) {
         setTimeout(self.connectionCheck, 5000);
       })
       .call();
+    */
   };
 
   hub.subscribe("connection-online", function() {
@@ -132,12 +125,13 @@ LUPAPISTE.App = function(startPage) {
   hub.subscribe("login", function(e) {
     trace("login", e);
     $("#user-name").html(e.user.firstName + " " + e.user.lastName);
-    $("#user-role").html(e.user.role);
+    $("#user-role").attr("data-test-id", e.user.role); // for testing purposes
+    $("#user-role").html(loc(e.user.role));
     $("#user-menu").show();
   });
 
   hub.subscribe("logout", function() {
-    self.immediatePageJump("/");
+    window.location = "/logout";
   });
 
 };

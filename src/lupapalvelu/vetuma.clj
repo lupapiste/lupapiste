@@ -1,6 +1,5 @@
 (ns lupapalvelu.vetuma
-  (:use [clojure.string :only [join split]]
-        [clojure.set :only [rename-keys]]
+  (:use [clojure.set :only [rename-keys]]
         [noir.core :only [defpage]]
         [noir.response :only [redirect status json]]
         [hiccup.core :only [html]]
@@ -8,11 +7,12 @@
         [hiccup.form]
         [lupapalvelu.log])
   (:require [digest]
+            [clojure.string :as string]
             [noir.request :as request]
             [noir.session :as session]
             [clj-time.core :as time]
             [clj-time.format :as format]))
-                     
+
 ;;
 ;; Configuration
 ;;
@@ -23,7 +23,7 @@
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
-(def constants 
+(def constants
   {:url       "https://testitunnistus.suomi.fi/VETUMALogin/app"
    :rcvid     "***REMOVED***1"
    :appid     "VETUMA-APP2"
@@ -32,9 +32,9 @@
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "https://localhost:8443/vetuma"
-   :canurl    "https://localhost:8443/vetuma/cancel"
-   :errurl    "https://localhost:8443/vetuma/error"
+   :returl    "{host}/vetuma"
+   :canurl    "{host}/vetuma/cancel"
+   :errurl    "{host}/vetuma/error"
    :ap        "***REMOVED***"
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
@@ -56,13 +56,22 @@
 
 (defn- logged [m] (info "%s" (str m)) m)
 
+(defn apply-template
+  "changes all variables in braces {} with keywords with same name.
+   for example (apply-template \"hi {name}\" {:name \"Teppo\"}) returns \"hi Teppo\""
+  [v m]
+  (string/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
+
+(defn apply-templates
+  "runs apply-template on all values, using the map as input"
+  [m]
+  (into {} (for [[k v] m] [k (apply-template v m)])))
 
 ;;
 ;; Mac
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-
 (defn- mac [data]  (-> data digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
@@ -71,14 +80,11 @@
     vec
     (conj (secret m))
     (conj "")
-    (->> (join "&"))
+    (->> (string/join "&"))
     mac))
 
-(defn- with-mac [m]
-  (merge m {:mac (mac-of m request-mac-keys)}))
-
-(defn- mac-verified [m]
-  (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
+(defn- with-mac [m] (merge m {:mac (mac-of m request-mac-keys)}))
+(defn- mac-verified [m] (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
 
 ;;
 ;; response parsing
@@ -86,15 +92,15 @@
 
 (defn- extract-subjectdata [{s :subjectdata}]
   (-> s
-    (split #", ")
-    (->> (map #(split % #"=")))
+    (string/split #", ")
+    (->> (map #(string/split % #"=")))
     (->> (into {}))
     keys-as-keywords
-    (rename-keys {:etunimi :firstName})
-    (rename-keys {:sukunimi :lastName})))
+    (rename-keys {:etunimi :firstname})
+    (rename-keys {:sukunimi :lastname})))
 
-(defn- extract-userid [{s :extradata}] 
-  {:userid (last (split s #"="))})
+(defn- extract-userid [{s :extradata}]
+  {:userid (last (string/split s #"="))})
 
 (defn- extract-request-id [{id :trid}]
   {:stamp id})
@@ -108,10 +114,12 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn- request-data []
+(defn- request-data [host]
   (-> constants
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
+    (assoc :host  host)
+    apply-templates
     with-mac
     (dissoc :key)
     keys-as-strings))
@@ -130,13 +138,30 @@
 (defonce mem (atom {}))
 
 ;;
-;; Web stuff 
+;; Web stuff
 ;;
 
 (defn- field [[k v]]
   (hidden-field k v))
 
 (defn- non-local? [& rest] (some #(not= -1 (.indexOf % ":")) rest))
+
+(defn host-and-ssl-port
+  "returns host with port changed from 8000 to 8443. Shitty crap."
+  [host]
+  (string/replace host #":8000" ":8443"))
+
+(defn host
+  ([] (host :current))
+  ([mode]
+    (let [request (request/ring-request)
+          scheme  (name (:scheme request))
+          host    (get-in request [:headers "host"])]
+      (case mode
+        :current (str scheme "://" host)
+        :secure  (if (= scheme "https")
+                   (host :current)
+                   (str "https://" (host-and-ssl-port host)))))))
 
 ; TODO: does not strip unneeded parameters
 (defpage "/vetuma" {:keys [success cancel error] :as paths}
@@ -146,7 +171,7 @@
       (session/put! *path-session-key* paths)
       (html
         (form-to [:post (:url constants)]
-          (map field (request-data))
+          (map field (request-data (host :secure)))
           (submit-button "submit"))))))
 
 (defpage [:post "/vetuma"] []

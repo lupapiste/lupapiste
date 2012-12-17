@@ -109,11 +109,12 @@
   ([uri]
     (debug "Connecting to DB: %s" uri)
     (m/connect-via-uri! uri)
-    (debug "DB is \"%s\"" (str (m/get-db)))))
+    (debug "DB is \"%s\"" (m/get-db))))
 
 (defn clear! []
   (warn "** Clearing DB **")
   (gfs/remove-all)
   (dorun (map #(mc/remove %) collections))
+  (mc/drop-indexes "users")
   (mc/ensure-index "users" {:email 1} {:unique true})
-  (mc/ensure-index "users" {:personId 1} {:unique true}))
+  #_(mc/ensure-index "users" {:personId 1} {:unique true}))

@@ -91,7 +91,7 @@
         unit = "TB"; // Future proof?
       }
 
-      if (unit != "B") {
+      if (unit !== "B") {
         value = value.toFixed(1);
       }
 
@@ -105,7 +105,11 @@
 
       var version = "";
       if (verValue && (verValue.major || verValue.minor)) {
-        version = verValue.major + "." + verValue.minor;
+        if (typeof verValue.major === "function") {
+          version = verValue.major() + "." + verValue.minor();
+        } else {
+          version = verValue.major + "." + verValue.minor;  
+        }
       }
       $(element).text(version);
     }
