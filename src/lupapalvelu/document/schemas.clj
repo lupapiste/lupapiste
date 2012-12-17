@@ -45,7 +45,7 @@
                          henkilo-body
                          {:name "patevyys" :type :group
                           :body [
-                            {:name "kuntaRoolikoodiType" :type :select
+                            {:name "kuntaRoolikoodi" :type :select
                           :body [{:name "GEO-suunnittelija"}
                                   {:name "LVI-suunnittelija"}
                                   {:name "pääsuunnittelija"}
