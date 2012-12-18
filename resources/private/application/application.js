@@ -56,6 +56,17 @@
       return false;
     },
 
+    markInforequestAnswered: function(model) {
+      var applicationId = application.id();
+      ajax.command("mark-inforequest-answered", { id: applicationId})
+      .success(function(d) {
+        notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
+        repository.reloadApplication(applicationId);
+      })
+      .call();
+      return false;
+    },
+
     setMeAsPaasuunnittelija: function(model) {
       var applicationId = application.id();
       ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
