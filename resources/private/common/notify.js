@@ -31,17 +31,14 @@ var notify = function() {
 
   function success(title, data) {
     debug(title, data);
-    $.pnotify(getMessage('success', title, data));
   }
 
   function error(title, data) {
     debug(title, data);
-    $.pnotify(getMessage('error', title, data));
   }
 
   function info(title, data) {
     debug(title, data);
-    $.pnotify(getMessage('info', title, data));
   }
 
   return {
