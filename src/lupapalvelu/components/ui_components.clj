@@ -72,7 +72,7 @@
    :applications {:depends [:common :repository :applications-common]
                   :js ["applications-config.js"]
                   :css ["applications.css"]
-                  :html ["applications.html" "all-applications.html"]}
+                  :html ["applications.html"]}
 
    :authority-applications {:depends [:common :repository :applications-common]
                             :js ["applications-config.js"]
