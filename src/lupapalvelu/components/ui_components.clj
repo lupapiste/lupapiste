@@ -66,7 +66,7 @@
                   :css ["tablesorter.css"]}
 
    :applications-common {:depends [:tablesorter :invites]
-                         :html ["inforequests.html"]
+                         :html ["inforequests.html" "all-applications.html"]
                          :js ["applications.js" "inforequests-config.js"]}
 
    :applications {:depends [:common :repository :applications-common]
