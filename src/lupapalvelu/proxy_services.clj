@@ -3,263 +3,128 @@
             [noir.response :as resp]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [lupapalvelu.wfs :as wfs])
   (:use [clojure.data.zip.xml]
-        [lupapalvelu.log]))
+        [lupapalvelu.log]
+        [lupapalvelu.util :only [dissoc-in select]]))
 
 ;;
 ;; NLS:
 ;;
 
-(def auth ["***REMOVED***" "***REMOVED***"])
+(defn- trim [s]
+  (if (s/blank? s) nil (s/trim s)))
 
-(def osoite-template-street
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-   <wfs:GetFeature version=\"1.1.0\"
-       xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
-       xmlns:wfs=\"http://www.opengis.net/wfs\"
-       xmlns:gml=\"http://www.opengis.net/gml\"
-       xmlns:ogc=\"http://www.opengis.net/ogc\"
-       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-       xsi:schemaLocation=\"http://www.opengis.net/wfs
-       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-     <wfs:Query typeName=\"oso:Osoitenimi\">
-       <ogc:SortBy>    
-         <ogc:SortProperty>
-           <ogc:PropertyName>
-             oso:kuntanimiFin
-           </ogc:PropertyName>
-         </ogc:SortProperty>             
-         <ogc:SortOrder>
-           DESC
-         </ogc:SortOrder> 
-       </ogc:SortBy>
-       <ogc:Filter>
-         <ogc:And>
-           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-             <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
-             <ogc:Literal>%s</ogc:Literal>
-           </ogc:PropertyIsLike>   
-           <ogc:PropertyIsEqualTo>
-             <ogc:PropertyName>oso:jarjestysnumero</ogc:PropertyName>
-             <ogc:Literal>1</ogc:Literal>
-           </ogc:PropertyIsEqualTo>                     
-         </ogc:And>
-       </ogc:Filter>            
-     </wfs:Query>
-   </wfs:GetFeature>")
-
-(def osoite-template-street-city
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-   <wfs:GetFeature version=\"1.1.0\"
-       xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
-       xmlns:wfs=\"http://www.opengis.net/wfs\"
-       xmlns:gml=\"http://www.opengis.net/gml\"
-       xmlns:ogc=\"http://www.opengis.net/ogc\"
-       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-       xsi:schemaLocation=\"http://www.opengis.net/wfs
-       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-     <wfs:Query typeName=\"oso:Osoitenimi\">
-       <ogc:Filter>
-         <ogc:And>
-           <ogc:Or>
-             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-               <ogc:PropertyName>oso:kuntanimiFin</ogc:PropertyName>
-               <ogc:Literal>%s</ogc:Literal>
-             </ogc:PropertyIsLike>
-             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-               <ogc:PropertyName>oso:kuntanimiSwe</ogc:PropertyName>
-               <ogc:Literal>%s</ogc:Literal>
-             </ogc:PropertyIsLike>
-           </ogc:Or>
-           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-             <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
-             <ogc:Literal>%s</ogc:Literal>
-           </ogc:PropertyIsLike>
-           <ogc:PropertyIsEqualTo>
-             <ogc:PropertyName>oso:jarjestysnumero</ogc:PropertyName>
-             <ogc:Literal>1</ogc:Literal>
-           </ogc:PropertyIsEqualTo>                     
-         </ogc:And>
-       </ogc:Filter>            
-     </wfs:Query>
-   </wfs:GetFeature>")
-
-(def osoite-template-street-number-city
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-   <wfs:GetFeature version=\"1.1.0\"
-       xmlns:oso=\"http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02\"
-       xmlns:wfs=\"http://www.opengis.net/wfs\"
-       xmlns:gml=\"http://www.opengis.net/gml\"
-       xmlns:ogc=\"http://www.opengis.net/ogc\"
-       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-       xsi:schemaLocation=\"http://www.opengis.net/wfs
-       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-     <wfs:Query typeName=\"oso:Osoitenimi\">
-       <ogc:Filter>
-         <ogc:And>
-           <ogc:Or>
-             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-               <ogc:PropertyName>oso:kuntanimiFin</ogc:PropertyName>
-               <ogc:Literal>%s</ogc:Literal>
-             </ogc:PropertyIsLike>
-             <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-               <ogc:PropertyName>oso:kuntanimiSwe</ogc:PropertyName>
-               <ogc:Literal>%s</ogc:Literal>
-             </ogc:PropertyIsLike>
-           </ogc:Or>
-           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-             <ogc:PropertyName>oso:katunimi</ogc:PropertyName>
-             <ogc:Literal>%s</ogc:Literal>
-           </ogc:PropertyIsLike>
-           <ogc:PropertyIsLike wildCard=\"*\" singleChar=\"?\" escape=\"!\" matchCase=\"false\">
-             <ogc:PropertyName>oso:katunumero</ogc:PropertyName>
-             <ogc:Literal>%s</ogc:Literal>
-           </ogc:PropertyIsLike>
-         </ogc:And>
-       </ogc:Filter>            
-     </wfs:Query>
-   </wfs:GetFeature>")
-
-(defn- address-part [feature part]
-  (first (xml-> feature :oso:Osoitenimi part text)))
-
-(defn- feature-to-address [feature]
-  (let [[x y] (s/split (address-part feature :oso:sijainti) #" ")]
-    {:katunimi (address-part feature :oso:katunimi)
-     :katunumero (address-part feature :oso:katunumero)
-     :kuntanimiFin (address-part feature :oso:kuntanimiFin)
-     :kuntanimiSwe (address-part feature :oso:kuntanimiSwe)
-     :x x
-     :y y}))
-
-(defn- feature-to-address-string [feature]
-  (let [address (feature-to-address feature)]
-    (str (:katunimi address) ", " (:kuntanimiFin address))))
-
-(defn parse-address [query]
+(defn- parse-address [query]
   (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*(.+))?" query)
-        street (if street (s/trim street))
-        city (if (s/blank? city) nil (s/trim city))]
-    {:street street
-     :number number
-     :city city}))
+        street (trim street)
+        city (trim city)]
+    [street number city]))
 
-(defn not-blank? [& s]
-  (every? (complement s/blank?) s))
+(defn get-addresses [[street number city]]
+  (wfs/execute wfs/maasto
+    (wfs/query {"typeName" "oso:Osoitenimi"}
+      (wfs/sort-by "oso:katunumero")
+      (wfs/filter
+        (wfs/and
+          (wfs/property-is-like "oso:katunimi"     street)
+          (wfs/property-is-like "oso:katunumero"   number)
+          (wfs/or
+            (wfs/property-is-like "oso:kuntanimiFin" city)
+            (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
-(defn get-address-request [{street :street number :number city :city} exact]
-  (debug "get-address-request: street=[%s], number=[%s], city=[%s], exact=[%s]" street number city exact)
-  (let [street (if exact street (str street "*"))
-        city (if exact city (str city "*"))]
-    (if (not-blank? street city)
-      (if (not-blank? number)
-        (format osoite-template-street-number-city city city street number)
-        (format osoite-template-street-city city city street))
-      (format osoite-template-street street))))
-
-(defn osoite [request]
-  (debug "resolving address: query='%s' exact='%s'" (get (:query-params request) "query") (get (:query-params request) "exact"))
+(defn get-addresses-proxy [request]
   (let [query (get (:query-params request) "query")
-        exact (Boolean/parseBoolean (get (:query-params request) "exact" "false"))
         address (parse-address query)
-        request (get-address-request address exact)
-        _ (debug "REQUEST: %s" request)
-        task (future (client/post "https://ws.nls.fi/maasto/wfs" {:body request :basic-auth auth :throw-exceptions false}))
-        response (deref task 3000 {:status 408 :body "timeout"})]
-    (case (:status response)
-      200 (do
-            (let [input-xml (:body response)
-                  features (-> input-xml
-                             (s/replace "UTF-8" "ISO-8859-1")
-                             (.getBytes "ISO-8859-1")
-                             java.io.ByteArrayInputStream.
-                             xml/parse
-                             zip/xml-zip)
-                  feature-members (xml-> features :gml:featureMember)
-                  feature-count (count feature-members)]
-              (debug "Received %d addresses" feature-count)
-              (if (> feature-count 15)
-                {:status 413 :body "too-many"}
-                (resp/json {:query query
-                            :suggestions (map feature-to-address-string feature-members)
-                            :data (map feature-to-address feature-members)}))))
-      408 response
+        [status response] (get-addresses address)]
+    (if (= status :ok)
+      (let [features (take 10 response)]
+        (resp/json {:query query
+                    :suggestions (map wfs/feature-to-address-string features)
+                    :data (map wfs/feature-to-address features)}))
+      (resp/status 503 "Service temporarily unavailable"))))
+
+(defn find-addresses [[street number city]]
+  (wfs/execute wfs/maasto
+    (cond
+      (and (s/blank? number) (s/blank? city)) (wfs/query {"typeName" "oso:Osoitenimi"}
+                                                (wfs/sort-by "oso:kuntanimiFin")
+                                                (wfs/filter
+                                                  (wfs/and
+                                                    (wfs/property-is-like "oso:katunimi" (str street "*"))
+                                                    (wfs/property-is-equal "oso:jarjestysnumero" "1"))))
+      (s/blank? city) (wfs/query {"typeName" "oso:Osoitenimi"}
+                        (wfs/sort-by "oso:kuntanimiFin")
+                        (wfs/filter
+                          (wfs/and
+                            (wfs/property-is-like "oso:katunimi"   (str street "*"))
+                            (wfs/property-is-like "oso:katunumero" (str number "*"))
+                            (wfs/property-is-less "oso:jarjestysnumero" "10"))))
+      (s/blank? number) (wfs/query {"typeName" "oso:Osoitenimi"}
+                          (wfs/sort-by "oso:katunumero")
+                          (wfs/filter
+                            (wfs/and
+                              (wfs/property-is-like "oso:katunimi" (str street "*"))
+                              (wfs/or
+                                (wfs/property-is-like "oso:kuntanimiFin" (str city "*"))
+                                (wfs/property-is-like "oso:kuntanimiSwe" (str city "*"))))))
+      :else (wfs/query {"typeName" "oso:Osoitenimi"}
+              (wfs/sort-by "oso:katunumero")
+              (wfs/filter
+                (wfs/and
+                  (wfs/property-is-like "oso:katunimi"     (str street "*"))
+                  (wfs/property-is-like "oso:katunumero"   (str number "*"))
+                  (wfs/or
+                    (wfs/property-is-like "oso:kuntanimiFin" (str city "*"))
+                    (wfs/property-is-like "oso:kuntanimiSwe" (str city "*")))))))))
+
+(defn find-addresses-proxy [request]
+  (let [query (get (:query-params request) "query")
+        address (parse-address query)
+        [status response] (find-addresses address)
+        feature->string (wfs/feature-to-address-string address)]
+    (if (= status :ok)
+      (let [features (take 10 response)]
+        (resp/json {:query query
+                    :suggestions (map feature->string features)
+                    :data (map wfs/feature-to-address features)}))
+      (resp/status 503 "Service temporarily unavailable"))))
+
+(defn- point-by-kiinteistotunnus [kiinteistotunnus]
+  (wfs/execute wfs/ktjkii
+    (wfs/query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (wfs/property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (wfs/property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs/filter
+        (wfs/property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" kiinteistotunnus)))))
+
+; TODO: Error handling
+(defn point-by-kiinteistotunnus-proxy [request]
+  (let [[status features] (-> request (:query-params) (get "kiinteistotunnus") (point-by-kiinteistotunnus))]
+    (if (= status :ok)
+      (resp/json (map wfs/feature-to-position features))
       (do
-        (error "Address query failed: status=%s response=%s" (:status response) (str response))
-        (resp/status 500 "ups")))))
+        (error "Failed to get point by 'kiinteistotunnus': %s" features)
+        (resp/status 503 "Service temporarily unavailable")))))
 
-(def pointbykiinteistotunnus-template
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-   <wfs:GetFeature version=\"1.1.0\"
-       xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\" xmlns:wfs=\"http://www.opengis.net/wfs\"
-       xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\"
-       xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-       xsi:schemaLocation=\"http://www.opengis.net/wfs
-       http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-     <wfs:Query typeName=\"ktjkiiwfs:PalstanTietoja\" srsName=\"EPSG:3067\">
-       <wfs:PropertyName>ktjkiiwfs:rekisteriyksikonKiinteistotunnus</wfs:PropertyName>
-       <wfs:PropertyName>ktjkiiwfs:tunnuspisteSijainti</wfs:PropertyName>
-       <ogc:Filter>
-         <ogc:PropertyIsEqualTo>
-           <ogc:PropertyName>ktjkiiwfs:rekisteriyksikonKiinteistotunnus</ogc:PropertyName>
-           <ogc:Literal>%s</ogc:Literal>
-         </ogc:PropertyIsEqualTo>
-       </ogc:Filter>
-     </wfs:Query>
-   </wfs:GetFeature>")
+(defn- kiinteistotunnus-by-point [[x y]]
+  (wfs/execute wfs/ktjkii
+    (wfs/query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (wfs/property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (wfs/property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (wfs/filter
+        (wfs/intersects
+          (wfs/property-name "ktjkiiwfs:sijainti")
+          (wfs/point x y))))))
 
-(defn- feature-to-position [feature]
-  (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
-    {:x x :y y}))
-
-(defn pointbykiinteistotunnus [request]
-  (let [kiinteistotunnus (get (:query-params request) "kiinteistotunnus")
-        input-xml (:body (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body (format pointbykiinteistotunnus-template kiinteistotunnus) :basic-auth auth}))
-        features (-> input-xml (s/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
-        result (map feature-to-position (xml-> features :gml:featureMember))]
-    (resp/json result)))
-
-(def kiinteistotunnusbypoint-template
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-   <wfs:GetFeature version=\"1.1.0\" xmlns:ktjkiiwfs=\"http://xml.nls.fi/ktjkiiwfs/2010/02\"
-       xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\"
-       xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"  
-       xsi:schemaLocation=\"http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd\">
-     <wfs:Query typeName=\"ktjkiiwfs:PalstanTietoja\" srsName=\"EPSG:3067\">
-       <wfs:PropertyName>ktjkiiwfs:rekisteriyksikonKiinteistotunnus</wfs:PropertyName>
-       <wfs:PropertyName>ktjkiiwfs:tunnuspisteSijainti</wfs:PropertyName>
-       <ogc:Filter>
-         <ogc:Intersects>
-           <ogc:PropertyName>ktjkiiwfs:sijainti</ogc:PropertyName>
-           <gml:Point>
-             <gml:pos>%s %s</gml:pos>
-           </gml:Point>
-         </ogc:Intersects>
-       </ogc:Filter>
-     </wfs:Query>
-   </wfs:GetFeature>")
-
-(defn- feature-to-kiinteistotunnus [feature]
-  {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))})
-
-(defn kiinteistotunnusbypoint
-  ([{query-params :query-params}]
-    (kiinteistotunnusbypoint (query-params "x") (query-params "y")))
-  ([x y]
-    (let [request-body (format kiinteistotunnusbypoint-template x y)
-          response (client/post "https://ws.nls.fi/ktjkii/wfs/wfs" {:body request-body :basic-auth auth})
-          input-xml (:body response)
-          features (-> input-xml (s/replace "UTF-8" "ISO-8859-1") (.getBytes "ISO-8859-1") java.io.ByteArrayInputStream. xml/parse zip/xml-zip)
-          result (map feature-to-kiinteistotunnus (xml-> features :gml:featureMember))]
-      (resp/json result))))
-
-(defn nls [request]
-  (client/get "https://ws.nls.fi/rasteriaineistot/image"
-    {:query-params (:query-params request)
-     :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-     :basic-auth auth
-     :as :stream}))
+(defn kiinteistotunnus-by-point-proxy [request]
+  (let [[status features] (-> request (:query-params) (select ["x" "y"]) (kiinteistotunnus-by-point))]
+    (if (= status :ok)
+      (resp/json (map wfs/feature-to-kiinteistotunnus features))
+      (do
+        (error "Failed to get 'kiinteistotunnus' by popint: %s" features)
+        (resp/status 503 "Service temporarily unavailable")))))
 
 ;
 ; Utils:
@@ -271,14 +136,14 @@
   stuff. At the moment strips the 'Set-Cookie' headers."
   [f]
   (fn [request]
-    (let [resp (f request)]
-      (assoc resp :headers (dissoc (:headers resp) "set-cookie")))))
+    (dissoc-in (f request) [:headers "set-cookie"])))
 
 ;;
 ;; Proxy services by name:
 ;;
 
-(def services {"nls" (secure nls)
-               "pointbykiinteistotunnus" (secure pointbykiinteistotunnus)
-               "kiinteistotunnusbypoint" (secure kiinteistotunnusbypoint)
-               "osoite" (secure osoite)})
+(def services {"nls" (secure wfs/raster-images)
+               "pointbykiinteistotunnus" (secure point-by-kiinteistotunnus-proxy)
+               "kiinteistotunnusbypoint" (secure kiinteistotunnus-by-point-proxy)
+               "find-address" (secure find-addresses-proxy)
+               "get-address" (secure get-addresses-proxy)})
