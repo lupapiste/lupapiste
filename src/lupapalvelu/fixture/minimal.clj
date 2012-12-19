@@ -19,7 +19,7 @@
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role :authority
-    :authority "tampere"
+    :authority "Tampere"
     :personId "kunta 122"
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -32,7 +32,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :authority "sipoo"
+    :authority "Sipoo"
     :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -45,7 +45,7 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role :authorityAdmin
-    :authority "sipoo"
+    :authority "Sipoo"
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
@@ -104,7 +104,7 @@
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
               :apikey "602cb9e58426c613c8b85abc"}}])
 
-(def municipalities [{:_id "sipoo"
+(def municipalities [{:_id "Sipoo"
                       :links [{:nameFin "Sipoo"
                                :url "http://sipoo.fi"}
                               {:nameFin "Rakennusvalvonta"
