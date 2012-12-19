@@ -40,29 +40,36 @@
                    {:name "osoite" :type :group :body simple-osoite-body}
                    {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
 
+(def party-body [{:name "henkilo" :type :group :body henkilo-body}
+                 {:name "yritys" :type :group :body yritys-body}])
+
+(def patevyys [{:name "koulutus" :type :string}
+               {:name "patevyysluokka" :type :select
+                :body [{:name "AA"}
+                       {:name "A"}
+                       {:name "B"}
+                       {:name "C"}
+                       {:name "ei tiedossa"}
+                       ]}
+               {:name "kokemus" :type :string};TODO vaih patevyysvatimusluokaksi
+               {:name "Liiteet" :type :string}])
+
+(def paasuunnittelija-body (conj
+                         party-body
+                         {:name "patevyys" :type :group :body patevyys}))
+
 ; TODO: Yritys?
 (def suunnittelija-body (conj
-                         henkilo-body
+                         party-body
                          {:name "patevyys" :type :group
-                          :body [
-                            {:name "kuntaRoolikoodi" :type :select
-                          :body [{:name "GEO-suunnittelija"}
-                                  {:name "LVI-suunnittelija"}
-                                  {:name "pääsuunnittelija"}
-                                  {:name "RAK-rakennesuunnittelija"}
-                                  {:name "ARK-rakennussuunnittelija"}
-                                  {:name  "Ei tiedossa"}]}
-                            {:name "koulutus" :type :string}
-                            {:name "patevyysluokka" :type :select
-                            :body [{:name "AA"}
-                                    {:name "A"}
-                                    {:name "B"}
-                                    {:name "C"}
-                                    {:name "ei tiedossa"}
-                                    ]}
-                            {:name "kokemus" :type :string};TODO vaih patevyysvatimusluokaksi
-                            {:name "Liiteet" :type :string}
-                            ]
+                          :body
+                          (conj [{:name "kuntaRoolikoodi" :type :select
+                                  :body [{:name "GEO-suunnittelija"}
+                                         {:name "LVI-suunnittelija"}
+                                         {:name "RAK-rakennesuunnittelija"}
+                                         {:name "ARK-rakennussuunnittelija"}
+                                         {:name  "Ei tiedossa"}]
+                                  }] patevyys)
                             })) ; TODO miten liitteet hanskataan
 
 (def schemas
@@ -162,8 +169,7 @@
                      {:name "parvekeTaiTerassi" :type :checkbox}]}]}
 
      {:info {:name "hakija"}
-      :body [{:name "henkilo" :type :group :body henkilo-body}
-             {:name "yritys" :type :group :body yritys-body}]}
+      :body party-body}
 
      {:info {:name "paasuunnittelija"}
       :body suunnittelija-body}
