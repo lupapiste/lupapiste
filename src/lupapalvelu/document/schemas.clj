@@ -63,13 +63,13 @@
                          party-body
                          {:name "patevyys" :type :group
                           :body
-                          (conj [{:name "kuntaRoolikoodi" :type :select
+                          (cons {:name "kuntaRoolikoodi" :type :select
                                   :body [{:name "GEO-suunnittelija"}
                                          {:name "LVI-suunnittelija"}
                                          {:name "RAK-rakennesuunnittelija"}
                                          {:name "ARK-rakennussuunnittelija"}
                                          {:name  "Ei tiedossa"}]
-                                  }] patevyys)
+                                  } patevyys)
                             })) ; TODO miten liitteet hanskataan
 
 (def schemas
