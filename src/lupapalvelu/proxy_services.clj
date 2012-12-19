@@ -41,7 +41,7 @@
     (if (= status :ok)
       (let [features (take 10 response)]
         (resp/json {:query query
-                    :suggestions (map wfs/feature-to-address-string features)
+                    :suggestions (map wfs/feature-to-simple-address-string features)
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable"))))
 

@@ -94,7 +94,7 @@
      :x x
      :y y}))
 
-(defn feature-to-address-string [feature]
+(defn feature-to-simple-address-string [feature]
   (let [{:keys [katunimi katunumero kuntanimiFin]} (feature-to-address feature)]
     (str katunimi " " katunumero ", " kuntanimiFin)))
 
