@@ -19,7 +19,7 @@
                        "knockout.mapping-2.3.2.js"
                        "knockout.validation.js"]}
    :underscore   {:js ["underscore.js"]}
-   :init         {:js ["hub.js" "log.js" foo]}
+   :init         {:js ["hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
                   :js ["openlayers.2.12.js" "gis.js" "map.js"]}
