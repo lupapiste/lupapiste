@@ -67,6 +67,7 @@
 (def default-schemas {:infoRequest []
                       :buildingPermit 
                       ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
+
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
                               [["paapiirustus" "asemapiirros"]
@@ -75,7 +76,6 @@
                                ["paapiirustus" "julkisivupiirros"]
                                ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                ["muut" "energiataloudellinen_selvitys"]])})
-
 
 (defcommand "create-application"
   {:parameters [:permitType :x :y :street :zip :city]
