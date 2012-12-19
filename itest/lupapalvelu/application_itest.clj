@@ -10,11 +10,10 @@
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
         application     (:application resp)]
-    application => (contains
-                     {:id application-id
-                      :state "draft"
-                      :location {:x 444444 :y 6666666}
-                      :permitType "buildingPermit"})
+    application => (contains {:id application-id
+                              :state "draft"
+                              :location {:x 444444 :y 6666666}
+                              :permitType "buildingPermit"})
     (first (:auth application)) => (contains
                                      {:firstName "Pena"
                                       :lastName "Panaani"
