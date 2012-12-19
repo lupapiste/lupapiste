@@ -91,7 +91,7 @@
                                ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :street :zip :city]
+  {:parameters [:permitType :x :y]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
@@ -107,9 +107,9 @@
        :municipality {}
        :location {:x (:x data)
                   :y (:y data)}
-       :address {:street (:street data)
-                 :zip (:zip data)
-                 :city (:city data)}
+       :address {:street (or (:street data) "")
+                 :zip (or (:zip data) "")
+                 :city (or (:city data) "")}
        :title (:street data)
        :authority (:city data)
        :roles {:applicant owner}
