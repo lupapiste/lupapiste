@@ -56,6 +56,19 @@
           {$set {:state :submitted
                  :submitted (:created command) }}))))
 
+(defcommand "mark-inforequest-answered"
+  {:parameters [:id]
+   :roles      [:applicant :authority]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [application]
+      (mongo/update
+        mongo/applications {:_id (:id application)}
+          {$set {:state :answered
+                 :modified (:created command)}}))))
+
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
     (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
