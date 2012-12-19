@@ -80,6 +80,7 @@
 (def default-schemas {:infoRequest []
                       :buildingPermit 
                       ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
+
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
                               [["paapiirustus" "asemapiirros"]
@@ -89,16 +90,15 @@
                                ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                ["muut" "energiataloudellinen_selvitys"]])})
 
-
 (defcommand "create-application"
   {:parameters [:permitType :x :y :street :zip :city]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id        (mongo/create-id)
-        owner     (role user :owner :type :owner)
-        permitType (:permitType data)
-        documents (map create-document ((keyword permitType) default-schemas))]
+        id         (mongo/create-id)
+        owner      (role user :owner :type :owner)
+        permitType (keyword (:permitType data))
+        documents  (map create-document (permitType default-schemas))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -116,12 +116,12 @@
        :auth [owner]
        :documents documents
        :permitType permitType 
-       :allowedAttahmentTypes (attachment-types-for (keyword permitType))
+       :allowedAttahmentTypes (attachment-types-for permitType)
        :attachments []})
     (future ; TODO: Should use agent with error handling:
       (if-let [municipality (:result (executed "municipality-by-location" command))]
         (mongo/update-by-id mongo/applications id {$set {:municipality municipality}})))
-    (doseq [attachment-type (default-attachments (keyword permitType))]
+    (doseq [attachment-type (default-attachments permitType)]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
