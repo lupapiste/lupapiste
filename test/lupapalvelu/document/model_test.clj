@@ -5,20 +5,21 @@
 
 ;; Simple test schema:
 
-(def schema {:info
-             {:name "test-model"
-              :version 1}
-             :body [{:type :group
-                     :name "1"
+(def schema {:info {:name "test-model"
+                    :version 1}
+             :body [{:name "1" :type :group
                      :body [{:name "11" :type :string}
                             {:name "12" :type :string :min-len 2 :max-len 3}
                             {:name "2" :type :group
                              :body [{:name "21" :type :string :min-len 2}
-                                    {:name "22" :type :boolean}]}]}]})
+                                    {:name "22" :type :boolean}]}
+                            {:name "3" :type :list
+                             :body [{:name "31" :type :string}
+                                    {:name "32" :type :checkbox}]}]}]})
 
 ;; Tests for internals:
 
-(def find-by-name @#'lupapalvelu.document.model/find-by-name)
+(def find-by-name #'lupapalvelu.document.model/find-by-name)
 
 (facts "Facts about internals"
   (fact (find-by-name (:body schema) ["1"]) => (-> schema :body first))

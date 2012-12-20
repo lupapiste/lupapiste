@@ -50,14 +50,14 @@
 ;; Neue api:
 ;;
 
-(defn- find-by-name [body [k & ks]]
-  (when-let [elem (some #(if (= (:name %) k) %) body)]
+(defn- find-by-name [schema-body [k & ks]]
+  (when-let [elem (some #(if (= (:name %) k) %) schema-body)]
     (if (nil? ks)
       elem
       (find-by-name (:body elem) ks))))
 
-(defn- validate-update [body results [k v]]
-  (let [elem (find-by-name body (s/split k #"\."))
+(defn- validate-update [schema-body results [k v]]
+  (let [elem (find-by-name schema-body (s/split k #"\."))
         result (validate (keywordize-keys elem) v)]
     (if (nil? result)
       results

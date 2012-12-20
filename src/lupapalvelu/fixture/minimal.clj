@@ -19,7 +19,7 @@
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role :authority
-    :authority :Tampere
+    :authority "Tampere"
     :personId "kunta 122"
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -32,7 +32,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :authority :Sipoo
+    :authority "Sipoo"
     :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -45,7 +45,7 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role :authorityAdmin
-    :authority :Sipoo
+    :authority "Sipoo"
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
@@ -72,8 +72,7 @@
     :id "5073c0a1c2e6c470aef589a5"
     :street "Mutakatu 7"
     :zip "33560"
-    :city "Tampere"
-     }
+    :city "Tampere"}
    {:id "777777777777777777000010" ;; Mikko Intonen
     :username "mikko@example.com"
     :enabled true
@@ -103,9 +102,15 @@
     :phone "0102030405"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
-              :apikey "602cb9e58426c613c8b85abc"}}
-   ])
+              :apikey "602cb9e58426c613c8b85abc"}}])
+
+(def municipalities [{:_id "Sipoo"
+                      :links [{:nameFin "Sipoo"
+                               :url "http://sipoo.fi"}
+                              {:nameFin "Rakennusvalvonta"
+                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
-  (dorun (map #(mongo/insert mongo/users %) users)))
+  (dorun (map (partial mongo/insert mongo/users) users))
+  (dorun (map (partial mongo/insert mongo/municipalities) municipalities)))

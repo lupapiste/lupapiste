@@ -133,18 +133,21 @@
 ;; Login/logout:
 ;;
 
-(def applicationpage-for {:applicant "/applicant"
-                          :authority "/authority"
-                          :authorityAdmin "/authority-admin"
-                          :admin "/admin"})
+(def applicationpage-for {"applicant" "/applicant"
+                          "authority" "/authority"
+                          "authorityAdmin" "/authority-admin"
+                          "admin" "/admin"})
 
 (defjson [:post "/api/login"] {:keys [username password]}
   (if-let [user (security/login username password)]
     (do
       (info "login: successful: username=%s" username)
       (session/put! :user user)
-      (let [userrole (keyword (:role user))]
-        (ok :user user :applicationpage (userrole applicationpage-for))))
+      (if-let [application-page (applicationpage-for (:role user))]
+        (ok :user user :applicationpage application-page)
+        (do
+          (error "Unknown user role: role=[%s]" (:role user))
+          (fail :error.login))))
     (do
       (info "login: failed: username=%s" username)
       (fail :error.login))))
