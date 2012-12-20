@@ -51,7 +51,6 @@
                        {:name "C"}
                        {:name "ei tiedossa"}
                        ]}
-               {:name "kokemus" :type :string};TODO vaih patevyysvatimusluokaksi
                {:name "Liiteet" :type :string}])
 
 (def paasuunnittelija-body (conj
