@@ -34,6 +34,7 @@
           </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
+
           <iframe id="file-preview-iframe" data-bind="attr: {src: '/api/view/' + latestVersion().fileId}"></iframe>
         </div>
       </div>
@@ -91,7 +92,7 @@
           <h3>Keskustele liitteestä:</h3>
             <table class="table table-striped">
               <tbody data-bind="foreach: comments">
-                <tr class="comment" data-bind="attr: {class: 'comment ' + $parent.category($data)}">
+                <tr class="comment" data-bind="attr: {'class': 'comment ' + $parent.category($data)}">
                   <td class="commentParty">
                     <span class="date" data-bind="dateTimeString: created"></span><br />
                     <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
