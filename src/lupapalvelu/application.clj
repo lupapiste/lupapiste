@@ -91,7 +91,7 @@
                                ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :municipality :message]
+  {:parameters [:permitType :x :y :address :municipality :message]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
