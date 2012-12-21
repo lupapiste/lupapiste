@@ -15,11 +15,11 @@
     :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
               :salt "$2a$10$WHPur/hjvaOTlm41VFjtju"
               :apikey "5087ba34c2e667024fbd5992"}}
-    {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
+   {:id "777777777777777777000016" ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role :authority
-    :authority "Tampere"
+    :authority "837"
     :personId "kunta 122"
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -28,11 +28,13 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5051ba0caa2480f374dcfeff"}}
-   {:id "777777777777777777000023" ;; Sonja Sibbo - Sipoon lupa-arkkitehti
+   ;; Sonja Sibbo - Sipoon lupa-arkkitehti
+   ;; sonja / sonja
+   {:id "777777777777777777000023"
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :authority "Sipoo"
+    :authority "753"
     :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -41,11 +43,12 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
+   ;; sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
     :email "admin@sipoo.fi"
     :enabled true
     :role :authorityAdmin
-    :authority "Sipoo"
+    :authority "753"
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
@@ -104,11 +107,23 @@
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
               :apikey "602cb9e58426c613c8b85abc"}}])
 
-(def municipalities [{:_id "Sipoo"
+(def municipalities [{:id "753"
                       :links [{:nameFin "Sipoo"
                                :url "http://sipoo.fi"}
                               {:nameFin "Rakennusvalvonta"
-                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]}])
+                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]}
+                     {:id "837"
+                      :links [{:nameFin "Tampere"
+                               :url "http://tampere.fi"}
+                              {:nameFin "Rakennusvalvonta"
+                               :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
+                              {:nameFin "Lomakkeet"
+                               :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
+                     {:id "186"
+                      :links [{:nameFin "J\u00E4rvenp\u00E4\u00E4"
+                               :url "http://www.jarvenpaa.fi"}
+                              {:nameFin "Rakennusvalvonta"
+                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
