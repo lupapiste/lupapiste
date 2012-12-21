@@ -21,7 +21,7 @@
             <p>Käsittelytunnus:</p>
             <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id()"></span>
           </div>
-          <div>
+          <div data-bind="if: state">
             <p>Tila:</p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
           </div>
