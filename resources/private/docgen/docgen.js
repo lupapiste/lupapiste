@@ -161,7 +161,7 @@ var docgen = (function () {
 
     var div = document.createElement("div");
     div.className = "form-group";
-    div.appendChild(makeLabel("group", myPath.join("."), specId));
+    div.appendChild(makeLabel("group", myPath.concat([name]).join("."), specId));
     div.appendChild(partsDiv);
     return div;
   }
@@ -256,7 +256,7 @@ var docgen = (function () {
     var title = document.createElement("h2");
     title.className = "application_section_header";
     title.appendChild(icon);
-    title.appendChild(document.createTextNode(loc(specId)));
+    title.appendChild(document.createTextNode(loc(specId + "." + specId)));
 
     title.onclick = accordion.toggle;
 
