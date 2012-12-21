@@ -50,8 +50,7 @@
                        {:name "B"}
                        {:name "C"}
                        {:name "ei tiedossa"}
-                       ]}
-               {:name "Liiteet" :type :string}])
+                       ]}])
 
 (def paasuunnittelija-body (conj
                          party-body
@@ -171,7 +170,7 @@
       :body party-body}
 
      {:info {:name "paasuunnittelija"}
-      :body suunnittelija-body}
+      :body paasuunnittelija-body}
 
      {:info {:name "suunnittelija"}
       :body suunnittelija-body}
