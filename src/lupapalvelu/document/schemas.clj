@@ -66,7 +66,7 @@
                                          {:name "LVI-suunnittelija"}
                                          {:name "RAK-rakennesuunnittelija"}
                                          {:name "ARK-rakennussuunnittelija"}
-                                         {:name  "Ei tiedossa"}]
+                                         {:name "ei tiedossa"}]
                                   } patevyys)
                             })) ; TODO miten liitteet hanskataan
 
