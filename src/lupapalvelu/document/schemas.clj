@@ -176,8 +176,8 @@
      {:info {:name "suunnittelija"}
       :body suunnittelija-body}
 
-     {:info {:name "maksaja"} ; TODO yritys ja suunnittelijatyypin valinta
-      :body henkilo-body}
+     {:info {:name "maksaja"}
+      :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
       :body [{:name "kiinteistotunnus" :type :string}
