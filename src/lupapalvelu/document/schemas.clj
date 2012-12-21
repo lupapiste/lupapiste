@@ -76,7 +76,7 @@
       :body [
              {:name "rakennuksenOmistajat"
               :type :group
-              :body henkilo-body} ;TODO yritys ja monta
+              :body party-body}
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
