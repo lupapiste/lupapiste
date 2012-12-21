@@ -121,7 +121,7 @@ var docgen = (function () {
 
     var div = document.createElement("span");
     div.className = "form-entry";
-    div.appendChild(makeLabel("select", myPath, specId));
+    div.appendChild(makeLabel("select", myPath + "._group_label", specId));
     div.appendChild(select);
     return div;
   }
@@ -143,7 +143,7 @@ var docgen = (function () {
 
     var div = document.createElement("div");
     div.className = "form-choice";
-    div.appendChild(makeLabel("choice", myPath.join("."), specId));
+    div.appendChild(makeLabel("choice", myPath.concat("_group_label").join("."), specId));
     div.appendChild(choicesDiv);
     return div;
   }
@@ -161,7 +161,7 @@ var docgen = (function () {
 
     var div = document.createElement("div");
     div.className = "form-group";
-    div.appendChild(makeLabel("group", myPath.concat([name]).join("."), specId));
+    div.appendChild(makeLabel("group", myPath.concat(["_group_label"]).join("."), specId));
     div.appendChild(partsDiv);
     return div;
   }
@@ -256,7 +256,7 @@ var docgen = (function () {
     var title = document.createElement("h2");
     title.className = "application_section_header";
     title.appendChild(icon);
-    title.appendChild(document.createTextNode(loc(specId + "." + specId)));
+    title.appendChild(document.createTextNode(loc(specId + "._group_label")));
 
     title.onclick = accordion.toggle;
 
