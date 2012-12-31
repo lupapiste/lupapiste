@@ -1,6 +1,6 @@
 var accordion = (function () {
 
-  var animationTime = 400;
+  var animationTime = 200;
   var animationEasing = "easeInOutCubic";
 
   function toggle(e) {
