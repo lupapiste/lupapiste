@@ -4,7 +4,7 @@ var repository = function() {
     ajax
       .query("applications")
       .success(function(data) {
-        debug("loaded "+data.applications.length+" applications");
+        debug("repository: load-all-applications: loaded " + data.applications.length + " applications");
         _.each(data.applications, function(application) {
           hub.send("application-loaded", {application: application});
         });
@@ -17,7 +17,7 @@ var repository = function() {
     ajax
       .query("application", {id: e.id})
       .success(function(data) {
-        debug("loaded application "+data.application.id);
+        debug("repository: load-application: loaded  " + data.application.id);
         hub.send("application-loaded", {application: data.application});
       })
       .error(function() { window.location.hash = "!/404"; })

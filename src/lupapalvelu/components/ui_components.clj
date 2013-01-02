@@ -3,21 +3,6 @@
   (:require [lupapalvelu.components.core :as c]
             [lupapalvelu.env :as env]))
 
-(defn foo []
-  (if (env/dev-mode?)
-    (str "function dev() { warn('This is dev'); return true; };")
-    (str "function dev() { warn('This is dev'); return false; };")))
-
-(def oskari {:depends [:init :jquery]
-             :js ["oskarimap.js" "map.js"]
-             :css ["oskarimap.css"]
-             :html ["map.html"]
-             :name "oskari"})
-
-(def dummymap {:depends [:init :jquery]
-               :js ["openlayers.2.12.js" "gis.js" "map.js"]
-               :name "dummymap"})
-
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
               :name "common"})
@@ -30,17 +15,20 @@
                        "jquery.pnotify.min.js"
                        "jquery.metadata-2.1.js"
                        "jquery.autocomplete.js"]}
-
-   :knockout     {:js ["knockout-2.1.0.debug.js" "knockout.mapping-2.3.2.js" "knockout.validation.js"]}
+   :knockout     {:js ["knockout-2.1.0.debug.js"
+                       "knockout.mapping-2.3.2.js"
+                       "knockout.validation.js"]}
    :underscore   {:js ["underscore.js"]}
-   :init         {:js ["hub.js" "log.js" foo]}
+   :init         {:js ["hub.js" "log.js"]}
 
-   :map          (if (env/dev-mode?) dummymap oskari)
+   :map          {:depends [:init :jquery]
+                  :js ["openlayers.2.12.js" "gis.js" "map.js"]}
 
    :debug        (if (env/dev-mode?) debugjs {})
 
    :common       {:depends [:init :jquery :knockout :underscore :debug]
-                  :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js" "ko.init.js" "dialog.js" "comment.js" "authorization.js" "lupapiste.application.js"]
+                  :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
+                       "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 

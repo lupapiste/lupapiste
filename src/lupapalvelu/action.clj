@@ -134,7 +134,7 @@
   [{{:keys [text target]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (when (= "draft" (:state application))
+      (if (= "draft" (:state application))
         (executed "open-application" command))
       (mongo/update-by-id
         mongo/applications
@@ -142,7 +142,7 @@
         {$set {:modified (:created command)}
          $push {:comments {:text    text
                            :target  target
-                           :created (-> command :created)
+                           :created (:created command)
                            :user    (security/summary user)}}}))))
 
 (defcommand "assign-to-me"
