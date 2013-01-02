@@ -141,7 +141,7 @@
       </div>
 
       <div class="tab-content" id="attachments_tab">
-        <p class="tab-info">T&auml;nne voit lis&auml;t&auml; hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&auml;s pyyt&auml;&auml; sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&auml;t merkit&auml;&auml;n taulukossa punaisella lipulla.</p>
+        <p class="tab-info">T&auml;nne voit lis&auml;t&auml; hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml; sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <div data-bind="if: attachmentsByGroup().length">
 
@@ -173,7 +173,7 @@
                   </td>
                   <td>
                     <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
-                      <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
+                      <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
                       <i data-bind="ltext: latestVersion.contentType"></i>
                       <i data-bind="size: latestVersion.size"></i>
                     </span>
