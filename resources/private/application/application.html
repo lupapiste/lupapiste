@@ -12,8 +12,7 @@
       <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
 
       <div data-bind="with: application">
-        <h1 data-bind="with: address">
-          <span id="test-application-street" data-bind="text: street"></span>, <span data-bind="text: zip"></span> <span data-bind="text: city"></span>
+        <h1 data-bind="text: address">
         </h1>
 
         <div class="application_summary_info" draggable="auto">
@@ -141,7 +140,7 @@
       </div>
 
       <div class="tab-content" id="attachments_tab">
-        <p class="tab-info">T&auml;nne voit lis&auml;t&auml; hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&auml;s pyyt&auml;&auml; sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&auml;t merkit&auml;&auml;n taulukossa punaisella lipulla.</p>
+        <p class="tab-info">T&auml;nne voit lis&auml;t&auml; hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml; sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <div data-bind="if: attachmentsByGroup().length">
 
@@ -173,7 +172,7 @@
                   </td>
                   <td>
                     <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
-                      <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a>
+                      <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
                       <i data-bind="ltext: latestVersion.contentType"></i>
                       <i data-bind="size: latestVersion.size"></i>
                     </span>

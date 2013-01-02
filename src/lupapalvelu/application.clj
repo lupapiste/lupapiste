@@ -92,14 +92,15 @@
                                ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :street :zip :city]
+  {:parameters [:permitType :x :y :address :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
         permitType (keyword (:permitType data))
-        documents  (map create-document (permitType default-schemas))]
+        documents  (map create-document (permitType default-schemas))
+        message    (:message data)]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -108,20 +109,20 @@
        :municipality {}
        :location {:x (:x data)
                   :y (:y data)}
-       :address {:street (:street data)
-                 :zip (:zip data)
-                 :city (:city data)}
-       :title (:street data)
-       :authority (:city data)
+       :address (:address data)
+       :title (:address data)
+       :authority (:municipality data)
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
        :permitType permitType 
        :allowedAttahmentTypes (attachment-types-for permitType)
        :attachments []})
-    (future ; TODO: Should use agent with error handling:
-      (if-let [municipality (:result (executed "municipality-by-location" command))]
-        (mongo/update-by-id mongo/applications id {$set {:municipality municipality}})))
+    (if message
+      (executed (assoc (lupapalvelu.core/command "add-comment" {:id id
+                                                                :text message
+                                                                :target {:type "application"}})
+                       :user user)))
     (doseq [attachment-type (default-attachments permitType)]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))

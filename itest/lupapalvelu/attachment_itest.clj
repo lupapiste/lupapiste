@@ -4,7 +4,7 @@
         [midje.sweet]))
 
 (fact
-  (let [resp            (command pena :create-application :permitType "buildingPermit" :x 408048 :y 6693225 :street "s" :city "c" :zip "z")
+  (let [resp            (command pena :create-application :permitType "buildingPermit" :x 408048 :y 6693225 :address "foo 42, bar" :municipality "753")
         application-id  (:id resp)
         application     (:application (query pena :application :id application-id))
         resp            (command veikko :create-attachment :id application-id :attachmentType {:type-group "tg" :type-id "tid"})
