@@ -17,6 +17,7 @@
           <span data-bind="if: type">
             <span data-bind="text: loc(name())"></span>
           </span>
+        </select>
           <span data-bind="if: latestVersion">
             <span>versio</span>
             <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
@@ -24,6 +25,14 @@
             <span data-bind="dateTimeString: latestVersion().created"></span>
           </span>
         </h1>
+        <div class="form-entry">
+            <label class="form-label">Vaihda liitteen tyyppi</label>
+            <select data-bind="value: attachmentType, foreach: allowedAttahmentTypes" class="form-input combobox">
+              <optgroup data-bind="attr: {label: loc('attachmentType.' + group)}, foreach: types">
+                <option data-bind="text: loc('attachmentType.' + $parent.group + '.' + name), value: $parent.group + '.' + name"></option>
+              </optgroup>
+             </select> 
+          </div>
       </div>
 
       <!-- Preview images and pdf files only -->
@@ -78,14 +87,6 @@
             data-bind="click: newAttachmentVersion">
           Lisää uusi versio
         </button>
-
-        <select data-bind="value: attachmentType, foreach: allowedAttahmentTypes">
-          <optgroup data-bind="attr: {label: loc('attachmentType.' + group)}, foreach: types">
-            <option data-bind="text: loc('attachmentType.' + $parent.group + '.' + name), value: $parent.group + '.' + name"></option>
-          </optgroup>
-        </select>
-
-        <div data-bind="text: attachmentType"></div>
       </div>
 
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
