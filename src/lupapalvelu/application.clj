@@ -91,14 +91,15 @@
                                ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality :message]
+  {:parameters [:permitType :x :y :address :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id         (mongo/create-id)
         owner      (role user :owner :type :owner)
         permitType (keyword (:permitType data))
-        documents  (map create-document (permitType default-schemas))]
+        documents  (map create-document (permitType default-schemas))
+        message    (:message data)]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -116,10 +117,11 @@
        :permitType permitType 
        :allowedAttahmentTypes (attachment-types-for permitType)
        :attachments []})
-    (executed (assoc (lupapalvelu.core/command "add-comment" {:id id
-                                                              :text (:message data)
-                                                              :target {:type "application"}})
-                     :user user))
+    (if message
+      (executed (assoc (lupapalvelu.core/command "add-comment" {:id id
+                                                                :text message
+                                                                :target {:type "application"}})
+                       :user user)))
     (doseq [attachment-type (default-attachments permitType)]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
