@@ -71,8 +71,6 @@
       var applicationId = application.id();
       ajax.command("convert-to-application", {id: applicationId})
         .success(function(d) {
-          console.log("ID:", d.id);
-          notify.success("neuvontapyynt\u00F6 muunnettu lupahakemukseksi", model);
           repository.reloadApplication(applicationId);
           repository.reloadApplication(d.id);
           window.location.hash = "!/application/" + d.id;
