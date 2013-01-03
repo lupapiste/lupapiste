@@ -77,7 +77,17 @@
   (with-application command
     (fn [inforequest]
       (let [application-id (mongo/create-id)]
-        (mongo/insert mongo/applications (assoc inforequest :id application-id :permitType "buildingPermit"))
+        (mongo/update
+          mongo/applications
+          {:_id (:id inforequest)}
+          {$set {:state :answered
+                 :modified (:created command)}})
+        (mongo/insert
+          mongo/applications
+          (assoc inforequest
+                 :id application-id
+                 :permitType "buildingPermit"
+                 :modified (:created command)))
         {:ok true :id application-id}))))
 
 (defn create-document [schema-name]
