@@ -68,6 +68,18 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
+(defcommand "convert-to-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [inforequest]
+      (let [application-id (mongo/create-id)]
+        (mongo/insert mongo/applications (assoc inforequest :id application-id :permitType "buildingPermit"))
+        {:ok true :id application-id}))))
+
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
     (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
