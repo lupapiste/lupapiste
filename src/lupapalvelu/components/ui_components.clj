@@ -28,7 +28,8 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :debug]
                   :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
+                       "ko.init.js" "dialog.js" "comment.js" "authorization.js"
+                       "address.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
