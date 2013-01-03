@@ -143,7 +143,7 @@
 ;;
 
 (def services {"nls" (secure wfs/raster-images)
-               "pointbykiinteistotunnus" (secure point-by-kiinteistotunnus-proxy)
-               "kiinteistotunnusbypoint" (secure kiinteistotunnus-by-point-proxy)
+               "point-by-kiinteistotunnus" (secure point-by-kiinteistotunnus-proxy)
+               "kiinteistotunnus-by-point" (secure kiinteistotunnus-by-point-proxy)
                "find-address" (secure find-addresses-proxy)
                "get-address" (secure get-addresses-proxy)})
