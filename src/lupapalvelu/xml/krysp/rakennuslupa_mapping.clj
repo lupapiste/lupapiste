@@ -93,7 +93,8 @@
                                        :child [{:tag :muuTunnus} {:tag :saapumisPvm}]}]}
                              {:tag :osapuolettieto
                               :child [osapuolet]}
-                             {:tag :rakennuspaikkatieto}
+                             {:tag :rakennuspaikkatieto
+                              :child [rakennuspaikka]}
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
                                        :child [{:tag :uusi}
