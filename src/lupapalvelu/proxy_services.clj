@@ -121,7 +121,7 @@
 (defn kiinteistotunnus-by-point-proxy [request]
   (let [[status features] (-> request (:query-params) (select ["x" "y"]) (kiinteistotunnus-by-point))]
     (if (= status :ok)
-      (resp/json (map wfs/feature-to-kiinteistotunnus features))
+      (resp/json (:kiinttunnus (wfs/feature-to-kiinteistotunnus (first features))))
       (do
         (error "Failed to get 'kiinteistotunnus' by popint: %s" features)
         (resp/status 503 "Service temporarily unavailable")))))
@@ -143,7 +143,7 @@
 ;;
 
 (def services {"nls" (secure wfs/raster-images)
-               "point-by-kiinteistotunnus" (secure point-by-kiinteistotunnus-proxy)
-               "kiinteistotunnus-by-point" (secure kiinteistotunnus-by-point-proxy)
-               "find-address" (secure find-addresses-proxy)
-               "get-address" (secure get-addresses-proxy)})
+               "point-by-kiinteistotunnus" point-by-kiinteistotunnus-proxy
+               "kiinteistotunnus-by-point" kiinteistotunnus-by-point-proxy
+               "find-address" find-addresses-proxy
+               "get-address" get-addresses-proxy})
