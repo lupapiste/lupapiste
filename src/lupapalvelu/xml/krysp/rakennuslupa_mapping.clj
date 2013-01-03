@@ -12,7 +12,6 @@
 
 (def rakennelma (conj [{:tag :kuvaus
                         :child [{:tag :kuvaus}]}]
-                      yksilointitieto
                       sijantitieto
                       {:tag :tunnus :child tunnus-children}))
 
