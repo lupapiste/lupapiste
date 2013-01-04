@@ -56,7 +56,6 @@
                          party-body
                          {:name "patevyys" :type :group :body patevyys}))
 
-; TODO: Yritys?
 (def suunnittelija-body (conj
                          party-body
                          {:name "patevyys" :type :group
@@ -179,7 +178,7 @@
       :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
-      :body [{:name "kiinteistotunnus" :type :string}
+      :body [{:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus}
              {:name "maaraalaTunnus" :type :string}
              {:name "kylaNimi" :type :string}
              {:name "tilanNimi" :type :string}

@@ -1,5 +1,5 @@
 (ns lupapalvelu.document.subtype
-  (:use [clojure.string :only [blank?]] 
+  (:use [clojure.string :only [blank?]]
         [lupapalvelu.log]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -21,6 +21,12 @@
     (blank? v) nil
     (re-matches #"\d+" v) nil
     :else [:warn "illegal-number"]))
+
+(defmethod subtype-validation :kiinteistotunnus [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^\d{14}$" v) nil
+    :else [:warn "illegal-kiinteistotunnus"]))
 
 (defmethod subtype-validation nil [_ _]
   nil)
