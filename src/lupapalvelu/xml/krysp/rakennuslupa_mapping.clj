@@ -15,6 +15,24 @@
                       sijantitieto
                       {:tag :tunnus :child tunnus-children}))
 
+(def huoneisto {:tag :huoneisto
+                :child [{:tag :huoneluku}
+                        {:tag :keittionTyyppi}
+                        {:tag :huoneistoala}
+                        {:tag :varusteet
+                         :child [{:tag :WCKytkin}
+                                 {:tag :ammeTaiSuihkuKytkin}
+                                 {:tag :saunaKytkin}
+                                 {:tag :parvekeTaiTerassiKytkin}
+                                 {:tag :lamminvesiKytkin}]}
+                        {:tag :huoneistonTyyppi}
+                        {:tag :huoneistotunnus
+                         :child [{:tag :porras}
+                                 {:tag :huoneistonumero}
+                                 {:tag :jakokirjain}
+                                 ]}
+                        ]})
+
 (def rakennus {:tag :Rakennus
                 :child [{:tag :yksilointitieto :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
                         {:tag :alkuHetki :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
@@ -51,24 +69,7 @@
                                           {:tag :uima-altaita}
                                           {:tag :vaestonsuoja}]}
                                  {:tag :jaahdytysmuoto}
-                                 {:tag :asuinhuoneistot
-                                  :child [{:tag :huoneisto
-                                           :child [{:tag :muutostapa}
-                                                   {:tag :huoneluku}
-                                                   {:tag :keittionTyyppi}
-                                                   {:tag :huoneistoala}
-                                                   {:tag :varusteet
-                                                    :child [{:tag :WCKytkin}
-                                                            {:tag :ammeTaiSuihkuKytkin}
-                                                            {:tag :saunaKytkin}
-                                                            {:tag :parvekeTaiTerassiKytkin}
-                                                            {:tag :lamminvesiKytkin}]}
-                                                   {:tag :huoneistonTyyppi}
-                                                   {:tag :huoneistotunnus
-                                                    :child [{:tag :porras}
-                                                            {:tag :huoneistonumero}
-                                                            {:tag :jakokirjain}
-                                                            ]}]}]}
+                                 {:tag :asuinhuoneistot :child [huoneisto]}
                                  ]}]})
 
 

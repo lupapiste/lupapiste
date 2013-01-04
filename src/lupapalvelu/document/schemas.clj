@@ -146,24 +146,28 @@
              {:name "poikkeamiset" :type :string}]}
 
      {:info {:name "huoneisto"}
-      :body [{:name "huoneluku" :type :string :subtype :number}
+      :body [{:name "huoneistoTunnus" :type :group
+              :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
+                     {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                     {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
+             {:name "huoneluku" :type :string :subtype :number :size "m"}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
                      {:name "keittokomero"}
                      {:name "keittotila"}
                      {:name "tupakeittio"}
                      {:name "ei tiedossa"}]}
-             {:name "huoneistoala" :type :string :unit "m2" :subtype :number}
+             {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
              {:name "huoneistoTyyppi" :type :select
               :body [{:name "asuinhuoneisto"}
                      {:name "toimitila"}
                      {:name "ei tiedossa"}]}
-             {:name "huoneistoTunnus" :type :string}
              {:name "varusteet" :type :choice
               :body [{:name "wc" :type :checkbox}
                      {:name "ammeTaiSuihku" :type :checkbox}
                      {:name "sauna" :type :checkbox}
-                     {:name "parvekeTaiTerassi" :type :checkbox}]}]}
+                     {:name "parvekeTaiTerassi" :type :checkbox}
+                     {:name "lamminvesi" :type :checkbox}]}]}
 
      {:info {:name "hakija"}
       :body party-body}
