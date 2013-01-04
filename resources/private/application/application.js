@@ -48,22 +48,34 @@
     submitApplication: function(model) {
       var applicationId = application.id();
       ajax.command("submit-application", { id: applicationId})
-      .success(function(d) {
-        notify.success("hakemus j\u00E4tetty",model);
-        repository.reloadApplication(applicationId);
-      })
-      .call();
+        .success(function(d) {
+          notify.success("hakemus j\u00E4tetty",model);
+          repository.reloadApplication(applicationId);
+        })
+        .call();
       return false;
     },
 
     markInforequestAnswered: function(model) {
       var applicationId = application.id();
-      ajax.command("mark-inforequest-answered", { id: applicationId})
-      .success(function(d) {
-        notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
-        repository.reloadApplication(applicationId);
-      })
-      .call();
+      ajax.command("mark-inforequest-answered", {id: applicationId})
+        .success(function(d) {
+          notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
+          repository.reloadApplication(applicationId);
+        })
+        .call();
+      return false;
+    },
+
+    convertToApplication: function(model) {
+      var applicationId = application.id();
+      ajax.command("convert-to-application", {id: applicationId})
+        .success(function(d) {
+          repository.reloadApplication(applicationId);
+          repository.reloadApplication(d.id);
+          window.location.hash = "!/application/" + d.id;
+        })
+        .call();
       return false;
     },
 

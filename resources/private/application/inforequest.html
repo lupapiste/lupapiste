@@ -31,6 +31,7 @@
         </div>
         <div class="inforequest_actions">
           <button data-bind="enable: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" type="submit" class="btn btn-primary" id="test-mark-inforequest-answered">Merkitse vastatuksi</button>
+          <button data-bind="enable: $root.authorization.ok('convert-to-application'), click: convertToApplication" type="submit" class="btn btn-primary">Aloita luvan hakeminen</button>
         </div>
       </div>
     </div>
