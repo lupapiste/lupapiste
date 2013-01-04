@@ -9,6 +9,7 @@
                  [clj-http "0.5.8"]
                  [digest "1.4.2"]
                  [clj-time "0.4.4"]
+                 [org.apache.commons/commons-lang3 "3.1"] ; Already a dependency but required explicitly
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.9.1"]
                  [org.clojure/data.xml "0.0.6"]
