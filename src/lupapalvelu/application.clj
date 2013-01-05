@@ -77,17 +77,20 @@
   (with-application command
     (fn [inforequest]
       (let [application-id (mongo/create-id)]
+        ; Mark source info-request as answered:
         (mongo/update
           mongo/applications
           {:_id (:id inforequest)}
           {$set {:state :answered
                  :modified (:created command)}})
+        ; Create application with data from info-request:
         (mongo/insert
           mongo/applications
           (assoc inforequest
                  :id application-id
                  :permitType "buildingPermit"
                  :modified (:created command)))
+        ; Reurn new application ID:
         {:ok true :id application-id}))))
 
 (defn create-document [schema-name]
@@ -98,19 +101,18 @@
      :schema schema
      :body {}}))
 
-; TODO: Figure out where these should come from?
 (def default-schemas {:infoRequest []
-                      :buildingPermit 
-                      ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
+                      :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
+                                       "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
 
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
-                              [["paapiirustus" "asemapiirros"]
-                               ["paapiirustus" "pohjapiirros"]
-                               ["paapiirustus" "leikkauspiirros"]
-                               ["paapiirustus" "julkisivupiirros"]
-                               ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
-                               ["muut" "energiataloudellinen_selvitys"]])})
+                                               [["paapiirustus" "asemapiirros"]
+                                                ["paapiirustus" "pohjapiirros"]
+                                                ["paapiirustus" "leikkauspiirros"]
+                                                ["paapiirustus" "julkisivupiirros"]
+                                                ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
+                                                ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
   {:parameters [:permitType :x :y :address :municipality]
