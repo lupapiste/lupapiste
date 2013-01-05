@@ -127,7 +127,7 @@
         comments   (map (fn [text]
                           {:text    text
                            :target  {:type "application"}
-                           :created (:created command)
+                           :created created
                            :user    (security/summary user)})
                         (:comments data))]
     (mongo/insert mongo/applications
