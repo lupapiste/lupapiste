@@ -7,7 +7,8 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.security :as security]))
 
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
@@ -123,29 +124,29 @@
         owner      (role user :owner :type :owner)
         permitType (keyword (:permitType data))
         documents  (map create-document (permitType default-schemas))
-        message    (:message data)]
+        comments   (map (fn [text]
+                          {:text    text
+                           :target  {:type "application"}
+                           :created (:created command)
+                           :user    (security/summary user)})
+                        (:comments data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
        :state :draft
-       :municipality {}
-       :location {:x (:x data)
-                  :y (:y data)}
+       :municipality (:municipality data)
+       :authority (:municipality data)
+       :location {:x (:x data) :y (:y data)}
        :address (:address data)
        :title (:address data)
-       :authority (:municipality data)
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
        :permitType permitType 
        :allowedAttahmentTypes (attachment-types-for permitType)
-       :attachments []})
-    (if message
-      (executed (assoc (lupapalvelu.core/command "add-comment" {:id id
-                                                                :text message
-                                                                :target {:type "application"}})
-                       :user user)))
+       :attachments []
+       :comments comments})
     (doseq [attachment-type (default-attachments permitType)]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
