@@ -34,7 +34,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :authority "753"
+    :authority "Sipoo"
     :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -48,7 +48,7 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role :authorityAdmin
-    :authority "753"
+    :authority "Sipoo"
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
