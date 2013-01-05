@@ -71,7 +71,7 @@ var gis = function() {
       if (Object.prototype.toString.call(locations) === "[object Array]") {
         location = locations[0];
       }
-      self.map.setCenter(new OpenLayers.LonLat(location.x, location.y), zoom || 7);
+      self.map.setCenter(new OpenLayers.LonLat(location.x, location.y), zoom);
       return self;
     };
     
