@@ -151,4 +151,3 @@
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
-
