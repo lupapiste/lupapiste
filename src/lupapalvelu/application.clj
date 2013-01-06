@@ -145,13 +145,7 @@
         id         (mongo/create-id)
         owner      (role user :owner :type :owner)
         permitType (keyword (:permitType data))
-        documents  (map create-document (permitType default-schemas))
-        comments   (map (fn [text]
-                          {:text    text
-                           :target  {:type "application"}
-                           :created created
-                           :user    (security/summary user)})
-                        (:comments data))]
+        documents  (map create-document (permitType default-schemas))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -168,7 +162,12 @@
        :permitType permitType 
        :allowedAttahmentTypes (attachment-types-for permitType)
        :attachments []
-       :comments comments})
+       :comments (if-let [message (:message data)]
+                   [{:text message
+                     :target  {:type "application"}
+                     :created created
+                     :user    (security/summary user)}]
+                   [])})
     (doseq [attachment-type (default-attachments permitType)]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
