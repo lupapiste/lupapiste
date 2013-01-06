@@ -8,7 +8,8 @@
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.util :as util]))
 
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
@@ -77,22 +78,43 @@
   [command]
   (with-application command
     (fn [inforequest]
-      (let [application-id (mongo/create-id)]
-        ; Mark source info-request as answered:
-        (mongo/update
-          mongo/applications
-          {:_id (:id inforequest)}
-          {$set {:state :answered
-                 :modified (:created command)}})
-        ; Create application with data from info-request:
-        (mongo/insert
-          mongo/applications
-          (assoc inforequest
-                 :id application-id
-                 :permitType "buildingPermit"
-                 :modified (:created command)))
-        ; Reurn new application ID:
-        {:ok true :id application-id}))))
+      ; Mark source info-request as answered:
+      (mongo/update
+        mongo/applications
+        {:_id (:id inforequest)}
+        {$set {:state :answered
+               :modified (:created command)}})
+      ; Create application with comments from info-request:
+      (executed
+        (lupapalvelu.core/command
+          "create-application"
+          (:user command)
+          (assoc
+            (util/sub-map inforequest [:x :y :municipality :address])
+            :permitType "buildingPermit"
+            :comments (map :text (:comments inforequest)))
+          {:permitType "buildingPermit"
+           :x (:x inforequest)
+           :y (:y inforequest)
+           :municipality (:municipality inforequest)}
+          
+          
+          {
+       
+       
+       
+       :municipality (:municipality data)
+       :authority (:municipality data)
+       :location {:x (:x data) :y (:y data)}
+       :address (:address data)
+       :title (:address data)
+       :roles {:applicant owner}
+       :auth [owner]
+       :documents documents
+       :permitType permitType 
+       :allowedAttahmentTypes (attachment-types-for permitType)
+       :attachments []
+       :comments comments})))))
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
