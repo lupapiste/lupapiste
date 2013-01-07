@@ -29,6 +29,6 @@
         application     (:application resp)
         state           (:state application)
         comments        (:comments application)]
-    state => "open"
+    state => "draft"
     (count comments) => 1
     (-> comments first :text) => "hello"))
