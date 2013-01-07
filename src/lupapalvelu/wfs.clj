@@ -9,7 +9,7 @@
 
 (def ^:private auth ["***REMOVED***" "***REMOVED***"])
 
-(def ^:private timeout 10000)
+(def ^:private timeout 30000)
 
 (defn query [attrs & e]
   (str "<?xml version='1.0' encoding='UTF-8'?>
