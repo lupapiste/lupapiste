@@ -8,7 +8,8 @@
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.util :as util]))
 
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
@@ -77,22 +78,26 @@
   [command]
   (with-application command
     (fn [inforequest]
-      (let [application-id (mongo/create-id)]
-        ; Mark source info-request as answered:
-        (mongo/update
+      ; Mark source info-request as answered:
+      (mongo/update
+        mongo/applications
+        {:_id (:id inforequest)}
+        {$set {:state :answered
+               :modified (:created command)}})
+      ; Create application with comments from info-request:
+      (let [result (executed
+                     (lupapalvelu.core/command
+                       "create-application"
+                       (:user command)
+                       (assoc
+                         (util/sub-map inforequest [:x :y :municipality :address])
+                         :permitType "buildingPermit")))
+            id (:id result)]
+        (mongo/update-by-id
           mongo/applications
-          {:_id (:id inforequest)}
-          {$set {:state :answered
-                 :modified (:created command)}})
-        ; Create application with data from info-request:
-        (mongo/insert
-          mongo/applications
-          (assoc inforequest
-                 :id application-id
-                 :permitType "buildingPermit"
-                 :modified (:created command)))
-        ; Reurn new application ID:
-        {:ok true :id application-id}))))
+          id
+          {$set {:comments (:comments inforequest)}})
+        (ok :id id)))))
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
@@ -123,13 +128,7 @@
         id         (mongo/create-id)
         owner      (role user :owner :type :owner)
         permitType (keyword (:permitType data))
-        documents  (map create-document (permitType default-schemas))
-        comments   (map (fn [text]
-                          {:text    text
-                           :target  {:type "application"}
-                           :created created
-                           :user    (security/summary user)})
-                        (:comments data))]
+        documents  (map create-document (permitType default-schemas))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -146,7 +145,12 @@
        :permitType permitType 
        :allowedAttahmentTypes (attachment-types-for permitType)
        :attachments []
-       :comments comments})
+       :comments (if-let [message (:message data)]
+                   [{:text message
+                     :target  {:type "application"}
+                     :created created
+                     :user    (security/summary user)}]
+                   [])})
     (doseq [attachment-type (default-attachments permitType)]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
