@@ -85,36 +85,18 @@
         {$set {:state :answered
                :modified (:created command)}})
       ; Create application with comments from info-request:
-      (executed
-        (lupapalvelu.core/command
-          "create-application"
-          (:user command)
-          (assoc
-            (util/sub-map inforequest [:x :y :municipality :address])
-            :permitType "buildingPermit"
-            :comments (map :text (:comments inforequest)))
-          {:permitType "buildingPermit"
-           :x (:x inforequest)
-           :y (:y inforequest)
-           :municipality (:municipality inforequest)}
-          
-          
-          {
-       
-       
-       
-       :municipality (:municipality data)
-       :authority (:municipality data)
-       :location {:x (:x data) :y (:y data)}
-       :address (:address data)
-       :title (:address data)
-       :roles {:applicant owner}
-       :auth [owner]
-       :documents documents
-       :permitType permitType 
-       :allowedAttahmentTypes (attachment-types-for permitType)
-       :attachments []
-       :comments comments})))))
+      (let [id (:id (executed
+                      (lupapalvelu.core/command
+                        "create-application"
+                        (:user command)
+                        (assoc
+                          (util/sub-map inforequest [:x :y :municipality :address])
+                          :permitType "buildingPermit"))))]
+        (mongo/update-by-id
+          mongo/applications
+          id
+          {$set {:comments (:comments inforequest)}})
+        (ok :id id)))))
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
