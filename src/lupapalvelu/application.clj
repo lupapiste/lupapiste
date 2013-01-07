@@ -85,13 +85,14 @@
         {$set {:state :answered
                :modified (:created command)}})
       ; Create application with comments from info-request:
-      (let [id (:id (executed
-                      (lupapalvelu.core/command
-                        "create-application"
-                        (:user command)
-                        (assoc
-                          (util/sub-map inforequest [:x :y :municipality :address])
-                          :permitType "buildingPermit"))))]
+      (let [result (executed
+                     (lupapalvelu.core/command
+                       "create-application"
+                       (:user command)
+                       (assoc
+                         (util/sub-map inforequest [:x :y :municipality :address])
+                         :permitType "buildingPermit")))
+            id (:id result)]
         (mongo/update-by-id
           mongo/applications
           id
