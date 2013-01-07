@@ -15,19 +15,19 @@
         <h1 data-bind="text: address">
         </h1>
 
-        <div class="application_summary_info" draggable="auto">
+        <div class="application_summary_info">
           <div>
             <p>K&auml;sittelytunnus:</p>
-            <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id(), attr: {'data-test-value': id}"></span>
+            <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id, attr: {'data-test-value': id}"></span>
           </div>
           <div>
             <p>Tila:</p>
             <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
           </div>
-            <div>
-              <p>Lupatyyppi:</p>
-              <span class="application_summary_text" data-bind="ltext: permitType()"></span>
-            </div>
+          <div>
+            <p>Lupatyyppi:</p>
+            <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+          </div>
           <div>
             <p>Toimenpiteet:</p>
             <ul data-bind="foreach: $root.documents">
