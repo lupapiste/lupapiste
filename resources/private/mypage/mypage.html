@@ -2,7 +2,22 @@
 <html lang="en">
 <body>
   <section class="page" id="mypage">
-    My page.
+    <form>
+      <div>Vaihda salasana:</div>
+      <label>Nykyinen salasana:</label>
+      <input data-bind="value: passwd0, valueUpdate: 'afterkeydown'" name="passwd0" type="password" placeholder="Nykyinen salasana"></input>
+      <br/>
+      <label>Uusi salasana:</label>
+      <input data-bind="value: passwd1, valueUpdate: 'afterkeydown'" name="passwd1" type="password" placeholder="Uusi salasana"></input>
+      <br/>
+      <label>Salasana uudelleen:</label>
+      <input data-bind="value: passwd2, valueUpdate: 'afterkeydown'" name="passwd2" type="password" placeholder="Salasana uudelleen"></input>
+      <span data-bind="visible: noMatch" style="color: gray; font-style: italic;">Salasanat eivät täsmää.</span>
+      <br/>
+      <button data-bind="click: changePassword, enable: ok" type="button" href="#">Vaihda salasana</button>
+      <span data-bind="visible: error() != null, text: error" style="font-weight: bold; color=red;"></span>
+      <img style="display: none" src="/img/ajax-loader-12.gif"/>
+    </form>
     <a href="#!/all-applications">Takaisin.</a>
   </section>
 </body>
