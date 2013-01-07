@@ -121,7 +121,8 @@
    
    :mypage  {:depends [:common]
              :js ["mypage.js"]
-             :html ["mypage.html"]}})
+             :html ["mypage.html"]
+             :css ["mypage.css"]}})
 
 ; Make sure that all resources are available:
 
