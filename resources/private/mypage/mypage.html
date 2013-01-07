@@ -9,6 +9,7 @@
       <br/>
       <label>Uusi salasana:</label>
       <input data-bind="value: passwd1, valueUpdate: 'afterkeydown'" name="passwd1" type="password" placeholder="Uusi salasana"></input>
+      <span data-bind="text: loc('passwd-change.quality.' + pwQuality()), attr: {'class': pwQuality}, visible: passwd1().length > 0"></span>
       <br/>
       <label>Salasana uudelleen:</label>
       <input data-bind="value: passwd2, valueUpdate: 'afterkeydown'" name="passwd2" type="password" placeholder="Salasana uudelleen"></input>
