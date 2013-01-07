@@ -1,5 +1,14 @@
 (function() {
 
+  function getPwQuality(pw) {
+    var l = pw.length;
+    if (l <= 6)  return 0;
+    if (l <= 8)  return 1;
+    if (l <= 10) return 2;
+    if (l <= 12) return 3;
+    return 4;
+  }
+
   function isNotBlank(s) { return !/^\s*$/.test(s); };
   function equals(s1, s2) { return s1 === s2; };
   
@@ -18,10 +27,11 @@
     $("#mypage input[name='passwd0']").focus();
     return model;
   }
-  
 
   model.ok = ko.computed(function() {
-    return isNotBlank(model.passwd0()) && isNotBlank(model.passwd1()) && equals(model.passwd1(), model.passwd2());
+    return isNotBlank(model.passwd0()) &&
+      (getPwQuality(model.passwd1()) > 0) &&
+      equals(model.passwd1(), model.passwd2());
   });
   
   model.noMatch = ko.computed(function() {
@@ -44,6 +54,12 @@
       })
       .call();
   };
+
+  var pwQualityData = ["poor", "low", "average", "good", "excellent"];
+  
+  model.pwQuality = ko.computed(function() {
+    return pwQualityData[getPwQuality(model.passwd1())];
+  });
 
   hub.onPageChange("mypage", model.clear);
   
