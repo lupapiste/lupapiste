@@ -89,26 +89,28 @@
         (resp/json {:query query
                     :suggestions (map feature->string features)
                     :data (map wfs/feature-to-address features)}))
-      (resp/status 503 "Service temporarily unavailable"))))
+      (do
+        (error "find-addresses failed: status=%s, response=%s" status response)
+        (resp/status 503 "Service temporarily unavailable")))))
 
-(defn- point-by-kiinteistotunnus [kiinteistotunnus]
+(defn- point-by-property-id [property-id]
   (wfs/execute wfs/ktjkii
     (wfs/query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (wfs/property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (wfs/property-name "ktjkiiwfs:tunnuspisteSijainti")
       (wfs/filter
-        (wfs/property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" kiinteistotunnus)))))
+        (wfs/property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 ; TODO: Error handling
-(defn point-by-kiinteistotunnus-proxy [request]
-  (let [[status features] (-> request (:query-params) (get "kiinteistotunnus") (point-by-kiinteistotunnus))]
+(defn point-by-property-id-proxy [request]
+  (let [[status features] (-> request (:query-params) (get "property-id") (point-by-property-id))]
     (if (= status :ok)
       (resp/json (map wfs/feature-to-position features))
       (do
-        (error "Failed to get point by 'kiinteistotunnus': %s" features)
+        (error "Failed to get point by 'property-id': %s" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
-(defn- kiinteistotunnus-by-point [[x y]]
+(defn- property-id-by-point [[x y]]
   (wfs/execute wfs/ktjkii
     (wfs/query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (wfs/property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
@@ -118,12 +120,12 @@
           (wfs/property-name "ktjkiiwfs:sijainti")
           (wfs/point x y))))))
 
-(defn kiinteistotunnus-by-point-proxy [request]
-  (let [[status features] (-> request (:query-params) (select ["x" "y"]) (kiinteistotunnus-by-point))]
+(defn property-id-by-point-proxy [request]
+  (let [[status features] (-> request (:query-params) (select ["x" "y"]) (property-id-by-point))]
     (if (= status :ok)
-      (resp/json (map wfs/feature-to-kiinteistotunnus features))
+      (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
       (do
-        (error "Failed to get 'kiinteistotunnus' by popint: %s" features)
+        (error "Failed to get 'property-id' by point: %s" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
 ;
@@ -143,7 +145,7 @@
 ;;
 
 (def services {"nls" (secure wfs/raster-images)
-               "point-by-kiinteistotunnus" (secure point-by-kiinteistotunnus-proxy)
-               "kiinteistotunnus-by-point" (secure kiinteistotunnus-by-point-proxy)
-               "find-address" (secure find-addresses-proxy)
-               "get-address" (secure get-addresses-proxy)})
+               "point-by-property-id" point-by-property-id-proxy
+               "property-id-by-point" property-id-by-point-proxy
+               "find-address" find-addresses-proxy
+               "get-address" get-addresses-proxy})

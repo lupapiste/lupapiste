@@ -7,7 +7,9 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.security :as security]
+            [lupapalvelu.util :as util]))
 
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
@@ -77,19 +79,26 @@
   [command]
   (with-application command
     (fn [inforequest]
-      (let [application-id (mongo/create-id)]
-        (mongo/update
+      ; Mark source info-request as answered:
+      (mongo/update
+        mongo/applications
+        {:_id (:id inforequest)}
+        {$set {:state :answered
+               :modified (:created command)}})
+      ; Create application with comments from info-request:
+      (let [result (executed
+                     (lupapalvelu.core/command
+                       "create-application"
+                       (:user command)
+                       (assoc
+                         (util/sub-map inforequest [:x :y :municipality :address])
+                         :permitType "buildingPermit")))
+            id (:id result)]
+        (mongo/update-by-id
           mongo/applications
-          {:_id (:id inforequest)}
-          {$set {:state :answered
-                 :modified (:created command)}})
-        (mongo/insert
-          mongo/applications
-          (assoc inforequest
-                 :id application-id
-                 :permitType "buildingPermit"
-                 :modified (:created command)))
-        {:ok true :id application-id}))))
+          id
+          {$set {:comments (:comments inforequest)}})
+        (ok :id id)))))
 
 (defn create-document [schema-name]
   (let [schema (get schemas/schemas schema-name)]
@@ -99,19 +108,18 @@
      :schema schema
      :body {}}))
 
-; TODO: Figure out where these should come from?
 (def default-schemas {:infoRequest []
-                      :buildingPermit 
-                      ["hakija" "paasuunnittelija" "suunnittelija" "maksaja" "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
+                      :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
+                                       "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
 
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
-                              [["paapiirustus" "asemapiirros"]
-                               ["paapiirustus" "pohjapiirros"]
-                               ["paapiirustus" "leikkauspiirros"]
-                               ["paapiirustus" "julkisivupiirros"]
-                               ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
-                               ["muut" "energiataloudellinen_selvitys"]])})
+                                               [["paapiirustus" "asemapiirros"]
+                                                ["paapiirustus" "pohjapiirros"]
+                                                ["paapiirustus" "leikkauspiirros"]
+                                                ["paapiirustus" "julkisivupiirros"]
+                                                ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
+                                                ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
   {:parameters [:permitType :x :y :address :municipality]
@@ -121,32 +129,30 @@
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
         permitType (keyword (:permitType data))
-        documents  (map create-document (permitType default-schemas))
-        message    (:message data)]
+        documents  (map create-document (permitType default-schemas))]
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
        :state :draft
-       :municipality {}
-       :location {:x (:x data)
-                  :y (:y data)}
+       :municipality (:municipality data)
+       :authority (:municipality data)
+       :location {:x (:x data) :y (:y data)}
        :address (:address data)
        :title (:address data)
-       :authority (:municipality data)
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
        :permitType permitType 
        :allowedAttahmentTypes (attachment-types-for permitType)
-       :attachments []})
-    (if message
-      (executed (assoc (lupapalvelu.core/command "add-comment" {:id id
-                                                                :text message
-                                                                :target {:type "application"}})
-                       :user user)))
+       :attachments []
+       :comments (if-let [message (:message data)]
+                   [{:text message
+                     :target  {:type "application"}
+                     :created created
+                     :user    (security/summary user)}]
+                   [])})
     (doseq [attachment-type (default-attachments permitType)]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
-

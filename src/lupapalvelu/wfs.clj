@@ -9,7 +9,7 @@
 
 (def ^:private auth ["***REMOVED***" "***REMOVED***"])
 
-(def ^:private timeout 3000)
+(def ^:private timeout 30000)
 
 (defn query [attrs & e]
   (str "<?xml version='1.0' encoding='UTF-8'?>
@@ -91,6 +91,7 @@
      :katunumero (address-part feature :oso:katunumero)
      :kuntanimiFin (address-part feature :oso:kuntanimiFin)
      :kuntanimiSwe (address-part feature :oso:kuntanimiSwe)
+     :kuntatunnus (address-part feature :oso:kuntatunnus)
      :x x
      :y y}))
 
@@ -112,7 +113,7 @@
   (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
     {:x x :y y}))
 
-(defn feature-to-kiinteistotunnus [feature]
+(defn feature-to-property-id [feature]
   {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))})
 
 (defn response->features [response]
