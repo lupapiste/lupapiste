@@ -46,16 +46,22 @@
                                  {:tag :BIM :child []}
                                  {:tag :kerrosluku}
                                  {:tag :kerrosala}
-                                 {:tag :rakentamistapa :child []}
-                                 {:tag :kantavaRakennusaine :child []}
+                                 {:tag :rakentamistapa}
+                                 {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
+                                                                    {:tag :rakennusaine}]}
                                  {:tag :julkisivu
                                   :child [{:tag :muuMateriaali}
                                           {:tag :julkisivumateriaali}]}
-                                 {:tag :verkostoliittymat :child []}
+                                 {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
+                                                                  {:tag :vesijohtoKytkin}
+                                                                  {:tag :sahkoKytkin}
+                                                                  {:tag :maakaasuKytkin}
+                                                                  {:tag :kaapeliKytkin}]}
                                  {:tag :energialuokka}
                                  {:tag :paloluokka}
-                                 {:tag :lammitystapa :child []}
-                                 {:tag :lammonlahde :child []}
+                                 {:tag :lammitystapa}
+                                 {:tag :lammonlahde :child [{:tag :polttoaine}
+                                                             {:tag :muu}]}
                                  {:tag :varusteet
                                   :child [{:tag :sahkoKytkin}
                                           {:tag :kaasuKytkin}
@@ -88,23 +94,20 @@
                               :child [osapuolet]}
                              {:tag :rakennuspaikkatieto
                               :child [rakennuspaikka]}
-                             ;{:tag :toimenpidetieto
-                             ; :child [{:tag :Toimenpide
-                                       ;:child [{:tag :uusi}
-                                        ;       {:tag :laajennus}
-                                       ;        {:tag :kayttotarkoitusmuutos}
-                                      ;         {:tag :perustus}
-                                     ;          {:tag :perusparannus}
-                                    ;           {:tag :uudelleenrakentaminen}
-                                   ;            {:tag :purkaminen}
-                                  ;             {:tag :muuMuutosTyo}
-                                 ;              {:tag :kaupunkikuvaToimenpide}
-                                ;               {:tag :katselmustieto}
-                               ;                {:tag :rakennustieto
-                              ;                  :child [rakennus]}
-                             ;                  {:tag :rakennelmatieto}]}]
-                             ; }
-                              ]}
-                    ]
-            }]}
-    )
+                             {:tag :toimenpidetieto
+                              :child [{:tag :Toimenpide
+                                       :child [{:tag :uusi
+                                                :child [{:tag :huoneistoala}
+                                                        {:tag :kuvaus}]}
+                                               {:tag :laajennus}
+                                               {:tag :kayttotarkoitusmuutos}
+                                               {:tag :perustus}
+                                               {:tag :perusparannus}
+                                               {:tag :uudelleenrakentaminen}
+                                               {:tag :purkaminen}
+                                               {:tag :muuMuutosTyo}
+                                               {:tag :kaupunkikuvaToimenpide}
+                                               {:tag :katselmustieto}
+                                               {:tag :rakennustieto
+                                                :child [rakennus]}
+                                               {:tag :rakennelmatieto}]}]}]}]}]})
