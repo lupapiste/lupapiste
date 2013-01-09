@@ -84,7 +84,7 @@
              {:name "kayttotarkoitus" :type :string}
              {:name "tilavuus" :type :string :unit "m3" :subtype :number}
              {:name "kokonaisala" :type :string :unit "m2" :subtype :number}
-             {:name "kellaripinta-ala" :type :string :unit "m2" :subtype :number}
+             {:name "kellarinpinta-ala" :type :string :unit "m2" :subtype :number}
              {:name "kerrosluku" :type :string :subtype :number}
              {:name "kerrosala" :type :string :unit "m2" :subtype :number}
              {:name "rakentamistapa" :type :select
@@ -144,7 +144,7 @@
                      {:name "lamminvesiKytkin" :type :checkbox}
                      {:name "aurinkopaneeliKytkin" :type :checkbox}
                      {:name "saunoja" :type :string}
-                     {:name "vaestonsuojia" :type :string}]}
+                     {:name "vaestonsuoja" :type :string}]}
              {:name "poikkeamiset" :type :string}]}
 
      {:info {:name "huoneisto"}
