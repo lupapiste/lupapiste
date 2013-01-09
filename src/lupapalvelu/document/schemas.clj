@@ -91,7 +91,7 @@
               :body [{:name "elementti" :type :checkbox}
                      {:name "paikalla" :type :checkbox}
                      {:name "ei tiedossa" :type :checkbox}]}
-             {:name "kantavarakennusaine" :type :select
+             {:name "kantavaRakennusaine" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
                      {:name "teras" :type :checkbox}
@@ -110,7 +110,7 @@
              {:name "verkostoliittymat" :type :choice
               :body [{:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
-                     {:name "sahkokytkin" :type :checkbox}
+                     {:name "sahkoKytkin" :type :checkbox}
                      {:name "maakaasuKytkin" :type :checkbox}
                      {:name "kaapeliKytkin" :type :checkbox}]}
              {:name "energialuokka" :type :string}
@@ -141,6 +141,8 @@
                      {:name "vesijohtoKytkin" :type :checkbox}
                      {:name "hissiKytkin" :type :checkbox}
                      {:name "koneellinenilmastointiKytkin" :type :checkbox}
+                     {:name "lamminvesiKytkin" :type :checkbox}
+                     {:name "aurinkopaneeliKytkin" :type :checkbox}
                      {:name "saunoja" :type :string}
                      {:name "vaestonsuojia" :type :string}]}
              {:name "poikkeamiset" :type :string}]}
