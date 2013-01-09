@@ -55,6 +55,7 @@
 
       <button data-bind="click: save, enable: ok" type="button" href="#">Vaihda salasana</button>
       <span data-bind="visible: error() != null, text: error" style="font-weight: bold; color=red;"></span>
+      <span data-bind="visible: error() == null && saved" style="font-weight: bold; color=green;">Salasana muutettu</span>
       <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
     </form>
 
