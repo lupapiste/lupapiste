@@ -7,33 +7,41 @@
 
 (def schema {:info {:name "test-model"
                     :version 1}
-             :body [{:name "1" :type :group
-                     :body [{:name "11" :type :string}
-                            {:name "12" :type :string :min-len 2 :max-len 3}
-                            {:name "2" :type :group
-                             :body [{:name "21" :type :string :min-len 2}
-                                    {:name "22" :type :boolean}]}
-                            {:name "3" :type :list
-                             :body [{:name "31" :type :string}
-                                    {:name "32" :type :checkbox}]}]}]})
+             :body [{:name "a" :type :group
+                     :body [{:name "aa" :type :string}
+                            {:name "ab" :type :string :min-len 2 :max-len 3}
+                            {:name "b" :type :group
+                             :body [{:name "ba" :type :string :min-len 2}
+                                    {:name "bb" :type :boolean}]}
+                            {:name "c" :type :list
+                             :body [{:name "ca" :type :string}
+                                    {:name "cb" :type :checkbox}]}]}]})
+
+(def schema-with-repetition {:info {:name "repetition-model" :version 1}
+                             :body [{:name "single" :type :string}
+                                    {:name "repeats" :type :group :repeating true
+                                     :body [{:name "single2" :type :string}
+                                            {:name "repeats2" :type :string :repeating true}]}]})
 
 ;; Tests for internals:
 
 (def find-by-name #'lupapalvelu.document.model/find-by-name)
 
 (facts "Facts about internals"
-  (fact (find-by-name (:body schema) ["1"]) => (-> schema :body first))
-  (fact (find-by-name (:body schema) ["1" "11"]) => {:name "11" :type :string})
-  (fact (find-by-name (:body schema) ["1" "2" "22"]) => {:name "22" :type :boolean})
-  (fact (find-by-name (:body schema) ["1" "2" "23"]) => nil))
+  (fact (find-by-name (:body schema) ["a"]) => (-> schema :body first))
+  (fact (find-by-name (:body schema) ["a" "aa"]) => {:name "aa" :type :string})
+  (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
+  (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
+
+
 
 ;; Validation tests:
 
 (facts "Simple validations"
-  (fact (validate-updates schema [["1.12" "foo"]]) => [])
-  (fact (validate-updates schema [["1.12" "f"]]) => [["1.12" :warn "illegal-value:too-short"]])
-  (fact (validate-updates schema [["1.12" "foooo"]]) => [["1.12" :err "illegal-value:too-long"]])
-  (fact (validate-updates schema [["1.12" "f"] ["1.12" "foooo"]]) => [["1.12" :warn "illegal-value:too-short"] ["1.12" :err "illegal-value:too-long"]]))
+  (fact (validate-updates schema [["a.ab" "foo"]]) => [])
+  (fact (validate-updates schema [["a.ab" "f"]]) => [["a.ab" :warn "illegal-value:too-short"]])
+  (fact (validate-updates schema [["a.ab" "foooo"]]) => [["a.ab" :err "illegal-value:too-long"]])
+  (fact (validate-updates schema [["a.ab" "f"] ["a.ab" "foooo"]]) => [["a.ab" :warn "illegal-value:too-short"] ["a.ab" :err "illegal-value:too-long"]]))
 
 (facts "with real schemas - important field for paasuunnittelija"
   (let [schema (schemas "paasuunnittelija")]
@@ -44,6 +52,13 @@
     (fact (validate-updates schema [["henkilo.henkilotiedot.etunimi" "Tauno"] ["henkilo.henkilotiedot.sukunimiz" "Palo"]])  => [["henkilo.henkilotiedot.sukunimiz" :err "illegal-key"]])
     (fact (validate-updates schema [["henkilo.yhteystiedot.email" "tauno@example.com"]]) => [])
     (fact (validate-updates schema [["henkilo.yhteystiedot.puhelin" "050"]]) =>        [])))
+
+(facts "Repeating section"
+  (fact "Single value contains no nested sections" (validate-updates schema-with-repetition [["single.1.single2"]]) => [["single.1.single2" :err "illegal-key"]])
+  (fact "Repeating section happy case" (validate-updates schema-with-repetition [["repeats.1.single2" "foo"]]) => [])
+  (fact "Invalid key under nested section" (validate-updates schema-with-repetition [["repeats.1.single3" "foo"]]) => [["repeats.1.single3" :err "illegal-key"]])
+  (fact "Unindexed repeating section" (validate-updates schema-with-repetition [["repeats.single2" "foo"]]) => [["repeats.single2" :err "illegal-key"]])
+)
 
 (facts "Facts about validation-status"
  (fact (validation-status []) => :ok)

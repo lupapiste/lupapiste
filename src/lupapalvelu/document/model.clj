@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.model
   (:use [lupapalvelu.log]
+        [lupapalvelu.strings]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [lupapalvelu.document.subtype :as subtype]))
@@ -49,12 +50,14 @@
 ;;
 ;; Neue api:
 ;;
-
 (defn- find-by-name [schema-body [k & ks]]
   (when-let [elem (some #(if (= (:name %) k) %) schema-body)]
     (if (nil? ks)
       elem
-      (find-by-name (:body elem) ks))))
+      (if (:repeating elem)
+        (when (numeric? (first ks))
+          (find-by-name (:body elem) (rest ks)))
+        (find-by-name (:body elem) ks)))))
 
 (defn- validate-update [schema-body results [k v]]
   (let [elem (find-by-name schema-body (s/split k #"\."))
