@@ -21,7 +21,7 @@
                              :body [{:name "single" :type :string}
                                     {:name "repeats" :type :group :repeating true
                                      :body [{:name "single2" :type :string}
-                                            {:name "repeats2" :type :string :repeating true}]}]})
+                                            {:name "repeats2" :type :string :subtype :digit :repeating true}]}]})
 
 ;; Tests for internals:
 
@@ -58,6 +58,8 @@
   (fact "Repeating section happy case" (validate-updates schema-with-repetition [["repeats.1.single2" "foo"]]) => [])
   (fact "Invalid key under nested section" (validate-updates schema-with-repetition [["repeats.1.single3" "foo"]]) => [["repeats.1.single3" :err "illegal-key"]])
   (fact "Unindexed repeating section" (validate-updates schema-with-repetition [["repeats.single2" "foo"]]) => [["repeats.single2" :err "illegal-key"]])
+  (fact "Repeating string, 0" (validate-updates schema-with-repetition [["repeats.1.repeats2.0" "1"]]) => [])
+  (fact "Repeating string, 1" (validate-updates schema-with-repetition [["repeats.1.repeats2.1" "foo"]]) => [["repeats.1.repeats2.1" :warn "illegal-number"]])
 )
 
 (facts "Facts about validation-status"

@@ -56,7 +56,9 @@
       elem
       (if (:repeating elem)
         (when (numeric? (first ks))
-          (find-by-name (:body elem) (rest ks)))
+          (if (seq (rest ks))
+            (find-by-name (:body elem) (rest ks))
+            elem))
         (find-by-name (:body elem) ks)))))
 
 (defn- validate-update [schema-body results [k v]]
