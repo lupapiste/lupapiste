@@ -81,7 +81,85 @@
                      {:name "muu"}
                      {:name "ei tiedossa"}]}
 
-             {:name "kayttotarkoitus" :type :string}
+             {:name "kayttotarkoitus" :type :select
+              :body [{:name "999 muualla luokittelemattomat rakennukset"}
+                     {:name "941 talousrakennukset"}
+                     {:name "931 saunarakennukset"}
+                     {:name "899 muut maa-, metsä- ja kalatalouden rakennukset"}
+                     {:name "893 turkistarhat"}
+                     {:name "892 kasvihuoneet"}
+                     {:name "891 viljankuivaamot ja viljan säilytysrakennukset"}
+                     {:name "819 eläinsuojat, ravihevostallit, maneesit yms"}
+                     {:name "811 navetat, sikalat, kanalat yms"}
+                     {:name "729 muut palo- ja pelastustoimen rakennukset"}
+                     {:name "722 väestönsuojat"}
+                     {:name "721 paloasemat"}
+                     {:name "719 muut varastorakennukset"}
+                     {:name "712 kauppavarastot"}
+                     {:name "711 teollisuusvarastot"}
+                     {:name "699 muut teollisuuden tuotantorakennukset"}
+                     {:name "692 teollisuus- ja pienteollisuustalot"}
+                     {:name "691 teollisuushallit"}
+                     {:name "613 yhdyskuntatekniikan rakennukset"}
+                     {:name "611 voimalaitosrakennukset"}
+                     {:name "549 muualla luokittelemattomat opetusrakennukset"}
+                     {:name "541 järjestöjen, liittojen, työnantajien yms opetusrakennukset"}
+                     {:name "532 tutkimuslaitosrakennukset"}
+                     {:name "531 korkeakoulurakennukset"}
+                     {:name "521 ammatillisten oppilaitosten rakennukset"}
+                     {:name "511 yleissivistävien oppilaitosten rakennukset"}
+                     {:name "369 muut kokoontumisrakennukset"}
+                     {:name "359 muut urheilu- ja kuntoilurakennukset"}
+                     {:name "354 monitoimihallit ja muut urheiluhallit"}
+                     {:name "353 tennis-, squash- ja sulkapallohallit"}
+                     {:name "352 uimahallit"}
+                     {:name "351 jäähallit"}
+                     {:name "349 muut uskonnollisten yhteisöjen rakennukset"}
+                     {:name "342 seurakuntatalot"}
+                     {:name "341 kirkot, kappelit, luostarit ja rukoushuoneet"}
+                     {:name "331 seura- ja kerhorakennukset yms"}
+                     {:name "324 näyttelyhallit"}
+                     {:name "323 museot ja taidegalleriat"}
+                     {:name "322 kirjastot ja arkistot"}
+                     {:name "312 elokuvateatterit"}
+                     {:name "311 teatterit, ooppera-, konsertti- ja kongressitalot"}
+                     {:name "241 vankilat"}
+                     {:name "239 muualla luokittelemattomat sosiaalitoimen rakennukset"}
+                     {:name "231 lasten päiväkodit"}
+                     {:name "229 muut huoltolaitosrakennukset"}
+                     {:name "223 kehitysvammaisten hoitolaitokset"}
+                     {:name "222 lasten- ja koulukodit"}
+                     {:name "221 vanhainkodit"}
+                     {:name "219 muut terveydenhuoltorakennukset"}
+                     {:name "215 terveydenhuollon erityislaitokset"}
+                     {:name "214 terveyskeskukset"}
+                     {:name "213 muut sairaalat"}
+                     {:name "211 keskussairaalat"}
+                     {:name "169 muut liikenteen rakennukset"}
+                     {:name "164 tietoliikenteen rakennukset"}
+                     {:name "163 pysäköintitalot"}
+                     {:name "162 kulkuneuvojen suoja- ja huoltorakennukset"}
+                     {:name "161 rautatie- ja linja-autoasemat, lento- ja satamaterminaalit"}
+                     {:name "151 toimistorakennukset"}
+                     {:name "141 ravintolat yms"}
+                     {:name "139 muut asuntolarakennukset"}
+                     {:name "131 asuntolat yms"}
+                     {:name "129 muut majoitusliikerakennukset"}
+                     {:name "124 vuokrattavat lomamökit ja -osakkeet"}
+                     {:name "123 loma-, lepo- ja virkistyskodit"}
+                     {:name "121 hotellit yms"}
+                     {:name "119 muut myymälärakennukset"}
+                     {:name "112 liike- ja tavaratalot, kauppakeskukset"}
+                     {:name "111 myymälähallit"}
+                     {:name "041 vapaa-ajan asuinrakennukset"}
+                     {:name "039 muut asuinkerrostalot"}
+                     {:name "032 luhtitalot"}
+                     {:name "022 ketjutalot"}
+                     {:name "021 rivitalot"}
+                     {:name "013 muut erilliset talot"}
+                     {:name "012 kahden asunnon talot"}
+                     {:name "011 yhden asunnon talot"}
+                     {:name "ei tiedossa"}]}
              {:name "tilavuus" :type :string :unit "m3" :subtype :number}
              {:name "kokonaisala" :type :string :unit "m2" :subtype :number}
              {:name "kellarinpinta-ala" :type :string :unit "m2" :subtype :number}
@@ -123,14 +201,14 @@
                      {:name "eiLammitysta" :type :checkbox}
                      {:name "ei tiedossa" :type :checkbox}]}
              {:name "lammonlahde" :type :select
-              :body [{:name "kaukotaialuelampo" :type :checkbox}
-                     {:name "kevytpolttooljy" :type :checkbox}
-                     {:name "raskaspolttooljy" :type :checkbox}
-                     {:name "sahko" :type :checkbox}
+              :body [{:name "kauko tai aluel\u00e4mp\u00f6" :type :checkbox}
+                     {:name "kevyt poltto\u00f6ljy" :type :checkbox}
+                     {:name "raskas poltto\u00f6ljy" :type :checkbox}
+                     {:name "s\u00e4hk\u00f6" :type :checkbox}
                      {:name "kaasu" :type :checkbox}
-                     {:name "kivihiilikoksitms" :type :checkbox}
+                     {:name "kiviihiili koksi tms." :type :checkbox}
                      {:name "turve" :type :checkbox}
-                     {:name "maalampo" :type :checkbox}
+                     {:name "maal\u00e4mp\u00f6" :type :checkbox}
                      {:name "puu" :type :checkbox}
                      {:name "muu" :type :string :size "s"}
                      {:name "ei tiedossa" :type :checkbox}]}
@@ -143,8 +221,8 @@
                      {:name "koneellinenilmastointiKytkin" :type :checkbox}
                      {:name "lamminvesiKytkin" :type :checkbox}
                      {:name "aurinkopaneeliKytkin" :type :checkbox}
-                     {:name "saunoja" :type :string}
-                     {:name "vaestonsuoja" :type :string}]}
+                     {:name "saunoja" :type :string :subtype :number}
+                     {:name "vaestonsuoja" :type :string :subtype :number}]}
              {:name "poikkeamiset" :type :string}]}
 
      {:info {:name "huoneisto"}
