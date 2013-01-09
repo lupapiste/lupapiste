@@ -88,23 +88,20 @@
                               :child [osapuolet]}
                              {:tag :rakennuspaikkatieto
                               :child [rakennuspaikka]}
-                             ;{:tag :toimenpidetieto
-                             ; :child [{:tag :Toimenpide
-                                       ;:child [{:tag :uusi}
-                                        ;       {:tag :laajennus}
-                                       ;        {:tag :kayttotarkoitusmuutos}
-                                      ;         {:tag :perustus}
-                                     ;          {:tag :perusparannus}
-                                    ;           {:tag :uudelleenrakentaminen}
-                                   ;            {:tag :purkaminen}
-                                  ;             {:tag :muuMuutosTyo}
-                                 ;              {:tag :kaupunkikuvaToimenpide}
-                                ;               {:tag :katselmustieto}
-                               ;                {:tag :rakennustieto
-                              ;                  :child [rakennus]}
-                             ;                  {:tag :rakennelmatieto}]}]
-                             ; }
-                              ]}
-                    ]
-            }]}
-    )
+                             {:tag :toimenpidetieto
+                              :child [{:tag :Toimenpide
+                                       :child [{:tag :uusi
+                                                :child [{:tag :huoneistoala}
+                                                        {:tag :kuvaus}]}
+                                               {:tag :laajennus}
+                                               {:tag :kayttotarkoitusmuutos}
+                                               {:tag :perustus}
+                                               {:tag :perusparannus}
+                                               {:tag :uudelleenrakentaminen}
+                                               {:tag :purkaminen}
+                                               {:tag :muuMuutosTyo}
+                                               {:tag :kaupunkikuvaToimenpide}
+                                               {:tag :katselmustieto}
+                                               {:tag :rakennustieto
+                                                :child [rakennus]}
+                                               {:tag :rakennelmatieto}]}]}]}]}]})
