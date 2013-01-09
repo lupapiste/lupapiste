@@ -3,20 +3,36 @@
         [lupapalvelu.core]
         [lupapalvelu.log])
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.util :as util]))
 
 (defcommand "change-passwd"
-  {:parameters [:old-pw :new-pw]
+  {:parameters [:oldPassword :newPassword]
    :roles      [:applicant :authority]}
-  [{{:keys [old-pw new-pw]} :data user :user}]
+  [{{:keys [oldPassword newPassword]} :data user :user}]
   (let [user-id (:id user)
-        user-data (mongo/by-id mongo/users user-id)
-        old-pwd-matches (security/check-password old-pw (-> user-data :private :password))]
-    (if old-pwd-matches
+        user-data (mongo/by-id mongo/users user-id)]
+    (if (security/check-password oldPassword (-> user-data :private :password))
       (do
         (debug "Password change: user-id=%s" user-id)
-        (security/change-password (:email user) new-pw)
+        (security/change-password (:email user) newPassword)
         (ok))
       (do
         (warn "Password change: failed: old password does not match: user-id=%s" user-id)
         (fail :old-password-does-not-match)))))
+
+(defquery "get-user-info" 
+  {:roles [:applicant :authority]}
+  [{user :user}]
+  (ok :user user))
+
+(defcommand "save-user-info" 
+  {:parameters [:firstName :lastName :street :city :zip :phone]
+   :roles      [:applicant :authority]}
+  [{data :data user :user}]
+  (let [user-id (:id user)]
+    (mongo/update-by-id
+      mongo/users
+      user-id
+      {$set (util/sub-map data [:firstName :lastName :street :city :zip :phone])})
+    (ok)))
