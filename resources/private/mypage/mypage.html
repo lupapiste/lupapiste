@@ -29,7 +29,7 @@
       <br/>
 
       <button data-bind="click: save" type="button" href="#">Tallenna</button>
-      <span data-bind="visible: error() != null, text: error" style="font-weight: bold; color=red;"></span>
+      <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color=red;"></span>
       <span data-bind="visible: error() == null && saved" style="font-weight: bold; color=green;">Tiedot tallennettu</span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
       
@@ -45,7 +45,7 @@
 
       <label>Uusi salasana:</label>
       <input data-bind="value: newPassword, valueUpdate: 'afterkeydown'" name="newPassword" type="password" placeholder="Uusi salasana"></input>
-      <span data-bind="text: loc('passwd-change.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
+      <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
       <br/>
 
       <label>Salasana uudelleen:</label>
@@ -54,7 +54,7 @@
       <br/>
 
       <button data-bind="click: save, enable: ok" type="button" href="#">Vaihda salasana</button>
-      <span data-bind="visible: error() != null, text: error" style="font-weight: bold; color=red;"></span>
+      <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color=red;"></span>
       <span data-bind="visible: error() == null && saved" style="font-weight: bold; color=green;">Salasana muutettu</span>
       <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
     </form>

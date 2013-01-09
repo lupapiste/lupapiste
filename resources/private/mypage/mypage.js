@@ -10,7 +10,7 @@
       ajax
         .command(commandName, _.reduce(propertyNames, function(m, n) { m[n] = model[n](); return m; }, {}))
         .success(function() { model.clear().saved(true); })
-        .error(function(d) { model.clear().saved(false).error(loc("own-info-error." + d.text)); })
+        .error(function(d) { model.clear().saved(false).error(d.text); })
         .complete(function() { clearTimeout(t); img.hide(); })
         .call();
     };
