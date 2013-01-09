@@ -122,10 +122,6 @@ LUPAPISTE.App = function(startPage) {
     $(".connection-error").show();
   });
 
-  hub.subscribe("login", function(e) {
-    $("#user-name").html(e.user.firstName + " " + e.user.lastName);
-  });
-
   hub.subscribe("logout", function() {
     window.location = "/logout";
   });
