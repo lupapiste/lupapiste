@@ -37,13 +37,13 @@
 
 (facts "with real schemas - important field for paasuunnittelija"
   (let [schema (schemas "paasuunnittelija")]
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"]])   => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimiz" "Tauno"]])  => [["henkilotiedot.etunimiz" :err "illegal-key"]])
-    (fact (validate-updates schema [["henkilotiedot.sukunimi" "Palo"]])   => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimi"  "Palo"]])  => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimiz" "Palo"]])  => [["henkilotiedot.sukunimiz" :err "illegal-key"]])
-    (fact (validate-updates schema [["yhteystiedot.email" "tauno@iki.fi"]]) => [])
-    (fact (validate-updates schema [["yhteystiedot.puhelin" "050"]]) =>        [])))
+    (fact (validate-updates schema [["henkilo.henkilotiedot.etunimi" "Tauno"]])   => [])
+    (fact (validate-updates schema [["henkilo.henkilotiedot.etunimiz" "Tauno"]])  => [["henkilo.henkilotiedot.etunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["henkilo.henkilotiedot.sukunimi" "Palo"]])   => [])
+    (fact (validate-updates schema [["henkilo.henkilotiedot.etunimi" "Tauno"] ["henkilo.henkilotiedot.sukunimi"  "Palo"]])  => [])
+    (fact (validate-updates schema [["henkilo.henkilotiedot.etunimi" "Tauno"] ["henkilo.henkilotiedot.sukunimiz" "Palo"]])  => [["henkilo.henkilotiedot.sukunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["henkilo.yhteystiedot.email" "tauno@example.com"]]) => [])
+    (fact (validate-updates schema [["henkilo.yhteystiedot.puhelin" "050"]]) =>        [])))
 
 (facts "Facts about validation-status"
  (fact (validation-status []) => :ok)

@@ -28,7 +28,8 @@
     (fn [{id :id}]
       (mongo/update-by-id mongo/applications id
         {$set {:modified (:created command)
-               :state :open}}))))
+               :state :open
+               :opened (:created command)}}))))
 
 (defcommand "approve-application"
   {:parameters [:id]
@@ -125,8 +126,8 @@
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id         (mongo/create-id)
-        owner      (role user :owner :type :owner)
+        id        (mongo/create-id)
+        owner     (role user :owner :type :owner)
         permitType (keyword (:permitType data))
         documents  (map create-document (permitType default-schemas))]
     (mongo/insert mongo/applications

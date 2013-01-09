@@ -1,106 +1,110 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:use  [lupapalvelu.xml.emit]
+  (:use  [lupapalvelu.xml.krysp.yhteiset]
          [clojure.data.xml]
          [clojure.java.io]))
 
 ;RakVal
-(def tunnus [{:tag :tunnus 
-              :child [{:tag :valtakunnallinenNumero}
+(def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
                       {:tag :kiinttun}
                       {:tag :rakennusnro}
-                      {:tag :aanestysalue}]}])
+                      {:tag :aanestysalue}])
 
-;YHTEISET
-(def piste [{:tag :piste 
-             :child [{:tag :Point 
-                      :child [{:tag :pos}]}]}])
-
-(def postiosoite [{:tag :osoite 
-                   :child [{:tag :kunta}
-                           {:tag :osoitenimi 
-                            :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"} 
-                            :child [{:tag :teksti}]}
-                           {:tag :postinumero}
-                           {:tag :postitoimipaikannimi}]}])
- 
-(def sijantitieto [{:tag :sijaintitieto
-                    :child [{:tag :Sijainti
-                             :child (conj postiosoite piste [{:tag :sijaintiepavarmuus}
-                                                             {:tag :luontitapa}])}]}])
-
-(def rakennusoikeudet [:tag :rakennusoikeudet
-                       :child [{:tag :kayttotarkoitus
-                                :child [{:tag :pintaAla}
-                                        {:tag :kayttotarkoitusKoodi}]}]])
-
-(def kiinteisto [{:tag :kiinteisto 
-                  :child (conj [{:tag :kiinteisto 
-                                 :child [{:tag :kylanimi}
-                                         {:tag :tilannimi}
-                                         {:tag :kiinteistotunnus}
-                                         {:tag :maaraAlaTunnus}]}
-                                {:tag :palsta}
-                                {:tag :kokotilaKytkin}
-                                {:tag :hallintaperuste}
-                                {:tag :vuokraAluetunnus}
-                                {:tag :kaavanaste}
-                                {:tag :kerrosala}
-                                {:tag :tasosijainti}
-                                {:tag :rakennusoikeusYhteensa}
-                                {:tag :uusiKytkin}]
-                               postiosoite
-                               sijantitieto
-                               rakennusoikeudet
-                               )}])
-
-(def yksilointitieto [{:tag :yksilointitieto}
-                      {:tag :alkuHetki}
-                      {:tag :loppuHetki}]) 
-
-(def rakennus [{:tag :Rakennuspaikka :child [(conj [] 
-                                                   yksilointitieto
-                                                   kiinteisto)]}])
-
-(def rakennuspaikka  (conj [{:tag :Rakennuspaikka}
-                            {:tag :kiinteisto 
-                             :child [{:tag :kiinteisto 
-                                      :child [{:tag :kylanimi}
-                                              {:tag :tilannimi}
-                                              {:tag :kiinteistotunnus}
-                                              {:tag :maaraAlaTunnus}]}
-                                     {:tag :palsta}
-                                     {:tag :kokotilaKytkin}
-                                     {:tag :hallintaperuste}
-                                     {:tag :vuokraAluetunnus}]}
-                            {:tag :kaavanaste}
-                            {:tag :kerrosala}
-                            {:tag :tasosijainti}
-                            {:tag :rakennusoikeudet 
-                             :child [{:tag :kayttotarkoitus 
-                                      :child [{:tag :pintaAla}
-                                              {:tag :kayttotarkoitusKoodi}]}]}
-                            {:tag :rakennusoikeusYhteensa}
-                            {:tag :uusiKytkin}] 
-                           yksilointitieto 
-                           sijantitieto 
-                           postiosoite))
-
-(def rakennelma (conj [{:tag :kuvaus 
-                        :child [{:tag :kuvaus}]}] 
-                      yksilointitieto
+(def rakennelma (conj [{:tag :kuvaus
+                        :child [{:tag :kuvaus}]}]
                       sijantitieto
-                      tunnus))
+                      {:tag :tunnus :child tunnus-children}))
+
+(def huoneisto {:tag :huoneisto
+                :child [{:tag :huoneluku}
+                        {:tag :keittionTyyppi}
+                        {:tag :huoneistoala}
+                        {:tag :varusteet
+                         :child [{:tag :WCKytkin}
+                                 {:tag :ammeTaiSuihkuKytkin}
+                                 {:tag :saunaKytkin}
+                                 {:tag :parvekeTaiTerassiKytkin}
+                                 {:tag :lamminvesiKytkin}]}
+                        {:tag :huoneistonTyyppi}
+                        {:tag :huoneistotunnus
+                         :child [{:tag :porras}
+                                 {:tag :huoneistonumero}
+                                 {:tag :jakokirjain}
+                                 ]}
+                        ]})
+
+(def rakennus {:tag :Rakennus
+                :child [{:tag :yksilointitieto :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
+                        {:tag :alkuHetki :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
+                        sijantitieto
+                        {:tag :rakennuksenTiedot
+                         :child [{:tag :rakennustunnus :child tunnus-children}
+                                 {:tag :kayttotarkoitus}
+                                 {:tag :tilavuus}
+                                 {:tag :kokonaisala}
+                                 {:tag :kellarinpinta-ala}
+                                 {:tag :BIM :child []}
+                                 {:tag :kerrosluku}
+                                 {:tag :kerrosala}
+                                 {:tag :rakentamistapa :child []}
+                                 {:tag :kantavaRakennusaine :child []}
+                                 {:tag :julkisivu
+                                  :child [{:tag :muuMateriaali}
+                                          {:tag :julkisivumateriaali}]}
+                                 {:tag :verkostoliittymat :child []}
+                                 {:tag :energialuokka}
+                                 {:tag :paloluokka}
+                                 {:tag :lammitystapa :child []}
+                                 {:tag :lammonlahde :child []}
+                                 {:tag :varusteet
+                                  :child [{:tag :sahkoKytkin}
+                                          {:tag :kaasuKytkin}
+                                          {:tag :viemariKytkin}
+                                          {:tag :vesijohtoKytkin}
+                                          {:tag :lamminvesiKytkin}
+                                          {:tag :aurinkopaneeliKytkin}
+                                          {:tag :hissiKytkin}
+                                          {:tag :koneellinenilmastointiKytkin}
+                                          {:tag :saunoja}
+                                          {:tag :uima-altaita}
+                                          {:tag :vaestonsuoja}]}
+                                 {:tag :jaahdytysmuoto}
+                                 {:tag :asuinhuoneistot :child [huoneisto]}
+                                 ]}]})
+
 
 (def rakennuslupa_to_krysp
-  [{
-    :tag :Rakennusvalvonta :attr { :xmlns:xs "http://www.w3.org/2001/XMLSchema"
-                                  :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-                                  :xmlns:gml "http://www.opengis.net/gml"
-                                  :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-                                  :targetNamespace "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-                                  :elementFormDefault "qualified" 
-                                  :attributeFormDefault "unqualified" 
-                                  :version "2.0.0"}
-    :child (conj rakennuspaikka rakennus rakennelma)}
-   ])
+  {:tag :Rakennusvalvonta :attr {:xmlns:xs "http://www.w3.org/2001/XMLSchema"
+                                  :xmlns "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
+   :child [{:tag :toimituksenTiedot :child toimituksenTiedot}
+           {:tag :rakennusvalvontaAsiatieto
+            :child [{:tag :RakennusvalvontaAsia
+                     :child [{:tag :kasittelynTilatieto :child [tilamuutos]}
+                             {:tag :luvanTunnisteTiedot
+                              :child [{:tag :LupaTunnus
+                                       :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}
+                                       :child [{:tag :muuTunnus} {:tag :saapumisPvm}]}]}
+                             {:tag :osapuolettieto
+                              :child [osapuolet]}
+                             {:tag :rakennuspaikkatieto
+                              :child [rakennuspaikka]}
+                             ;{:tag :toimenpidetieto
+                             ; :child [{:tag :Toimenpide
+                                       ;:child [{:tag :uusi}
+                                        ;       {:tag :laajennus}
+                                       ;        {:tag :kayttotarkoitusmuutos}
+                                      ;         {:tag :perustus}
+                                     ;          {:tag :perusparannus}
+                                    ;           {:tag :uudelleenrakentaminen}
+                                   ;            {:tag :purkaminen}
+                                  ;             {:tag :muuMuutosTyo}
+                                 ;              {:tag :kaupunkikuvaToimenpide}
+                                ;               {:tag :katselmustieto}
+                               ;                {:tag :rakennustieto
+                              ;                  :child [rakennus]}
+                             ;                  {:tag :rakennelmatieto}]}]
+                             ; }
+                              ]}
+                    ]
+            }]}
+    )
