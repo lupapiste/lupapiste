@@ -201,14 +201,14 @@
                      {:name "eiLammitysta" :type :checkbox}
                      {:name "ei tiedossa" :type :checkbox}]}
              {:name "lammonlahde" :type :select
-              :body [{:name "kaukotaialuelampo" :type :checkbox}
-                     {:name "kevytpolttooljy" :type :checkbox}
-                     {:name "raskaspolttooljy" :type :checkbox}
-                     {:name "sahko" :type :checkbox}
+              :body [{:name "kauko tai aluel\u00e4mp\u00f6" :type :checkbox}
+                     {:name "kevyt poltto\u00f6ljy" :type :checkbox}
+                     {:name "raskas poltto\u00f6ljy" :type :checkbox}
+                     {:name "s\u00e4hk\u00f6" :type :checkbox}
                      {:name "kaasu" :type :checkbox}
-                     {:name "kivihiilikoksitms" :type :checkbox}
+                     {:name "kiviihiili koksi tms." :type :checkbox}
                      {:name "turve" :type :checkbox}
-                     {:name "maalampo" :type :checkbox}
+                     {:name "maal\u00e4mp\u00f6" :type :checkbox}
                      {:name "puu" :type :checkbox}
                      {:name "muu" :type :string :size "s"}
                      {:name "ei tiedossa" :type :checkbox}]}
@@ -221,8 +221,8 @@
                      {:name "koneellinenilmastointiKytkin" :type :checkbox}
                      {:name "lamminvesiKytkin" :type :checkbox}
                      {:name "aurinkopaneeliKytkin" :type :checkbox}
-                     {:name "saunoja" :type :string}
-                     {:name "vaestonsuoja" :type :string}]}
+                     {:name "saunoja" :type :string :subtype :number}
+                     {:name "vaestonsuoja" :type :string :subtype :number}]}
              {:name "poikkeamiset" :type :string}]}
 
      {:info {:name "huoneisto"}
