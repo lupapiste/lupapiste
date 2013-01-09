@@ -18,8 +18,7 @@
                                   {:ab ["AB Value" "AB Value2"]
                                    :ad {:level3 [{:level4 1} {:level4 2}]}
                                    :ac "AB Value3"}
-                                  {
-                                   :ab ["2nd AB Value" "2nd AB Value2"]
+                                  {:ab ["2nd AB Value" "2nd AB Value2"]
                                    :ad {:level3 [{:level4 ["2. L4-1a" "2. L4-1b"]} {:level4 "2. L4-2"}]}
                                    :ac "2nd AB Value3"}
                                  ]

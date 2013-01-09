@@ -75,14 +75,7 @@
 
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta :attr {:xmlns:xs "http://www.w3.org/2001/XMLSchema"
-                                  :xmlns "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-                                  ;:xmlns:gml "http://www.opengis.net/gml"
-                                  ;:xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-                                  ; XXX not in schema:
-                                  ; :elementFormDefault "qualified"
-                                  ; :attributeFormDefault "unqualified"
-                                  ; :version "2.0.0"
-                                  }
+                                  :xmlns "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
    :child [{:tag :toimituksenTiedot :child toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
