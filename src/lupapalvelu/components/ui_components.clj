@@ -90,12 +90,14 @@
 
    :applicant    {:depends [:common :map :applications
                             :application :attachment :create-application :docgen
-                            :create-inforequest :buildinfo]
+                            :create-inforequest :buildinfo
+                            :mypage]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :map :application
-                            :authority-applications :attachment :buildinfo :docgen]
+                            :authority-applications :attachment :buildinfo :docgen
+                            :mypage]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -103,24 +105,29 @@
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
-   :admin        {:depends [:common :map :buildinfo]
-                  :js ["admin.js"]
-                  :html ["index.html" "admin.html"]}
+   :tree    {:depends [:jquery]
+             :js ["tree.js"]
+             :css ["tree.css"]}
 
-   :iframe       {:depends [:common]
-                  :css ["iframe.css"]}
+   :admin   {:depends [:common :map :buildinfo]
+             :js ["admin.js"]
+             :html ["index.html" "admin.html"]}
 
-   :upload       {:depends [:iframe]
-                  :js ["upload.js"]
-                  :css ["upload.css"]}
+   :iframe  {:depends [:common]
+             :css ["iframe.css"]}
 
-   :tree         {:depends [:jquery]
-                  :js ["tree.js"]
-                  :css ["tree.css"]}
+   :upload  {:depends [:iframe]
+             :js ["upload.js"]
+             :css ["upload.css"]}
+
+   :welcome {:depends [:common :register :buildinfo]
+             :js ["login.js"]
+             :html ["login.html" "index.html"]}
    
-   :welcome      {:depends [:common :register :buildinfo]
-                  :js ["login.js"]
-                  :html ["login.html" "index.html"]}})
+   :mypage  {:depends [:common]
+             :js ["mypage.js"]
+             :html ["mypage.html"]
+             :css ["mypage.css"]}})
 
 ; Make sure that all resources are available:
 

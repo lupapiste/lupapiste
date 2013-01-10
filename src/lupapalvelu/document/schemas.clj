@@ -80,7 +80,7 @@
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
                      {:name "ei tiedossa"}]}
-
+             {:name "kuvaus" :type :string :size "l"}
              {:name "kayttotarkoitus" :type :select
               :body [{:name "999 muualla luokittelemattomat rakennukset"}
                      {:name "941 talousrakennukset"}
