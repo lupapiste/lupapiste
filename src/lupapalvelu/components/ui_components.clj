@@ -86,7 +86,7 @@
 
    :create-inforequest  {:depends [:common]
                          :js ["create-inforequest.js"]
-                         :html ["create-inforequest.html"]}
+                         :html ["create-inforequest.html" "create-inforequest-2.html"]}
 
    :applicant    {:depends [:common :map :applications
                             :application :attachment :create-application :docgen
