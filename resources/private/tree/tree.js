@@ -27,6 +27,23 @@ var selectionTree = (function() {
       return false;
     };
     
+    self.makeHandler = function(key, val, d) {
+      var createNext = (typeof(val) === "string") ? self.makeTerminalElement : self.make;
+      return function(e) {
+        e.preventDefault();
+        
+        var next = createNext(val);
+        self.stack.push(next);
+        d.parentNode.appendChild(next);
+
+        $(d).animate({"margin-left": -400}, self.speed);
+        
+        self.crumbs.push(key);
+        self.breadcrumbs.html(self.crumbs.join(" / "));
+        return false;
+      };
+    };
+        
     self.make = function(t) {
       var d = document.createElement("div");
       d.setAttribute("class", "tree-magic");
@@ -42,26 +59,6 @@ var selectionTree = (function() {
       return link;
     };
     
-    self.makeHandler = function(key, val, d) {
-      return (typeof(val) === "string") ? self.makeTerminalHandler(key, val, d) : self.makeTreeHandler(key, val, d);
-    };
-    
-    self.makeTerminalHandler = function(key, name, d) {
-      return function(e) {
-        e.preventDefault();
-        
-        var next = self.makeTerminalElement(name);
-        self.stack.push(next);
-        d.parentNode.appendChild(next);
-
-        $(d).animate({"margin-left": -400}, self.speed);
-        
-        self.crumbs.push(key);
-        self.breadcrumbs.html(self.crumbs.join(" / "));
-        return false;
-      };
-    };
-    
     self.makeTerminalElement = function(name) {
       var e = document.createElement("div");
       e.setAttribute("class", "tree-result");
@@ -69,22 +66,6 @@ var selectionTree = (function() {
       return e;
     };
 
-    self.makeTreeHandler = function(key, t, d) {
-      return function(e) {
-        e.preventDefault();
-        
-        var next = self.make(t);
-        self.stack.push(next);
-        d.parentNode.appendChild(next);
-
-        $(d).animate({"margin-left": -400}, self.speed);
-        
-        self.crumbs.push(key);
-        self.breadcrumbs.html(self.crumbs.join(" / "));
-        return false;
-      };
-    };
-    
     self.speed = 400;
     self.crumbs = [];
     self.stack = [self.make(self.data)];
