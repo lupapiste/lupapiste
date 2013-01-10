@@ -138,9 +138,7 @@ var docgen = (function () {
     var myModel = model[name] || {};
 
     var choicesDiv = document.createElement("div");
-    $.each(choices, function (i, choice) {
-      choicesDiv.appendChild(build(choice, myModel, path, save, specId, true));
-    });
+    appendElements(choicesDiv, choices, myModel, path, save, specId, true);
 
     var div = document.createElement("div");
     div.className = "form-choice";
@@ -155,9 +153,7 @@ var docgen = (function () {
     var myModel = model[name] || {};
 
     var partsDiv = document.createElement("div");
-    for (var i = 0; i < parts.length; i++) {
-      partsDiv.appendChild(build(parts[i], myModel, path, save, specId));
-    }
+    appendElements(partsDiv, parts, myModel, path, save, specId);
 
     var div = document.createElement("div");
     div.className = "form-group";
@@ -192,27 +188,24 @@ var docgen = (function () {
     var builder = builders[spec.type] || buildUnknown;
 
     if (spec.repeating) {
-      return _.map(model[myName], function(v, k) {
+      return _.map(model[myName], function(val, key) {
         var myModel = {};
-        myModel[myName] = v;
-        return builder(spec, myModel, myPath.concat([k]), save, specId, partOfChoice)
+        myModel[myName] = val;
+        return builder(spec, myModel, myPath.concat([key]), save, specId, partOfChoice)
       });
     }
 
     return builder(spec, model, myPath, save, specId, partOfChoice);
   }
 
-  function appendElements(body, specs, model, path, save, specId) {
-    var l = specs.length;
-    for (var i = 0; i < l; i++) {
-      var children = build(specs[i], model, path, save, specId);
+  function appendElements(body, specs, model, path, save, specId, partOfChoice) {
+    _.each(specs, function(spec) {
+      var children = build(spec, model, path, save, specId, partOfChoice);
       if (!_.isArray(children)) {
         children = [children];
-      } else {
-        debug(children);
       }
       _.each(children, function(o) {body.appendChild(o)});
-    }
+    });
     return body;
   }
 
