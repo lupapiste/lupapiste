@@ -206,7 +206,7 @@
                      {:name "raskas poltto\u00f6ljy" :type :checkbox}
                      {:name "s\u00e4hk\u00f6" :type :checkbox}
                      {:name "kaasu" :type :checkbox}
-                     {:name "kiviihiili koksi tms." :type :checkbox}
+                     {:name "kiviihiili koksi tms" :type :checkbox}
                      {:name "turve" :type :checkbox}
                      {:name "maal\u00e4mp\u00f6" :type :checkbox}
                      {:name "puu" :type :checkbox}
