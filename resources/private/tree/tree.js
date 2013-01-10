@@ -49,7 +49,7 @@ var selectionTree = (function() {
         $(d).animate({"margin-left": -400}, self.speed);
         
         self.crumbs.push(key);
-        self.breadcrumbs.html(crumbs.join(" / "));
+        self.breadcrumbs.html(self.crumbs.join(" / "));
         return false;
       };
     };
@@ -72,14 +72,14 @@ var selectionTree = (function() {
         $(d).animate({"margin-left": -400}, self.speed);
         
         self.crumbs.push(key);
-        self.breadcrumbs.html(crumbs.join(" / "));
+        self.breadcrumbs.html(self.crumbs.join(" / "));
         return false;
       };
     };
     
     self.speed = 400;
     self.crumbs = [];
-    self.stack = [make(self.data)];
+    self.stack = [self.make(self.data)];
     
     self.content.append(self.stack[0]);
     
