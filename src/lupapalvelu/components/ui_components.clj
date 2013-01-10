@@ -80,11 +80,12 @@
                   :js ["docgen.js"]
                   :css ["docgen.css"]}
 
-   :create-application  {:js ["create-application.js"]
+   :create-application  {:depends [:common :tree]
+                         :js ["create-application.js"]
                          :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
 
-   :create-inforequest  {:js ["create-inforequest.js"]
-                         :depends [:common]
+   :create-inforequest  {:depends [:common]
+                         :js ["create-inforequest.js"]
                          :html ["create-inforequest.html"]}
 
    :applicant    {:depends [:common :map :applications
@@ -93,7 +94,8 @@
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :map :application :authority-applications :attachment :buildinfo :docgen]
+   :authority    {:depends [:common :map :application
+                            :authority-applications :attachment :buildinfo :docgen]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -112,6 +114,10 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
+   :tree         {:depends [:jquery]
+                  :js ["tree.js"]
+                  :css ["tree.css"]}
+   
    :welcome      {:depends [:common :register :buildinfo]
                   :js ["login.js"]
                   :html ["login.html" "index.html"]}})
