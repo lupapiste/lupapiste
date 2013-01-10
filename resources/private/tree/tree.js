@@ -1,22 +1,30 @@
 var selectionTree = (function() {
 
-  function Tree(data, content, breadcrumbs) {
+  function Tree(data, content, breadcrumbs, callback) {
     var self = this;
     
     self.content = $(content);
     self.breadcrumbs = $(breadcrumbs);
     self.data = data;
+    self.callback = callback;
         
     self.goback = function() {
       if (self.stack.length > 1) {
         var d = self.stack.pop();
         var n = self.stack[self.stack.length - 1];
-        $(d).animate({"margin-left": 400}, speed, function() { n.parentNode.removeChild(d); });
-        $(n).animate({"margin-left": 0}, speed);  
+        $(d).animate({"margin-left": 400}, self.speed, function() { n.parentNode.removeChild(d); });
+        $(n).animate({"margin-left": 0}, self.speed);  
         self.crumbs.pop();
         self.breadcrumbs.html(self.crumbs.join(" / "));
       }
-      return self;
+      return false;
+    };
+    
+    self.reset = function() {
+      self.crumbs = [];
+      self.stack = [self.make(self.data)];
+      self.content.empty().append(self.stack[0]);
+      return false;
     };
     
     self.make = function(t) {
@@ -86,7 +94,7 @@ var selectionTree = (function() {
   }
   
   return {
-    create: function(data, content, breadcrumbs) { return new Tree(data, content, breadcrumbs); }
+    create: function(data, content, breadcrumbs, callback) { return new Tree(data, content, breadcrumbs, callback); }
   };
   
 })();
