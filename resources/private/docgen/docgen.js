@@ -1,15 +1,21 @@
 var docgen = (function () {
 
-  function makeLabel(type, path, specId) {
+  function pathStrToID(pathStr) {
+    return pathStr.replace(/\./g, "-");
+  }
+
+  function makeLabel(type, pathStr, specId) {
     var label = document.createElement("label");
-    label.id = path.replace(/\./g, "-");
+    label.htmlFor = pathStrToID(pathStr);
     label.className = "form-label form-label-" + type;
-    label.appendChild(document.createTextNode(loc(specId + "." + path)));
+    var locKey = specId + "." + pathStr.replace(/\.\d+\./g, ".");
+    label.appendChild(document.createTextNode(loc(locKey)));
     return label;
   }
 
   function makeInput(type, path, value, save, extraClass) {
     var input = document.createElement("input");
+    input.id = pathStrToID(path);
     input.name = path;
 
     try {
@@ -30,7 +36,7 @@ var docgen = (function () {
   }
 
   function buildCheckbox(spec, model, path, save, specId) {
-    var myPath = path.concat([spec.name]).join(".");
+    var myPath = path.join(".");
     var span = document.createElement("span");
     span.className = "form-entry";
     span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
@@ -39,7 +45,7 @@ var docgen = (function () {
   }
 
   function buildString(spec, model, path, save, specId, partOfChoice) {
-    var myPath = path.concat([spec.name]).join(".");
+    var myPath = path.join(".");
     var div = document.createElement("span");
     var sizeClass = "";
     if (spec.size) {
@@ -60,7 +66,7 @@ var docgen = (function () {
   }
 
   function buildText(spec, model, path, save, specId) {
-    var myPath = path.concat([spec.name]).join(".");
+    var myPath = path.join(".");
 
     var input = document.createElement("textarea");
     input.name = myPath;
@@ -78,7 +84,7 @@ var docgen = (function () {
   }
 
   function buildDate(spec, model, path, save, specId) {
-    var myPath = path.concat([spec.name]).join(".");
+    var myPath = path.join(".");
 
     var input = document.createElement("input");
     input.setAttribute("type", "date");
@@ -95,7 +101,7 @@ var docgen = (function () {
   }
 
   function buildSelect(spec, model, path, save, specId) {
-    var myPath = path.concat([spec.name]).join(".");
+    var myPath = path.join(".");
 
     var select = document.createElement("select");
     select.name = myPath;
@@ -130,20 +136,15 @@ var docgen = (function () {
     var name = spec.name;
     var choices = spec.body;
     var myModel = model[name] || {};
-    var myPath = path.concat([name]);
 
     var choicesDiv = document.createElement("div");
     $.each(choices, function (i, choice) {
-      if (choice.type === "string") {
-        choicesDiv.appendChild(buildString(choice, myModel, myPath, save, specId, true));
-      } else {
-        choicesDiv.appendChild(build(choice, myModel, myPath, save, specId));
-      }
+      choicesDiv.appendChild(build(choice, myModel, path, save, specId, true));
     });
 
     var div = document.createElement("div");
     div.className = "form-choice";
-    div.appendChild(makeLabel("choice", myPath.concat("_group_label").join("."), specId));
+    div.appendChild(makeLabel("choice", path.concat("_group_label").join("."), specId));
     div.appendChild(choicesDiv);
     return div;
   }
@@ -152,16 +153,15 @@ var docgen = (function () {
     var name = spec.name;
     var parts = spec.body;
     var myModel = model[name] || {};
-    var myPath = path.concat([name]);
 
     var partsDiv = document.createElement("div");
     for (var i = 0; i < parts.length; i++) {
-      partsDiv.appendChild(build(parts[i], myModel, myPath, save, specId));
+      partsDiv.appendChild(build(parts[i], myModel, path, save, specId));
     }
 
     var div = document.createElement("div");
     div.className = "form-group";
-    div.appendChild(makeLabel("group", myPath.concat(["_group_label"]).join("."), specId));
+    div.appendChild(makeLabel("group", path.concat(["_group_label"]).join("."), specId));
     div.appendChild(partsDiv);
     return div;
   }
@@ -185,15 +185,33 @@ var docgen = (function () {
     unknown: buildUnknown
   };
 
-  function build(spec, model, path, save, specId) {
+  function build(spec, model, path, save, specId, partOfChoice) {
+
+    var myName = spec.name;
+    var myPath = path.concat([myName]);
     var builder = builders[spec.type] || buildUnknown;
-    return builder(spec, model, path, save, specId);
+
+    if (spec.repeating) {
+      return _.map(model[myName], function(v, k) {
+        var myModel = {};
+        myModel[myName] = v;
+        return builder(spec, myModel, myPath.concat([k]), save, specId, partOfChoice)
+      });
+    }
+
+    return builder(spec, model, myPath, save, specId, partOfChoice);
   }
 
   function appendElements(body, specs, model, path, save, specId) {
     var l = specs.length;
     for (var i = 0; i < l; i++) {
-      body.appendChild(build(specs[i], model, path, save, specId));
+      var children = build(specs[i], model, path, save, specId);
+      if (!_.isArray(children)) {
+        children = [children];
+      } else {
+        debug(children);
+      }
+      _.each(children, function(o) {body.appendChild(o)});
     }
     return body;
   }
