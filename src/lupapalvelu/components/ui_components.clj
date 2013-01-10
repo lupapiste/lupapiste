@@ -85,7 +85,7 @@
                          :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
 
    :create-inforequest  {:depends [:common]
-                         :js ["create-inforequest.js"]
+                         :js ["tree-data.js" "create-inforequest.js"]
                          :html ["create-inforequest.html" "create-inforequest-2.html"]}
 
    :applicant    {:depends [:common :map :applications
