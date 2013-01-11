@@ -33,7 +33,7 @@ var docgen = (function () {
     input.className = "form-input " + type + " " + (extraClass || "");
     input.onchange = save;
     if (type === "checkbox") {
-      if (value) input.checked = "checked";
+      input.checked = value;
     } else {
       input.value = value || "";
     }
@@ -193,12 +193,40 @@ var docgen = (function () {
     var builder = builders[spec.type] || buildUnknown;
 
     if (spec.repeating) {
+      var repeatingId = myPath.join("-")
       var models = model[myName] || [{}];
-      return _.map(models, function(val, key) {
+      var elements = _.map(models, function(val, key) {
         var myModel = {};
         myModel[myName] = val;
-        return builder(spec, myModel, myPath.concat([key]), save, specId, partOfChoice)
+        var elem = builder(spec, myModel, myPath.concat([key]), save, specId, partOfChoice);
+        elem.setAttribute("data-repeating-id", repeatingId);
+        elem.setAttribute("data-repeating-id-" + repeatingId, key);
+        return elem;
       });
+
+      var appendButton = document.createElement("button");
+      appendButton.id = myPath.join("_") + "_append";
+      appendButton.className = "btn";
+      appendButton.innerHTML = loc(specId + "."+  myPath.join(".") + "._append_label");
+
+      var appender = function() {
+        var parent$ = $(this.parentNode);
+        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.children("*[data-repeating-id-" + repeatingId + "='"+ count + "']").length) {
+          count++;
+        }
+        var myModel = {};
+        myModel[myName] = {};
+        var elem = builder(spec, myModel, myPath.concat([count]), save, specId, partOfChoice);
+        elem.setAttribute("data-repeating-id", repeatingId);
+        elem.setAttribute("data-repeating-id-" + repeatingId, count);
+        $(this).before(elem);
+      };
+
+      $(appendButton).click(appender);
+      elements.push(appendButton);
+
+      return elements;
     }
 
     return builder(spec, model, myPath, save, specId, partOfChoice);
