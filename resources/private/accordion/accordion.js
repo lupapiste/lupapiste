@@ -6,6 +6,11 @@ var accordion = (function () {
   function toggle(event) {
     var e = getEvent(event);
     var target = e.target;
+
+    if ($(target).hasClass("font-icon")) {
+      target = target.parentNode;
+    }
+
     var content = $(target).next();
 
     var state = content.attr("data-accordion-state");

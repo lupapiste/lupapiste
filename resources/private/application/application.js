@@ -267,10 +267,7 @@
 
   var accordian = {
     accordianClick: function(data, event) {
-     var target = event.target;
-     $(target).children(".font-icon").toggleClass("icon-collapsed");
-     $(target).children(".font-icon").toggleClass("icon-expanded");
-     $(target).next(".application_section_content").toggleClass('content_expanded');
+      accordion.toggle(event);
     }
   };
 

@@ -263,7 +263,7 @@ var docgen = (function () {
 
   function buildElement(spec, model, save, specId) {
     var section = document.createElement("section");
-    section.className = "application_section_header";
+    section.className = "application_section";
 
     var icon = document.createElement("span");
     icon.className = "font-icon icon-expanded";
