@@ -171,7 +171,7 @@
 
       // Update map:
       var location = application.location();
-      
+
       hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
 
       // docgen:
@@ -239,15 +239,15 @@
 
   var tab = {
     tabClick: function(data, event) {
-     var self = event.target;
-     setSelectedTab('#applicationTabs', self);
+      var target = event.target;
+     setSelectedTab('#applicationTabs', target);
     }
   };
 
   function isTabSelected(id) {
     return $(id + ' > li').hasClass("active");
   }
-  
+
   function selectDefaultTab(id) {
     setSelectedTab(id, $('.active-as-default'));
   }
@@ -262,13 +262,13 @@
 
   var accordian = {
     accordianClick: function(data, event) {
-     self = event.target;
-     $(self).children(".font-icon").toggleClass("icon-collapsed");
-     $(self).children(".font-icon").toggleClass("icon-expanded");
-     $(self).next(".application_section_content").toggleClass('content_expanded');
+     var target = event.target;
+     $(target).children(".font-icon").toggleClass("icon-collapsed");
+     $(target).children(".font-icon").toggleClass("icon-expanded");
+     $(target).next(".application_section_content").toggleClass('content_expanded');
     }
   };
-  
+
   var initApplication = function(e) {
     currentId = e.pagePath[0];
     hub.send("load-application", {id: currentId});
@@ -294,7 +294,7 @@
       tab: tab,
       accordian: accordian
     };
-    
+
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
   });

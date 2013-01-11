@@ -3,8 +3,10 @@ var accordion = (function () {
   var animationTime = 200;
   var animationEasing = "easeInOutCubic";
 
-  function toggle(e) {
-    var content = $(e.target).next();
+  function toggle(event) {
+    var e = getEvent(event);
+    var target = e.target;
+    var content = $(target).next();
 
     var state = content.attr("data-accordion-state");
     var height = content.attr("data-accordion-height");
@@ -22,17 +24,18 @@ var accordion = (function () {
         .attr("data-accordion-state", state)
         .animate({ height: height }, animationTime, animationEasing);
       setTimeout( function(){content.removeClass("content_expanded")}, animationTime );
-      $(e.target).children().removeClass("icon-expanded");
-      $(e.target).children().addClass("icon-collapsed");
+      $(target).children().removeClass("icon-expanded");
+      $(target).children().addClass("icon-collapsed");
     } else {
       state = "open";
       content.addClass("content_expanded");
-      $(e.target).children().removeClass("icon-collapsed");
-      $(e.target).children().addClass("icon-expanded");
+      $(target).children().removeClass("icon-collapsed");
+      $(target).children().addClass("icon-expanded");
       content
         .attr("data-accordion-state", state)
         .animate({ height: height }, animationTime, animationEasing);
     }
+
     e.preventDefault();
     return false;
   }

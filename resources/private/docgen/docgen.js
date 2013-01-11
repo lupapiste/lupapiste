@@ -188,7 +188,8 @@ var docgen = (function () {
     var builder = builders[spec.type] || buildUnknown;
 
     if (spec.repeating) {
-      return _.map(model[myName], function(val, key) {
+      var models = model[myName] || [{}];
+      return _.map(models, function(val, key) {
         var myModel = {};
         myModel[myName] = val;
         return builder(spec, myModel, myPath.concat([key]), save, specId, partOfChoice)
@@ -228,7 +229,8 @@ var docgen = (function () {
   }
 
   function makeSaverDelegate(save, eventData) {
-    return function (e) {
+    return function (event) {
+      var e = getEvent(event);
       e.preventDefault();
       e.stopPropagation();
 

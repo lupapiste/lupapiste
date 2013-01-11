@@ -27,7 +27,8 @@
    :debug        (if (env/dev-mode?) debugjs {})
 
    :common       {:depends [:init :jquery :knockout :underscore :debug]
-                  :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
+                  :js ["event.js" "pageutil.js" "loc.js" "notify.js" "ajax.js"
+                       "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"
                        "address.js"]
                   :css ["css/main.css"]
@@ -118,7 +119,7 @@
    :welcome {:depends [:common :register :buildinfo]
              :js ["login.js"]
              :html ["login.html" "index.html"]}
-   
+
    :mypage  {:depends [:common]
              :js ["mypage.js"]
              :html ["mypage.html"]
