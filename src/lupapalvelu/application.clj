@@ -14,9 +14,15 @@
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
+(defn find-authorities-in-applications-municipality [id]
+  (let [apps (mongo/select mongo/applications {:_id id} {:municipality 1})
+        data (reduce (fn [data app] (assoc data (:id app) (mongo/select mongo/users {:authority (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))) {} apps)]
+    data))
+
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
-    (ok :application app)
+    (let [authorities (find-authorities-in-applications-municipality id)]
+      (ok :application app :authorities authorities))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -25,9 +31,7 @@
   {:parameters [:id]
    :authenticated true}
   [{{:keys [id]} :data}]
-  (let [application-ids (if (vector? id) id (vector id))
-        apps (mongo/select mongo/applications {:_id {$in application-ids}} {:municipality 1})
-        data (reduce (fn [data app] (assoc data (:id app) (mongo/select mongo/users {:authority (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))) {} apps)]
+  (let [data (find-authorities-in-applications-municipality id)]
     (ok :authorityInfo data)))
 
 (defcommand "open-application"

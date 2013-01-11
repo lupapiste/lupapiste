@@ -144,15 +144,17 @@
     return result;
   }
 
-  function showApplication(data) {
-    authorizationModel.refresh(data,function() {
+  function showApplication(applicationDetails) {
+    debug("######################", applicationDetails);
+    authorizationModel.refresh(applicationDetails.application,function() {
       // new data mapping
-      applicationModel.data(ko.mapping.fromJS(data));
-      ko.mapping.fromJS(data, {}, application);
+      var app = applicationDetails.application;
+      applicationModel.data(ko.mapping.fromJS(app));
+      ko.mapping.fromJS(app, {}, application);
 
       // comments
-      commentModel.setApplicationId(data.id);
-      commentModel.setComments(data.comments);
+      commentModel.setApplicationId(app.id);
+      commentModel.setComments(app.comments);
 
       var statuses = {
         requires_user_action: {statusName: "missing"},
@@ -161,13 +163,13 @@
       };
 
       attachments.removeAll();
-      _.each(data.attachments || [], function(a) {
+      _.each(app.attachments || [], function(a) {
         var s = statuses[a.state] || {statusName: "foo"};
         a.statusName = s.statusName;
         attachments.push(a);
       });
 
-      attachmentsByGroup(getAttachmentsByGroup(data.attachments));
+      attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 
       // Update map:
       var location = application.location();
@@ -192,7 +194,7 @@
 
       var docgenDiv = $("#docgen").empty();
 
-      _.each(data.documents, function(doc) {
+      _.each(app.documents, function(doc) {
         docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
       });
 
@@ -205,8 +207,8 @@
   }
 
   hub.subscribe("application-loaded", function(e) {
-    if (!currentId || (currentId === e.application.id)) {
-      showApplication(e.application);
+    if (!currentId || (currentId === e.applicationDetails.application.id)) {
+      showApplication(e.applicationDetails);
     }
   });
 

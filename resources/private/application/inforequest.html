@@ -28,6 +28,16 @@
             <p>Luotu:</p>
             <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
           </div>
+          <div>
+            <p>Käsittelijä:</p>
+            <span id="test-inforequest-assignee" class="application_summary_text">
+              <select xdata-bind="options: authorities, optionsText: function(item) {
+                         return item.firstName + ' ' + item.lastName
+                     },
+                     optionsCaption: loc('choose')"></select>
+             </span>
+          </div>
+          
         </div>
         <div class="inforequest_actions">
           <button data-bind="enable: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" type="submit" class="btn btn-primary" id="test-mark-inforequest-answered">Merkitse vastatuksi</button>
