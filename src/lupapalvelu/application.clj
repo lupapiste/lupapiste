@@ -15,8 +15,8 @@
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
 (defn find-authorities-in-applications-municipality [id]
-  (let [apps (mongo/select mongo/applications {:_id id} {:municipality 1})
-        data (reduce (fn [data app] (assoc data (:id app) (mongo/select mongo/users {:authority (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))) {} apps)]
+  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
+        data (mongo/select mongo/users {:authority (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
     data))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
@@ -27,7 +27,7 @@
 
 ;; Gets an array of application ids and returns a map for each application that contains the
 ;; application id and the authorities in that municipality.
-(defquery "authorities-in-applications-municipalities"
+(defquery "authorities-in-applications-municipality"
   {:parameters [:id]
    :authenticated true}
   [{{:keys [id]} :data}]

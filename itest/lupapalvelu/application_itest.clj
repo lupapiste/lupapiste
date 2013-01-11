@@ -35,6 +35,5 @@
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja)"
   (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
-        authorityInfo  (:authorityInfo (query sonja :authorities-in-applications-municipalities :id application-id))]
-    (fact (count authorityInfo) => 1)
-    (fact (count (get authorityInfo (keyword application-id))) => 2)))
+        authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
+    (count authorities) => 2))
