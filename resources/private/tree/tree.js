@@ -51,7 +51,7 @@ var selectionTree = (function() {
         var next = terminal ? self.makeTerminalElement(val) : self.make(val);
         self.stack.push(next);
         d.parentNode.appendChild(next);
-        var done = (terminal && self.callback) ? function() { self.callback(val); } : null;
+        var done = (terminal && self.callback) ? self.callback.bind(self, val) : null;
         $(d).animate({"margin-left": -self.width}, self.speed, done);
         return false;
       };
@@ -61,11 +61,27 @@ var selectionTree = (function() {
       var d = document.createElement("div");
       d.setAttribute("class", "tree-magic");
       for (var key in t) d.appendChild( self.makeLink(key, t[key], d) );
+
+      if (self.stack.length > 0) {
+        var link = document.createElement("a");
+        link.innerHTML = loc("tree.back");
+        link.href = "#";
+        link.onclick = self.goback;
+        d.appendChild(link);
+      }
+      
+      if (self.stack.length > 1) {
+        var link = document.createElement("a");
+        link.innerHTML = loc("tree.start");
+        link.href = "#";
+        link.onclick = self.reset;
+        d.appendChild(link);
+      }
+
       return d;
     };
 
     self.makeLink  = function(key, val, d) {
-      console.log("M:", "key:", key, "val:", self.crumbs.join("."));
       var link = document.createElement("a");
       var lkey = "tree." + (self.crumbs.length == 0 ? key : self.crumbs.join(".") + "." + key) + ".name";
       link.innerHTML = loc(lkey);
@@ -80,7 +96,9 @@ var selectionTree = (function() {
   }
   
   return {
-    create: function(data, content, breadcrumbs, callback, contentFactory) { return new Tree(data, content, breadcrumbs, callback, contentFactory); }
+    create: function(data, content, breadcrumbs, callback, contentFactory) {
+      return new Tree(data, content, breadcrumbs, callback, contentFactory);
+    }
   };
   
 })();
