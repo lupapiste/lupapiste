@@ -27,7 +27,7 @@
   [{{:keys [id]} :data}]
   (let [application-ids (if (vector? id) id (vector id))
         apps (mongo/select mongo/applications {:_id {$in application-ids}} {:municipality 1})
-        data (reduce (fn [data app] (assoc data (:id app) (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))) {} apps)]
+        data (reduce (fn [data app] (assoc data (:id app) (mongo/select mongo/users {:authority (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))) {} apps)]
     (ok :authorityInfo data)))
 
 (defcommand "open-application"
