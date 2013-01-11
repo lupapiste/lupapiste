@@ -35,15 +35,15 @@ var selectionTree = (function() {
       return function(e) {
         e.preventDefault();
         
-        var createNext = (typeof(val) === "string") ? self.makeTerminalElement : self.make;
-        var next = createNext(val);
-        self.stack.push(next);
-        d.parentNode.appendChild(next);
-
-        $(d).animate({"margin-left": -self.width}, self.speed);
-        
         self.crumbs.push(key);
         self.breadcrumbs.html(self.crumbs.join(" / "));
+        
+        var terminal = typeof(val) === "string";
+        var next = terminal ? self.makeTerminalElement(val) : self.make(val);
+        self.stack.push(next);
+        d.parentNode.appendChild(next);
+        var done = (terminal && self.callback) ? function() { self.callback(val); } : null;
+        $(d).animate({"margin-left": -self.width}, self.speed, done);
         return false;
       };
     };
@@ -56,15 +56,16 @@ var selectionTree = (function() {
     };
 
     self.makeLink  = function(key, val, d) {
+      console.log("M:", "key:", key, "val:", self.crumbs.join("."));
       var link = document.createElement("a");
-      link.innerHTML = key;
+      var lkey = "tree." + (self.crumbs.length == 0 ? key : self.crumbs.join(".") + "." + key) + ".name";
+      link.innerHTML = loc(lkey);
       link.href = "#";
       link.onclick = self.makeHandler(key, val, d);
       return link;
     };
     
     self.makeTerminalElement = function(name) {
-      if (self.callback) self.callback(name);
       var e = document.createElement("div");
       e.setAttribute("class", "tree-result");
       e.innerHTML = name;
