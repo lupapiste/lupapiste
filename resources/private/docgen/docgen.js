@@ -4,9 +4,14 @@ var docgen = (function () {
     return pathStr.replace(/\./g, "-");
   }
 
+  function pathStrToLabelID(pathStr) {
+    return "label-" + pathStrToID(pathStr);
+  }
+
   function makeLabel(type, pathStr, specId) {
     var label = document.createElement("label");
-    label.htmlFor = pathStrToID(pathStr);
+    label.id = pathStrToLabelID(pathStr);
+    label.htmlFor = pathStrToID(pathStr);;
     label.className = "form-label form-label-" + type;
     var locKey = specId + "." + pathStr.replace(/\.\d+\./g, ".");
     label.appendChild(document.createTextNode(loc(locKey)));
@@ -230,16 +235,12 @@ var docgen = (function () {
 
   function makeSaverDelegate(save, eventData) {
     return function (event) {
-      var e = getEvent(event);
-      e.preventDefault();
-      e.stopPropagation();
-
-      var target = e.target;
+      var target = getEvent(event).target;
       var path = target.name;
       var value = (target.type === "checkbox") ? target.checked : target.value;
 
       var loader = loaderImg();
-      var label = document.getElementById(path.replace(/\./g, "-"));
+      var label = document.getElementById(pathStrToLabelID(path));
       label.appendChild(loader);
 
       save(path, value, function (status) {
@@ -255,8 +256,8 @@ var docgen = (function () {
           error("Unknown result:", result, "path:", path);
         }
       }, eventData);
-
-      return false;
+      // No return value or stoping the event propagation:
+      // That would prevent moving to the next field with tab key in IE8.
     };
   }
 
