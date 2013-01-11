@@ -17,10 +17,15 @@
 
     self.auth = ko.computed(function() {
       var value = [];
-      if(self.data() !== undefined) {
+      if (self.data() !== undefined) {
         var auth = ko.utils.unwrapObservable(self.data().auth());
-        // FIXME: Too complex for jshint, refactor me please:
-        var pimped = _.reduce(auth, function(r, i) { var a = r[i.id()] || (i.roles = [], i); a.roles.push(i.role()); r[i.id()] = a; return r;}, {});
+        var withRoles = function(r, i) {
+          var a = r[i.id()] || (i.roles = [], i);
+          a.roles.push(i.role());
+          r[i.id()] = a;
+          return r;
+        }
+        var pimped = _.reduce(auth, withRoles, {});
         value = _.values(pimped);
       }
       return value;
