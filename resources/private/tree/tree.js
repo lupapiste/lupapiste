@@ -1,14 +1,23 @@
 var selectionTree = (function() {
 
-  function Tree(data, content, breadcrumbs, callback) {
+  function defaultContentFactory(name) {
+    var e = document.createElement("div");
+    e.setAttribute("class", "tree-result");
+    e.innerHTML = name;
+    return e;
+  }
+
+  function Tree(data, content, breadcrumbs, callback, contentFactory) {
     var self = this;
     
+    self.data = data;
     self.content = $(content);
     self.breadcrumbs = $(breadcrumbs);
-    self.data = data;
+    self.callback = callback;
+    self.makeTerminalElement = contentFactory || defaultContentFactory;
+
     self.width = content.parent().width();
     self.speed = self.width; // magical, but good.
-    self.callback = callback;
     self.crumbs = [];
     self.stack = [];
         
@@ -65,20 +74,13 @@ var selectionTree = (function() {
       return link;
     };
     
-    self.makeTerminalElement = function(name) {
-      var e = document.createElement("div");
-      e.setAttribute("class", "tree-result");
-      e.innerHTML = name;
-      return e;
-    };
-
     self.stack.push(self.make(self.data));
     self.content.append(self.stack[0]);
     
   }
   
   return {
-    create: function(data, content, breadcrumbs, callback) { return new Tree(data, content, breadcrumbs, callback); }
+    create: function(data, content, breadcrumbs, callback, contentFactory) { return new Tree(data, content, breadcrumbs, callback, contentFactory); }
   };
   
 })();
