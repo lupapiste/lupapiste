@@ -31,10 +31,15 @@
           <div>
             <p>Käsittelijä:</p>
             <span id="test-inforequest-assignee" class="application_summary_text">
-              <select xdata-bind="options: authorities, optionsText: function(item) {
-                         return item.firstName + ' ' + item.lastName
-                     },
-                     optionsCaption: loc('choose')"></select>
+              <select data-bind="options: $root.authorities, 
+                                 optionsText: function(item) {
+                                  return item.firstName + ' ' + item.lastName;
+                                 },
+                                 optionsValue:function(item) {
+                                  return item.id;
+                                 },
+                                 value: $root.application.assignee,
+                                 optionsCaption: loc('choose')"></select>
              </span>
           </div>
           

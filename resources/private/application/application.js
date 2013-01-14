@@ -39,6 +39,8 @@
     address: ko.observable(),
     verdict: ko.observable(),
 
+    assignee: ko.observable(),
+
     // new stuff
     invites: ko.observableArray(),
 
@@ -125,8 +127,25 @@
 
   };
 
+  var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
+
+  var AuthorityInfo = function(id, firstName, lastName) {
+    this.id = id;
+    this.firstName = firstName;
+    this.lastName = lastName;
+  };       
+
+  application.assignee.subscribe(function() {
+    var assigneeId;
+    if(application.assignee()) {
+      assigneeId = application.assignee().id;
+    } else {
+      assigneeId = null;
+    }
+    debug("changed to: ", assigneeId);
+  });
 
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
@@ -143,10 +162,25 @@
     });
     return result;
   }
-
+  
+  function resolveSelectedAuthority() {
+    debug("resolving", application);
+  }
+  
+  function initAuthoritiesSelectList(data) {
+    authorities.removeAll();
+    _.each(data || [], function(authority) {
+      authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
+    });
+    
+    application.assignee(resolveSelectedAuthority());
+  }
+  
   function showApplication(applicationDetails) {
-    debug("######################", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
+      
+      initAuthoritiesSelectList(applicationDetails.authorities);
+      
       // new data mapping
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
@@ -287,6 +321,7 @@
   $(function() {
     var bindings = {
       application: application,
+      authorities: authorities,
       attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
       applicationModel: applicationModel,

@@ -34,6 +34,18 @@
   (let [data (find-authorities-in-applications-municipality id)]
     (ok :authorityInfo data)))
 
+(defcommand "assign-application"
+  {:parameters  [:id :assigneeId]
+   :roles       [:authority]}
+  [{{:keys [assigneeId]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (println "#################" assigneeId)
+      (println (:id application))
+      (mongo/update-by-id
+        mongo/applications (:id application)
+        {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}))))
+
 (defcommand "open-application"
   {:parameters [:id]
    :roles      [:applicant]

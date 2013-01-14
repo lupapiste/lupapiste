@@ -14,7 +14,6 @@ var repository = function() {
     ajax
       .query("application", {id: e.id})
       .success(function(data) {
-        debug(data);
         debug("repository: load-application: loaded  " + data.application.id);
         hub.send("application-loaded", {applicationDetails: data});
       })

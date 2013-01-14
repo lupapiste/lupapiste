@@ -33,7 +33,18 @@
     (count comments) => 1
     (-> comments first :text) => "hello"))
 
-(fact "Application in Sipoo has two possible authorities: Sonja and Ronja)"
-  (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
-        authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
-    (count authorities) => 2))
+(fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
+      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+            authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
+        (count authorities) => 2))
+
+(fact "Assign application to an authority"
+      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+            application (query sonja :application :id application-id)
+            application-roles-before-assignation (:roles application)
+            authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+            authority (first authorities)
+            resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
+            assigned-app (:application (query sonja :application :id application-id))]
+        (println application)
+        (count authorities) => 2))
