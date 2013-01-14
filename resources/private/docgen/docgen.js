@@ -209,10 +209,7 @@ var docgen = (function () {
         return makeElem(myModel, key);
       });
 
-      var appendButton = document.createElement("button");
-      appendButton.id = myPath.join("_") + "_append";
-      appendButton.className = "btn";
-      appendButton.innerHTML = loc(specId + "."+  myPath.join(".") + "._append_label");
+      var appendButton = createButton(myPath.join("_") + "_append", loc(specId + "."+  myPath.join(".") + "._append_label"));
 
       var appender = function() {
         var parent$ = $(this.parentNode);
@@ -317,6 +314,14 @@ var docgen = (function () {
     return section;
   }
 
+  function createButton(id, label) {
+    var appendButton = document.createElement("button");
+    appendButton.id = id;
+    appendButton.className = "btn";
+    appendButton.innerHTML = label;
+    return appendButton;
+  }
+
   function DocModel(spec, model, callback, eventData) {
     var self = this;
 
@@ -340,7 +345,8 @@ var docgen = (function () {
   }
 
   return {
-    build: makeDocModel
+    build: makeDocModel,
+    createDocumentButton: createButton
   };
 
 })();
