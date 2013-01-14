@@ -250,16 +250,16 @@
                      {:name "parvekeTaiTerassi" :type :checkbox}
                      {:name "lamminvesi" :type :checkbox}]}]}
 
-     {:info {:name "hakija"}
+     {:info {:name "hakija" :repeating true}
       :body party-body}
 
      {:info {:name "paasuunnittelija"}
       :body paasuunnittelija-body}
 
-     {:info {:name "suunnittelija"}
+     {:info {:name "suunnittelija" :repeating true}
       :body suunnittelija-body}
 
-     {:info {:name "maksaja"}
+     {:info {:name "maksaja" :repeating true}
       :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
