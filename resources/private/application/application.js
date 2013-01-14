@@ -195,11 +195,20 @@
           .call();
       };
 
-      var docgenDiv = $("#docgen").empty();
+      function makeFilter(docset) {
 
-      _.each(data.documents, function(doc) {
-        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
-      });
+      }
+
+      function displayDocuments(containerSelector, documents) {
+        var docgenDiv = $(containerSelector).empty();
+        _.each(documents, function(doc) {
+          docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+        });
+      }
+
+      var partyDocumentNames = ["hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+      displayDocuments("#applicationDocgen", _.filter(data.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
+      displayDocuments("#partiesDocgen", _.filter(data.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
       if(! isTabSelected('#applicationTabs')) {
         selectDefaultTab('#applicationTabs');
