@@ -17,10 +17,15 @@
 
     self.auth = ko.computed(function() {
       var value = [];
-      if(self.data() !== undefined) {
+      if (self.data() !== undefined) {
         var auth = ko.utils.unwrapObservable(self.data().auth());
-        // FIXME: Too complex for jshint, refactor me please:
-        var pimped = _.reduce(auth, function(r, i) { var a = r[i.id()] || (i.roles = [], i); a.roles.push(i.role()); r[i.id()] = a; return r;}, {});
+        var withRoles = function(r, i) {
+          var a = r[i.id()] || (i.roles = [], i);
+          a.roles.push(i.role());
+          r[i.id()] = a;
+          return r;
+        }
+        var pimped = _.reduce(auth, withRoles, {});
         value = _.values(pimped);
       }
       return value;
@@ -171,7 +176,7 @@
 
       // Update map:
       var location = application.location();
-      
+
       hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
 
       // docgen:
@@ -239,15 +244,15 @@
 
   var tab = {
     tabClick: function(data, event) {
-     var self = event.target;
-     setSelectedTab('#applicationTabs', self);
+      var target = event.target;
+     setSelectedTab('#applicationTabs', target);
     }
   };
 
   function isTabSelected(id) {
     return $(id + ' > li').hasClass("active");
   }
-  
+
   function selectDefaultTab(id) {
     setSelectedTab(id, $('.active-as-default'));
   }
@@ -262,13 +267,10 @@
 
   var accordian = {
     accordianClick: function(data, event) {
-     self = event.target;
-     $(self).children(".font-icon").toggleClass("icon-collapsed");
-     $(self).children(".font-icon").toggleClass("icon-expanded");
-     $(self).next(".application_section_content").toggleClass('content_expanded');
+      accordion.toggle(event);
     }
   };
-  
+
   var initApplication = function(e) {
     currentId = e.pagePath[0];
     hub.send("load-application", {id: currentId});
@@ -294,7 +296,7 @@
       tab: tab,
       accordian: accordian
     };
-    
+
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
   });
