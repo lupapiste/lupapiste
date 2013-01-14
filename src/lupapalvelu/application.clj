@@ -3,7 +3,8 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.attachment :only [create-attachment attachment-types-for]])
+        [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
+        [lupapalvelu.document.commands :only [create-document]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
@@ -100,14 +101,6 @@
           {$set {:comments (:comments inforequest)}})
         (ok :id id)))))
 
-(defn create-document [schema-name]
-  (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
-    {:id (mongo/create-id)
-     :created (now)
-     :schema schema
-     :body {}}))
-
 (def default-schemas {:infoRequest []
                       :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
                                        "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
@@ -129,7 +122,7 @@
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
         permitType (keyword (:permitType data))
-        documents  (map create-document (permitType default-schemas))]
+        documents  (map #(create-document (mongo/create-id) %) (permitType default-schemas))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -143,7 +136,7 @@
        :roles {:applicant owner}
        :auth [owner]
        :documents documents
-       :permitType permitType 
+       :permitType permitType
        :allowedAttahmentTypes (attachment-types-for permitType)
        :attachments []
        :comments (if-let [message (:message data)]
