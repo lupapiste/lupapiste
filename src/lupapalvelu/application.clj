@@ -141,7 +141,8 @@
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
-       :permitType permit-type 
+       :permitType permit-type
+       :infoRequest (if (:infoRequest data) true false)
        :allowedAttahmentTypes (attachment-types-for permit-type)
        :documents (map create-document (permit-type default-schemas [])) 
        :attachments []
