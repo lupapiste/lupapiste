@@ -206,15 +206,18 @@
           if (doc.schema.info.repeating) {
             var btn = docgen.createDocumentButton();
             var appender = function() {
-              var newDocId = "get me from backend"; // TODO
-              var newElem = docgen.build(doc.schema, {}, save, {doc: newDocId, app: application.id()}).element;
-              $(elem).after(newElem);
-            };
+              ajax
+                .command("create-doc", {schema: doc.schema.info.name, id: application.id()})
+                .success(function(e) {
+                  var newDocId = e.doc;
+                  var newElem = docgen.build(doc.schema, {}, save, {doc: newDocId, app: application.id()}).element;
+                  $(elem).after(newElem);})
+                .call();
+                };
             $(btn).click(appender);
             elem.lastChild.appendChild(btn);
           }
           docgenDiv.append(elem);
-
         });
       }
 
