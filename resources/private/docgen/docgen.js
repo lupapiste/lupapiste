@@ -195,13 +195,18 @@ var docgen = (function () {
     if (spec.repeating) {
       var repeatingId = myPath.join("-")
       var models = model[myName] || [{}];
+
+      function makeElem(myModel, id) {
+        var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
+        elem.setAttribute("data-repeating-id", repeatingId);
+        elem.setAttribute("data-repeating-id-" + repeatingId, id);
+        return elem;
+      }
+
       var elements = _.map(models, function(val, key) {
         var myModel = {};
         myModel[myName] = val;
-        var elem = builder(spec, myModel, myPath.concat([key]), save, specId, partOfChoice);
-        elem.setAttribute("data-repeating-id", repeatingId);
-        elem.setAttribute("data-repeating-id-" + repeatingId, key);
-        return elem;
+        return makeElem(myModel, key);
       });
 
       var appendButton = document.createElement("button");
@@ -217,10 +222,7 @@ var docgen = (function () {
         }
         var myModel = {};
         myModel[myName] = {};
-        var elem = builder(spec, myModel, myPath.concat([count]), save, specId, partOfChoice);
-        elem.setAttribute("data-repeating-id", repeatingId);
-        elem.setAttribute("data-repeating-id-" + repeatingId, count);
-        $(this).before(elem);
+        $(this).before(makeElem(myModel, count));
       };
 
       $(appendButton).click(appender);
