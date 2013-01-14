@@ -35,7 +35,8 @@ var selectionTree = (function() {
     
     self.reset = function() {
       self.crumbs = [];
-      self.stack = [self.make(self.data)];
+      self.stack = [];
+      self.stack.push(self.make(self.data));
       self.content.empty().append(self.stack[0]);
       return false;
     };
