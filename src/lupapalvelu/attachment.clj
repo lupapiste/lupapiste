@@ -87,7 +87,7 @@
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
 (defn attachment-types-for [permit-type]
-  (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type)))
+  (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type {:muut [:muu]})))
 
 ;;
 ;; Upload
