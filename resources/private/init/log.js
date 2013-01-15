@@ -14,4 +14,6 @@
   window.warn  = function() { logv(3, Array.prototype.slice.call(arguments)); };
   window.error = function() { logv(4, Array.prototype.slice.call(arguments)); };
   
+  window.setLogLimit = function(l) { limit = l; };
+  
 })();
