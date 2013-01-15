@@ -6,6 +6,15 @@ var selectionTree = (function() {
     e.innerHTML = name;
     return e;
   }
+  
+  function stopProp(f) {
+    return function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      f();
+      return false;
+    };
+  }
 
   function Tree(content, breadcrumbs, callback, contentFactory) {
     var self = this;
@@ -25,7 +34,7 @@ var selectionTree = (function() {
       if (self.stack.length > 1) {
         var d = self.stack.pop();
         var n = self.stack[self.stack.length - 1];
-        $(d).animate({"margin-left": self.width}, self.speed, function() { n.parentNode.removeChild(d); });
+        $(d).animate({"margin-left": self.width}, self.speed, function() { d.parentNode.removeChild(d); });
         $(n).animate({"margin-left": 0}, self.speed);  
         self.crumbs.pop();
         self.breadcrumbs.html(self.crumbs.join(" / "));
@@ -33,15 +42,52 @@ var selectionTree = (function() {
       return self;
     };
     
+    self.gostart = function() {
+      if (self.stack.length > 0) {
+        var d = self.stack.pop();
+        $(d).animate({"margin-left": self.width}, self.speed, self.gostart2);
+        self.breadcrumbs.animate({"opacity": 0.0}, self.speed, function() { self.breadcrumbs.html("").css("opacity", 1.0); });
+        var p = d.parentNode;
+        _.each(self.stack, function(n) { p.removeChild(n); });
+      } else {
+        self.gostart2();
+      }
+    };
+    
+    self.gostart2 = function() {
+      self.crumbs = [];
+      self.stack = [];
+      self.content.empty();
+      if (self.data) {
+        var n = self.make(self.data);
+        self.stack.push(n);
+        $(n).css("margin-left", -self.width);  
+        self.content.append(n);
+        $(n).animate({"margin-left": 0}, self.speed);
+      }
+      return self;
+    };
+    
     self.reset = function(newData) {
+      self.data = newData;
+      return self.gostart();
+    };
+    
+    self.reset = function(newData) {
+      if (self.stack.length > 0) {
+        var d = self.stack[0];
+        $(d).animate({"margin-left": self.width}, self.speed, function() { d.parentNode.removeChild(d); });
+      }
       self.crumbs = [];
       self.stack = [];
       self.breadcrumbs.html("");
       self.content.empty();
       if (newData) self.data = newData;
       if (self.data) {
-        self.stack.push(self.make(self.data));
-        self.content.append(self.stack[0]);
+        var n = self.make(self.data);
+        self.stack.push(n);
+        $(n).css("margin-left", self.width).animate({"margin-left": 0}, self.speed);  
+        self.content.append(n);
       }
       return self;
     };
@@ -49,6 +95,7 @@ var selectionTree = (function() {
     self.makeHandler = function(key, val, d) {
       return function(e) {
         e.preventDefault();
+        e.stopPropagation();
         
         self.crumbs.push(key);
         self.breadcrumbs.html(self.crumbs.join(" / "));
@@ -62,7 +109,10 @@ var selectionTree = (function() {
         return false;
       };
     };
-        
+    
+    self.gobackEventHandler = stopProp(self.goback);
+    self.gostartEventHandler = stopProp(self.gostart);
+    
     self.make = function(t) {
       var d = document.createElement("div");
       d.setAttribute("class", "tree-magic");
@@ -72,7 +122,7 @@ var selectionTree = (function() {
         var link = document.createElement("a");
         link.innerHTML = loc("tree.back");
         link.href = "#";
-        link.onclick = self.goback;
+        link.onclick = self.gobackEventHandler;
         d.appendChild(link);
       }
       
@@ -80,7 +130,7 @@ var selectionTree = (function() {
         var link = document.createElement("a");
         link.innerHTML = loc("tree.start");
         link.href = "#";
-        link.onclick = self.reset;
+        link.onclick = self.gostartEventHandler;
         d.appendChild(link);
       }
 
