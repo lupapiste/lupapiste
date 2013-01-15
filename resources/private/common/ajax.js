@@ -41,7 +41,7 @@ var ajax = function() {
       self.rawData = (v === undefined) ? true : v;
       return self;
     }
-    
+
     self.dataType = function(dataType) {
       self.request.dataType = dataType;
       return self;
