@@ -19,9 +19,13 @@
   "devel": true,
   "unused": true,
   "predef": [
+    "$",
+    "ko",
+    "hub",
     "require",
     "define",
     "angular",
-    "_"
+    "_",
+    "ajax"
   ]
 }

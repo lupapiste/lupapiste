@@ -1,10 +1,8 @@
-/*
- * register.js:
- */
+'use strict'
 
 ;(function() {
 
-  var keys = ["stamp", "personId", "firstname", "lastname", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
+  var keys = ['stamp', 'personId', 'firstname', 'lastname', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
 
   function json(model) {
     var d = {};
@@ -19,32 +17,32 @@
 
   function reset(model) {
     for (var i in keys) {
-      model[keys[i]]("");
+      model[keys[i]]('');
       model[keys[i]].isModified(false);
     }
     return false;
   }
 
   function submit(m) {
-    ajax.command("register-user", json(m))
-      .success(function(e) {
-        $("#register-email-error").html("&nbsp;");
+    ajax.command('register-user', json(m))
+      .success(function() {
+        $('#register-email-error').html('&nbsp;');
         var login = model().email();
         var password = model().password();
         reset(model());
-        ajax.post("/api/login")
-          .param("username", login)
-          .param("password", password)
-          .success(function(e) { window.location = "/applicant"; })
+        ajax.post('/api/login')
+          .param('username', login)
+          .param('password', password)
+          .success(function() { window.location = '/applicant'; })
           .call();
       })
       .error(function(e) {
         // FIXME: DIRTY HACKS
-        if (e.text.indexOf("lupapalvelu.users.$email_1") !== -1) {
-          $("#register-email-error").html("sahkopostiosoite on jo varattu.");
+        if (e.text.indexOf('lupapalvelu.users.$email_1') !== -1) {
+          $('#register-email-error').html('sahkopostiosoite on jo varattu.');
         }
-        if (e.text.indexOf("duplicate key error index: lupapalvelu.users.$personId_1") !== -1) {
-          $("#register-email-error").html("hetu on jo varattu.");
+        if (e.text.indexOf('duplicate key error index: lupapalvelu.users.$personId_1') !== -1) {
+          $('#register-email-error').html('hetu on jo varattu.');
         }
         error(e.text);
         // TODO: now what?
@@ -75,24 +73,24 @@
     model().disabled(!valid);
   });
 
-  hub.onPageChange("register", function() {
-    $.get("/vetuma", {success: "/welcome#!/register2",
-                    cancel:  "/welcome#!/register/cancel",
-                    error:   "/welcome#!/register/error"},function(d) {
-      $("#vetuma-register").html(d).find(":submit").addClass("btn btn-primary")
+  hub.onPageChange('register', function() {
+    $.get('/vetuma', {success: '/welcome#!/register2',
+                    cancel:  '/welcome#!/register/cancel',
+                    error:   '/welcome#!/register/error'},function(d) {
+      $('#vetuma-register').html(d).find(':submit').addClass('btn btn-primary')
                         .attr('value','Tunnistaudu')
-                        .attr("id", "vetuma-init");
+                        .attr('id', 'vetuma-init');
     });
   });
 
-  hub.onPageChange("register2", function() {
-    $.get("/vetuma/user", function(data) {
+  hub.onPageChange('register2', function() {
+    $.get('/vetuma/user', function(data) {
       model().personId(data.userid);
       model().firstname(data.firstname);
       model().lastname(data.lastname);
       model().stamp(data.stamp);
     });
 
-    ko.applyBindings(model, $("#register2")[0]);
+    ko.applyBindings(model, $('#register2')[0]);
   });
 })();
