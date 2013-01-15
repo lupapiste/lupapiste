@@ -269,7 +269,7 @@
 
         var displayOrder = ["rakennuspaikka", "uusiRakennus", "huoneisto", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
         var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
-          return displayOrder.indexOf(docGroup[0].schema.info.name)
+          return _.indexOf(displayOrder, docGroup[0].schema.info.name)
         });
 
         var docgenDiv = $(containerSelector).empty();
