@@ -76,10 +76,10 @@
              {:name "rakennuksenOmistajat"
               :type :group
               :body party-body}
-             {:name "kuvaus" 
+             {:name "toimenpiteenKuvaus" 
               :type :group
-              :body [{:name "kuvaus" :type :string :size "l"}
-                     {:name "poikkeamiset" :type :string :size "l"}]}
+              :body [{:name "kuvaus" :type :text :size "l"}
+                     {:name "poikkeamiset" :type :text :size "l"}]}
              {:name "kaytto" 
               :type :group
               :body [{:name "rakentajaTyyppi" :type "select"
@@ -275,14 +275,14 @@
      {:info {:name "maksaja"}
       :body party-body}
 
-     {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
-      :body [{:name "huoneistonTyyppi" 
+     {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osoitettu)
+      :body [{:name "kiinteisto" 
               :type :group
               :body[{:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus}
                     {:name "kokotilaKytkin" :type :checkbox}
-                    {:name "maaraalaTunnus" :type :string}]}
-             {:name "kylaNimi" :type :string}
-             {:name "tilanNimi" :type :string}
+                    {:name "maaraalaTunnus" :type :string}
+                    {:name "kylaNimi" :type :string}
+                    {:name "tilanNimi" :type :string}]}
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
