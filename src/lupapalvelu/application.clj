@@ -122,13 +122,14 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality]
+  {:parameters [:x :y :address :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id          (mongo/create-id)
         owner       (role user :owner :type :owner)
-        permit-type (keyword (:permitType data))]
+        permit-type (keyword (:permitType data))
+        operation   (keyword (:operation data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -141,10 +142,11 @@
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
-       :permitType permit-type
        :infoRequest (if (:infoRequest data) true false)
-       :allowedAttahmentTypes (attachment-types-for permit-type)
-       :documents (map create-document (permit-type default-schemas [])) 
+       :permitType permit-type
+       :operations (if operation [operation] [])
+       :allowedAttahmentTypes (attachment-types-for operation)
+       :documents (map create-document (default-schemas operation [])) 
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message
@@ -152,7 +154,7 @@
                      :created created
                      :user    (security/summary user)}]
                    [])})
-    (doseq [attachment-type (default-attachments permit-type [])]
+    (doseq [attachment-type (default-attachments operation [])]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
