@@ -14,10 +14,38 @@
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
+(defn find-authorities-in-applications-municipality [id]
+  (let [app (mongo/select-one mongo/applications {:_id id} {:authority 1})
+        data (mongo/select mongo/users {:authority (:authority app) :role "authority"} {:firstName 1 :lastName 1})]
+    data))
+
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+  (println "app id" id)
   (if-let [app (get-application-as id user)]
-    (ok :application app)
+    (let [authorities (find-authorities-in-applications-municipality id)]
+      (ok :application app :authorities authorities))
     (fail :error.not-found)))
+
+;; Gets an array of application ids and returns a map for each application that contains the
+;; application id and the authorities in that municipality.
+(defquery "authorities-in-applications-municipality"
+  {:parameters [:id]
+   :authenticated true}
+  [{{:keys [id]} :data}]
+  (let [data (find-authorities-in-applications-municipality id)]
+    (ok :authorityInfo data)))
+
+(defcommand "assign-application"
+  {:parameters  [:id :assigneeId]
+   :roles       [:authority]}
+  [{{:keys [assigneeId]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (mongo/update-by-id
+        mongo/applications (:id application)
+        (if assigneeId 
+          {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
+          {$unset {:roles.authority ""}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -28,7 +56,8 @@
     (fn [{id :id}]
       (mongo/update-by-id mongo/applications id
         {$set {:modified (:created command)
-               :state :open}}))))
+               :state :open
+               :opened (:created command)}}))))
 
 (defcommand "approve-application"
   {:parameters [:id]
@@ -125,16 +154,16 @@
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id         (mongo/create-id)
-        owner      (role user :owner :type :owner)
+        id        (mongo/create-id)
+        owner     (role user :owner :type :owner)
         permitType (keyword (:permitType data))
         documents  (map create-document (permitType default-schemas))]
+    (println permitType)
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
-       :state :draft
-       :municipality (:municipality data)
+       :state (if (= permitType :infoRequest) :open :draft)
        :authority (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)

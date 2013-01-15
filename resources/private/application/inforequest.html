@@ -20,7 +20,7 @@
             <p>Käsittelytunnus:</p>
             <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id"></span>
           </div>
-          <div>
+          <div data-bind="if: state">
             <p>Tila:</p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
           </div>
@@ -28,6 +28,23 @@
             <p>Luotu:</p>
             <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
           </div>
+          
+          <!-- ko if: $root.authorization.ok('assign-application') -->
+            <div>
+              <p>Käsittelijä:</p>
+              <span id="test-inforequest-assignee" class="application_summary_text">
+  
+                <select data-bind="options: $root.authorities, 
+                                   optionsText: function(item) {
+                                    return item.firstName + ' ' + item.lastName;
+                                   },
+                                   optionsValue: 'id',
+                                   value: $root.application.assignee,
+                                   optionsCaption: loc('choose')"></select>
+               </span>
+            </div>
+          <!-- /ko -->
+          
         </div>
         <div class="inforequest_actions">
           <button data-bind="enable: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" type="submit" class="btn btn-primary" id="test-mark-inforequest-answered">Merkitse vastatuksi</button>

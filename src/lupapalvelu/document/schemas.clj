@@ -25,7 +25,7 @@
 
 (def yhteystiedot-body [{:name "puhelin" :type :string :subtype :tel}
                         {:name "email" :type :string :subtype :email}
-                        {:name "fax" :type :string}])
+                        {:name "fax" :type :string :subtype :tel}])
 
 (def henkilotiedot-body [{:name "etunimi" :type :string}
                          {:name "sukunimi" :type :string}
@@ -40,51 +40,143 @@
                    {:name "osoite" :type :group :body simple-osoite-body}
                    {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
 
-; TODO: Yritys?
+(def party-body [{:name "henkilo" :type :group :body henkilo-body}
+                 {:name "yritys" :type :group :body yritys-body}])
+
+(def patevyys [{:name "koulutus" :type :string}
+               {:name "patevyysluokka" :type :select
+                :body [{:name "AA"}
+                       {:name "A"}
+                       {:name "B"}
+                       {:name "C"}
+                       {:name "ei tiedossa"}
+                       ]}])
+
+(def paasuunnittelija-body (conj
+                         party-body
+                         {:name "patevyys" :type :group :body patevyys}))
+
 (def suunnittelija-body (conj
-                         henkilo-body
-                         {:name "patevyys" :type :group 
-                          :body [
-                            {:name "koulutus" :type :string}
-                            {:name "patevyysluokka" :type :select
-                            :body [{:name "aa"}
-                                    {:name "a"}
-                                    {:name "b"}
-                                    {:name "c"}]}
-                            {:name "kokemus" :type :string}
-                            {:name "Liiteet" :type :string}
-                            ]
+                         party-body
+                         {:name "patevyys" :type :group
+                          :body
+                          (cons {:name "kuntaRoolikoodi" :type :select
+                                  :body [{:name "GEO-suunnittelija"}
+                                         {:name "LVI-suunnittelija"}
+                                         {:name "RAK-rakennesuunnittelija"}
+                                         {:name "ARK-rakennussuunnittelija"}
+                                         {:name "ei tiedossa"}]
+                                  } patevyys)
                             })) ; TODO miten liitteet hanskataan
 
 (def schemas
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
       :body [
-             {:name "rakennuksenOmistajat" 
-              :type :group 
-              :body henkilo-body} ;TODO yritys ja monta
+             {:name "rakennuksenOmistajat"
+              :type :group
+              :repeating true
+              :body party-body}
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
                      {:name "muu"}
-                     {:name "eiTiedossa"}]}
-             
-             {:name "kayttotarkoitus" :type :string}
-             {:name "tilavuus" :type :string}
-             {:name "kokonaisala" :type :string}
-             {:name "kellaripinta-ala" :type :string}
-             {:name "kerrosluku" :type :string}
+                     {:name "ei tiedossa"}]}
+             {:name "kuvaus" :type :string :size "l"}
+             {:name "kayttotarkoitus" :type :select
+              :body [{:name "999 muualla luokittelemattomat rakennukset"}
+                     {:name "941 talousrakennukset"}
+                     {:name "931 saunarakennukset"}
+                     {:name "899 muut maa-, metsä- ja kalatalouden rakennukset"}
+                     {:name "893 turkistarhat"}
+                     {:name "892 kasvihuoneet"}
+                     {:name "891 viljankuivaamot ja viljan säilytysrakennukset"}
+                     {:name "819 eläinsuojat, ravihevostallit, maneesit yms"}
+                     {:name "811 navetat, sikalat, kanalat yms"}
+                     {:name "729 muut palo- ja pelastustoimen rakennukset"}
+                     {:name "722 väestönsuojat"}
+                     {:name "721 paloasemat"}
+                     {:name "719 muut varastorakennukset"}
+                     {:name "712 kauppavarastot"}
+                     {:name "711 teollisuusvarastot"}
+                     {:name "699 muut teollisuuden tuotantorakennukset"}
+                     {:name "692 teollisuus- ja pienteollisuustalot"}
+                     {:name "691 teollisuushallit"}
+                     {:name "613 yhdyskuntatekniikan rakennukset"}
+                     {:name "611 voimalaitosrakennukset"}
+                     {:name "549 muualla luokittelemattomat opetusrakennukset"}
+                     {:name "541 järjestöjen, liittojen, työnantajien yms opetusrakennukset"}
+                     {:name "532 tutkimuslaitosrakennukset"}
+                     {:name "531 korkeakoulurakennukset"}
+                     {:name "521 ammatillisten oppilaitosten rakennukset"}
+                     {:name "511 yleissivistävien oppilaitosten rakennukset"}
+                     {:name "369 muut kokoontumisrakennukset"}
+                     {:name "359 muut urheilu- ja kuntoilurakennukset"}
+                     {:name "354 monitoimihallit ja muut urheiluhallit"}
+                     {:name "353 tennis-, squash- ja sulkapallohallit"}
+                     {:name "352 uimahallit"}
+                     {:name "351 jäähallit"}
+                     {:name "349 muut uskonnollisten yhteisöjen rakennukset"}
+                     {:name "342 seurakuntatalot"}
+                     {:name "341 kirkot, kappelit, luostarit ja rukoushuoneet"}
+                     {:name "331 seura- ja kerhorakennukset yms"}
+                     {:name "324 näyttelyhallit"}
+                     {:name "323 museot ja taidegalleriat"}
+                     {:name "322 kirjastot ja arkistot"}
+                     {:name "312 elokuvateatterit"}
+                     {:name "311 teatterit, ooppera-, konsertti- ja kongressitalot"}
+                     {:name "241 vankilat"}
+                     {:name "239 muualla luokittelemattomat sosiaalitoimen rakennukset"}
+                     {:name "231 lasten päiväkodit"}
+                     {:name "229 muut huoltolaitosrakennukset"}
+                     {:name "223 kehitysvammaisten hoitolaitokset"}
+                     {:name "222 lasten- ja koulukodit"}
+                     {:name "221 vanhainkodit"}
+                     {:name "219 muut terveydenhuoltorakennukset"}
+                     {:name "215 terveydenhuollon erityislaitokset"}
+                     {:name "214 terveyskeskukset"}
+                     {:name "213 muut sairaalat"}
+                     {:name "211 keskussairaalat"}
+                     {:name "169 muut liikenteen rakennukset"}
+                     {:name "164 tietoliikenteen rakennukset"}
+                     {:name "163 pysäköintitalot"}
+                     {:name "162 kulkuneuvojen suoja- ja huoltorakennukset"}
+                     {:name "161 rautatie- ja linja-autoasemat, lento- ja satamaterminaalit"}
+                     {:name "151 toimistorakennukset"}
+                     {:name "141 ravintolat yms"}
+                     {:name "139 muut asuntolarakennukset"}
+                     {:name "131 asuntolat yms"}
+                     {:name "129 muut majoitusliikerakennukset"}
+                     {:name "124 vuokrattavat lomamökit ja -osakkeet"}
+                     {:name "123 loma-, lepo- ja virkistyskodit"}
+                     {:name "121 hotellit yms"}
+                     {:name "119 muut myymälärakennukset"}
+                     {:name "112 liike- ja tavaratalot, kauppakeskukset"}
+                     {:name "111 myymälähallit"}
+                     {:name "041 vapaa-ajan asuinrakennukset"}
+                     {:name "039 muut asuinkerrostalot"}
+                     {:name "032 luhtitalot"}
+                     {:name "022 ketjutalot"}
+                     {:name "021 rivitalot"}
+                     {:name "013 muut erilliset talot"}
+                     {:name "012 kahden asunnon talot"}
+                     {:name "011 yhden asunnon talot"}
+                     {:name "ei tiedossa"}]}
+             {:name "tilavuus" :type :string :unit "m3" :subtype :number}
+             {:name "kokonaisala" :type :string :unit "m2" :subtype :number}
+             {:name "kellarinpinta-ala" :type :string :unit "m2" :subtype :number}
+             {:name "kerrosluku" :type :string :subtype :number}
              {:name "kerrosala" :type :string :unit "m2" :subtype :number}
              {:name "rakentamistapa" :type :select
               :body [{:name "elementti" :type :checkbox}
                      {:name "paikalla" :type :checkbox}
-                     {:name "eiTiedossa" :type :checkbox}]}
-             {:name "kantavarakennusaine" :type :select
+                     {:name "ei tiedossa" :type :checkbox}]}
+             {:name "kantavaRakennusaine" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
                      {:name "teras" :type :checkbox}
                      {:name "puu" :type :checkbox}
                      {:name "muurakennusaine" :type :string :size "s"}
-                     {:name "eiTiedossa" :type :checkbox}]} 
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "julkisivu" :type :select
               :body [{:name "betoni" :type :checkbox}
                      {:name "tiili" :type :checkbox}
@@ -93,11 +185,11 @@
                      {:name "puu" :type :checkbox}
                      {:name "lasi" :type :checkbox}
                      {:name "muumateriaali" :type :string :size "s"}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "verkostoliittymat" :type :choice
               :body [{:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
-                     {:name "sahkokytkin" :type :checkbox}
+                     {:name "sahkoKytkin" :type :checkbox}
                      {:name "maakaasuKytkin" :type :checkbox}
                      {:name "kaapeliKytkin" :type :checkbox}]}
              {:name "energialuokka" :type :string}
@@ -108,19 +200,19 @@
                      {:name "suorasahko" :type :checkbox}
                      {:name "uuni" :type :checkbox}
                      {:name "eiLammitysta" :type :checkbox}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "lammonlahde" :type :select
-              :body [{:name "kaukotaialuelampo" :type :checkbox}
-                     {:name "kevytpolttooljy" :type :checkbox}
-                     {:name "raskaspolttooljy" :type :checkbox}
-                     {:name "sahko" :type :checkbox}
+              :body [{:name "kauko tai aluel\u00e4mp\u00f6" :type :checkbox}
+                     {:name "kevyt poltto\u00f6ljy" :type :checkbox}
+                     {:name "raskas poltto\u00f6ljy" :type :checkbox}
+                     {:name "s\u00e4hk\u00f6" :type :checkbox}
                      {:name "kaasu" :type :checkbox}
-                     {:name "kivihiilikoksitms" :type :checkbox}
+                     {:name "kiviihiili koksi tms." :type :checkbox}
                      {:name "turve" :type :checkbox}
-                     {:name "maalampo" :type :checkbox}
+                     {:name "maal\u00e4mp\u00f6" :type :checkbox}
                      {:name "puu" :type :checkbox}
                      {:name "muu" :type :string :size "s"}
-                     {:name "eiTiedossa" :type :checkbox}]}
+                     {:name "ei tiedossa" :type :checkbox}]}
              {:name "varusteet" :type :choice
               :body [{:name "sahkoKytkin" :type :checkbox}
                      {:name "kaasuKytkin" :type :checkbox}
@@ -128,63 +220,68 @@
                      {:name "vesijohtoKytkin" :type :checkbox}
                      {:name "hissiKytkin" :type :checkbox}
                      {:name "koneellinenilmastointiKytkin" :type :checkbox}
-                     {:name "saunoja" :type :string}
-                     {:name "vaestonsuojia" :type :string}]}
+                     {:name "lamminvesiKytkin" :type :checkbox}
+                     {:name "aurinkopaneeliKytkin" :type :checkbox}
+                     {:name "saunoja" :type :string :subtype :number}
+                     {:name "vaestonsuoja" :type :string :subtype :number}]}
              {:name "poikkeamiset" :type :string}]}
-     
+
      {:info {:name "huoneisto"}
-      :body [{:name "huoneluku" :type :string}
+      :body [{:name "huoneistoTunnus" :type :group
+              :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
+                     {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                     {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
+             {:name "huoneluku" :type :string :subtype :number :size "m"}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
-                     {:name "keittoKomero"}
-                     {:name "keittoTila"}
+                     {:name "keittokomero"}
+                     {:name "keittotila"}
                      {:name "tupakeittio"}
-                     {:name "eiTiedossa"}]}
-             {:name "huoneistoala" :type :string}
+                     {:name "ei tiedossa"}]}
+             {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
              {:name "huoneistoTyyppi" :type :select
               :body [{:name "asuinhuoneisto"}
                      {:name "toimitila"}
-                     {:name "eiTiedossa"}]}
-             {:name "huoneistoTunnus" :type :string}
-             {:name "varusteet" :type :choice 
+                     {:name "ei tiedossa"}]}
+             {:name "varusteet" :type :choice
               :body [{:name "wc" :type :checkbox}
                      {:name "ammeTaiSuihku" :type :checkbox}
                      {:name "sauna" :type :checkbox}
-                     {:name "parvekeTaiTerassi" :type :checkbox}]}]}
-     
-     {:info {:name "hakija"} 
-      :body [{:name "henkilo" :type :group :body henkilo-body}
-             {:name "yritys" :type :group :body yritys-body}]}
-     
+                     {:name "parvekeTaiTerassi" :type :checkbox}
+                     {:name "lamminvesi" :type :checkbox}]}]}
+
+     {:info {:name "hakija"}
+      :body party-body}
+
      {:info {:name "paasuunnittelija"}
-      :body suunnittelija-body}
-     
+      :body paasuunnittelija-body}
+
      {:info {:name "suunnittelija"}
       :body suunnittelija-body}
-     
-     {:info {:name "maksaja"} ; TODO yritys ja suunnittelijatyypin valinta
-      :body henkilo-body}
-     
+
+     {:info {:name "maksaja"}
+      :body party-body}
+
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
-      :body [{:name "kiinteistotunnus" :type :string}
+      :body [{:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus}
              {:name "maaraalaTunnus" :type :string}
              {:name "kylaNimi" :type :string}
              {:name "tilanNimi" :type :string}
-             {:name "kokotilaKytkin" :type :checkbox} ; TODO jos maara-ala tunnus kokotilakytkin pitaisi olla false. Tarvitaanko ollenkaan?
+             {:name "kokotilaKytkin" :type :checkbox}
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
-                     {:name "eiTiedossa"}]}
+                     {:name "ei tiedossa"}]}
              {:name "kaavanaste" :type "select"
               :body [{:name "asema"}
                      {:name "ranta"}
                      {:name "rakennus"}
                      {:name "yleis"}
                      {:name "eiKaavaa"}
-                     {:name "eiTiedossa"}]}]}
-     
+                     {:name "ei tiedossa"}]}]}
+
      {:info {:name "osoite"}
       :body full-osoite-body}
-     
+
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
