@@ -33,11 +33,16 @@ var selectionTree = (function() {
       return false;
     };
     
-    self.reset = function() {
+    self.reset = function(newData) {
       self.crumbs = [];
       self.stack = [];
-      self.stack.push(self.make(self.data));
-      self.content.empty().append(self.stack[0]);
+      self.breadcrumbs.html("");
+      self.content.empty();
+      if (newData) self.data = newData;
+      if (self.data) {
+        self.stack.push(self.make(self.data));
+        self.content.append(self.stack[0]);
+      }
       return false;
     };
     
