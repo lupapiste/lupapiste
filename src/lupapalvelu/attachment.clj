@@ -166,9 +166,9 @@
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
     (->> match (drop 1) (map keyword))))
 
-(defn- allowed-attachment-type-for? [permit-type {:keys [type-group type-id]}]
-  (let [permits (get-in attachment-types-for-permit-type [permit-type (keyword type-group)])]
-    (some (partial = (keyword type-id)) permits)))
+(defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
+  (println "allowed-attachment-type-for?" allowed-types type-group type-id (some (partial = (keyword type-id)) (get allowed-types type-group)))
+  (some (partial = type-id) (map keyword (get allowed-types type-group))))
 
 ;;
 ;; Actions
@@ -250,22 +250,24 @@
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
-      (if (and attachmentType (allowed-attachment-type-for? (get-permit-type id) attachmentType))
-        (let [content-type (mime/mime-type sanitazed-filename)]
-          (mongo/upload id file-id sanitazed-filename content-type tempfile created)
-          (.delete (file tempfile))
-          (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
-            (executed (assoc (command "add-comment"
-                                      {:id id
-                                       :text text,
-                                       :target {:type :attachment
-                                                :id (:id attachment-version)
-                                                :version (:version attachment-version)
-                                                :filename (:filename attachment-version)
-                                                :fileId (:fileId attachment-version)}})
-                             :user user))
-            (fail :error.unknown)))
-        (fail :error.illegal-attachment-type))
+      (if-let [application (mongo/by-id mongo/applications id)]
+        (if (and attachmentType (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachmentType))
+          (let [content-type (mime/mime-type sanitazed-filename)]
+            (mongo/upload id file-id sanitazed-filename content-type tempfile created)
+            (.delete (file tempfile))
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
+              (executed (assoc (command "add-comment"
+                                        {:id id
+                                         :text text,
+                                         :target {:type :attachment
+                                                  :id (:id attachment-version)
+                                                  :version (:version attachment-version)
+                                                  :filename (:filename attachment-version)
+                                                  :fileId (:fileId attachment-version)}})
+                               :user user))
+              (fail :error.unknown)))
+          (fail :error.illegal-attachment-type))
+        (fail :error.no-such-application))
       (fail :error.illegal-file-type))))
 
 ;;
