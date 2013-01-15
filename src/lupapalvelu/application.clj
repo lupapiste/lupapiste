@@ -114,14 +114,6 @@
                                                 ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
-(defn create-document [schema-name]
-  (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
-    {:id (mongo/create-id)
-     :created (now)
-     :schema schema
-     :body {}}))
-
 (defcommand "create-application"
   {:parameters [:x :y :address :municipality]
    :roles      [:applicant]}
@@ -147,7 +139,7 @@
        :permitType permit-type
        :operations (if operation [operation] [])
        :allowedAttahmentTypes (attachment-types-for operation)
-       :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas)) 
+       :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas))
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message
