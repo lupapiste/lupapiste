@@ -155,17 +155,17 @@
     this.lastName = lastName;
   };       
 
-  function updateAssignee(assignee) {
-    var assigneeId = assignee ? assignee.id : null;
-    debug("update called", assigneeId);
+  function updateAssignee(value) {
+    debug("updateAssignee called, assigneeId: ", value);
     // do not update assignee if page is still initializing
     if(isInitializing) {
-      debug("-----------------------------------------------");
+      debug("isInitializing, return");
       return;
     }
+    
+    var assigneeId = value ? value : null;
 
-    debug("Set application " + currentId + " assignee to " + assigneeId);
-
+    debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
       .success(function(e) {
       })
@@ -179,20 +179,14 @@
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
   
-  function resolveApplicationAssignee() {
-    debug("resolving", application.roles);
-    if(application.roles && application.roles.authority) {
-      debug("resolving2");
-      debug(application.roles);
-      debug(application.roles.authority);
-      debug(application.roles.authority.id);
-      debug(application.roles.authority.id());
-      var auth = new AuthorityInfo(application.roles.authority.id(), application.roles.authority.firstName(), application.roles.authority.lastName());
-      debug(auth);
+  function resolveApplicationAssignee(roles) {
+    debug("resolveApplicationAssignee called, roles: ", roles);
+    if(roles && roles.authority) {
+      var auth = new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName);
+      debug("resolved authority: ", auth);
       return auth;
     } else {
-      debug("resolving3");
-      debug(null);
+      debug("not assigned");
       return null;
     }
   }
@@ -269,9 +263,12 @@
 
       debug("set isInitializing to false");
       isInitializing = false;
-      var a = resolveApplicationAssignee();
-      debug("set assignee to", a);
-      application.assignee(a);
+
+      // set the value behind assignee selection list
+      var assignee = resolveApplicationAssignee(app.roles);
+      var assigneeId = assignee ? assignee.id : null;
+      application.assignee(assigneeId);
+      
       pageutil.setPageReady("application");
     });
   }
