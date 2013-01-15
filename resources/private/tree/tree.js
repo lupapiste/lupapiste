@@ -76,7 +76,7 @@ var selectionTree = (function() {
     self.reset = function(newData) {
       if (self.stack.length > 0) {
         var d = self.stack[0];
-        $(d).animate({"margin-left": self.width}, self.speed, function() { d.parentNode.removeChild(d); });
+        $(d).animate({"margin-left": self.width}, self.speed);
       }
       self.crumbs = [];
       self.stack = [];
