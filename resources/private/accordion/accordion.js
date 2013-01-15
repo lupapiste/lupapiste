@@ -1,5 +1,5 @@
-"use strict";
 var accordion = (function() {
+  "use strict";
 
   var animationTime = 200;
   var animationEasing = "easeInOutCubic";
