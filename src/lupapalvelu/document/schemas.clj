@@ -75,6 +75,7 @@
       :body [
              {:name "rakennuksenOmistajat"
               :type :group
+              :repeating true
               :body party-body}
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
