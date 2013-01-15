@@ -162,7 +162,12 @@
       debug("isInitializing, return");
       return;
     }
-    
+
+    // The right is validated in the back-end. This check is just to prevent error.
+    if(! authorizationModel.ok('assign-application')) {
+      return;
+    }
+
     var assigneeId = value ? value : null;
 
     debug("Setting application " + currentId + " assignee to " + assigneeId);
@@ -261,14 +266,13 @@
         selectDefaultTab('#applicationTabs');
       }
 
-      debug("set isInitializing to false");
-      isInitializing = false;
-
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
       
+      debug("set isInitializing to false");
+      isInitializing = false;
       pageutil.setPageReady("application");
     });
   }
