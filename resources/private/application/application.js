@@ -158,7 +158,7 @@
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
-  };       
+  };
 
   function updateAssignee(value) {
     debug("updateAssignee called, assigneeId: ", value);
@@ -182,13 +182,13 @@
       .error(function(e) {
         error(e);
       })
-      .fail(function(e) { 
-        error(e); 
+      .fail(function(e) {
+        error(e);
       }).call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
-  
+
   function resolveApplicationAssignee(roles) {
     debug("resolveApplicationAssignee called, roles: ", roles);
     if(roles && roles.authority) {
@@ -200,14 +200,14 @@
       return null;
     }
   }
-  
+
   function initAuthoritiesSelectList(data) {
     authorities.removeAll();
     _.each(data || [], function(authority) {
       authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
   }
-  
+
   function showApplication(applicationDetails) {
     debug("set isInitializing to true");
     isInitializing = true;
@@ -276,7 +276,7 @@
         _.each(sortedDocs, function(docGroup) {
 
           _.each(docGroup, function(doc) {
-        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+        docgenDiv.append(docgen.build(doc.schema, doc.body, save, doc.id, application.id()).element);
       });
 
           var schema = docGroup[0].schema;
@@ -289,7 +289,7 @@
               ajax.command("create-doc", {schema: schema.info.name, id: application.id()})
                   .success(function(e) {
                     var newDocId = e.doc;
-                    var newElem = docgen.build(schema, {}, save, {doc: newDocId, app: application.id()}).element;
+                    var newElem = docgen.build(schema, {}, save, newDocId, application.id()).element;
                     $(self).before(newElem);})
                     .call();
             });
@@ -310,7 +310,7 @@
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
-      
+
       debug("set isInitializing to false");
       isInitializing = false;
       pageutil.setPageReady("application");
