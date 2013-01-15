@@ -1,4 +1,5 @@
 var docgen = (function () {
+  "use strict";
 
   function pathStrToID(pathStr) {
     return pathStr.replace(/\./g, "-");

@@ -1,4 +1,5 @@
 var repository = (function() {
+  "use strict";
 
   hub.subscribe("load-all-applications", function() {
     ajax

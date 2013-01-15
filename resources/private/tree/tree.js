@@ -1,4 +1,5 @@
 var selectionTree = (function() {
+  "use strict";
 
   function defaultContentFactory(name) {
     var e = document.createElement("div");

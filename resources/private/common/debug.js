@@ -1,4 +1,5 @@
 $(function() {
+  "use strict";
 
   $("footer").prepend('<label class="checkbox"><input type="checkbox" id="todo" checked="checked">N\u00e4yt\u00e4 toteuttamattomat</label>' +
       '<label class="checkbox"><input type="checkbox" id="hidden">K\u00e4\u00e4nn\u00e4 piilotetut</label>'+

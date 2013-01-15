@@ -1,4 +1,5 @@
-var invites = function() {
+var invites = (function() {
+  "use strict";
 
   function getInvites(callback) {
     ajax.query("invites")
@@ -12,4 +13,4 @@ var invites = function() {
     getInvites : getInvites
   };
 
-}();
+})();

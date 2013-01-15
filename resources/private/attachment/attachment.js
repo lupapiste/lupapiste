@@ -1,8 +1,5 @@
-/**
- * attachment.js:
- */
-
-var attachment = function() {
+var attachment = (function() {
+  "use strict";
 
   var applicationId;
   var attachmentId;
@@ -222,4 +219,4 @@ var attachment = function() {
 
   return { newAttachment: newAttachment };
 
-}();
+})();

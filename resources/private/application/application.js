@@ -1,8 +1,5 @@
-/**
- * application.js:
- */
-
 ;(function() {
+  "use strict";
 
   var isInitializing = true;
   var currentId;
