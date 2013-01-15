@@ -32,6 +32,7 @@
 
   var application = {
     id: ko.observable(),
+    infoRequest: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
     permitType: ko.observable(),

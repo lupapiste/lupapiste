@@ -199,10 +199,15 @@ var attachment = (function() {
   hub.subscribe("upload-done", uploadDone);
 
   function newAttachment(m) {
-    initFileUpload(m.application.id(), null, null, true);
+    console.log("NEW ATTACHMENT:", this.application.id(), this.application.infoRequest());
+    var infoRequest = this.application.infoRequest();
+    var type = infoRequest ? "muut.muu" : null;
+    var selector = infoRequest ? false : true;
+    initFileUpload(m.application.id(), null, type, selector);
   }
 
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
+    console.log("INIT:", attachmentType, typeSelector);
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
