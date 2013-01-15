@@ -43,6 +43,21 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
+   ;; Sonja Sibbo - Sipoon lupa-arkkitehti
+   ;; ronja / sonja
+   {:id "777777777777777777000024"
+    :email "ronja.sibbo@sipoo.fi"
+    :enabled true
+    :role :authority
+    :authority "Sipoo"
+    :personId "kunta123"
+    :firstName "Ronja"
+    :lastName "Sibbo"
+    :phone "03121991"
+    :username "ronja"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
+              :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
+              :apikey "5056e6d3aa24a1c901e6b9dd"}}
    ;; sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
     :email "admin@sipoo.fi"

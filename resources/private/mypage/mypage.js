@@ -15,7 +15,7 @@
         .call();
     };
   }
-  
+
   function OwnInfo() {
 
     this.firstName = ko.observable("");
@@ -26,7 +26,8 @@
     this.phone = ko.observable("");
     this.error = ko.observable(null);
     this.saved = ko.observable(false);
-    
+    this.role = ko.observable("");
+
     this.init = function(u) {
       return this
         .firstName(u.firstName || "")
@@ -34,8 +35,9 @@
         .street(u.street || "")
         .city(u.city || "")
         .zip(u.zip || "")
-        .phone(u.phone || "");
-    }; 
+        .phone(u.phone || "")
+        .role(u.role || "");
+    };
 
     this.clear = function() {
       return this.saved(false).error(null);
@@ -43,12 +45,13 @@
 
     this.ok = ko.computed(function() { return isNotBlank(this.firstName()); }, this);
     this.save = makeSaveFn("save-user-info", ["firstName", "lastName", "street", "city", "zip", "phone"]);
-    
+
     this.updateUserName = function() {
       $("#user-name").html(this.firstName() + " " + this.lastName());
+      $("#user-name").attr("data-test-role", this.role());
       return this;
     };
-    
+
   }
 
   function getPwQuality(password) {
@@ -61,13 +64,13 @@
   }
 
   function Password() {
-    
+
     this.oldPassword = ko.observable("");
     this.newPassword = ko.observable("");
     this.newPassword2 = ko.observable("");
     this.error = ko.observable(null);
     this.saved = ko.observable(false);
-    
+
     this.clear = function() {
       return this
         .oldPassword("")
@@ -76,27 +79,27 @@
         .saved(false)
         .error(null);
     };
-    
+
     this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && getPwQuality(this.newPassword()) !== "poor" && equals(this.newPassword(), this.newPassword2()); }, this);
     this.noMatch = ko.computed(function() { return isNotBlank(this.newPassword()) && isNotBlank(this.newPassword2()) && !equals(this.newPassword(), this.newPassword2()); }, this);
-    
+
     this.save = makeSaveFn("change-passwd", ["oldPassword", "newPassword"]);
     this.quality = ko.computed(function() { return getPwQuality(this.newPassword()); }, this);
-    
+
   }
 
   var ownInfo = new OwnInfo();
   var pw = new Password();
-  
+
   hub.onPageChange("mypage", function() { ownInfo.clear(); pw.clear(); });
 
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
-  
+
   ownInfo.saved.subscribe(function(v) { if (v) ownInfo.updateUserName(); });
-  
+
   $(function() {
     ko.applyBindings(ownInfo, $("#own-info-form")[0]);
     ko.applyBindings(pw, $("#pw-form")[0]);
   });
-  
+
 })();
