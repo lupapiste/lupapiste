@@ -216,7 +216,7 @@
           var schema = docGroup[0].schema;
 
           if (schema.info.repeating) {
-            var btn = docgen.createDocumentButton(schema.info.name, schema.info.name);
+            var btn = docgen.createDocumentButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
             $(btn).click(function() {
               var self = this;
