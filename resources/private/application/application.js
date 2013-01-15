@@ -195,29 +195,40 @@
           .call();
       };
 
-      function makeFilter(docset) {
-
-      }
-
       function displayDocuments(containerSelector, documents) {
+
+        var groupedDocs = _.groupBy(documents, function (doc) {
+          return doc.schema.info.name;
+        });
+
+        var displayOrder = ["rakennuspaikka", "uusiRakennus", "huoneisto", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
+          return displayOrder.indexOf(docGroup[0].schema.info.name)
+        });
+
         var docgenDiv = $(containerSelector).empty();
-        _.each(documents, function(doc) {
-          var elem = docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element;
-          if (doc.schema.info.repeating) {
-            var btn = docgen.createDocumentButton();
-            var appender = function() {
-              ajax
-                .command("create-doc", {schema: doc.schema.info.name, id: application.id()})
-                .success(function(e) {
-                  var newDocId = e.doc;
-                  var newElem = docgen.build(doc.schema, {}, save, {doc: newDocId, app: application.id()}).element;
-                  $(elem).after(newElem);})
-                .call();
-                };
-            $(btn).click(appender);
-            elem.lastChild.appendChild(btn);
+        _.each(sortedDocs, function(docGroup) {
+
+          _.each(docGroup, function(doc) {
+            docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+          });
+
+          var schema = docGroup[0].schema;
+
+          if (schema.info.repeating) {
+            var btn = docgen.createDocumentButton(schema.info.name, schema.info.name);
+
+            $(btn).click(function() {
+              var self = this;
+              ajax.command("create-doc", {schema: schema.info.name, id: application.id()})
+                  .success(function(e) {
+                    var newDocId = e.doc;
+                    var newElem = docgen.build(schema, {}, save, {doc: newDocId, app: application.id()}).element;
+                    $(self).before(newElem);})
+                    .call();
+            });
+            docgenDiv.append(btn);
           }
-          docgenDiv.append(elem);
         });
       }
 
