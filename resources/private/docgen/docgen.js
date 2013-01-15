@@ -9,7 +9,7 @@ var docgen = (function () {
     self.appId = appId;
     self.eventData = {doc: docId, app: appId};
 
-    // Utils
+    // ID utilities
 
     function pathStrToID(pathStr) {
       return docId + pathStr.replace(/\./g, "-");
@@ -17,6 +17,10 @@ var docgen = (function () {
 
     function pathStrToLabelID(pathStr) {
       return "label-" + pathStrToID(pathStr);
+    }
+
+    function pathStrToGroupID(pathStr) {
+      return "group-" + pathStrToID(pathStr);
     }
 
     // Element constructors
@@ -156,11 +160,10 @@ var docgen = (function () {
 
     function buildChoice(spec, model, path, save, specId) {
       var name = spec.name;
-      var choices = spec.body;
       var myModel = model[name] || {};
 
       var choicesDiv = document.createElement("div");
-      appendElements(choicesDiv, choices, myModel, path, save, specId, true);
+      appendElements(choicesDiv, spec, myModel, path, save, specId, true);
 
       var div = document.createElement("div");
       div.className = "form-choice";
@@ -171,15 +174,16 @@ var docgen = (function () {
 
     function buildGroup(spec, model, path, save, specId) {
       var name = spec.name;
-      var parts = spec.body;
       var myModel = model[name] || {};
 
       var partsDiv = document.createElement("div");
-      appendElements(partsDiv, parts, myModel, path, save, specId);
+      appendElements(partsDiv, spec, myModel, path, save, specId);
 
+      var pathStr = path.join(".");
       var div = document.createElement("div");
+      div.id = pathStrToGroupID(pathStr);
       div.className = "form-group";
-      div.appendChild(makeLabel("group", path.join("."), specId, true));
+      div.appendChild(makeLabel("group", pathStr, specId, true));
       div.appendChild(partsDiv);
       return div;
     }
@@ -248,13 +252,41 @@ var docgen = (function () {
       return builder(spec, model, myPath, save, specId, partOfChoice);
     }
 
-    function appendElements(body, specs, model, path, save, specId, partOfChoice) {
-      _.each(specs, function(spec) {
+    function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+
+      var selectOneOf = [];
+      if (schema.info && schema.info.selectOneOf) {
+        var selectOneOf = schema.info.selectOneOf;
+      }
+
+      _.each(selectOneOf, function(s) {
+        var input = document.createElement("input");
+        input.type = "button";
+        input.value = s;
+        $(input).click(function() {
+          var v = this.value;
+          var parent$ = $(this.parentNode);
+          parent$.children("[data-select-one-of]").hide();
+          parent$.children("[data-select-one-of='" + v + "']").show();
+        });
+        body.appendChild(input);
+      });
+
+      _.each(schema.body, function(spec) {
         var children = build(spec, model, path, save, specId, partOfChoice);
         if (!_.isArray(children)) {
           children = [children];
         }
-        _.each(children, function(o) {body.appendChild(o)});
+        _.each(children, function(elem) {
+          if (selectOneOf.length) {
+            elem.setAttribute("data-select-one-of", spec.name);
+
+            if (selectOneOf[0] !== spec.name) {
+              $(elem).hide();
+            }
+          }
+          body.appendChild(elem)
+        });
       });
       return body;
     }
@@ -325,7 +357,7 @@ var docgen = (function () {
       sectionContainer.className = "application_section_content content_expanded";
 
       var elements = document.createElement("article");
-      appendElements(elements, self.spec.body, self.model, [], save, specId);
+      appendElements(elements, self.spec, self.model, [], save, specId);
 
       sectionContainer.appendChild(elements);
       section.appendChild(title);

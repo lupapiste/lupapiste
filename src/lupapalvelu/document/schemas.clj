@@ -250,7 +250,7 @@
                      {:name "parvekeTaiTerassi" :type :checkbox}
                      {:name "lamminvesi" :type :checkbox}]}]}
 
-     {:info {:name "hakija" :repeating true}
+     {:info {:name "hakija" :repeating true :selectOneOf ["henkilo", "yritys"]}
       :body party-body}
 
      {:info {:name "paasuunnittelija"}
