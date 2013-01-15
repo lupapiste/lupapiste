@@ -32,3 +32,33 @@
     state => "draft"
     (count comments) => 1
     (-> comments first :text) => "hello"))
+
+(fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
+      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+            authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
+        (count authorities) => 2))
+
+(fact "Assign application to an authority"
+      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+            application (:application (query sonja :application :id application-id))
+            roles-before-assignation (:roles application)
+            authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+            authority (first authorities)
+            resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
+            assigned-app (:application (query sonja :application :id application-id))
+            roles-after-assignation (:roles assigned-app)]
+        (count roles-before-assignation) => 1
+        (count roles-after-assignation) => 2))
+
+(fact "Assign application to an authority and then to no-one"
+      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+            application (:application (query sonja :application :id application-id))
+            roles-before-assignation (:roles application)
+            authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+            authority (first authorities)
+            resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
+            resp (command sonja :assign-application :id application-id :assigneeId nil)
+            assigned-app (:application (query sonja :application :id application-id))
+            roles-in-the-end (:roles assigned-app)]
+        (count roles-before-assignation) => 1
+        (count roles-in-the-end) => 1))

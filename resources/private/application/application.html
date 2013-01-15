@@ -28,6 +28,22 @@
             <p>Lupatyyppi:</p>
             <span class="application_summary_text" data-bind="ltext: permitType()"></span>
           </div>
+
+          <!-- ko if: $root.authorization.ok('assign-application') -->
+            <div>
+              <p>Käsittelijä:</p>
+              <span id="test-application-assignee" class="application_summary_text">
+  
+                <select data-bind="options: $root.authorities, 
+                                   optionsText: function(item) {
+                                    return item.firstName + ' ' + item.lastName;
+                                   },
+                                   optionsValue: 'id',
+                                   value: $root.application.assignee,
+                                   optionsCaption: loc('choose')"></select>
+               </span>
+            </div>
+          <!-- /ko -->
           <div>
             <p>Toimenpiteet:</p>
             <ul data-bind="foreach: $root.documents">
