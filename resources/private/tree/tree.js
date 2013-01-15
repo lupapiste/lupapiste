@@ -116,7 +116,7 @@ var selectionTree = (function() {
     self.make = function(t) {
       var d = document.createElement("div");
       d.setAttribute("class", "tree-magic");
-      for (var key in t) d.appendChild( self.makeLink(key, t[key], d) );
+      _.each(t, function(v) { d.appendChild(self.makeLink(v[0], v[1], d));});
 
       if (self.stack.length > 0) {
         var link = document.createElement("a");
