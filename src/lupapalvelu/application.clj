@@ -40,7 +40,6 @@
   [{{:keys [assigneeId]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (println "################# Assign application " id "to assignee " assigneeId)
       (mongo/update-by-id
         mongo/applications (:id application)
         (if assigneeId 
