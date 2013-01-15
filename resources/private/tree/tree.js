@@ -7,10 +7,10 @@ var selectionTree = (function() {
     return e;
   }
 
-  function Tree(data, content, breadcrumbs, callback, contentFactory) {
+  function Tree(content, breadcrumbs, callback, contentFactory) {
     var self = this;
     
-    self.data = data;
+    self.data = null;
     self.content = $(content);
     self.breadcrumbs = $(breadcrumbs);
     self.callback = callback;
@@ -30,7 +30,7 @@ var selectionTree = (function() {
         self.crumbs.pop();
         self.breadcrumbs.html(self.crumbs.join(" / "));
       }
-      return false;
+      return self;
     };
     
     self.reset = function(newData) {
@@ -43,7 +43,7 @@ var selectionTree = (function() {
         self.stack.push(self.make(self.data));
         self.content.append(self.stack[0]);
       }
-      return false;
+      return self;
     };
     
     self.makeHandler = function(key, val, d) {
@@ -95,15 +95,12 @@ var selectionTree = (function() {
       link.onclick = self.makeHandler(key, val, d);
       return link;
     };
-    
-    self.stack.push(self.make(self.data));
-    self.content.append(self.stack[0]);
-    
+        
   }
   
   return {
-    create: function(data, content, breadcrumbs, callback, contentFactory) {
-      return new Tree(data, content, breadcrumbs, callback, contentFactory);
+    create: function(content, breadcrumbs, callback, contentFactory) {
+      return new Tree(content, breadcrumbs, callback, contentFactory);
     }
   };
   
