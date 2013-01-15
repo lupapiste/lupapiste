@@ -157,7 +157,7 @@ var attachment = function() {
   });
 
   hub.subscribe("application-loaded", function(data) {
-    var app = data.application;
+    var app = data.applicationDetails.application;
     if (applicationId === app.id) showAttachment(app);
   });
 

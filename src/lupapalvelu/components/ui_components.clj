@@ -27,7 +27,8 @@
    :debug        (if (env/dev-mode?) debugjs {})
 
    :common       {:depends [:init :jquery :knockout :underscore :debug]
-                  :js ["pageutil.js" "loc.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
+                  :js ["event.js" "pageutil.js" "loc.js" "notify.js" "ajax.js"
+                       "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"
                        "address.js"]
                   :css ["css/main.css"]
@@ -80,12 +81,13 @@
                   :js ["docgen.js"]
                   :css ["docgen.css"]}
 
-   :create-application  {:js ["create-application.js"]
+   :create-application  {:depends [:common :tree]
+                         :js ["create-application.js"]
                          :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
 
-   :create-inforequest  {:js ["create-inforequest.js"]
-                         :depends [:common]
-                         :html ["create-inforequest.html"]}
+   :create-inforequest  {:depends [:common]
+                         :js ["create-inforequest.js"]
+                         :html ["create-inforequest.html" "create-inforequest-2.html"]}
 
    :applicant    {:depends [:common :map :applications
                             :application :attachment :create-application :docgen
@@ -100,11 +102,15 @@
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :buildinfo]
+   :authority-admin {:depends [:common :buildinfo :mypage]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
-   :admin   {:depends [:common :map :buildinfo]
+   :tree    {:depends [:jquery]
+             :js ["tree.js"]
+             :css ["tree.css"]}
+
+   :admin   {:depends [:common :map :buildinfo :mypage]
              :js ["admin.js"]
              :html ["index.html" "admin.html"]}
 
@@ -118,7 +124,7 @@
    :welcome {:depends [:common :register :buildinfo]
              :js ["login.js"]
              :html ["login.html" "index.html"]}
-   
+
    :mypage  {:depends [:common]
              :js ["mypage.js"]
              :html ["mypage.html"]

@@ -5,9 +5,6 @@ var repository = function() {
       .query("applications")
       .success(function(data) {
         debug("repository: load-all-applications: loaded " + data.applications.length + " applications");
-        _.each(data.applications, function(application) {
-          hub.send("application-loaded", {application: application});
-        });
         hub.send("all-applications-loaded", {applications: data.applications});
       })
       .call();
@@ -18,7 +15,7 @@ var repository = function() {
       .query("application", {id: e.id})
       .success(function(data) {
         debug("repository: load-application: loaded  " + data.application.id);
-        hub.send("application-loaded", {application: data.application});
+        hub.send("application-loaded", {applicationDetails: data});
       })
       .error(function() { window.location.hash = "!/404"; })
       .call();

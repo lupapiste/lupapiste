@@ -100,14 +100,6 @@
           {$set {:comments (:comments inforequest)}})
         (ok :id id)))))
 
-(defn create-document [schema-name]
-  (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
-    {:id (mongo/create-id)
-     :created (now)
-     :schema schema
-     :body {}}))
-
 (def default-schemas {:infoRequest []
                       :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
                                        "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
@@ -121,15 +113,23 @@
                                                 ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
+(defn create-document [schema-name]
+  (let [schema (get schemas/schemas schema-name)]
+    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
+    {:id (mongo/create-id)
+     :created (now)
+     :schema schema
+     :body {}}))
+
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality]
+  {:parameters [:x :y :address :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id        (mongo/create-id)
-        owner     (role user :owner :type :owner)
-        permitType (keyword (:permitType data))
-        documents  (map create-document (permitType default-schemas))]
+        id          (mongo/create-id)
+        owner       (role user :owner :type :owner)
+        permit-type (keyword (:permitType data))
+        operation   (keyword (:operation data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -142,9 +142,11 @@
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents documents
-       :permitType permitType 
-       :allowedAttahmentTypes (attachment-types-for permitType)
+       :infoRequest (if (:infoRequest data) true false)
+       :permitType permit-type
+       :operations (if operation [operation] [])
+       :allowedAttahmentTypes (attachment-types-for operation)
+       :documents (map create-document (:buildingPermit default-schemas)) 
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message
@@ -152,7 +154,7 @@
                      :created created
                      :user    (security/summary user)}]
                    [])})
-    (doseq [attachment-type (default-attachments permitType)]
+    (doseq [attachment-type (default-attachments operation [])]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
