@@ -146,7 +146,7 @@
        :permitType permit-type
        :operations (if operation [operation] [])
        :allowedAttahmentTypes (attachment-types-for operation)
-       :documents (map create-document (default-schemas operation [])) 
+       :documents (map create-document (:buildingPermit default-schemas)) 
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message
