@@ -15,38 +15,10 @@
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
-(defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:authority 1})
-        data (mongo/select mongo/users {:authority (:authority app) :role "authority"} {:firstName 1 :lastName 1})]
-    data))
-
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (println "app id" id)
   (if-let [app (get-application-as id user)]
-    (let [authorities (find-authorities-in-applications-municipality id)]
-      (ok :application app :authorities authorities))
+    (ok :application app)
     (fail :error.not-found)))
-
-;; Gets an array of application ids and returns a map for each application that contains the
-;; application id and the authorities in that municipality.
-(defquery "authorities-in-applications-municipality"
-  {:parameters [:id]
-   :authenticated true}
-  [{{:keys [id]} :data}]
-  (let [data (find-authorities-in-applications-municipality id)]
-    (ok :authorityInfo data)))
-
-(defcommand "assign-application"
-  {:parameters  [:id :assigneeId]
-   :roles       [:authority]}
-  [{{:keys [assigneeId]} :data user :user :as command}]
-  (with-application command
-    (fn [application]
-      (mongo/update-by-id
-        mongo/applications (:id application)
-        (if assigneeId 
-          {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
-          {$unset {:roles.authority ""}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -142,29 +114,40 @@
                                                 ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
+(defn create-document [schema-name]
+  (let [schema (get schemas/schemas schema-name)]
+    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
+    {:id (mongo/create-id)
+     :created (now)
+     :schema schema
+     :body {}}))
+
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality]
+  {:parameters [:x :y :address :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id        (mongo/create-id)
         owner     (role user :owner :type :owner)
-        permitType (keyword (:permitType data))
-        documents  (map #(create-document (mongo/create-id) %) (permitType default-schemas))]
+        permit-type (keyword (:permitType data))
+        operation   (keyword (:operation data))]
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
-       :state (if (= permitType :infoRequest) :open :draft)
+       :state :draft
+       :municipality (:municipality data)
        :authority (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
-       :documents documents
-       :permitType permitType 
-       :allowedAttahmentTypes (attachment-types-for permitType)
+       :infoRequest (if (:infoRequest data) true false)
+       :permitType permit-type
+       :operations (if operation [operation] [])
+       :allowedAttahmentTypes (attachment-types-for operation)
+       :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas)) 
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message
@@ -172,7 +155,7 @@
                      :created created
                      :user    (security/summary user)}]
                    [])})
-    (doseq [attachment-type (default-attachments permitType)]
+    (doseq [attachment-type (default-attachments operation [])]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))

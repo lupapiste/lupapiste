@@ -1,11 +1,10 @@
 (ns lupapalvelu.user-itest
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
-        [clojure.pprint :only [pprint]])
-  (:require [lupapalvelu.fixture :as fixture]))
+        [clojure.pprint :only [pprint]]))
 
 (fact
-  (fixture/apply-fixture "minimal")
+  (apply-remote-minimal)
   (:user (query pena :get-user-info)) => (contains {:enabled true
                                                     :firstName "Pena"
                                                     :lastName "Panaani"
