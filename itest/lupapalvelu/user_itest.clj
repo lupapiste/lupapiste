@@ -2,7 +2,8 @@
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
         [clojure.pprint :only [pprint]])
-  (:require [lupapalvelu.fixture :as fixture]))
+  (:require [lupapalvelu.fixture :as fixture]
+            [lupapalvelu.fixture.minimal]))
 
 (fact
   (fixture/apply-fixture "minimal")
