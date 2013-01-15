@@ -15,8 +15,8 @@
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
 (defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
-        data (mongo/select mongo/users {:authority (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
+  (let [app (mongo/select-one mongo/applications {:_id id} {:authority 1})
+        data (mongo/select mongo/users {:authority (:authority app) :role "authority"} {:firstName 1 :lastName 1})]
     data))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
@@ -40,11 +40,12 @@
   [{{:keys [assigneeId]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (println "#################" assigneeId)
-      (println (:id application))
+      (println "################# Assign application " id "to assignee " assigneeId)
       (mongo/update-by-id
         mongo/applications (:id application)
-        {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}))))
+        (if assigneeId 
+          {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
+          {$unset {:roles.authority ""}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -163,7 +164,6 @@
        :created created
        :modified created
        :state :draft
-       :municipality (:municipality data)
        :authority (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)

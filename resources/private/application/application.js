@@ -4,6 +4,7 @@
 
 ;(function() {
 
+  var isInitializing = true;
   var currentId;
   var applicationModel = new ApplicationModel();
   var authorizationModel = authorization.create();
@@ -131,21 +132,6 @@
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
-  var AuthorityInfo = function(id, firstName, lastName) {
-    this.id = id;
-    this.firstName = firstName;
-    this.lastName = lastName;
-  };       
-
-  application.assignee.subscribe(function() {
-    var assigneeId;
-    if(application.assignee()) {
-      assigneeId = application.assignee().id;
-    } else {
-      assigneeId = null;
-    }
-    debug("changed to: ", assigneeId);
-  });
 
   function makeSubscribable(initialValue, listener) {
     var v = ko.observable(initialValue);
@@ -163,8 +149,52 @@
     return result;
   }
   
-  function resolveSelectedAuthority() {
-    debug("resolving", application);
+  var AuthorityInfo = function(id, firstName, lastName) {
+    this.id = id;
+    this.firstName = firstName;
+    this.lastName = lastName;
+  };       
+
+  function updateAssignee(assignee) {
+    var assigneeId = assignee ? assignee.id : null;
+    debug("update called", assigneeId);
+    // do not update assignee if page is still initializing
+    if(isInitializing) {
+      debug("-----------------------------------------------");
+      return;
+    }
+
+    debug("Set application " + currentId + " assignee to " + assigneeId);
+
+    ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
+      .success(function(e) {
+      })
+      .error(function(e) {
+        error(e);
+      })
+      .fail(function(e) { 
+        error(e); 
+      }).call();
+  }
+
+  application.assignee.subscribe(function(v) { updateAssignee(v); });
+  
+  function resolveApplicationAssignee() {
+    debug("resolving", application.roles);
+    if(application.roles && application.roles.authority) {
+      debug("resolving2");
+      debug(application.roles);
+      debug(application.roles.authority);
+      debug(application.roles.authority.id);
+      debug(application.roles.authority.id());
+      var auth = new AuthorityInfo(application.roles.authority.id(), application.roles.authority.firstName(), application.roles.authority.lastName());
+      debug(auth);
+      return auth;
+    } else {
+      debug("resolving3");
+      debug(null);
+      return null;
+    }
   }
   
   function initAuthoritiesSelectList(data) {
@@ -172,15 +202,13 @@
     _.each(data || [], function(authority) {
       authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
-    
-    application.assignee(resolveSelectedAuthority());
   }
   
   function showApplication(applicationDetails) {
+    debug("set isInitializing to true");
+    isInitializing = true;
+    debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
-      
-      initAuthoritiesSelectList(applicationDetails.authorities);
-      
       // new data mapping
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
@@ -204,6 +232,9 @@
       });
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
+
+      debug("init authorities select list");
+      initAuthoritiesSelectList(applicationDetails.authorities);
 
       // Update map:
       var location = application.location();
@@ -236,6 +267,11 @@
         selectDefaultTab('#applicationTabs');
       }
 
+      debug("set isInitializing to false");
+      isInitializing = false;
+      var a = resolveApplicationAssignee();
+      debug("set assignee to", a);
+      application.assignee(a);
       pageutil.setPageReady("application");
     });
   }

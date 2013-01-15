@@ -16,8 +16,7 @@
 (defn application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
-    :authority {:authority (:authority user)
-                :state {$ne "draft"}}
+    :authority {:authority (:authority user)}
     :admin     {}
     (do
       (warn "invalid role to get applications")
