@@ -14,7 +14,8 @@
             [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
-            [lupapalvelu.perf-mon :as perf-mon])
+            [lupapalvelu.perf-mon :as perf-mon]
+            [lupapalvelu.user])
   (:gen-class))
 
 (def custom-content-type {".ttf" "font/ttf"})

@@ -28,6 +28,22 @@
             <p>Lupatyyppi:</p>
             <span class="application_summary_text" data-bind="ltext: permitType()"></span>
           </div>
+
+          <!-- ko if: $root.authorization.ok('assign-application') -->
+            <div>
+              <p>Käsittelijä:</p>
+              <span id="test-application-assignee" class="application_summary_text">
+  
+                <select data-bind="options: $root.authorities, 
+                                   optionsText: function(item) {
+                                    return item.firstName + ' ' + item.lastName;
+                                   },
+                                   optionsValue: 'id',
+                                   value: $root.application.assignee,
+                                   optionsCaption: loc('choose')"></select>
+               </span>
+            </div>
+          <!-- /ko -->
           <div>
             <p>Toimenpiteet:</p>
             <ul data-bind="foreach: $root.documents">
@@ -43,18 +59,18 @@
           </div>
         </div>
         <div class="application_actions">
-          <button id="test-submit-application" data-bind="enable: $root.authorization.ok('submit-application'), click: submitApplication" type="submit" class="btn btn-primary">J&auml;t&auml; hakemus k&auml;sitelt&auml;v&auml;ksi</button>
-          <button id="test-approve-application" data-bind="enable: $root.authorization.ok('approve-application'), click: approveApplication" type="submit" class="btn btn-primary">Siirr&auml; kuntarekisteriin</button>
-          <button class="todo btn action-bar-button" data-bind="enable:false">Kysy neuvoa</button>
-          <button class="todo btn action-bar-button" data-bind="enable:false">Lis&auml;&auml; toimenpide</button>
-          <button class="todo btn action-bar-button" data-bind="enable:false">Poista hakemus</button>
+          <button data-bind="click: submitApplication,  enable: $root.authorization.ok('submit-application')"  type="submit" class="btn btn-primary"  id="test-submit-application" >Jätä hakemus käsiteltäväksi</button>
+          <button data-bind="click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  id="test-approve-application">Siirrä kuntarekisteriin</button>
+          <button data-bind="enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
+          <button data-bind="enable:false" class="todo btn action-bar-button">Lisää toimenpide</button>
+          <button data-bind="enable:false" class="todo btn action-bar-button">Poista hakemus</button>
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a class="active-as-default" id="test-application-tab" data-bind="click: $root.tab.tabClick, clickBubble: false, ltext: 'permitApplication_application_tab_title'" href="#application_tab">Hakemuksen tiedot</a></li>
-            <li><a id="test-attachments-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#attachments_tab">Suunnitelmat ja liitteet</a></li>
-            <li><a id="test-verdict-tab" data-bind="click: $root.tab.tabClick, clickBubble: false" href="#decision_tab">P&auml;&auml;t&ouml;s</a></li>
-            <li><a id="test-conversation-tab" id="test-conversation-tab"  data-bind="click: $root.tab.tabClick, clickBubble: false" href="#conversation_tab">Keskusteluketju</a></li>
+            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
+            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   id="test-attachments-tab"  >Suunnitelmat ja liitteet</a></li>
+            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
+            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
           </ul>
         </div>
       </div>
