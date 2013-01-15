@@ -158,12 +158,12 @@
         owner     (role user :owner :type :owner)
         permitType (keyword (:permitType data))
         documents  (map create-document (permitType default-schemas))]
-    (println data)
+    (println permitType)
     (mongo/insert mongo/applications
       {:id id
        :created created
        :modified created
-       :state :draft
+       :state (if (= permitType :infoRequest) :open :draft)
        :authority (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
