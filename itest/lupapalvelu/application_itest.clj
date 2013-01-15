@@ -40,6 +40,8 @@
 
 (fact "Assign application to an authority"
       (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+            ;; add a comment to change state to open
+            comment (command pena :add-comment :id application-id :text "hello" :target "application")
             application (:application (query sonja :application :id application-id))
             roles-before-assignation (:roles application)
             authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
@@ -52,6 +54,8 @@
 
 (fact "Assign application to an authority and then to no-one"
       (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+            ;; add a comment change set state to open
+            comment (command pena :add-comment :id application-id :text "hello" :target "application")
             application (:application (query sonja :application :id application-id))
             roles-before-assignation (:roles application)
             authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))

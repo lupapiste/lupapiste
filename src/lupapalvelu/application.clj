@@ -20,6 +20,7 @@
     data))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+  (println "app id" id)
   (if-let [app (get-application-as id user)]
     (let [authorities (find-authorities-in-applications-municipality id)]
       (ok :application app :authorities authorities))
