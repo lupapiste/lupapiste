@@ -139,8 +139,8 @@ var selectionTree = (function() {
 
     self.makeLink  = function(key, val, d) {
       var link = document.createElement("a");
-      var lkey = "tree." + (self.crumbs.length == 0 ? key : self.crumbs.join(".") + "." + key) + ".name";
-      link.innerHTML = loc(lkey);
+      // var lkey = "tree." + (self.crumbs.length == 0 ? key : self.crumbs.join(".") + "." + key) + ".name";
+      link.innerHTML = key;
       link.href = "#";
       link.onclick = self.makeHandler(key, val, d);
       return link;
