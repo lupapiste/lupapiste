@@ -36,6 +36,11 @@
     "define",
     "angular",
     "_",
-    "ajax"
+    "ajax",
+    "gis",
+    "LUPAPISTE",
+    "applicationsConfig",
+    "invites",
+    "inforequestsConfig"
   ]
 }
