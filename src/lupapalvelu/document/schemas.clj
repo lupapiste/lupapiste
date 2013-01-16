@@ -40,7 +40,8 @@
                    {:name "osoite" :type :group :body simple-osoite-body}
                    {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
 
-(def party-body [{:name "henkilo" :type :group :body henkilo-body}
+(def party-body [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                 {:name "henkilo" :type :group :body henkilo-body}
                  {:name "yritys" :type :group :body yritys-body}])
 
 (def patevyys [{:name "koulutus" :type :string}
@@ -76,6 +77,7 @@
              {:name "rakennuksenOmistajat"
               :type :group
               :repeating true
+              :selectOneOf ["henkilo", "yritys"]
               :body party-body}
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
@@ -253,13 +255,13 @@
      {:info {:name "hakija" :repeating true :selectOneOf ["henkilo", "yritys"]}
       :body party-body}
 
-     {:info {:name "paasuunnittelija"}
+     {:info {:name "paasuunnittelija" :selectOneOf ["henkilo", "yritys"]}
       :body paasuunnittelija-body}
 
-     {:info {:name "suunnittelija" :repeating true}
+     {:info {:name "suunnittelija" :repeating true :selectOneOf ["henkilo", "yritys"]}
       :body suunnittelija-body}
 
-     {:info {:name "maksaja" :repeating true}
+     {:info {:name "maksaja" :repeating true :selectOneOf ["henkilo", "yritys"]}
       :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)

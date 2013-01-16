@@ -27,7 +27,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   // ID utilities
 
   function pathStrToID(pathStr) {
-      return docId + pathStr.replace(/\./g, "-");
+      return self.docId + pathStr.replace(/\./g, "-");
   }
 
   function pathStrToLabelID(pathStr) {
@@ -53,7 +53,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   function makeInput(type, path, value, save, extraClass) {
     var input = document.createElement("input");
     input.id = pathStrToID(path);
-    input.name = path;
+    input.name = docId + "." + path;
 
     try {
       input.type = type;
@@ -72,12 +72,17 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     return input;
   }
 
+  function makeEntrySpan() {
+    var span = document.createElement("span");
+    span.className = "form-entry";
+    return span;
+  }
+
   // Form field builders
 
   function buildCheckbox(spec, model, path, save, specId) {
     var myPath = path.join(".");
-    var span = document.createElement("span");
-    span.className = "form-entry";
+    var span = makeEntrySpan();
     span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
     span.appendChild(makeLabel("checkbox", myPath, specId));
     return span;
@@ -85,23 +90,23 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
 
   function buildString(spec, model, path, save, specId, partOfChoice) {
     var myPath = path.join(".");
-    var div = document.createElement("span");
+    var span =  makeEntrySpan();
+    span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
+
+    var type = (spec.subtype === "email") ? "email" : "text";
     var sizeClass = "";
     if (spec.size) {
       if (spec.size === "s") sizeClass = "form-input short";
       if (spec.size === "m") sizeClass = "form-input medium";
     }
-    div.className = "form-entry";
-    div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
-    var type = (spec.subtype === "email") ? "email" : "text";
-    div.appendChild(makeInput(type, myPath, model[spec.name], save, sizeClass));
+    span.appendChild(makeInput(type, myPath, model[spec.name], save, sizeClass));
     if (spec.unit) {
       var unit = document.createElement("span");
       unit.className = "form-string-unit";
       unit.appendChild(document.createTextNode(loc("unit." + spec.unit)));
-      div.appendChild(unit);
+      span.appendChild(unit);
     }
-    return div;
+    return span;
   }
 
   function buildText(spec, model, path, save, specId) {
@@ -115,28 +120,21 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     input.onchange = save;
     input.value = model[spec.name] || "";
 
-    var div = document.createElement("span");
-    div.className = "form-entry";
-    div.appendChild(makeLabel("text", myPath, specId));
-    div.appendChild(input);
-    return div;
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("text", myPath, specId));
+    span.appendChild(input);
+    return span;
   }
 
   function buildDate(spec, model, path, save, specId) {
     var myPath = path.join(".");
+    var value = model[spec.name] || "";
+    var input = makeInput("date", myPath, value, save, "form-date");
 
-    var input = document.createElement("input");
-    input.setAttribute("type", "date");
-    input.name = myPath;
-    input.className = "form-input form-date";
-    input.onchange = save;
-    input.value = model[spec.name] || "";
-
-    var div = document.createElement("span");
-    div.className = "form-entry";
-    div.appendChild(makeLabel("date", myPath, specId));
-    div.appendChild(input);
-    return div;
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("date", myPath, specId));
+    span.appendChild(input);
+    return span;
   }
 
   function buildSelect(spec, model, path, save, specId) {
@@ -152,9 +150,9 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     var option = document.createElement("option");
     option.value = "";
     option.appendChild(document.createTextNode(loc("selectone")));
-      if (selectedOption === "") {
-        option.selected = "selected";
-      }
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
     select.appendChild(option);
 
     $.each(spec.body, function (i, o) {
@@ -162,15 +160,16 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
       var option = document.createElement("option");
       option.value = name;
       option.appendChild(document.createTextNode(loc(specId + "." + myPath + "." + name)));
-      if (selectedOption === name) option.selected = "selected";
+      if (selectedOption === name) {
+        option.selected = "selected";
+      }
       select.appendChild(option);
     });
 
-    var div = document.createElement("span");
-    div.className = "form-entry";
-      div.appendChild(makeLabel("select", myPath, specId, true));
-    div.appendChild(select);
-    return div;
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("select", myPath, specId, true));
+    span.appendChild(select);
+    return span;
   }
 
   function buildChoice(spec, model, path, save, specId) {
@@ -178,29 +177,67 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     var myModel = model[name] || {};
 
     var choicesDiv = document.createElement("div");
-      appendElements(choicesDiv, spec, myModel, path, save, specId, true);
+    appendElements(choicesDiv, spec, myModel, path, save, specId, true);
 
     var div = document.createElement("div");
     div.className = "form-choice";
-      div.appendChild(makeLabel("choice", path.join("."), specId, true));
+    div.appendChild(makeLabel("choice", path.join("."), specId, true));
     div.appendChild(choicesDiv);
     return div;
   }
 
   function buildGroup(spec, model, path, save, specId) {
+    var myPath = path.join(".");
     var name = spec.name;
     var myModel = model[name] || {};
 
     var partsDiv = document.createElement("div");
-      appendElements(partsDiv, spec, myModel, path, save, specId);
+    appendElements(partsDiv, spec, myModel, path, save, specId);
 
-      var pathStr = path.join(".");
     var div = document.createElement("div");
-      div.id = pathStrToGroupID(pathStr);
+    div.id = pathStrToGroupID(myPath);
     div.className = "form-group";
-      div.appendChild(makeLabel("group", pathStr, specId, true));
+    div.appendChild(makeLabel("group", myPath, specId, true));
     div.appendChild(partsDiv);
     return div;
+  }
+
+  function buildRadioGroup(spec, model, path, save, specId) {
+    var myPath = path.join(".");
+    var myModel = model[name] || _.first(spec.body).name;
+
+    var partsDiv = document.createElement("div");
+    partsDiv.id = pathStrToID(myPath);
+
+    var span = makeEntrySpan();
+
+    $.each(spec.body, function (i, o) {
+      var pathForId = myPath + "." + o.name;
+      var input = makeInput("radio", myPath, o.name, save);
+      input.id = pathStrToID(pathForId);
+      input.checked = o.name === myModel;
+
+//    $(input).change(function() {
+//      var v = this.value;
+//console.log(v);
+//      var parent$ = $(this.parentNode.parentNode);
+//      parent$.children("[data-select-one-of]").hide();
+//    parent$.children("[data-select-one-of='" + v + "']").show();
+//  });
+
+      span.appendChild(input);
+      span.appendChild(makeLabel("radio", pathForId, specId));
+
+//      var name = o.name;
+//      var option = document.createElement("p");
+//      option.value = name;
+//      option.appendChild(document.createTextNode(loc(specId + "." + myPath + "." + name)));
+//      //if (selectedOption === name) option.selected = "selected";
+//      span.appendChild(option);
+    });
+
+    partsDiv.appendChild(span);
+    return partsDiv;
   }
 
   function buildUnknown(spec, model, path, save, specId) {
@@ -217,6 +254,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     choice: buildChoice,
     checkbox: buildCheckbox,
     select: buildSelect,
+    radioGroup: buildRadioGroup,
     date: buildDate,
     element: buildElement,
     unknown: buildUnknown
@@ -227,6 +265,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     var myName = spec.name;
     var myPath = path.concat([myName]);
     var builder = builders[spec.type] || buildUnknown;
+    var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
       var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
@@ -236,7 +275,6 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     }
 
     if (spec.repeating) {
-      var repeatingId = myPath.join("-")
       var models = model[myName] || [{}];
 
       var elements = _.map(models, function(val, key) {
@@ -245,7 +283,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
         return makeElem(myModel, key);
       });
 
-        var appendButton = LUPAPISTE.DOMUtils.makeButton(myPath.join("_") + "_append", loc(specId + "."+  myPath.join(".") + "._append_label"));
+      var appendButton = LUPAPISTE.DOMUtils.makeButton(myPath.join("_") + "_append", loc(specId + "."+  myPath.join(".") + "._append_label"));
 
       var appender = function() {
         var parent$ = $(this.parentNode);
@@ -271,50 +309,39 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
 
     var selectOneOf = [];
     if (schema.info && schema.info.selectOneOf) {
-      var selectOneOf = schema.info.selectOneOf;
+      selectOneOf = schema.info.selectOneOf;
     }
-///////////////////////////////////////////////////////////////////////////////////////////
-    _.each(selectOneOf, function(s, i) {
-      var myPath = path.concat(["_selected"]).join(".");
-      var id = pathStrToID(myPath + "." + s);
-
-      var span = document.createElement("span");
-      span.className = "form-entry";
-
-
-      var input = makeInput("radio", myPath, s, save);
-        input.id = id;
-        input.checked = i === 0;
-
-        $(input).change(function() {
-          var v = this.value;
-console.log(v);
-          var parent$ = $(this.parentNode.parentNode);
-          parent$.children("[data-select-one-of]").hide();
-        parent$.children("[data-select-one-of='" + v + "']").show();
-      });
-
-      span.appendChild(input);
-      span.appendChild(makeLabel("checkbox", myPath + "." + s, specId));
-      body.appendChild(span);
-    });
 
     _.each(schema.body, function(spec) {
-    var children = build(spec, model, path, save, specId, partOfChoice);
-    if (!_.isArray(children)) {
-      children = [children];
-    }
-      _.each(children, function(elem) {
-        if (selectOneOf.length) {
-          elem.setAttribute("data-select-one-of", spec.name);
-
-          if (selectOneOf[0] !== spec.name) {
-            $(elem).hide();
-          }
+        var children = build(spec, model, path, save, specId, partOfChoice);
+        if (!_.isArray(children)) {
+          children = [children];
         }
-        body.appendChild(elem)
+        _.each(children, function(elem) {
+          if (selectOneOf.length) {
+            if (_.indexOf(selectOneOf, spec.name) >= 0) {
+              elem.setAttribute("data-select-one-of", spec.name);
+            }
+            // Hide all but the first of the selections
+            if (_.indexOf(selectOneOf, spec.name) > 0) {
+              $(elem).hide();
+            }
+          }
+          body.appendChild(elem)
+        });
     });
+
+    if (selectOneOf.length) {
+      var s = "[name='" + self.docId + path.join(".") +"._selected']";
+      $(body).find(s).change(function() {
+        var v = this.value;
+        var parent$ = $(body);
+        console.log(parent$);
+        parent$.children("[data-select-one-of]").hide();
+        parent$.children("[data-select-one-of='" + v + "']").show();
       });
+    }
+
     return body;
   }
 
@@ -322,18 +349,6 @@ console.log(v);
     var img = document.createElement("img");
     img.src = "/img/ajax-loader-12.gif";
     return img;
-  }
-
-  function removeClass(target, classNames) {
-    var names = target.className.split(/\s+/);
-    _.each((typeof classNames === "string") ? [classNames] : classNames, function (className) { names = _.without(names, className); });
-    target.className = names.join(" ");
-  }
-
-  function addClass(target, classNames) {
-    var names = target.className.split(/\s+/);
-    _.each((typeof classNames === "string") ? [classNames] : classNames, function (className) { names.push(className); });
-    target.className = names.join(" ");
   }
 
   function makeSaverDelegate(save, eventData) {
@@ -355,13 +370,13 @@ console.log(v);
           if (label) {
         label.removeChild(loader);
           }
-        removeClass(target, ["form-input-warn", "form-input-err"]);
+        $(target).removeClass("form-input-warn").removeClass("form-input-err");
         if (status === "ok") {
           // Nada.
         } else if (status === "warn") {
-          addClass(target, "form-input-warn");
+          $(target).addClass("form-input-warn");
         } else if (status === "err") {
-          addClass(target, "form-input-err");
+          $(target).addClass("form-input-err");
         } else {
           error("Unknown result:", result, "path:", path);
         }
@@ -391,7 +406,7 @@ console.log(v);
     sectionContainer.className = "application_section_content content_expanded";
 
     var elements = document.createElement("article");
-      appendElements(elements, self.spec, self.model, [], save, specId);
+    appendElements(elements, self.spec, self.model, [], save, specId);
 
     sectionContainer.appendChild(elements);
     section.appendChild(title);
