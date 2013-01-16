@@ -142,29 +142,31 @@
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality]
+  {:parameters [:permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id          (mongo/create-id)
         owner       (role user :owner :type :owner)
-        permitType (keyword (:permitType data))
-        operation   (keyword (:operation data))]
+        permit-type   (keyword (:permitType data))
+        operation     (keyword (:operation data))
+        info-request  (if (:infoRequest data) true false)]
     (mongo/insert mongo/applications
       {:id id
-       :permitType permitType
        :created created
        :modified created
-       :state (if (= permitType :infoRequest) :open :draft)
+       :state (if info-request :open :draft)
        :municipality (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
+       :propertyId (:propertyId data)
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
-       :infoRequest (if (:infoRequest data) true false)
+       :infoRequest info-request
+       :permitType permit-type
        :operations (if operation [operation] [])
-       :allowedAttahmentTypes (attachment-types-for operation)
+       :allowedAttahmentTypes (if info-request {:muut [:muu]} (attachment-types-for operation))
        :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas))
        :attachments []
        :comments (if-let [message (:message data)]
@@ -177,3 +179,13 @@
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
+
+(defcommand "add-operation"
+  {:parameters [:id :operation]
+   :roles      [:applicant :authority]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [application]
+      (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))

@@ -48,8 +48,8 @@
                   :css ["accordion.css"]}
 
    :application  {:depends [:common :repository]
-                  :js ["application.js"]
-                  :html ["application.html" "inforequest.html"]}
+                  :js ["application.js" "add-operation.js"]
+                  :html ["application.html" "inforequest.html" "add-operation.html"]}
 
    :tablesorter  {:depends [:jquery]
                   :js ["jquery.tablesorter-2.0.5b.js" "lupapiste.tablesorter.js"]
