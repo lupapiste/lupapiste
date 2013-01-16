@@ -15,8 +15,8 @@
   (ok :applications (mongo/select mongo/applications (application-query-for user))))
 
 (defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:authority 1})
-        data (mongo/select mongo/users {:authority (:authority app) :role "authority"} {:firstName 1 :lastName 1})]
+  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
+        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
     data))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
@@ -149,19 +149,20 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:x :y :address :municipality]
+  {:parameters [:permitType :x :y :address :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id          (mongo/create-id)
         owner       (role user :owner :type :owner)
-        permit-type (keyword (:permitType data))
+        permitType (keyword (:permitType data))
         operation   (keyword (:operation data))]
     (mongo/insert mongo/applications
       {:id id
+       :permitType permitType
        :created created
        :modified created
-       :state :draft
+       :state (if (= permitType :infoRequest) :open :draft)
        :municipality (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
@@ -169,7 +170,6 @@
        :roles {:applicant owner}
        :auth [owner]
        :infoRequest (if (:infoRequest data) true false)
-       :permitType permit-type
        :operations (if operation [operation] [])
        :allowedAttahmentTypes (attachment-types-for operation)
        :documents (map create-document (:buildingPermit default-schemas)) 

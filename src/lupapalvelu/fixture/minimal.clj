@@ -74,6 +74,7 @@
     :enabled true
     :firstName "Judge"
     :lastName "Dread"
+    :email "judge.dread@example.com"
     :role :admin
     :private {:apikey "505718b0aa24a1c901e6ba24"}}
    {:lastName "Nieminen" ;; Mikkos neighbour
