@@ -18,17 +18,11 @@
     
     self.init = function(application) {
       self.application = application;
-      self
-        .title(application.title)
-        .url("#!/application/" + application.id)
-        .operation(null)
-        .treeReady(false);
+      self.operation(null).treeReady(false).title(application.title).url("#!/application/" + application.id);
       var id = application.id;
       ajax
         .query("municipality", {municipality: application.municipality})
-        .success(function (data) {
-          if (self.application.id === id) self.setOperations(data.operations).treeReady(true);
-        })
+        .success(function (data) { if (self.application.id === id) self.setOperations(data.operations).treeReady(true); })
         .call();
       return self;
     };
@@ -39,32 +33,27 @@
     };
     
     self.generateLast = function(value) {
-      var e = document.createElement("div");
-      e.setAttribute("class", "tree-result");
-      
-      var btn = document.createElement("button");
-      btn.setAttribute("class", "btn btn-primary");
-      btn.innerText = loc('addOperation');
-      btn.onclick = function() {
-        ajax.command("add-operation", {id: self.application.id, operation: value})
-          .success(function() {
-            window.location.hash = self.url();
-          })
-          .call();
-        return false;
-      };
-      e.appendChild(btn);
-      
-      btn = document.createElement("button");
-      btn.setAttribute("class", "btn");
-      btn.innerText = loc('back');
-      btn.onclick = function() {
-        self.tree.goback();
-        return false;
-      };
-      e.appendChild(btn);
-      
-      return e;
+      var e = $("<div>").addClass("tree-result");
+      e.append($("<button>")
+        .addClass("btn")
+        .addClass("btn-primary")
+        .html(loc('addOperation'))
+        .click(function(e) {
+          ajax
+            .command("add-operation", {id: self.application.id, operation: value})
+            .success(function() { window.location.hash = self.url(); })
+            .call();
+          $(e.target)
+            .parent()
+            .empty()
+            .append($("<img>").attr("src", "/img/ajax-loader.gif"));
+          return false;
+        }));
+      e.append($("<button>")
+        .addClass("btn")
+        .html(loc('back'))
+        .click(self.tree.goback));
+      return e[0];
     };
   }
     
@@ -81,9 +70,8 @@
   });
 
   hub.subscribe("application-loaded", function(e) {
-    if (currentId === e.applicationDetails.application.id) {
-      model.init(e.applicationDetails.application);
-    }
+    var application = e.applicationDetails.application;
+    if (currentId === application.id) model.init(application);
   });
 
   $(function() {
