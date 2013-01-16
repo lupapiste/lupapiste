@@ -75,11 +75,11 @@
 
   hub.onPageChange('register', function() {
     $.get('/vetuma', {success: '/welcome#!/register2',
-                    cancel:  '/welcome#!/register/cancel',
-                    error:   '/welcome#!/register/error'},function(d) {
+                      cancel:  '/welcome#!/register/cancel',
+                      error:   '/welcome#!/register/error'},function(d) {
       $('#vetuma-register').html(d).find(':submit').addClass('btn btn-primary')
-                        .attr('value','Tunnistaudu')
-                        .attr('id', 'vetuma-init');
+                           .attr('value','Tunnistaudu')
+                           .attr('id', 'vetuma-init');
     });
   });
 
