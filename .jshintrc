@@ -41,6 +41,7 @@
     "LUPAPISTE",
     "applicationsConfig",
     "invites",
-    "inforequestsConfig"
+    "inforequestsConfig",
+    "loc"
   ]
 }

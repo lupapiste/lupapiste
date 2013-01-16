@@ -129,8 +129,8 @@
         .call();
       return false;
     },
-    
-    addOperation: function(model) {
+
+    addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     }
