@@ -149,29 +149,31 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality]
+  {:parameters [:permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id          (mongo/create-id)
-        owner       (role user :owner :type :owner)
-        permitType (keyword (:permitType data))
-        operation   (keyword (:operation data))]
+        id            (mongo/create-id)
+        owner         (role user :owner :type :owner)
+        permit-type   (keyword (:permitType data))
+        operation     (keyword (:operation data))
+        info-request  (if (:infoRequest data) true false)]
     (mongo/insert mongo/applications
       {:id id
-       :permitType permitType
        :created created
        :modified created
-       :state (if (= permitType :infoRequest) :open :draft)
+       :state (if info-request :open :draft)
        :municipality (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
+       :propertyId (:propertyId data)
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
-       :infoRequest (if (:infoRequest data) true false)
+       :infoRequest info-request
+       :permitType permit-type
        :operations (if operation [operation] [])
-       :allowedAttahmentTypes (attachment-types-for operation)
+       :allowedAttahmentTypes (if info-request {:muut [:muu]} (attachment-types-for operation))
        :documents (map create-document (:buildingPermit default-schemas)) 
        :attachments []
        :comments (if-let [message (:message data)]

@@ -22,11 +22,15 @@
           </div>
           <div>
             <p>Tila:</p>
-            <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+            <span id="test-application-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
           <div>
             <p>Lupatyyppi:</p>
-            <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+            <span class="application_summary_text" data-bind="ltext: permitType"></span>
+          </div>
+          <div>
+            <p>Kiinteistötunnus:</p>
+            <span class="application_summary_text" data-bind="ltext: propertyId" data-test-id="application-property-id"></span>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
