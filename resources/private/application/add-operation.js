@@ -12,7 +12,6 @@
       self.application = application;
       self.title(application.title);
       self.url("#!/application/" + application.id);
-      console.log("INIT:", application);
       return self;
     };
     
@@ -33,12 +32,10 @@
   hub.onPageChange("add-operation", function(e) {
     currentId = e.pagePath[0];
     hub.send("load-application", {id: currentId});
-    console.log("LOADING:");
   });
 
   hub.subscribe("application-loaded", function(e) {
     if (currentId === e.applicationDetails.application.id) {
-      console.log("LOADED:");
       model.init(e.applicationDetails.application);
     }
   });
