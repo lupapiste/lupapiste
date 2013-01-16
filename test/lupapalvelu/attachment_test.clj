@@ -22,7 +22,7 @@
   (fact (encode-filename "12345\n678\r\n90")                  => (just ascii-pattern)))
 
 (facts "Test parse-attachment-type"
-  (fact (parse-attachment-type "foo.bar")  => [:foo :bar])
+  (fact (parse-attachment-type "foo.bar")  => {:type-group :foo, :type-id :bar})
   (fact (parse-attachment-type "foo.")     => nil)
   (fact (parse-attachment-type "")         => nil)
   (fact (parse-attachment-type nil)        => nil))
