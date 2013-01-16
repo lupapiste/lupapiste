@@ -21,7 +21,7 @@ var authorization = (function() {
   }
 
   return {
-    create: function() {return new AuthorizationModel(); }
+    create: function() { return new AuthorizationModel(); }
   };
 
 })();
