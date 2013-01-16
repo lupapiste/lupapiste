@@ -1,5 +1,7 @@
 var log = function() {
 
+  'use strict';
+
   var levelName = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"];
 
   var getCallerName = function(caller) {

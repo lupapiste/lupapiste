@@ -22,6 +22,8 @@
     "$",
     "ko",
     "hub",
+    "trace",
+    "error",
     "require",
     "define",
     "angular",
