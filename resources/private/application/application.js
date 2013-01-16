@@ -36,6 +36,7 @@
     state: ko.observable(),
     location: ko.observable(),
     permitType: ko.observable(),
+    propertyId: ko.observable(),
     title: ko.observable(),
     created: ko.observable(),
     documents: ko.observable(),

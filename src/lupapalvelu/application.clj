@@ -149,7 +149,7 @@
      :body {}}))
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality]
+  {:parameters [:permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
@@ -166,6 +166,7 @@
        :municipality (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
+       :propertyId (:propertyId data)
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
