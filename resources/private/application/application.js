@@ -4,8 +4,6 @@
 
 ;(function() {
 
-  'use strict';
-
   var isInitializing = true;
   var currentId;
   var applicationModel = new ApplicationModel();
@@ -138,12 +136,6 @@
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
-
-  function makeSubscribable(initialValue, listener) {
-    var v = ko.observable(initialValue);
-    v.subscribe(listener);
-    return v;
-  }
 
   function getAttachmentsByGroup(attachments) {
     var grouped = _.groupBy(attachments, function(attachment) {
