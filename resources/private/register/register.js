@@ -1,7 +1,5 @@
 ;(function() {
 
-  'use strict';
-
   var keys = ['stamp', 'personId', 'firstname', 'lastname', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
 
   function json(model) {
@@ -73,10 +71,11 @@
     model().disabled(!valid);
   });
 
-  hub.onPageChange('register', function() {
+  hub.onPageChange('register', function(e) {
+    debug("event:",e);
     $.get('/vetuma', {success: '/welcome#!/register2',
                       cancel:  '/welcome#!/register/cancel',
-                      error:   '/welcome#!/register/error'},function(d) {
+                      error:   '/welcome#!/register/error'}, function(d) {
       $('#vetuma-register').html(d).find(':submit').addClass('btn btn-primary')
                            .attr('value','Tunnistaudu')
                            .attr('id', 'vetuma-init');
