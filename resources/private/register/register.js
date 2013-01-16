@@ -98,8 +98,6 @@
                                 .attr('id', 'vetuma-init');
     });
     statusModel.subPage(subPage());
-    console.log("cancel?", statusModel.isCancel());
-    console.log("error?", statusModel.isError());
     ko.applyBindings(statusModel, $('#register')[0]);
   });
 
