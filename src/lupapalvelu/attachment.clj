@@ -164,10 +164,10 @@
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
-    (->> match (drop 1) (map keyword))))
+    (let [[type-group type-id] (->> match (drop 1) (map keyword))]
+      {:type-group type-group :type-id type-id})))
 
 (defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
-  (println "allowed-attachment-type-for?" allowed-types type-group type-id (some (partial = (keyword type-id)) (get allowed-types type-group)))
   (some (partial = type-id) (map keyword (get allowed-types type-group))))
 
 ;;
@@ -187,9 +187,8 @@
   [{{:keys [id attachmentId attachmentType]} :data :as command}]
   (with-application command
     (fn [application]
-      (let [[type-group type-id] (parse-attachment-type attachmentType)
-            attachment-type {:type-group type-group :type-id type-id}]
-        (if (allowed-attachment-type-for? (keyword (:permitType application)) attachment-type)
+      (let [attachment-type (parse-attachment-type attachmentType)]
+        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachment-type)
           (do
             (mongo/update
               mongo/applications
@@ -251,7 +250,7 @@
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
       (if-let [application (mongo/by-id mongo/applications id)]
-        (if (and attachmentType (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachmentType))
+        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (file tempfile))
