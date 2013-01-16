@@ -131,12 +131,7 @@
     },
     
     addOperation: function(model) {
-      var applicationId = application.id();
-      ajax.command("add-operation", {id: applicationId, operation: "Fancy operation"})
-        .success(function(d) {
-          console.log("Add operation successful");
-        })
-        .call();
+      window.location.hash = "#!/add-operation/" + application.id();
       return false;
     }
 
