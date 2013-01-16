@@ -165,7 +165,7 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/vetuma" [data]
+(defpage "/vetuma" {:as data}
   (let [paths (select-keys data [:success :cancel :error])]
     (if (non-local? (vals paths))
       (status 400 (format "invalid return paths: %s" paths))
