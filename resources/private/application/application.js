@@ -273,20 +273,20 @@
         _.each(sortedDocs, function(docGroup) {
 
           _.each(docGroup, function(doc) {
-        docgenDiv.append(docgen.build(doc.schema, doc.body, save, doc.id, application.id()).element);
+        docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, doc.id, application.id()).element);
       });
 
           var schema = docGroup[0].schema;
 
           if (schema.info.repeating) {
-            var btn = docgen.createDocumentButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
+            var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
             $(btn).click(function() {
               var self = this;
               ajax.command("create-doc", {schema: schema.info.name, id: application.id()})
                   .success(function(e) {
                     var newDocId = e.doc;
-                    var newElem = docgen.build(schema, {}, save, newDocId, application.id()).element;
+                    var newElem = new LUPAPISTE.DocModel(schema, {}, save, newDocId, application.id()).element;
                     $(self).before(newElem);})
                     .call();
             });
