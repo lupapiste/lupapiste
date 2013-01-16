@@ -1,4 +1,5 @@
-var hub = function() {
+var hub = (function() {
+  "use strict";
 
   var nextId = 0;
   var subscriptions = { };
@@ -73,4 +74,4 @@ var hub = function() {
     onPageChange:     onPageChange
   };
 
-}();
+})();

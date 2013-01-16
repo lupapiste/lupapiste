@@ -1,4 +1,5 @@
 var selectionTree = (function() {
+  "use strict";
 
   function defaultContentFactory(name) {
     var e = document.createElement("div");
@@ -35,7 +36,7 @@ var selectionTree = (function() {
         var d = self.stack.pop();
         var n = self.stack[self.stack.length - 1];
         $(d).animate({"margin-left": self.width}, self.speed, function() { d.parentNode.removeChild(d); });
-        $(n).animate({"margin-left": 0}, self.speed);  
+        $(n).animate({"margin-left": 0}, self.speed);
         self.crumbs.pop();
         self.breadcrumbs.html(self.crumbs.join(" / "));
       }
@@ -61,7 +62,7 @@ var selectionTree = (function() {
       if (self.data) {
         var n = self.make(self.data);
         self.stack.push(n);
-        $(n).css("margin-left", -self.width);  
+        $(n).css("margin-left", -self.width);
         self.content.append(n);
         $(n).animate({"margin-left": 0}, self.speed);
       }

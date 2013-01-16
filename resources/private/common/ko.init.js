@@ -1,8 +1,5 @@
-/*
- * ko.init.js
- */
-
 ;(function() {
+  "use strict";
 
   //
   // initialize Knockout validation
@@ -38,7 +35,6 @@
       var date = new Date(value);
       var hours = withLeadinngZero(date.getHours());
       var mins = withLeadinngZero(date.getMinutes());
-
       $(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + hours + ":" + mins);
     }
   };

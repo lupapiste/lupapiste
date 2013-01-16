@@ -1,4 +1,5 @@
-var pageutil = function() {
+var pageutil = (function() {
+  "use strict";
 
   function setPageReady(id) {
     $("#pageStatus").append('<div id="'+id+'-page-is-ready">' + id + '-page-is-ready</div>');
@@ -32,4 +33,4 @@ var pageutil = function() {
     getURLParameter:  getURLParameter
   };
 
-}();
+})();

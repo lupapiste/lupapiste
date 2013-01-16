@@ -1,8 +1,5 @@
-/**
- * application.js:
- */
-
 ;(function() {
+  "use strict";
 
   var isInitializing = true;
   var currentId;
@@ -30,14 +27,16 @@
         value = _.values(pimped);
       }
       return value;
-    },self);
+    }, self);
   }
 
   var application = {
     id: ko.observable(),
+    infoRequest: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
     permitType: ko.observable(),
+    propertyId: ko.observable(),
     title: ko.observable(),
     created: ko.observable(),
     documents: ko.observable(),
@@ -109,7 +108,7 @@
       return false;
     },
 
-    removeInvite : function(model) {
+    removeInvite: function(model) {
       var applicationId = application.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function() {
@@ -120,7 +119,7 @@
       return false;
     },
 
-    removeAuth : function(model) {
+    removeAuth: function(model) {
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function() {
@@ -128,6 +127,11 @@
           repository.reloadApplication(applicationId);
         })
         .call();
+      return false;
+    },
+    
+    addOperation: function(model) {
+      window.location.hash = "#!/add-operation/" + application.id();
       return false;
     }
 
@@ -156,13 +160,13 @@
   function updateAssignee(value) {
     debug("updateAssignee called, assigneeId: ", value);
     // do not update assignee if page is still initializing
-    if(isInitializing) {
+    if (isInitializing) {
       debug("isInitializing, return");
       return;
     }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if(! authorizationModel.ok('assign-application')) {
+    if (!authorizationModel.ok('assign-application')) {
       return;
     }
 
@@ -184,7 +188,7 @@
 
   function resolveApplicationAssignee(roles) {
     debug("resolveApplicationAssignee called, roles: ", roles);
-    if(roles && roles.authority) {
+    if (roles && roles.authority) {
       var auth = new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName);
       debug("resolved authority: ", auth);
       return auth;

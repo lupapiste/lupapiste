@@ -4,7 +4,7 @@
   <section class="page" id="inforequest">
 
     <div class="breadcrumb" data-bind="with: application">
-        <a href="#!/inforequests" id="test-inforequests" data-bind="ltext: 'infoRequests'">Neuvontapyynnöt</a>
+        <a href="#!/inforequests" data-test-id="test-inforequests" data-bind="ltext: 'infoRequests'">Neuvontapyynnöt</a>
        / <span data-bind="text: title"></span>
     </div>
 
@@ -58,6 +58,69 @@
         <p>Tässä näkymässä voit käsitellä neuvontapyynnön tietoja.</p>
       </aside>
     </div>
+    
+    <div class="container">
+      <p class="tab-info"> Liitteet</p>
+      <div data-bind="if: attachmentsByGroup().length">
+
+        <table class="table">
+          <tbody data-bind="foreach: attachmentsByGroup()">
+            <tr class="attachment-group-header">
+              <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
+            </tr>
+            <tr>
+              <th>Tila</th>
+              <th>Tyyppi</th>
+              <th>Tiedosto</th>
+              <th>Muokattu</th>
+              <th></th>
+            </tr>
+            <!-- ko foreach: attachments -->
+            <tr style="cursor: pointer;">
+              <td data-bind="attr: {'class': statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
+              <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
+                <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
+                  <span data-bind="if: type != null">
+                    <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                  </span>
+                  <span data-bind="if: type == null">
+                    <i>Nimet&ouml;n</i>
+                  </span>
+                </a>
+              </td>
+              <td>
+                <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
+                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
+                  <i data-bind="ltext: latestVersion.contentType"></i>
+                  <i data-bind="size: latestVersion.size"></i>
+                </span>
+              </td>
+              <td>
+                <span data-bind="dateString: modified"></span>
+                <span data-bind="if: $data.latestVersion">
+                  <span data-bind="fullName: latestVersion.user"></span>
+                </span>
+              </td>
+              <td>
+              </td>
+            </tr>
+          <!-- /ko -->
+          </tbody>
+        </table>
+
+      </div>
+      <div data-bind="ifnot: attachmentsByGroup.length">
+        <i>Ei liitteit&auml;</i>
+      </div>
+      <button
+          id="add-attachment"
+          class="btn btn-primary modal"
+          data-window-id="upload-dialog"
+          data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
+        Lis&auml;&auml; liite
+      </button>
+    </div>
+    
     <div class="container" data-bind="with: $root.comment">
         <p class="tab-info"> Kysymys ja keskustelu.</p>
         <div class="tab-wrapper">

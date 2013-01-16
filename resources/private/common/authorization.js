@@ -1,8 +1,5 @@
-/*
- * authorization.js:
- */
-
-var authorization = function() {
+var authorization = (function() {
+  "use strict";
 
   function AuthorizationModel() {
     var self = this;
@@ -24,7 +21,7 @@ var authorization = function() {
   }
 
   return {
-    create: function() {return new AuthorizationModel(); }
+    create: function() { return new AuthorizationModel(); }
   };
 
-}();
+})();

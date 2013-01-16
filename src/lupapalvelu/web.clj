@@ -191,9 +191,9 @@
                            :id applicationId
                            :attachmentId attachmentId
                            :text text)
-        [type-group type-id] (attachment/parse-attachment-type attachmentType)
-        upload-data (if (and type-group type-id)
-                      (assoc upload-data :attachmentType {:type-group type-group :type-id type-id})
+        attachment-type (attachment/parse-attachment-type attachmentType)
+        upload-data (if attachment-type
+                      (assoc upload-data :attachmentType attachment-type)
                       upload-data)
         result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)

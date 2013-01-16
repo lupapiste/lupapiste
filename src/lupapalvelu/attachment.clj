@@ -87,7 +87,7 @@
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
 (defn attachment-types-for [permit-type]
-  (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type {:muut [:muu]})))
+  (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type))))
 
 ;;
 ;; Upload
@@ -164,11 +164,11 @@
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
-    (->> match (drop 1) (map keyword))))
+    (let [[type-group type-id] (->> match (drop 1) (map keyword))]
+      {:type-group type-group :type-id type-id})))
 
-(defn- allowed-attachment-type-for? [permit-type {:keys [type-group type-id]}]
-  (let [permits (get-in attachment-types-for-permit-type [permit-type (keyword type-group)])]
-    (some (partial = (keyword type-id)) permits)))
+(defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
+  (some (partial = type-id) (map keyword (get allowed-types type-group))))
 
 ;;
 ;; Actions
@@ -187,9 +187,8 @@
   [{{:keys [id attachmentId attachmentType]} :data :as command}]
   (with-application command
     (fn [application]
-      (let [[type-group type-id] (parse-attachment-type attachmentType)
-            attachment-type {:type-group type-group :type-id type-id}]
-        (if (allowed-attachment-type-for? (keyword (:permitType application)) attachment-type)
+      (let [attachment-type (parse-attachment-type attachmentType)]
+        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachment-type)
           (do
             (mongo/update
               mongo/applications
@@ -250,22 +249,24 @@
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
-      (if (and attachmentType (allowed-attachment-type-for? (get-permit-type id) attachmentType))
-        (let [content-type (mime/mime-type sanitazed-filename)]
-          (mongo/upload id file-id sanitazed-filename content-type tempfile created)
-          (.delete (file tempfile))
-          (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
-            (executed (assoc (command "add-comment"
-                                      {:id id
-                                       :text text,
-                                       :target {:type :attachment
-                                                :id (:id attachment-version)
-                                                :version (:version attachment-version)
-                                                :filename (:filename attachment-version)
-                                                :fileId (:fileId attachment-version)}})
-                             :user user))
-            (fail :error.unknown)))
-        (fail :error.illegal-attachment-type))
+      (if-let [application (mongo/by-id mongo/applications id)]
+        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachmentType)
+          (let [content-type (mime/mime-type sanitazed-filename)]
+            (mongo/upload id file-id sanitazed-filename content-type tempfile created)
+            (.delete (file tempfile))
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
+              (executed (assoc (command "add-comment"
+                                        {:id id
+                                         :text text,
+                                         :target {:type :attachment
+                                                  :id (:id attachment-version)
+                                                  :version (:version attachment-version)
+                                                  :filename (:filename attachment-version)
+                                                  :fileId (:fileId attachment-version)}})
+                               :user user))
+              (fail :error.unknown)))
+          (fail :error.illegal-attachment-type))
+        (fail :error.no-such-application))
       (fail :error.illegal-file-type))))
 
 ;;
