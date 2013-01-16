@@ -217,23 +217,8 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
       input.id = pathStrToID(pathForId);
       input.checked = o.name === myModel;
 
-//    $(input).change(function() {
-//      var v = this.value;
-//console.log(v);
-//      var parent$ = $(this.parentNode.parentNode);
-//      parent$.children("[data-select-one-of]").hide();
-//    parent$.children("[data-select-one-of='" + v + "']").show();
-//  });
-
       span.appendChild(input);
       span.appendChild(makeLabel("radio", pathForId, specId));
-
-//      var name = o.name;
-//      var option = document.createElement("p");
-//      option.value = name;
-//      option.appendChild(document.createTextNode(loc(specId + "." + myPath + "." + name)));
-//      //if (selectedOption === name) option.selected = "selected";
-//      span.appendChild(option);
     });
 
     partsDiv.appendChild(span);
@@ -293,7 +278,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
         }
         var myModel = {};
         myModel[myName] = {};
-          $(this).before(makeElem(myModel, count));
+        $(this).before(makeElem(myModel, count));
       };
 
       $(appendButton).click(appender);
@@ -310,6 +295,8 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     var selectOneOf = [];
     if (schema.info && schema.info.selectOneOf) {
       selectOneOf = schema.info.selectOneOf;
+    } else if (schema.selectOneOf) {
+      selectOneOf = schema.selectOneOf;
     }
 
     _.each(schema.body, function(spec) {
@@ -332,14 +319,14 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     });
 
     if (selectOneOf.length) {
-      var s = "[name='" + self.docId + path.join(".") +"._selected']";
+      var s = "[name$='._selected']";
       $(body).find(s).change(function() {
         var v = this.value;
         var parent$ = $(body);
-        console.log(parent$);
         parent$.children("[data-select-one-of]").hide();
         parent$.children("[data-select-one-of='" + v + "']").show();
       });
+
     }
 
     return body;
@@ -413,7 +400,6 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     section.appendChild(sectionContainer);
 
     return section;
-
   }
 
   self.element = buildElement();
