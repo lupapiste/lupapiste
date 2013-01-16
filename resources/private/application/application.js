@@ -108,7 +108,7 @@
       return false;
     },
 
-    removeInvite : function(model) {
+    removeInvite: function(model) {
       var applicationId = application.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function(d) {
@@ -119,12 +119,22 @@
       return false;
     },
 
-    removeAuth : function(model) {
+    removeAuth: function(model) {
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function(d) {
           notify.success("oikeus poistettu", model);
           repository.reloadApplication(applicationId);
+        })
+        .call();
+      return false;
+    },
+    
+    addOperation: function(model) {
+      var applicationId = application.id();
+      ajax.command("add-operation", {id: applicationId, operation: "Fancy operation"})
+        .success(function(d) {
+          console.log("Add operation successful");
         })
         .call();
       return false;
