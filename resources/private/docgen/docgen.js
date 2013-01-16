@@ -12,7 +12,7 @@ var docgen = (function () {
   function makeLabel(type, pathStr, specId) {
     var label = document.createElement("label");
     label.id = pathStrToLabelID(pathStr);
-    label.htmlFor = pathStrToID(pathStr);;
+    label.htmlFor = pathStrToID(pathStr);
     label.className = "form-label form-label-" + type;
     var locKey = specId + "." + pathStr.replace(/\.\d+\./g, ".");
     label.appendChild(document.createTextNode(loc(locKey)));
@@ -194,7 +194,7 @@ var docgen = (function () {
     var builder = builders[spec.type] || buildUnknown;
 
     if (spec.repeating) {
-      var repeatingId = myPath.join("-")
+      var repeatingId = myPath.join("-");
       var models = model[myName] || [{}];
       var elements = _.map(models, function(val, key) {
         var myModel = {};
@@ -239,7 +239,7 @@ var docgen = (function () {
       if (!_.isArray(children)) {
         children = [children];
       }
-      _.each(children, function(o) {body.appendChild(o)});
+      _.each(children, function(o) {body.appendChild(o);});
     });
     return body;
   }

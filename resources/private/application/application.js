@@ -22,12 +22,12 @@
           a.roles.push(i.role());
           r[i.id()] = a;
           return r;
-        }
+        };
         var pimped = _.reduce(auth, withRoles, {});
         value = _.values(pimped);
       }
       return value;
-    },self);
+    }, self);
   }
 
   var application = {
@@ -161,13 +161,13 @@
   function updateAssignee(value) {
     debug("updateAssignee called, assigneeId: ", value);
     // do not update assignee if page is still initializing
-    if(isInitializing) {
+    if (isInitializing) {
       debug("isInitializing, return");
       return;
     }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if(! authorizationModel.ok('assign-application')) {
+    if (!authorizationModel.ok('assign-application')) {
       return;
     }
 
@@ -189,7 +189,7 @@
   
   function resolveApplicationAssignee(roles) {
     debug("resolveApplicationAssignee called, roles: ", roles);
-    if(roles && roles.authority) {
+    if (roles && roles.authority) {
       var auth = new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName);
       debug("resolved authority: ", auth);
       return auth;
