@@ -1,8 +1,5 @@
-/*
- * notify.js:
- */
-
-var notify = function() {
+var notify = (function() {
+  "use strict";
 
   var level = {
     DEBUG : 'DEBUG',
@@ -49,4 +46,4 @@ var notify = function() {
     setLevel : setLevel
   };
 
-}();
+})();

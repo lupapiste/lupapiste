@@ -6,6 +6,8 @@
 (defn- not-empty? [m] (not (empty? m)))
 
 (fact "creating application without message"
+  (apply-remote-minimal)
+  (apply-remote-minimal)
   (let [resp            (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "753")
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
@@ -23,6 +25,7 @@
     (:allowedAttahmentTypes application) => not-empty?))
 
 (fact "creating application message"
+  (apply-remote-minimal)
   (let [resp            (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "753" :message "hello")
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
@@ -34,26 +37,29 @@
     (-> comments first :text) => "hello"))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
-      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
-            authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
-        (count authorities) => 2))
+(apply-remote-minimal)
+(let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "753" :message "hello"))
+      authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
+  (count authorities) => 2))
 
 (fact "Assign application to an authority"
-      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
-            ;; add a comment to change state to open
-            comment (command pena :add-comment :id application-id :text "hello" :target "application")
-            application (:application (query sonja :application :id application-id))
-            roles-before-assignation (:roles application)
-            authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
-            authority (first authorities)
-            resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
-            assigned-app (:application (query sonja :application :id application-id))
-            roles-after-assignation (:roles assigned-app)]
-        (count roles-before-assignation) => 1
-        (count roles-after-assignation) => 2))
+(apply-remote-minimal)
+    (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "753" :message "hello"))
+          ;; add a comment to change state to open
+          comment (command pena :add-comment :id application-id :text "hello" :target "application")
+          application (:application (query sonja :application :id application-id))
+          roles-before-assignation (:roles application)
+          authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+          authority (first authorities)
+          resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
+          assigned-app (:application (query sonja :application :id application-id))
+          roles-after-assignation (:roles assigned-app)]
+      (count roles-before-assignation) => 1
+      (count roles-after-assignation) => 2))
 
 (fact "Assign application to an authority and then to no-one"
-      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "Sipoo" :message "hello"))
+  (apply-remote-minimal)
+      (let [application-id (:id (command pena :create-application :permitType "buildingPermit" :x 444444 :y 6666666 :address "foo 42, bar" :municipality "753" :message "hello"))
             ;; add a comment change set state to open
             comment (command pena :add-comment :id application-id :text "hello" :target "application")
             application (:application (query sonja :application :id application-id))

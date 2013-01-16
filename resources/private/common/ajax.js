@@ -1,8 +1,5 @@
-/*
- * ajax.js:
- */
-
-var ajax = function() {
+var ajax = (function() {
+  "use strict";
 
   var nop = function() { };
 
@@ -41,7 +38,7 @@ var ajax = function() {
       self.rawData = (v === undefined) ? true : v;
       return self;
     }
-    
+
     self.dataType = function(dataType) {
       self.request.dataType = dataType;
       return self;
@@ -140,4 +137,4 @@ var ajax = function() {
     query:     query
   };
 
-}();
+})();
