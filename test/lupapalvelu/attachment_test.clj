@@ -22,7 +22,7 @@
   (fact (encode-filename "12345\n678\r\n90")                  => (just ascii-pattern)))
 
 (facts "Test parse-attachment-type"
-  (fact (parse-attachment-type "foo.bar")  => [:foo :bar])
+  (fact (parse-attachment-type "foo.bar")  => {:type-group :foo, :type-id :bar})
   (fact (parse-attachment-type "foo.")     => nil)
   (fact (parse-attachment-type "")         => nil)
   (fact (parse-attachment-type nil)        => nil))
@@ -44,10 +44,10 @@
 (def allowed-attachment-type-for? #'lupapalvelu.attachment/allowed-attachment-type-for?)
 
 (facts "Facts about allowed-attachment-type-for?"
-  (fact (allowed-attachment-type-for? :buildingPermit {:type-group "hakija" :type-id "valtakirja"})          => truthy)
-  (fact (allowed-attachment-type-for? :buildingPermit {:type-group "paapiirustus" :type-id "asemapiirros"})  => truthy)
-  (fact (allowed-attachment-type-for? :buildingPermit {:type-group "hakija" :type-id "asemapiirros"})        => falsey)
-  (fact (allowed-attachment-type-for? :buildingPermit {})                                                    => falsey))
+  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g1 :type-id :t1}) => truthy)
+  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g1 :type-id :t2}) => truthy)
+  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g1 :type-id :t3}) => falsey)
+  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g2 :type-id :t1}) => falsey))
 
 ; The result of attachment-types-for has very strict format that is required by upload.html. The
 ; structure should be a vector that looks like this:
