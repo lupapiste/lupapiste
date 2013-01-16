@@ -139,7 +139,9 @@ var docgen = (function () {
       var option = document.createElement("option");
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
-      if (selectedOption === "") option.selected = "selected";
+      if (selectedOption === "") {
+        option.selected = "selected";
+      }
       select.appendChild(option);
 
       $.each(spec.body, function (i, o) {
@@ -258,18 +260,30 @@ var docgen = (function () {
       if (schema.info && schema.info.selectOneOf) {
         var selectOneOf = schema.info.selectOneOf;
       }
+///////////////////////////////////////////////////////////////////////////////////////////
+      _.each(selectOneOf, function(s, i) {
+        var myPath = path.concat(["_selected"]).join(".");
+        var id = pathStrToID(myPath + "." + s);
 
-      _.each(selectOneOf, function(s) {
-        var input = document.createElement("input");
-        input.type = "button";
-        input.value = s;
-        $(input).click(function() {
+        var span = document.createElement("span");
+        span.className = "form-entry";
+
+
+        var input = makeInput("radio", myPath, s, save);
+        input.id = id;
+        input.checked = i === 0;
+
+        $(input).change(function() {
           var v = this.value;
-          var parent$ = $(this.parentNode);
+console.log(v);
+          var parent$ = $(this.parentNode.parentNode);
           parent$.children("[data-select-one-of]").hide();
           parent$.children("[data-select-one-of='" + v + "']").show();
         });
-        body.appendChild(input);
+
+        span.appendChild(input);
+        span.appendChild(makeLabel("checkbox", myPath + "." + s, specId));
+        body.appendChild(span);
       });
 
       _.each(schema.body, function(spec) {
@@ -313,14 +327,21 @@ var docgen = (function () {
       return function (event) {
         var target = getEvent(event).target;
         var path = target.name;
-        var value = (target.type === "checkbox") ? target.checked : target.value;
+        var value = target.value;
+        if (target.type === "checkbox") {
+          value = target.checked;
+        }
 
         var loader = loaderImg();
         var label = document.getElementById(pathStrToLabelID(path));
-        label.appendChild(loader);
+        if (label) {
+          label.appendChild(loader);
+        }
 
         save(path, value, function (status) {
-          label.removeChild(loader);
+          if (label) {
+            label.removeChild(loader);
+          }
           removeClass(target, ["form-input-warn", "form-input-err"]);
           if (status === "ok") {
             // Nada.
