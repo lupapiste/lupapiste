@@ -65,21 +65,42 @@
     reset: reset
   };
 
+  function StatusModel() {
+    var self = this;
+    self.subPage = ko.observable();
+
+    self.isCancel = ko.computed(function() { return self.subPage() === 'cancel'; });
+    self.isError = ko.computed(function() { return self.subPage() === 'error'; });
+  }
+
+  var statusModel = new StatusModel();
+
   model.confirmPassword = ko.observable().extend({equal: model.password});
   model = ko.validatedObservable(model);
   model.isValid.subscribe(function(valid) {
     model().disabled(!valid);
   });
 
-  hub.onPageChange('register', function(e) {
-    debug("event:",e);
+  function subPage() {
+    var hash = (location.hash || "").substr(3);
+    var path = hash.split("/");
+    var pagePath = path.splice(1, path.length - 1);
+    return _.first(pagePath) || undefined;
+  }
+
+  hub.onPageChange('register', function() {
     $.get('/vetuma', {success: '/welcome#!/register2',
                       cancel:  '/welcome#!/register/cancel',
                       error:   '/welcome#!/register/error'}, function(d) {
-      $('#vetuma-register').html(d).find(':submit').addClass('btn btn-primary')
-                           .attr('value','Tunnistaudu')
-                           .attr('id', 'vetuma-init');
+      $('#vetuma-register')
+        .html(d).find(':submit').addClass('btn btn-primary')
+                                .attr('value','Tunnistaudu')
+                                .attr('id', 'vetuma-init');
     });
+    statusModel.subPage(subPage());
+    console.log("cancel?", statusModel.isCancel());
+    console.log("error?", statusModel.isError());
+    ko.applyBindings(statusModel, $('#register')[0]);
   });
 
   hub.onPageChange('register2', function() {
@@ -92,4 +113,5 @@
 
     ko.applyBindings(model, $('#register2')[0]);
   });
+
 })();
