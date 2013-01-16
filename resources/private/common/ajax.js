@@ -1,8 +1,5 @@
-/*
- * ajax.js:
- */
-
-var ajax = function() {
+var ajax = (function() {
+  "use strict";
 
   var nop = function() { };
 
@@ -140,4 +137,4 @@ var ajax = function() {
     query:     query
   };
 
-}();
+})();

@@ -1,4 +1,5 @@
 ;(function() {
+  "use strict";
 
   function isNotBlank(s) { return !/^\s*$/.test(s); }
   function equals(s1, s2) { return s1 === s2; }
