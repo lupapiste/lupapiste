@@ -1,8 +1,5 @@
-/*
- * ko.init.js
- */
-
 ;(function() {
+  "use strict";
 
   //
   // initialize Knockout validation

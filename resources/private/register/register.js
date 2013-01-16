@@ -1,8 +1,5 @@
-/*
- * register.js:
- */
-
 ;(function() {
+  "use strict";
 
   var keys = ["stamp", "personId", "firstname", "lastname", "email", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city"];
 

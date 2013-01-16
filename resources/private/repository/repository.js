@@ -1,4 +1,5 @@
-var repository = function() {
+var repository = (function() {
+  "use strict";
 
   hub.subscribe("load-all-applications", function() {
     ajax
@@ -25,4 +26,4 @@ var repository = function() {
     reloadApplication: function(id) { hub.send("load-application", {id: id}); },
     reloadAllApplications: function() { hub.send("load-all-applications"); }
   };
-}();
+})();

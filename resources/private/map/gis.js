@@ -1,4 +1,5 @@
-var gis = function() {
+var gis = (function() {
+  "use strict";
   
   function makeIcon(image, w, h) {
     var size = new OpenLayers.Size(w, h);
@@ -114,4 +115,4 @@ var gis = function() {
     makeMap: function(element) { return new Map(element); }
   };
   
-}();
+})();
