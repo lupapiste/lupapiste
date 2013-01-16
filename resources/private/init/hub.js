@@ -1,7 +1,3 @@
-/*
- * hub.js:
- */
-
 var hub = function() {
 
   var nextId = 0;
