@@ -158,6 +158,7 @@
         permit-type   (keyword (:permitType data))
         operation     (keyword (:operation data))
         info-request  (if (:infoRequest data) true false)]
+    (println "NEW:" (if info-request {:muut [:muu]} (attachment-types-for operation)))
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -186,6 +187,8 @@
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
+
+(:allowedAttahmentTypes (mongo/by-id mongo/applications "50f6db6df8282ca3dc978413"))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]

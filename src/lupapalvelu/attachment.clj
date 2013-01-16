@@ -87,7 +87,7 @@
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
 (defn attachment-types-for [permit-type]
-  (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type))))
+  (attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type)))
 
 ;;
 ;; Upload
@@ -178,7 +178,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [{{application-id :id} :data}]
-  (ok :typeGroups (attachment-types-for (get-permit-type application-id))))
+  (ok :typeGroups (reduce to-key-types-vec (attachment-types-for (get-permit-type application-id)))))
 
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
