@@ -21,6 +21,8 @@
   "predef": [
     "$",
     "ko",
+    "_",
+    "loc",
     "hub",
     "debug",
     "pageutil",
@@ -32,16 +34,11 @@
     "error",
     "repository",
     "notify",
-    "require",
-    "define",
-    "angular",
-    "_",
     "ajax",
     "gis",
     "LUPAPISTE",
-    "applicationsConfig",
     "invites",
-    "inforequestsConfig",
-    "loc"
+    "applicationsConfig",
+    "inforequestsConfig"
   ]
 }
