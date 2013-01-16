@@ -148,20 +148,23 @@
 
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
-  [host]
-  (string/replace host #":8000" ":8443"))
+  [host] (string/replace host #":8000" ":8443"))
+
+
+(defpage "/vetuma/host" []
+  (json {:current (host) :secure (host :secure)}))
 
 (defn host
   ([] (host :current))
   ([mode]
     (let [request (request/ring-request)
           scheme  (name (:scheme request))
-          host    (get-in request [:headers "host"])]
+          hostie  (get-in request [:headers "host"])]
       (case mode
-        :current (str scheme "://" host)
+        :current (str scheme "://" hostie)
         :secure  (if (= scheme "https")
                    (host :current)
-                   (str "https://" (host-and-ssl-port host)))))))
+                   (str "https://" (host-and-ssl-port hostie)))))))
 
 ; TODO: does not strip unneeded parameters
 (defpage "/vetuma" {:keys [success cancel error] :as paths}
