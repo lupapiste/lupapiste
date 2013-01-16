@@ -160,10 +160,9 @@
         info-request  (if (:infoRequest data) true false)]
     (mongo/insert mongo/applications
       {:id id
-       :permitType permitType
        :created created
        :modified created
-       :state (if (= permitType :infoRequest) :open :draft)
+       :state (if info-request :open :draft)
        :municipality (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
