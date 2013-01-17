@@ -31,7 +31,7 @@ Application verdict is visible to applicant
   Wait and click  test-verdict-tab
   Wait until  Element should be visible  test-application-verdict
   Logout
-  
+
 Application verdict is visible to authority
   Sonja logs in
   Click element  test-application-link
