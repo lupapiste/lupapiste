@@ -7,7 +7,7 @@ var selectionTree = (function() {
     e.innerHTML = name;
     return e;
   }
-  
+
   function stopProp(f) {
     return function(e) {
       e.stopPropagation();
@@ -19,7 +19,7 @@ var selectionTree = (function() {
 
   function Tree(content, breadcrumbs, callback, contentFactory) {
     var self = this;
-    
+
     self.data = null;
     self.content = $(content);
     self.breadcrumbs = $(breadcrumbs);
@@ -30,7 +30,7 @@ var selectionTree = (function() {
     self.speed = self.width; // magical, but good.
     self.crumbs = [];
     self.stack = [];
-        
+
     self.goback = function() {
       if (self.stack.length > 1) {
         var d = self.stack.pop();
@@ -42,7 +42,7 @@ var selectionTree = (function() {
       }
       return self;
     };
-    
+
     self.gostart = function() {
       if (self.stack.length > 0) {
         var d = self.stack.pop();
@@ -54,7 +54,7 @@ var selectionTree = (function() {
         self.gostart2();
       }
     };
-    
+
     self.gostart2 = function() {
       self.crumbs = [];
       self.stack = [];
@@ -68,12 +68,12 @@ var selectionTree = (function() {
       }
       return self;
     };
-    
+
     self.reset = function(newData) {
       self.data = newData;
       return self.gostart();
     };
-    
+
     self.reset = function(newData) {
       if (self.stack.length > 0) {
         var d = self.stack[0];
@@ -83,24 +83,24 @@ var selectionTree = (function() {
       self.stack = [];
       self.breadcrumbs.html("");
       self.content.empty();
-      if (newData) self.data = newData;
+      if (newData) { self.data = newData; }
       if (self.data) {
         var n = self.make(self.data);
         self.stack.push(n);
-        $(n).css("margin-left", self.width).animate({"margin-left": 0}, self.speed);  
+        $(n).css("margin-left", self.width).animate({"margin-left": 0}, self.speed);
         self.content.append(n);
       }
       return self;
     };
-    
+
     self.makeHandler = function(key, val, d) {
       return function(e) {
         e.preventDefault();
         e.stopPropagation();
-        
+
         self.crumbs.push(key);
         self.breadcrumbs.html(self.crumbs.join(" / "));
-        
+
         var terminal = typeof(val) === "string";
         var next = terminal ? self.makeTerminalElement(val) : self.make(val);
         self.stack.push(next);
@@ -110,25 +110,26 @@ var selectionTree = (function() {
         return false;
       };
     };
-    
+
     self.gobackEventHandler = stopProp(self.goback);
     self.gostartEventHandler = stopProp(self.gostart);
-    
-    self.make = function(t) {
+
+    self.make =   function(t) {
       var d = document.createElement("div");
+      var link;
       d.setAttribute("class", "tree-magic");
       _.each(t, function(v) { d.appendChild(self.makeLink(v[0], v[1], d));});
 
       if (self.stack.length > 0) {
-        var link = document.createElement("a");
+        link = document.createElement("a");
         link.innerHTML = loc("tree.back");
         link.href = "#";
         link.onclick = self.gobackEventHandler;
         d.appendChild(link);
       }
-      
+
       if (self.stack.length > 1) {
-        var link = document.createElement("a");
+        link = document.createElement("a");
         link.innerHTML = loc("tree.start");
         link.href = "#";
         link.onclick = self.gostartEventHandler;
@@ -146,13 +147,13 @@ var selectionTree = (function() {
       link.onclick = self.makeHandler(key, val, d);
       return link;
     };
-        
+
   }
-  
+
   return {
     create: function(content, breadcrumbs, callback, contentFactory) {
       return new Tree(content, breadcrumbs, callback, contentFactory);
     }
   };
-  
+
 })();

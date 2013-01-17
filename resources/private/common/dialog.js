@@ -12,6 +12,8 @@ if (typeof LUPAPISTE === "undefined") {
  * @param {String}  Mask color: 'black' or 'white'
  */
 LUPAPISTE.Modal = function(maskId, maskColor) {
+  "use strict";
+
   var self = this;
   self.mask = undefined;
   self.maskId = maskId;
@@ -73,6 +75,7 @@ LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
  * Initializes modal dialog elements
  */
 LUPAPISTE.ModalDialog.init = function() {
+  "use strict";
 
   this.createMask();
 
@@ -103,6 +106,7 @@ LUPAPISTE.ModalProgress = new LUPAPISTE.Modal("ModalProgressMask", "white");
 LUPAPISTE.ModalProgress.progressBarId = "ModalProgressBar";
 
 LUPAPISTE.ModalProgress.init = function() {
+  "use strict";
 
   this.createMask();
 
@@ -126,6 +130,8 @@ LUPAPISTE.ModalProgress.init = function() {
 };
 
 LUPAPISTE.ModalProgress.show = function() {
+  "use strict";
+
   this.open("#" + LUPAPISTE.ModalProgress.progressBarId);
   this.getMask().unbind('click');
 };

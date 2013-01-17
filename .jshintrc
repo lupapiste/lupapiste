@@ -19,13 +19,26 @@
   "devel": true,
   "unused": true,
   "predef": [
-    "require",
-    "define",
-    "angular",
-    "_",
-    "hub",
-    "ajax",
     "$",
-    "ko"
+    "ko",
+    "_",
+    "loc",
+    "hub",
+    "debug",
+    "pageutil",
+    "accordion",
+    "docgen",
+    "authorization",
+    "comments",
+    "trace",
+    "error",
+    "repository",
+    "notify",
+    "ajax",
+    "gis",
+    "LUPAPISTE",
+    "invites",
+    "applicationsConfig",
+    "inforequestsConfig"
   ]
 }

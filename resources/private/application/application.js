@@ -55,7 +55,7 @@
     submitApplication: function(model) {
       var applicationId = application.id();
       ajax.command("submit-application", { id: applicationId})
-        .success(function(d) {
+        .success(function() {
           notify.success("hakemus j\u00E4tetty",model);
           repository.reloadApplication(applicationId);
         })
@@ -66,7 +66,7 @@
     markInforequestAnswered: function(model) {
       var applicationId = application.id();
       ajax.command("mark-inforequest-answered", {id: applicationId})
-        .success(function(d) {
+        .success(function() {
           notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
           repository.reloadApplication(applicationId);
         })
@@ -74,7 +74,7 @@
       return false;
     },
 
-    convertToApplication: function(model) {
+    convertToApplication: function() {
       var applicationId = application.id();
       ajax.command("convert-to-application", {id: applicationId})
         .success(function(d) {
@@ -89,7 +89,7 @@
     setMeAsPaasuunnittelija: function(model) {
       var applicationId = application.id();
       ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
-      .success(function(d) {
+      .success(function() {
         notify.success("tiedot tallennettu",model);
         repository.reloadApplication(applicationId);
       })
@@ -100,7 +100,7 @@
     approveApplication: function(model) {
       var applicationId = application.id();
       ajax.command("approve-application", { id: applicationId})
-        .success(function(d) {
+        .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
           repository.reloadApplication(applicationId);
         })
@@ -111,7 +111,7 @@
     removeInvite: function(model) {
       var applicationId = application.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
-        .success(function(d) {
+        .success(function() {
           notify.success("kutsu poistettu", model);
           repository.reloadApplication(applicationId);
         })
@@ -122,15 +122,15 @@
     removeAuth: function(model) {
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
-        .success(function(d) {
+        .success(function() {
           notify.success("oikeus poistettu", model);
           repository.reloadApplication(applicationId);
         })
         .call();
       return false;
     },
-
-    addOperation: function(model) {
+    
+    addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     }
@@ -141,13 +141,6 @@
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
-
-  function makeSubscribable(initialValue, listener) {
-    var v = ko.observable(initialValue);
-    v.subscribe(listener);
-    return v;
-  }
-
   function getAttachmentsByGroup(attachments) {
     var grouped = _.groupBy(attachments, function(attachment) {
       return attachment.type['type-group'];
@@ -157,12 +150,12 @@
     });
     return result;
   }
-
+  
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
-  };
+  };       
 
   function updateAssignee(value) {
     debug("updateAssignee called, assigneeId: ", value);
@@ -181,18 +174,18 @@
 
     debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function(e) {
+      .success(function() {
       })
       .error(function(e) {
         error(e);
       })
-      .fail(function(e) {
-        error(e);
+      .fail(function(e) { 
+        error(e); 
       }).call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
-
+  
   function resolveApplicationAssignee(roles) {
     debug("resolveApplicationAssignee called, roles: ", roles);
     if (roles && roles.authority) {
@@ -204,14 +197,14 @@
       return null;
     }
   }
-
+  
   function initAuthoritiesSelectList(data) {
     authorities.removeAll();
     _.each(data || [], function(authority) {
       authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
   }
-
+  
   function showApplication(applicationDetails) {
     debug("set isInitializing to true");
     isInitializing = true;
@@ -269,7 +262,7 @@
 
         var groupedDocs = _.groupBy(documents, function (doc) {
           return doc.schema.info.name;
-        });
+      });
 
         var displayOrder = ["rakennuspaikka", "uusiRakennus", "huoneisto", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
         var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
@@ -315,7 +308,7 @@
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
-
+      
       debug("set isInitializing to false");
       isInitializing = false;
       pageutil.setPageReady("application");
@@ -342,7 +335,7 @@
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
-        .success(function(d) {
+        .success(function() {
           self.email(undefined);
           self.text(undefined);
           repository.reloadApplication(id);

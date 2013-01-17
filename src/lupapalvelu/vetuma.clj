@@ -3,11 +3,13 @@
         [noir.core :only [defpage]]
         [noir.response :only [redirect status json]]
         [hiccup.core :only [html]]
+        [monger.operators]
         [clj-time.local :only [local-now]]
         [hiccup.form]
         [lupapalvelu.log])
   (:require [digest]
             [clojure.string :as string]
+            [lupapalvelu.mongo :as mongo]
             [noir.request :as request]
             [noir.session :as session]
             [clj-time.core :as time]
@@ -16,9 +18,6 @@
 ;;
 ;; Configuration
 ;;
-
-(def ^:dynamic *path-session-key* "vetuma-return-paths")
-(def ^:dynamic *user-session-key* "vetuma-user")
 
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
@@ -141,56 +140,68 @@
 ;; Web stuff
 ;;
 
+(defn session-id [] (get-in (request/ring-request) [:cookies "ring-session" :value]))
+
 (defn- field [[k v]]
   (hidden-field k v))
 
-(defn- non-local? [& rest] (some #(not= -1 (.indexOf % ":")) rest))
+(defn- non-local? [paths] (some #(not= -1 (.indexOf % ":")) (vals paths)))
 
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
-  [host]
-  (string/replace host #":8000" ":8443"))
+  [host] (string/replace host #":8000" ":8443"))
 
 (defn host
   ([] (host :current))
   ([mode]
     (let [request (request/ring-request)
           scheme  (name (:scheme request))
-          host    (get-in request [:headers "host"])]
+          hostie  (get-in request [:headers "host"])]
       (case mode
-        :current (str scheme "://" host)
+        :current (str scheme "://" hostie)
         :secure  (if (= scheme "https")
                    (host :current)
-                   (str "https://" (host-and-ssl-port host)))))))
+                   (str "https://" (host-and-ssl-port hostie)))))))
 
-; TODO: does not strip unneeded parameters
-(defpage "/vetuma" {:keys [success cancel error] :as paths}
-  (if (non-local? success cancel error)
-    (status 400 (format "invalid return paths: %s" paths))
-    (do
-      (session/put! *path-session-key* paths)
-      (html
-        (form-to [:post (:url constants)]
-          (map field (request-data (host :secure)))
-          (submit-button "submit"))))))
+(defpage "/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
+  (let [paths     {:success success :error error :cancel cancel}
+        sessionid (session-id)]
+    (if (non-local? paths)
+      (status 400 (format "invalid return paths: %s" paths))
+      (do
+        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths} :upsert true)
+        (html
+          (form-to [:post (:url constants)]
+                   (map field (request-data (host :secure)))
+                   (submit-button "submit")))))))
 
 (defpage [:post "/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
                logged
                parsed
                user-extracted
-               logged)]
-    (session/put! *user-session-key* user)
-    (swap! mem assoc (:stamp user) user)
-    (redirect (:success (session/get *path-session-key*)))))
+               logged)
+        data (mongo/update-one-and-return :vetuma {:sessionid (session-id)} {$set {:user user}})
+        uri  (get-in data [:paths :success])]
+    (redirect uri)))
 
 (defpage [:post "/vetuma/:status"] {status :status}
-  (redirect ((session/get *path-session-key*) (keyword status))))
+  (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
+        return-uri (get-in data [:paths (keyword status)])]
+    (redirect return-uri)))
 
 (defpage "/vetuma/user" []
-  (json (session/get *user-session-key*)))
+  (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
+        user (-> data :user)]
+    (json user)))
 
 (defpage "/vetuma/stamp/:stamp" {:keys [stamp]}
-  (let [user (@mem stamp)]
-    (swap! mem dissoc stamp)
+  (let [data (mongo/select-one :vetuma {:user.stamp stamp})
+        user (-> data :user)
+        id   (:id data)]
+    (mongo/remove-many :vetuma {:_id id})
     (json user)))
+
+;;
+;; Web stuff
+;;
