@@ -187,7 +187,7 @@
 
 (defpage [:post "/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
-        return-uri (-> data :paths (keyword status))]
+        return-uri (get-in data [:paths (keyword status)])]
     (redirect return-uri)))
 
 (defpage "/vetuma/user" []
@@ -197,7 +197,9 @@
 
 (defpage "/vetuma/stamp/:stamp" {:keys [stamp]}
   (let [data (mongo/select-one :vetuma {:user.stamp stamp})
-        user (-> data :user)]
+        user (-> data :user)
+        id   (:id data)]
+    (mongo/remove-many :vetuma {:_id id})
     (json user)))
 
 ;;
