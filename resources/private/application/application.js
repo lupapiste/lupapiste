@@ -108,7 +108,7 @@
       return false;
     },
 
-    removeInvite : function(model) {
+    removeInvite: function(model) {
       var applicationId = application.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function(d) {
@@ -119,7 +119,7 @@
       return false;
     },
 
-    removeAuth : function(model) {
+    removeAuth: function(model) {
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function(d) {
@@ -127,6 +127,11 @@
           repository.reloadApplication(applicationId);
         })
         .call();
+      return false;
+    },
+    
+    addOperation: function(model) {
+      window.location.hash = "#!/add-operation/" + application.id();
       return false;
     }
 
