@@ -158,7 +158,6 @@
         permit-type   (keyword (:permitType data))
         operation     (keyword (:operation data))
         info-request  (if (:infoRequest data) true false)]
-    (println "NEW:" (if info-request {:muut [:muu]} (attachment-types-for operation)))
     (mongo/insert mongo/applications
       {:id id
        :created created
@@ -174,7 +173,7 @@
        :infoRequest info-request
        :permitType permit-type
        :operations (if operation [operation] [])
-       :allowedAttahmentTypes (if info-request {:muut [:muu]} (attachment-types-for operation))
+       :allowedAttachmentTypes (if info-request [[:muut [:muu]]] (attachment-types-for operation))
        :documents (map create-document (:buildingPermit default-schemas)) 
        :attachments []
        :comments (if-let [message (:message data)]
