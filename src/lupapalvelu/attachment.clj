@@ -166,7 +166,8 @@
       {:type-group type-group :type-id type-id})))
 
 (defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
-  (some (partial = type-id) (map keyword (get allowed-types type-group))))
+  (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
+    (some (partial = (name type-id)) types)))
 
 ;;
 ;; Actions
