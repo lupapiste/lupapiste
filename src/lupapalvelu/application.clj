@@ -3,7 +3,8 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.attachment :only [create-attachment attachment-types-for]])
+        [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
+        [lupapalvelu.document.commands :only [create-document]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
@@ -140,14 +141,6 @@
                                                 ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
-(defn create-document [schema-name]
-  (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
-    {:id (mongo/create-id)
-     :created (now)
-     :schema schema
-     :body {}}))
-
 (defcommand "create-application"
   {:parameters [:permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
@@ -174,7 +167,7 @@
        :permitType permit-type
        :operations (if operation [operation] [])
        :allowedAttachmentTypes (if info-request [[:muut [:muu]]] (attachment-types-for operation))
-       :documents (map create-document (:buildingPermit default-schemas)) 
+       :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas))
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message

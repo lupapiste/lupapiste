@@ -129,7 +129,7 @@
         .call();
       return false;
     },
-
+    
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
@@ -150,12 +150,12 @@
     });
     return result;
   }
-
+  
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
-  };
+  };       
 
   function updateAssignee(value) {
     debug("updateAssignee called, assigneeId: ", value);
@@ -179,13 +179,13 @@
       .error(function(e) {
         error(e);
       })
-      .fail(function(e) {
-        error(e);
+      .fail(function(e) { 
+        error(e); 
       }).call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
-
+  
   function resolveApplicationAssignee(roles) {
     debug("resolveApplicationAssignee called, roles: ", roles);
     if (roles && roles.authority) {
@@ -197,14 +197,14 @@
       return null;
     }
   }
-
+  
   function initAuthoritiesSelectList(data) {
     authorities.removeAll();
     _.each(data || [], function(authority) {
       authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
   }
-
+  
   function showApplication(applicationDetails) {
     debug("set isInitializing to true");
     isInitializing = true;
@@ -258,11 +258,47 @@
           .call();
       };
 
-      var docgenDiv = $("#docgen").empty();
+      function displayDocuments(containerSelector, documents) {
 
-      _.each(app.documents, function(doc) {
-        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+        var groupedDocs = _.groupBy(documents, function (doc) {
+          return doc.schema.info.name;
       });
+
+        var displayOrder = ["rakennuspaikka", "uusiRakennus", "huoneisto", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
+          return _.indexOf(displayOrder, docGroup[0].schema.info.name)
+        });
+
+        var docgenDiv = $(containerSelector).empty();
+        _.each(sortedDocs, function(docGroup) {
+          _.each(docGroup, function(doc) {
+            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, doc.id, application.id()).element);
+          });
+
+          var schema = docGroup[0].schema;
+
+          if (schema.info.repeating) {
+            var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
+
+            $(btn).click(function() {
+              var self = this;
+              ajax
+                .command("create-doc", {schema: schema.info.name, id: application.id()})
+                .success(function(data) {
+                  var newDocId = data.doc;
+                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, newDocId, application.id()).element;
+                  $(self).before(newElem);
+                })
+                .call();
+            });
+            docgenDiv.append(btn);
+          }
+        });
+      }
+
+      var partyDocumentNames = ["hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+      displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
+      displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
       if(! isTabSelected('#applicationTabs')) {
         selectDefaultTab('#applicationTabs');
@@ -272,7 +308,7 @@
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
-
+      
       debug("set isInitializing to false");
       isInitializing = false;
       pageutil.setPageReady("application");
