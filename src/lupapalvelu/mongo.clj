@@ -86,6 +86,10 @@
   [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
   (mc/find-and-modify collection conditions document :return-new true :upsert upsert :remove remove :sort sort :fields fields))
 
+(defn remove-many
+  "Returns all documents matching query."
+  [collection query] (mc/remove collection query))
+
 (defn set-file-id [^GridFSInputFile input ^String id]
   (.setId input id)
   input)
