@@ -83,11 +83,11 @@ var selectionTree = (function () {
       self.stack = [];
       self.breadcrumbs.html("");
       self.content.empty();
-      if (newData) self.data = newData;
+      if (newData) { self.data = newData; }
       if (self.data) {
         var n = self.make(self.data);
         self.stack.push(n);
-        $(n).css("margin-left", self.width).animate({ "margin-left": 0 }, self.speed);
+        $(n).css("margin-left", self.width).animate({"margin-left": 0}, self.speed);
         self.content.append(n);
       }
       return self;
@@ -114,15 +114,17 @@ var selectionTree = (function () {
     self.gobackEventHandler = stopProp(self.goback);
     self.gostartEventHandler = stopProp(self.gostart);
 
-    self.make = function (t) {
+
+    self.make = function(t) {
       var d = document.createElement("div");
+      var link;
       d.setAttribute("class", "tree-magic");
       _.each(t, function (v) { d.appendChild(self.makeLink(v[0], v[1], d)); });
 
       if (self.stack.length > 0) {
         var icon = document.createElement("span");
         icon.className = "font-icon icon-tree-back";
-        var link = document.createElement("a");
+        link = document.createElement("a");
         link.className = "tree-back";
         link.innerHTML = loc("tree.back");
         link.href = "#";
@@ -134,7 +136,6 @@ var selectionTree = (function () {
       if (self.stack.length > 1) {
         var icon = document.createElement("span");
         icon.className = "font-icon icon-tree-start";
-        var link = document.createElement("a");
         link.className = "tree-start";
         link.innerHTML = loc("tree.start");
         link.href = "#";
