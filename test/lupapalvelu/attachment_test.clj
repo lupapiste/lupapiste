@@ -44,26 +44,10 @@
 (def allowed-attachment-type-for? #'lupapalvelu.attachment/allowed-attachment-type-for?)
 
 (facts "Facts about allowed-attachment-type-for?"
-  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g1 :type-id :t1}) => truthy)
-  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g1 :type-id :t2}) => truthy)
-  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g1 :type-id :t3}) => falsey)
-  (fact (allowed-attachment-type-for? {:g1 [:t1 :t2]} {:type-group :g2 :type-id :t1}) => falsey))
-
-; The result of attachment-types-for has very strict format that is required by upload.html. The
-; structure should be a vector that looks like this:
-;
-; [{:key :hakija
-;   :types [{:key :valtakirja}
-;           {:key :ote_kauppa_ja_yhdistysrekisterista}
-;           {:key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta}]}
-;  {:key :rakennuspaikan_hallinta
-;   :types [{:key :jaljennos_myonnetyista_lainhuudoista}
-;           ...
-
-(facts "The result of attachment-types-for has very strict format that is required by upload.html"
-  (fact (attachment-types-for :buildingPermit) => sequential?)
-  (fact (first (attachment-types-for :buildingPermit)) => associative?)
-  (fact (:group (first (attachment-types-for :buildingPermit))) => keyword?)
-  (fact (:types (first (attachment-types-for :buildingPermit))) => sequential?)
-  (fact (first (:types (first (attachment-types-for :buildingPermit)))) => associative?)
-  (fact (:name (first (:types (first (attachment-types-for :buildingPermit))))) => keyword?))
+  (let [allowed-types [["a" ["1" "2"]] ["b" ["3" "4"]]]]
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :a :type-id :1}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :a :type-id :2}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :3}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :4}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :5}) => falsey)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :c :type-id :1}) => falsey)))
