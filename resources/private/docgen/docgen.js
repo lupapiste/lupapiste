@@ -15,6 +15,10 @@ LUPAPISTE.DOMUtils = {
 LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   "use strict";
 
+  // Magic key: if schema contains "_selected" radioGroup,
+  // user can select only one of the schemas named in "_selected" group
+  var SELECT_ONE_OF_GROUP_KEY = "_selected";
+
   var self = this;
 
   self.spec = spec;
@@ -290,19 +294,22 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     return builder(spec, model, myPath, save, specId, partOfChoice);
   }
 
-  function appendElements(body, schema, model, path, save, specId, partOfChoice) {
-
-    var SELECT_ONE_OF_GROUP_KEY = "_selected";
-    var selectOneOf = [];
+  function getSelectOneOfDefinition(schema) {
     var selectOneOfSchema = _.find(schema.body, function(spec){
-      return spec.name === SELECT_ONE_OF_GROUP_KEY;
+      return spec.name === SELECT_ONE_OF_GROUP_KEY && spec.type === "radioGroup";
     });
 
     if (selectOneOfSchema) {
-      selectOneOf = _.map(selectOneOfSchema.body, function(spec) {
+      return _.map(selectOneOfSchema.body, function(spec) {
         return spec.name;
       });
     }
+
+    return [];
+  }
+
+  function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+    var selectOneOf = getSelectOneOfDefinition(schema);
 
     _.each(schema.body, function(spec) {
         var children = build(spec, model, path, save, specId, partOfChoice);
@@ -326,12 +333,9 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     if (selectOneOf.length) {
       var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
       $(body).find(s).change(function() {
-        var v = this.value;
-        var parent$ = $(body);
-        parent$.children("[data-select-one-of]").hide();
-        parent$.children("[data-select-one-of='" + v + "']").show();
+        $(body).children("[data-select-one-of]").hide();
+        $(body).children("[data-select-one-of='" + this.value + "']").show();
       });
-
     }
 
     return body;
