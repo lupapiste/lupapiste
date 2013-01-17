@@ -220,6 +220,13 @@ var attachment = (function() {
     }
   }
 
-  return { newAttachment: newAttachment };
+  function regroupAttachmentList() {
+    // do me
+  }
+  
+  return {
+    newAttachment: newAttachment,
+    regroupAttachmentList: regroupAttachmentList
+  };
 
 })();
