@@ -163,7 +163,7 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/vetuma" {:keys [success, cancel, error] :or {success "1" cancel "2" error "3"} :as data}
+(defpage "/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
   (let [paths     {:success success :error error :cancel cancel}
         sessionid (session-id)]
     (if (non-local? paths)
