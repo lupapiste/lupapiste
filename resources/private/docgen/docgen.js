@@ -300,9 +300,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     });
 
     if (selectOneOfSchema) {
-      return _.map(selectOneOfSchema.body, function(spec) {
-        return spec.name;
-      });
+      return _.map(selectOneOfSchema.body, function(spec) {return spec.name;}) || [];
     }
 
     return [];
@@ -317,14 +315,12 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
           children = [children];
         }
         _.each(children, function(elem) {
-          if (selectOneOf.length) {
-            if (_.indexOf(selectOneOf, spec.name) >= 0) {
-              elem.setAttribute("data-select-one-of", spec.name);
-            }
-            // Hide all but the first of the selections
-            if (_.indexOf(selectOneOf, spec.name) > 0) {
-              $(elem).hide();
-            }
+          if (_.indexOf(selectOneOf, spec.name) >= 0) {
+            elem.setAttribute("data-select-one-of", spec.name);
+          }
+          // Hide all but the first of the selections
+          if (_.indexOf(selectOneOf, spec.name) > 0) {
+            $(elem).hide();
           }
           body.appendChild(elem)
         });
@@ -351,21 +347,21 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     return function (event) {
       var target = getEvent(event).target;
       var path = target.name;
-        var value = target.value;
-        if (target.type === "checkbox") {
-          value = target.checked;
-        }
+      var value = target.value;
+      if (target.type === "checkbox") {
+        value = target.checked;
+      }
 
       var loader = loaderImg();
       var label = document.getElementById(pathStrToLabelID(path));
-        if (label) {
-      label.appendChild(loader);
-        }
+      if (label) {
+        label.appendChild(loader);
+      }
 
       save(path, value, function (status) {
-          if (label) {
-        label.removeChild(loader);
-          }
+        if (label) {
+          label.removeChild(loader);
+        }
         $(target).removeClass("form-input-warn").removeClass("form-input-err");
         if (status === "ok") {
           // Nada.

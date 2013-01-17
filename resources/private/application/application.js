@@ -129,7 +129,7 @@
         .call();
       return false;
     },
-    
+
     addOperation: function(model) {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
@@ -278,10 +278,9 @@
 
         var docgenDiv = $(containerSelector).empty();
         _.each(sortedDocs, function(docGroup) {
-
           _.each(docGroup, function(doc) {
-        docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, doc.id, application.id()).element);
-      });
+            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, doc.id, application.id()).element);
+          });
 
           var schema = docGroup[0].schema;
 
@@ -290,12 +289,14 @@
 
             $(btn).click(function() {
               var self = this;
-              ajax.command("create-doc", {schema: schema.info.name, id: application.id()})
-                  .success(function(e) {
-                    var newDocId = e.doc;
-                    var newElem = new LUPAPISTE.DocModel(schema, {}, save, newDocId, application.id()).element;
-                    $(self).before(newElem);})
-                    .call();
+              ajax
+                .command("create-doc", {schema: schema.info.name, id: application.id()})
+                .success(function(data) {
+                  var newDocId = data.doc;
+                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, newDocId, application.id()).element;
+                  $(self).before(newElem);
+                })
+                .call();
             });
             docgenDiv.append(btn);
           }
