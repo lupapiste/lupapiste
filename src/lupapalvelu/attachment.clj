@@ -83,9 +83,6 @@
 (defn- get-permit-type [application-id]
   (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
 
-(defn- to-key-types-vec [r [k v]]
-  (conj r {:group k :types (map (fn [v] {:name v}) v)}))
-
 (defn attachment-types-for [permit-type]
   (attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type)))
 
@@ -174,11 +171,16 @@
 ;; Actions
 ;;
 
+(defn- to-key-types-vec [r [k v]]
+  (conj r {:group k :types (map (fn [v] {:name v}) v)}))
+
 (defquery "attachment-types"
   {:parameters [:id]
    :roles      [:applicant :authority]}
-  [{{application-id :id} :data}]
-  (ok :typeGroups (reduce to-key-types-vec (attachment-types-for (get-permit-type application-id)))))
+  [command]
+  (with-application command (comp (partial ok :attachmentTypes)
+                                  (partial reduce to-key-types-vec [])
+                                  :allowedAttahmentTypes)))
 
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]

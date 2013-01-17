@@ -24,7 +24,7 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
     ajax
       .query("attachment-types",{id: applicationId})
       .success(function(d) {
-        LUPAPISTE.Upload.attachmentTypeGroups(d.typeGroups);
+        LUPAPISTE.Upload.attachmentTypeGroups(d.attachmentTypes);
         ko.applyBindings(LUPAPISTE.Upload, $("#attachmentUploadForm")[0]);
       })
       .call();
