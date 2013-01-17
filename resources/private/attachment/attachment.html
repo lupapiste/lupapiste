@@ -25,13 +25,13 @@
           </span>
         </h1>
         <div class="form-entry">
-            <label class="form-label">Vaihda liitteen tyyppi</label>
-        <select data-bind="value: attachmentType, foreach: allowedAttahmentTypes">
-          <optgroup data-bind="attr: {label: loc('attachmentType.' + group + '._group_label')}, foreach: types">
-            <option data-bind="text: loc('attachmentType.' + $parent.group + '.' + name), value: $parent.group + '.' + name"></option>
-          </optgroup>
-        </select>
-      </div>
+          <label class="form-label">Vaihda liitteen tyyppi</label>
+          <select data-bind="value: attachmentType, foreach: allowedAttahmentTypes">
+            <optgroup data-bind="attr: {label: loc('attachmentType.' + group + '._group_label')}, foreach: types">
+              <option data-bind="text: loc('attachmentType.' + $parent.group + '.' + name), value: $parent.group + '.' + name"></option>
+            </optgroup>
+          </select>
+        </div>
       </div>
 
       <!-- Preview images and pdf files only -->
