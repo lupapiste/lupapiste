@@ -47,7 +47,7 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :application  {:depends [:common :repository]
+   :application  {:depends [:common :repository :tree]
                   :js ["application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html"]}
 
