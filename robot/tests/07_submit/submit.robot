@@ -2,7 +2,7 @@
 
 Documentation   Sonja can't submit application
 Suite teardown  Logout
-Resource        ../../common_resource.txt
+Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
