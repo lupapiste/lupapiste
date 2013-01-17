@@ -51,5 +51,3 @@
     (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :4}) => truthy)
     (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :5}) => falsey)
     (fact (allowed-attachment-type-for? allowed-types {:type-group :c :type-id :1}) => falsey)))
-
-
