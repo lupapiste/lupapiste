@@ -8,6 +8,7 @@
         [lupapalvelu.log])
   (:require [digest]
             [clojure.string :as string]
+            [lupapalvelu.mongo :as mongo]
             [noir.request :as request]
             [noir.session :as session]
             [clj-time.core :as time]
@@ -149,9 +150,6 @@
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
   [host] (string/replace host #":8000" ":8443"))
-
-(defpage "/vetuma/host" []
-  (json {:current (host) :secure (host :secure)}))
 
 (defn host
   ([] (host :current))
