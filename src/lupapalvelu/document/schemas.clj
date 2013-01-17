@@ -77,7 +77,6 @@
              {:name "rakennuksenOmistajat"
               :type :group
               :repeating true
-              :selectOneOf ["henkilo", "yritys"]
               :body party-body}
              {:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
@@ -252,16 +251,16 @@
                      {:name "parvekeTaiTerassi" :type :checkbox}
                      {:name "lamminvesi" :type :checkbox}]}]}
 
-     {:info {:name "hakija" :repeating true :selectOneOf ["henkilo", "yritys"]}
+     {:info {:name "hakija" :repeating true}
       :body party-body}
 
-     {:info {:name "paasuunnittelija" :selectOneOf ["henkilo", "yritys"]}
+     {:info {:name "paasuunnittelija"}
       :body paasuunnittelija-body}
 
-     {:info {:name "suunnittelija" :repeating true :selectOneOf ["henkilo", "yritys"]}
+     {:info {:name "suunnittelija" :repeating true}
       :body suunnittelija-body}
 
-     {:info {:name "maksaja" :repeating true :selectOneOf ["henkilo", "yritys"]}
+     {:info {:name "maksaja" :repeating true}
       :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)

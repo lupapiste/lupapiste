@@ -292,11 +292,16 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
 
   function appendElements(body, schema, model, path, save, specId, partOfChoice) {
 
+    var SELECT_ONE_OF_GROUP_KEY = "_selected";
     var selectOneOf = [];
-    if (schema.info && schema.info.selectOneOf) {
-      selectOneOf = schema.info.selectOneOf;
-    } else if (schema.selectOneOf) {
-      selectOneOf = schema.selectOneOf;
+    var selectOneOfSchema = _.find(schema.body, function(spec){
+      return spec.name === SELECT_ONE_OF_GROUP_KEY;
+    });
+
+    if (selectOneOfSchema) {
+      selectOneOf = _.map(selectOneOfSchema.body, function(spec) {
+        return spec.name;
+      });
     }
 
     _.each(schema.body, function(spec) {
@@ -319,7 +324,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     });
 
     if (selectOneOf.length) {
-      var s = "[name$='._selected']";
+      var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
       $(body).find(s).change(function() {
         var v = this.value;
         var parent$ = $(body);
