@@ -7,43 +7,80 @@
 
     self.title = ko.observable();
     self.url = ko.observable();
+    self.operation = ko.observable();
+    self.treeReady = ko.observable(false);
+    self.tree = null;
+    
+    self.clear = function() {
+      self.application = null;
+      return self.title("").url("").operation(null).treeReady(false);
+    };
     
     self.init = function(application) {
       self.application = application;
-      self.title(application.title);
-      self.url("#!/application/" + application.id);
-      console.log("INIT:", application);
+      self.operation(null).treeReady(false).title(application.title).url("#!/application/" + application.id);
+      var id = application.id;
+      ajax
+        .query("municipality", {municipality: application.municipality})
+        .success(function (data) { if (self.application.id === id) self.setOperations(data.operations).treeReady(true); })
+        .call();
       return self;
     };
     
-    self.addOperation = function() {
-      ajax.command("add-operation", {id: self.application.id, operation: "Fancy operation"})
-        .success(function(d) {
-          window.location.hash = self.url();
-        })
-        .call();
-      return false;
+    self.setOperations = function(operations) {
+      if (self.tree) self.tree.reset(operations);
+      return self;
     };
     
+    self.generateLast = function(value) {
+      var e = $("<div>").addClass("tree-result");
+      e.append($("<button>")
+        .addClass("btn")
+        .addClass("btn-primary")
+        .html(loc('addOperation'))
+        .click(function(e) {
+          ajax
+            .command("add-operation", {id: self.application.id, operation: value})
+            .success(function() { window.location.hash = self.url(); })
+            .call();
+          $(e.target)
+            .parent()
+            .empty()
+            .append($("<img>").attr("src", "/img/ajax-loader.gif"));
+          return false;
+        }));
+      e.append($("<button>")
+        .addClass("btn")
+        .html(loc('back'))
+        .click(self.tree.goback));
+      return e[0];
+    };
   }
     
   var model = new Model();
   var currentId;
 
   hub.onPageChange("add-operation", function(e) {
-    currentId = e.pagePath[0];
-    hub.send("load-application", {id: currentId});
-    console.log("LOADING:");
-  });
-
-  hub.subscribe("application-loaded", function(e) {
-    if (currentId === e.applicationDetails.application.id) {
-      console.log("LOADED:");
-      model.init(e.applicationDetails.application);
+    var newId = e.pagePath[0];
+    if (newId !== currentId) {
+      currentId = newId;
+      model.clear();
+      hub.send("load-application", {id: currentId});
     }
   });
 
+  hub.subscribe("application-loaded", function(e) {
+    var application = e.applicationDetails.application;
+    if (currentId === application.id) model.init(application);
+  });
+
   $(function() {
+    var tree = selectionTree.create(
+        $("#add-operation .tree-content"),
+        $("#add-operation .tree-breadcrumbs"),
+        model.operation,
+        model.generateLast);
+    model.tree = tree;
     ko.applyBindings(model, $("#add-operation")[0]);
   });
   

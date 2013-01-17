@@ -13,13 +13,16 @@
   
     <h1>Lisää toimenpide</h1>
 
-    <div class="tree">
+    <div class="tree" data-bind="visible: treeReady">
       <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
       <div class="tree-content">
       </div>
     </div>
+    <div class="tree" data-bind="visible: !treeReady()">
+      <img src="/img/ajax-loader.gif"/>
+    </div>
     
-    <button data-bind="click: addOperation, ltext: 'addOperation'"></button>
+    <a href="#" data-bind="attr: {href: url}, ltext: 'back'"></a>
     
   </section>
 </body>
