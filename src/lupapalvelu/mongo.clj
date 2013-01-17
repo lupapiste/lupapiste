@@ -3,6 +3,7 @@
         lupapalvelu.log)
   (:require [monger.core :as m]
             [monger.collection :as mc]
+            [monger.db :as db]
             [monger.gridfs :as gfs])
   (:import [org.bson.types ObjectId]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
@@ -119,9 +120,9 @@
         (reset! connected true)))))
 
 (defn clear! []
-  (warn "** Clearing DB **")
+  (warn "Clearing MongoDB:" mongouri)
   (gfs/remove-all)
-  (dorun (map #(mc/remove %) collections))
-  (mc/drop-indexes "users")
-  (mc/ensure-index "users" {:email 1} {:unique true})
+  (db/drop-db (m/get-db))
+  (mc/ensure-index :users {:email 1} {:unique true})
+  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds 300})
   #_(mc/ensure-index "users" {:personId 1} {:unique true}))
