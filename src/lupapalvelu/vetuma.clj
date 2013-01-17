@@ -148,31 +148,33 @@
 
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
-  [host]
-  (string/replace host #":8000" ":8443"))
+  [host] (string/replace host #":8000" ":8443"))
+
+(defpage "/vetuma/host" []
+  (json {:current (host) :secure (host :secure)}))
 
 (defn host
   ([] (host :current))
   ([mode]
     (let [request (request/ring-request)
           scheme  (name (:scheme request))
-          host    (get-in request [:headers "host"])]
+          hostie  (get-in request [:headers "host"])]
       (case mode
-        :current (str scheme "://" host)
+        :current (str scheme "://" hostie)
         :secure  (if (= scheme "https")
                    (host :current)
-                   (str "https://" (host-and-ssl-port host)))))))
+                   (str "https://" (host-and-ssl-port hostie)))))))
 
-; TODO: does not strip unneeded parameters
-(defpage "/vetuma" {:keys [success cancel error] :as paths}
-  (if (non-local? success cancel error)
-    (status 400 (format "invalid return paths: %s" paths))
-    (do
-      (session/put! *path-session-key* paths)
-      (html
-        (form-to [:post (:url constants)]
-          (map field (request-data (host :secure)))
-          (submit-button "submit"))))))
+(defpage "/vetuma" {:as data}
+  (let [paths (select-keys data [:success :cancel :error])]
+    (if (non-local? (vals paths))
+      (status 400 (format "invalid return paths: %s" paths))
+      (do
+        (session/put! *path-session-key* paths)
+        (html
+          (form-to [:post (:url constants)]
+                   (map field (request-data (host :secure)))
+                   (submit-button "submit")))))))
 
 (defpage [:post "/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
