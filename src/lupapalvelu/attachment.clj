@@ -23,7 +23,7 @@
 
 (def attachment-types-for-permit-type
   {:infoRequest {:muut [:muu]}
-   :buildingPermit {:hakija [:valtakirja
+   :buildingPermit [:hakija [:valtakirja
                              :ote_kauppa_ja_yhdistysrekisterista
                              :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
                     :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
@@ -78,13 +78,14 @@
                            :valaistussuunnitelma
                            :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
                            :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
-                           :muu]}})
+                           :muu]]})
 
 (defn- get-permit-type [application-id]
   (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
 
+; TODO: Uses :buildingPermit as a default permit type.
 (defn attachment-types-for [permit-type]
-  (attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type)))
+  (partition 2 (get attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type))))
 
 ;;
 ;; Upload
@@ -178,9 +179,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [command]
-  (with-application command (comp (partial ok :attachmentTypes)
-                                  (partial reduce to-key-types-vec [])
-                                  :allowedAttahmentTypes)))
+  (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
 
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
@@ -190,7 +189,7 @@
   (with-application command
     (fn [application]
       (let [attachment-type (parse-attachment-type attachmentType)]
-        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachment-type)
+        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
           (do
             (mongo/update
               mongo/applications
@@ -247,12 +246,12 @@
   [{created :created
     user    :user
     {:keys [id attachmentId attachmentType filename tempfile size text]} :data}]
-  (debug "Create GridFS file: %s %s %s %s %s %d (%s)" id attachmentId attachmentType filename tempfile size text)
+  (debug "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
       (if-let [application (mongo/by-id mongo/applications id)]
-        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachmentType)
+        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (file tempfile))
