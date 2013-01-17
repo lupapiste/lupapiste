@@ -65,7 +65,7 @@ var attachment = (function() {
     name:           ko.observable(),
     type:           ko.observable(),
     attachmentType: ko.observable(),
-    allowedAttahmentTypes: ko.observableArray(),
+    allowedAttachmentTypes: ko.observableArray(),
 
     hasPreview: function() {
       return this.isImage() || this.isPdf() || this.isPlainText();
@@ -131,7 +131,7 @@ var attachment = (function() {
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
     model.name("attachmentType." + type);
-    model.allowedAttahmentTypes(application.allowedAttahmentTypes);
+    model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
     model.application.id(applicationId);
     model.application.title(application.title);
@@ -209,24 +209,35 @@ var attachment = (function() {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
-    if (iframe) {
-      if (iframe.contentWindow.LUPAPISTE && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
-        iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
-      } else {
-        error("LUPAPISTE.Upload.init is not a function");
-      }
-    } else {
-      error("IFrame not found ", iframeId);
-    }
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
   }
 
-  function regroupAttachmentList() {
-    // do me
+  /*
+   * Accepts a vector of attachment types. Each type is a tuple of two elements, first
+   * being the name of the type group and second is the list of attachment names belonging
+   * to that group. For example, following is a valid value for 'types':
+   * 
+   *  regroupAttachmentTypeList(
+   *    [
+   *      ["muut", ["selvitys a", "selvitys b"]],
+   *      ["tiedot", ["tieto a", "tieto b"]]
+   *    ]
+   *  );
+   * 
+   * Returns the same information, but wraps each group into a map with two keys, "group" that has the name of
+   * the group as a value, and "types" that has the list of attachment types as a value. The example above would
+   * return this structure:
+   * 
+   * [{"group": "muut", "types": ["selvitys a", "selvitys b"]}, {"group": "tiedot", "types": ["tieto a", "tieto b"]}]
+   */
+  
+  function regroupAttachmentTypeList(types) {
+    return _.map(types, function(v) { return {"group": v[0], "types": v[1]}; });
   }
   
   return {
     newAttachment: newAttachment,
-    regroupAttachmentList: regroupAttachmentList
+    regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 
 })();
