@@ -22,7 +22,7 @@
    :init         {:js ["hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
-                  :js ["openlayers.2.12.js" "gis.js" "map.js"]}
+                  :js ["openlayers.2.12.js" "gis.js"]}
 
    :debug        (if (env/dev-mode?) debugjs {})
 
