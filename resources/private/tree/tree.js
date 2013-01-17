@@ -136,6 +136,7 @@ var selectionTree = (function () {
       if (self.stack.length > 1) {
         var icon = document.createElement("span");
         icon.className = "font-icon icon-tree-start";
+        link = document.createElement("a");
         link.className = "tree-start";
         link.innerHTML = loc("tree.start");
         link.href = "#";
