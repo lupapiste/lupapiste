@@ -126,8 +126,8 @@ var selectionTree = (function () {
         link.className = "tree-back";
         link.innerHTML = loc("tree.back");
         link.href = "#";
-        link.appendChild(icon);
         link.onclick = self.gobackEventHandler;
+        link.appendChild(icon);
         d.appendChild(link);
       }
 
@@ -139,6 +139,7 @@ var selectionTree = (function () {
         link.innerHTML = loc("tree.start");
         link.href = "#";
         link.onclick = self.gostartEventHandler;
+        link.appendChild(icon);
         d.appendChild(link);
       }
 
