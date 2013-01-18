@@ -2,7 +2,9 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [sade.security :as sadesecurity]
+            [sade.client :as sadeclient]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
             [lupapalvelu.email :as email]
@@ -123,10 +125,14 @@
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
   [{data :data}]
-  (let [from-vetuma (client/json-get (str "/vetuma/stamp/" (:stamp data)))]
-    (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) from-vetuma)
-    (security/create-user (merge data from-vetuma))
-    nil))
+  (let [vetuma   (client/json-get (str "/vetuma/stamp/" (:stamp data)))
+        userdata (merge data vetuma)]
+    (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
+    (if-let [user (security/create-user userdata)]
+      (do
+        (sadesecurity/send-activation-mail-for {:user user :from "lupapiste@solita.fi" :service-name "Lupapiste" :host-url (sadeclient/uri)})
+        (ok :id (:_id user)))
+      (fail :error.create_user))))
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
