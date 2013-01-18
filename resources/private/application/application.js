@@ -135,6 +135,15 @@
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
+    },
+    
+    cancelApplication: function() {
+      var id = application.id();
+      ajax
+        .command("cancel-application", {id: id})
+        .success(repository.reloadApplication.bind(repository, id))
+        .call();
+      return false;
     }
 
   };
