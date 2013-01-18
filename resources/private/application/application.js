@@ -142,7 +142,7 @@
       ajax
         .command("cancel-application", {id: id})
         .success(function() {
-          window.location.hash = "!/all-applications";
+          window.location.hash = "!/applications";
         })
         .call();
       return false;
