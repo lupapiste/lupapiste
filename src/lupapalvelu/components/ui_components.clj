@@ -22,7 +22,7 @@
    :init         {:js ["hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
-                  :js ["openlayers.2.12.js" "gis.js" "map.js"]}
+                  :js ["openlayers.2.12.js" "gis.js"]}
 
    :debug        (if (env/dev-mode?) debugjs {})
 
@@ -47,7 +47,7 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :application  {:depends [:common :repository]
+   :application  {:depends [:common :repository :tree]
                   :js ["application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html"]}
 

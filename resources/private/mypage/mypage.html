@@ -6,29 +6,28 @@
     <form id="own-info-form">
 
       <h2>Omat tiedot:</h2>
-
-      <label>Etunimi:</label>
-      <input data-bind="value: firstName" name="firstName" type="text" placeholder="Etunimi"></input>
-      <br/>
-
-      <label>Sukunimi:</label>
-      <input data-bind="value: lastName" name="lastName" type="text" placeholder="Sukunimi"></input>
-      <br/>
-
-      <label>Osoite:</label>
-      <br/>
-      <input data-bind="value: street" name="street" type="text" placeholder="Katu"></input>
-      <br/>
-      <input data-bind="value: city" name="city" type="text" placeholder="Kaupunki"></input>
-      <br/>
-      <input data-bind="value: zip" name="zip" type="text" placeholder="Postinumero"></input>
-      <br/>
-
-      <label>Puhelin:</label>
-      <input data-bind="value: phone" name="phone" type="text" placeholder="Puhelin numero"></input>
-      <br/>
-
-      <button data-bind="click: save" type="button" href="#">Tallenna</button>
+      <div class="form-entry">
+        <label for="firstName" class="form-label">Etunimi:</label>
+        <input data-bind="value: firstName" name="firstName" type="text" placeholder="Etunimi" class="form-input"></input>
+      </div>
+      
+      <div class="form-entry">
+        <label for="lastName" class="form-label">Sukunimi:</label>
+        <input data-bind="value: lastName" name="lastName" type="text" placeholder="Sukunimi" class="form-input"></input>
+      </div>
+      <div class="form-entry">
+        <label for="street" class="form-label">Katuosoite:</label>
+        <input data-bind="value: street" name="street" type="text" placeholder="Katu" class="form-input"></input>
+        <label for="city" class="form-label">Postitoimipaikka:</label>
+        <input data-bind="value: city" name="city" type="text" placeholder="Kaupunki" class="form-input"></input>
+        <label for="zip" class="form-label">Postinumero:</label>
+        <input data-bind="value: zip" name="zip" type="text" placeholder="Postinumero" class="form-input"></input>
+      </div>
+      <div class="form-entry">
+        <label for="phone" class="form-label">Puhelin:</label>
+        <input data-bind="value: phone" name="phone" type="text" placeholder="Puhelin numero" class="form-input"></input>
+      </div>
+      <button data-bind="click: save" type="button" href="#" class="btn btn-primary">Tallenna</button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color=red;"></span>
       <span data-bind="visible: error() == null && saved" style="font-weight: bold; color=green;">Tiedot tallennettu</span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
@@ -39,21 +38,18 @@
     
       <h2>Vaihda salasana:</h2>
 
-      <label>Nykyinen salasana:</label>
-      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown'" name="oldPassword" type="password" placeholder="Nykyinen salasana"></input>
-      <br/>
+      <label for="oldPassword" class="form-label">Nykyinen salasana:</label>
+      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown'" name="oldPassword" type="password" placeholder="Nykyinen salasana" class="form-input"></input>
 
-      <label>Uusi salasana:</label>
-      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown'" name="newPassword" type="password" placeholder="Uusi salasana"></input>
+      <label for="newPassword" class="form-label">Uusi salasana:</label>
+      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown'" name="newPassword" type="password" placeholder="Uusi salasana" class="form-input"></input>
       <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
-      <br/>
 
-      <label>Salasana uudelleen:</label>
-      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown'" name="newPassword2" type="password" placeholder="Salasana uudelleen"></input>
+      <label for="newPassword2" class="form-label">Salasana uudelleen:</label>
+      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown'" name="newPassword2" type="password" placeholder="Salasana uudelleen" class="form-input"></input>
       <span data-bind="visible: noMatch" style="color: gray; font-style: italic;">Salasanat eivät täsmää.</span>
-      <br/>
 
-      <button data-bind="click: save, enable: ok" type="button" href="#">Vaihda salasana</button>
+      <button data-bind="click: save, enable: ok" type="button" href="#" class="btn btn-primary">Vaihda salasana</button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color=red;"></span>
       <span data-bind="visible: error() == null && saved" style="font-weight: bold; color=green;">Salasana muutettu</span>
       <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>

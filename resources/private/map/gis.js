@@ -55,24 +55,16 @@ var gis = (function() {
       return self;
     };
 
-    self.add = function(locations, markerIcon) {
+    self.add = function(x, y, markerIcon) {
       var icon = markerIcon || defaultIcon;
-      _.each(locations, function(location) {
-        var marker = makeMarker(new OpenLayers.LonLat(location.x, location.y), icon);
-        self.markerLayer.addMarker(marker);
-        self.markers.push(marker);
-      });
+      var marker = makeMarker(new OpenLayers.LonLat(x, y), icon);
+      self.markerLayer.addMarker(marker);
+      self.markers.push(marker);
       return self;
     };
 
-    self.center = function(locations, zoom) {
-      // If 'locations' is an array, take just the first.
-      // TODO: Should consider all locations.
-      var location = locations;
-      if (Object.prototype.toString.call(locations) === "[object Array]") {
-        location = locations[0];
-      }
-      self.map.setCenter(new OpenLayers.LonLat(location.x, location.y), zoom);
+    self.center = function(x, y, zoom) {
+      self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
 

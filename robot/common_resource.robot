@@ -16,6 +16,7 @@ ${LOGIN URL}                    ${SERVER}/welcome#!/login
 ${LOGOUT URL}                    ${SERVER}/logout
 ${APPLICATIONS PATH}            /applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /authority#!/applications
+${AUTHORITY INFOREQUESTS URL}   ${SERVER}/authority#!/inforequests
 ${FIXTURE URL}                  ${SERVER}/fixture
 
 ${SELENIUM}                     ${EMPTY}
@@ -82,10 +83,16 @@ Open application
   Click element    test-application-link
   Wait until page contains element  application-page-is-ready
 
-Open inforequest
-  Wait until page contains element  test-inforequest-link
-  Click element  test-inforequest-link
+# Open nth inforequest in list, n begins from 1
+Open nth inforequest
+  [Arguments]  ${Index}
+  Go to  ${AUTHORITY INFOREQUESTS URL}
+  Wait until page contains element  //tr[@data-test-class="inforequest-row"]
+  Click element  //tr[@data-test-class="inforequest-row"][${Index}]
   Wait until page contains element  application-page-is-ready
+
+Open any inforequest
+  Open nth inforequest  1
 
 Open attachment tab
   Wait until page contains element  test-application-link
