@@ -15,6 +15,7 @@
                          [security :as security]
                          [attachment :as attachment]
                          [proxy-services :as proxy-services])
+            [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
 
@@ -164,6 +165,20 @@
       (resp/redirect application-page)
       (resp/redirect "/welcome#"))
     (resp/redirect "/welcome#")))
+
+;;
+;; FROM SADE
+;;
+
+(defpage "/security/activate/:activation-key" {key :activation-key}
+  (if-let [user (sadesecurity/activate-account key)]
+    (do
+      (info "User account '%s' activated, auto-logging in the user" (:username user))
+      (session/put! :user user)
+      (resp/redirect "/"))
+    (do
+      (warn (format "Invalid user account activation attempt with key '%s', possible hacking attempt?" key))
+      (resp/redirect "/"))))
 
 ;;
 ;; Apikey-authentication
