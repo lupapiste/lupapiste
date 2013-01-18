@@ -80,8 +80,10 @@
 
 
 (def rakennuslupa_to_krysp
-  {:tag :Rakennusvalvonta :attr {:xmlns:xs "http://www.w3.org/2001/XMLSchema"
-                                  :xmlns "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
+  {:tag :Rakennusvalvonta :attr {:xmlns:xlink "http://www.w3.org/1999/xlink" :xmlns:xml "http://www.w3.org/XML/1998/namespace"
+  :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance" :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  :xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.0/rakennusvalvonta.xsd"
+  :xmlns "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
    :child [{:tag :toimituksenTiedot :child toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
