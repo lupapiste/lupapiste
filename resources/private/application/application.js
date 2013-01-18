@@ -7,7 +7,9 @@
   var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
   var commentModel = comments.create();
-
+  var applicationMap;
+  var inforequestMap;
+  
   function ApplicationModel() {
     var self = this;
 
@@ -239,8 +241,10 @@
 
       // Update map:
       var location = application.location();
-
-      hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
+      var x = location.x();
+      var y = location.y();
+      applicationMap.clear().add(x, y).center(x, y, 10);
+      inforequestMap.clear().add(x, y).center(x, y, 10);
 
       // docgen:
 
@@ -379,18 +383,18 @@
 
   var initApplication = function(e) {
     currentId = e.pagePath[0];
+    applicationMap.updateSize();
+    inforequestMap.updateSize();
     hub.send("load-application", {id: currentId});
   };
 
-  hub.onPageChange("application", function(e) {
-    initApplication(e);
-  });
-
-  hub.onPageChange("inforequest", function(e) {
-    initApplication(e);
-  });
+  hub.onPageChange("application", initApplication);
+  hub.onPageChange("inforequest", initApplication);
 
   $(function() {
+    applicationMap = gis.makeMap("application-map").center([{x: 404168, y: 6693765}], 7);
+    inforequestMap = gis.makeMap("inforequest-map").center([{x: 404168, y: 6693765}], 7);
+
     var bindings = {
       application: application,
       authorities: authorities,
