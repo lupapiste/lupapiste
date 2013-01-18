@@ -15,10 +15,11 @@
 
 (defn application-query-for [user]
   (case (keyword (:role user))
-    :applicant {:auth.id (:id user)}
+    :applicant {:auth.id (:id user)
+                :state {$ne "canceled"}}
     :authority {:municipality (:municipality user)
-                :state {$ne "draft"}}
-    :admin     {}
+                :state {$and [{$ne "draft"} {$ne "canceled"}]}}
+    :admin     {:state {$ne "canceled"}}
     (do
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
