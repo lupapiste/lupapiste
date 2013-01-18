@@ -91,8 +91,6 @@
 ;; Web UI:
 ;;
 
-(defpage "/" [] (resp/redirect "/welcome#"))
-
 (def content-type {:html "text/html; charset=utf-8"
                    :js   "application/javascript"
                    :css  "text/css"})
@@ -159,6 +157,13 @@
 (defpage "/logout" []
   (session/clear!)
   (resp/redirect "/"))
+
+(defpage "/" []
+  (if (logged-in?)
+    (if-let [application-page (applicationpage-for (:role (current-user)))]
+      (resp/redirect application-page)
+      (resp/redirect "/welcome#"))
+    (resp/redirect "/welcome#")))
 
 ;;
 ;; Apikey-authentication
