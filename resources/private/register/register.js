@@ -86,7 +86,7 @@
     var hash = (location.hash || "").substr(3);
     var path = hash.split("/");
     var pagePath = path.splice(1, path.length - 1);
-    return _.first(pagePath) || undefined;
+    return _.first(pagePath) || undefined;
   }
 
   hub.onPageChange('register', function() {
