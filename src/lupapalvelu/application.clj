@@ -26,10 +26,23 @@
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields {:propertyId "Fobozaa"})
+(def meta-fields [{:field :applicant
+                   :schema "hakija"
+                   :f (fn [doc]
+                        (let [data (get-in doc [:body :henkilo :henkilotiedot])]
+                          {:firstName (:etunimi data)
+                           :lastName (:sukunimi data)}))}])
+
+(defn search-doc [app schema]
+  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
 
 (defn with-meta-fields [app]
-  (reduce (fn [app [field-name source-path]] (assoc app field-name source-path)) app meta-fields))
+  (reduce (fn [app {:keys [field schema f]}]
+            (if-let [doc (search-doc app schema)]
+              (assoc app field (f doc))
+              app))
+          app
+          meta-fields))
 
 ;;
 ;; Query application:
