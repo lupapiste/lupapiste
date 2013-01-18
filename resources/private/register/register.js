@@ -102,9 +102,13 @@
       model().firstname(data.firstname);
       model().lastname(data.lastname);
       model().stamp(data.stamp);
+      ko.applyBindings(model, $('#register2')[0]);
     });
+  });
 
-    ko.applyBindings(model, $('#register2')[0]);
+  hub.onPageChange('register3', function() {
+    console.log(model);
+    ko.applyBindings(model, $('#register3')[0]);
   });
 
 })();
