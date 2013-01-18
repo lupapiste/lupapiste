@@ -130,7 +130,11 @@
     (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
     (if-let [user (security/create-user userdata)]
       (do
-        (sadesecurity/send-activation-mail-for {:user user :from "lupapiste@solita.fi" :service-name "Lupapiste" :host-url (sadeclient/uri)})
+        (future
+          (sadesecurity/send-activation-mail-for {:user user
+                                                  :from "lupapiste@solita.fi"
+                                                  :service-name "Lupapiste"
+                                                  :host-url (sadeclient/uri)}))
         (ok :id (:_id user)))
       (fail :error.create_user))))
 
