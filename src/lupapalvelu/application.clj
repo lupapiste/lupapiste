@@ -43,14 +43,13 @@
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (map with-meta-fields (mongo/select mongo/applications (application-query-for user)))))
 
-(defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
-        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
-    data))
+(defn find-authorities-in-applications-municipality [app]
+  (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
-    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality id))
+    (ok :application (with-meta-fields app)
+        :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -59,7 +58,10 @@
   {:parameters [:id]
    :authenticated true}
   [command]
-  (ok :authorityInfo (find-authorities-in-applications-municipality (-> command :data :id))))
+  (let [id (-> command :data :id)
+        app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
+        authorities (find-authorities-in-applications-municipality app)]
+    (ok :authorityInfo authorities)))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
