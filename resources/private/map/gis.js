@@ -64,7 +64,7 @@ var gis = (function() {
     };
 
     self.center = function(x, y, zoom) {
-      self.map.setCenter(new OpenLayers.LonLat(x, y), zoom || 7);
+      self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
 
