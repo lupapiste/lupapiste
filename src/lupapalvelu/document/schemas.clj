@@ -95,87 +95,87 @@
              {:name "kaytto"
               :type :group
               :body [{:name "rakentajaTyyppi" :type "select"
-              :body [{:name "liiketaloudellinen"}
-                     {:name "muu"}
-                     {:name "ei tiedossa"}]}
-             {:name "kayttotarkoitus" :type :select
-              :body [{:name "999 muualla luokittelemattomat rakennukset"}
-                     {:name "941 talousrakennukset"}
-                     {:name "931 saunarakennukset"}
-                     {:name "899 muut maa-, mets\u00e4- ja kalatalouden rakennukset"}
-                     {:name "893 turkistarhat"}
-                     {:name "892 kasvihuoneet"}
-                     {:name "891 viljankuivaamot ja viljan s\u00e4ilytysrakennukset"}
-                     {:name "819 el\u00e4insuojat, ravihevostallit, maneesit yms"}
-                     {:name "811 navetat, sikalat, kanalat yms"}
-                     {:name "729 muut palo- ja pelastustoimen rakennukset"}
-                     {:name "722 v\u00e4est\u00f6nsuojat"}
-                     {:name "721 paloasemat"}
-                     {:name "719 muut varastorakennukset"}
-                     {:name "712 kauppavarastot"}
-                     {:name "711 teollisuusvarastot"}
-                     {:name "699 muut teollisuuden tuotantorakennukset"}
-                     {:name "692 teollisuus- ja pienteollisuustalot"}
-                     {:name "691 teollisuushallit"}
-                     {:name "613 yhdyskuntatekniikan rakennukset"}
-                     {:name "611 voimalaitosrakennukset"}
-                     {:name "549 muualla luokittelemattomat opetusrakennukset"}
-                     {:name "541 j\u00e4rjest\u00f6jen, liittojen, ty\u00f6nantajien yms opetusrakennukset"}
-                     {:name "532 tutkimuslaitosrakennukset"}
-                     {:name "531 korkeakoulurakennukset"}
-                     {:name "521 ammatillisten oppilaitosten rakennukset"}
-                     {:name "511 yleissivist\u00e4vien oppilaitosten rakennukset"}
-                     {:name "369 muut kokoontumisrakennukset"}
-                     {:name "359 muut urheilu- ja kuntoilurakennukset"}
-                     {:name "354 monitoimihallit ja muut urheiluhallit"}
-                     {:name "353 tennis-, squash- ja sulkapallohallit"}
-                     {:name "352 uimahallit"}
-                     {:name "351 j\u00e4\u00e4hallit"}
-                     {:name "349 muut uskonnollisten yhteis\u00f6jen rakennukset"}
-                     {:name "342 seurakuntatalot"}
-                     {:name "341 kirkot, kappelit, luostarit ja rukoushuoneet"}
-                     {:name "331 seura- ja kerhorakennukset yms"}
-                     {:name "324 n\u00e4yttelyhallit"}
-                     {:name "323 museot ja taidegalleriat"}
-                     {:name "322 kirjastot ja arkistot"}
-                     {:name "312 elokuvateatterit"}
-                     {:name "311 teatterit, ooppera-, konsertti- ja kongressitalot"}
-                     {:name "241 vankilat"}
-                     {:name "239 muualla luokittelemattomat sosiaalitoimen rakennukset"}
-                     {:name "231 lasten p\u00e4iv\u00e4kodit"}
-                     {:name "229 muut huoltolaitosrakennukset"}
-                     {:name "223 kehitysvammaisten hoitolaitokset"}
-                     {:name "222 lasten- ja koulukodit"}
-                     {:name "221 vanhainkodit"}
-                     {:name "219 muut terveydenhuoltorakennukset"}
-                     {:name "215 terveydenhuollon erityislaitokset"}
-                     {:name "214 terveyskeskukset"}
-                     {:name "213 muut sairaalat"}
-                     {:name "211 keskussairaalat"}
-                     {:name "169 muut liikenteen rakennukset"}
-                     {:name "164 tietoliikenteen rakennukset"}
-                     {:name "163 pys\u00e4k\u00f6intitalot"}
-                     {:name "162 kulkuneuvojen suoja- ja huoltorakennukset"}
-                     {:name "161 rautatie- ja linja-autoasemat, lento- ja satamaterminaalit"}
-                     {:name "151 toimistorakennukset"}
-                     {:name "141 ravintolat yms"}
-                     {:name "139 muut asuntolarakennukset"}
-                     {:name "131 asuntolat yms"}
-                     {:name "129 muut majoitusliikerakennukset"}
-                     {:name "124 vuokrattavat lomam\u00f6kit ja -osakkeet"}
-                     {:name "123 loma-, lepo- ja virkistyskodit"}
-                     {:name "121 hotellit yms"}
-                     {:name "119 muut myym\u00e4l\u00e4rakennukset"}
-                     {:name "112 liike- ja tavaratalot, kauppakeskukset"}
-                     {:name "111 myym\u00e4l\u00e4hallit"}
-                     {:name "041 vapaa-ajan asuinrakennukset"}
-                     {:name "039 muut asuinkerrostalot"}
-                     {:name "032 luhtitalot"}
-                     {:name "022 ketjutalot"}
-                     {:name "021 rivitalot"}
-                     {:name "013 muut erilliset talot"}
-                     {:name "012 kahden asunnon talot"}
-                     {:name "011 yhden asunnon talot"}
+                      :body [{:name "liiketaloudellinen"}
+                             {:name "muu"}
+                             {:name "ei tiedossa"}]}
+                     {:name "kayttotarkoitus" :type :select
+                      :body [{:name "999 muualla luokittelemattomat rakennukset"}
+                             {:name "941 talousrakennukset"}
+                             {:name "931 saunarakennukset"}
+                             {:name "899 muut maa-, mets\u00e4- ja kalatalouden rakennukset"}
+                             {:name "893 turkistarhat"}
+                             {:name "892 kasvihuoneet"}
+                             {:name "891 viljankuivaamot ja viljan s\u00e4ilytysrakennukset"}
+                             {:name "819 el\u00e4insuojat, ravihevostallit, maneesit yms"}
+                             {:name "811 navetat, sikalat, kanalat yms"}
+                             {:name "729 muut palo- ja pelastustoimen rakennukset"}
+                             {:name "722 v\u00e4est\u00f6nsuojat"}
+                             {:name "721 paloasemat"}
+                             {:name "719 muut varastorakennukset"}
+                             {:name "712 kauppavarastot"}
+                             {:name "711 teollisuusvarastot"}
+                             {:name "699 muut teollisuuden tuotantorakennukset"}
+                             {:name "692 teollisuus- ja pienteollisuustalot"}
+                             {:name "691 teollisuushallit"}
+                             {:name "613 yhdyskuntatekniikan rakennukset"}
+                             {:name "611 voimalaitosrakennukset"}
+                             {:name "549 muualla luokittelemattomat opetusrakennukset"}
+                             {:name "541 j\u00e4rjest\u00f6jen, liittojen, ty\u00f6nantajien yms opetusrakennukset"}
+                             {:name "532 tutkimuslaitosrakennukset"}
+                             {:name "531 korkeakoulurakennukset"}
+                             {:name "521 ammatillisten oppilaitosten rakennukset"}
+                             {:name "511 yleissivist\u00e4vien oppilaitosten rakennukset"}
+                             {:name "369 muut kokoontumisrakennukset"}
+                             {:name "359 muut urheilu- ja kuntoilurakennukset"}
+                             {:name "354 monitoimihallit ja muut urheiluhallit"}
+                             {:name "353 tennis-, squash- ja sulkapallohallit"}
+                             {:name "352 uimahallit"}
+                             {:name "351 j\u00e4\u00e4hallit"}
+                             {:name "349 muut uskonnollisten yhteis\u00f6jen rakennukset"}
+                             {:name "342 seurakuntatalot"}
+                             {:name "341 kirkot, kappelit, luostarit ja rukoushuoneet"}
+                             {:name "331 seura- ja kerhorakennukset yms"}
+                             {:name "324 n\u00e4yttelyhallit"}
+                             {:name "323 museot ja taidegalleriat"}
+                             {:name "322 kirjastot ja arkistot"}
+                             {:name "312 elokuvateatterit"}
+                             {:name "311 teatterit, ooppera-, konsertti- ja kongressitalot"}
+                             {:name "241 vankilat"}
+                             {:name "239 muualla luokittelemattomat sosiaalitoimen rakennukset"}
+                             {:name "231 lasten p\u00e4iv\u00e4kodit"}
+                             {:name "229 muut huoltolaitosrakennukset"}
+                             {:name "223 kehitysvammaisten hoitolaitokset"}
+                             {:name "222 lasten- ja koulukodit"}
+                             {:name "221 vanhainkodit"}
+                             {:name "219 muut terveydenhuoltorakennukset"}
+                             {:name "215 terveydenhuollon erityislaitokset"}
+                             {:name "214 terveyskeskukset"}
+                             {:name "213 muut sairaalat"}
+                             {:name "211 keskussairaalat"}
+                             {:name "169 muut liikenteen rakennukset"}
+                             {:name "164 tietoliikenteen rakennukset"}
+                             {:name "163 pys\u00e4k\u00f6intitalot"}
+                             {:name "162 kulkuneuvojen suoja- ja huoltorakennukset"}
+                             {:name "161 rautatie- ja linja-autoasemat, lento- ja satamaterminaalit"}
+                             {:name "151 toimistorakennukset"}
+                             {:name "141 ravintolat yms"}
+                             {:name "139 muut asuntolarakennukset"}
+                             {:name "131 asuntolat yms"}
+                             {:name "129 muut majoitusliikerakennukset"}
+                             {:name "124 vuokrattavat lomam\u00f6kit ja -osakkeet"}
+                             {:name "123 loma-, lepo- ja virkistyskodit"}
+                             {:name "121 hotellit yms"}
+                             {:name "119 muut myym\u00e4l\u00e4rakennukset"}
+                             {:name "112 liike- ja tavaratalot, kauppakeskukset"}
+                             {:name "111 myym\u00e4l\u00e4hallit"}
+                             {:name "041 vapaa-ajan asuinrakennukset"}
+                             {:name "039 muut asuinkerrostalot"}
+                             {:name "032 luhtitalot"}
+                             {:name "022 ketjutalot"}
+                             {:name "021 rivitalot"}
+                             {:name "013 muut erilliset talot"}
+                             {:name "012 kahden asunnon talot"}
+                             {:name "011 yhden asunnon talot"}
                              {:name "ei tiedossa"}]}]}
              {:name "mitat"
               :type :group
