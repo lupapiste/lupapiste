@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Inforequest state handling
-#Suite teardown  Logout
+Suite teardown  Logout
 Resource        ../../common_resource.txt
 
 *** Test Cases ***
@@ -13,18 +13,18 @@ Authority assigns an inforequest to herself and then back to no-one
   Open any inforequest
   Wait until page contains element  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
-  Click link  test-inforequests
+  Click link  xpath=//a[@data-test-id="test-inforequests"]
   Wait until  Number of assigned inforequests  Sonja  1
-#  Logout
+  Logout
   
-#Applicant marks inforequest answered
-#  Mikko logs in
-#  Wait and click  test-from-applications-to-inforequests-tab
-#  Wait until  Number of visible applications on page  inforequests  2
-#  Wait and click  test-inforequest-link
-#  Wait and click  test-mark-inforequest-answered
-#  Wait until  Inforequest state is  Vastattu
-#  Logout
+Applicant marks inforequest answered
+  Mikko logs in
+  Wait and click  test-from-applications-to-inforequests-tab
+  Wait until  Number of visible applications on page  inforequests  2
+  Wait and click  test-inforequest-link
+  Wait and click  test-mark-inforequest-answered
+  Wait until  Inforequest state is  Vastattu
+  Logout
 
 *** Keywords ***
 
