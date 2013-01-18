@@ -18,7 +18,7 @@
     :applicant {:auth.id (:id user)
                 :state {$ne "canceled"}}
     :authority {:municipality (:municipality user)
-                :state {$and [{$ne "draft"} {$ne "canceled"}]}}
+                $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
     :admin     {:state {$ne "canceled"}}
     (do
       (warn "invalid role to get applications")
