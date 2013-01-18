@@ -34,7 +34,8 @@
               <p>Käsittelijä:</p>
               <span id="test-inforequest-assignee" class="application_summary_text">
   
-                <select data-bind="options: $root.authorities, 
+                <select id="inforequest-assignee-select" 
+                        data-bind="options: $root.authorities, 
                                    optionsText: function(item) {
                                     return item.firstName + ' ' + item.lastName;
                                    },
