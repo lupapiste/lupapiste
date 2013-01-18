@@ -88,11 +88,11 @@
               :type :group
               :repeating true
               :body party-body}
-             {:name "toimenpiteenKuvaus" 
+             {:name "toimenpiteenKuvaus"
               :type :group
               :body [{:name "kuvaus" :type :text :size "l"}
                      {:name "poikkeamiset" :type :text :size "l"}]}
-             {:name "kaytto" 
+             {:name "kaytto"
               :type :group
               :body [{:name "rakentajaTyyppi" :type "select"
               :body [{:name "liiketaloudellinen"}
@@ -177,14 +177,14 @@
                      {:name "012 kahden asunnon talot"}
                      {:name "011 yhden asunnon talot"}
                              {:name "ei tiedossa"}]}]}
-             {:name "mitat" 
+             {:name "mitat"
               :type :group
               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
                      {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number}
                      {:name "kerrosluku" :type :string :size "s" :subtype :number}
                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}]}
-             {:name "rakenne" 
+             {:name "rakenne"
               :type :group
               :body [{:name "rakentamistapa" :type :select
               :body [{:name "elementti" :type :checkbox}
@@ -206,7 +206,7 @@
                      {:name "lasi" :type :checkbox}
                      {:name "muumateriaali" :type :string :size "s"}
                              {:name "ei tiedossa" :type :checkbox}]}]}
-             {:name "lammitys" 
+             {:name "lammitys"
               :type :group
               :body [{:name "lammitystapa" :type :select
               :body [{:name "vesikeskus" :type :checkbox}
@@ -244,7 +244,7 @@
                      {:name "aurinkopaneeliKytkin" :type :checkbox}
                      {:name "saunoja" :type :string :subtype :number}
                      {:name "vaestonsuoja" :type :string :subtype :number}]}
-             {:name "luokitus" 
+             {:name "luokitus"
               :type :group
               :body [{:name "energialuokka" :type :string :size "s"}
                      {:name "paloluokka" :type :string :size "s"}]}]}
@@ -254,7 +254,7 @@
               :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
                      {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
                      {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
-             {:name "huoneistonTyyppi" 
+             {:name "huoneistonTyyppi"
               :type :group
               :body [{:name "huoneistoTyyppi" :type :select
                       :body [{:name "asuinhuoneisto"}
@@ -288,12 +288,12 @@
       :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osoitettu)
-      :body [{:name "kiinteisto" 
+      :body [{:name "kiinteisto"
               :type :group
-      :body [{:name "maaraalaTunnus" :type :string}
-                    {:name "kokotilaKytkin" :type :checkbox}
-             {:name "kylaNimi" :type :string}
-                    {:name "tilanNimi" :type :string}]}
+              :body [{:name "maaraalaTunnus" :type :string}
+                     {:name "kokotilaKytkin" :type :checkbox}
+                     {:name "kylaNimi" :type :string}
+                     {:name "tilanNimi" :type :string}]}
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
