@@ -1,8 +1,5 @@
-/**
- * application.js:
- */
-
 ;(function() {
+  "use strict";
 
   var isInitializing = true;
   var currentId;
@@ -10,7 +7,9 @@
   var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
   var commentModel = comments.create();
-
+  var applicationMap;
+  var inforequestMap;
+  
   function ApplicationModel() {
     var self = this;
 
@@ -25,19 +24,21 @@
           a.roles.push(i.role());
           r[i.id()] = a;
           return r;
-        }
+        };
         var pimped = _.reduce(auth, withRoles, {});
         value = _.values(pimped);
       }
       return value;
-    },self);
+    }, self);
   }
 
   var application = {
     id: ko.observable(),
+    infoRequest: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
     permitType: ko.observable(),
+    propertyId: ko.observable(),
     title: ko.observable(),
     created: ko.observable(),
     documents: ko.observable(),
@@ -56,7 +57,7 @@
     submitApplication: function(model) {
       var applicationId = application.id();
       ajax.command("submit-application", { id: applicationId})
-        .success(function(d) {
+        .success(function() {
           notify.success("hakemus j\u00E4tetty",model);
           repository.reloadApplication(applicationId);
         })
@@ -67,7 +68,7 @@
     markInforequestAnswered: function(model) {
       var applicationId = application.id();
       ajax.command("mark-inforequest-answered", {id: applicationId})
-        .success(function(d) {
+        .success(function() {
           notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
           repository.reloadApplication(applicationId);
         })
@@ -75,7 +76,7 @@
       return false;
     },
 
-    convertToApplication: function(model) {
+    convertToApplication: function() {
       var applicationId = application.id();
       ajax.command("convert-to-application", {id: applicationId})
         .success(function(d) {
@@ -90,7 +91,7 @@
     setMeAsPaasuunnittelija: function(model) {
       var applicationId = application.id();
       ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
-      .success(function(d) {
+      .success(function() {
         notify.success("tiedot tallennettu",model);
         repository.reloadApplication(applicationId);
       })
@@ -101,7 +102,7 @@
     approveApplication: function(model) {
       var applicationId = application.id();
       ajax.command("approve-application", { id: applicationId})
-        .success(function(d) {
+        .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
           repository.reloadApplication(applicationId);
         })
@@ -109,10 +110,10 @@
       return false;
     },
 
-    removeInvite : function(model) {
+    removeInvite: function(model) {
       var applicationId = application.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
-        .success(function(d) {
+        .success(function() {
           notify.success("kutsu poistettu", model);
           repository.reloadApplication(applicationId);
         })
@@ -120,14 +121,19 @@
       return false;
     },
 
-    removeAuth : function(model) {
+    removeAuth: function(model) {
       var applicationId = application.id();
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
-        .success(function(d) {
+        .success(function() {
           notify.success("oikeus poistettu", model);
           repository.reloadApplication(applicationId);
         })
         .call();
+      return false;
+    },
+    
+    addOperation: function() {
+      window.location.hash = "#!/add-operation/" + application.id();
       return false;
     }
 
@@ -136,13 +142,6 @@
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
-
-
-  function makeSubscribable(initialValue, listener) {
-    var v = ko.observable(initialValue);
-    v.subscribe(listener);
-    return v;
-  }
 
   function getAttachmentsByGroup(attachments) {
     var grouped = _.groupBy(attachments, function(attachment) {
@@ -163,13 +162,13 @@
   function updateAssignee(value) {
     debug("updateAssignee called, assigneeId: ", value);
     // do not update assignee if page is still initializing
-    if(isInitializing) {
+    if (isInitializing) {
       debug("isInitializing, return");
       return;
     }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if(! authorizationModel.ok('assign-application')) {
+    if (!authorizationModel.ok('assign-application')) {
       return;
     }
 
@@ -177,7 +176,7 @@
 
     debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function(e) {
+      .success(function() {
       })
       .error(function(e) {
         error(e);
@@ -191,7 +190,7 @@
   
   function resolveApplicationAssignee(roles) {
     debug("resolveApplicationAssignee called, roles: ", roles);
-    if(roles && roles.authority) {
+    if (roles && roles.authority) {
       var auth = new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName);
       debug("resolved authority: ", auth);
       return auth;
@@ -230,20 +229,21 @@
 
       attachments.removeAll();
       _.each(app.attachments || [], function(a) {
-        var s = statuses[a.state] || {statusName: "foo"};
-        a.statusName = s.statusName;
+        var s = statuses[a.state];
+        a.statusName = s.statusName || "unknown";
         attachments.push(a);
       });
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 
-      debug("init authorities select list");
       initAuthoritiesSelectList(applicationDetails.authorities);
 
       // Update map:
       var location = application.location();
-
-      hub.send("application-map", {locations: location ? [{x: location.x(), y: location.y()}] : []});
+      var x = location.x();
+      var y = location.y();
+      applicationMap.clear().add(x, y).center(x, y, 10);
+      inforequestMap.clear().add(x, y).center(x, y, 10);
 
       // docgen:
 
@@ -261,11 +261,47 @@
           .call();
       };
 
-      var docgenDiv = $("#docgen").empty();
+      function displayDocuments(containerSelector, documents) {
 
-      _.each(app.documents, function(doc) {
-        docgenDiv.append(docgen.build(doc.schema, doc.body, save, {doc: doc.id, app: application.id()}).element);
+        var groupedDocs = _.groupBy(documents, function (doc) {
+          return doc.schema.info.name;
       });
+
+        var displayOrder = ["rakennuspaikka", "uusiRakennus", "huoneisto", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
+          return _.indexOf(displayOrder, docGroup[0].schema.info.name)
+        });
+
+        var docgenDiv = $(containerSelector).empty();
+        _.each(sortedDocs, function(docGroup) {
+          _.each(docGroup, function(doc) {
+            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, doc.id, application.id()).element);
+          });
+
+          var schema = docGroup[0].schema;
+
+          if (schema.info.repeating) {
+            var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
+
+            $(btn).click(function() {
+              var self = this;
+              ajax
+                .command("create-doc", {schema: schema.info.name, id: application.id()})
+                .success(function(data) {
+                  var newDocId = data.doc;
+                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, newDocId, application.id()).element;
+                  $(self).before(newElem);
+                })
+                .call();
+            });
+            docgenDiv.append(btn);
+          }
+        });
+      }
+
+      var partyDocumentNames = ["hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+      displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
+      displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
       if(! isTabSelected('#applicationTabs')) {
         selectDefaultTab('#applicationTabs');
@@ -302,7 +338,7 @@
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
-        .success(function(d) {
+        .success(function() {
           self.email(undefined);
           self.text(undefined);
           repository.reloadApplication(id);
@@ -346,18 +382,18 @@
 
   var initApplication = function(e) {
     currentId = e.pagePath[0];
+    applicationMap.updateSize();
+    inforequestMap.updateSize();
     hub.send("load-application", {id: currentId});
   };
 
-  hub.onPageChange("application", function(e) {
-    initApplication(e);
-  });
-
-  hub.onPageChange("inforequest", function(e) {
-    initApplication(e);
-  });
+  hub.onPageChange("application", initApplication);
+  hub.onPageChange("inforequest", initApplication);
 
   $(function() {
+    applicationMap = gis.makeMap("application-map").center([{x: 404168, y: 6693765}], 7);
+    inforequestMap = gis.makeMap("inforequest-map").center([{x: 404168, y: 6693765}], 7);
+
     var bindings = {
       application: application,
       authorities: authorities,

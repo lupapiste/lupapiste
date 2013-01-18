@@ -16,7 +16,7 @@
 (defn application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
-    :authority {:authority (:authority user)
+    :authority {:municipality (:municipality user)
                 :state {$ne "draft"}}
     :admin     {}
     (do

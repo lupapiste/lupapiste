@@ -6,6 +6,8 @@
  *  - stopPropagation method
  */
 function getEvent(event) {
+  "use strict";
+
   var e = event || window.event;
 
   if (!e.target) {

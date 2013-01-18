@@ -22,19 +22,23 @@
           </div>
           <div>
             <p>Tila:</p>
-            <span id="test-application-state" class="application_summary_text" data-bind="ltext: state()"></span>
+            <span id="test-application-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
           <div>
             <p>Lupatyyppi:</p>
-            <span class="application_summary_text" data-bind="ltext: permitType()"></span>
+            <span class="application_summary_text" data-bind="ltext: permitType"></span>
+          </div>
+          <div>
+            <p>Kiinteistötunnus:</p>
+            <span class="application_summary_text" data-bind="text: propertyId" data-test-id="application-property-id"></span>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
               <p>Käsittelijä:</p>
               <span id="test-application-assignee" class="application_summary_text">
-  
-                <select data-bind="options: $root.authorities, 
+
+                <select data-bind="options: $root.authorities,
                                    optionsText: function(item) {
                                     return item.firstName + ' ' + item.lastName;
                                    },
@@ -62,12 +66,13 @@
           <button data-bind="click: submitApplication,  enable: $root.authorization.ok('submit-application')"  type="submit" class="btn btn-primary"  id="test-submit-application" >Jätä hakemus käsiteltäväksi</button>
           <button data-bind="click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  id="test-approve-application">Siirrä kuntarekisteriin</button>
           <button data-bind="enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
-          <button data-bind="enable:false" class="todo btn action-bar-button">Lisää toimenpide</button>
+          <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
           <button data-bind="enable:false" class="todo btn action-bar-button">Poista hakemus</button>
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
+            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   id="test-attachments-tab"  >Suunnitelmat ja liitteet</a></li>
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
@@ -122,7 +127,16 @@
 
         <!-- docgen generated content: -->
         <div class="application_section">
-          <div id="docgen">
+          <div id="applicationDocgen">
+            <!-- This is where generated document will be placed. -->
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="parties_tab" style="display: block;">
+        <!-- docgen generated content: -->
+        <div class="application_section">
+          <div id="partiesDocgen">
             <!-- This is where generated document will be placed. -->
           </div>
         </div>

@@ -40,6 +40,10 @@
 (defmethod validate :select [elem v]
   nil)
 
+;; FIXME
+(defmethod validate :radioGroup [elem v]
+  nil)
+
 (defmethod validate nil [_ _]
   [:err "illegal-key"])
 
