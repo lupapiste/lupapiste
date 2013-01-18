@@ -131,10 +131,11 @@
     (if-let [user (security/create-user userdata)]
       (do
         (future
-          (sadesecurity/send-activation-mail-for {:user user
-                                                  :from "lupapiste@solita.fi"
-                                                  :service-name "Lupapiste"
-                                                  :host-url (sadeclient/uri)}))
+          (let [pimped_user (merge user {:_id (:id user)})] ;; FIXME
+            (sadesecurity/send-activation-mail-for {:user user
+                                                    :from "lupapiste@solita.fi"
+                                                    :service-name "Lupapiste"
+                                                    :host-url (sadeclient/uri)})))
         (ok :id (:_id user)))
       (fail :error.create_user))))
 
