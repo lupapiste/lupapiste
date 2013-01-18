@@ -33,10 +33,9 @@
     };
     
     self.generateLast = function(value) {
-      var e = $("<div>").addClass("tree-result");
-      e.append($("<button>")
-        .addClass("btn")
-        .addClass("btn-primary")
+      var e = $("<div>").addClass("tree-magic");
+      e.append($("<a>")
+        .addClass("tree-action")
         .html(loc('addOperation'))
         .click(function(e) {
           ajax
@@ -49,9 +48,11 @@
             .append($("<img>").attr("src", "/img/ajax-loader.gif"));
           return false;
         }));
-      e.append($("<button>")
-        .addClass("btn")
+      var icon = $("<span>").addClass("font-icon icon-tree-back");
+      e.append($("<a>")
+        .addClass("tree-back")
         .html(loc('back'))
+        .append(icon)
         .click(self.tree.goback));
       return e[0];
     };
