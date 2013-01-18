@@ -2,7 +2,7 @@
 
 Documentation   Application gets verdict
 Suite teardown  Logout
-Resource        ../../common_resource.txt
+Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
