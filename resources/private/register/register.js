@@ -26,6 +26,7 @@
     ajax.command('register-user', json(m))
       .success(function() {
         $('#register-email-error').html('&nbsp;');
+        confirmModel.email = model().email();
         reset(model());
         window.location.hash = "!/register3";
       })
@@ -58,6 +59,10 @@
     disabled: ko.observable(true),
     submit: submit,
     reset: reset
+  };
+
+  var confirmModel = {
+    email: ""
   };
 
   function StatusModel() {
@@ -107,8 +112,7 @@
   });
 
   hub.onPageChange('register3', function() {
-    console.log(model());
-    ko.applyBindings(model, $('#register3')[0]);
+    ko.applyBindings(confirmModel, $('#register3')[0]);
   });
 
 })();
