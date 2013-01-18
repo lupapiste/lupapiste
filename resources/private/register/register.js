@@ -26,14 +26,8 @@
     ajax.command('register-user', json(m))
       .success(function() {
         $('#register-email-error').html('&nbsp;');
-        var login = model().email();
-        var password = model().password();
         reset(model());
-        ajax.post('/api/login')
-          .param('username', login)
-          .param('password', password)
-          .success(function() { window.location = '/applicant'; })
-          .call();
+        window.location.hash = "!/register3";
       })
       .error(function(e) {
         // FIXME: DIRTY HACKS
