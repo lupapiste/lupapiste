@@ -229,14 +229,13 @@
 
       attachments.removeAll();
       _.each(app.attachments || [], function(a) {
-        var s = statuses[a.state] || {statusName: "foo"};
-        a.statusName = s.statusName;
+        var s = statuses[a.state];
+        a.statusName = s.statusName || "unknown";
         attachments.push(a);
       });
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 
-      debug("init authorities select list");
       initAuthoritiesSelectList(applicationDetails.authorities);
 
       // Update map:
