@@ -22,7 +22,7 @@
                                       :lastName "Panaani"
                                       :type "owner"
                                       :role "owner"})
-    (:allowedAttahmentTypes application) => not-empty?))
+    (:allowedAttachmentTypes application) => not-empty?))
 
 (fact "creating application message"
   (apply-remote-minimal)

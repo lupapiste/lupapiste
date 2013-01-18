@@ -34,7 +34,8 @@
               <p>Käsittelijä:</p>
               <span id="test-inforequest-assignee" class="application_summary_text">
   
-                <select data-bind="options: $root.authorities, 
+                <select id="inforequest-assignee-select" 
+                        data-bind="options: $root.authorities, 
                                    optionsText: function(item) {
                                     return item.firstName + ' ' + item.lastName;
                                    },
@@ -60,37 +61,21 @@
     </div>
     
     <div class="container">
-      <p class="tab-info"> Liitteet</p>
-      <div data-bind="if: attachmentsByGroup().length">
+      <p class="tab-info">Liitteet</p>
+      <div data-bind="if: attachments().length">
 
         <table class="table">
-          <tbody data-bind="foreach: attachmentsByGroup()">
-            <tr class="attachment-group-header">
-              <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
-            </tr>
+          <tbody>
             <tr>
-              <th>Tila</th>
-              <th>Tyyppi</th>
               <th>Tiedosto</th>
               <th>Muokattu</th>
               <th></th>
             </tr>
             <!-- ko foreach: attachments -->
-            <tr style="cursor: pointer;">
-              <td data-bind="attr: {'class': statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
-              <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
-                <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
-                  <span data-bind="if: type != null">
-                    <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
-                  </span>
-                  <span data-bind="if: type == null">
-                    <i>Nimet&ouml;n</i>
-                  </span>
-                </a>
-              </td>
+            <tr>
               <td>
-                <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
-                  <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
+                <span data-bind="if: latestVersion && latestVersion.filename">
+                  <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
                   <i data-bind="ltext: latestVersion.contentType"></i>
                   <i data-bind="size: latestVersion.size"></i>
                 </span>
@@ -104,12 +89,12 @@
               <td>
               </td>
             </tr>
-          <!-- /ko -->
+            <!-- /ko -->
           </tbody>
         </table>
 
       </div>
-      <div data-bind="ifnot: attachmentsByGroup.length">
+      <div data-bind="ifnot: attachments().length">
         <i>Ei liitteit&auml;</i>
       </div>
       <button

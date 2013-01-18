@@ -72,6 +72,7 @@
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
+            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   id="test-attachments-tab"  >Suunnitelmat ja liitteet</a></li>
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
             <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
@@ -126,7 +127,16 @@
 
         <!-- docgen generated content: -->
         <div class="application_section">
-          <div id="docgen">
+          <div id="applicationDocgen">
+            <!-- This is where generated document will be placed. -->
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="parties_tab" style="display: block;">
+        <!-- docgen generated content: -->
+        <div class="application_section">
+          <div id="partiesDocgen">
             <!-- This is where generated document will be placed. -->
           </div>
         </div>

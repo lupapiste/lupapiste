@@ -10,8 +10,9 @@ var selectionTree = (function () {
 
   function stopProp(f) {
     return function (e) {
-      e.stopPropagation();
-      e.preventDefault();
+      var event = getEvent(e);
+      event.stopPropagation();
+      event.preventDefault();
       f();
       return false;
     };
@@ -70,11 +71,6 @@ var selectionTree = (function () {
     };
 
     self.reset = function (newData) {
-      self.data = newData;
-      return self.gostart();
-    };
-
-    self.reset = function (newData) {
       if (self.stack.length > 0) {
         var d = self.stack[0];
         $(d).animate({ "margin-left": self.width }, self.speed);
@@ -83,7 +79,7 @@ var selectionTree = (function () {
       self.stack = [];
       self.breadcrumbs.html("");
       self.content.empty();
-      if (newData) { self.data = newData; }
+      if (newData) self.data = newData;
       if (self.data) {
         var n = self.make(self.data);
         self.stack.push(n);
@@ -95,9 +91,11 @@ var selectionTree = (function () {
 
     self.makeHandler = function (key, val, d) {
       return function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-
+        var event = getEvent(e);
+        
+        event.preventDefault();
+        event.stopPropagation();
+        
         self.crumbs.push(key);
         self.breadcrumbs.html(self.crumbs.join(" / "));
 
@@ -107,6 +105,7 @@ var selectionTree = (function () {
         d.parentNode.appendChild(next);
         var done = (terminal && self.callback) ? self.callback.bind(self, val) : null;
         $(d).animate({ "margin-left": -self.width }, self.speed, done);
+        
         return false;
       };
     };
@@ -148,9 +147,8 @@ var selectionTree = (function () {
       return d;
     };
 
-    self.makeLink = function (key, val, d) {
+    self.makeLink = function(key, val, d) {
       var link = document.createElement("a");
-      // var lkey = "tree." + (self.crumbs.length == 0 ? key : self.crumbs.join(".") + "." + key) + ".name";
       link.innerHTML = key;
       link.href = "#";
       link.onclick = self.makeHandler(key, val, d);

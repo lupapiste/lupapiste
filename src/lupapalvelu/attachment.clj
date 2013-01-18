@@ -23,46 +23,20 @@
 
 (def attachment-types-for-permit-type
   {:infoRequest {:muut [:muu]}
-   :buildingPermit {:hakija [:valtakirja
-                             :ote_kauppa_ja_yhdistysrekisterista
-                             :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
-                    :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
-                                              :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
-                                              :rasitustodistus
-                                              :todistus_erityisoikeuden_kirjaamisesta
-                                              :jaljennos_vuokrasopimuksesta
-                                              :jaljennos_perunkirjasta]
+   :buildingPermit [:hakija [:valtakirja]
                     :rakennuspaikka [:ote_alueen_peruskartasta
-                                     :ote_asemakaavasta_jos_asemakaava_alueella
-                                     :ote_kiinteistorekisteristerista
-                                     :tonttikartta_tarvittaessa
-                                     :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
-                                     :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
+                                     :tonttikartta_tarvittaessa]
                     :paapiirustus [:asemapiirros
                                    :pohjapiirros
-                                   :leikkauspiirros
                                    :julkisivupiirros]
                     :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
-                                                :selvitys_naapurien_kuulemisesta
-                                                :elyn_tai_kunnan_poikkeamapaatos
                                                 :suunnittelutarveratkaisu
                                                 :ymparistolupa]
-                    :muut [:selvitys_rakennuspaikan_terveellisyydesta
-                           :selvitys_rakennuspaikan_korkeusasemasta
-                           :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
+                    :muut [:selvitys_liittymisesta_ymparoivaan_rakennuskantaan
                            :julkisivujen_varityssuunnitelma
                            :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
-                           :piha_tai_istutussuunnitelma
-                           :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
-                           :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
-                           :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
-                           :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
                            :energiataloudellinen_selvitys
                            :paloturvallisuussuunnitelma
-                           :liikkumis_ja_esteettomyysselvitys
-                           :kerrosalaselvitys
-                           :vaestonsuojasuunnitelma
-                           :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
                            :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
                            :selvitys_kiinteiston_jatehuollon_jarjestamisesta
                            :rakennesuunnitelma
@@ -71,23 +45,71 @@
                            :radontekninen_suunnitelma
                            :kalliorakentamistekninen_suunnitelma
                            :paloturvallisuusselvitys
-                           :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
-                           :merkki_ja_turvavalaistussuunnitelma
-                           :sammutusautomatiikkasuunnitelma
-                           :rakennusautomaatiosuunnitelma
-                           :valaistussuunnitelma
                            :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-                           :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
-                           :muu]}})
+                           :muu]]
+   :all [:hakija [:valtakirja
+                  :ote_kauppa_ja_yhdistysrekisterista
+                  :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
+         :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
+                                   :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
+                                   :rasitustodistus
+                                   :todistus_erityisoikeuden_kirjaamisesta
+                                   :jaljennos_vuokrasopimuksesta
+                                   :jaljennos_perunkirjasta]
+         :rakennuspaikka [:ote_alueen_peruskartasta
+                          :ote_asemakaavasta_jos_asemakaava_alueella
+                          :ote_kiinteistorekisteristerista
+                          :tonttikartta_tarvittaessa
+                          :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
+                          :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
+         :paapiirustus [:asemapiirros
+                        :pohjapiirros
+                        :leikkauspiirros
+                        :julkisivupiirros]
+         :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
+                                     :selvitys_naapurien_kuulemisesta
+                                     :elyn_tai_kunnan_poikkeamapaatos
+                                     :suunnittelutarveratkaisu
+                                     :ymparistolupa]
+         :muut [:selvitys_rakennuspaikan_terveellisyydesta
+                :selvitys_rakennuspaikan_korkeusasemasta
+                :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
+                :julkisivujen_varityssuunnitelma
+                :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+                :piha_tai_istutussuunnitelma
+                :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
+                :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
+                :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
+                :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
+                :energiataloudellinen_selvitys
+                :paloturvallisuussuunnitelma
+                :liikkumis_ja_esteettomyysselvitys
+                :kerrosalaselvitys
+                :vaestonsuojasuunnitelma
+                :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
+                :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
+                :selvitys_kiinteiston_jatehuollon_jarjestamisesta
+                :rakennesuunnitelma
+                :ilmanvaihtosuunnitelma
+                :lammityslaitesuunnitelma
+                :radontekninen_suunnitelma
+                :kalliorakentamistekninen_suunnitelma
+                :paloturvallisuusselvitys
+                :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
+                :merkki_ja_turvavalaistussuunnitelma
+                :sammutusautomatiikkasuunnitelma
+                :rakennusautomaatiosuunnitelma
+                :valaistussuunnitelma
+                :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+                :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
+                :muu]]})
 
 (defn- get-permit-type [application-id]
   (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
 
-(defn- to-key-types-vec [r [k v]]
-  (conj r {:group k :types (map (fn [v] {:name v}) v)}))
-
+; TODO: Uses :buildingPermit as a default permit type.
 (defn attachment-types-for [permit-type]
-  (reduce to-key-types-vec [] (attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type))))
+  (partition 2 (get attachment-types-for-permit-type permit-type (:buildingPermit attachment-types-for-permit-type))))
 
 ;;
 ;; Upload
@@ -168,17 +190,21 @@
       {:type-group type-group :type-id type-id})))
 
 (defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
-  (some (partial = type-id) (map keyword (get allowed-types type-group))))
+  (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
+    (some (partial = (name type-id)) types)))
 
 ;;
 ;; Actions
 ;;
 
+(defn- to-key-types-vec [r [k v]]
+  (conj r {:group k :types (map (fn [v] {:name v}) v)}))
+
 (defquery "attachment-types"
   {:parameters [:id]
    :roles      [:applicant :authority]}
-  [{{application-id :id} :data}]
-  (ok :typeGroups (attachment-types-for (get-permit-type application-id))))
+  [command]
+  (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
 
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
@@ -188,7 +214,7 @@
   (with-application command
     (fn [application]
       (let [attachment-type (parse-attachment-type attachmentType)]
-        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachment-type)
+        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
           (do
             (mongo/update
               mongo/applications
@@ -245,12 +271,12 @@
   [{created :created
     user    :user
     {:keys [id attachmentId attachmentType filename tempfile size text]} :data}]
-  (debug "Create GridFS file: %s %s %s %s %s %d (%s)" id attachmentId attachmentType filename tempfile size text)
+  (debug "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
       (if-let [application (mongo/by-id mongo/applications id)]
-        (if (allowed-attachment-type-for? (:allowedAttahmentTypes application) attachmentType)
+        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (file tempfile))
