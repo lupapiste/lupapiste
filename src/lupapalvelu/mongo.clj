@@ -133,5 +133,6 @@
   (gfs/remove-all)
   (db/drop-db (m/get-db))
   (mc/ensure-index :users {:email 1} {:unique true})
-  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds 300})
+  (mc/ensure-index :activations {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
+  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
   #_(mc/ensure-index "users" {:personId 1} {:unique true}))
