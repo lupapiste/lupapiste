@@ -73,7 +73,7 @@
     (get-user-by-email email)))
 
 (defn create-user [user]
-  (create-any-user (merge user {:role :user :enabled false})))
+  (create-any-user (merge user {:role :applicant :enabled false})))
 
 (defn create-authority [user]
   (create-any-user (merge user {:role :authority :enabled true})))
