@@ -107,7 +107,7 @@
   });
 
   hub.onPageChange('register3', function() {
-    console.log(model);
+    console.log(model());
     ko.applyBindings(model, $('#register3')[0]);
   });
 
