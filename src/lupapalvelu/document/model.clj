@@ -86,19 +86,6 @@
         schema-body (:body (get schemas schema-name))]
     (validate-document-fields schema-body nil (:body document) [])))
 
-(defn- validate-document-fields2 [schema-body k v path]
-  (let [current-path (if k (conj path (name k)) path)]
-    (if (map? v)
-      (map (fn [[k2 v2]] (validate-document-fields2 schema-body k2 v2 current-path)) v)
-      (let [elem (find-by-name schema-body current-path)
-            result (validate (keywordize-keys elem) v)]
-        result))))
-
-(defn validate-document-against-current-schema2 [document]
-  (let [schema-name (get-in document [:schema :info :name])
-        schema-body (:body (get schemas schema-name))]
-    (validate-document-fields2 schema-body nil (:body document) [])))
-
 (defn validate-updates
   "Validate updates against schema.
 
