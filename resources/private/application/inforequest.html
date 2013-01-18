@@ -70,25 +70,12 @@
               <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
             </tr>
             <tr>
-              <th>Tila</th>
-              <th>Tyyppi</th>
               <th>Tiedosto</th>
               <th>Muokattu</th>
               <th></th>
             </tr>
             <!-- ko foreach: attachments -->
             <tr style="cursor: pointer;">
-              <td data-bind="attr: {'class': statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
-              <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
-                <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
-                  <span data-bind="if: type != null">
-                    <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
-                  </span>
-                  <span data-bind="if: type == null">
-                    <i>Nimet&ouml;n</i>
-                  </span>
-                </a>
-              </td>
               <td>
                 <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
                   <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
