@@ -20,10 +20,25 @@
         data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
     data))
 
+;;
+;; Meta-fields:
+;;
+;; Fetch some fields drom the depths of documents and put them to top level
+;; so that yhey are easy to find in UI.
+
+(def meta-fields {:propertyId "Fobozaa"})
+
+(defn with-meta-fields [app]
+  (reduce (fn [app [field-name source-path]] (assoc app field-name source-path)) app meta-fields))
+
+;;
+;; Query application:
+;;
+
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
     (let [authorities (find-authorities-in-applications-municipality id)]
-      (ok :application app :authorities authorities))
+      (ok :application (with-meta-fields app) :authorities authorities))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
