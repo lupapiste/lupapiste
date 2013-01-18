@@ -48,8 +48,7 @@
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
-    (ok :application (with-meta-fields app)
-        :authorities (find-authorities-in-applications-municipality app))
+    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
