@@ -274,8 +274,7 @@
       :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osositettu)
-      :body [{:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus}
-             {:name "maaraalaTunnus" :type :string}
+      :body [{:name "maaraalaTunnus" :type :string}
              {:name "kylaNimi" :type :string}
              {:name "tilanNimi" :type :string}
              {:name "kokotilaKytkin" :type :checkbox}
