@@ -75,7 +75,7 @@
    :register     {:depends [:common]
                   :css ["register.css"]
                   :js ["register.js"]
-                  :html ["register.html" "register2.html"]}
+                  :html ["register.html" "register2.html" "register3.html"]}
 
    :docgen       {:depends [:accordion :common]
                   :js ["docgen.js"]
