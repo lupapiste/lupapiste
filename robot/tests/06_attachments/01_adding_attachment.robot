@@ -3,7 +3,7 @@
 Documentation  Mikko adds an attachment
 Suite setup     Mikko logs in
 Suite teardown  Logout
-Resource       ../../common_resource.txt
+Resource       ../../common_resource.robot
 Variables      variables.py
 
 *** Test Cases ***

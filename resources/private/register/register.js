@@ -26,14 +26,9 @@
     ajax.command('register-user', json(m))
       .success(function() {
         $('#register-email-error').html('&nbsp;');
-        var login = model().email();
-        var password = model().password();
+        confirmModel.email = model().email();
         reset(model());
-        ajax.post('/api/login')
-          .param('username', login)
-          .param('password', password)
-          .success(function() { window.location = '/applicant'; })
-          .call();
+        window.location.hash = "!/register3";
       })
       .error(function(e) {
         // FIXME: DIRTY HACKS
@@ -64,6 +59,10 @@
     disabled: ko.observable(true),
     submit: submit,
     reset: reset
+  };
+
+  var confirmModel = {
+    email: ""
   };
 
   function StatusModel() {
@@ -108,9 +107,12 @@
       model().firstname(data.firstname);
       model().lastname(data.lastname);
       model().stamp(data.stamp);
+      ko.applyBindings(model, $('#register2')[0]);
     });
+  });
 
-    ko.applyBindings(model, $('#register2')[0]);
+  hub.onPageChange('register3', function() {
+    ko.applyBindings(confirmModel, $('#register3')[0]);
   });
 
 })();

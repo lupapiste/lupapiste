@@ -3,7 +3,7 @@
 Documentation  Authority admin creates users
 Suite setup     Sipoo logs in
 Suite teardown  Logout
-Resource       ../../common_resource.txt
+Resource       ../../common_resource.robot
 
 *** Test Cases ***
 

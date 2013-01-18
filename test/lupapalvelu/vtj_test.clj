@@ -17,7 +17,7 @@
                     :lastName    [:NykyinenSukunimi :Sukunimi]
                     :street      [:VakinainenKotimainenLahiosoite :LahiosoiteS]
                     :zip         [:VakinainenKotimainenLahiosoite :Postinumero]
-                    :city        [:VakinainenKotimainenLahiosoite :PostitoimipaikkaS]}) 
+                    :city        [:VakinainenKotimainenLahiosoite :PostitoimipaikkaS]})
      => {:lastName "Marttila"
          :firstName "Sylvi Sofie"
          :city "KUOPIO"

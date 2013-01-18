@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation  Seija should see only applications from Sipoo
-Resource       ../../common_resource.txt
+Resource       ../../common_resource.robot
 
 *** Test Cases ***
 

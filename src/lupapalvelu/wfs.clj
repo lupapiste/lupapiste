@@ -154,4 +154,3 @@
      :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
      :basic-auth ["***REMOVED***" "***REMOVED***"]
      :as :stream}))
-

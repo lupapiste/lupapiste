@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Mikko can't approve application
-Resource        ../../common_resource.txt
+Resource        ../../common_resource.robot
 
 *** Test Cases ***
 

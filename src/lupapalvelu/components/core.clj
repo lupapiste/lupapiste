@@ -16,7 +16,7 @@
   [found depends]
   (filter (comp not (set found)) depends))
 
-(defn get-dependencies 
+(defn get-dependencies
   "Return a lazy-seq of all dependencies of component 'c'. The returned seq contains the keywords of dependencies
    with the root dependency first."
   ([components c]
