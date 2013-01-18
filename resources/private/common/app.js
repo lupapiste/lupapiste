@@ -11,6 +11,8 @@ if (typeof LUPAPISTE === "undefined") {
  */
 LUPAPISTE.App = function(startPage) {
 
+  "use strict";
+
   var self = this;
 
   self.startPage = startPage;
