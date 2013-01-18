@@ -50,8 +50,7 @@
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
-    (let [authorities (find-authorities-in-applications-municipality id)]
-      (ok :application (with-meta-fields app) :authorities authorities))
+    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality id))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -59,9 +58,8 @@
 (defquery "authorities-in-applications-municipality"
   {:parameters [:id]
    :authenticated true}
-  [{{:keys [id]} :data}]
-  (let [data (find-authorities-in-applications-municipality id)]
-    (ok :authorityInfo data)))
+  [command]
+  (ok :authorityInfo (find-authorities-in-applications-municipality (-> command :data :id))))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
