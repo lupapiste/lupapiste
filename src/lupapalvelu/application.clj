@@ -12,11 +12,6 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]))
 
-(defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
-        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
-    data))
-
 ;;
 ;; Meta-fields:
 ;;
@@ -53,6 +48,11 @@
     (let [authorities (find-authorities-in-applications-municipality id)]
       (ok :application (with-meta-fields app) :authorities authorities))
     (fail :error.not-found)))
+
+(defn find-authorities-in-applications-municipality [id]
+  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
+        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
+    data))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
 ;; application id and the authorities in that municipality.
