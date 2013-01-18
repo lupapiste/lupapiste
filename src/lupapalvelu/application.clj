@@ -216,3 +216,13 @@
   (with-application command
     (fn [application]
       (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
+
+(defcommand "cancel-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [application]
+      (debug "Cancel application: id='%s'" (get-in command [:data :id])))))
