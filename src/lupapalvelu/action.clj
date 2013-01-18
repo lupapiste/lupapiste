@@ -132,7 +132,7 @@
       (do
         (future
           (let [pimped_user (merge user {:_id (:id user)})] ;; FIXME
-            (sadesecurity/send-activation-mail-for {:user user
+            (sadesecurity/send-activation-mail-for {:user pimped_user
                                                     :from "lupapiste@solita.fi"
                                                     :service-name "Lupapiste"
                                                     :host-url (sadeclient/uri)})))
