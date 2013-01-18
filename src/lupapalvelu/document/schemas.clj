@@ -182,57 +182,57 @@
               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
                      {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number}
-                     {:name "kerrosluku" :type :string :size "s" :subtype :number}
+                     {:name "kerrosluku" :type :string :size "s"}
                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}]}
              {:name "rakenne"
               :type :group
               :body [{:name "rakentamistapa" :type :select
-              :body [{:name "elementti" :type :checkbox}
-                     {:name "paikalla" :type :checkbox}
-                     {:name "ei tiedossa" :type :checkbox}]}
-             {:name "kantavaRakennusaine" :type :select
-              :body [{:name "betoni" :type :checkbox}
-                     {:name "tiili" :type :checkbox}
-                     {:name "teras" :type :checkbox}
-                     {:name "puu" :type :checkbox}
-                     {:name "muurakennusaine" :type :string :size "s"}
-                     {:name "ei tiedossa" :type :checkbox}]}
-             {:name "julkisivu" :type :select
-              :body [{:name "betoni" :type :checkbox}
-                     {:name "tiili" :type :checkbox}
-                     {:name "metallilevy" :type :checkbox}
-                     {:name "kivi" :type :checkbox}
-                     {:name "puu" :type :checkbox}
-                     {:name "lasi" :type :checkbox}
-                     {:name "muumateriaali" :type :string :size "s"}
+                      :body [{:name "elementti" :type :checkbox}
+                             {:name "paikalla" :type :checkbox}
+                             {:name "ei tiedossa" :type :checkbox}]}
+                     {:name "kantavaRakennusaine" :type :select
+                      :body [{:name "betoni" :type :checkbox}
+                             {:name "tiili" :type :checkbox}
+                             {:name "teras" :type :checkbox}
+                             {:name "puu" :type :checkbox}
+                             {:name "muurakennusaine" :type :string :size "s"}
+                             {:name "ei tiedossa" :type :checkbox}]}
+                     {:name "julkisivu" :type :select
+                      :body [{:name "betoni" :type :checkbox}
+                             {:name "tiili" :type :checkbox}
+                             {:name "metallilevy" :type :checkbox}
+                             {:name "kivi" :type :checkbox}
+                             {:name "puu" :type :checkbox}
+                             {:name "lasi" :type :checkbox}
+                             {:name "muumateriaali" :type :string :size "s"}
                              {:name "ei tiedossa" :type :checkbox}]}]}
              {:name "lammitys"
               :type :group
               :body [{:name "lammitystapa" :type :select
-              :body [{:name "vesikeskus" :type :checkbox}
-                     {:name "ilmakeskus" :type :checkbox}
-                     {:name "suorasahko" :type :checkbox}
-                     {:name "uuni" :type :checkbox}
-                     {:name "eiLammitysta" :type :checkbox}
-                     {:name "ei tiedossa" :type :checkbox}]}
-             {:name "lammonlahde" :type :select
-              :body [{:name "kauko tai aluel\u00e4mp\u00f6" :type :checkbox}
-                     {:name "kevyt poltto\u00f6ljy" :type :checkbox}
-                     {:name "raskas poltto\u00f6ljy" :type :checkbox}
-                     {:name "s\u00e4hk\u00f6" :type :checkbox}
-                     {:name "kaasu" :type :checkbox}
-                     {:name "kiviihiili koksi tms" :type :checkbox}
-                     {:name "turve" :type :checkbox}
-                     {:name "maal\u00e4mp\u00f6" :type :checkbox}
-                     {:name "puu" :type :checkbox}
-                     {:name "muu" :type :string :size "s"}
+                      :body [{:name "vesikeskus" :type :checkbox}
+                             {:name "ilmakeskus" :type :checkbox}
+                             {:name "suorasahko" :type :checkbox}
+                             {:name "uuni" :type :checkbox}
+                             {:name "eiLammitysta" :type :checkbox}
+                             {:name "ei tiedossa" :type :checkbox}]}
+                     {:name "lammonlahde" :type :select
+                      :body [{:name "kauko tai aluel\u00e4mp\u00f6" :type :checkbox}
+                             {:name "kevyt poltto\u00f6ljy" :type :checkbox}
+                             {:name "raskas poltto\u00f6ljy" :type :checkbox}
+                             {:name "s\u00e4hk\u00f6" :type :checkbox}
+                             {:name "kaasu" :type :checkbox}
+                             {:name "kiviihiili koksi tms" :type :checkbox}
+                             {:name "turve" :type :checkbox}
+                             {:name "maal\u00e4mp\u00f6" :type :checkbox}
+                             {:name "puu" :type :checkbox}
+                             {:name "muu" :type :string :size "s"}
                              {:name "ei tiedossa" :type :checkbox}]}]}
              {:name "verkostoliittymat" :type :choice
-                      :body [{:name "viemariKytkin" :type :checkbox}
-                             {:name "vesijohtoKytkin" :type :checkbox}
-                             {:name "sahkoKytkin" :type :checkbox}
-                             {:name "maakaasuKytkin" :type :checkbox}
-                             {:name "kaapeliKytkin" :type :checkbox}]}
+              :body [{:name "viemariKytkin" :type :checkbox}
+                     {:name "vesijohtoKytkin" :type :checkbox}
+                     {:name "sahkoKytkin" :type :checkbox}
+                     {:name "maakaasuKytkin" :type :checkbox}
+                     {:name "kaapeliKytkin" :type :checkbox}]}
              {:name "varusteet" :type :choice
               :body [{:name "sahkoKytkin" :type :checkbox}
                      {:name "kaasuKytkin" :type :checkbox}
@@ -261,7 +261,7 @@
                              {:name "toimitila"}
                              {:name "ei tiedossa"}]}
                       {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
-                      {:name "huoneluku" :type :string :subtype :number :size "m"}]}
+                      {:name "huoneluku" :type :string :size "m"}]}
              {:name "keittionTyyppi" :type :select
               :body [{:name "keittio"}
                      {:name "keittokomero"}
