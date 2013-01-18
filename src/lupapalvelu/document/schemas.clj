@@ -290,9 +290,8 @@
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osoitettu)
       :body [{:name "kiinteisto" 
               :type :group
-      :body [{:name "kiinteistotunnus" :type :string :subtype :kiinteistotunnus}
+      :body [{:name "maaraalaTunnus" :type :string}
                     {:name "kokotilaKytkin" :type :checkbox}
-             {:name "maaraalaTunnus" :type :string}
              {:name "kylaNimi" :type :string}
                     {:name "tilanNimi" :type :string}]}
              {:name "hallintaperuste" :type :select

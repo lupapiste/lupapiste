@@ -12,18 +12,43 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]))
 
-(defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (mongo/select mongo/applications (application-query-for user))))
+;;
+;; Meta-fields:
+;;
+;; Fetch some fields drom the depths of documents and put them to top level
+;; so that yhey are easy to find in UI.
 
-(defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
-        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
-    data))
+(def meta-fields [{:field :applicant
+                   :schema "hakija"
+                   :f (fn [doc]
+                        (let [data (get-in doc [:body :henkilo :henkilotiedot])]
+                          {:firstName (:etunimi data)
+                           :lastName (:sukunimi data)}))}])
+
+(defn search-doc [app schema]
+  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
+
+(defn with-meta-fields [app]
+  (reduce (fn [app {:keys [field schema f]}]
+            (if-let [doc (search-doc app schema)]
+              (assoc app field (f doc))
+              app))
+          app
+          meta-fields))
+
+;;
+;; Query application:
+;;
+
+(defquery "applications" {:authenticated true} [{user :user}]
+  (ok :applications (map with-meta-fields (mongo/select mongo/applications (application-query-for user)))))
+
+(defn find-authorities-in-applications-municipality [app]
+  (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
-    (let [authorities (find-authorities-in-applications-municipality id)]
-      (ok :application app :authorities authorities))
+    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -31,9 +56,11 @@
 (defquery "authorities-in-applications-municipality"
   {:parameters [:id]
    :authenticated true}
-  [{{:keys [id]} :data}]
-  (let [data (find-authorities-in-applications-municipality id)]
-    (ok :authorityInfo data)))
+  [command]
+  (let [id (-> command :data :id)
+        app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
+        authorities (find-authorities-in-applications-municipality app)]
+    (ok :authorityInfo authorities)))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
