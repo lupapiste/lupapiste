@@ -141,7 +141,9 @@
       var id = application.id();
       ajax
         .command("cancel-application", {id: id})
-        .success(repository.reloadApplication.bind(repository, id))
+        .success(function() {
+          window.location.hash = "!/all-applications";
+        })
         .call();
       return false;
     }
