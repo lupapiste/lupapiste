@@ -42,7 +42,7 @@
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
-        (if assigneeId 
+        (if assigneeId
           {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
           {$unset {:roles.authority ""}})))))
 
@@ -174,7 +174,7 @@
        :permitType permit-type
        :operations (if operation [operation] [])
        :allowedAttahmentTypes (if info-request {:muut [:muu]} (attachment-types-for operation))
-       :documents (map create-document (:buildingPermit default-schemas)) 
+       :documents (map create-document (:buildingPermit default-schemas))
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message

@@ -185,4 +185,3 @@
                      :documents.$.body.email    (:email user)
                      :documents.$.body.puhelin  (:phone user)
                      :modified (:created command)}})))))))
-

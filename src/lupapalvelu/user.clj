@@ -21,12 +21,12 @@
         (warn "Password change: failed: old password does not match: user-id=%s" user-id)
         (fail :old-password-does-not-match)))))
 
-(defquery "get-user-info" 
+(defquery "get-user-info"
   {:roles [:applicant :authority]}
   [{user :user}]
   (ok :user user))
 
-(defcommand "save-user-info" 
+(defcommand "save-user-info"
   {:parameters [:firstName :lastName :street :city :zip :phone]
    :roles      [:applicant :authority]}
   [{data :data user :user}]
