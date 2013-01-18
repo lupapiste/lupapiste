@@ -43,16 +43,16 @@
 (defquery "applications" {:authenticated true} [{user :user}]
   (ok :applications (map with-meta-fields (mongo/select mongo/applications (application-query-for user)))))
 
+(defn find-authorities-in-applications-municipality [id]
+  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
+        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
+    data))
+
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
     (let [authorities (find-authorities-in-applications-municipality id)]
       (ok :application (with-meta-fields app) :authorities authorities))
     (fail :error.not-found)))
-
-(defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
-        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
-    data))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
 ;; application id and the authorities in that municipality.
