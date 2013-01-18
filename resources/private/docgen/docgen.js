@@ -28,6 +28,8 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   self.appId = appId;
   self.eventData = {doc: docId, app: appId};
 
+  self.sizeClasses = {"s" : "form-input short", "m" : "form-input medium"};
+
   // ID utilities
 
   function pathStrToID(pathStr) {
@@ -97,19 +99,26 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     var span =  makeEntrySpan();
     span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
 
+
+
     var type = (spec.subtype === "email") ? "email" : "text";
-    var sizeClass = "";
-    if (spec.size) {
-      if (spec.size === "s") sizeClass = "form-input short";
-      if (spec.size === "m") sizeClass = "form-input medium";
-    }
-    span.appendChild(makeInput(type, myPath, model[spec.name], save, sizeClass));
+    var sizeClass = self.sizeClasses[spec.size] || "";
+    var input = makeInput(type, myPath, model[spec.name], save, sizeClass)
+
     if (spec.unit) {
+      var inputAndUnit = document.createElement("span");
+      inputAndUnit.className = "form-input-and-unit";
+      inputAndUnit.appendChild(input);
+
       var unit = document.createElement("span");
       unit.className = "form-string-unit";
       unit.appendChild(document.createTextNode(loc("unit." + spec.unit)));
-      span.appendChild(unit);
+      inputAndUnit.appendChild(unit);
+      span.appendChild(inputAndUnit);
+    } else {
+      span.appendChild(input);
     }
+
     return span;
   }
 

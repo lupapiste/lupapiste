@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.model
   (:use [lupapalvelu.log]
         [lupapalvelu.strings]
+        [lupapalvelu.document.schemas :only [schemas]]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [lupapalvelu.document.subtype :as subtype]))
@@ -71,6 +72,19 @@
     (if (nil? result)
       results
       (conj results (cons k result)))))
+
+(defn- validate-document-fields [schema-body k v path]
+  (let [current-path (if k (conj path (name k)) path)]
+    (if (map? v)
+      (every? true? (map (fn [[k2 v2]] (validate-document-fields schema-body k2 v2 current-path)) v))
+      (let [elem (find-by-name schema-body current-path)
+            result (validate (keywordize-keys elem) v)]
+        (nil? result)))))
+
+(defn validate-against-current-schema [document]
+  (let [schema-name (get-in document [:schema :info :name])
+        schema-body (:body (get schemas schema-name))]
+    (validate-document-fields schema-body nil (:body document) [])))
 
 (defn validate-updates
   "Validate updates against schema.
