@@ -26,12 +26,6 @@ Hessu Kesa can login
 Hessu Kesa can logout
   Logout
 
-Hessu Kesa can login again
-  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
-
-Hessu Kesa can logout again
-  Logout
-
 *** Keywords ***
 
 User count is
