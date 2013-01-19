@@ -12,22 +12,22 @@ Authority admin goes to admin page
 
 Authority admin creates three users
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
-  Create user  heikki.virtanen@sipoo.fi  Heikki  Virtanen  123456
-  Create user  minni.janatuinen@sipoo.fi  Minni  Janatuinen  123456
-  Create user  hessu.kesa@sipoo.fi  Hessu  Kesa  123456
+  Create user  heikki.virtanen@example.com  Heikki  Virtanen  123456
+  Create user  minni.janatuinen@example.com  Minni  Janatuinen  123456
+  Create user  hessu.kesa@example.com  Hessu  Kesa  123456
   Wait Until  Element Should Be Visible  test-authority-admin-users-table
   ${userCountAfter} =  Evaluate  ${userCount} + 3
   User count is  ${userCountAfter}
 
 Hessu Kesa can login
   Logout
-  Authority logs in  hessu.kesa@sipoo.fi  123456  Hessu Kesa
+  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
 
 Hessu Kesa can logout
   Logout
 
 Hessu Kesa can login again
-  Authority logs in  hessu.kesa@sipoo.fi  123456  Hessu Kesa
+  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
 
 Hessu Kesa can logout again
   Logout
