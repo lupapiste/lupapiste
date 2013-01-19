@@ -7,11 +7,11 @@
         <a href="#!/applications">Pääkäyttäjän osio</a>
       </div>
       <h1 id="admin-header">Pääkäyttäjän osio</h1>
-      <h2>Fixtures</h2>
+      <h2>Fixturet</h2>
       <ul data-bind="foreach: fixtures.data">
         <li><a href="#" data-bind="text: $data, click: $root.fixtures.apply"></a></li>
       </ul>
-      <h2>Applications</h2>
+      <h2>Anna lausunto</h2>
       <ul data-bind="foreach: applications.data">
         <li><a href="#" data-bind="text: id, click: $root.applications.giveVerdict"></a></li>
       </ul>
