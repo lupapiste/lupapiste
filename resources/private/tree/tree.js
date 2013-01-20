@@ -92,10 +92,10 @@ var selectionTree = (function () {
     self.makeHandler = function (key, val, d) {
       return function (e) {
         var event = getEvent(e);
-        
+
         event.preventDefault();
         event.stopPropagation();
-        
+
         self.crumbs.push(key);
         self.breadcrumbs.html(self.crumbs.join(" / "));
 
@@ -105,7 +105,7 @@ var selectionTree = (function () {
         d.parentNode.appendChild(next);
         var done = (terminal && self.callback) ? self.callback.bind(self, val) : null;
         $(d).animate({ "margin-left": -self.width }, self.speed, done);
-        
+
         return false;
       };
     };

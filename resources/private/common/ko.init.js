@@ -104,7 +104,7 @@
         if (typeof verValue.major === "function") {
           version = verValue.major() + "." + verValue.minor();
         } else {
-          version = verValue.major + "." + verValue.minor;  
+          version = verValue.major + "." + verValue.minor;
         }
       }
       $(element).text(version);

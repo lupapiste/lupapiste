@@ -11,7 +11,7 @@
    :roles      [:applicant :authority]}
   [{{:keys [oldPassword newPassword]} :data user :user}]
   (let [user-id (:id user)
-        user-data (mongo/by-id mongo/users user-id)]
+        user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
       (do
         (debug "Password change: user-id=%s" user-id)
@@ -32,7 +32,7 @@
   [{data :data user :user}]
   (let [user-id (:id user)]
     (mongo/update-by-id
-      mongo/users
+      :users
       user-id
       {$set (util/sub-map data [:firstName :lastName :street :city :zip :phone])})
     (ok)))

@@ -10,7 +10,7 @@
         <label for="firstName" class="form-label">Etunimi:</label>
         <input data-bind="value: firstName" name="firstName" type="text" placeholder="Etunimi" class="form-input"></input>
       </div>
-      
+
       <div class="form-entry">
         <label for="lastName" class="form-label">Sukunimi:</label>
         <input data-bind="value: lastName" name="lastName" type="text" placeholder="Sukunimi" class="form-input"></input>
@@ -31,11 +31,11 @@
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color=red;"></span>
       <span data-bind="visible: error() == null && saved" style="font-weight: bold; color=green;">Tiedot tallennettu</span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
-      
+
     </form>
-    
+
     <form id="pw-form">
-    
+
       <h2>Vaihda salasana:</h2>
 
       <label for="oldPassword" class="form-label">Nykyinen salasana:</label>
@@ -56,7 +56,7 @@
     </form>
 
     <a href="#!/all-applications">Takaisin.</a>
-    
+
   </section>
 </body>
 </html>

@@ -9,7 +9,7 @@
   var commentModel = comments.create();
   var applicationMap;
   var inforequestMap;
-  
+
   function ApplicationModel() {
     var self = this;
 
@@ -131,7 +131,7 @@
         .call();
       return false;
     },
-    
+
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
@@ -152,12 +152,12 @@
     });
     return result;
   }
-  
+
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
-  };       
+  };
 
   function updateAssignee(value) {
     debug("updateAssignee called, assigneeId: ", value);
@@ -181,13 +181,13 @@
       .error(function(e) {
         error(e);
       })
-      .fail(function(e) { 
-        error(e); 
+      .fail(function(e) {
+        error(e);
       }).call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
-  
+
   function resolveApplicationAssignee(roles) {
     debug("resolveApplicationAssignee called, roles: ", roles);
     if (roles && roles.authority) {
@@ -199,14 +199,14 @@
       return null;
     }
   }
-  
+
   function initAuthoritiesSelectList(data) {
     authorities.removeAll();
     _.each(data || [], function(authority) {
       authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
   }
-  
+
   function showApplication(applicationDetails) {
     debug("set isInitializing to true");
     isInitializing = true;
@@ -311,7 +311,7 @@
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
-      
+
       debug("set isInitializing to false");
       isInitializing = false;
       pageutil.setPageReady("application");
