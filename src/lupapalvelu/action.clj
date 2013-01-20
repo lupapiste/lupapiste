@@ -26,14 +26,14 @@
       {:_id "-1"} ))) ; should not yield any results
 
 (defn get-application-as [application-id user]
-  (mongo/select-one mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
+  (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]}))
 
 (defquery "invites"
   {:authenticated true}
   [{{:keys [id]} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
-        data       (mongo/select mongo/applications filter projection)
+        data       (mongo/select :applications filter projection)
         invites    (flatten (map (comp :invites) data))]
     (ok :invites invites)))
 
@@ -58,7 +58,7 @@
   (with-application command
     (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
-        (mongo/update mongo/applications
+        (mongo/update :applications
           {:_id application-id
            :invites {$not {$elemMatch {:user.username email}}}}
           {$push {:invites {:title       title
@@ -82,7 +82,7 @@
   [{user :user :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+      (mongo/update :applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
         {$push {:auth         (role user :writer)}
          $pull {:invites      {:user.id (:id user)}}}))))
 
@@ -94,7 +94,7 @@
     (fn [{application-id :id}]
       (with-user email
         (fn [_]
-          (mongo/update-by-id mongo/applications application-id
+          (mongo/update-by-id :applications application-id
             {$pull {:invites      {:user.username email}
                     :auth         {$and [{:username email}
                                          {:type {$ne :owner}}]}}}))))))
@@ -106,7 +106,7 @@
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (mongo/update-by-id mongo/applications application-id
+      (mongo/update-by-id :applications application-id
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
@@ -148,7 +148,7 @@
       (if (= "draft" (:state application))
         (executed "open-application" command))
       (mongo/update-by-id
-        mongo/applications
+        :applications
         (:id application)
         {$set {:modified (:created command)}
          $push {:comments {:text    text
@@ -163,7 +163,7 @@
   (with-application command
     (fn [application]
       (mongo/update-by-id
-        mongo/applications (:id application)
+        :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
 (defn create-document [schema-name]
@@ -188,7 +188,7 @@
           (do
             (info "merging user %s with best effort into document %s" user name)
             (mongo/update
-              mongo/applications
+              :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
               {$set {:documents.$.body.etunimi  (:firstName user)

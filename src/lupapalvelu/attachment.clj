@@ -105,7 +105,7 @@
                 :muu]]})
 
 (defn- get-permit-type [application-id]
-  (keyword (:permitType (mongo/select-one mongo/applications {:_id application-id} [:permitType]))))
+  (keyword (:permitType (mongo/select-one :applications {:_id application-id} [:permitType]))))
 
 ; TODO: Uses :buildingPermit as a default permit type.
 (defn attachment-types-for [permit-type]
@@ -122,7 +122,7 @@
                           :state :requires_user_action
                           :modified now
                           :versions []}]
-    (mongo/update-by-id mongo/applications application-id
+    (mongo/update-by-id :applications application-id
       {$set {:modified now}
        $push {:attachments attachment-model}})
     attachment-id))
@@ -142,7 +142,7 @@
     (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
   ([application-id attachment-id file-id filename content-type size now user retry-limit]
     (if (> retry-limit 0)
-      (when-let [application (mongo/by-id mongo/applications application-id)]
+      (when-let [application (mongo/by-id :applications application-id)]
         (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
               next-version (next-attachment-version latest-version user)
               version-model {:version  next-version
@@ -156,7 +156,7 @@
                              :contentType content-type
                              :size size}
               result-count (mongo/update-by-query
-                             mongo/applications
+                             :applications
                              {:_id application-id
                               :attachments {$elemMatch {:id attachment-id
                                                         :latestVersion.version.major (:major latest-version)
@@ -217,7 +217,7 @@
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
           (do
             (mongo/update
-              mongo/applications
+              :applications
               {:_id (:id application)
                :attachments {$elemMatch {:id attachmentId}}}
               {$set {:attachments.$.type attachment-type}})
@@ -235,7 +235,7 @@
   (with-application command
     (fn [{id :id}]
       (mongo/update
-        mongo/applications
+        :applications
         {:_id id, :attachments {$elemMatch {:id attachmentId}}}
         {$set {:modified (:created command)
                :attachments.$.state :ok}}))))
@@ -249,7 +249,7 @@
   (with-application command
     (fn [{id :id}]
       (mongo/update
-        mongo/applications
+        :applications
         {:_id id, :attachments {$elemMatch {:id attachmentId}}}
         {$set {:modified (:created command)
                :attachments.$.state :requires_user_action}}))))
@@ -275,7 +275,7 @@
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
-      (if-let [application (mongo/by-id mongo/applications id)]
+      (if-let [application (mongo/by-id :applications id)]
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
