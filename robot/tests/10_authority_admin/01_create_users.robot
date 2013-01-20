@@ -33,7 +33,7 @@ Activating Heikki removes activation link
   Logout
 
 Heikki user can now login
-  Authority logs in  heikki.virtanen@example.com  123456  Hessu Kesa
+  Authority logs in  heikki.virtanen@example.com  123456  Heikki Virtanen
   Logout
 
 Hessu can't still login
