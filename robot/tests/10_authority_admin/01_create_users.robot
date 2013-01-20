@@ -20,24 +20,24 @@ Authority admin creates three users
   Logout
 
 Created user cant login
-  Login  hessu.kesa@example.com  123456
+  Login  heikki.virtanen@example.com  123456
   User should not be logged in
 
-Admin activates Hessu (to simulate activating via email)
+Admin activates Heikki (to simulate activating via email)
   As Solitaadmin
-  Wait until  page should contain link  hessu.kesa@example.com
-  Click link  hessu.kesa@example.com
+  Wait until  page should contain link  heikki.virtanen@example.com
+  Click link  heikki.virtanen@example.com
 
-Activating Hessu removes activation link
-  Wait until  page should not contain link  hessu.kesa@example.com
+Activating Heikki removes activation link
+  Wait until  page should not contain link  heikki.virtanen@example.com
   Logout
 
-Hessu user can now login
-  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
+Heikki user can now login
+  Authority logs in  heikki.virtanen@example.com  123456  Hessu Kesa
   Logout
 
-Heikki can't still login
-  Login  heikki.virtanen@example.com  123456
+Hessu can't still login
+  Login  hessu.kesa@example.com  123456
   User should not be logged in
 
 *** Keywords ***
