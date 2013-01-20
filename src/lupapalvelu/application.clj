@@ -44,7 +44,7 @@
   (ok :applications (map with-meta-fields (mongo/select mongo/applications (application-query-for user)))))
 
 (defn find-authorities-in-applications-municipality [app]
-  (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
+  (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
@@ -71,7 +71,7 @@
       (mongo/update-by-id
         mongo/applications (:id application)
         (if assigneeId
-          {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
+          {$set {:roles.authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
           {$unset {:roles.authority ""}})))))
 
 (defcommand "open-application"

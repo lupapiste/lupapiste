@@ -116,7 +116,7 @@
   (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
     (let [apikey (security/create-apikey)]
       (mongo/update
-        mongo/users
+        :users
         {:username (:username user)}
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey))

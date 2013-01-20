@@ -9,10 +9,8 @@
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
 (def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
-(def ^:const users "users")
 (def ^:const applications "applications")
 (def ^:const municipalities "municipalities")
-(def collections [users applications municipalities])
 
 ;;
 ;; Utils
