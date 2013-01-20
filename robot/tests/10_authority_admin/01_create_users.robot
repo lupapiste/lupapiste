@@ -24,7 +24,7 @@ Created user cant login
   User should not be logged in
 
 Admin activates Heikki (to simulate activating via email)
-  As Solitaadmin
+  Solitaadmin logs in
   Wait until  page should contain link  heikki.virtanen@example.com
   Click link  heikki.virtanen@example.com
 
