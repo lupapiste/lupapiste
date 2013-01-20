@@ -181,6 +181,7 @@ As Sonja
 As Solitaadmin
   Open browser to login page
   Solitaadmin logs in
+  Wait until page contains element  admin-header
 
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko69  Mikko Intonen

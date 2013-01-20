@@ -70,7 +70,7 @@
     (fn [application]
       (mongo/update-by-id
         mongo/applications (:id application)
-        (if assigneeId 
+        (if assigneeId
           {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
           {$unset {:roles.authority ""}})))))
 
