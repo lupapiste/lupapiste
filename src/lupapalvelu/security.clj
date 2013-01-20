@@ -44,24 +44,24 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
-(defn- create-any-user [{:keys [email password userid role firstname lastname phone address enabled authority] :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone address enabled municipality] :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
         id                (mongo/create-id)
         old-user          (get-user-by-email email)
-        new-user          {:id         id
-                           :username   email
-                           :email      email
-                           :role       role
-                           :personId   userid
-                           :firstName  firstname
-                           :lastName   lastname
-                           :phone      phone
-                           :address    address
-                           :authority  authority
-                           :enabled    enabled
-                           :private    {:salt salt
-                                        :password hashed-password}}]
+        new-user          {:id           id
+                           :username     email
+                           :email        email
+                           :role         role
+                           :personId     userid
+                           :firstName    firstname
+                           :lastName     lastname
+                           :phone        phone
+                           :address      address
+                           :municipality municipality
+                           :enabled      enabled
+                           :private      {:salt salt
+                                          :password hashed-password}}]
     (info "register user: %s" (dissoc user :password))
     (if (= "dummy" (:role old-user))
       (do
