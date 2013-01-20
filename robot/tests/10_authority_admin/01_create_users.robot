@@ -15,7 +15,7 @@ Authority admin creates three users
   Create user  heikki.virtanen@example.com  Heikki  Virtanen  123456
   Create user  hessu.kesa@example.com  Hessu  Kesa  123456
   Wait Until  Element Should Be Visible  test-authority-admin-users-table
-  ${userCountAfter} =  Evaluate  ${userCount} + 3
+  ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
   Logout
 
@@ -23,15 +23,22 @@ Created user cant login
   Login  hessu.kesa@example.com  123456
   User should not be logged in
 
-Admin activates Hessa (to simulate activating via email)
+Admin activates Hessu (to simulate activating via email)
   As Solitaadmin
+  Wait until  page should contain link  hessu.kesa@example.com
+  Click link  hessu.kesa@example.com
+
+Activating Hessu removes activation link
+  Wait until  page should not contain link  hessu.kesa@example.com
   Logout
 
-Created user can login
+Hessu user can now login
   Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
-
-Created user can logout
   Logout
+
+Heikki can't still login
+  Login  heikki.virtanen@example.com  123456
+  User should not be logged in
 
 *** Keywords ***
 
