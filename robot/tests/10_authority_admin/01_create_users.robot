@@ -17,13 +17,18 @@ Authority admin creates three users
   Wait Until  Element Should Be Visible  test-authority-admin-users-table
   ${userCountAfter} =  Evaluate  ${userCount} + 3
   User count is  ${userCountAfter}
-
-Hessu Kesa can login
   Logout
-  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
 
-Hessu Kesa can logout
-  Logout
+Created user cant login
+  Login  hessu.kesa@example.com  123456
+  User should not be logged in
+
+#Hessu Kesa can login
+#  Logout
+#  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
+
+#Hessu Kesa can logout
+#  Logout
 
 *** Keywords ***
 
