@@ -23,12 +23,15 @@ Created user cant login
   Login  hessu.kesa@example.com  123456
   User should not be logged in
 
-#Hessu Kesa can login
-#  Logout
-#  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
+Admin activates Hessa (to simulate activating via email)
+  As Solitaadmin
+  Logout
 
-#Hessu Kesa can logout
-#  Logout
+Created user can login
+  Authority logs in  hessu.kesa@example.com  123456  Hessu Kesa
+
+Created user can logout
+  Logout
 
 *** Keywords ***
 
