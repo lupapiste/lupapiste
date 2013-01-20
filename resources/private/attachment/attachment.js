@@ -215,7 +215,7 @@ var attachment = (function() {
   function regroupAttachmentTypeList(types) {
     return _.map(types, function(v) { return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })}; });
   }
-  
+
   return {
     newAttachment: newAttachment,
     regroupAttachmentTypeList: regroupAttachmentTypeList
