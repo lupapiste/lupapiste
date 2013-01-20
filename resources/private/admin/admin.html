@@ -7,13 +7,17 @@
         <a href="#!/applications">Pääkäyttäjän osio</a>
       </div>
       <h1 id="admin-header">Pääkäyttäjän osio</h1>
-      <h2>Fixturet</h2>
+      <h3>Fixturet</h3>
       <ul data-bind="foreach: fixtures.data">
         <li><a href="#" data-bind="text: $data, click: $root.fixtures.apply"></a></li>
       </ul>
-      <h2>Anna lausunto</h2>
+      <h3>Lausunto</h3>
       <ul data-bind="foreach: applications.data">
         <li><a href="#" data-bind="text: id, click: $root.applications.giveVerdict"></a></li>
+      </ul>
+      <h3>Aktivoi tili</h3>
+      <ul data-bind="foreach: activations.data">
+        <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
       </ul>
     </div>
   </section>
