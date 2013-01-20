@@ -144,4 +144,4 @@
 (deffixture "minimal" {}
   (mongo/clear!)
   (dorun (map (partial mongo/insert :users) users))
-  (dorun (map (partial mongo/insert mongo/municipalities) municipalities)))
+  (dorun (map (partial mongo/insert :municipalities) municipalities)))
