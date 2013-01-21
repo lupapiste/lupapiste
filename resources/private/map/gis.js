@@ -11,19 +11,19 @@ var gis = (function() {
     return new OpenLayers.Marker(pos, icon.clone());
   }
 
-  var defaultIcon = makeIcon("img/marker-blue.png", 21, 25);
+  var defaultIcon = makeIcon("/img/marker-blue.png", 21, 25);
 
   function Map(element) {
     var self = this;
 
     self.map = new OpenLayers.Map(element, {
+      theme: "/theme/default/style.css",
       projection: new OpenLayers.Projection("EPSG:3067"),
       units: "m",
       maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
       resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
     });
 
-    //var wmsServers = ["https://***REMOVED***:***REMOVED***@ws.nls.fi/rasteriaineistot/image?"];
     var wmsServers = ["/proxy/nls"];
     var base = new OpenLayers.Layer("", {displayInLayerSwitcher: false, isBaseLayer: true});
     var taustakartta_5k = new OpenLayers.Layer.WMS("taustakartta_5k", wmsServers, {layers: "taustakartta_5k", format: "image/png"}, {isBaseLayer: false, maxScale: 1, minScale: 5000});
