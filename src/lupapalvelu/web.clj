@@ -125,8 +125,8 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:app" :app apps-pattern]] {app :app}
-  (single-resource :html (keyword app) (resp/redirect "/welcome#")))
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
+  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
 
 ;;
 ;; Login/logout:
@@ -159,12 +159,19 @@
   (session/clear!)
   (resp/redirect "/"))
 
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" lang "/welcome")))
+
+(defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
+  (session/clear!)
+  (redirect-to-frontpage lang))
+
 (defpage "/" []
   (if (logged-in?)
     (if-let [application-page (applicationpage-for (:role (current-user)))]
       (resp/redirect application-page)
-      (resp/redirect "/welcome#"))
-    (resp/redirect "/welcome#")))
+      (redirect-to-frontpage "fi"))
+    (redirect-to-frontpage "fi")))
 
 ;;
 ;; FROM SADE
