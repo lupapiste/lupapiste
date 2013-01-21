@@ -80,14 +80,42 @@
                                   } patevyys)
                             })) ; TODO miten liitteet hanskataan
 
+(def huoneisto-body [{:name "huoneistoTunnus" :type :group
+              :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
+                     {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                     {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
+             {:name "huoneistonTyyppi"
+              :type :group
+              :body [{:name "huoneistoTyyppi" :type :select
+                      :body [{:name "asuinhuoneisto"}
+                             {:name "toimitila"}
+                             {:name "ei tiedossa"}]}
+                      {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
+                      {:name "huoneluku" :type :string :size "m"}]}
+             {:name "keittionTyyppi" :type :select
+              :body [{:name "keittio"}
+                     {:name "keittokomero"}
+                     {:name "keittotila"}
+                     {:name "tupakeittio"}
+                     {:name "ei tiedossa"}]}
+             {:name "varusteet" :type :choice
+              :body [{:name "wc" :type :checkbox}
+                     {:name "ammeTaiSuihku" :type :checkbox}
+                     {:name "sauna" :type :checkbox}
+                     {:name "parvekeTaiTerassi" :type :checkbox}
+                     {:name "lamminvesi" :type :checkbox}]}])
+
+
+;{:name "rakennuksenOmistajat"
+ ;             :type :group
+  ;            :repeating true
+   ;           :body party-body}
+
 (def schemas
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
       :body [
-             {:name "rakennuksenOmistajat"
-              :type :group
-              :repeating true
-              :body party-body}
+
              {:name "toimenpiteenKuvaus"
               :type :group
               :body [{:name "kuvaus" :type :text :size "l"}
@@ -247,33 +275,11 @@
              {:name "luokitus"
               :type :group
               :body [{:name "energialuokka" :type :string :size "s"}
-                     {:name "paloluokka" :type :string :size "s"}]}]}
-
-     {:info {:name "huoneisto"}
-      :body [{:name "huoneistoTunnus" :type :group
-              :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
-                     {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
-                     {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
-             {:name "huoneistonTyyppi"
+                     {:name "paloluokka" :type :string :size "s"}]}
+             {:name "huoneistot"
               :type :group
-              :body [{:name "huoneistoTyyppi" :type :select
-                      :body [{:name "asuinhuoneisto"}
-                             {:name "toimitila"}
-                             {:name "ei tiedossa"}]}
-                      {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
-                      {:name "huoneluku" :type :string :size "m"}]}
-             {:name "keittionTyyppi" :type :select
-              :body [{:name "keittio"}
-                     {:name "keittokomero"}
-                     {:name "keittotila"}
-                     {:name "tupakeittio"}
-                     {:name "ei tiedossa"}]}
-             {:name "varusteet" :type :choice
-              :body [{:name "wc" :type :checkbox}
-                     {:name "ammeTaiSuihku" :type :checkbox}
-                     {:name "sauna" :type :checkbox}
-                     {:name "parvekeTaiTerassi" :type :checkbox}
-                     {:name "lamminvesi" :type :checkbox}]}]}
+              :repeating true
+              :body huoneisto-body}]}
 
      {:info {:name "hakija" :repeating true}
       :body party-body}

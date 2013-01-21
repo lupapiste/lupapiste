@@ -157,7 +157,7 @@
 
 (def default-schemas {:infoRequest []
                       :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
-                                       "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
+                                       "rakennuspaikka" "uusiRakennus" "lisatiedot"]})
 
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})

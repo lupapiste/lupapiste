@@ -267,7 +267,7 @@
           return doc.schema.info.name;
       });
 
-        var displayOrder = ["rakennuspaikka", "uusiRakennus", "huoneisto", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+        var displayOrder = ["rakennuspaikka", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
         var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
           return _.indexOf(displayOrder, docGroup[0].schema.info.name)
         });
