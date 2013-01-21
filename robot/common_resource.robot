@@ -178,6 +178,10 @@ As Sonja
   Open browser to login page
   Sonja logs in
 
+As Sipoo
+  Open browser to login page
+  Sipoo logs in
+
 As Solitaadmin
   Open browser to login page
   Solitaadmin logs in
