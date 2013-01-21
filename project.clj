@@ -22,8 +22,8 @@
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]]}
-             :itest {:test-paths ["itest"]}
-             :ftest {:test-paths ["ftest"]}
+             :itest {:test-paths ^:replace ["itest"]}
+             :ftest {:test-paths ^:replace ["ftest"]}
              :lupadev {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
 
