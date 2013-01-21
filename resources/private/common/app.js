@@ -33,10 +33,26 @@ LUPAPISTE.App = function(startPage) {
       LUPAPISTE.ModalDialog.init();
     }
 
-    $("a.logout").click(function(e) {
-      hub.send("logout");
-      e.preventDefault();
+    var naviLinks = $("<span>").attr("id", "navi-right");
+
+    _.each(loc.getSupportedLanguages(), function(lang) {
+      if (lang !== loc.getCurrentLanguage()) {
+        naviLinks.append(
+            $("<a>").attr("href", "#").text(loc("in_"  + lang))
+            .click(function(e) {
+              hub.send("change-lang", {lang: lang});
+              e.preventDefault();
+              }));
+      }
     });
+    naviLinks.append(" ");
+    naviLinks.append($("<a>")
+        .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
+        .text(loc("logout")));
+
+    $("nav").append(naviLinks);
+
+    $("#user-logout")
   };
   $(this.domReady);
 
@@ -125,10 +141,6 @@ LUPAPISTE.App = function(startPage) {
 
   hub.subscribe("connection-offline", function() {
     $(".connection-error").show();
-  });
-
-  hub.subscribe("logout", function() {
-    window.location = "/" + loc.getCurrentLanguage() + "/logout";
   });
 
 };
