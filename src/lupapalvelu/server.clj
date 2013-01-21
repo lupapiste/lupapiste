@@ -21,9 +21,8 @@
 
 (def custom-content-type {".eot"   "application/vnd.ms-fontobject"
                           ".ttf"   "font/ttf"
-                          ".otf"   "font/opentype"
-                          ".woff"  "font/x-woff"
-                          ".svg"   "image/svg+xml"})
+                          ".otf"   "font/otf"
+                          ".woff"  "application/font-woff"})
 
 (defn apply-custom-content-types
   "Ring middleware.
