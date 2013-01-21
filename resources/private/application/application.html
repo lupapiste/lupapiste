@@ -67,7 +67,7 @@
           <button data-bind="click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  id="test-approve-application">Siirrä kuntarekisteriin</button>
           <button data-bind="enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
           <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
-          <button data-bind="click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="todo btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
+          <button data-bind="click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
