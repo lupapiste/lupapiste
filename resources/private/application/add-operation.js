@@ -32,14 +32,14 @@
       return self;
     };
 
-    self.generateLast = function(value, key) {
+    self.generateLast = function(val, key) {
       var e = $("<div>").addClass("tree-magic");
       e.append($("<a>")
         .addClass("tree-action")
         .html(loc('addOperation'))
         .click(function(e) {
           ajax
-            .command("add-operation", {id: self.application.id, operation: key})
+            .command("add-operation", {id: self.application.id, operation: val.op})
             .success(function() { window.location.hash = self.url(); })
             .call();
           var target = $(e.target);

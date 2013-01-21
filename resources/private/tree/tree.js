@@ -99,7 +99,7 @@ var selectionTree = (function () {
         self.crumbs.push(key);
         self.breadcrumbs.html(self.crumbs.join(" / "));
 
-        var terminal = typeof (val) === "string";
+        var terminal = !_.isArray(val);
         var next = terminal ? self.makeTerminalElement(val, key) : self.make(val);
         self.stack.push(next);
         d.parentNode.appendChild(next);
