@@ -41,10 +41,10 @@
 ;;
 
 (defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (map with-meta-fields (mongo/select mongo/applications (application-query-for user)))))
+  (ok :applications (map with-meta-fields (mongo/select :applications (application-query-for user)))))
 
 (defn find-authorities-in-applications-municipality [app]
-  (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
+  (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
@@ -58,7 +58,7 @@
    :authenticated true}
   [command]
   (let [id (-> command :data :id)
-        app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
+        app (mongo/select-one :applications {:_id id} {:municipality 1})
         authorities (find-authorities-in-applications-municipality app)]
     (ok :authorityInfo authorities)))
 
@@ -69,9 +69,9 @@
   (with-application command
     (fn [application]
       (mongo/update-by-id
-        mongo/applications (:id application)
-        (if assigneeId 
-          {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
+        :applications (:id application)
+        (if assigneeId
+          {$set {:roles.authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
           {$unset {:roles.authority ""}})))))
 
 (defcommand "open-application"
@@ -81,7 +81,7 @@
   [command]
   (with-application command
     (fn [{id :id}]
-      (mongo/update-by-id mongo/applications id
+      (mongo/update-by-id :applications id
         {$set {:modified (:created command)
                :state :open
                :opened (:created command)}}))))
@@ -108,7 +108,7 @@
       (if (nil? (-> application :roles :authority))
         (executed "assign-to-me" command))
       (mongo/update
-        mongo/applications {:_id (:id application) :state :submitted}
+        :applications {:_id (:id application) :state :submitted}
         {$set {:state :sent}}))))
 
 (defcommand "submit-application"
@@ -120,7 +120,7 @@
   (with-application command
     (fn [application]
       (mongo/update
-        mongo/applications {:_id (:id application)}
+        :applications {:_id (:id application)}
           {$set {:state :submitted
                  :submitted (:created command) }}))))
 
@@ -133,7 +133,7 @@
   (with-application command
     (fn [application]
       (mongo/update
-        mongo/applications {:_id (:id application)}
+        :applications {:_id (:id application)}
           {$set {:state :answered
                  :modified (:created command)}}))))
 
@@ -147,7 +147,7 @@
     (fn [inforequest]
       ; Mark source info-request as answered:
       (mongo/update
-        mongo/applications
+        :applications
         {:_id (:id inforequest)}
         {$set {:state :answered
                :modified (:created command)}})
@@ -161,7 +161,7 @@
                          :permitType "buildingPermit")))
             id (:id result)]
         (mongo/update-by-id
-          mongo/applications
+          :applications
           id
           {$set {:comments (:comments inforequest)}})
         (ok :id id)))))
@@ -189,7 +189,7 @@
         permit-type   (keyword (:permitType data))
         operation     (keyword (:operation data))
         info-request  (if (:infoRequest data) true false)]
-    (mongo/insert mongo/applications
+    (mongo/insert :applications
       {:id id
        :created created
        :modified created

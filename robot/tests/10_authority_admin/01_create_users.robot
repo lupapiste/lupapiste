@@ -3,7 +3,7 @@
 Documentation  Authority admin creates users
 Suite setup     Sipoo logs in
 Suite teardown  Logout
-Resource       ../../common_resource.txt
+Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
@@ -12,25 +12,33 @@ Authority admin goes to admin page
 
 Authority admin creates three users
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
-  Create user  heikki.virtanen@sipoo.fi  Heikki  Virtanen  123456
-  Create user  minni.janatuinen@sipoo.fi  Minni  Janatuinen  123456
-  Create user  hessu.kesa@sipoo.fi  Hessu  Kesa  123456
+  Create user  heikki.virtanen@example.com  Heikki  Virtanen  123456
+  Create user  hessu.kesa@example.com  Hessu  Kesa  123456
   Wait Until  Element Should Be Visible  test-authority-admin-users-table
-  ${userCountAfter} =  Evaluate  ${userCount} + 3
+  ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
-
-Hessu Kesa can login
-  Logout
-  Authority logs in  hessu.kesa@sipoo.fi  123456  Hessu Kesa
-
-Hessu Kesa can logout
   Logout
 
-Hessu Kesa can login again
-  Authority logs in  hessu.kesa@sipoo.fi  123456  Hessu Kesa
+Created user cant login
+  Login  heikki.virtanen@example.com  123456
+  User should not be logged in
 
-Hessu Kesa can logout again
+Admin activates Heikki (to simulate activating via email)
+  Solitaadmin logs in
+  Wait until  page should contain link  heikki.virtanen@example.com
+  Click link  heikki.virtanen@example.com
+
+Activating Heikki removes activation link
+  Wait until  page should not contain link  heikki.virtanen@example.com
   Logout
+
+Heikki user can now login
+  Authority logs in  heikki.virtanen@example.com  123456  Heikki Virtanen
+  Logout
+
+Hessu can't still login
+  Login  hessu.kesa@example.com  123456
+  User should not be logged in
 
 *** Keywords ***
 

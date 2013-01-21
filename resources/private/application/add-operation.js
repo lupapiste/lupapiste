@@ -2,7 +2,7 @@
 
   function Model() {
     var self = this;
-    
+
     self.application = null;
 
     self.title = ko.observable();
@@ -10,12 +10,12 @@
     self.operation = ko.observable();
     self.treeReady = ko.observable(false);
     self.tree = null;
-    
+
     self.clear = function() {
       self.application = null;
       return self.title("").url("").operation(null).treeReady(false);
     };
-    
+
     self.init = function(application) {
       self.application = application;
       self.operation(null).treeReady(false).title(application.title).url("#!/application/" + application.id);
@@ -26,17 +26,16 @@
         .call();
       return self;
     };
-    
+
     self.setOperations = function(operations) {
       if (self.tree) self.tree.reset(operations);
       return self;
     };
-    
+
     self.generateLast = function(value) {
-      var e = $("<div>").addClass("tree-result");
-      e.append($("<button>")
-        .addClass("btn")
-        .addClass("btn-primary")
+      var e = $("<div>").addClass("tree-magic");
+      e.append($("<a>")
+        .addClass("tree-action")
         .html(loc('addOperation'))
         .click(function(e) {
           ajax
@@ -49,14 +48,16 @@
             .append($("<img>").attr("src", "/img/ajax-loader.gif"));
           return false;
         }));
-      e.append($("<button>")
-        .addClass("btn")
+      var icon = $("<span>").addClass("font-icon icon-tree-back");
+      e.append($("<a>")
+        .addClass("tree-back")
         .html(loc('back'))
+        .append(icon)
         .click(self.tree.goback));
       return e[0];
     };
   }
-    
+
   var model = new Model();
   var currentId;
 
@@ -83,5 +84,5 @@
     model.tree = tree;
     ko.applyBindings(model, $("#add-operation")[0]);
   });
-  
+
 })();

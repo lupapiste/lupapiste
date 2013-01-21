@@ -201,7 +201,3 @@
         id   (:id data)]
     (mongo/remove-many :vetuma {:_id id})
     (json user)))
-
-;;
-;; Web stuff
-;;
