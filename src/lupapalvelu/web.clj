@@ -4,17 +4,18 @@
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]])
-  (:require (noir  [request :as request]
+  (:require [noir  [request :as request]
                    [response :as resp]
                    [session :as session]
-                   [server :as server])
-            (lupapalvelu [env :as env]
+                   [server :as server]]
+            [lupapalvelu [env :as env]
                          [core :as core]
                          [action :as action]
                          [singlepage :as singlepage]
                          [security :as security]
                          [attachment :as attachment]
-                         [proxy-services :as proxy-services])
+                         [proxy-services :as proxy-services]
+                         [municipality]]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
