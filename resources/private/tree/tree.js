@@ -100,7 +100,7 @@ var selectionTree = (function () {
         self.breadcrumbs.html(self.crumbs.join(" / "));
 
         var terminal = typeof (val) === "string";
-        var next = terminal ? self.makeTerminalElement(val) : self.make(val);
+        var next = terminal ? self.makeTerminalElement(val, key) : self.make(val);
         self.stack.push(next);
         d.parentNode.appendChild(next);
         var done = (terminal && self.callback) ? self.callback.bind(self, val) : null;
