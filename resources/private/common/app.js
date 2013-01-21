@@ -33,7 +33,10 @@ LUPAPISTE.App = function(startPage) {
       LUPAPISTE.ModalDialog.init();
     }
 
-    $(".logout-button").click(function() { hub.send("logout"); });
+    $("a.logout").click(function(e) {
+      hub.send("logout");
+      e.preventDefault();
+    });
   };
   $(this.domReady);
 
@@ -125,7 +128,7 @@ LUPAPISTE.App = function(startPage) {
   });
 
   hub.subscribe("logout", function() {
-    window.location = "/logout";
+    window.location = "/" + loc.getCurrentLanguage() + "/logout";
   });
 
 };
