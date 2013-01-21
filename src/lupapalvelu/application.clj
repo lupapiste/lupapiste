@@ -92,7 +92,7 @@
    :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
-  (mongo/update-by-id mongo/applications (-> command :data :id)
+  (mongo/update-by-id :applications (-> command :data :id)
                       {$set {:modified (:created command)
                              :state :canceled}})
   (ok))
