@@ -52,13 +52,11 @@ Remove link
 User sees link
   [Arguments]  ${name}  ${url}
   Begin inforequest
-  Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
   Element should contain  xpath=//a[@href='${url}']  ${name}
   
 User does not see link
   [Arguments]  ${name}
   Begin inforequest
-  Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
   Element should not be visible  //a[text()='${name}']
 
 Begin inforequest
@@ -72,5 +70,4 @@ Begin inforequest
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
-  # Do not touch this sleep
-  Sleep  1
+  Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
