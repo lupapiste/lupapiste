@@ -122,7 +122,7 @@
              :css ["upload.css"]}
 
    :welcome {:depends [:common :register :buildinfo]
-             :js ["login.js"]
+             :js ["welcome.js" "login.js"]
              :html ["login.html" "index.html"]}
 
    :mypage  {:depends [:common]
