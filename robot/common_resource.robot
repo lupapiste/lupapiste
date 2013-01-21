@@ -27,11 +27,6 @@ Browser
   [Arguments]  ${url}
   Open browser  ${url}  ${BROWSER}   remote_url=${SELENIUM}
 
-Initialize fixture
-  [Arguments]  ${fixture}
-  Browser  ${FIXTURE URL}/${fixture}
-  Wait until  Page should contain   fixture applied: ${fixture}
-
 Open browser to login page
   Browser  ${LOGIN URL}
   Maximize browser window
@@ -177,6 +172,10 @@ As Veikko
 As Sonja
   Open browser to login page
   Sonja logs in
+
+As Sipoo
+  Open browser to login page
+  Sipoo logs in
 
 As Solitaadmin
   Open browser to login page

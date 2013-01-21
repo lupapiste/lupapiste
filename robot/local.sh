@@ -1,6 +1,6 @@
 #!/bin/bash
 
-target=$1
+target=$@
 
 if [ -z $target ] ; then
 	target="tests"

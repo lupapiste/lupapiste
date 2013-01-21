@@ -9,12 +9,14 @@ Variables      variables.py
 *** Test Cases ***
 
 Mikko goes to empty attachments tab
+  [Tags]  attachments
   Wait until page contains element  test-application-link
   Click element    test-application-link
   Wait until page contains element  application-page-is-ready
   Click element    test-attachments-tab
 
 Mikko adds txt attachment
+  [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}
 
 *** Keywords ***
