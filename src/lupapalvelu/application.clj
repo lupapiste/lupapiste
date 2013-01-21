@@ -86,6 +86,17 @@
                :state :open
                :opened (:created command)}}))))
 
+(defcommand "cancel-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (mongo/update-by-id :applications (-> command :data :id)
+                      {$set {:modified (:created command)
+                             :state :canceled}})
+  (ok))
+
 (defcommand "approve-application"
   {:parameters [:id]
    :roles      [:authority]

@@ -9,4 +9,8 @@ $(function() {
   $("#todo").click(function() { $(".todo").toggleClass("todo-off"); });
   $("#hidden").click(function() { $(".page").toggleClass("visible"); });
   $("#events").click(function() { hub.send("toggle-show-events"); });
+  
+  // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
+  window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
+
 });

@@ -135,6 +135,17 @@
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
+    },
+    
+    cancelApplication: function() {
+      var id = application.id();
+      ajax
+        .command("cancel-application", {id: id})
+        .success(function() {
+          window.location.hash = "!/applications";
+        })
+        .call();
+      return false;
     }
 
   };

@@ -5,7 +5,7 @@
             [clojure.xml :as xml]
             [clojure.zip :as zip])
   (:use [clojure.data.zip.xml :only [xml-> text]]
-        [lupapalvelu.util :only [starts-with-i]]))
+        [lupapalvelu.strings :only [starts-with-i]]))
 
 (def ^:private auth ["***REMOVED***" "***REMOVED***"])
 
