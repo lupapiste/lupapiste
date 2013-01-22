@@ -237,7 +237,7 @@
 (defquery "merge-details-from-krysp"
   {:parameters [:id]
    :roles-in   [:applicant :authority]}
-  [{{:keys [id]} :data user :user :as command}]
+  [{{:keys [id]} :data :as command}]
   (with-application command
     (fn [application]
       (let [document (domain/get-document-by-name application "huoneisto")
