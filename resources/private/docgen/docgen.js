@@ -71,7 +71,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     input.className = "form-input " + type + " " + (extraClass || "");
     input.onchange = save;
     if (type === "checkbox") {
-      input.checked = value === "true"; //FIXME: should come as booleans
+      input.checked = _.isBoolean(value) && value || value === "true";
     } else {
       input.value = value || "";
     }
