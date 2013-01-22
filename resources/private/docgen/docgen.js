@@ -271,7 +271,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
       elem.setAttribute("data-repeating-id-" + repeatingId, id);
       return elem;
     }
-
+    
     if (spec.repeating) {
       var models = model[myName] || [{}];
 
@@ -387,6 +387,17 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     };
   }
 
+  function removeDoc(e) {
+    var n = $(e.target).parent();
+    var docId = n.attr("data-doc-id");
+    var appId = n.attr("data-app-id");
+    ajax
+      .command("remove-doc", {id: appId, docId: docId})
+      .success(function() { console.log("Donetzky"); })
+      .call();
+    return false;
+  }
+  
   function buildElement() {
     var specId = self.spec.info.name;
     var save = makeSaverDelegate(self.callback, self.eventData);
@@ -400,8 +411,16 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     title.className = "application_section_header";
     title.appendChild(icon);
     title.appendChild(document.createTextNode(loc(specId + "._group_label")));
-
+    title.setAttribute("data-doc-id", self.docId);
+    title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.toggle;
+    if (self.spec.info.removable) {
+      $(title)
+        .append($("<button>")
+          .addClass("remove")
+          .html("[remove]")
+          .click(removeDoc));
+    }
 
     var sectionContainer = document.createElement("div");
     sectionContainer.className = "application_section_content content_expanded";
