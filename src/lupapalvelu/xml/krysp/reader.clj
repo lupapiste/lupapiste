@@ -1,11 +1,12 @@
 (ns lupapalvelu.xml.krysp.reader
   (:use sade.xml)
-  (:require [clojure.string :refer [split]]
-            [clojure.walk :refer [postwalk]]))
+  (:require [clojure.string :as s]
+            [clojure.walk :refer [postwalk]]
+            [clj-http.client :as client]))
 
 (defn strip-key
   "removes namespacey part of a keyword key of a map entry"
-  [[k v]] (if (keyword? k) [(-> k name (split #":") last keyword) v] [k v]))
+  [[k v]] (if (keyword? k) [(-> k name (s/split #":") last keyword) v] [k v]))
 
 (defn strip-keys
   "removes recursively all namespacey parts from map keywords keys"
@@ -18,6 +19,12 @@
 (defn strip-empty-maps
   "removes recursively all keys from map which have empty map as value"
   [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp (partial not= {}) val) x)) x)) m))
+
+(defn strip-trailing-slash [s] (s/replace s #"/*$" ""))
+
+(defn test-krysp-source [server]
+  (let [url      (str (strip-trailing-slash server) "/geoserver/wfs?request=GetCapabilities")]
+    (try (-> url client/get :status (= 200)) (catch Exception e false))))
 
 (defn building-info [id]
   (let [url (str "http://212.213.116.162/geoserver/wfs?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
