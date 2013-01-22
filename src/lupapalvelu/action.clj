@@ -15,6 +15,11 @@
 
 (defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
 
+(defquery "municipalities" 
+  {:authenticated true} 
+  [{user :user}]
+  (ok :municipalities (mongo/select :municipalities)))
+
 (defn application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)

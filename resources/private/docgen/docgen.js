@@ -172,7 +172,8 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
       var name = o.name;
       var option = document.createElement("option");
       option.value = name;
-      option.appendChild(document.createTextNode(loc(specId + "." + myPath + "." + name)));
+      var locKey = specId + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
+      option.appendChild(document.createTextNode(loc(locKey)));
       if (selectedOption === name) {
         option.selected = "selected";
       }

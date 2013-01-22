@@ -16,6 +16,7 @@ ${LOGIN URL}                    ${SERVER}/welcome#!/login
 ${LOGOUT URL}                    ${SERVER}/logout
 ${APPLICATIONS PATH}            /applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /authority#!/applications
+${INFOREQUESTS URL}   			${SERVER}/applicant#!/inforequests
 ${AUTHORITY INFOREQUESTS URL}   ${SERVER}/authority#!/inforequests
 ${FIXTURE URL}                  ${SERVER}/fixture
 
