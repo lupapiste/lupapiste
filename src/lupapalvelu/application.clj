@@ -226,4 +226,8 @@
   [command]
   (with-application command
     (fn [application]
-      (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
+      (let [data (:data command)
+            id (:id data)
+            operation (:operation data)]
+        (mongo/update-by-id :applications id {$push {:operations operation}})))))
+
