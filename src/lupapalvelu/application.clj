@@ -4,7 +4,8 @@
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
         [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
-        [lupapalvelu.document.commands :only [create-document]])
+        [lupapalvelu.document.commands :only [create-document create-op-document]]
+        [lupapalvelu.operations :only [operation->schema initial-operation->schemas]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
@@ -180,14 +181,18 @@
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :propertyId :municipality]
+  {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id            (mongo/create-id)
         owner         (role user :owner :type :owner)
+        op            (keyword (:operation data))
+        op-doc-id     (mongo/create-id)
+        op-doc        (create-op-document op-doc-id (operation->schema op))
+        documents     (cons op-doc (map #(create-document (mongo/create-id) %) (initial-operation->schemas op)))
+        operations    [{:operation op :doc-id op-doc-id}]
         permit-type   (keyword (:permitType data))
-        operation     (keyword (:operation data))
         info-request  (if (:infoRequest data) true false)]
     (mongo/insert :applications
       {:id id
@@ -203,9 +208,9 @@
        :auth [owner]
        :infoRequest info-request
        :permitType permit-type
-       :operations (if operation [operation] [])
-       :allowedAttachmentTypes (if info-request [[:muut [:muu]]] (attachment-types-for operation))
-       :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas))
+       :operations operations
+       :documents documents
+       :allowedAttachmentTypes (if info-request [[:muut [:muu]]] (attachment-types-for op))
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message
@@ -213,7 +218,7 @@
                      :created created
                      :user    (security/summary user)}]
                    [])})
-    (doseq [attachment-type (default-attachments operation [])]
+    (doseq [attachment-type (default-attachments op [])]
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
@@ -226,8 +231,10 @@
   [command]
   (with-application command
     (fn [application]
-      (let [data (:data command)
-            id (:id data)
-            operation (:operation data)]
-        (mongo/update-by-id :applications id {$push {:operations operation}})))))
-
+      (let [data    (:data command)
+            id      (:id data)
+            op      (:operation data)
+            doc-id  (mongo/create-id)
+            doc     (create-op-document doc-id (operation->schema op))]
+        (mongo/update-by-id :applications id {$push {:operations {:operation op :doc-id doc-id}
+                                                     :documents doc}})))))
