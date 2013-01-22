@@ -42,7 +42,7 @@
   ko.bindingHandlers.ltext = {
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text(value && (value.length > 0) ? loc(value) : "");
+      $(element).text(value && (value.length > 0) ? loc(value) : "$$EMPTY_LTEXT$$");
     }
   };
 
