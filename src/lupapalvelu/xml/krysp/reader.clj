@@ -22,7 +22,9 @@
 
 (defn strip-trailing-slash [s] (s/replace s #"/*$" ""))
 
-(defn test-krysp-source [server]
+(defn test-krysp-source
+  "checks if the krysp-source is a geoserver (daily wtf)"
+  [server]
   (let [url      (str (strip-trailing-slash server) "/geoserver/wfs?request=GetCapabilities")]
     (try (-> url client/get :status (= 200)) (catch Exception e false))))
 
