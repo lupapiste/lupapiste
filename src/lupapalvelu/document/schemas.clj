@@ -74,9 +74,12 @@
                           (cons {:name "kuntaRoolikoodi" :type :select
                                   :body [{:name "GEO-suunnittelija"}
                                          {:name "LVI-suunnittelija"}
+                                         {:name "IV-suunnittelija"}
+                                         {:name "KVV-suunnittelija"}
                                          {:name "RAK-rakennesuunnittelija"}
                                          {:name "ARK-rakennussuunnittelija"}
-                                         {:name "ei tiedossa"}]
+                                         {:name "ei tiedossa"}
+                                         {:name "Vaikeiden töiden suunnittelija"}]
                                   } patevyys)
                             })) ; TODO miten liitteet hanskataan
 
