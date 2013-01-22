@@ -226,8 +226,10 @@
   [{{:keys [id]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (let [old-doc  (domain/get-document-by-name application "huoneisto")
+      (let [document (domain/get-document-by-name application "huoneisto")
+            old-body (:body document)
             kryspxml (krysp/building-info "24500301050006")
-            new-doc  (krysp/building-document kryspxml)]
-        (ok :old old-doc :new new-doc)))))
+            new-body (krysp/building-document kryspxml)
+            merged   (merge old-body new-body)]
+        (ok :old old-body :new new-body :merged merged)))))
 
