@@ -63,7 +63,7 @@
    :puun-kaataminen uusi-rakennus
    :muu-maisema-toimenpide uusi-rakennus})
 
-(def ^:private common ["hakija" "maksaja" "rakennuspaikka" "lisatiedot"])
+(def ^:private common ["maksaja" "rakennuspaikka" "lisatiedot"])
 
 (def initial-operation->schemas
   {:asuinrakennus (concat common ["paasuunnittelija" "suunnittelija"])

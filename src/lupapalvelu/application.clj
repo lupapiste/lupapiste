@@ -180,6 +180,11 @@
                                                 ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
+(defn create-hakija-document [{:keys [id firstName lastName]}]
+  (create-document (mongo/create-id) "hakija" {:henkilo {:henkilotiedot {:id id
+                                                                         :etunimi firstName
+                                                                         :sukunimi lastName}}}))
+
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
@@ -190,7 +195,10 @@
         op            (keyword (:operation data))
         op-doc-id     (mongo/create-id)
         op-doc        (create-op-document op-doc-id (operation->schema op))
-        documents     (cons op-doc (map #(create-document (mongo/create-id) %) (initial-operation->schemas op)))
+        hakija        (create-hakija-document user)
+        documents     (conj (map #(create-document (mongo/create-id) %) (initial-operation->schemas op))
+                            op-doc
+                            hakija)
         operations    [{:operation op :doc-id op-doc-id}]
         permit-type   (keyword (:permitType data))
         info-request  (if (:infoRequest data) true false)]
