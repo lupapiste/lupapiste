@@ -217,7 +217,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
 
   function buildRadioGroup(spec, model, path, save, specId) {
     var myPath = path.join(".");
-    var myModel = model[name] || _.first(spec.body).name;
+    var myModel = model[spec.name] || _.first(spec.body).name;
 
     var partsDiv = document.createElement("div");
     partsDiv.id = pathStrToID(myPath);
