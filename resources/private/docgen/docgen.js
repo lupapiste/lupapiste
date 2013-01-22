@@ -320,8 +320,11 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
   function appendElements(body, schema, model, path, save, specId, partOfChoice) {
 
     function toggleSelectedGroup(value) {
-      $(body).children("[data-select-one-of]").hide();
-      $(body).children("[data-select-one-of='" + value + "']").show();
+      $(body)
+        .children("[data-select-one-of]")
+        .hide()
+        .filter("[data-select-one-of='" + value + "']")
+        .show();
     }
 
     var selectOneOf = getSelectOneOfDefinition(schema);
