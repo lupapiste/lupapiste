@@ -219,9 +219,10 @@
     (fn [application]
       (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
 
-(defcommand "consume-details-from-krysp"
+(defquery "consume-details-from-krysp"
   {:parameters [:id]
-   :roles-in   [:applicant :authority]}
+   ;;:roles-in   [:applicant :authority]
+   }
   [{{:keys [id]} :data user :user :as command}]
   (with-application command
     (fn [application]

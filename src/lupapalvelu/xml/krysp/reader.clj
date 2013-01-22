@@ -29,7 +29,7 @@
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
-(defn huoneisto-doc [xml]
+(defn building-document [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
         body {:body
               {:huoneistoTunnus
