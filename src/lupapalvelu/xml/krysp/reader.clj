@@ -4,6 +4,16 @@
             [clojure.walk :refer [postwalk]]
             [clj-http.client :as client]))
 
+;;
+;; Test urls
+;;
+
+(def logica-test-source "http://212.213.116.162/geoserver/wfs")
+
+;;
+;; Helpers
+;;
+
 (defn strip-key
   "removes namespacey part of a keyword key of a map entry"
   [[k v]] (if (keyword? k) [(-> k name (s/split #":") last keyword) v] [k v]))
@@ -23,13 +33,13 @@
 (defn strip-trailing-slash [s] (s/replace s #"/*$" ""))
 
 (defn test-krysp-source
-  "checks if the krysp-source is a geoserver (daily wtf)"
-  [server]
-  (let [url      (str (strip-trailing-slash server) "/geoserver/wfs?request=GetCapabilities")]
-    (try (-> url client/get :status (= 200)) (catch Exception e false))))
+  "checks if the krysp-source is Web Feature Service -enabled"
+  [url] (try
+          (-> url (client/get {:query-param {:request :GetCapabilities}}) :status (= 200))
+          (catch Exception e false)))
 
-(defn building-info [id]
-  (let [url (str "http://212.213.116.162/geoserver/wfs?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
+(defn building-info [server id]
+  (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
     (-> url parse xml->edn strip-keys)))
 
 #_(-> "./dev-resources/public/krysp/building.xml" slurp parse xml->edn strip-keys)
