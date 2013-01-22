@@ -22,6 +22,7 @@ Applicant marks inforequest answered
   Wait and click  test-from-applications-to-inforequests-tab
   Wait until  Number of visible applications on page  inforequests  2
   Wait and click  test-inforequest-link
+  Wait until  Inforequest state is  Avoin
   Wait and click  test-mark-inforequest-answered
   Wait until  Inforequest state is  Vastattu
   Logout
