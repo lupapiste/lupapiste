@@ -6,6 +6,7 @@
         [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
         [lupapalvelu.document.commands :only [create-document]])
   (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
@@ -219,7 +220,21 @@
     (fn [application]
       (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
 
-(defquery "consume-details-from-krysp"
+(env/in-dev "to verify data gets merged correctly"
+  (defquery "view-details-from-krysp"
+    {:parameters [:id]}
+    [{{:keys [id]} :data :as command}]
+    (with-application command
+      (fn [application]
+        (let [document (domain/get-document-by-name application "huoneisto")
+              old-body (:body document)
+              source   krysp/logica-test-source
+              kryspxml (krysp/building-info source "24500301050006")
+              new-body (krysp/building-document kryspxml)
+              merged   (merge old-body new-body)]
+          (ok :old old-body :new new-body :merged merged))))))
+
+(defquery "merge-details-from-krysp"
   {:parameters [:id]
    :roles-in   [:applicant :authority]}
   [{{:keys [id]} :data user :user :as command}]
@@ -227,7 +242,8 @@
     (fn [application]
       (let [document (domain/get-document-by-name application "huoneisto")
             old-body (:body document)
-            kryspxml (krysp/building-info "24500301050006")
+            source   (krysp/logica-test-source)
+            kryspxml (krysp/building-info source "24500301050006")
             new-body (krysp/building-document kryspxml)
             merged   (merge old-body new-body)]
         (ok :old old-body :new new-body :merged merged)))))
