@@ -53,7 +53,7 @@
       if (value && value.firstName && value.lastName) {
         fullName = value.firstName + "\u00a0" + value.lastName;
       }
-      $(element).text(fullName); //TODO: does not work with comments in application.html
+      $(element).html(fullName); //TODO: does not work with comments in application.html
     }
   };
 
