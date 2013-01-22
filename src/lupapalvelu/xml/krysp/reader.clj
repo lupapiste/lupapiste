@@ -30,8 +30,6 @@
   "removes recursively all keys from map which have empty map as value"
   [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp (partial not= {}) val) x)) x)) m))
 
-(defn strip-trailing-slash [s] (s/replace s #"/*$" ""))
-
 (defn test-krysp-source
   "checks if the krysp-source is Web Feature Service -enabled"
   [url] (try
