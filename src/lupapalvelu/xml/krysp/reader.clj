@@ -15,6 +15,9 @@
   "removes recursively all keys from map which have value of nil"
   [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp not nil? val) x)) x)) m))
 
+(defn strip-empty-maps
+  [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp not nil? val) x)) x)) m))
+
 (defn building-info [id]
   (let [url (str "http://212.213.116.162/geoserver/wfs?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
     (-> url parse xml->edn strip-keys)))
@@ -26,18 +29,19 @@
 ;;
 
 (defn huoneisto-doc [xml]
-  (let [from (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])]
-    {:body
-     {:huoneistoTunnus
-      {:huoneistonumero nil, :jakokirjain nil, :porras nil},
-      :huoneistonTyyppi
-      {:huoneistoTyyppi (get-in from [:valmisHuoneisto :huoneistonTyyppi]),
-       :huoneistoala (get-in from [:valmisHuoneisto :huoneistoala]),
-       :huoneluku (get-in from [:valmisHuoneisto :huoneluku])},
-      :keittionTyyppi nil,
-      :varusteet
-      {:ammeTaiSuihku (get-in from [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin]),
-       :lamminvesi (get-in from [:valmisHuoneisto :varusteet :lamminvesiKytkin]),
-       :parvekeTaiTerassi (get-in from [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
-       :sauna (get-in from [:valmisHuoneisto :varusteet :saunaKytkin]),
-       :wc (get-in from [:valmisHuoneisto :varusteet :WCKytkin])}}}))
+  (let [from (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
+        doc  {:body
+              {:huoneistoTunnus
+               {:huoneistonumero nil, :jakokirjain nil, :porras nil},
+               :huoneistonTyyppi
+               {:huoneistoTyyppi (get-in from [:valmisHuoneisto :huoneistonTyyppi]),
+                :huoneistoala (get-in from [:valmisHuoneisto :huoneistoala]),
+                :huoneluku (get-in from [:valmisHuoneisto :huoneluku])},
+               :keittionTyyppi nil,
+               :varusteet
+               {:ammeTaiSuihku (get-in from [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin]),
+                :lamminvesi (get-in from [:valmisHuoneisto :varusteet :lamminvesiKytkin]),
+                :parvekeTaiTerassi (get-in from [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
+                :sauna (get-in from [:valmisHuoneisto :varusteet :saunaKytkin]),
+                :wc (get-in from [:valmisHuoneisto :varusteet :WCKytkin])}}}]
+    (strip-nils doc)))
