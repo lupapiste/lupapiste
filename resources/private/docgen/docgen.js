@@ -394,7 +394,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     var appId = n.attr("data-app-id");
     ajax
       .command("remove-doc", {id: appId, docId: docId})
-      .success(function() { console.log("Donetzky"); })
+      .success(function() { n.parent().remove(); })
       .call();
     return false;
   }
