@@ -3,7 +3,7 @@
 <body>
   <section class="page" id="attachment" data-bind="with: attachment">
     <div class="breadcrumb">
-      <a href="#!/applications" id="test-applications">Lupahakemukset</a>
+      <a href="#!/applications" id="test-applications" data-bind="ltext: 'permitApplications'">Lupahakemukset</a>
       /
       <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications">
         <span data-bind="text: application.title"></span>
