@@ -1,28 +1,65 @@
-var docgen = (function () {
+if (typeof LUPAPISTE === "undefined") {
+  var LUPAPISTE = {};
+}
+
+LUPAPISTE.DOMUtils = {
+  makeButton: function (id, label) {
+    var appendButton = document.createElement("button");
+    appendButton.id = id;
+    appendButton.className = "btn";
+    appendButton.innerHTML = label;
+    return appendButton;
+  }
+};
+
+LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   "use strict";
 
+  // Magic key: if schema contains "_selected" radioGroup,
+  // user can select only one of the schemas named in "_selected" group
+  var SELECT_ONE_OF_GROUP_KEY = "_selected";
+
+  var self = this;
+
+  self.spec = spec;
+  self.model = model;
+  self.callback = callback;
+  self.docId = docId;
+  self.appId = appId;
+  self.eventData = {doc: docId, app: appId};
+
+  self.sizeClasses = {"s" : "form-input short", "m" : "form-input medium"};
+
+  // ID utilities
+
   function pathStrToID(pathStr) {
-    return pathStr.replace(/\./g, "-");
+      return self.docId + pathStr.replace(/\./g, "-");
   }
 
   function pathStrToLabelID(pathStr) {
     return "label-" + pathStrToID(pathStr);
   }
 
-  function makeLabel(type, pathStr, specId) {
+  function pathStrToGroupID(pathStr) {
+    return "group-" + pathStrToID(pathStr);
+  }
+
+  function makeLabel(type, pathStr, specId, groupLabel) {
     var label = document.createElement("label");
     label.id = pathStrToLabelID(pathStr);
-    label.htmlFor = pathStrToID(pathStr);;
+    label.htmlFor = pathStrToID(pathStr);
     label.className = "form-label form-label-" + type;
-    var locKey = specId + "." + pathStr.replace(/\.\d+\./g, ".");
-    label.appendChild(document.createTextNode(loc(locKey)));
+
+    var path = groupLabel ? pathStr + "._group_label" : pathStr;
+    var locKey = specId + "." + path.replace(/\.\d+\./g, ".");
+    label.innerHTML = loc(locKey);
     return label;
   }
 
   function makeInput(type, path, value, save, extraClass) {
     var input = document.createElement("input");
     input.id = pathStrToID(path);
-    input.name = path;
+    input.name = docId + "." + path;
 
     try {
       input.type = type;
@@ -41,10 +78,17 @@ var docgen = (function () {
     return input;
   }
 
-  function buildCheckbox(spec, model, path, save, specId) {
-    var myPath = path.join(".");
+  function makeEntrySpan() {
     var span = document.createElement("span");
     span.className = "form-entry";
+    return span;
+  }
+
+  // Form field builders
+
+  function buildCheckbox(spec, model, path, save, specId) {
+    var myPath = path.join(".");
+    var span = makeEntrySpan();
     span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
     span.appendChild(makeLabel("checkbox", myPath, specId));
     return span;
@@ -52,23 +96,30 @@ var docgen = (function () {
 
   function buildString(spec, model, path, save, specId, partOfChoice) {
     var myPath = path.join(".");
-    var div = document.createElement("span");
-    var sizeClass = "";
-    if (spec.size) {
-      if (spec.size === "s") sizeClass = "form-input short";
-      if (spec.size === "m") sizeClass = "form-input medium";
-    }
-    div.className = "form-entry";
-    div.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
+    var span =  makeEntrySpan();
+    span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
+
+
+
     var type = (spec.subtype === "email") ? "email" : "text";
-    div.appendChild(makeInput(type, myPath, model[spec.name], save, sizeClass));
+    var sizeClass = self.sizeClasses[spec.size] || "";
+    var input = makeInput(type, myPath, model[spec.name], save, sizeClass)
+
     if (spec.unit) {
+      var inputAndUnit = document.createElement("span");
+      inputAndUnit.className = "form-input-and-unit";
+      inputAndUnit.appendChild(input);
+
       var unit = document.createElement("span");
       unit.className = "form-string-unit";
       unit.appendChild(document.createTextNode(loc("unit." + spec.unit)));
-      div.appendChild(unit);
+      inputAndUnit.appendChild(unit);
+      span.appendChild(inputAndUnit);
+    } else {
+      span.appendChild(input);
     }
-    return div;
+
+    return span;
   }
 
   function buildText(spec, model, path, save, specId) {
@@ -82,28 +133,21 @@ var docgen = (function () {
     input.onchange = save;
     input.value = model[spec.name] || "";
 
-    var div = document.createElement("span");
-    div.className = "form-entry";
-    div.appendChild(makeLabel("text", myPath, specId));
-    div.appendChild(input);
-    return div;
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("text", myPath, specId));
+    span.appendChild(input);
+    return span;
   }
 
   function buildDate(spec, model, path, save, specId) {
     var myPath = path.join(".");
+    var value = model[spec.name] || "";
+    var input = makeInput("date", myPath, value, save, "form-date");
 
-    var input = document.createElement("input");
-    input.setAttribute("type", "date");
-    input.name = myPath;
-    input.className = "form-input form-date";
-    input.onchange = save;
-    input.value = model[spec.name] || "";
-
-    var div = document.createElement("span");
-    div.className = "form-entry";
-    div.appendChild(makeLabel("date", myPath, specId));
-    div.appendChild(input);
-    return div;
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("date", myPath, specId));
+    span.appendChild(input);
+    return span;
   }
 
   function buildSelect(spec, model, path, save, specId) {
@@ -119,53 +163,80 @@ var docgen = (function () {
     var option = document.createElement("option");
     option.value = "";
     option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") option.selected = "selected";
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
     select.appendChild(option);
 
     $.each(spec.body, function (i, o) {
       var name = o.name;
       var option = document.createElement("option");
       option.value = name;
-      option.appendChild(document.createTextNode(loc(specId + "." + myPath + "." + name)));
-      if (selectedOption === name) option.selected = "selected";
+      var locKey = specId + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
+      option.appendChild(document.createTextNode(loc(locKey)));
+      if (selectedOption === name) {
+        option.selected = "selected";
+      }
       select.appendChild(option);
     });
 
-    var div = document.createElement("span");
-    div.className = "form-entry";
-    div.appendChild(makeLabel("select", myPath + "._group_label", specId));
-    div.appendChild(select);
-    return div;
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("select", myPath, specId, true));
+    span.appendChild(select);
+    return span;
   }
 
   function buildChoice(spec, model, path, save, specId) {
     var name = spec.name;
-    var choices = spec.body;
     var myModel = model[name] || {};
 
     var choicesDiv = document.createElement("div");
-    appendElements(choicesDiv, choices, myModel, path, save, specId, true);
+    appendElements(choicesDiv, spec, myModel, path, save, specId, true);
 
     var div = document.createElement("div");
     div.className = "form-choice";
-    div.appendChild(makeLabel("choice", path.concat("_group_label").join("."), specId));
+    div.appendChild(makeLabel("choice", path.join("."), specId, true));
     div.appendChild(choicesDiv);
     return div;
   }
 
   function buildGroup(spec, model, path, save, specId) {
+    var myPath = path.join(".");
     var name = spec.name;
-    var parts = spec.body;
     var myModel = model[name] || {};
 
     var partsDiv = document.createElement("div");
-    appendElements(partsDiv, parts, myModel, path, save, specId);
+    appendElements(partsDiv, spec, myModel, path, save, specId);
 
     var div = document.createElement("div");
+    div.id = pathStrToGroupID(myPath);
     div.className = "form-group";
-    div.appendChild(makeLabel("group", path.concat(["_group_label"]).join("."), specId));
+    div.appendChild(makeLabel("group", myPath, specId, true));
     div.appendChild(partsDiv);
     return div;
+  }
+
+  function buildRadioGroup(spec, model, path, save, specId) {
+    var myPath = path.join(".");
+    var myModel = model[spec.name] || _.first(spec.body).name;
+
+    var partsDiv = document.createElement("div");
+    partsDiv.id = pathStrToID(myPath);
+
+    var span = makeEntrySpan();
+
+    $.each(spec.body, function (i, o) {
+      var pathForId = myPath + "." + o.name;
+      var input = makeInput("radio", myPath, o.name, save);
+      input.id = pathStrToID(pathForId);
+      input.checked = o.name === myModel;
+
+      span.appendChild(input);
+      span.appendChild(makeLabel("radio", pathForId, specId));
+    });
+
+    partsDiv.appendChild(span);
+    return partsDiv;
   }
 
   function buildUnknown(spec, model, path, save, specId) {
@@ -182,6 +253,7 @@ var docgen = (function () {
     choice: buildChoice,
     checkbox: buildCheckbox,
     select: buildSelect,
+    radioGroup: buildRadioGroup,
     date: buildDate,
     element: buildElement,
     unknown: buildUnknown
@@ -192,23 +264,25 @@ var docgen = (function () {
     var myName = spec.name;
     var myPath = path.concat([myName]);
     var builder = builders[spec.type] || buildUnknown;
+    var repeatingId = myPath.join("-");
+
+    function makeElem(myModel, id) {
+      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
+      elem.setAttribute("data-repeating-id", repeatingId);
+      elem.setAttribute("data-repeating-id-" + repeatingId, id);
+      return elem;
+    }
 
     if (spec.repeating) {
-      var repeatingId = myPath.join("-")
       var models = model[myName] || [{}];
+
       var elements = _.map(models, function(val, key) {
         var myModel = {};
         myModel[myName] = val;
-        var elem = builder(spec, myModel, myPath.concat([key]), save, specId, partOfChoice);
-        elem.setAttribute("data-repeating-id", repeatingId);
-        elem.setAttribute("data-repeating-id-" + repeatingId, key);
-        return elem;
+        return makeElem(myModel, key);
       });
 
-      var appendButton = document.createElement("button");
-      appendButton.id = myPath.join("_") + "_append";
-      appendButton.className = "btn";
-      appendButton.innerHTML = loc(specId + "."+  myPath.join(".") + "._append_label");
+      var appendButton = LUPAPISTE.DOMUtils.makeButton(myPath.join("_") + "_append", loc(specId + "."+  myPath.join(".") + "._append_label"));
 
       var appender = function() {
         var parent$ = $(this.parentNode);
@@ -218,10 +292,7 @@ var docgen = (function () {
         }
         var myModel = {};
         myModel[myName] = {};
-        var elem = builder(spec, myModel, myPath.concat([count]), save, specId, partOfChoice);
-        elem.setAttribute("data-repeating-id", repeatingId);
-        elem.setAttribute("data-repeating-id-" + repeatingId, count);
-        $(this).before(elem);
+        $(this).before(makeElem(myModel, count));
       };
 
       $(appendButton).click(appender);
@@ -233,14 +304,53 @@ var docgen = (function () {
     return builder(spec, model, myPath, save, specId, partOfChoice);
   }
 
-  function appendElements(body, specs, model, path, save, specId, partOfChoice) {
-    _.each(specs, function(spec) {
-      var children = build(spec, model, path, save, specId, partOfChoice);
-      if (!_.isArray(children)) {
-        children = [children];
-      }
-      _.each(children, function(o) {body.appendChild(o)});
+  function getSelectOneOfDefinition(schema) {
+    var selectOneOfSchema = _.find(schema.body, function(spec){
+      return spec.name === SELECT_ONE_OF_GROUP_KEY && spec.type === "radioGroup";
     });
+
+    if (selectOneOfSchema) {
+      return _.map(selectOneOfSchema.body, function(spec) {return spec.name;}) || [];
+    }
+
+    return [];
+  }
+
+  function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+
+    function toggleSelectedGroup(value) {
+      $(body).children("[data-select-one-of]").hide();
+      $(body).children("[data-select-one-of='" + value + "']").show();
+    }
+
+    var selectOneOf = getSelectOneOfDefinition(schema);
+
+    _.each(schema.body, function(spec) {
+        var children = build(spec, model, path, save, specId, partOfChoice);
+        if (!_.isArray(children)) {
+          children = [children];
+        }
+        _.each(children, function(elem) {
+          if (_.indexOf(selectOneOf, spec.name) >= 0) {
+            elem.setAttribute("data-select-one-of", spec.name);
+            $(elem).hide();
+          }
+
+          body.appendChild(elem)
+        });
+    });
+
+    if (selectOneOf.length) {
+      // Show current selection or the first of the group
+      var myModel = model[SELECT_ONE_OF_GROUP_KEY] || _.first(selectOneOf);
+      toggleSelectedGroup(myModel);
+
+      var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
+      $(body).find(s).change(function() {
+        toggleSelectedGroup(this.value);
+      });
+    }
+
     return body;
   }
 
@@ -250,37 +360,32 @@ var docgen = (function () {
     return img;
   }
 
-  function removeClass(target, classNames) {
-    var names = target.className.split(/\s+/);
-    _.each((typeof classNames === "string") ? [classNames] : classNames, function (className) { names = _.without(names, className); });
-    target.className = names.join(" ");
-  }
-
-  function addClass(target, classNames) {
-    var names = target.className.split(/\s+/);
-    _.each((typeof classNames === "string") ? [classNames] : classNames, function (className) { names.push(className); });
-    target.className = names.join(" ");
-  }
-
   function makeSaverDelegate(save, eventData) {
     return function (event) {
       var target = getEvent(event).target;
       var path = target.name;
-      var value = (target.type === "checkbox") ? target.checked : target.value;
+      var value = target.value;
+      if (target.type === "checkbox") {
+        value = target.checked;
+      }
 
       var loader = loaderImg();
       var label = document.getElementById(pathStrToLabelID(path));
-      label.appendChild(loader);
+      if (label) {
+        label.appendChild(loader);
+      }
 
       save(path, value, function (status) {
-        label.removeChild(loader);
-        removeClass(target, ["form-input-warn", "form-input-err"]);
+        if (label) {
+          label.removeChild(loader);
+        }
+        $(target).removeClass("form-input-warn").removeClass("form-input-err");
         if (status === "ok") {
           // Nada.
         } else if (status === "warn") {
-          addClass(target, "form-input-warn");
+          $(target).addClass("form-input-warn");
         } else if (status === "err") {
-          addClass(target, "form-input-err");
+          $(target).addClass("form-input-err");
         } else {
           error("Unknown result:", result, "path:", path);
         }
@@ -290,7 +395,10 @@ var docgen = (function () {
     };
   }
 
-  function buildElement(spec, model, save, specId) {
+  function buildElement() {
+    var specId = self.spec.info.name;
+    var save = makeSaverDelegate(self.callback, self.eventData);
+
     var section = document.createElement("section");
     section.className = "application_section";
 
@@ -307,7 +415,7 @@ var docgen = (function () {
     sectionContainer.className = "application_section_content content_expanded";
 
     var elements = document.createElement("article");
-    appendElements(elements, spec.body, model, [], save, specId);
+    appendElements(elements, self.spec, self.model, [], save, specId);
 
     sectionContainer.appendChild(elements);
     section.appendChild(title);
@@ -316,30 +424,5 @@ var docgen = (function () {
     return section;
   }
 
-  function DocModel(spec, model, callback, eventData) {
-    var self = this;
-
-    self.spec = spec;
-    self.model = model;
-    self.callback = callback;
-    self.eventData = eventData;
-
-    self.element = buildElement(self.spec, self.model, makeSaverDelegate(self.callback, self.eventData), self.spec.info.name);
-
-    self.applyUpdates = function (updates) {
-      // TODO: Implement me.
-      $.each(updates, function (i, u) {
-        debug("update", u[0], u[1]);
-      });
-    };
-  }
-
-  function makeDocModel(spec, model, callback, eventData) {
-    return new DocModel(spec, model, callback, eventData || {});
-  }
-
-  return {
-    build: makeDocModel
-  };
-
-})();
+  self.element = buildElement();
+}

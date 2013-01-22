@@ -65,7 +65,7 @@ var attachment = (function() {
     name:           ko.observable(),
     type:           ko.observable(),
     attachmentType: ko.observable(),
-    allowedAttahmentTypes: ko.observableArray(),
+    allowedAttachmentTypes: ko.observableArray(),
 
     hasPreview: function() {
       return this.isImage() || this.isPdf() || this.isPlainText();
@@ -131,7 +131,7 @@ var attachment = (function() {
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
     model.name("attachmentType." + type);
-    model.allowedAttahmentTypes(application.allowedAttahmentTypes);
+    model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
     model.application.id(applicationId);
     model.application.title(application.title);
@@ -199,24 +199,26 @@ var attachment = (function() {
   hub.subscribe("upload-done", uploadDone);
 
   function newAttachment(m) {
-    initFileUpload(m.application.id(), null, null, true);
+    var infoRequest = this.application.infoRequest();
+    var type = infoRequest ? "muut.muu" : null;
+    var selector = infoRequest ? false : true;
+    initFileUpload(m.application.id(), null, type, selector);
   }
 
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
-    if (iframe) {
-      if (iframe.contentWindow.LUPAPISTE && typeof iframe.contentWindow.LUPAPISTE.Upload.init === "function") {
-        iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
-      } else {
-        error("LUPAPISTE.Upload.init is not a function");
-      }
-    } else {
-      error("IFrame not found ", iframeId);
-    }
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
   }
 
-  return { newAttachment: newAttachment };
+  function regroupAttachmentTypeList(types) {
+    return _.map(types, function(v) { return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })}; });
+  }
+
+  return {
+    newAttachment: newAttachment,
+    regroupAttachmentTypeList: regroupAttachmentTypeList
+  };
 
 })();

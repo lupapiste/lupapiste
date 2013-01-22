@@ -3,7 +3,8 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.attachment :only [create-attachment attachment-types-for]])
+        [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
+        [lupapalvelu.document.commands :only [create-document]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
@@ -11,18 +12,43 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]))
 
-(defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (mongo/select mongo/applications (application-query-for user))))
+;;
+;; Meta-fields:
+;;
+;; Fetch some fields drom the depths of documents and put them to top level
+;; so that yhey are easy to find in UI.
 
-(defn find-authorities-in-applications-municipality [id]
-  (let [app (mongo/select-one mongo/applications {:_id id} {:municipality 1})
-        data (mongo/select mongo/users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1})]
-    data))
+(def meta-fields [{:field :applicant
+                   :schema "hakija"
+                   :f (fn [doc]
+                        (let [data (get-in doc [:body :henkilo :henkilotiedot])]
+                          {:firstName (:etunimi data)
+                           :lastName (:sukunimi data)}))}])
+
+(defn search-doc [app schema]
+  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
+
+(defn with-meta-fields [app]
+  (reduce (fn [app {:keys [field schema f]}]
+            (if-let [doc (search-doc app schema)]
+              (assoc app field (f doc))
+              app))
+          app
+          meta-fields))
+
+;;
+;; Query application:
+;;
+
+(defquery "applications" {:authenticated true} [{user :user}]
+  (ok :applications (map with-meta-fields (mongo/select :applications (application-query-for user)))))
+
+(defn find-authorities-in-applications-municipality [app]
+  (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
   (if-let [app (get-application-as id user)]
-    (let [authorities (find-authorities-in-applications-municipality id)]
-      (ok :application app :authorities authorities))
+    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -30,9 +56,11 @@
 (defquery "authorities-in-applications-municipality"
   {:parameters [:id]
    :authenticated true}
-  [{{:keys [id]} :data}]
-  (let [data (find-authorities-in-applications-municipality id)]
-    (ok :authorityInfo data)))
+  [command]
+  (let [id (-> command :data :id)
+        app (mongo/select-one :applications {:_id id} {:municipality 1})
+        authorities (find-authorities-in-applications-municipality app)]
+    (ok :authorityInfo authorities)))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
@@ -41,9 +69,9 @@
   (with-application command
     (fn [application]
       (mongo/update-by-id
-        mongo/applications (:id application)
-        (if assigneeId 
-          {$set {:roles.authority (security/summary (mongo/select-one mongo/users {:_id assigneeId}))}}
+        :applications (:id application)
+        (if assigneeId
+          {$set {:roles.authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
           {$unset {:roles.authority ""}})))))
 
 (defcommand "open-application"
@@ -53,10 +81,21 @@
   [command]
   (with-application command
     (fn [{id :id}]
-      (mongo/update-by-id mongo/applications id
+      (mongo/update-by-id :applications id
         {$set {:modified (:created command)
                :state :open
                :opened (:created command)}}))))
+
+(defcommand "cancel-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (mongo/update-by-id :applications (-> command :data :id)
+                      {$set {:modified (:created command)
+                             :state :canceled}})
+  (ok))
 
 (defcommand "approve-application"
   {:parameters [:id]
@@ -69,7 +108,7 @@
       (if (nil? (-> application :roles :authority))
         (executed "assign-to-me" command))
       (mongo/update
-        mongo/applications {:_id (:id application) :state :submitted}
+        :applications {:_id (:id application) :state :submitted}
         {$set {:state :sent}}))))
 
 (defcommand "submit-application"
@@ -81,7 +120,7 @@
   (with-application command
     (fn [application]
       (mongo/update
-        mongo/applications {:_id (:id application)}
+        :applications {:_id (:id application)}
           {$set {:state :submitted
                  :submitted (:created command) }}))))
 
@@ -94,7 +133,7 @@
   (with-application command
     (fn [application]
       (mongo/update
-        mongo/applications {:_id (:id application)}
+        :applications {:_id (:id application)}
           {$set {:state :answered
                  :modified (:created command)}}))))
 
@@ -108,7 +147,7 @@
     (fn [inforequest]
       ; Mark source info-request as answered:
       (mongo/update
-        mongo/applications
+        :applications
         {:_id (:id inforequest)}
         {$set {:state :answered
                :modified (:created command)}})
@@ -122,14 +161,14 @@
                          :permitType "buildingPermit")))
             id (:id result)]
         (mongo/update-by-id
-          mongo/applications
+          :applications
           id
           {$set {:comments (:comments inforequest)}})
         (ok :id id)))))
 
 (def default-schemas {:infoRequest []
                       :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
-                                       "rakennuspaikka" "uusiRakennus" "huoneisto" "lisatiedot"]})
+                                       "rakennuspaikka" "uusiRakennus" "lisatiedot"]})
 
 (def default-attachments {:infoRequest []
                           :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
@@ -140,39 +179,33 @@
                                                 ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
                                                 ["muut" "energiataloudellinen_selvitys"]])})
 
-(defn create-document [schema-name]
-  (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
-    {:id (mongo/create-id)
-     :created (now)
-     :schema schema
-     :body {}}))
-
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :municipality]
+  {:parameters [:permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
-        id          (mongo/create-id)
-        owner       (role user :owner :type :owner)
-        permitType (keyword (:permitType data))
-        operation   (keyword (:operation data))]
-    (mongo/insert mongo/applications
+        id            (mongo/create-id)
+        owner         (role user :owner :type :owner)
+        permit-type   (keyword (:permitType data))
+        operation     (keyword (:operation data))
+        info-request  (if (:infoRequest data) true false)]
+    (mongo/insert :applications
       {:id id
-       :permitType permitType
        :created created
        :modified created
-       :state (if (= permitType :infoRequest) :open :draft)
+       :state (if info-request :open :draft)
        :municipality (:municipality data)
        :location {:x (:x data) :y (:y data)}
        :address (:address data)
+       :propertyId (:propertyId data)
        :title (:address data)
        :roles {:applicant owner}
        :auth [owner]
-       :infoRequest (if (:infoRequest data) true false)
+       :infoRequest info-request
+       :permitType permit-type
        :operations (if operation [operation] [])
-       :allowedAttahmentTypes (attachment-types-for operation)
-       :documents (map create-document (:buildingPermit default-schemas)) 
+       :allowedAttachmentTypes (if info-request [[:muut [:muu]]] (attachment-types-for operation))
+       :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas))
        :attachments []
        :comments (if-let [message (:message data)]
                    [{:text message
@@ -184,3 +217,13 @@
       (info "Create attachment: [%s]: %s" id attachment-type)
       (create-attachment id attachment-type created))
     (ok :id id)))
+
+(defcommand "add-operation"
+  {:parameters [:id :operation]
+   :roles      [:applicant :authority]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [application]
+      (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))

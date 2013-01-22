@@ -2,7 +2,9 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [sade.security :as sadesecurity]
+            [sade.client :as sadeclient]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
             [lupapalvelu.email :as email]
@@ -13,25 +15,31 @@
 
 (defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
 
+(defquery "municipalities" 
+  {:authenticated true} 
+  [{user :user}]
+  (ok :municipalities (mongo/select :municipalities)))
+
 (defn application-query-for [user]
   (case (keyword (:role user))
-    :applicant {:auth.id (:id user)}
+    :applicant {:auth.id (:id user)
+                :state {$ne "canceled"}}
     :authority {:municipality (:municipality user)
-                :state {$ne "draft"}}
-    :admin     {}
+                $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
+    :admin     {:state {$ne "canceled"}}
     (do
       (warn "invalid role to get applications")
       {:_id "-1"} ))) ; should not yield any results
 
 (defn get-application-as [application-id user]
-  (mongo/select-one mongo/applications {$and [{:_id application-id} (application-query-for user)]}))
+  (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]}))
 
 (defquery "invites"
   {:authenticated true}
   [{{:keys [id]} :user}]
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
-        data       (mongo/select mongo/applications filter projection)
+        data       (mongo/select :applications filter projection)
         invites    (flatten (map (comp :invites) data))]
     (ok :invites invites)))
 
@@ -56,7 +64,7 @@
   (with-application command
     (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
-        (mongo/update mongo/applications
+        (mongo/update :applications
           {:_id application-id
            :invites {$not {$elemMatch {:user.username email}}}}
           {$push {:invites {:title       title
@@ -80,7 +88,7 @@
   [{user :user :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (mongo/update mongo/applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+      (mongo/update :applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
         {$push {:auth         (role user :writer)}
          $pull {:invites      {:user.id (:id user)}}}))))
 
@@ -92,7 +100,7 @@
     (fn [{application-id :id}]
       (with-user email
         (fn [_]
-          (mongo/update-by-id mongo/applications application-id
+          (mongo/update-by-id :applications application-id
             {$pull {:invites      {:user.username email}
                     :auth         {$and [{:username email}
                                          {:type {$ne :owner}}]}}}))))))
@@ -104,7 +112,7 @@
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (mongo/update-by-id mongo/applications application-id
+      (mongo/update-by-id :applications application-id
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
@@ -114,7 +122,7 @@
   (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
     (let [apikey (security/create-apikey)]
       (mongo/update
-        mongo/users
+        :users
         {:username (:username user)}
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey))
@@ -123,10 +131,19 @@
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
   [{data :data}]
-  (let [from-vetuma (client/json-get (str "/vetuma/stamp/" (:stamp data)))]
-    (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) from-vetuma)
-    (security/create-user (merge data from-vetuma))
-    nil))
+  (let [vetuma   (client/json-get (str "/vetuma/stamp/" (:stamp data)))
+        userdata (merge data vetuma)]
+    (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
+    (if-let [user (security/create-user userdata)]
+      (do
+        (future
+          (let [pimped_user (merge user {:_id (:id user)})] ;; FIXME
+            (sadesecurity/send-activation-mail-for {:user pimped_user
+                                                    :from "lupapiste@solita.fi"
+                                                    :service-name "Lupapiste"
+                                                    :host-url (sadeclient/uri)})))
+        (ok :id (:_id user)))
+      (fail :error.create_user))))
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
@@ -137,7 +154,7 @@
       (if (= "draft" (:state application))
         (executed "open-application" command))
       (mongo/update-by-id
-        mongo/applications
+        :applications
         (:id application)
         {$set {:modified (:created command)}
          $push {:comments {:text    text
@@ -152,7 +169,7 @@
   (with-application command
     (fn [application]
       (mongo/update-by-id
-        mongo/applications (:id application)
+        :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
 (defn create-document [schema-name]
@@ -177,7 +194,7 @@
           (do
             (info "merging user %s with best effort into document %s" user name)
             (mongo/update
-              mongo/applications
+              :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
               {$set {:documents.$.body.etunimi  (:firstName user)
@@ -185,4 +202,3 @@
                      :documents.$.body.email    (:email user)
                      :documents.$.body.puhelin  (:phone user)
                      :modified (:created command)}})))))))
-

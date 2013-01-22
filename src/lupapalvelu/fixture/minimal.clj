@@ -124,11 +124,17 @@
               :apikey "602cb9e58426c613c8b85abc"}}])
 
 (def municipalities [{:id "753"
+                      :municipalityCode "753"
+                      :nameFin "Sipoo"
+                      :nameSve "Sibbo"
                       :links [{:nameFin "Sipoo"
                                :url "http://sipoo.fi"}
                               {:nameFin "Rakennusvalvonta"
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]}
                      {:id "837"
+                      :nameFin "Tampere"
+                      :nameSve "Tammerfors"
+                      :municipalityCode "837"
                       :links [{:nameFin "Tampere"
                                :url "http://tampere.fi"}
                               {:nameFin "Rakennusvalvonta"
@@ -136,6 +142,9 @@
                               {:nameFin "Lomakkeet"
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
                      {:id "186"
+                      :nameFin "J\u00E4rvenp\u00E4\u00E4"
+                      :nameSve "Tr\u00E4skenda"
+                      :municipalityCode "186"
                       :links [{:nameFin "J\u00E4rvenp\u00E4\u00E4"
                                :url "http://www.jarvenpaa.fi"}
                               {:nameFin "Rakennusvalvonta"
@@ -143,5 +152,5 @@
 
 (deffixture "minimal" {}
   (mongo/clear!)
-  (dorun (map (partial mongo/insert mongo/users) users))
-  (dorun (map (partial mongo/insert mongo/municipalities) municipalities)))
+  (dorun (map (partial mongo/insert :users) users))
+  (dorun (map (partial mongo/insert :municipalities) municipalities)))

@@ -15,6 +15,7 @@
                          [security :as security]
                          [attachment :as attachment]
                          [proxy-services :as proxy-services])
+            [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
 
@@ -91,8 +92,6 @@
 ;; Web UI:
 ;;
 
-(defpage "/" [] (resp/redirect "/welcome#"))
-
 (def content-type {:html "text/html; charset=utf-8"
                    :js   "application/javascript"
                    :css  "text/css"})
@@ -160,6 +159,27 @@
   (session/clear!)
   (resp/redirect "/"))
 
+(defpage "/" []
+  (if (logged-in?)
+    (if-let [application-page (applicationpage-for (:role (current-user)))]
+      (resp/redirect application-page)
+      (resp/redirect "/welcome#"))
+    (resp/redirect "/welcome#")))
+
+;;
+;; FROM SADE
+;;
+
+(defpage "/security/activate/:activation-key" {key :activation-key}
+  (if-let [user (sadesecurity/activate-account key)]
+    (do
+      (info "User account '%s' activated, auto-logging in the user" (:username user))
+      (session/put! :user user)
+      (resp/redirect "/"))
+    (do
+      (warn (format "Invalid user account activation attempt with key '%s', possible hacking attempt?" key))
+      (resp/redirect "/"))))
+
 ;;
 ;; Apikey-authentication
 ;;
@@ -191,9 +211,9 @@
                            :id applicationId
                            :attachmentId attachmentId
                            :text text)
-        [type-group type-id] (attachment/parse-attachment-type attachmentType)
-        upload-data (if (and type-group type-id)
-                      (assoc upload-data :attachmentType {:type-group type-group :type-id type-id})
+        attachment-type (attachment/parse-attachment-type attachmentType)
+        upload-data (if attachment-type
+                      (assoc upload-data :attachmentType attachment-type)
                       upload-data)
         result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)

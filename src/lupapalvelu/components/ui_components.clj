@@ -22,7 +22,7 @@
    :init         {:js ["hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
-                  :js ["openlayers.2.12.js" "gis.js" "map.js"]}
+                  :js ["openlayers.2.12.js" "gis.js"]}
 
    :debug        (if (env/dev-mode?) debugjs {})
 
@@ -47,9 +47,9 @@
                   :js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :application  {:depends [:common :repository]
-                  :js ["application.js"]
-                  :html ["application.html" "inforequest.html"]}
+   :application  {:depends [:common :repository :tree]
+                  :js ["application.js" "add-operation.js"]
+                  :html ["application.html" "inforequest.html" "add-operation.html"]}
 
    :tablesorter  {:depends [:jquery]
                   :js ["jquery.tablesorter-2.0.5b.js" "lupapiste.tablesorter.js"]
@@ -75,7 +75,7 @@
    :register     {:depends [:common]
                   :css ["register.css"]
                   :js ["register.js"]
-                  :html ["register.html" "register2.html"]}
+                  :html ["register.html" "register2.html" "register3.html"]}
 
    :docgen       {:depends [:accordion :common]
                   :js ["docgen.js"]

@@ -1,16 +1,16 @@
 var gis = (function() {
   "use strict";
-  
+
   function makeIcon(image, w, h) {
     var size = new OpenLayers.Size(w, h);
     var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
     return new OpenLayers.Icon(image, size, offset);
   }
-  
+
   function makeMarker(pos, icon) {
     return new OpenLayers.Marker(pos, icon.clone());
   }
-  
+
   var defaultIcon = makeIcon("img/marker-blue.png", 21, 25);
 
   function Map(element) {
@@ -40,7 +40,7 @@ var gis = (function() {
     var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServers, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
 
     self.map.addLayers([base, taustakartta_5k, taustakartta_10k, taustakartta_20k, taustakartta_40k, taustakartta_160k, taustakartta_320k, taustakartta_800k, taustakartta_2m, taustakartta_4m, taustakartta_8m, kiinteistorajat, kiinteistotunnukset]);
-    
+
     self.markerLayer = new OpenLayers.Layer.Markers("Markers");
     self.map.addLayer(self.markerLayer);
 
@@ -55,34 +55,38 @@ var gis = (function() {
       return self;
     };
 
-    self.add = function(locations, markerIcon) {
+    self.add = function(x, y, markerIcon) {
       var icon = markerIcon || defaultIcon;
-      _.each(locations, function(location) {
-        var marker = makeMarker(new OpenLayers.LonLat(location.x, location.y), icon);
-        self.markerLayer.addMarker(marker);
-        self.markers.push(marker);
-      });
+      var marker = makeMarker(new OpenLayers.LonLat(x, y), icon);
+      self.markerLayer.addMarker(marker);
+      self.markers.push(marker);
       return self;
     };
 
-    self.center = function(locations, zoom) {
-      // If 'locations' is an array, take just the first.
-      // TODO: Should consider all locations.
-      var location = locations;
-      if (Object.prototype.toString.call(locations) === "[object Array]") {
-        location = locations[0];
-      }
-      self.map.setCenter(new OpenLayers.LonLat(location.x, location.y), zoom);
+    self.center = function(x, y, zoom) {
+      self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
     
+    self.getZoom = function() {
+      return self.map.zoom;
+    }
+    
+    self.getMaxZoom = function() {
+      return 11;
+    }
+    
+    self.centerWithMaxZoom = function(x, y) {
+      return self.center(x, y, self.getMaxZoom());
+    }
+
     self.updateSize = function() {
       self.map.updateSize();
       return self;
     };
 
     self.addClickHandler = function(handler) {
-      var ClickControl = OpenLayers.Class(OpenLayers.Control, {                
+      var ClickControl = OpenLayers.Class(OpenLayers.Control, {
         defaultHandlerOptions: {
           "single": true,
           "double": false,
@@ -95,18 +99,18 @@ var gis = (function() {
           this.handlerOptions = OpenLayers.Util.extend({}, this.defaultHandlerOptions);
           OpenLayers.Control.prototype.initialize.apply(this, arguments);
           this.handler = new OpenLayers.Handler.Click(this, {"click": this.trigger}, this.handlerOptions);
-        }, 
+        },
 
         trigger: function(e) {
           var pos = self.map.getLonLatFromPixel(e.xy);
           handler(pos.lon, pos.lat);
         }
       });
-      
+
       var click = new ClickControl();
       self.map.addControl(click);
       click.activate();
-      
+
       return self;
     };
   }
@@ -114,5 +118,5 @@ var gis = (function() {
   return {
     makeMap: function(element) { return new Map(element); }
   };
-  
+
 })();

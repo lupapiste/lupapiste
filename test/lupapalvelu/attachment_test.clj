@@ -22,7 +22,7 @@
   (fact (encode-filename "12345\n678\r\n90")                  => (just ascii-pattern)))
 
 (facts "Test parse-attachment-type"
-  (fact (parse-attachment-type "foo.bar")  => [:foo :bar])
+  (fact (parse-attachment-type "foo.bar")  => {:type-group :foo, :type-id :bar})
   (fact (parse-attachment-type "foo.")     => nil)
   (fact (parse-attachment-type "")         => nil)
   (fact (parse-attachment-type nil)        => nil))
@@ -44,26 +44,10 @@
 (def allowed-attachment-type-for? #'lupapalvelu.attachment/allowed-attachment-type-for?)
 
 (facts "Facts about allowed-attachment-type-for?"
-  (fact (allowed-attachment-type-for? :buildingPermit {:type-group "hakija" :type-id "valtakirja"})          => truthy)
-  (fact (allowed-attachment-type-for? :buildingPermit {:type-group "paapiirustus" :type-id "asemapiirros"})  => truthy)
-  (fact (allowed-attachment-type-for? :buildingPermit {:type-group "hakija" :type-id "asemapiirros"})        => falsey)
-  (fact (allowed-attachment-type-for? :buildingPermit {})                                                    => falsey))
-
-; The result of attachment-types-for has very strict format that is required by upload.html. The
-; structure should be a vector that looks like this:
-;
-; [{:key :hakija
-;   :types [{:key :valtakirja}
-;           {:key :ote_kauppa_ja_yhdistysrekisterista}
-;           {:key :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta}]}
-;  {:key :rakennuspaikan_hallinta
-;   :types [{:key :jaljennos_myonnetyista_lainhuudoista}
-;           ...
-
-(facts "The result of attachment-types-for has very strict format that is required by upload.html"
-  (fact (attachment-types-for :buildingPermit) => sequential?)
-  (fact (first (attachment-types-for :buildingPermit)) => associative?)
-  (fact (:group (first (attachment-types-for :buildingPermit))) => keyword?)
-  (fact (:types (first (attachment-types-for :buildingPermit))) => sequential?)
-  (fact (first (:types (first (attachment-types-for :buildingPermit)))) => associative?)
-  (fact (:name (first (:types (first (attachment-types-for :buildingPermit))))) => keyword?))
+  (let [allowed-types [["a" ["1" "2"]] ["b" ["3" "4"]]]]
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :a :type-id :1}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :a :type-id :2}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :3}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :4}) => truthy)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :5}) => falsey)
+    (fact (allowed-attachment-type-for? allowed-types {:type-group :c :type-id :1}) => falsey)))
