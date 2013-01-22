@@ -31,18 +31,17 @@
 
 (defn building-document [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
-        body {:body
-              {:huoneistoTunnus
-               {:huoneistonumero nil, :jakokirjain nil, :porras nil},
-               :huoneistonTyyppi
-               {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi]),
-                :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala]),
-                :huoneluku (get-in data [:valmisHuoneisto :huoneluku])},
-               :keittionTyyppi nil,
-               :varusteet
-               {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin]),
-                :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin]),
-                :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
-                :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin]),
-                :wc (get-in data [:valmisHuoneisto :varusteet :WCKytkin])}}}]
+        body {:huoneistoTunnus
+              {:huoneistonumero nil, :jakokirjain nil, :porras nil},
+              :huoneistonTyyppi
+              {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi]),
+               :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala]),
+               :huoneluku (get-in data [:valmisHuoneisto :huoneluku])},
+              :keittionTyyppi nil,
+              :varusteet
+              {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin]),
+               :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin]),
+               :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
+               :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin]),
+               :wc (get-in data [:valmisHuoneisto :varusteet :WCKytkin])}}]
     (-> body strip-nils strip-empty-maps)))
