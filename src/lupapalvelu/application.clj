@@ -246,4 +246,9 @@
             kryspxml (krysp/building-info source "24500301050006")
             new-body (krysp/building-document kryspxml)
             merged   (merge old-body new-body)]
-        (ok :old old-body :new new-body :merged merged)))))
+        (mongo/update
+          :applications
+          {:_id (:id application)
+           :documents {$elemMatch {:schema.info.name name}}}
+          {$set {:documents.$.body merged
+                 :modified (:created command)}})))))
