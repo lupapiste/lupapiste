@@ -51,13 +51,13 @@ Remove link
 
 User sees link
   [Arguments]  ${name}  ${url}
-  Create inforequest  Latokuja 4, Sipoo  753  Saako navetan purkaa?
+  Begin inforequest
   Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
   Element should contain  xpath=//a[@href='${url}']  ${name}
   
 User does not see link
   [Arguments]  ${name}
-  Create inforequest  Latokuja 4, Sipoo  753  Saako navetan purkaa?
+  Begin inforequest
   Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
   Element should not be visible  //a[text()='${name}']
 
@@ -65,9 +65,8 @@ Begin inforequest
   Go to  ${INFOREQUESTS URL}
   Wait and click  test-to-inforequest-create
   Wait until page contains element  xpath=//input[@data-test-id="create-inforequest-address"]
-  Input text  xpath=//input[@data-test-id="create-inforequest-address"]  ${address}
-  Input text  xpath=//input[@data-test-id="create-inforequest-address"]  ${address}
-  Select From List  create-inforequest-municipality-select  ${municipalityId}
+  Input text  xpath=//input[@data-test-id="create-inforequest-address"]  Latokuja 103, Sipoo
+  Select From List  create-inforequest-municipality-select  753
   Wait Until  Element should be enabled  xpath=//button[@data-test-id="test-inforequest-create-continue"]
   Wait and click  xpath=//button[@data-test-id="test-inforequest-create-continue"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]

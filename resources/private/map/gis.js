@@ -77,7 +77,7 @@ var gis = (function() {
     }
     
     self.centerWithMaxZoom = function(x, y) {
-      self.center(x, y, self.getMaxZoom());
+      return self.center(x, y, self.getMaxZoom());
     }
 
     self.updateSize = function() {
