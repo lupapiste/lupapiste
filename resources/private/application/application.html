@@ -37,7 +37,6 @@
             <div>
               <p>Käsittelijä:</p>
               <span id="test-application-assignee" class="application_summary_text">
-
                 <select data-bind="options: $root.authorities,
                                    optionsText: function(item) {
                                     return item.firstName + ' ' + item.lastName;
@@ -52,7 +51,7 @@
             <p>Toimenpiteet:</p>
             <ul data-bind="foreach: operations">
               <li>
-                <span data-bind="ltext: $data" data-test-id="test-application-operation"></span>
+                <span data-bind="ltext: operation" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
