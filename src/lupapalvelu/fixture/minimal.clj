@@ -125,29 +125,29 @@
 
 (def municipalities [{:id "753"
                       :municipalityCode "753"
-                      :nameFi "Sipoo"
-                      :nameSv "Sibbo"
-                      :links [{:nameFi "Sipoo"
+                      :nameFin "Sipoo"
+                      :nameSve "Sibbo"
+                      :links [{:nameFin "Sipoo"
                                :url "http://sipoo.fi"}
-                              {:nameFi "Rakennusvalvonta"
+                              {:nameFin "Rakennusvalvonta"
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]}
                      {:id "837"
-                      :nameFi "Tampere"
-                      :nameSv "Tammerfors"
+                      :nameFin "Tampere"
+                      :nameSve "Tammerfors"
                       :municipalityCode "837"
-                      :links [{:nameFi "Tampere"
+                      :links [{:nameFin "Tampere"
                                :url "http://tampere.fi"}
-                              {:nameFi "Rakennusvalvonta"
+                              {:nameFin "Rakennusvalvonta"
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
-                              {:nameFi "Lomakkeet"
+                              {:nameFin "Lomakkeet"
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
                      {:id "186"
-                      :nameFi "J\u00E4rvenp\u00E4\u00E4"
-                      :nameSv "Tr\u00E4skenda"
+                      :nameFin "J\u00E4rvenp\u00E4\u00E4"
+                      :nameSve "Tr\u00E4skenda"
                       :municipalityCode "186"
-                      :links [{:nameFi "J\u00E4rvenp\u00E4\u00E4"
+                      :links [{:nameFin "J\u00E4rvenp\u00E4\u00E4"
                                :url "http://www.jarvenpaa.fi"}
-                              {:nameFi "Rakennusvalvonta"
+                              {:nameFin "Rakennusvalvonta"
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}])
 
 (deffixture "minimal" {}
