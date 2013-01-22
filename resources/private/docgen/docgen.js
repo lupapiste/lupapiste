@@ -238,7 +238,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     return partsDiv;
   }
 
-  function buildUnknown(spec, model, path, save, specId) {
+  function buildUnknown(spec, model, path) {
     error("Unknown element type:", spec.type, path);
     var div = document.createElement("div");
     div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
@@ -331,7 +331,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
           if (_.indexOf(selectOneOf, spec.name) > 0) {
             $(elem).hide();
           }
-          body.appendChild(elem)
+          body.appendChild(elem);
         });
     });
 
@@ -372,14 +372,12 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
           label.removeChild(loader);
         }
         $(target).removeClass("form-input-warn").removeClass("form-input-err");
-        if (status === "ok") {
-          // Nada.
-        } else if (status === "warn") {
+        if (status === "warn") {
           $(target).addClass("form-input-warn");
         } else if (status === "err") {
           $(target).addClass("form-input-err");
-        } else {
-          error("Unknown result:", result, "path:", path);
+        } else if (status !== "ok"){
+          error("Unknown status:", status, "path:", path);
         }
       }, eventData);
       // No return value or stoping the event propagation:
@@ -417,4 +415,4 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   }
 
   self.element = buildElement();
-}
+};
