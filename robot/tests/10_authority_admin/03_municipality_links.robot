@@ -51,23 +51,27 @@ Remove link
 
 User sees link
   [Arguments]  ${name}  ${url}
-  Begin inforequest
+  Create inforequest  Latokuja 4, Sipoo  753  Saako navetan purkaa?
+  Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
   Element should contain  xpath=//a[@href='${url}']  ${name}
   
 User does not see link
   [Arguments]  ${name}
-  Begin inforequest
+  Create inforequest  Latokuja 4, Sipoo  753  Saako navetan purkaa?
+  Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
   Element should not be visible  //a[text()='${name}']
 
 Begin inforequest
-  Wait and click  test-from-applications-to-inforequests-tab
+  Go to  ${INFOREQUESTS URL}
   Wait and click  test-to-inforequest-create
-  Wait Until  Element should be enabled  xpath=//input[@data-test-id="create-inforequest-search"]
-  Input Text  xpath=//input[@data-test-id="create-inforequest-search"]  Latokuja 1, Sipoo
-  Wait and click  xpath=//button[@data-test-id="create-inforequest-do-search"]
-  Wait Until  Element should be enabled  xpath=//button[@data-test-id="create-inforequest-create"]
-  Wait and click  xpath=//button[@data-test-id="create-inforequest-create"]
+  Wait until page contains element  xpath=//input[@data-test-id="create-inforequest-address"]
+  Input text  xpath=//input[@data-test-id="create-inforequest-address"]  ${address}
+  Input text  xpath=//input[@data-test-id="create-inforequest-address"]  ${address}
+  Select From List  create-inforequest-municipality-select  ${municipalityId}
+  Wait Until  Element should be enabled  xpath=//button[@data-test-id="test-inforequest-create-continue"]
+  Wait and click  xpath=//button[@data-test-id="test-inforequest-create-continue"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
   Wait until  Element should be visible  xpath=//section[@id='create-inforequest2']//div[@class='tree-result']
+  
