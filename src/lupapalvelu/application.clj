@@ -8,6 +8,8 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]))
@@ -216,3 +218,15 @@
   (with-application command
     (fn [application]
       (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
+
+(defcommand "consume-details-from-krysp"
+  {:parameters [:id]
+   :roles-in   [:applicant :authority]}
+  [{{:keys [id]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (let [old-doc  (domain/get-document-by-name application "huoneisto")
+            kryspxml (krysp/building-info "24500301050006")
+            new-doc  (krysp/building-document kryspxml)]
+        (ok :old old-doc :new new-doc)))))
+
