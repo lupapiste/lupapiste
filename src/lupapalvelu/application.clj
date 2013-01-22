@@ -252,6 +252,6 @@
           :applications
           {:_id (:id application)
            :documents {$elemMatch {:schema.info.name doc-name}}}
-          {$set {:documents.$.body.foo "merged"
+          {$set {:documents.$.body merged
                  :modified (:created command)}})
         (ok)))))
