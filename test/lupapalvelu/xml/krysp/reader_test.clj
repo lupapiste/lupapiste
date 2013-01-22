@@ -10,6 +10,4 @@
                      ":a:b:c" 2}) => {[:a :b :c] 1
                                       ":a:b:c" 2}))
 
-(facts
-  (fact "strip-nils removes keys with nil value recursivily"
-        (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}}))
+(fact (strip-nils {:a 1 :b nil :c {: 2 :e nil}}) => {:a 1 :c {:d 2}})
