@@ -418,8 +418,8 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     if (self.spec.info.removable) {
       $(title)
         .append($("<button>")
-          .addClass("remove")
-          .html("[remove]")
+          .addClass("icon-remove")
+          .html("[X]")
           .click(removeDoc));
     }
 
