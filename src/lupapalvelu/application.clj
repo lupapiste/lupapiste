@@ -242,13 +242,15 @@
     (fn [application]
       (let [document (domain/get-document-by-name application "huoneisto")
             old-body (:body document)
-            source   (krysp/logica-test-source)
+            source   krysp/logica-test-source
             kryspxml (krysp/building-info source "24500301050006")
             new-body (krysp/building-document kryspxml)
             merged   (merge old-body new-body)]
+        (println merged)
         (mongo/update
           :applications
           {:_id (:id application)
            :documents {$elemMatch {:schema.info.name name}}}
           {$set {:documents.$.body merged
-                 :modified (:created command)}})))))
+                 :modified (:created command)}})
+        (ok)))))
