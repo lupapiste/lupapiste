@@ -35,7 +35,7 @@
 (defn legacy-is-alive?
   "checks if the legacy system is Web Feature Service -enabled. kindof."
   [url] (try
-          (-> url (http/get {:query-param {:request :GetCapabilities}}) :status (= 200))
+          (-> url (http/get {:query-param {:request :GetCapabilities} :throw-exceptions false}) :status (= 200))
           (catch Exception e false)))
 
 (defn building-info [server id]
