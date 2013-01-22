@@ -318,6 +318,12 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
   }
 
   function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+
+    function toggleSelectedGroup(value) {
+      $(body).children("[data-select-one-of]").hide();
+      $(body).children("[data-select-one-of='" + value + "']").show();
+    }
+
     var selectOneOf = getSelectOneOfDefinition(schema);
 
     _.each(schema.body, function(spec) {
@@ -328,20 +334,21 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         _.each(children, function(elem) {
           if (_.indexOf(selectOneOf, spec.name) >= 0) {
             elem.setAttribute("data-select-one-of", spec.name);
-          }
-          // Hide all but the first of the selections
-          if (_.indexOf(selectOneOf, spec.name) > 0) {
             $(elem).hide();
           }
+
           body.appendChild(elem)
         });
     });
 
     if (selectOneOf.length) {
+      // Show current selection or the first of the group
+      var myModel = model[SELECT_ONE_OF_GROUP_KEY] || _.first(selectOneOf);
+      toggleSelectedGroup(myModel);
+
       var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
       $(body).find(s).change(function() {
-        $(body).children("[data-select-one-of]").hide();
-        $(body).children("[data-select-one-of='" + this.value + "']").show();
+        toggleSelectedGroup(this.value);
       });
     }
 
