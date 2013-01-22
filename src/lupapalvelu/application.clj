@@ -221,8 +221,7 @@
 
 (defquery "consume-details-from-krysp"
   {:parameters [:id]
-   ;;:roles-in   [:applicant :authority]
-   }
+   :roles-in   [:applicant :authority]}
   [{{:keys [id]} :data user :user :as command}]
   (with-application command
     (fn [application]
@@ -232,4 +231,3 @@
             new-body (krysp/building-document kryspxml)
             merged   (merge old-body new-body)]
         (ok :old old-body :new new-body :merged merged)))))
-
