@@ -5,7 +5,9 @@
 
 (defn strip-key [[k v]] (if (keyword? k) [(-> k name (split #":") last keyword) v] [k v]))
 (defn strip-keys [m] (postwalk (fn [x] (if (map? x) (into {} (map strip-key x)) x)) m))
-(defn strip-nils [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp not nil? val) x)) x)) m))
+(defn strip-nils
+  "removes recursively all keys from map which have value of nil"
+  [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp not nil? val) x)) x)) m))
 
 (defn building-info [id]
   (let [url (str "http://212.213.116.162/geoserver/wfs?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
