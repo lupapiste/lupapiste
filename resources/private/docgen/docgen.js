@@ -12,7 +12,7 @@ LUPAPISTE.DOMUtils = {
   }
 };
 
-LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
+LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, appId) {
   "use strict";
 
   // Magic key: if schema contains "_selected" radioGroup,
@@ -23,7 +23,8 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
 
   self.spec = spec;
   self.model = model;
-  self.callback = callback;
+  self.saveCallback = saveCallback;
+  self.removeCallback = removeCallback;
   self.docId = docId;
   self.appId = appId;
   self.eventData = {doc: docId, app: appId};
@@ -388,20 +389,19 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     };
   }
 
+  function removeThis() {
+    this.parent().slideUp(function() { $(this).remove(); });
+  }
+  
   function removeDoc(e) {
     var n = $(e.target).parent();
-    var docId = n.attr("data-doc-id");
-    var appId = n.attr("data-app-id");
-    ajax
-      .command("remove-doc", {id: appId, docId: docId})
-      .success(function() { n.parent().remove(); })
-      .call();
+    self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.spec.info.name + "._group_label"), removeThis.bind(n));
     return false;
   }
   
   function buildElement() {
     var specId = self.spec.info.name;
-    var save = makeSaverDelegate(self.callback, self.eventData);
+    var save = makeSaverDelegate(self.saveCallback, self.eventData);
 
     var section = document.createElement("section");
     section.className = "application_section";
@@ -437,4 +437,5 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   }
 
   self.element = buildElement();
-}
+};
+

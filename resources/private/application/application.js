@@ -10,6 +10,33 @@
   var applicationMap;
   var inforequestMap;
 
+  var removeDocModel = new function() {
+    var self = this;
+    
+    self.appId = ko.observable();
+    self.docId = ko.observable();
+    self.docName = ko.observable();
+    self.callback = null;
+    
+    self.init = function(appId, docId, docName, callback) {
+      self.appId(appId).docId(docId).docName(docName);
+      self.callback = callback;
+      LUPAPISTE.ModalDialog.open("#dialog-remove-doc");
+      return self;
+    };
+    
+    self.ok = function() {
+      ajax
+        .command("remove-doc", {id: self.appId(), docId: self.docId()})
+        .success(self.callback)
+        .call();
+      return false;
+    };
+    
+    self.cancel = function() { return true; };
+
+  }
+  
   function ApplicationModel() {
     var self = this;
 
@@ -275,19 +302,15 @@
 
       function displayDocuments(containerSelector, documents) {
 
-        var groupedDocs = _.groupBy(documents, function (doc) {
-          return doc.schema.info.name;
-      });
+        var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
 
         var displayOrder = ["rakennuspaikka", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
-          return _.indexOf(displayOrder, docGroup[0].schema.info.name)
-        });
+        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name) });
 
         var docgenDiv = $(containerSelector).empty();
         _.each(sortedDocs, function(docGroup) {
           _.each(docGroup, function(doc) {
-            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, doc.id, application.id()).element);
+            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
           });
 
           var schema = docGroup[0].schema;
@@ -301,7 +324,7 @@
                 .command("create-doc", {schema: schema.info.name, id: application.id()})
                 .success(function(data) {
                   var newDocId = data.doc;
-                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, newDocId, application.id()).element;
+                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application.id()).element;
                   $(self).before(newElem);
                 })
                 .call();
@@ -416,7 +439,8 @@
       invite: inviteModel,
       authorization: authorizationModel,
       tab: tab,
-      accordian: accordian
+      accordian: accordian,
+      removeDocModel: removeDocModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
