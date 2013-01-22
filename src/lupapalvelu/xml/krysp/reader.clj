@@ -1,14 +1,16 @@
 (ns lupapalvelu.xml.krysp.reader
   (:use sade.xml)
   (:require [clojure.string :as s]
+            [sade.client :as client]
             [clojure.walk :refer [postwalk]]
-            [clj-http.client :as client]))
+            [clj-http.client :as http]))
 
 ;;
 ;; Test urls
 ;;
 
 (def logica-test-source "http://212.213.116.162/geoserver/wfs")
+(def local-test-source  (client/uri "/krysp/building.xml"))
 
 ;;
 ;; Helpers
@@ -33,7 +35,7 @@
 (defn test-krysp-source
   "checks if the krysp-source is Web Feature Service -enabled"
   [url] (try
-          (-> url (client/get {:query-param {:request :GetCapabilities}}) :status (= 200))
+          (-> url (http/get {:query-param {:request :GetCapabilities}}) :status (= 200))
           (catch Exception e false)))
 
 (defn building-info [server id]
