@@ -127,7 +127,8 @@
                       :links [{:nameFin "Sipoo"
                                :url "http://sipoo.fi"}
                               {:nameFin "Rakennusvalvonta"
-                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]}
+                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                      :legacy "http://212.213.116.162/geoserver/wfs"}
                      {:id "837"
                       :links [{:nameFin "Tampere"
                                :url "http://tampere.fi"}
