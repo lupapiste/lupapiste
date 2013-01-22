@@ -50,10 +50,9 @@
           <!-- /ko -->
           <div>
             <p>Toimenpiteet:</p>
-            <ul data-bind="foreach: $root.documents">
+            <ul data-bind="foreach: operations">
               <li>
-                <span data-bind="ltext: schema.info.name" id="test-application-operation"></span>
-                <i>(<span data-bind="dateTimeString: created"></span>)</i>
+                <span data-bind="ltext: $data" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
