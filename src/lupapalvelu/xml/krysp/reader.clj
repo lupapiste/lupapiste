@@ -10,6 +10,8 @@
   (let [url (str "http://212.213.116.162/geoserver/wfs?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
     (-> url parse xml->edn strip-keys)))
 
+#_(-> "./dev-resources/public/krysp/building.xml" slurp parse xml->edn strip-keys)
+
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
@@ -30,6 +32,3 @@
        :parvekeTaiTerassi (get-in from [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
        :sauna (get-in from [:valmisHuoneisto :varusteet :saunaKytkin]),
        :wc (get-in from [:valmisHuoneisto :varusteet :WCKytkin])}}}))
-
-
-#_(-> "./dev-resources/public/krysp/building.xml" slurp parse xml->edn strip-keys)
