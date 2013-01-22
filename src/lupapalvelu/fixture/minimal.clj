@@ -124,21 +124,30 @@
               :apikey "602cb9e58426c613c8b85abc"}}])
 
 (def municipalities [{:id "753"
-                      :links [{:nameFin "Sipoo"
+                      :municipalityCode "753"
+                      :nameFi "Sipoo"
+                      :nameSv "Sibbo"
+                      :links [{:nameFi "Sipoo"
                                :url "http://sipoo.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:nameFi "Rakennusvalvonta"
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]}
                      {:id "837"
-                      :links [{:nameFin "Tampere"
+                      :nameFi "Tampere"
+                      :nameSv "Tammerfors"
+                      :municipalityCode "837"
+                      :links [{:nameFi "Tampere"
                                :url "http://tampere.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:nameFi "Rakennusvalvonta"
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
-                              {:nameFin "Lomakkeet"
+                              {:nameFi "Lomakkeet"
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
                      {:id "186"
-                      :links [{:nameFin "J\u00E4rvenp\u00E4\u00E4"
+                      :nameFi "J\u00E4rvenp\u00E4\u00E4"
+                      :nameSv "Tr\u00E4skenda"
+                      :municipalityCode "186"
+                      :links [{:nameFi "J\u00E4rvenp\u00E4\u00E4"
                                :url "http://www.jarvenpaa.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:nameFi "Rakennusvalvonta"
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}])
 
 (deffixture "minimal" {}
