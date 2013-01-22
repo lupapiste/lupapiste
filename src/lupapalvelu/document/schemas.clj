@@ -79,7 +79,7 @@
                                          {:name "RAK-rakennesuunnittelija"}
                                          {:name "ARK-rakennussuunnittelija"}
                                          {:name "ei tiedossa"}
-                                         {:name "Vaikeiden töiden suunnittelija"}]
+                                         {:name "Vaikeiden t\u00F6iden suunnittelija"}]
                                   } patevyys)
                             })) ; TODO miten liitteet hanskataan
 
