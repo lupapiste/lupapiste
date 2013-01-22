@@ -32,8 +32,8 @@
   "removes recursively all keys from map which have empty map as value"
   [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp (partial not= {}) val) x)) x)) m))
 
-(defn test-krysp-source
-  "checks if the krysp-source is Web Feature Service -enabled"
+(defn legacy-is-alive?
+  "checks if the legacy system is Web Feature Service -enabled. kindof."
   [url] (try
           (-> url (http/get {:query-param {:request :GetCapabilities}}) :status (= 200))
           (catch Exception e false)))
