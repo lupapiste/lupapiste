@@ -3,8 +3,14 @@
   (:require [clojure.string :refer [split]]
             [clojure.walk :refer [postwalk]]))
 
-(defn strip-key [[k v]] (if (keyword? k) [(-> k name (split #":") last keyword) v] [k v]))
-(defn strip-keys [m] (postwalk (fn [x] (if (map? x) (into {} (map strip-key x)) x)) m))
+(defn strip-key
+  "removes namespacey part of a keyword key of a map entry"
+  [[k v]] (if (keyword? k) [(-> k name (split #":") last keyword) v] [k v]))
+
+(defn strip-keys
+  "removes recursively all namespacey parts from map keywords keys"
+  [m] (postwalk (fn [x] (if (map? x) (into {} (map strip-key x)) x)) m))
+
 (defn strip-nils
   "removes recursively all keys from map which have value of nil"
   [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp not nil? val) x)) x)) m))
