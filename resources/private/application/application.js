@@ -45,6 +45,7 @@
     attachments: ko.observableArray(),
     address: ko.observable(),
     verdict: ko.observable(),
+    operations: ko.observable(),
 
     assignee: ko.observable(),
 
