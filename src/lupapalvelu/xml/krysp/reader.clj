@@ -42,8 +42,6 @@
   (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
     (-> url parse xml->edn strip-keys)))
 
-#_(-> "./dev-resources/public/krysp/building.xml" slurp parse xml->edn strip-keys)
-
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
