@@ -108,21 +108,7 @@
                      {:name "parvekeTaiTerassi" :type :checkbox}
                      {:name "lamminvesi" :type :checkbox}]}])
 
-
-;{:name "rakennuksenOmistajat"
- ;             :type :group
-  ;            :repeating true
-   ;           :body party-body}
-
-(def schemas
-  (to-map-by-name
-    [{:info {:name "uusiRakennus"}
-      :body [
-
-             {:name "toimenpiteenKuvaus"
-              :type :group
-              :body [{:name "kuvaus" :type :text :size "l"}
-                     {:name "poikkeamiset" :type :text :size "l"}]}
+(def rakennuksen-tiedot [
              {:name "kaytto"
               :type :group
               :body [{:name "rakentajaTyyppi" :type "select"
@@ -282,7 +268,24 @@
              {:name "huoneistot"
               :type :group
               :repeating true
-              :body huoneisto-body}]}
+              :body huoneisto-body}])
+
+  (def toimenpiteen-kuvaus [{:name "toimenpiteenKuvaus"
+              :type :group
+              :body [{:name "kuvaus" :type :text :size "l"}
+                     {:name "poikkeamiset" :type :text :size "l"}]}])
+
+(def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
+                          :type :group :repeating true
+                          :body party-body}])
+
+(def schemas
+  (to-map-by-name
+    [{:info {:name "uusiRakennus"}
+      :body (into toimenpiteen-kuvaus rakennuksen-tiedot)}
+
+     {:info {:name "rakennuksen-muutaminen"}
+      :body (into toimenpiteen-kuvaus (into rakennuksen-omistajat rakennuksen-tiedot))}
 
      {:info {:name "hakija" :repeating true}
       :body party-body}
