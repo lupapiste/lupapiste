@@ -29,19 +29,19 @@
 ;;
 
 (defn huoneisto-doc [xml]
-  (let [from (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
+  (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
         doc  {:body
               {:huoneistoTunnus
                {:huoneistonumero nil, :jakokirjain nil, :porras nil},
                :huoneistonTyyppi
-               {:huoneistoTyyppi (get-in from [:valmisHuoneisto :huoneistonTyyppi]),
-                :huoneistoala (get-in from [:valmisHuoneisto :huoneistoala]),
-                :huoneluku (get-in from [:valmisHuoneisto :huoneluku])},
+               {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi]),
+                :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala]),
+                :huoneluku (get-in data [:valmisHuoneisto :huoneluku])},
                :keittionTyyppi nil,
                :varusteet
-               {:ammeTaiSuihku (get-in from [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin]),
-                :lamminvesi (get-in from [:valmisHuoneisto :varusteet :lamminvesiKytkin]),
-                :parvekeTaiTerassi (get-in from [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
-                :sauna (get-in from [:valmisHuoneisto :varusteet :saunaKytkin]),
-                :wc (get-in from [:valmisHuoneisto :varusteet :WCKytkin])}}}]
+               {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin]),
+                :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin]),
+                :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
+                :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin]),
+                :wc (get-in  [:valmisHuoneisto :varusteet :WCKytkin])}}}]
     (strip-nils doc)))
