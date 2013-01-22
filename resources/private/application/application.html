@@ -112,7 +112,7 @@
                     <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                     (<span data-bind="text: username"></span>)
                     <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                    <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                    <a class="remove-read" href="#" data-bind="ltext: '', click: $root.application.removeAuth">Poista</a>
                   </li>
                 </ul>
               </div>
