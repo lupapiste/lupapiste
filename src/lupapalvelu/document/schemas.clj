@@ -284,16 +284,16 @@
               :repeating true
               :body huoneisto-body}]}
 
-     {:info {:name "hakija" :repeating true :removable true}
+     {:info {:name "hakija" :repeating true}
       :body party-body}
 
-     {:info {:name "paasuunnittelija" :removable true}
+     {:info {:name "paasuunnittelija"}
       :body paasuunnittelija-body}
 
-     {:info {:name "suunnittelija" :repeating true :removable true}
+     {:info {:name "suunnittelija" :repeating true}
       :body suunnittelija-body}
 
-     {:info {:name "maksaja" :repeating true :removable true}
+     {:info {:name "maksaja" :repeating true}
       :body party-body}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osoitettu)
