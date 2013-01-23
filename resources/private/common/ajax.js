@@ -133,15 +133,10 @@ var ajax = (function() {
   }
 
   function onAjaxRequestCall(c) {
-    debug("################");
-    debug(c.callId);
-    debug(c.request.url);
     $('.ajax-calls').append('<span class="ajax-call" data-ajax-call-id="'+c.callId+'">Ajax: '+c.request.url+'</span><br/>');
   }
   
   function onAjaxCallSuccess(c) {
-    debug("+++");
-    debug(c.callId);
     $('.ajax-calls').children('span[data-ajax-call-id="'+c.callId+'"]').remove();
   }
 
