@@ -242,9 +242,11 @@
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (if (logged-in?)
-    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
-    {:status 401}))
+  (if (env/dev-mode?)
+    {:status 201}
+    (if (logged-in?)
+      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
+      {:status 401})))
 
 ;;
 ;; dev utils:
