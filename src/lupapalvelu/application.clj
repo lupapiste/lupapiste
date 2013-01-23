@@ -184,15 +184,16 @@
                                          :created created
                                          :schema (schemas/schemas schema-name)
                                          :body {}})
-        make-attachment (fn [attachment-type] {:id (mongo/create-id)
-                                               :type attachment-type
-                                               :state :requires_user_action
-                                               :modified created
-                                               :versions []})]
+        make-att      (fn [type-group type-id] {:id (mongo/create-id)
+                                                :type {:type-group type-group :type-id type-id}
+                                                :state :requires_user_action
+                                                :modified created
+                                                :versions []})]
     (mongo/insert :applications
       {:id            id
        :created       created
        :modified      created
+       :infoRequest   info-request?
        :state         (if info-request? :open :draft)
        :municipality  (:municipality data)
        :location      {:x (:x data) :y (:y data)}
@@ -201,14 +202,13 @@
        :title         (:address data)
        :roles         {:applicant owner}
        :auth          [owner]
-       :infoRequest   info-request?
        :operations    [{:operation op :doc-id op-doc-id}]
        :documents     (conj (map make-doc (operation->initial-schema-names op))
                             (update-in (make-doc "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
                             (-> (make-doc (operation->schema-name op))
                               (assoc :id op-doc-id)
                               (update-in [:schema :info] merge {:op true :removable true})))
-       :attachments   (map make-attachment (operation->initial-attachemnt-types op []))
+       :attachments   (mapcat #(map (partial make-att (first %)) (second %)) (partition 2 (operation->initial-attachemnt-types op [])))   
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types)) 
