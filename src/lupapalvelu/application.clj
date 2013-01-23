@@ -203,7 +203,7 @@
        :roles         {:applicant owner}
        :auth          [owner]
        :operations    [{:operation op :doc-id op-doc-id}]
-       :documents     (conj (map make-doc (operation->initial-schema-names op))
+       :documents     (conj (map make-doc (operation->initial-schema-names op []))
                             (update-in (make-doc "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
                             (-> (make-doc (name op))
                               (assoc :id op-doc-id)
