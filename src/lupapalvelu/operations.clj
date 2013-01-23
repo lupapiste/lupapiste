@@ -34,7 +34,7 @@
 
 (def ^:private uusi-rakennus "uusiRakennus")
 
-(def operation->schema
+(def operation->schema-name
   {:asuinrakennus uusi-rakennus
    :vapaa-ajan-asuinrakennus uusi-rakennus 
    :varasto-tms uusi-rakennus
@@ -60,30 +60,66 @@
    :puun-kaataminen uusi-rakennus
    :muu-maisema-toimenpide uusi-rakennus})
 
-(def ^:private common ["maksaja" "rakennuspaikka" "lisatiedot"])
+(def ^:private common-schemas ["maksaja" "rakennuspaikka" "lisatiedot"])
 
-(def initial-operation->schemas
-  {:asuinrakennus (concat common ["paasuunnittelija" "suunnittelija"])
-   :vapaa-ajan-asuinrakennus (concat common ["suunnittelija"])
-   :varasto-tms common
-   :julkinen-rakennus common
-   :muu-uusi-rakentaminen common
-   :laajentaminen common
-   :kayttotark-muutos common
-   :julkisivu-muutos common
-   :jakaminen-tai-yhdistaminen common
-   :markatilan-laajentaminen common
-   :takka-tai-hormi common
-   :parveke-tai-terassi common
-   :muu-laajentaminen common
-   :auto-katos common
-   :masto-tms common
-   :mainoslaite common
-   :aita common
-   :maalampo common
-   :jatevesi common
-   :muu-rakentaminen common
-   :purkaminen common
-   :kaivuu common
-   :puun-kaataminen common
-   :muu-maisema-toimenpide common})
+(def operation->initial-schema-names
+  {:asuinrakennus (concat common-schemas ["paasuunnittelija" "suunnittelija"])
+   :vapaa-ajan-asuinrakennus (concat common-schemas ["suunnittelija"])
+   :varasto-tms common-schemas
+   :julkinen-rakennus common-schemas
+   :muu-uusi-rakentaminen common-schemas
+   :laajentaminen common-schemas
+   :kayttotark-muutos common-schemas
+   :julkisivu-muutos common-schemas
+   :jakaminen-tai-yhdistaminen common-schemas
+   :markatilan-laajentaminen common-schemas
+   :takka-tai-hormi common-schemas
+   :parveke-tai-terassi common-schemas
+   :muu-laajentaminen common-schemas
+   :auto-katos common-schemas
+   :masto-tms common-schemas
+   :mainoslaite common-schemas
+   :aita common-schemas
+   :maalampo common-schemas
+   :jatevesi common-schemas
+   :muu-rakentaminen common-schemas
+   :purkaminen common-schemas
+   :kaivuu common-schemas
+   :puun-kaataminen common-schemas
+   :muu-maisema-toimenpide common-schemas})
+
+(def operation->initial-attachemnt-types
+  {:asuinrakennus [:hakija [:valtakirja]
+                   :rakennuspaikka [:ote_alueen_peruskartasta]
+                   :paapiirustus [:asemapiirros
+                                  :pohjapiirros
+                                  :julkisivupiirros]
+                   :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]})
+
+(def operation->allowed-attachemnt-types
+  {:asuinrakennus [:hakija [:valtakirja]
+                   :rakennuspaikka [:ote_alueen_peruskartasta
+                                    :tonttikartta_tarvittaessa]
+                   :paapiirustus [:asemapiirros
+                                  :pohjapiirros
+                                  :julkisivupiirros]
+                   :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
+                                               :suunnittelutarveratkaisu
+                                               :ymparistolupa]
+                   :muut [:selvitys_liittymisesta_ymparoivaan_rakennuskantaan
+                          :julkisivujen_varityssuunnitelma
+                          :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+                          :energiataloudellinen_selvitys
+                          :paloturvallisuussuunnitelma
+                          :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
+                          :selvitys_kiinteiston_jatehuollon_jarjestamisesta
+                          :rakennesuunnitelma
+                          :ilmanvaihtosuunnitelma
+                          :lammityslaitesuunnitelma
+                          :radontekninen_suunnitelma
+                          :kalliorakentamistekninen_suunnitelma
+                          :paloturvallisuusselvitys
+                          :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+                          :muu]]})
+
+
