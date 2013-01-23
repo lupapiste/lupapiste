@@ -36,9 +36,9 @@
 
 (def operation->schema-name
   {:asuinrakennus uusi-rakennus
-   :vapaa-ajan-asuinrakennus uusi-rakennus 
-   :varasto-tms uusi-rakennus
-   :julkinen-rakennus uusi-rakennus
+   :vapaa-ajan-asuinrakennus "rakennuspaikka" ; Just for testing...
+   :varasto-tms "paasuunnittelija"
+   :julkinen-rakennus "hakija"
    :muu-uusi-rakentaminen uusi-rakennus
    :laajentaminen uusi-rakennus
    :kayttotark-muutos uusi-rakennus
