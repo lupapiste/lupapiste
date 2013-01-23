@@ -3,7 +3,7 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.operations :only [operation->schema-name operation->initial-schema-names operation->initial-attachemnt-types operation->allowed-attachemnt-types]])
+        [lupapalvelu.operations :only [operation->initial-schema-names operation->initial-attachemnt-types operation->allowed-attachemnt-types]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
@@ -205,7 +205,7 @@
        :operations    [{:operation op :doc-id op-doc-id}]
        :documents     (conj (map make-doc (operation->initial-schema-names op))
                             (update-in (make-doc "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
-                            (-> (make-doc (operation->schema-name op))
+                            (-> (make-doc (name op))
                               (assoc :id op-doc-id)
                               (update-in [:schema :info] merge {:op true :removable true})))
        :attachments   (mapcat #(map (partial make-att (first %)) (second %)) (partition 2 (operation->initial-attachemnt-types op [])))   
@@ -231,12 +231,12 @@
     (fn [application]
       (let [data       (:data command)
             id         (:id data)
-            op         (keyword (:operation data))
+            op         (:operation data)
             doc-id     (mongo/create-id)
             operation  {:operation op :doc-id doc-id}
             document   {:id doc-id
                         :created (:created command)
-                        :schema (schemas/schemas (operation->schema-name op))
+                        :schema (schemas/schemas op)
                         :body {}}
             document   (update-in document [:schema :info] merge {:op true :removable true})]
         (mongo/update-by-id :applications id {$push {:operations operation
