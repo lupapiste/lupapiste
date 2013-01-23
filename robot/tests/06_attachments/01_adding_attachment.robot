@@ -2,7 +2,6 @@
 
 Documentation  Mikko adds an attachment
 Suite setup     Mikko logs in
-Test setup      Wait Until  Ajax calls have finished
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
@@ -11,9 +10,8 @@ Variables      variables.py
 
 Mikko goes to empty attachments tab
   [Tags]  attachments
-  Wait until page contains element  test-application-link
-  Click element    test-application-link
-  Click element    test-attachments-tab
+  Wait and click by test class  application-link
+  Wait and click element by test id  attachments-tab
 
 Mikko adds txt attachment
   [Tags]  attachments
@@ -27,7 +25,7 @@ Attachment count is
 
 Add attachment
   [Arguments]  ${path}  ${description}
-  Click element    add-attachment
+  Wait and click   add-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
@@ -50,7 +48,7 @@ Open attachment and check content
 
 Open attachment preview page
   [Arguments]  ${filename}
-  Click element  test-attachments-tab
+  Click element by test class  attachments-tab
   Click element  test-attachment-type-link
   ## This reload is a hack that is needed only for tests
   Execute Javascript  window.location.reload()

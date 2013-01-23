@@ -75,8 +75,7 @@ Go to page
   Click link  test-${page}-link
 
 Open application
-  Wait until page contains element  test-application-link
-  Click element    test-application-link
+  Wait and click by test class  application-link
 
 # Open nth inforequest in list, n begins from 1
 Open nth inforequest
@@ -89,9 +88,8 @@ Open any inforequest
   Open nth inforequest  1
 
 Open attachment tab
-  Wait until page contains element  test-application-link
-  Click element    test-application-link
-  Click element  test-attachments-tab
+  Wait and click by test class  application-link
+  Wait and click element by test id  attachments-tab
 
 Logout
   Go to  ${LOGIN URL}
@@ -114,7 +112,6 @@ Login
   Input text  login-username  ${username}
   Input text  login-password  ${password}
   Click button  login-button
-  Wait Until  Ajax calls have finished
 
 User should be logged in
   [Arguments]  ${name}
@@ -211,8 +208,25 @@ Click link by test id
 
 Wait and click enabled button
   [Arguments]  ${id}
-  Wait Until  Element should be enabled  xpath=//button[@data-test-id="${id}"]
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
   Wait and click  xpath=//button[@data-test-id="${id}"]
-  
-Ajax calls have finished
-  Xpath Should Match X Times  //div[@class="ajax-calls"]/span[@class="ajax-call"]  0
+
+Wait and click by test class
+  [Arguments]  ${class}
+  Wait and click  xpath=//*[@data-test-class="${class}"]
+
+Wait until page contains element by test class
+  [Arguments]  ${class}
+  Wait until page contains element  xpath=//*[@data-test-class="${class}"]
+
+Element should be visible by test class
+  [Arguments]  ${class}
+  Element should be visible  xpath=//*[@data-test-class="${class}"]
+
+Element should contain by test class
+  [Arguments]  ${class}  ${value}
+  Element should contain  xpath=//*[@data-test-class="${class}"]  ${value}
+
+Wait and click element by test id
+  [Arguments]  ${id}
+  Wait and click  xpath=//*[@data-test-id="${id}"]
