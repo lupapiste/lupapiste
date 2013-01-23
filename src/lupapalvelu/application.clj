@@ -231,12 +231,13 @@
     (fn [application]
       (let [data       (:data command)
             id         (:id data)
-            op         (:operation data)
+            op         (keyword (:operation data))
             doc-id     (mongo/create-id)
             operation  {:operation op :doc-id doc-id}
             document   {:id doc-id
                         :created (:created command)
                         :schema (schemas/schemas (operation->schema-name op))
-                        :body {}}]
+                        :body {}}
+            document   (update-in document [:schema :info] merge {:op true :removable true})]
         (mongo/update-by-id :applications id {$push {:operations operation
                                                      :documents document}})))))
