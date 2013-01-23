@@ -2,6 +2,7 @@
 
 Documentation  Authority admin creates users
 Suite setup     Sipoo logs in
+Test setup      Wait Until  Ajax calls have finished
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 
@@ -56,3 +57,5 @@ Create user
   Input text       user-password  ${password}
   Click element    test-create-user-save
   Wait Until  Element Should Not Be Visible  dialog-add-user
+  Wait Until  Ajax calls have finished
+  

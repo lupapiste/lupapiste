@@ -1,16 +1,18 @@
 *** Settings ***
 
 Documentation   Application gets verdict
+Test setup      Wait Until  Ajax calls have finished
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Application does not have verdict
+Mikko opens application to see verdict
   Mikko logs in
   Wait until page contains element  test-application-link
   Click element  test-application-link
-  Wait until page contains element  application-page-is-ready
+  
+Application does not have verdict
   Click element  test-verdict-tab
   Element should not be visible  test-application-verdict
   ${ID} =  Get Element Attribute  xpath=//*[@data-bind-test-id='application-id']@data-test-value
@@ -25,16 +27,19 @@ Solita Admin can log in and gives verdict
   Click link  ${APPLICATION ID}
   Logout
 
-Application verdict is visible to applicant
+Mikko opens application
   Mikko logs in
   Click element  test-application-link
+  
+Application verdict is visible to applicant
   Wait and click  test-verdict-tab
-  Wait until  Element should be visible  test-application-verdict
+  Element should be visible  test-application-verdict
   Logout
 
-Application verdict is visible to authority
+Sonja opens application
   Sonja logs in
   Click element  test-application-link
-  Wait until page contains element  application-page-is-ready
+
+Application verdict is visible to authority
   Click element  test-verdict-tab
-  Wait until  Element should be visible  test-application-verdict
+  Element should be visible  test-application-verdict

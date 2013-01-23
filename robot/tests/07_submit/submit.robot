@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Sonja can't submit application
+Test setup      Wait Until  Ajax calls have finished
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -15,7 +16,6 @@ Sonja can't submit application
 Mikko could submit application
   Mikko logs in
   Click element  test-application-link
-  Wait until page contains element  application-page-is-ready
   Wait Until  Element should be enabled  test-submit-application
 
 Submit date is not be visible
@@ -23,7 +23,6 @@ Submit date is not be visible
 
 Mikko submits application
   Click element  test-submit-application
-  Wait until  page should contain element  application-page-is-ready
 
 Mikko cant re-submit application
   Wait Until  Element should be disabled  test-submit-application
