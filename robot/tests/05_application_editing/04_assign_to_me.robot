@@ -9,7 +9,6 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Sonja can assign a non-assigned application
-  Wait until page contains element  test-assign-to-me
   Application is not assigned
   Click element  test-assign-to-me
   

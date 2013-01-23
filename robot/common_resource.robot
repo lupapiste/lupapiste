@@ -196,6 +196,23 @@ Sipoo logs in
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until page contains element  admin-header
+
+Input text by test id
+  [Arguments]  ${id}  ${value}
+  Input text  xpath=//input[@data-test-id="${id}"]  ${value}
+
+Select From List by test id
+  [Arguments]  ${id}  ${value}
+  Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Click link by test id
+  [Arguments]  ${id}
+  Click link  xpath=//a[@data-test-id="${id}"]
+
+Wait and click enabled button
+  [Arguments]  ${id}
+  Wait Until  Element should be enabled  xpath=//button[@data-test-id="${id}"]
+  Wait and click  xpath=//button[@data-test-id="${id}"]
   
 Ajax calls have finished
   Xpath Should Match X Times  //div[@class="ajax-calls"]/span[@class="ajax-call"]  0
