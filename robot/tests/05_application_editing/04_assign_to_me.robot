@@ -2,7 +2,8 @@
 
 Documentation  Sonja can assign application to herself
 Suite setup    Sonja logs in
-Test teardown  Logout
+Test setup     Wait Until  Ajax calls have finished
+Suite teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
@@ -11,7 +12,8 @@ Sonja can assign a non-assigned application
   Wait until page contains element  test-assign-to-me
   Application is not assigned
   Click element  test-assign-to-me
-  Wait until page contains element  applications-page-is-ready
+  
+Assignee has changed
   Application is assigned  Sonja Sibbo
 
 *** Keywords ***

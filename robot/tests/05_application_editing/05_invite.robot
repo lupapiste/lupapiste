@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Application invites
+Test setup      Wait Until  Ajax calls have finished
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
