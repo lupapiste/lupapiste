@@ -182,14 +182,14 @@
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
-  function getAttachmentsByGroup(attachments) {
-    var grouped = _.groupBy(attachments, function(attachment) {
-      return attachment.type['type-group'];
-    });
-    var result = _.map(grouped, function(value, key) {
-      return {group: key, attachments: value};
-    });
-    return result;
+  function getLatestVersion(attachment) {
+    return _.last(attachment.versions || []);
+  }
+  
+  function getAttachmentsByGroup(source) {
+    var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
+    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
+    return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
 
   var AuthorityInfo = function(id, firstName, lastName) {
@@ -261,15 +261,15 @@
       commentModel.setComments(app.comments);
 
       var statuses = {
-        requires_user_action: {statusName: "missing"},
-        requires_authority_action: {statusName: "new"},
-        ok:{statusName: "ok"}
+        requires_user_action: "missing",
+        requires_authority_action: "new",
+        ok: "ok"
       };
 
       attachments.removeAll();
       _.each(app.attachments || [], function(a) {
-        var s = statuses[a.state];
-        a.statusName = s.statusName || "unknown";
+        a.statusName = statuses[a.state] || "unknown";
+        a.latestVersion = _.last(a.versions);
         attachments.push(a);
       });
 

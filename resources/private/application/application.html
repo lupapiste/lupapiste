@@ -206,7 +206,7 @@
                     </a>
                   </td>
                   <td>
-                    <span data-bind="if: $data.latestVersion && $data.latestVersion.filename">
+                    <span data-bind="if: $data.latestVersion">
                       <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
                       <i data-bind="ltext: latestVersion.contentType"></i>
                       <i data-bind="size: latestVersion.size"></i>
@@ -218,8 +218,8 @@
                     </span>
                   </td>
                   <td>
-                    <span data-bind="dateString: modified"></span>
                     <span data-bind="if: $data.latestVersion">
+                      <span data-bind="dateString: modified"></span>
                       <span data-bind="fullName: latestVersion.user"></span>
                     </span>
                   </td>
