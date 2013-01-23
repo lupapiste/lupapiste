@@ -3,11 +3,10 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
-        [lupapalvelu.document.commands :only [create-document create-op-document]]
-        [lupapalvelu.operations :only [operation->schema initial-operation->schemas]])
+        [lupapalvelu.operations :only [operation->schema-name operation->initial-schema-names operation->initial-attachemnt-types operation->allowed-attachemnt-types]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.tepa :as tepa]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
@@ -171,20 +170,6 @@
                       :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
                                        "rakennuspaikka" "uusiRakennus" "lisatiedot"]})
 
-(def default-attachments {:infoRequest []
-                          :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
-                                               [["paapiirustus" "asemapiirros"]
-                                                ["paapiirustus" "pohjapiirros"]
-                                                ["paapiirustus" "leikkauspiirros"]
-                                                ["paapiirustus" "julkisivupiirros"]
-                                                ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
-                                                ["muut" "energiataloudellinen_selvitys"]])})
-
-(defn create-hakija-document [{:keys [id firstName lastName]}]
-  (create-document (mongo/create-id) "hakija" {:henkilo {:henkilotiedot {:id id
-                                                                         :etunimi firstName
-                                                                         :sukunimi lastName}}}))
-
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
@@ -194,41 +179,46 @@
         owner         (role user :owner :type :owner)
         op            (keyword (:operation data))
         op-doc-id     (mongo/create-id)
-        op-doc        (create-op-document op-doc-id (operation->schema op))
-        hakija        (create-hakija-document user)
-        documents     (conj (map #(create-document (mongo/create-id) %) (initial-operation->schemas op))
-                            op-doc
-                            hakija)
-        operations    [{:operation op :doc-id op-doc-id}]
-        permit-type   (keyword (:permitType data))
-        info-request  (if (:infoRequest data) true false)]
+        info-request? (if (:infoRequest data) true false)
+        make-doc      (fn [schema-name] {:id (mongo/create-id)
+                                         :created created
+                                         :schema (schemas/schemas schema-name)
+                                         :body {}})
+        make-attachment (fn [attachment-type] {:id (mongo/create-id)
+                                               :type attachment-type
+                                               :state :requires_user_action
+                                               :modified created
+                                               :versions []})]
     (mongo/insert :applications
-      {:id id
-       :created created
-       :modified created
-       :state (if info-request :open :draft)
-       :municipality (:municipality data)
-       :location {:x (:x data) :y (:y data)}
-       :address (:address data)
-       :propertyId (:propertyId data)
-       :title (:address data)
-       :roles {:applicant owner}
-       :auth [owner]
-       :infoRequest info-request
-       :permitType permit-type
-       :operations operations
-       :documents documents
-       :allowedAttachmentTypes (if info-request [[:muut [:muu]]] (attachment-types-for op))
-       :attachments []
-       :comments (if-let [message (:message data)]
-                   [{:text message
-                     :target  {:type "application"}
-                     :created created
-                     :user    (security/summary user)}]
-                   [])})
-    (doseq [attachment-type (default-attachments op [])]
-      (info "Create attachment: [%s]: %s" id attachment-type)
-      (create-attachment id attachment-type created))
+      {:id            id
+       :created       created
+       :modified      created
+       :state         (if info-request? :open :draft)
+       :municipality  (:municipality data)
+       :location      {:x (:x data) :y (:y data)}
+       :address       (:address data)
+       :propertyId    (:propertyId data)
+       :title         (:address data)
+       :roles         {:applicant owner}
+       :auth          [owner]
+       :infoRequest   info-request?
+       :operations    [{:operation op :doc-id op-doc-id}]
+       :documents     (conj (map make-doc (operation->initial-schema-names op))
+                            (update-in (make-doc "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
+                            (-> (make-doc (operation->schema-name op))
+                              (assoc :id op-doc-id)
+                              (update-in [:schema :info] merge {:op true :removable true})))
+       :attachments   (map make-attachment (operation->initial-attachemnt-types op []))
+       :allowedAttachmentTypes (if info-request?
+                                 [[:muut [:muu]]]
+                                 (partition 2 attachment/attachment-types)) 
+       :comments      (if-let [message (:message data)]
+                        [{:text message
+                          :target  {:type "application"}
+                          :created created
+                          :user    (security/summary user)}]
+                        [])
+       :permitType     (keyword (:permitType data))})
     (ok :id id)))
 
 (defcommand "add-operation"
@@ -239,10 +229,14 @@
   [command]
   (with-application command
     (fn [application]
-      (let [data    (:data command)
-            id      (:id data)
-            op      (:operation data)
-            doc-id  (mongo/create-id)
-            doc     (create-op-document doc-id (operation->schema op))]
-        (mongo/update-by-id :applications id {$push {:operations {:operation op :doc-id doc-id}
-                                                     :documents doc}})))))
+      (let [data       (:data command)
+            id         (:id data)
+            op         (:operation data)
+            doc-id     (mongo/create-id)
+            operation  {:operation op :doc-id doc-id}
+            document   {:id doc-id
+                        :created (:created command)
+                        :schema (schemas/schemas (operation->schema-name op))
+                        :body {}}]
+        (mongo/update-by-id :applications id {$push {:operations operation
+                                                     :documents document}})))))
