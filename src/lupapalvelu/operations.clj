@@ -32,34 +32,6 @@
   ; Same data for all municipalities for now.
   operations-data)
 
-(def ^:private uusi-rakennus "uusiRakennus")
-
-(def operation->schema-name
-  {:asuinrakennus uusi-rakennus
-   :vapaa-ajan-asuinrakennus "rakennuspaikka" ; Just for testing...
-   :varasto-tms "paasuunnittelija"
-   :julkinen-rakennus "hakija"
-   :muu-uusi-rakentaminen uusi-rakennus
-   :laajentaminen uusi-rakennus
-   :kayttotark-muutos uusi-rakennus
-   :julkisivu-muutos uusi-rakennus
-   :jakaminen-tai-yhdistaminen uusi-rakennus
-   :markatilan-laajentaminen uusi-rakennus
-   :takka-tai-hormi uusi-rakennus
-   :parveke-tai-terassi uusi-rakennus
-   :muu-laajentaminen uusi-rakennus
-   :auto-katos uusi-rakennus
-   :masto-tms uusi-rakennus
-   :mainoslaite uusi-rakennus
-   :aita uusi-rakennus
-   :maalampo uusi-rakennus
-   :jatevesi uusi-rakennus
-   :muu-rakentaminen uusi-rakennus
-   :purkaminen uusi-rakennus
-   :kaivuu uusi-rakennus
-   :puun-kaataminen uusi-rakennus
-   :muu-maisema-toimenpide uusi-rakennus})
-
 (def ^:private common-schemas ["maksaja" "rakennuspaikka" "lisatiedot"])
 
 (def operation->initial-schema-names
