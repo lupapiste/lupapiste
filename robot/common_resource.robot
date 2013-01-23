@@ -77,7 +77,6 @@ Go to page
 Open application
   Wait until page contains element  test-application-link
   Click element    test-application-link
-  Wait until page contains element  application-page-is-ready
 
 # Open nth inforequest in list, n begins from 1
 Open nth inforequest
@@ -85,7 +84,6 @@ Open nth inforequest
   Go to  ${AUTHORITY INFOREQUESTS URL}
   Wait until page contains element  //tr[@data-test-class="inforequest-row"]
   Click element  //tr[@data-test-class="inforequest-row"][${Index}]
-  Wait until page contains element  application-page-is-ready
 
 Open any inforequest
   Open nth inforequest  1
@@ -93,7 +91,6 @@ Open any inforequest
 Open attachment tab
   Wait until page contains element  test-application-link
   Click element    test-application-link
-  Wait until page contains element  application-page-is-ready
   Click element  test-attachments-tab
 
 Logout
@@ -117,6 +114,7 @@ Login
   Input text  login-username  ${username}
   Input text  login-password  ${password}
   Click button  login-button
+  Wait Until  Ajax calls have finished
 
 User should be logged in
   [Arguments]  ${name}
@@ -130,14 +128,12 @@ User logs in
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  Wait until page contains element  applications-page-is-ready
   User role should be  applicant
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  Wait until page contains element  applications-page-is-ready
   User role should be  authority
   Authority applications page should be open
 
@@ -200,3 +196,23 @@ Sipoo logs in
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until page contains element  admin-header
+
+Input text by test id
+  [Arguments]  ${id}  ${value}
+  Input text  xpath=//input[@data-test-id="${id}"]  ${value}
+
+Select From List by test id
+  [Arguments]  ${id}  ${value}
+  Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Click link by test id
+  [Arguments]  ${id}
+  Click link  xpath=//a[@data-test-id="${id}"]
+
+Wait and click enabled button
+  [Arguments]  ${id}
+  Wait Until  Element should be enabled  xpath=//button[@data-test-id="${id}"]
+  Wait and click  xpath=//button[@data-test-id="${id}"]
+  
+Ajax calls have finished
+  Xpath Should Match X Times  //div[@class="ajax-calls"]/span[@class="ajax-call"]  0

@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation  Authority admin edits municipality links
+Test setup     Wait Until  Ajax calls have finished
 Test teardown  Logout
 Resource       ../../common_resource.robot
 

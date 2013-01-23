@@ -2,6 +2,7 @@
 
 Documentation  Mikko adds an attachment
 Suite setup     Mikko logs in
+Test setup      Wait Until  Ajax calls have finished
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
@@ -12,7 +13,6 @@ Mikko goes to empty attachments tab
   [Tags]  attachments
   Wait until page contains element  test-application-link
   Click element    test-application-link
-  Wait until page contains element  application-page-is-ready
   Click element    test-attachments-tab
 
 Mikko adds txt attachment
