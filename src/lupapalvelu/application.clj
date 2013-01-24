@@ -4,10 +4,14 @@
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
         [lupapalvelu.operations :only [operation->initial-schema-names operation->initial-attachemnt-types operation->allowed-attachemnt-types]])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [clojure.string :as s]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]))
@@ -213,7 +217,7 @@
                         (make-att group kind))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
-                                 (partition 2 attachment/attachment-types)) 
+                                 (partition 2 attachment/attachment-types))
        :comments      (if-let [message (:message data)]
                         [{:text message
                           :target  {:type "application"}
@@ -243,3 +247,30 @@
             document   (update-in document [:schema :info] merge {:op true :removable true})]
         (mongo/update-by-id :applications id {$push {:operations operation
                                                      :documents document}})))))
+
+(defn get-legacy [municipality-id]
+  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
+        legacy       (:legacy municipality)]
+    (when-not (s/blank? legacy) legacy)))
+
+(defquery "merge-details-from-krysp"
+  {:parameters [:id]
+   :roles-in   [:applicant :authority]}
+  [{{:keys [id]} :data :as command}]
+  (with-application command
+    (fn [{:keys [municipality] :as application}]
+      (if-let [legacy (get-legacy municipality)]
+        (let [doc-name     "huoneisto"
+              document     (domain/get-document-by-name application doc-name)
+              old-body     (:body document)
+              kryspxml     (krysp/building-info legacy "24500301050006")
+              new-body     (krysp/building-document kryspxml)
+              merged       (merge old-body new-body)]
+          (mongo/update
+            :applications
+            {:_id (:id application)
+             :documents {$elemMatch {:schema.info.name doc-name}}}
+            {$set {:documents.$.body merged
+                   :modified (:created command)}})
+          (ok :old old-body :new new-body :merged merged))
+        (fail :no_legacy_available)))))
