@@ -50,10 +50,12 @@
     update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var fullName = "";
-      if (value && value.firstName && value.lastName) {
-        fullName = value.firstName + "\u00a0" + value.lastName;
+      if (value) {
+        if (value.firstName) fullName = _.isFunction(value.firstName) ? value.firstName() : value.firstName;
+        if (value.firstName && value.lastName) fullName += "\u00a0";
+        if (value.lastName) fullName += _.isFunction(value.lastName) ? value.lastName() : value.lastName;
       }
-      $(element).text(fullName); //TODO: does not work with comments in application.html
+      $(element).html(fullName);
     }
   };
 

@@ -47,9 +47,10 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
     var winHeight = $(window).height();
     var winWidth = $(window).width();
-    $(selector).css('top',  winHeight/2-$(selector).height()/2);
-    $(selector).css('left', winWidth/2-$(selector).width()/2);
-    $(selector).fadeIn(600);
+    $(selector)
+      .css('top',  winHeight/2-$(selector).height()/2)
+      .css('left', winWidth/2-$(selector).width()/2)
+      .fadeIn(600);
     return false;
   };
 

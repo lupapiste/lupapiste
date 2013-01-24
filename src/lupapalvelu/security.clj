@@ -1,7 +1,8 @@
 (ns lupapalvelu.security
-  (:use monger.operators)
-  (:use lupapalvelu.log)
-  (:require [lupapalvelu.mongo :as mongo])
+  (:use [monger.operators]
+        [lupapalvelu.log])
+  (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.util :as util])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
 (defn non-private [map]
@@ -15,11 +16,8 @@
 (defn summary
   "returns common information about the user or nil"
   [user]
-  (and user {:id        (:id user)
-             :username  (:username user)
-             :firstName (:firstName user)
-             :lastName  (:lastName user)
-             :role      (:role user)}))
+  (when user
+    (util/sub-map user [:id :username :firstName :lastName :role])))
 
 (defn login
   "returns non-private information of first enabled user with the username and password"
