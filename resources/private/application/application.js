@@ -342,9 +342,7 @@
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
 
-      debug("set isInitializing to false");
       isInitializing = false;
-      pageutil.setPageReady("application");
     });
   }
 

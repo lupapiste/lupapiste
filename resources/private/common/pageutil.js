@@ -1,18 +1,6 @@
 var pageutil = (function() {
   "use strict";
 
-  function setPageReady(id) {
-    $("#pageStatus").append('<div id="'+id+'-page-is-ready">' + id + '-page-is-ready</div>');
-  }
-
-  function isPageReady(id) {
-    return  $('#'+id+'-page-is-ready').length > 0;
-  }
-
-  function setPageNotReady() {
-    $("#pageStatus").children().remove();
-  }
-
   /**
    * Returns HTTP GET parameter value or null if the parameter is not set.
    */
@@ -27,9 +15,6 @@ var pageutil = (function() {
   }
 
   return {
-    setPageReady:     setPageReady,
-    setPageNotReady:  setPageNotReady,
-    isPageReady:      isPageReady,
     getURLParameter:  getURLParameter
   };
 
