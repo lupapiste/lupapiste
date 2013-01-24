@@ -19,7 +19,10 @@
             [lupapalvelu.operations])
   (:gen-class))
 
-(def custom-content-type {".ttf" "font/ttf"})
+(def custom-content-type {".eot"   "application/vnd.ms-fontobject"
+                          ".ttf"   "font/ttf"
+                          ".otf"   "font/otf"
+                          ".woff"  "application/font-woff"})
 
 (defn apply-custom-content-types
   "Ring middleware.
