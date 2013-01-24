@@ -222,8 +222,9 @@
       (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
 
 (defn get-legacy [municipality-id]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})]
-    (:legacy municipality)))
+  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
+        legacy       (:legacy municipality)]
+    (when-not (s/blank? legacy) legacy)))
 
 (defquery "merge-details-from-krysp"
   {:parameters [:id]
