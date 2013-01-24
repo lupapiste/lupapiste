@@ -81,18 +81,11 @@
                   :js ["docgen.js"]
                   :css ["docgen.css"]}
 
-   :create-application  {:depends [:common :tree]
-                         :js ["create-application.js"]
-                         :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
+   :create      {:depends [:common :tree]
+                 :js ["create.js"]
+                 :html ["create.html"]}
 
-   :create-inforequest  {:depends [:common]
-                         :js ["create-inforequest.js"]
-                         :html ["create-inforequest.html" "create-inforequest-2.html"]}
-
-   :applicant    {:depends [:common :map :applications
-                            :application :attachment :create-application :docgen
-                            :create-inforequest :buildinfo
-                            :mypage]
+   :applicant    {:depends [:common :map :applications :application :attachment :create :docgen :buildinfo :mypage]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
