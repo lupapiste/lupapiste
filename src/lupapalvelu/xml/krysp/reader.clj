@@ -9,8 +9,8 @@
 ;; Test urls
 ;;
 
-(def logica-test-source "http://212.213.116.162/geoserver/wfs")
-(def local-test-source  (client/uri "/krysp/building.xml"))
+(def logica-test-legacy "http://212.213.116.162/geoserver/wfs")
+(def local-test-legacy  (client/uri "/krysp/building.xml"))
 
 ;;
 ;; Helpers
