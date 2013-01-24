@@ -33,8 +33,6 @@
   (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
 
-
-
 ;; Validation tests:
 
 (facts "Simple validations"
@@ -59,8 +57,7 @@
   (fact "Invalid key under nested section" (validate-updates schema-with-repetition [["repeats.1.single3" "foo"]]) => [["repeats.1.single3" :err "illegal-key"]])
   (fact "Unindexed repeating section" (validate-updates schema-with-repetition [["repeats.single2" "foo"]]) => [["repeats.single2" :err "illegal-key"]])
   (fact "Repeating string, 0" (validate-updates schema-with-repetition [["repeats.1.repeats2.0" "1"]]) => [])
-  (fact "Repeating string, 1" (validate-updates schema-with-repetition [["repeats.1.repeats2.1" "foo"]]) => [["repeats.1.repeats2.1" :warn "illegal-number"]])
-)
+  (fact "Repeating string, 1" (validate-updates schema-with-repetition [["repeats.1.repeats2.1" "foo"]]) => [["repeats.1.repeats2.1" :warn "illegal-number"]]))
 
 (facts "Facts about validation-status"
  (fact (validation-status []) => :ok)

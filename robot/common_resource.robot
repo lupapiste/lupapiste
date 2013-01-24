@@ -1,8 +1,8 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-...      More about robot http://code.google.com/p/robotframework/.
-Library    Selenium2Library   timeout=15  run_on_failure=Log Source
+...            More about robot http://code.google.com/p/robotframework/.
+Library        Selenium2Library   timeout=15  run_on_failure=Log Source
 
 *** Variables ***
 
@@ -12,12 +12,12 @@ ${DEFAULT_SPEED}                0
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/welcome#!/login
+${LOGIN URL}                    ${SERVER}/fi/welcome#!/login
 ${LOGOUT URL}                    ${SERVER}/logout
-${APPLICATIONS PATH}            /applicant#!/applications
-${AUTHORITY APPLICATIONS PATH}  /authority#!/applications
-${INFOREQUESTS URL}   			${SERVER}/applicant#!/inforequests
-${AUTHORITY INFOREQUESTS URL}   ${SERVER}/authority#!/inforequests
+${APPLICATIONS PATH}            /fi/applicant#!/applications
+${AUTHORITY APPLICATIONS PATH}  /fi/authority#!/applications
+${INFOREQUESTS URL}   			${SERVER}/fi/applicant#!/inforequests
+${AUTHORITY INFOREQUESTS URL}   ${SERVER}/fi/authority#!/inforequests
 ${FIXTURE URL}                  ${SERVER}/fixture
 
 ${SELENIUM}                     ${EMPTY}
@@ -75,9 +75,7 @@ Go to page
   Click link  test-${page}-link
 
 Open application
-  Wait until page contains element  test-application-link
-  Click element    test-application-link
-  Wait until page contains element  application-page-is-ready
+  Wait and click by test class  application-link
 
 # Open nth inforequest in list, n begins from 1
 Open nth inforequest
@@ -85,16 +83,13 @@ Open nth inforequest
   Go to  ${AUTHORITY INFOREQUESTS URL}
   Wait until page contains element  //tr[@data-test-class="inforequest-row"]
   Click element  //tr[@data-test-class="inforequest-row"][${Index}]
-  Wait until page contains element  application-page-is-ready
 
 Open any inforequest
   Open nth inforequest  1
 
 Open attachment tab
-  Wait until page contains element  test-application-link
-  Click element    test-application-link
-  Wait until page contains element  application-page-is-ready
-  Click element  test-attachments-tab
+  Wait and click by test class  application-link
+  Wait and click element by test id  attachments-tab
 
 Logout
   Go to  ${LOGIN URL}
@@ -130,14 +125,12 @@ User logs in
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  Wait until page contains element  applications-page-is-ready
   User role should be  applicant
   Applications page should be open
 
 Authority logs in
   [Arguments]  ${login}  ${password}  ${username}
   User logs in  ${login}  ${password}  ${username}
-  Wait until page contains element  applications-page-is-ready
   User role should be  authority
   Authority applications page should be open
 
@@ -200,3 +193,40 @@ Sipoo logs in
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until page contains element  admin-header
+
+Input text by test id
+  [Arguments]  ${id}  ${value}
+  Input text  xpath=//input[@data-test-id="${id}"]  ${value}
+
+Select From List by test id
+  [Arguments]  ${id}  ${value}
+  Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Click link by test id
+  [Arguments]  ${id}
+  Click link  xpath=//a[@data-test-id="${id}"]
+
+Wait and click enabled button
+  [Arguments]  ${id}
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
+  Wait and click  xpath=//button[@data-test-id="${id}"]
+
+Wait and click by test class
+  [Arguments]  ${class}
+  Wait and click  xpath=//*[@data-test-class="${class}"]
+
+Wait until page contains element by test class
+  [Arguments]  ${class}
+  Wait until page contains element  xpath=//*[@data-test-class="${class}"]
+
+Element should be visible by test class
+  [Arguments]  ${class}
+  Element should be visible  xpath=//*[@data-test-class="${class}"]
+
+Element should contain by test class
+  [Arguments]  ${class}  ${value}
+  Element should contain  xpath=//*[@data-test-class="${class}"]  ${value}
+
+Wait and click element by test id
+  [Arguments]  ${id}
+  Wait and click  xpath=//*[@data-test-id="${id}"]

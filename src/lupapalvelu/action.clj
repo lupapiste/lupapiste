@@ -172,14 +172,6 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-(defn create-document [schema-name]
-  (let [schema (get schemas/schemas schema-name)]
-    (if (nil? schema) (throw (Exception. (str "Unknown schema: [" schema-name "]"))))
-    {:id (mongo/create-id)
-     :created (now)
-     :schema schema
-     :body {}}))
-
 (defcommand "user-to-document"
   {:parameters [:id :name]
    :authenticated true}

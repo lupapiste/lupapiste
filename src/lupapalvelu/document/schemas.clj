@@ -3,9 +3,7 @@
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
   [docs]
-  (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc))
-          {}
-          docs))
+  (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
 (def simple-osoite-body [{:name "katu" :type :string}
                          {:name "postinumero" :type :string :size "s"}
@@ -328,4 +326,56 @@
       :body full-osoite-body}
 
      {:info {:name "lisatiedot"}
-      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
+      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
+     
+     ; Rest are templates for future. Just guessing...
+     
+     {:info {:name "asuinrakennus"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "vapaa-ajan-asuinrakennus"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "varasto-tms"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "julkinen-rakennus"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "muu-uusi-rakentaminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "laajentaminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "kayttotark-muutos"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "julkisivu-muutos"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "jakaminen-tai-yhdistaminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "markatilan-laajentaminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "takka-tai-hormi"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "parveke-tai-terassi"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "muu-laajentaminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "auto-katos"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "masto-tms"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "mainoslaite"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "aita"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "maalampo"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "jatevesi"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "muu-rakentaminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "purkaminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "kaivuu"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "puun-kaataminen"}
+      :body [{:name "foo" :type :string}]}
+     {:info {:name "muu-maisema-toimenpide"}
+      :body [{:name "foo" :type :string}]}]))
+

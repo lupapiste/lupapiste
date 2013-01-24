@@ -23,6 +23,7 @@
     "ko",
     "_",
     "loc",
+    "getEvent",
     "hub",
     "debug",
     "pageutil",

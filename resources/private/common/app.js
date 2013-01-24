@@ -8,8 +8,9 @@ if (typeof LUPAPISTE === "undefined") {
 
 /**
  * @param {String} startPage   ID of the landing page
+ * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
-LUPAPISTE.App = function(startPage) {
+LUPAPISTE.App = function(startPage, allowAnonymous) {
 
   "use strict";
 
@@ -18,6 +19,7 @@ LUPAPISTE.App = function(startPage) {
   self.startPage = startPage;
   self.currentPage = undefined;
   self.session = undefined;
+  self.allowAnonymous = allowAnonymous;
 
   /**
    * Complete the App initialization after DOM is loaded.
@@ -33,7 +35,27 @@ LUPAPISTE.App = function(startPage) {
       LUPAPISTE.ModalDialog.init();
     }
 
-    $(".logout-button").click(function() { hub.send("logout"); });
+    var naviLinks = $("<span>").attr("id", "navi-right");
+
+    _.each(loc.getSupportedLanguages(), function(lang) {
+      if (lang !== loc.getCurrentLanguage()) {
+        naviLinks.append(
+            $("<a>").attr("href", "#").text(loc("in_"  + lang))
+            .click(function(e) {
+              hub.send("change-lang", {lang: lang});
+              e.preventDefault();
+              }));
+      }
+    });
+
+    if (!self.allowAnonymous) {
+      naviLinks.append(" ");
+      naviLinks.append($("<a>")
+        .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
+        .text(loc("logout")));
+    }
+
+    $("nav").append(naviLinks);
   };
   $(this.domReady);
 
@@ -82,7 +104,7 @@ LUPAPISTE.App = function(startPage) {
 
     var path = hash.split("/");
 
-    if (self.session === undefined) {
+    if (!self.allowAnonymous && self.session === undefined) {
       trace("session === undefined", hash, path);
       ajax.query("user")
         .success(function (e) {
@@ -98,7 +120,7 @@ LUPAPISTE.App = function(startPage) {
       return;
     }
 
-    self.openPage(self.session ? path : ["login"]);
+    self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
   };
 
   this.connectionCheck = function() {
@@ -125,7 +147,7 @@ LUPAPISTE.App = function(startPage) {
   });
 
   hub.subscribe("logout", function() {
-    window.location = "/logout";
+    window.location = "/" + loc.getCurrentLanguage() + "/logout";
   });
 
 };
