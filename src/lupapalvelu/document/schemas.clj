@@ -204,46 +204,46 @@
              {:name "rakenne"
               :type :group
               :body [{:name "rakentamistapa" :type :select
-                      :body [{:name "elementti" :type :checkbox}
-                             {:name "paikalla" :type :checkbox}
-                             {:name "ei tiedossa" :type :checkbox}]}
+                      :body [{:name "elementti"}
+                             {:name "paikalla"}
+                             {:name "ei tiedossa"}]}
                      {:name "kantavaRakennusaine" :type :select
-                      :body [{:name "betoni" :type :checkbox}
-                             {:name "tiili" :type :checkbox}
-                             {:name "teras" :type :checkbox}
-                             {:name "puu" :type :checkbox}
+                      :body [{:name "betoni"}
+                             {:name "tiili"}
+                             {:name "teras"}
+                             {:name "puu"}
                              {:name "muurakennusaine" :type :string :size "s"}
-                             {:name "ei tiedossa" :type :checkbox}]}
+                             {:name "ei tiedossa"}]}
                      {:name "julkisivu" :type :select
-                      :body [{:name "betoni" :type :checkbox}
-                             {:name "tiili" :type :checkbox}
-                             {:name "metallilevy" :type :checkbox}
-                             {:name "kivi" :type :checkbox}
-                             {:name "puu" :type :checkbox}
-                             {:name "lasi" :type :checkbox}
+                      :body [{:name "betoni"}
+                             {:name "tiili"}
+                             {:name "metallilevy"}
+                             {:name "kivi"}
+                             {:name "puu"}
+                             {:name "lasi"}
                              {:name "muumateriaali" :type :string :size "s"}
-                             {:name "ei tiedossa" :type :checkbox}]}]}
+                             {:name "ei tiedossa"}]}]}
              {:name "lammitys"
               :type :group
               :body [{:name "lammitystapa" :type :select
-                      :body [{:name "vesikeskus" :type :checkbox}
-                             {:name "ilmakeskus" :type :checkbox}
-                             {:name "suorasahko" :type :checkbox}
-                             {:name "uuni" :type :checkbox}
-                             {:name "eiLammitysta" :type :checkbox}
-                             {:name "ei tiedossa" :type :checkbox}]}
+                      :body [{:name "vesikeskus"}
+                             {:name "ilmakeskus"}
+                             {:name "suorasahko"}
+                             {:name "uuni"}
+                             {:name "eiLammitysta"}
+                             {:name "ei tiedossa"}]}
                      {:name "lammonlahde" :type :select
-                      :body [{:name "kauko tai aluel\u00e4mp\u00f6" :type :checkbox}
-                             {:name "kevyt poltto\u00f6ljy" :type :checkbox}
-                             {:name "raskas poltto\u00f6ljy" :type :checkbox}
-                             {:name "s\u00e4hk\u00f6" :type :checkbox}
-                             {:name "kaasu" :type :checkbox}
-                             {:name "kiviihiili koksi tms" :type :checkbox}
-                             {:name "turve" :type :checkbox}
-                             {:name "maal\u00e4mp\u00f6" :type :checkbox}
-                             {:name "puu" :type :checkbox}
-                             {:name "muu" :type :string :size "s"}
-                             {:name "ei tiedossa" :type :checkbox}]}]}
+                      :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
+                             {:name "kevyt poltto\u00f6ljy"}
+                             {:name "raskas poltto\u00f6ljy"}
+                             {:name "s\u00e4hk\u00f6"}
+                             {:name "kaasu"}
+                             {:name "kiviihiili koksi tms"}
+                             {:name "turve"}
+                             {:name "maal\u00e4mp\u00f6"}
+                             {:name "puu"}
+                             {:name "muu" :type :string :size "s"} ;TODO tukii tekstille
+                             {:name "ei tiedossa"}]}]}
              {:name "verkostoliittymat" :type :choice
               :body [{:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
@@ -270,22 +270,28 @@
               :repeating true
               :body huoneisto-body}])
 
-  (def toimenpiteen-kuvaus [{:name "toimenpiteenKuvaus"
-              :type :group
-              :body [{:name "kuvaus" :type :text :size "l"}
-                     {:name "poikkeamiset" :type :text :size "l"}]}])
+
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                           :type :group :repeating true
                           :body party-body}])
 
+(def muutostyonlaji [{:name :muutostyolaji :type :select
+                               :body
+                               [{:name "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t"}
+                                {:name "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"}
+                                {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
+                               )
+
+(def rakennuksen-muuttaminen (into muutostyonlaji (into rakennuksen-omistajat rakennuksen-tiedot)))
+
 (def schemas
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
-      :body (into toimenpiteen-kuvaus rakennuksen-tiedot)}
+      :body rakennuksen-tiedot}
 
-     {:info {:name "rakennuksen-muutaminen"}
-      :body (into toimenpiteen-kuvaus (into rakennuksen-omistajat rakennuksen-tiedot))}
+     {:info {:name "rakennuksen-muuttaminen"}
+      :body rakennuksen-muuttaminen}
 
      {:info {:name "hakija" :repeating true}
       :body party-body}
