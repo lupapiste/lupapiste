@@ -109,6 +109,8 @@
     {"Cache-Control" "no-cache"}
     {"Cache-Control" "public, max-age=86400"}))
 
+(def default-lang "fi")
+
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     (->>
@@ -151,6 +153,9 @@
       (info "login: failed: username=%s" username)
       (fail :error.login))))
 
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" lang "/welcome")))
+
 (defjson [:post "/api/logout"] []
   (session/clear!)
   (ok))
@@ -159,9 +164,6 @@
   (session/clear!)
   (resp/redirect "/"))
 
-(defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" lang "/welcome")))
-
 (defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (session/clear!)
   (redirect-to-frontpage lang))
@@ -169,9 +171,9 @@
 (defpage "/" []
   (if (logged-in?)
     (if-let [application-page (applicationpage-for (:role (current-user)))]
-      (resp/redirect application-page)
-      (redirect-to-frontpage "fi"))
-    (redirect-to-frontpage "fi")))
+      (resp/redirect (str "/" default-lang application-page))
+      (redirect-to-frontpage default-lang))
+    (redirect-to-frontpage default-lang)))
 
 ;;
 ;; FROM SADE
