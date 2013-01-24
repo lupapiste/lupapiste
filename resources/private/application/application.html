@@ -115,7 +115,7 @@
                 </ul>
               </div>
               <br/>
-              <a href=""  id="test-add-invite"
+              <a href="#"  id="test-add-invite"
                  data-window-id="dialog-valtuutus" class="modal"
                  data-bind="ltext: '', visible: $root.authorization.ok('invite')">Lis&auml;&auml; valtuutus</a>
             </div>
@@ -227,7 +227,7 @@
                   </td>
                   <td>
                     <span data-bind="if: $data.latestVersion">
-                      <a href="" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
+                      <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
                       <i data-bind="ltext: latestVersion.contentType"></i>
                       <i data-bind="size: latestVersion.size"></i>
                     </span>

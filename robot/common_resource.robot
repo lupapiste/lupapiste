@@ -1,8 +1,8 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-...      More about robot http://code.google.com/p/robotframework/.
-Library    Selenium2Library   timeout=15  run_on_failure=Log Source
+...            More about robot http://code.google.com/p/robotframework/.
+Library        Selenium2Library   timeout=15  run_on_failure=Log Source
 
 *** Variables ***
 
@@ -12,12 +12,12 @@ ${DEFAULT_SPEED}                0
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/welcome#!/login
+${LOGIN URL}                    ${SERVER}/fi/welcome#!/login
 ${LOGOUT URL}                    ${SERVER}/logout
-${APPLICATIONS PATH}            /applicant#!/applications
-${AUTHORITY APPLICATIONS PATH}  /authority#!/applications
-${INFOREQUESTS URL}   			${SERVER}/applicant#!/inforequests
-${AUTHORITY INFOREQUESTS URL}   ${SERVER}/authority#!/inforequests
+${APPLICATIONS PATH}            /fi/applicant#!/applications
+${AUTHORITY APPLICATIONS PATH}  /fi/authority#!/applications
+${INFOREQUESTS URL}   			${SERVER}/fi/applicant#!/inforequests
+${AUTHORITY INFOREQUESTS URL}   ${SERVER}/fi/authority#!/inforequests
 ${FIXTURE URL}                  ${SERVER}/fixture
 
 ${SELENIUM}                     ${EMPTY}
