@@ -17,25 +17,26 @@
 
         <div class="application_summary_info">
           <div>
-            <p>K&auml;sittelytunnus:</p>
-            <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id, attr: {'data-test-value': id}"></span>
+            <p data-bind="ltext: ''">K&auml;sittelytunnus:</p>
+            <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id"
+                  data-bind="text: id, attr: {'data-test-value': id}"></span>
           </div>
           <div>
-            <p>Tila:</p>
+            <p data-bind="ltext: ''">Tila:</p>
             <span id="test-application-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
           <div>
-            <p>Lupatyyppi:</p>
+            <p data-bind="ltext: ''">Lupatyyppi:</p>
             <span class="application_summary_text" data-bind="ltext: permitType"></span>
           </div>
           <div>
-            <p>Kiinteistötunnus:</p>
+            <p data-bind="ltext: ''">Kiinteistötunnus:</p>
             <span class="application_summary_text" data-bind="text: propertyId" data-test-id="application-property-id"></span>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
-              <p>Käsittelijä:</p>
+              <p data-bind="ltext: ''">Käsittelijä:</p>
               <span id="test-application-assignee" class="application_summary_text">
 
                 <select data-bind="options: $root.authorities,
@@ -49,7 +50,7 @@
             </div>
           <!-- /ko -->
           <div>
-            <p>Toimenpiteet:</p>
+            <p data-bind="ltext: ''">Toimenpiteet:</p>
             <ul data-bind="foreach: $root.documents">
               <li>
                 <span data-bind="ltext: schema.info.name" id="test-application-operation"></span>
@@ -58,32 +59,40 @@
             </ul>
           </div>
           <div data-bind="with: $root.applicationModel.data">
-            <p>Hakemus j&auml;tetty:</p>
+            <p data-bind="ltext: ''">Hakemus j&auml;tetty:</p>
             <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
           </div>
         </div>
         <div class="application_actions">
-          <button data-bind="click: submitApplication,  enable: $root.authorization.ok('submit-application')"  type="submit" class="btn btn-primary"  id="test-submit-application" >Jätä hakemus käsiteltäväksi</button>
-          <button data-bind="click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  data-test-id="approve-application">Siirrä kuntarekisteriin</button>
-          <button data-bind="enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
-          <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
-          <button data-bind="click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
+          <button data-bind="ltext: '', click: submitApplication,  enable: $root.authorization.ok('submit-application')"  type="submit" class="btn btn-primary"  id="test-submit-application" >Jätä hakemus käsiteltäväksi</button>
+          <button data-bind="ltext: '', click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  data-test-id="approve-application">Siirrä kuntarekisteriin</button>
+          <button data-bind="ltext: 'create-inforequest.inforequest', enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
+          <button data-bind="ltext: '', click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
+          <button data-bind="ltext: '', click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
-            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
-            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   data-test-id="attachments-tab"  >Suunnitelmat ja liitteet</a></li>
-            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
-            <li><a data-bind="click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   data-test-id="attachments-tab"  >Suunnitelmat ja liitteet</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
           </ul>
         </div>
       </div>
     </div>
     <div class="sidebar">
       <aside class="instructions">
-          <h3>Ohje</h3>
-          <p>T&auml;ss&auml; n&auml;kym&auml;ss&auml; voit k&auml;sitell&auml; hakemuksen tietoja. Voit kysy&auml; tarvittaessa neuvoa rakennusvalvonnasta keskusteluketjussa. Voit j&auml;tt&auml;&auml; valmiin hakemuksen k&auml;sittelyyn painamalla "J&auml;t&auml; hakemus" nappia. T&auml;ll&auml;in rakennusvirannomainen tarkistaa hakemuksesi ja ottaa sen k&auml;sittelyyn. Tehty&auml;&auml;n p&auml;&auml;t&auml;ksen rakennusviranomainen siirt&auml;&auml; hakemuksen tilaan hyv&auml;ksytty tai ev&auml;tty. Varsinaisen p&auml;&auml;t&auml;sp&auml;yt&auml;kirjan l&auml;yd&auml;t "P&auml;&auml;t&auml;s"-v&auml;lilehdelt&auml;</p>
+          <h3 data-bind="ltext: ''">Ohje</h3>
+          <p data-bind="ltext: ''">T&auml;ss&auml; n&auml;kym&auml;ss&auml; voit
+          k&auml;sitell&auml; hakemuksen tietoja. Voit kysy&auml; tarvittaessa
+          neuvoa rakennusvalvonnasta keskusteluketjussa. Voit j&auml;tt&auml;&auml;
+          valmiin hakemuksen k&auml;sittelyyn painamalla "J&auml;t&auml; hakemus"
+          nappia. T&auml;ll&auml;in rakennusvirannomainen tarkistaa hakemuksesi ja
+          ottaa sen k&auml;sittelyyn. Tehty&auml;&auml;n p&auml;&auml;t&auml;ksen
+          rakennusviranomainen siirt&auml;&auml; hakemuksen tilaan hyv&auml;ksytty
+          tai ev&auml;tty. Varsinaisen p&auml;&auml;t&auml;sp&auml;yt&auml;kirjan
+          l&auml;yd&auml;t "P&auml;&auml;t&auml;s"-v&auml;lilehdelt&auml;</p>
       </aside>
     </div>
 
@@ -92,26 +101,27 @@
       <div class="tab-content" id="application_tab" style="display: block;">
 
         <div class="application_section" data-bind="with: application">
-          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick, clickBubble: false"> <span class="font-icon icon-expanded"></span> Hakemuksen perustiedot</h2>
+          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick">
+            <span class="font-icon icon-expanded"></span> <span data-bind="ltext: ''">Hakemuksen perustiedot</span></h2>
           <div class="application_section_content content_expanded">
             <div>
-              <h3>Valtuutetut</h3>
+              <h3 data-bind="ltext: ''">Valtuutetut</h3>
               <div data-bind="with: $root.applicationModel">
                 <ul data-bind="foreach: auth">
                   <li>
                     <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                     (<span data-bind="text: username"></span>)
                     <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                    <a class="remove-read" href="#" data-bind="click: $root.application.removeAuth">Poista</a>
+                    <a class="remove-read" href="#" data-bind="ltext: '', click: $root.application.removeAuth">Poista</a>
                   </li>
                 </ul>
               </div>
               <br/>
               <a href=""  id="test-add-invite"
                  data-window-id="dialog-valtuutus" class="modal"
-                 data-bind="visible: $root.authorization.ok('invite')">Lis&auml;&auml; valtuutus</a>
+                 data-bind="ltext: '', visible: $root.authorization.ok('invite')">Lis&auml;&auml; valtuutus</a>
             </div>
-            <h3>Kutsutut</h3>
+            <h3 data-bind="ltext: ''">Kutsutut</h3>
 
             <ul data-bind="foreach: invites">
               <li class="user-invite">
@@ -121,7 +131,8 @@
                 <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
               </li>
             </ul>
-            <button data-bind="disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">ole p&auml;&auml;suunnittelija</button>
+            <button data-bind="ltext: '', disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">
+              ole p&auml;&auml;suunnittelija</button>
           </div>
         </div>
 
@@ -143,20 +154,29 @@
       </div>
 
       <div class="tab-content" id="conversation_tab" data-bind="with: $root.comment">
-        <p class="tab-info"> T&auml;&auml;ll&auml; voit keskustella hakemuksesta viranomaisten ja valtuutettujen, kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen n&auml;kee hakemuksesi ja voi vastata esitt&auml;miisi kysymyksiin. N&auml;in voitte yhdess&auml; valmistella hakemusta ennen sen j&auml;tt&auml;mist&auml;.</p>
+        <p data-bind="ltext: ''" class="tab-info">
+        T&auml;&auml;ll&auml; voit keskustella hakemuksesta viranomaisten ja valtuutettujen,
+        kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen n&auml;kee hakemuksesi
+        ja voi vastata esitt&auml;miisi kysymyksiin. N&auml;in voitte yhdess&auml; valmistella
+        hakemusta ennen sen j&auml;tt&auml;mist&auml;.</p>
         <div class="tab-wrapper">
           <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
               <tr class="comment">
-                <td class="comment-party commenttd"><span class="date" data-bind="dateTimeString: created"></span><br /> <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br /> <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek --> <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
+                <td class="comment-party commenttd"><span class="date" data-bind="dateTimeString: created"></span><br />
+                  <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
+                  <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek -->
+                  <b>(<span class="role" data-bind="ltext: user.role"></span>)</b></td>
                 <td class="commenttd" data-bind="text: text"></td>
               </tr>
             </tbody>
           </table>
           <form>
-            <h3>Kirjoita viesti:</h3>
-            <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
-            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
+            <h3 data-bind="ltext: ''">Kirjoita viesti:</h3>
+            <textarea class="form-input textarea" id="commentText"
+              data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+            <button id="application.addComment"
+              data-bind="ltext: '', disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
           </form>
         </div>
       </div>
@@ -170,7 +190,10 @@
       </div>
 
       <div class="tab-content" id="attachments_tab">
-        <p class="tab-info">T&auml;nne voit lis&auml;t&auml; hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml; sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n taulukossa punaisella lipulla.</p>
+        <p data-bind="ltext: ''" class="tab-info">T&auml;nne voit lis&auml;t&auml;
+          hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml;
+          sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n
+          taulukossa punaisella lipulla.</p>
         <div class="tab-wrapper">
           <div data-bind="if: attachmentsByGroup().length">
 
@@ -180,11 +203,11 @@
                   <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
                 </tr>
                 <tr>
-                  <th>Tila</th>
-                  <th>Tyyppi</th>
-                  <th>Tiedosto</th>
-                  <th>Versio</th>
-                  <th>Muokattu</th>
+                  <th data-bind="ltext: ''">Tila</th>
+                  <th data-bind="ltext: ''">Tyyppi</th>
+                  <th data-bind="ltext: ''">Tiedosto</th>
+                  <th data-bind="ltext: ''">Versio</th>
+                  <th data-bind="ltext: ''">Muokattu</th>
                   <th></th>
                 </tr>
                 <!-- ko foreach: attachments -->
@@ -196,7 +219,7 @@
                         <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
                       </span>
                       <span data-bind="if: type == null">
-                        <i>Nimet&ouml;n</i>
+                        <i data-bind="ltext: ''">Nimet&ouml;n</i>
                       </span>
                     </a>
                   </td>
@@ -227,13 +250,13 @@
 
           </div>
           <div data-bind="ifnot: attachmentsByGroup.length">
-            <i>Ei liitteit&auml;</i>
+            <i data-bind="ltext: 'attachments.none'">Ei liitteit&auml;</i>
           </div>
           <button
               id="add-attachment"
               class="btn btn-primary modal"
               data-window-id="upload-dialog"
-              data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
+              data-bind="ltext: '', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
             Lis&auml;&auml; liite
           </button>
         </div>
@@ -245,15 +268,15 @@
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
           &auml;
-          <p>Lis&auml;&auml; valtuutus</p>
+          <p data-bind="ltext: ''">Lis&auml;&auml; valtuutus</p>
           &auml;
           <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content">
           <div data-bind="with: $root.invite">
-            <label class="form-label" for="invite-email">S&auml;hk&ouml;postiosoite</label>
+            <label data-bind="ltext: ''" class="form-label" for="invite-email">S&auml;hk&ouml;postiosoite</label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
-            <label class="form-label" for="invite-text">Viesti</label>
+            <label data-bind="ltext: ''" class="form-label" for="invite-text">Viesti</label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
             <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
           </div>

@@ -109,6 +109,8 @@
     {"Cache-Control" "no-cache"}
     {"Cache-Control" "public, max-age=86400"}))
 
+(def default-lang "fi")
+
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     (->>
@@ -125,8 +127,8 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:app" :app apps-pattern]] {app :app}
-  (single-resource :html (keyword app) (resp/redirect "/welcome#")))
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
+  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
 
 ;;
 ;; Login/logout:
@@ -151,6 +153,9 @@
       (info "login: failed: username=%s" username)
       (fail :error.login))))
 
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" lang "/welcome")))
+
 (defjson [:post "/api/logout"] []
   (session/clear!)
   (ok))
@@ -159,12 +164,16 @@
   (session/clear!)
   (resp/redirect "/"))
 
+(defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
+  (session/clear!)
+  (redirect-to-frontpage lang))
+
 (defpage "/" []
   (if (logged-in?)
     (if-let [application-page (applicationpage-for (:role (current-user)))]
-      (resp/redirect application-page)
-      (resp/redirect "/welcome#"))
-    (resp/redirect "/welcome#")))
+      (resp/redirect (str "/" default-lang application-page))
+      (redirect-to-frontpage default-lang))
+    (redirect-to-frontpage default-lang)))
 
 ;;
 ;; FROM SADE
