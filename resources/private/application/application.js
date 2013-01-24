@@ -35,7 +35,7 @@
     
     self.cancel = function() { return true; };
 
-  }
+  };
   
   function ApplicationModel() {
     var self = this;
