@@ -5,7 +5,8 @@
         [lupapalvelu.action :only [application-query-for get-application-as]]
         [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
         [lupapalvelu.document.commands :only [create-document]])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [clojure.string :as s]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.document.model :as model]
@@ -234,6 +235,11 @@
               merged   (merge old-body new-body)]
           (ok :old old-body :new new-body :merged merged))))))
 
+(defn has-legacy? [municipality-id]
+  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
+        legacy       (:legacy municipality)]
+    (not (s/blank? legacy))))
+
 (defquery "merge-details-from-krysp"
   {:parameters [:id]
    :roles-in   [:applicant :authority]}
@@ -242,10 +248,10 @@
     (fn [application]
       (let [doc-name     "huoneisto"
             municipality (:municipality application)
-            legacy
+            legacy       (:legacy (mongo/select-one :municipalities {:_id municipality}))
             document     (domain/get-document-by-name application doc-name)
             old-body     (:body document)
-            kryspxml     (krysp/building-info source "24500301050006")
+            kryspxml     (krysp/building-info legacy "24500301050006")
             new-body     (krysp/building-document kryspxml)
             merged       (merge old-body new-body)]
         (println merged)
