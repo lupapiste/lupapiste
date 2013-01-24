@@ -65,7 +65,7 @@
         </div>
         <div class="application_actions">
           <button data-bind="ltext: '', click: submitApplication,  enable: $root.authorization.ok('submit-application')"  type="submit" class="btn btn-primary"  id="test-submit-application" >Jätä hakemus käsiteltäväksi</button>
-          <button data-bind="ltext: '', click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  id="test-approve-application">Siirrä kuntarekisteriin</button>
+          <button data-bind="ltext: '', click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  data-test-id="approve-application">Siirrä kuntarekisteriin</button>
           <button data-bind="ltext: 'create-inforequest.inforequest', enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
           <button data-bind="ltext: '', click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
           <button data-bind="ltext: '', click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
@@ -74,7 +74,7 @@
           <ul class="tabs" id="applicationTabs">
             <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
             <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   id="test-attachments-tab"  >Suunnitelmat ja liitteet</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   data-test-id="attachments-tab"  >Suunnitelmat ja liitteet</a></li>
             <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
             <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
           </ul>

@@ -7,5 +7,5 @@ Resource       ../../common_resource.robot
 
 Sonja should not see zero applications
   Sonja logs in
-  Wait until  Number of visible applications on page  applications  0
+  Number of visible applications on page  applications  0
   Logout
