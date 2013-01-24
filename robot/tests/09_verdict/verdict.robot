@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Application gets verdict
-Test setup      Wait Until  Ajax calls have finished
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -9,9 +8,9 @@ Resource        ../../common_resource.robot
 
 Mikko opens application to see verdict
   Mikko logs in
-  Wait until page contains element  test-application-link
-  Click element  test-application-link
-  
+  Wait and click by test class  application-link
+  Sleep  1
+
 Application does not have verdict
   Click element  test-verdict-tab
   Element should not be visible  test-application-verdict
@@ -29,17 +28,17 @@ Solita Admin can log in and gives verdict
 
 Mikko opens application
   Mikko logs in
-  Click element  test-application-link
+  Wait and click by test class  application-link
   
 Application verdict is visible to applicant
   Wait and click  test-verdict-tab
-  Element should be visible  test-application-verdict
+  Wait Until  Element should be visible  test-application-verdict
   Logout
 
 Sonja opens application
   Sonja logs in
-  Click element  test-application-link
+  Wait and click by test class  application-link
 
 Application verdict is visible to authority
   Click element  test-verdict-tab
-  Element should be visible  test-application-verdict
+  Wait Until  Element should be visible  test-application-verdict
