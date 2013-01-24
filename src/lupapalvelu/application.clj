@@ -208,7 +208,9 @@
                             (-> (make-doc (name op))
                               (assoc :id op-doc-id)
                               (update-in [:schema :info] merge {:op true :removable true})))
-       :attachments   (mapcat #(map (partial make-att (first %)) (second %)) (partition 2 (operation->initial-attachemnt-types op [])))   
+       :attachments   (for [[group types] (partition 2 (operation->initial-attachemnt-types op []))
+                            kind types]
+                        (make-att group kind))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types)) 
