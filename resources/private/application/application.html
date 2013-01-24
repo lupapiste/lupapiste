@@ -101,7 +101,7 @@
       <div class="tab-content" id="application_tab" style="display: block;">
 
         <div class="application_section" data-bind="with: application">
-          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick, clickBubble: false">
+          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick">
             <span class="font-icon icon-expanded"></span> <span data-bind="ltext: ''">Hakemuksen perustiedot</span></h2>
           <div class="application_section_content content_expanded">
             <div>
@@ -189,7 +189,7 @@
         </div>
       </div>
 
-      <div data-bind="ltext: ''" class="tab-content" id="attachments_tab">
+      <div class="tab-content" id="attachments_tab">
         <p data-bind="ltext: ''" class="tab-info">T&auml;nne voit lis&auml;t&auml;
           hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml;
           sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n

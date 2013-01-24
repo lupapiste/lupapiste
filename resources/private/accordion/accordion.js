@@ -10,7 +10,9 @@ var accordion = (function() {
     e.stopPropagation();
     var target = $(e.target);
 
-    if (target.hasClass("font-icon")) target = target.parent();
+    if (target.is("span")) {
+      target = target.parent();
+    }
 
     var content = target.next();
 
