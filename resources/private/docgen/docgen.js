@@ -240,7 +240,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return partsDiv;
   }
 
-  function buildUnknown(spec, model, path, save, specId) {
+  function buildUnknown(spec, model, path) {
     error("Unknown element type:", spec.type, path);
     var div = document.createElement("div");
     div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
@@ -273,7 +273,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       elem.setAttribute("data-repeating-id-" + repeatingId, id);
       return elem;
     }
-    
+
     if (spec.repeating) {
       var models = model[myName] || [{}];
 
@@ -340,7 +340,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
             $(elem).hide();
           }
 
-          body.appendChild(elem)
+          body.appendChild(elem);
         });
     });
 
@@ -384,14 +384,12 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
           label.removeChild(loader);
         }
         $(target).removeClass("form-input-warn").removeClass("form-input-err");
-        if (status === "ok") {
-          // Nada.
-        } else if (status === "warn") {
+        if (status === "warn") {
           $(target).addClass("form-input-warn");
         } else if (status === "err") {
           $(target).addClass("form-input-err");
-        } else {
-          error("Unknown result:", result, "path:", path);
+        } else if (status !== "ok") {
+          error("Unknown status:", status, "path:", path);
         }
       }, eventData);
       // No return value or stoping the event propagation:
@@ -402,13 +400,13 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
   function removeThis() {
     this.parent().slideUp(function() { $(this).remove(); });
   }
-  
+
   function removeDoc(e) {
     var n = $(e.target).parent();
     self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.spec.info.name + "._group_label"), removeThis.bind(n));
     return false;
   }
-  
+
   function buildElement() {
     var specId = self.spec.info.name;
     var save = makeSaverDelegate(self.saveCallback, self.eventData);
