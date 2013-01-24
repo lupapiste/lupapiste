@@ -93,5 +93,3 @@
                           :paloturvallisuusselvitys
                           :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
                           :muu]]})
-
-
