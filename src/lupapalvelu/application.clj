@@ -240,13 +240,14 @@
   [{{:keys [id]} :data :as command}]
   (with-application command
     (fn [application]
-      (let [doc-name "huoneisto"
-            document (domain/get-document-by-name application doc-name)
-            old-body (:body document)
-            source   krysp/logica-test-source
-            kryspxml (krysp/building-info source "24500301050006")
-            new-body (krysp/building-document kryspxml)
-            merged   (merge old-body new-body)]
+      (let [doc-name     "huoneisto"
+            municipality (:municipality application)
+            legacy
+            document     (domain/get-document-by-name application doc-name)
+            old-body     (:body document)
+            kryspxml     (krysp/building-info source "24500301050006")
+            new-body     (krysp/building-document kryspxml)
+            merged       (merge old-body new-body)]
         (println merged)
         (mongo/update
           :applications
