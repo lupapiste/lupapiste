@@ -20,17 +20,21 @@
   "removes namespacey part of a keyword key of a map entry"
   [[k v]] (if (keyword? k) [(-> k name (s/split #":") last keyword) v] [k v]))
 
+(defn postwalk-map
+  "traverses m and applies f to all maps within"
+  [f m] (postwalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
+
 (defn strip-keys
   "removes recursively all namespacey parts from map keywords keys"
-  [m] (postwalk (fn [x] (if (map? x) (into {} (map strip-key x)) x)) m))
+  [m] (postwalk-map (partial map strip-key) m))
 
 (defn strip-nils
   "removes recursively all keys from map which have value of nil"
-  [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp not nil? val) x)) x)) m))
+  [m] (postwalk-map (partial filter (comp not nil? val)) m))
 
 (defn strip-empty-maps
   "removes recursively all keys from map which have empty map as value"
-  [m] (postwalk (fn [x] (if (map? x) (into {} (filter (comp (partial not= {}) val) x)) x)) m))
+  [m] (postwalk-map (partial filter (comp (partial not= {}) val)) m))
 
 (defn legacy-is-alive?
   "checks if the legacy system is Web Feature Service -enabled. kindof."
