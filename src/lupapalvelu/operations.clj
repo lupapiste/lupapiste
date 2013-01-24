@@ -32,8 +32,10 @@
   ; Same data for all municipalities for now.
   operations-data)
 
+; Just guessing...
 (def ^:private common-schemas ["maksaja" "rakennuspaikka" "lisatiedot"])
 
+; Just guessing...
 (def operation->initial-schema-names
   {:asuinrakennus (concat common-schemas ["paasuunnittelija" "suunnittelija"])
    :vapaa-ajan-asuinrakennus (concat common-schemas ["suunnittelija"])

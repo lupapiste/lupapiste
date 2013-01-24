@@ -215,14 +215,10 @@
 
     debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {
-      })
-      .error(function(e) {
-        error(e);
-      })
-      .fail(function(e) {
-        error(e);
-      }).call();
+      .success(function() {})
+      .error(function(e) { error(e); })
+      .fail(function(e) { error(e); })
+      .call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
@@ -266,12 +262,11 @@
         ok: "ok"
       };
 
-      attachments.removeAll();
-      _.each(app.attachments || [], function(a) {
+      attachments(_.map(app.attachments || [], function(a) {
         a.statusName = statuses[a.state] || "unknown";
         a.latestVersion = _.last(a.versions);
-        attachments.push(a);
-      });
+        return a;
+      }));
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 

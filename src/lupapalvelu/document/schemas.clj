@@ -319,6 +319,8 @@
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
      
+     ; Rest are templates for future. Just guessing...
+     
      {:info {:name "asuinrakennus"}
       :body [{:name "foo" :type :string}]}
      {:info {:name "vapaa-ajan-asuinrakennus"}
