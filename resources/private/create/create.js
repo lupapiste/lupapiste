@@ -88,7 +88,7 @@
     return e;
   }
 
-  hub.onPageChange("create-inforequest", function() {
+  hub.onPageChange("create", function() {
     addressModel.clear();
     part2Model.clear();
   });
