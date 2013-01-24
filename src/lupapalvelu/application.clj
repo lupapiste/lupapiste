@@ -221,25 +221,6 @@
     (fn [application]
       (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
 
-(env/in-dev "to verify data gets merged correctly"
-  (defquery "view-details-from-krysp"
-    {:parameters [:id]}
-    [{{:keys [id]} :data :as command}]
-    (with-application command
-      (fn [application]
-        (let [document (domain/get-document-by-name application "huoneisto")
-              old-body (:body document)
-              source   krysp/logica-test-source
-              kryspxml (krysp/building-info source "24500301050006")
-              new-body (krysp/building-document kryspxml)
-              merged   (merge old-body new-body)]
-          (ok :old old-body :new new-body :merged merged))))))
-
-(defn has-legacy? [municipality-id]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
-        legacy       (:legacy municipality)]
-    (not (s/blank? legacy))))
-
 (defn get-legacy [municipality-id]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id})]
     (:legacy municipality)))
@@ -263,5 +244,5 @@
              :documents {$elemMatch {:schema.info.name doc-name}}}
             {$set {:documents.$.body merged
                    :modified (:created command)}})
-          (ok))
+          (ok :old old-body :new new-body :merged merged))
         (fail :no_legacy_available)))))
