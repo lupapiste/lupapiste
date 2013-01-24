@@ -240,25 +240,28 @@
         legacy       (:legacy municipality)]
     (not (s/blank? legacy))))
 
+(defn get-legacy [municipality-id]
+  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})]
+    (:legacy municipality)))
+
 (defquery "merge-details-from-krysp"
   {:parameters [:id]
    :roles-in   [:applicant :authority]}
   [{{:keys [id]} :data :as command}]
   (with-application command
-    (fn [application]
-      (let [doc-name     "huoneisto"
-            municipality (:municipality application)
-            legacy       (:legacy (mongo/select-one :municipalities {:_id municipality}))
-            document     (domain/get-document-by-name application doc-name)
-            old-body     (:body document)
-            kryspxml     (krysp/building-info legacy "24500301050006")
-            new-body     (krysp/building-document kryspxml)
-            merged       (merge old-body new-body)]
-        (println merged)
-        (mongo/update
-          :applications
-          {:_id (:id application)
-           :documents {$elemMatch {:schema.info.name doc-name}}}
-          {$set {:documents.$.body merged
-                 :modified (:created command)}})
-        (ok)))))
+    (fn [{:keys [municipality] :as application}]
+      (if-let [legacy (get-legacy municipality)]
+        (let [doc-name     "huoneisto"
+              document     (domain/get-document-by-name application doc-name)
+              old-body     (:body document)
+              kryspxml     (krysp/building-info legacy "24500301050006")
+              new-body     (krysp/building-document kryspxml)
+              merged       (merge old-body new-body)]
+          (mongo/update
+            :applications
+            {:_id (:id application)
+             :documents {$elemMatch {:schema.info.name doc-name}}}
+            {$set {:documents.$.body merged
+                   :modified (:created command)}})
+          (ok))
+        (fail :no_legacy_available)))))
