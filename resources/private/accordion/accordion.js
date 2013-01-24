@@ -10,7 +10,9 @@ var accordion = (function() {
     e.stopPropagation();
     var target = $(e.target);
 
-    if (target.hasClass("font-icon")) target = target.parent();
+    if (target.is("span")) {
+      target = target.parent();
+    }
 
     var content = target.next();
 
@@ -30,11 +32,11 @@ var accordion = (function() {
         .attr("data-accordion-state", state)
         .animate({ height: height }, animationTime, animationEasing);
       setTimeout(function() { content.removeClass("content_expanded"); }, animationTime);
-      target.children().removeClass("icon-expanded").addClass("icon-collapsed");
+      target.children(".font-icon").removeClass("icon-expanded").addClass("icon-collapsed");
     } else {
       state = "open";
       content.addClass("content_expanded");
-      target.children().removeClass("icon-collapsed").addClass("icon-expanded");
+      target.children(".font-icon").removeClass("icon-collapsed").addClass("icon-expanded");
       content
         .attr("data-accordion-state", state)
         .animate({ height: height }, animationTime, animationEasing);

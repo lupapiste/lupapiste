@@ -12,7 +12,7 @@ LUPAPISTE.DOMUtils = {
   }
 };
 
-LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
+LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, appId) {
   "use strict";
 
   // Magic key: if schema contains "_selected" radioGroup,
@@ -23,7 +23,8 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
 
   self.spec = spec;
   self.model = model;
-  self.callback = callback;
+  self.saveCallback = saveCallback;
+  self.removeCallback = removeCallback;
   self.docId = docId;
   self.appId = appId;
   self.eventData = {doc: docId, app: appId};
@@ -239,7 +240,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     return partsDiv;
   }
 
-  function buildUnknown(spec, model, path, save, specId) {
+  function buildUnknown(spec, model, path) {
     error("Unknown element type:", spec.type, path);
     var div = document.createElement("div");
     div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
@@ -319,8 +320,11 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   function appendElements(body, schema, model, path, save, specId, partOfChoice) {
 
     function toggleSelectedGroup(value) {
-      $(body).children("[data-select-one-of]").hide();
-      $(body).children("[data-select-one-of='" + value + "']").show();
+      $(body)
+        .children("[data-select-one-of]")
+        .hide()
+        .filter("[data-select-one-of='" + value + "']")
+        .show();
     }
 
     var selectOneOf = getSelectOneOfDefinition(schema);
@@ -336,7 +340,7 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
             $(elem).hide();
           }
 
-          body.appendChild(elem)
+          body.appendChild(elem);
         });
     });
 
@@ -380,14 +384,12 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
           label.removeChild(loader);
         }
         $(target).removeClass("form-input-warn").removeClass("form-input-err");
-        if (status === "ok") {
-          // Nada.
-        } else if (status === "warn") {
+        if (status === "warn") {
           $(target).addClass("form-input-warn");
         } else if (status === "err") {
           $(target).addClass("form-input-err");
-        } else {
-          error("Unknown result:", result, "path:", path);
+        } else if (status !== "ok") {
+          error("Unknown status:", status, "path:", path);
         }
       }, eventData);
       // No return value or stoping the event propagation:
@@ -395,9 +397,19 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     };
   }
 
+  function removeThis() {
+    this.parent().slideUp(function() { $(this).remove(); });
+  }
+
+  function removeDoc(e) {
+    var n = $(e.target).parent();
+    self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.spec.info.name + "._group_label"), removeThis.bind(n));
+    return false;
+  }
+
   function buildElement() {
     var specId = self.spec.info.name;
-    var save = makeSaverDelegate(self.callback, self.eventData);
+    var save = makeSaverDelegate(self.saveCallback, self.eventData);
 
     var section = document.createElement("section");
     section.className = "application_section";
@@ -408,8 +420,16 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
     title.className = "application_section_header";
     title.appendChild(icon);
     title.appendChild(document.createTextNode(loc(specId + "._group_label")));
-
+    title.setAttribute("data-doc-id", self.docId);
+    title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.toggle;
+    if (self.spec.info.removable) {
+      $(title)
+        .append($("<button>")
+          .addClass("icon-remove")
+          .html("[X]")
+          .click(removeDoc));
+    }
 
     var sectionContainer = document.createElement("div");
     sectionContainer.className = "application_section_content content_expanded";
@@ -425,4 +445,5 @@ LUPAPISTE.DocModel = function(spec, model, callback, docId, appId) {
   }
 
   self.element = buildElement();
-}
+};
+

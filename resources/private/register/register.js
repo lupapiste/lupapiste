@@ -89,9 +89,10 @@
   }
 
   hub.onPageChange('register', function() {
-    $.get('/vetuma', {success: '/welcome#!/register2',
-                      cancel:  '/welcome#!/register/cancel',
-                      error:   '/welcome#!/register/error'}, function(d) {
+    var urlPrefix = "/" + loc.getCurrentLanguage() + "/welcome";
+    $.get('/vetuma', {success: urlPrefix + '#!/register2',
+                      cancel:  urlPrefix + '#!/register/cancel',
+                      error:   urlPrefix + '#!/register/error'}, function(d) {
       $('#vetuma-register')
         .html(d).find(':submit').addClass('btn btn-primary')
                                 .attr('value','Tunnistaudu')

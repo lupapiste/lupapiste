@@ -3,11 +3,15 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.attachment :only [create-attachment attachment-types-for]]
-        [lupapalvelu.document.commands :only [create-document]])
-  (:require [lupapalvelu.mongo :as mongo]
+        [lupapalvelu.operations :only [operation->initial-schema-names operation->initial-attachemnt-types operation->allowed-attachemnt-types]])
+  (:require [clojure.string :as s]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.env :as env]
             [lupapalvelu.tepa :as tepa]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]))
@@ -170,52 +174,57 @@
                       :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
                                        "rakennuspaikka" "uusiRakennus" "lisatiedot"]})
 
-(def default-attachments {:infoRequest []
-                          :buildingPermit (map (fn [[type-group type-id]] {:type-group type-group :type-id type-id})
-                                               [["paapiirustus" "asemapiirros"]
-                                                ["paapiirustus" "pohjapiirros"]
-                                                ["paapiirustus" "leikkauspiirros"]
-                                                ["paapiirustus" "julkisivupiirros"]
-                                                ["rakennuspaikka" "selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista"]
-                                                ["muut" "energiataloudellinen_selvitys"]])})
-
 (defcommand "create-application"
-  {:parameters [:permitType :x :y :address :propertyId :municipality]
+  {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
         id            (mongo/create-id)
         owner         (role user :owner :type :owner)
-        permit-type   (keyword (:permitType data))
-        operation     (keyword (:operation data))
-        info-request  (if (:infoRequest data) true false)]
+        op            (keyword (:operation data))
+        op-doc-id     (mongo/create-id)
+        info-request? (if (:infoRequest data) true false)
+        make-doc      (fn [schema-name] {:id (mongo/create-id)
+                                         :created created
+                                         :schema (schemas/schemas schema-name)
+                                         :body {}})
+        make-att      (fn [type-group type-id] {:id (mongo/create-id)
+                                                :type {:type-group type-group :type-id type-id}
+                                                :state :requires_user_action
+                                                :modified created
+                                                :versions []})]
     (mongo/insert :applications
-      {:id id
-       :created created
-       :modified created
-       :state (if info-request :open :draft)
-       :municipality (:municipality data)
-       :location {:x (:x data) :y (:y data)}
-       :address (:address data)
-       :propertyId (:propertyId data)
-       :title (:address data)
-       :roles {:applicant owner}
-       :auth [owner]
-       :infoRequest info-request
-       :permitType permit-type
-       :operations (if operation [operation] [])
-       :allowedAttachmentTypes (if info-request [[:muut [:muu]]] (attachment-types-for operation))
-       :documents (map #(create-document (mongo/create-id) %) (:buildingPermit default-schemas))
-       :attachments []
-       :comments (if-let [message (:message data)]
-                   [{:text message
-                     :target  {:type "application"}
-                     :created created
-                     :user    (security/summary user)}]
-                   [])})
-    (doseq [attachment-type (default-attachments operation [])]
-      (info "Create attachment: [%s]: %s" id attachment-type)
-      (create-attachment id attachment-type created))
+      {:id            id
+       :created       created
+       :modified      created
+       :infoRequest   info-request?
+       :state         (if info-request? :open :draft)
+       :municipality  (:municipality data)
+       :location      {:x (:x data) :y (:y data)}
+       :address       (:address data)
+       :propertyId    (:propertyId data)
+       :title         (:address data)
+       :roles         {:applicant owner}
+       :auth          [owner]
+       :operations    [{:operation op :doc-id op-doc-id}]
+       :documents     (conj (map make-doc (operation->initial-schema-names op []))
+                            (update-in (make-doc "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
+                            (-> (make-doc (name op))
+                              (assoc :id op-doc-id)
+                              (update-in [:schema :info] merge {:op true :removable true})))
+       :attachments   (for [[group types] (partition 2 (operation->initial-attachemnt-types op []))
+                            kind types]
+                        (make-att group kind))
+       :allowedAttachmentTypes (if info-request?
+                                 [[:muut [:muu]]]
+                                 (partition 2 attachment/attachment-types))
+       :comments      (if-let [message (:message data)]
+                        [{:text message
+                          :target  {:type "application"}
+                          :created created
+                          :user    (security/summary user)}]
+                        [])
+       :permitType     (keyword (:permitType data))})
     (ok :id id)))
 
 (defcommand "add-operation"
@@ -226,4 +235,42 @@
   [command]
   (with-application command
     (fn [application]
-      (debug "Adding operation: id='%s', operation='%s'" (get-in command [:data :id]) (get-in command [:data :operation])))))
+      (let [data       (:data command)
+            id         (:id data)
+            op         (:operation data)
+            doc-id     (mongo/create-id)
+            operation  {:operation op :doc-id doc-id}
+            document   {:id doc-id
+                        :created (:created command)
+                        :schema (schemas/schemas op)
+                        :body {}}
+            document   (update-in document [:schema :info] merge {:op true :removable true})]
+        (mongo/update-by-id :applications id {$push {:operations operation
+                                                     :documents document}})))))
+
+(defn get-legacy [municipality-id]
+  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
+        legacy       (:legacy municipality)]
+    (when-not (s/blank? legacy) legacy)))
+
+(defquery "merge-details-from-krysp"
+  {:parameters [:id]
+   :roles-in   [:applicant :authority]}
+  [{{:keys [id]} :data :as command}]
+  (with-application command
+    (fn [{:keys [municipality] :as application}]
+      (if-let [legacy (get-legacy municipality)]
+        (let [doc-name     "huoneisto"
+              document     (domain/get-document-by-name application doc-name)
+              old-body     (:body document)
+              kryspxml     (krysp/building-info legacy "24500301050006")
+              new-body     (krysp/building-document kryspxml)
+              merged       (merge old-body new-body)]
+          (mongo/update
+            :applications
+            {:_id (:id application)
+             :documents {$elemMatch {:schema.info.name doc-name}}}
+            {$set {:documents.$.body merged
+                   :modified (:created command)}})
+          (ok :old old-body :new new-body :merged merged))
+        (fail :no_legacy_available)))))

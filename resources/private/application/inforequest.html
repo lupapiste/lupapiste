@@ -17,21 +17,21 @@
 
         <div class="application_summary_info">
           <div>
-            <p>Käsittelytunnus:</p>
+            <p data-bind="ltext: ''">Käsittelytunnus:</p>
             <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id" data-bind="text: id"></span>
           </div>
           <div data-bind="if: state">
-            <p>Tila:</p>
+            <p data-bind="ltext: ''">Tila:</p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
           </div>
           <div data-bind="with: $root.applicationModel.data">
-            <p>Luotu:</p>
+            <p data-bind="ltext: ''">Luotu:</p>
             <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
-              <p>Käsittelijä:</p>
+              <p data-bind="ltext: ''">Käsittelijä:</p>
               <span id="test-inforequest-assignee" class="application_summary_text">
 
                 <select id="inforequest-assignee-select"
@@ -55,20 +55,20 @@
     </div>
     <div class="sidebar">
       <aside class="instructions">
-        <h3>Ohje</h3>
-        <p>Tässä näkymässä voit käsitellä neuvontapyynnön tietoja.</p>
+        <h3 data-bind="ltext: ''">Ohje</h3>
+        <p data-bind="ltext: ''">Tässä näkymässä voit käsitellä neuvontapyynnön tietoja.</p>
       </aside>
     </div>
 
     <div class="container">
-      <p class="tab-info">Liitteet</p>
+      <p class="tab-info" data-bind="ltext: ''">Liitteet</p>
       <div data-bind="if: attachments().length">
 
         <table class="table">
           <tbody>
             <tr>
-              <th>Tiedosto</th>
-              <th>Muokattu</th>
+              <th data-bind="ltext: ''">Tiedosto</th>
+              <th data-bind="ltext: ''">Muokattu</th>
               <th></th>
             </tr>
             <!-- ko foreach: attachments -->
@@ -95,7 +95,7 @@
 
       </div>
       <div data-bind="ifnot: attachments().length">
-        <i>Ei liitteit&auml;</i>
+        <i data-bind="ltext: ''">Ei liitteit&auml;</i>
       </div>
       <button
           id="add-attachment"
@@ -107,7 +107,7 @@
     </div>
 
     <div class="container" data-bind="with: $root.comment">
-        <p class="tab-info"> Kysymys ja keskustelu.</p>
+        <p class="tab-info" data-bind="ltext: ''"> Kysymys ja keskustelu.</p>
         <div class="tab-wrapper">
           <table class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
@@ -118,7 +118,7 @@
             </tbody>
           </table>
           <form>
-            <h3>Kirjoita viesti:</h3>
+            <h3 data-bind="ltext: ''">Kirjoita viesti:</h3>
             <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
             <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
           </form>
