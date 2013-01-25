@@ -79,7 +79,7 @@
 (defn get-buildings [xml]
   (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
-(defn building-document [xml]
+(defn ->building [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
         body {:huoneistoTunnus
               {:huoneistonumero nil, :jakokirjain nil, :porras nil},

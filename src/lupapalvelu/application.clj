@@ -264,7 +264,7 @@
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
               kryspxml     (krysp/building-info legacy "24500301050006")
-              new-body     (krysp/building-document kryspxml)
+              new-body     (krysp/->building kryspxml)
               merged       (merge old-body new-body)]
           (mongo/update
             :applications
