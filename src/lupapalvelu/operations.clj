@@ -38,14 +38,14 @@
 (def ^:private common-schemas ["maksaja" "rakennuspaikka" "lisatiedot"])
 
 (def operations
-  {:asuinrakennus               {:schema "asuinrakennus"
+  {:asuinrakennus               {:schema "uusiRakennus"
                                  :required common-schemas
-                                 :attachments [:hakija [:valtakirja]
-                                               :rakennuspaikka [:ote_alueen_peruskartasta]
-                                               :paapiirustus [:asemapiirros
-                                                              :pohjapiirros
-                                                              :julkisivupiirros]
-                                               :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]}
+                                 :attachments [:hakija [:valtakirja
+                                                        :rakennuspaikka [:ote_alueen_peruskartasta]
+                                                        :paapiirustus [:asemapiirros
+                                                                       :pohjapiirros
+                                                                       :julkisivupiirros]
+                                                        :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]]}
    :vapaa-ajan-asuinrakennus    {:schema "vapaa-ajan-asuinrakennus"
                                  :required common-schemas
                                  :attachments []}
@@ -58,7 +58,7 @@
    :muu-uusi-rakentaminen       {:schema "muu-uusi-rakentaminen"
                                  :required common-schemas
                                  :attachments []}
-   :laajentaminen               {:schema "laajentaminen"
+   :laajentaminen               {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
    :kayttotark-muutos           {:schema "kayttotark-muutos"
