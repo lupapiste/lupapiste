@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page" id="create-inforequest">
+
+    <div class="breadcrumb">
+      <a href="#!/inforequests" id="test-inforequests" data-bind="ltext: 'infoRequests'">Neuvontapyynnöt</a> / <span>Uusi neuvontapyyntö</span>
+    </div>
+
+    <h1 data-bind="ltext: ''">Uusi neuvontapyyntö 1/3</h1>
+
+    <p data-bind="ltext: ''">
+      Määritä hankkeen sijainti valitsemalla paikka kartalta tai
+      antamalla alla olevaan kenttään osoite tai kiinteistötunnus.
+    </p>
+
+    <div id="create-inforequest-map" class="map map-large create-application-map" style="width: 848px; height: 400px;">
+      <div class="create-application-search-box-container">
+        <div class="create-application-search-box">
+          <input data-bind="value: search, valueUpdate: 'afterkeydown'" type="text" class="form-input text address-search" data-test-id="create-inforequest-address-search"/>
+          <button data-bind="ltext: 'search', click: doSearch" class="btn btn-primary map-search-button" data-test-id="create-inforequest-do-search">Hae</button>
+        </div>
+      </div>
+    </div>
+    <div class="form-container create-application-details">
+      <h3 data-bind="ltext: ''">Hankkeen tiedot:</h3>
+
+      <div>
+        <div class="label-container">
+          <label data-bind="ltext: ''" >Osoite:</label>
+        </div>
+        <input data-test-id="create-inforequest-address" type="text" class="form-input text long create-application-form" data-bind="value: address, valueUpdate: 'afterkeydown'"></input>
+      </div>
+
+      <div>
+        <div class="label-container">
+          <label data-bind="ltext: ''">Kunta: </label>
+        </div>
+        <select id="create-inforequest-municipality-select"
+                class="form-input long create-application-form"
+                data-bind="options: municipalities,
+                           optionsText: function(item) {
+                            return item.nameFin;
+                           },
+                           optionsValue: 'municipalityCode',
+                           value: municipalityCode,
+                           optionsCaption: loc('choose')"></select>
+      </div>
+
+    <div>
+        <div class="label-container">
+          <label data-bind="ltext: ''">Kiinteistötunnus: </label>
+        </div>
+        <input id="create-inforequest-property-id" type="text" class="form-input text long create-application-form" data-bind="value: propertyId, valueUpdate: 'afterkeydown'"></input>
+    </div>
+
+      <div class="create-application-actions">
+        <a data-bind="ltext: 'cancel'" href="#!/inforequests" class="btn-link btn-wizard btn-create-application">Peruuta</a>
+        <button
+            class="btn btn-primary application-create btn-wizard"
+            data-bind="ltext: 'continue', click: submit, enable: ok"
+            data-test-id="test-inforequest-create-continue">
+      Jatka
+    </button>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
