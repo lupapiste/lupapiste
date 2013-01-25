@@ -87,7 +87,7 @@
     (count roles-before-assignation) => 1
     (count roles-in-the-end) => 1))
 
-(fact "Assert that proper documents are created"
+#_(fact "Assert that proper documents are created"
   (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
                       (operations/operations :bar) => {:schema "bar" :required ["b" "c"] :attachments []}
                       (schemas/schemas "hakija") => {:info {:name "hakija"}, :body []}
