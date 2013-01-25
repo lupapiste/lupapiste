@@ -18,4 +18,7 @@
   (let [translations {:a :A :b :B}]
     (fact (translate translations :a) => :A)
     (fact (translate translations :c) => nil)
-    (fact (translate translations :c :nils true) => :c)))
+    (fact (translate translations :c :nils true) => :c)
+
+    (fact (translate-keys translations {:a 1 :b 2}) => {:A 1 :B 2})
+    (fact (translate-keys translations {:a 1 :c 2}) => {:A 1})))

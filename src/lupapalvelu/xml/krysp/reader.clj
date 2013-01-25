@@ -64,14 +64,20 @@
                    :aanestysalue nil
                    :rakennusnro :buildingId})
 
-(defn translate [m k & {:keys [nils] :or {nils false}}]
-  (or (m k) (and nils k) nil))
+(defn translate
+  [dictionary k & {:keys [nils] :or {nils false}}]
+  (or (dictionary k) (and nils k) nil))
 
-(defn translate-keys [m]
-  (postwalk-map (partial map (fn [[k v]] [(translate k translations) v])) m))
+(defn translate-keys [dictionary m]
+  (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
+
+(defn ->buildingIds [m]
+  {:building
+   {:propertyId (get-in m [:rakennustunnus :kiinttun])
+    :buildingId (get-in m [:rakennustunnus :rakennusnro])}})
 
 (defn get-buildings [xml]
-  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp strip-keys xml->edn translate-keys)))))
+  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
 (defn building-document [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
