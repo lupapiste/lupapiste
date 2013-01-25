@@ -20,21 +20,8 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
-
-  /**
-   * Complete the App initialization after DOM is loaded.
-   */
-  this.domReady = function() {
-    $(window).hashchange(self.hashChanged);
-    $(window).hashchange();
-    $(window).unload(self.unload);
-
-    self.connectionCheck();
-
-    if (typeof LUPAPISTE.ModalDialog !== "undefined") {
-      LUPAPISTE.ModalDialog.init();
-    }
-
+  
+  this.createNaviLinks = function() {
     var naviLinks = $("<span>").attr("id", "navi-right");
 
     _.each(loc.getSupportedLanguages(), function(lang) {
@@ -54,8 +41,24 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
         .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
         .text(loc("logout")));
     }
+    return naviLinks;
+  };  
+  
+  /**
+   * Complete the App initialization after DOM is loaded.
+   */
+  this.domReady = function() {
+    $(window).hashchange(self.hashChanged);
+    $(window).hashchange();
+    $(window).unload(self.unload);
 
-    $("nav").append(naviLinks);
+    self.connectionCheck();
+
+    if (typeof LUPAPISTE.ModalDialog !== "undefined") {
+      LUPAPISTE.ModalDialog.init();
+    }
+
+    $("nav").append(createNaviLinks());
   };
   $(this.domReady);
 
