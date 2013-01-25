@@ -14,6 +14,7 @@
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
+            [lupapalvelu.municipality :as municipality]
             [lupapalvelu.util :as util]))
 
 ;;
@@ -248,10 +249,9 @@
         (mongo/update-by-id :applications id {$push {:operations operation
                                                      :documents document}})))))
 
-(defn get-legacy [municipality-id]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
-        legacy       (:legacy municipality)]
-    (when-not (s/blank? legacy) legacy)))
+;;
+;; krysp enrichment
+;;
 
 (defquery "merge-details-from-krysp"
   {:parameters [:id]
@@ -259,7 +259,7 @@
   [{{:keys [id]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
-      (if-let [legacy (get-legacy municipality)]
+      (if-let [legacy (municipality/get-legacy municipality)]
         (let [doc-name     "huoneisto"
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
@@ -274,3 +274,15 @@
                    :modified (:created command)}})
           (ok :old old-body :new new-body :merged merged))
         (fail :no_legacy_available)))))
+
+(defquery "get-building-info-from-legacy"
+  {:parameters [:propertyId]
+   ;;:authenticated true
+   }
+  [{{:keys [propertyId]} :data}]
+  (let [municipality  (municipality/municipality-by-propertyId propertyId)]
+    (if-let [legacy   (municipality/get-legacy municipality)]
+      (let [kryspxml  (krysp/building-info legacy propertyId)
+            buildings (krysp/get-buildings kryspxml)]
+        (ok :data buildings))
+      (fail :no_legacy_available))))
