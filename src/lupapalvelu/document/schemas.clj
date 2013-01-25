@@ -283,6 +283,14 @@
 
 (def rakennuksen-muuttaminen (into muutostyonlaji (into rakennuksen-omistajat rakennuksen-tiedot)))
 
+(def purku (into [{:name "poistumanSyy" :type :select
+                   :body [{:name "purettu uudisrakentamisen vuoksi"}
+                          {:name "purettu muusta syyst\u00e4"}
+                          {:name "tuhoutunut"}
+                          {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                          {:name "poistaminen"}]}
+                  {:name "poistumanAjankohta" :type :string}] (into rakennuksen-omistajat rakennuksen-tiedot)))
+
 (def schemas
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
@@ -290,6 +298,9 @@
 
      {:info {:name "rakennuksen-muuttaminen"}
       :body rakennuksen-muuttaminen}
+
+     {:info {:name "purku"}
+      :body purku}
 
      {:info {:name "hakija" :repeating true}
       :body party-body}
@@ -327,9 +338,9 @@
 
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
-     
+
      ; Rest are templates for future. Just guessing...
-     
+
      {:info {:name "asuinrakennus"}
       :body [{:name "foo" :type :string}]}
      {:info {:name "vapaa-ajan-asuinrakennus"}
