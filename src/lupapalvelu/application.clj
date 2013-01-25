@@ -170,10 +170,6 @@
           {$set {:comments (:comments inforequest)}})
         (ok :id id)))))
 
-(def default-schemas {:infoRequest []
-                      :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
-                                       "rakennuspaikka" "uusiRakennus" "lisatiedot"]})
-
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
