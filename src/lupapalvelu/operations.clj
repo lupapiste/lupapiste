@@ -103,7 +103,7 @@
    :muu-rakentaminen            {:schema "muu-rakentaminen"
                                  :required common-schemas
                                  :attachments []}
-   :purkaminen                  {:schema "purkaminen"
+   :purkaminen                  {:schema "purku"
                                  :required common-schemas
                                  :attachments []}
    :kaivuu                      {:schema "kaivuu"
