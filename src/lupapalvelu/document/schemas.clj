@@ -283,7 +283,12 @@
 
 (def rakennuksen-muuttaminen (into muutostyonlaji (into rakennuksen-omistajat rakennuksen-tiedot)))
 
-(def purku (into [{:name "poistumanSyy" :type :string}
+(def purku (into [{:name "poistumanSyy" :type :select
+                   :body [{:name "purettu uudisrakentamisen vuoksi"}
+                          {:name "purettu muusta syyst\u00e4"}
+                          {:name "tuhoutunut"}
+                          {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                          {:name "poistaminen"}]}
                   {:name "poistumanAjankohta" :type :string}] (into rakennuksen-omistajat rakennuksen-tiedot)))
 
 (def schemas
