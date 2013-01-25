@@ -78,6 +78,9 @@
                               :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
                               :muu]])
 
+(defn municipality-attachments [municipality]
+  attachment-types)
+
 ;;
 ;; Upload
 ;;
