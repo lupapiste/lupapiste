@@ -42,15 +42,44 @@
           (-> url (http/get {:query-param {:request :GetCapabilities} :throw-exceptions false}) :status (= 200))
           (catch Exception e false)))
 
+(defn building-xml [server id]
+  (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")
+        raw (:body (http/get url))
+        xml (parse raw)]
+    xml))
+
+;;
+;; don't use this, deprecated
+;;
+
 (defn building-info [server id]
-  (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
-    (-> url parse xml->edn strip-keys)))
+  (-> (building-xml server id) xml->edn strip-keys))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
-(defn building-document [xml]
+(def translations {:rakennustunnus :building
+                   :kiinttun :propertyId
+                   :aanestysalue nil
+                   :rakennusnro :buildingId})
+
+(defn translate
+  [dictionary k & {:keys [nils] :or {nils false}}]
+  (or (dictionary k) (and nils k) nil))
+
+(defn translate-keys [dictionary m]
+  (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
+
+(defn ->buildingIds [m]
+  {:building
+   {:propertyId (get-in m [:rakennustunnus :kiinttun])
+    :buildingId (get-in m [:rakennustunnus :rakennusnro])}})
+
+(defn get-buildings [xml]
+  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
+
+(defn ->building [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
         body {:huoneistoTunnus
               {:huoneistonumero nil, :jakokirjain nil, :porras nil},
