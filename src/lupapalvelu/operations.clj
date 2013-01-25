@@ -2,7 +2,7 @@
 
 (def default-description "Hankkeesi vaatii todenn\u00E4k\u00F6isesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa my\u00F6s tutustua alla listattuihin sivustoihin, joilta l\u00F6yd\u00E4t lis\u00E4\u00E4 tietoa rakennusvalvonnasta. Voit my\u00F6s kysy\u00E4 lis\u00E4\u00E4 aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekem\u00E4ll\u00E4 neuvontapyynn\u00F6n.")
 
-(def operations-data
+(def ^:private operations-tree
   [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" {:op :asuinrakennus :text default-description}]
                                                                      ["Vapaa-ajan asuinrakennus" {:op :vapaa-ajan-asuinrakennus :text default-description}]
                                                                      ["Varasto, sauna, autotalli tai muu talousrakennus" {:op :varasto-tms :text default-description}]
@@ -28,70 +28,90 @@
                                     ["Puun kaataminen" {:op :puun-kaataminen :text default-description}]
                                     ["Muu" {:op :muu-maisema-toimenpide :text default-description}]]]])
 
-(defn operations [municipality]
+(defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
-  operations-data)
+  operations-tree)
 
-; Just guessing...
+; Operations must be the same as in the tree structure above.
+; Mappings to schemas and attachments are currently random.
+
 (def ^:private common-schemas ["maksaja" "rakennuspaikka" "lisatiedot"])
 
-; Just guessing...
-(def operation->initial-schema-names
-  {:asuinrakennus (concat common-schemas ["paasuunnittelija" "suunnittelija"])
-   :vapaa-ajan-asuinrakennus (concat common-schemas ["suunnittelija"])
-   :varasto-tms common-schemas
-   :julkinen-rakennus common-schemas
-   :muu-uusi-rakentaminen common-schemas
-   :laajentaminen common-schemas
-   :kayttotark-muutos common-schemas
-   :julkisivu-muutos common-schemas
-   :jakaminen-tai-yhdistaminen common-schemas
-   :markatilan-laajentaminen common-schemas
-   :takka-tai-hormi common-schemas
-   :parveke-tai-terassi common-schemas
-   :muu-laajentaminen common-schemas
-   :auto-katos common-schemas
-   :masto-tms common-schemas
-   :mainoslaite common-schemas
-   :aita common-schemas
-   :maalampo common-schemas
-   :jatevesi common-schemas
-   :muu-rakentaminen common-schemas
-   :purkaminen common-schemas
-   :kaivuu common-schemas
-   :puun-kaataminen common-schemas
-   :muu-maisema-toimenpide common-schemas})
-
-(def operation->initial-attachemnt-types
-  {:asuinrakennus [:hakija [:valtakirja]
-                   :rakennuspaikka [:ote_alueen_peruskartasta]
-                   :paapiirustus [:asemapiirros
-                                  :pohjapiirros
-                                  :julkisivupiirros]
-                   :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]})
-
-(def operation->allowed-attachemnt-types
-  {:asuinrakennus [:hakija [:valtakirja]
-                   :rakennuspaikka [:ote_alueen_peruskartasta
-                                    :tonttikartta_tarvittaessa]
-                   :paapiirustus [:asemapiirros
-                                  :pohjapiirros
-                                  :julkisivupiirros]
-                   :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
-                                               :suunnittelutarveratkaisu
-                                               :ymparistolupa]
-                   :muut [:selvitys_liittymisesta_ymparoivaan_rakennuskantaan
-                          :julkisivujen_varityssuunnitelma
-                          :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
-                          :energiataloudellinen_selvitys
-                          :paloturvallisuussuunnitelma
-                          :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
-                          :selvitys_kiinteiston_jatehuollon_jarjestamisesta
-                          :rakennesuunnitelma
-                          :ilmanvaihtosuunnitelma
-                          :lammityslaitesuunnitelma
-                          :radontekninen_suunnitelma
-                          :kalliorakentamistekninen_suunnitelma
-                          :paloturvallisuusselvitys
-                          :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-                          :muu]]})
+(def operations
+  {:asuinrakennus               {:schema "uusiRakennus"
+                                 :required common-schemas
+                                 :attachments [:hakija [:valtakirja
+                                                        :rakennuspaikka [:ote_alueen_peruskartasta]
+                                                        :paapiirustus [:asemapiirros
+                                                                       :pohjapiirros
+                                                                       :julkisivupiirros]
+                                                        :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]]}
+   :vapaa-ajan-asuinrakennus    {:schema "vapaa-ajan-asuinrakennus"
+                                 :required common-schemas
+                                 :attachments []}
+   :varasto-tms                 {:schema "varasto-tms"
+                                 :required common-schemas
+                                 :attachments []}
+   :julkinen-rakennus           {:schema "julkinen-rakennus"
+                                 :required common-schemas
+                                 :attachments []}
+   :muu-uusi-rakentaminen       {:schema "muu-uusi-rakentaminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :laajentaminen               {:schema "rakennuksen-muuttaminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :kayttotark-muutos           {:schema "kayttotark-muutos"
+                                 :required common-schemas
+                                 :attachments []}
+   :julkisivu-muutos            {:schema "julkisivu-muutos"
+                                 :required common-schemas
+                                 :attachments []}
+   :jakaminen-tai-yhdistaminen  {:schema "jakaminen-tai-yhdistaminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :markatilan-laajentaminen    {:schema "markatilan-laajentaminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :takka-tai-hormi             {:schema "takka-tai-hormi"
+                                 :required common-schemas
+                                 :attachments []}
+   :parveke-tai-terassi         {:schema "parveke-tai-terassi"
+                                 :required common-schemas
+                                 :attachments []}
+   :muu-laajentaminen           {:schema "muu-laajentaminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :auto-katos                  {:schema "auto-katos"
+                                 :required common-schemas
+                                 :attachments []}
+   :masto-tms                   {:schema "masto-tms"
+                                 :required common-schemas
+                                 :attachments []}
+   :mainoslaite                 {:schema "mainoslaite"
+                                 :required common-schemas
+                                 :attachments []}
+   :aita                        {:schema "aita"
+                                 :required common-schemas
+                                 :attachments []}
+   :maalampo                    {:schema "maalampo"
+                                 :required common-schemas
+                                 :attachments []}
+   :jatevesi                    {:schema "jatevesi"
+                                 :required common-schemas
+                                 :attachments []}
+   :muu-rakentaminen            {:schema "muu-rakentaminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :purkaminen                  {:schema "purkaminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :kaivuu                      {:schema "kaivuu"
+                                 :required common-schemas
+                                 :attachments []}
+   :puun-kaataminen             {:schema "puun-kaataminen"
+                                 :required common-schemas
+                                 :attachments []}
+   :muu-maisema-toimenpide      {:schema "muu-maisema-toimenpide"
+                                 :required common-schemas
+                                 :attachments []}})

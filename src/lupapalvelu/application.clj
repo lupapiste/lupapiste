@@ -2,8 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.operations :only [operation->initial-schema-names operation->initial-attachemnt-types operation->allowed-attachemnt-types]])
+        [lupapalvelu.action :only [application-query-for get-application-as]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.env :as env]
@@ -15,7 +14,9 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
-            [lupapalvelu.util :as util]))
+            [lupapalvelu.util :as util]
+            [lupapalvelu.util :as util]
+            [lupapalvelu.operations :as operations]))
 
 ;;
 ;; Meta-fields:
@@ -171,10 +172,29 @@
           {$set {:comments (:comments inforequest)}})
         (ok :id id)))))
 
-(def default-schemas {:infoRequest []
-                      :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
-                                       "rakennuspaikka" "uusiRakennus" "lisatiedot"]})
+(defn- make-attachments [created op]
+  (for [[type-group type-ids] (partition 2 (:attachments (operations/operations op)))
+        type-id type-ids]
+    {:id (mongo/create-id)
+     :type {:type-group type-group :type-id type-id}
+     :state :requires_user_action
+     :modified created
+     :versions []}))
 
+(defn- make-documents [user created existing-documents op]
+  (let [make (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
+        op-info               (operations/operations op)
+        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+        required-schema-names (filter (complement existing-schema-names) (:required op-info))
+        required-docs         (map make required-schema-names)
+        op-schema-name        (:schema op-info)
+        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        new-docs              (cons op-doc required-docs)]
+    (if user
+      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user)) new-docs)
+      new-docs)))
+
+(schemas/schemas "asuinrakennus")
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
@@ -183,17 +203,7 @@
         id            (mongo/create-id)
         owner         (role user :owner :type :owner)
         op            (keyword (:operation data))
-        op-doc-id     (mongo/create-id)
-        info-request? (if (:infoRequest data) true false)
-        make-doc      (fn [schema-name] {:id (mongo/create-id)
-                                         :created created
-                                         :schema (schemas/schemas schema-name)
-                                         :body {}})
-        make-att      (fn [type-group type-id] {:id (mongo/create-id)
-                                                :type {:type-group type-group :type-id type-id}
-                                                :state :requires_user_action
-                                                :modified created
-                                                :versions []})]
+        info-request? (if (:infoRequest data) true false)]
     (mongo/insert :applications
       {:id            id
        :created       created
@@ -207,15 +217,8 @@
        :title         (:address data)
        :roles         {:applicant owner}
        :auth          [owner]
-       :operations    [{:operation op :doc-id op-doc-id}]
-       :documents     (conj (map make-doc (operation->initial-schema-names op []))
-                            (update-in (make-doc "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
-                            (-> (make-doc (name op))
-                              (assoc :id op-doc-id)
-                              (update-in [:schema :info] merge {:op true :removable true})))
-       :attachments   (for [[group types] (partition 2 (operation->initial-attachemnt-types op []))
-                            kind types]
-                        (make-att group kind))
+       :documents     (make-documents user created nil op)
+       :attachments   (make-attachments created op)
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types))
@@ -236,18 +239,12 @@
   [command]
   (with-application command
     (fn [application]
-      (let [data       (:data command)
-            id         (:id data)
-            op         (:operation data)
-            doc-id     (mongo/create-id)
-            operation  {:operation op :doc-id doc-id}
-            document   {:id doc-id
-                        :created (:created command)
-                        :schema (schemas/schemas op)
-                        :body {}}
-            document   (update-in document [:schema :info] merge {:op true :removable true})]
-        (mongo/update-by-id :applications id {$push {:operations operation
-                                                     :documents document}})))))
+      (let [id         (get-in command [:data :id])
+            created    (:created command)
+            documents  (:documents application)
+            op         (keyword (get-in command [:data :operation]))
+            new-docs   (make-documents nil created documents op)]
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}})))))
 
 ;;
 ;; krysp enrichment
