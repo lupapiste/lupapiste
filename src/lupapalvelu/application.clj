@@ -15,7 +15,6 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
             [lupapalvelu.util :as util]
-            [lupapalvelu.util :as util]
             [lupapalvelu.operations :as operations]))
 
 ;;
