@@ -96,7 +96,7 @@
   $(function() {
 
     addressModel.setMap(gis.makeMap("create-inforequest-map").center(404168, 6840000, 1));
-    ko.applyBindings(addressModel, $("#create-inforequest")[0]);
+    ko.applyBindings(addressModel, $("#create")[0]);
     $("#create-inforequest-search").autocomplete({
       serviceUrl:      "/proxy/find-address",
       deferRequestBy:  500,
