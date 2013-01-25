@@ -44,7 +44,8 @@
 
 (defn building-xml [server id]
   (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")
-        xml (parse url)]
+        raw (:body (http/get url))
+        xml (parse raw)]
     xml))
 
 ;;
@@ -52,7 +53,7 @@
 ;;
 
 (defn building-info [server id]
-  (-> (building-xml server id) parse xml->edn strip-keys))
+  (-> (building-xml server id) xml->edn strip-keys))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
