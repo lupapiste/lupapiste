@@ -59,8 +59,19 @@
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
+(def translations {:rakennustunnus :building
+                   :kiinttun :propertyId
+                   :aanestysalue nil
+                   :rakennusnro :buildingId})
+
+(defn translate [m k & {:keys [nils] :or {nils false}}]
+  (or (m k) (and nils k) nil))
+
+(defn translate-keys [m]
+  (postwalk-map (partial map (fn [[k v]] [(translate k translations) v])) m))
+
 (defn get-buildings [xml]
-  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp strip-keys xml->edn)))))
+  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp strip-keys xml->edn translate-keys)))))
 
 (defn building-document [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
