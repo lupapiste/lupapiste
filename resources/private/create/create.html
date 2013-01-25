@@ -4,68 +4,109 @@
   <section class="page" id="create">
 
     <div class="breadcrumb">
-      <a href="#!/all-applications" id="test-inforequests" data-bind="ltext: 'request.requests'">Hakemukset</a>
+      <a href="#!/all-applications" id="test-inforequests" data-bind="ltext: 'request.requests'"></a>
       /
       <span data-bind="ltext: 'request.new'"></span>
     </div>
 
-    <h1 data-bind="ltext: 'request.createNew'"></h1>
+    <h1 data-bind="ltext: 'newRequest.title'"></h1>
 
-    <p data-bind="ltext: ''">
-      Määritä hankkeen sijainti valitsemalla paikka kartalta tai
-      antamalla alla olevaan kenttään osoite tai kiinteistötunnus.
-    </p>
+    <p data-bind="ltext: 'newRequest.locationInfo'"></p>
 
     <div id="create-inforequest-map" class="map map-large create-application-map" style="width: 848px; height: 400px;">
       <div class="create-application-search-box-container">
         <div class="create-application-search-box">
-          <input data-bind="value: search, valueUpdate: 'afterkeydown'" type="text" class="form-input text address-search" data-test-id="create-inforequest-address-search"/>
-          <button data-bind="ltext: 'search', click: doSearch" class="btn btn-primary map-search-button" data-test-id="create-inforequest-do-search">Hae</button>
+          <input data-bind="value: search.search, valueUpdate: 'afterkeydown'" type="text" class="form-input text address-search" data-test-id="create-inforequest-address-search"/>
+          <button data-bind="click: search.doSearch, ltext: 'search'" class="btn btn-primary map-search-button" data-test-id="create-inforequest-do-search">Hae</button>
         </div>
       </div>
     </div>
+    
     <div class="form-container create-application-details">
-      <h3 data-bind="ltext: ''">Hankkeen tiedot:</h3>
+      <h3 data-bind="ltext: 'newRequest.location'"></h3>
 
       <div>
         <div class="label-container">
-          <label data-bind="ltext: ''" >Osoite:</label>
+          <label data-bind="ltext: 'newRequest.address'"></label>
         </div>
-        <input data-test-id="create-inforequest-address" type="text" class="form-input text long create-application-form" data-bind="value: address, valueUpdate: 'afterkeydown'"></input>
+        <input
+          data-bind="value: address, valueUpdate: 'afterkeydown'"
+          data-test-id="create-inforequest-address"
+          type="text"
+          class="form-input text long create-application-form">
       </div>
 
       <div>
         <div class="label-container">
-          <label data-bind="ltext: ''">Kunta: </label>
+          <label data-bind="ltext: 'newRequest.municipality'"></label>
         </div>
-        <select id="create-inforequest-municipality-select"
-                class="form-input long create-application-form"
-                data-bind="options: municipalities,
-                           optionsText: function(item) {
-                            return item.nameFin;
-                           },
-                           optionsValue: 'municipalityCode',
-                           value: municipalityCode,
-                           optionsCaption: loc('choose')"></select>
+        <select id="create-inforequest-municipality-select" class="form-input long create-application-form"
+          data-bind="options: search.municipalities,
+                     optionsText: function(item) { return item.nameFin; },
+                     optionsValue: 'search.municipalityCode',
+                     value: search.municipalityCode,
+                     optionsCaption: loc('choose')">
+        </select>
       </div>
 
-    <div>
+      <div>
         <div class="label-container">
-          <label data-bind="ltext: ''">Kiinteistötunnus: </label>
+          <label data-bind="ltext: 'newRequest.propertyId'"></label>
         </div>
-        <input id="create-inforequest-property-id" type="text" class="form-input text long create-application-form" data-bind="value: propertyId, valueUpdate: 'afterkeydown'"></input>
-    </div>
+        <input
+          data-bind="value: search.propertyId, valueUpdate: 'afterkeydown'"
+          data-test-id="create-inforequest-property-id"
+          type="text"
+          class="form-input text long create-application-form"></input>
+      </div>
 
       <div class="create-application-actions">
-        <a data-bind="ltext: 'cancel'" href="#!/inforequests" class="btn-link btn-wizard btn-create-application">Peruuta</a>
         <button
+            data-bind="click: showPart2.bind($data, true), enable: search.ok, ltext: 'continue'"
             class="btn btn-primary application-create btn-wizard"
-            data-bind="ltext: 'continue', click: submit, enable: ok"
             data-test-id="test-inforequest-create-continue">
-      Jatka
-    </button>
+        </button>
       </div>
     </div>
+    
+    <!-- Phase 2: -->
+    
+    <div data-binb="visible: showPart2" class="form-container create-application-details">
+      <h2 data-bind="ltext: 'newRequest.descTitle'"></h2>
+      <p data-bind="ltext: 'newRequest.descInfo'"></p>
+
+      <div class="tree" data-bind="visible: operations">
+        <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
+        <div class="tree-content">
+        </div>
+      </div>
+      <div class="tree" data-bind="visible: !operations()">
+        <img src="/img/ajax-loader.gif"/>
+      </div>
+
+      <form data-bind="visible: showCreateButtons" class="tree-width">
+        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'" class="btn btn-primary btn-wizard" data-test-id="test-create-inforequest-btn"></button>
+        <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" class="btn btn-primary btn-wizard" data-test-id="test-create-application-btn"></button>
+      </form>
+
+      <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
+        <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
+        <textarea
+            class="form-input tree-width"
+            data-bind="value: message, valueUpdate: 'afterkeydown'"
+            rows="3"
+            placeholder="Hankkeen oleelliset tiedot, kuten käyttötarkoitus, rakennuksen koko, jne."
+            data-test-id="test-create-inforequest-message">
+        </textarea>
+        <button
+            data-bind="click: createInfoRequest, enable: message().length > 0"
+            class="btn btn-primary"
+            data-test-id="test-create-inforequest-create-inforequest">
+          Kysy neuvoa
+        </button>
+      </form>
+    </div>
+    
   </section>
 </body>
 </html>
