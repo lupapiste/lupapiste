@@ -26,8 +26,15 @@
 
    :debug        (if (env/dev-mode?) debugjs {})
 
-   :common       {:depends [:init :jquery :knockout :underscore :debug]
-                  :js ["event.js" "pageutil.js" "loc.js" "notify.js" "ajax.js"
+   :i18n         {:depends [:jquery :underscore]
+                  :js (into ["loc.js"]
+                            (flatten
+                              (for [lang ["fi" "sv"]]
+                                (for [file ["common", "docgen", "applications", "attachments", "welcome", "mypage"]]
+                                  (str file "_" lang ".js")))))}
+
+   :common       {:depends [:init :jquery :knockout :underscore :debug :i18n]
+                  :js ["event.js" "pageutil.js" "notify.js" "ajax.js"
                        "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"
                        "address.js"]
