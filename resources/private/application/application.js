@@ -247,15 +247,25 @@
     isInitializing = true;
     debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
+      
       // new data mapping
+      
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
-      // comments
+      // Operations:
+      
+      // FIXME: scan from documents
+      application.operations([{operation: "foo"}, {operation: "bar"}]);
+      
+      // Comments:
+      
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
 
+      // Attachments:
+      
       var statuses = {
         requires_user_action: "missing",
         requires_authority_action: "new",
