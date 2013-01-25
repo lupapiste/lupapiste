@@ -192,7 +192,6 @@
       (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user)) new-docs)
       new-docs)))
 
-(schemas/schemas "asuinrakennus")
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
