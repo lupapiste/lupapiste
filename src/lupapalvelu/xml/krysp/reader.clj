@@ -42,13 +42,24 @@
           (-> url (http/get {:query-param {:request :GetCapabilities} :throw-exceptions false}) :status (= 200))
           (catch Exception e false)))
 
+(defn building-xml [server id]
+  (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")
+        xml (parse url)]
+    xml))
+
+;;
+;; don't use this, deprecated
+;;
+
 (defn building-info [server id]
-  (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
-    (-> url parse xml->edn strip-keys)))
+  (-> (building-xml server id) parse xml->edn strip-keys))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
+
+(defn get-buildings [xml]
+  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp strip-keys xml->edn)))))
 
 (defn building-document [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
