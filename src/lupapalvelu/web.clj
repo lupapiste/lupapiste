@@ -256,6 +256,31 @@
     {:status 401}))
 
 ;;
+;; jQuery dataTables support:
+;;
+
+
+(defn make-row [x]
+  {"DT_RowId" (str "app-id-" x)
+   "DT_RowClass" (if (odd? x) "application" "inforequest")
+   "0" (str "a" x)
+   "1" (str "b" x)
+   "2" (str "c" x)
+   "3" (str "d" x)
+   "4" (str "e" x)
+   "5" (str "f" x)
+   "6" (str "g" x)
+   "7" (str "j" x)})
+
+(defpage "/api/applications" []
+  (->> {:sEcho ((:query-params (request/ring-request)) "sEcho")
+        :iTotalRecords 20
+        :iTotalDisplayRecords 10,
+        :aaData (map make-row (range 10))}
+    (resp/json)
+    (resp/status 200)))
+
+;;
 ;; dev utils:
 ;;
 
