@@ -2,7 +2,8 @@
   (:use sade.xml)
   (:require [clojure.string :as s]
             [sade.client :as client]
-            [clojure.walk :refer [postwalk]]
+            [clojure.walk :refer [postwalk postwalk-demo]]
+            [lupapalvelu.document.schemas :as schema]
             [clj-http.client :as http]))
 
 ;;
@@ -59,6 +60,14 @@
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
+(defn sample-)
+(defn sample [schema]
+  (postwalk-map (fn [m] {:name (:name m)}) schema))
+
+;;
+;;
+;;
+
 (def translations {:rakennustunnus :building
                    :kiinttun :propertyId
                    :aanestysalue nil
@@ -78,6 +87,93 @@
 
 (defn get-buildings [xml]
   (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
+
+(defn ->rakennuksen-muttaminen [xml]
+  {:verkostoliittymat
+   {:kaapeliKytkin nil
+    :maakaasuKytkin nil
+    :sahkoKytkin nil
+    :vesijohtoKytkin nil
+    :viemariKytkin nil}
+   :rakennuksenOmistajat
+   {:0
+    {:_selected "henkilo"
+     :henkilo
+     {:henkilotiedot
+      {:etunimi nil
+       :hetu nil
+       :sukunimi nil}
+      :osoite
+      {:katu nil
+       :postinumero nil
+       :postitoimipaikka nil
+      :yhteystiedot
+      {:email nil
+       :fax nil
+       :puhelin nil}},
+     :yritys
+     {:liikeJaYhteisoTunnus nil
+      :osoite
+      {:katu nil
+       :postinumero nil
+       :postitoimipaikka nil
+      :yhteyshenkilo
+      {:henkilotiedot
+       {:etunimi nil
+        :sukunimi nil
+       :yhteystiedot
+       {:email nil
+        :fax nil
+        :puhelin nil}},
+      :yritysnimi nil}}},
+   :kaytto
+   {:kayttotarkoitus nil
+    :rakentajaTyyppi nil}
+   :luokitus
+   {:energialuokka nil
+    :paloluokka nil}
+   :mitat
+   {:kellarinpinta-ala nil
+    :kerrosala nil
+    :kerrosluku nil
+    :kokonaisala nil
+    :tilavuus nil}
+   :rakenne
+   {:julkisivu nil
+    :kantavaRakennusaine nil
+    :rakentamistapa nil}
+   :lammitys
+   {:lammitystapa nil
+    :lammonlahde nil}
+   :muutostyolaji nil
+   :varusteet
+   {:kaasuKytkin nil
+    :lamminvesiKytkin nil
+    :sahkoKytkin nil
+    :vaestonsuoja nil
+    :vesijohtoKytkin nil
+    :viemariKytkin nil
+    :saunoja nil
+    :hissiKytkin nil
+    :koneellinenilmastointiKytkin nil
+    :aurinkopaneeliKytkin nil},
+   :huoneistot
+   {:0
+    {:huoneistoTunnus
+     {:huoneistonumero nil
+      :jakokirjain nil
+      :porras nil}
+     :huoneistonTyyppi
+     {:huoneistoTyyppi nil
+      :huoneistoala nil
+      :huoneluku nil}
+     :keittionTyyppi nil
+     :varusteet
+     {:ammeTaiSuihku nil
+      :lamminvesi nil
+      :parvekeTaiTerassi nil
+      :sauna nil
+      :wc nil}}}}}}})
 
 (defn ->building [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
