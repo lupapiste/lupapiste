@@ -73,7 +73,7 @@
     
     <!-- Phase 2: -->
     
-    <div data-bind="visible: showPart2" class="form-container create-application-details">
+    <div data-bind="visible: showPart2" class="form-container">
       <h2 data-bind="ltext: 'newRequest.descTitle'"></h2>
       <p data-bind="ltext: 'newRequest.descInfo'"></p>
 
@@ -86,10 +86,10 @@
         <img src="/img/ajax-loader.gif"/>
       </div>
 
-      <form data-bind="visible: operation" class="tree-width">
-        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'" class="btn btn-primary btn-wizard" data-test-id="test-create-inforequest-btn"></button>
+      <div data-bind="visible: operation" class="tree-width">
         <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" class="btn btn-primary btn-wizard" data-test-id="test-create-application-btn"></button>
-      </form>
+        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'" class="btn btn-primary btn-wizard" data-test-id="test-create-inforequest-btn"></button>
+      </div>
 
       <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
         <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
