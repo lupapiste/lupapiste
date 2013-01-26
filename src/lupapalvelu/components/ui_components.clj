@@ -29,8 +29,7 @@
    :common       {:depends [:init :jquery :knockout :underscore :debug]
                   :js ["event.js" "pageutil.js" "loc.js" "notify.js" "ajax.js"
                        "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "comment.js" "authorization.js"
-                       "address.js"]
+                       "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
@@ -83,7 +82,7 @@
 
    :create       {:depends [:common]
                   :js ["create.js"]
-                  :html ["create.html" "create-2.html"]}
+                  :html ["create.html"]}
 
    :applicant    {:depends [:common :map :applications
                             :application :attachment
