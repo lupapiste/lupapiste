@@ -126,8 +126,8 @@
     };
 
     self.makeSearchDone = function(requestId) {
-      return function(result) {
-        if (requestId === self.updateRequestId && result.data && result.data.length > 0) {
+      return self.makeSuccess(requestId, function(result) {
+        if (result.data && result.data.length > 0) {
           var data = result.data[0], x = data.x, y = data.y;
           self
             .setXY(x, y)
@@ -137,14 +137,18 @@
             .searchMunicipality(x, y)
             .searchPropertyId(x, y);
         }
-      };
+      });
     };
     
+    self.makeSuccess = function(requestId, fn) {
+      return function(result) { if (requestId === self.updateRequestId) fn(result); };
+    };
+
     self.searchMunicipality = function(x, y) {
       var requestId = self.updateRequestId;
       ajax
         .query("municipality-by-location", {x: x, y: y})
-        .success(function(data) { if (requestId === self.updateRequestId) self.setMunicipality(data.result); })
+        .success(self.makeSuccess(requestId, function(data) { self.setMunicipality(data.result); }))
         .error(function() { if (requestId === self.updateRequestId) self.setMunicipality(null); })
         .call();
       return self;
@@ -156,7 +160,7 @@
         .get("/proxy/property-id-by-point")
         .param("x", x)
         .param("y", y)
-        .success(function(data) { if (requestId === self.updateRequestId) self.setPropertyId(data); })
+        .success(self.makeSuccess(requestId, self.setPropertyId))
         .call();
       return self;
     };
