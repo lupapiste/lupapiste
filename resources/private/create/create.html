@@ -16,8 +16,8 @@
     <div id="create-inforequest-map" class="map map-large create-application-map" style="width: 848px; height: 400px;">
       <div class="create-application-search-box-container">
         <div class="create-application-search-box">
-          <input data-bind="value: search.search, valueUpdate: 'afterkeydown'" type="text" class="form-input text address-search" data-test-id="create-inforequest-address-search"/>
-          <button data-bind="click: search.doSearch, ltext: 'search'" class="btn btn-primary map-search-button" data-test-id="create-inforequest-do-search">Hae</button>
+          <input data-bind="value: search, valueUpdate: 'afterkeydown'" type="text" class="form-input text address-search" id="create-inforequest-address-search"/>
+          <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary map-search-button" data-test-id="create-inforequest-do-search">Hae</button>
         </div>
       </div>
     </div>
@@ -40,12 +40,14 @@
         <div class="label-container">
           <label data-bind="ltext: 'newRequest.municipality'"></label>
         </div>
-        <select id="create-inforequest-municipality-select" class="form-input long create-application-form"
-          data-bind="options: search.municipalities,
-                     optionsText: function(item) { return item.nameFin; },
-                     optionsValue: 'search.municipalityCode',
-                     value: search.municipalityCode,
-                     optionsCaption: loc('choose')">
+        <select
+          data-bind="options: municipalities,
+                     optionsText: getMunicipalityName,
+                     optionsValue: 'municipalityCode',
+                     value: municipalityCode,
+                     optionsCaption: loc('choose')"
+          data-test-id="create-inforequest-municipality-select"
+          class="form-input long create-application-form">
         </select>
       </div>
 
@@ -54,7 +56,7 @@
           <label data-bind="ltext: 'newRequest.propertyId'"></label>
         </div>
         <input
-          data-bind="value: search.propertyId, valueUpdate: 'afterkeydown'"
+          data-bind="value: propertyId"
           data-test-id="create-inforequest-property-id"
           type="text"
           class="form-input text long create-application-form"></input>
@@ -62,7 +64,7 @@
 
       <div class="create-application-actions">
         <button
-            data-bind="click: showPart2.bind($data, true), enable: search.ok, ltext: 'continue'"
+            data-bind="enable: addressOk, click: showPart2.bind($data, true), ltext: 'continue'"
             class="btn btn-primary application-create btn-wizard"
             data-test-id="test-inforequest-create-continue">
         </button>
@@ -71,7 +73,7 @@
     
     <!-- Phase 2: -->
     
-    <div data-binb="visible: showPart2" class="form-container create-application-details">
+    <div data-bind="visible: showPart2" class="form-container create-application-details">
       <h2 data-bind="ltext: 'newRequest.descTitle'"></h2>
       <p data-bind="ltext: 'newRequest.descInfo'"></p>
 
@@ -84,7 +86,7 @@
         <img src="/img/ajax-loader.gif"/>
       </div>
 
-      <form data-bind="visible: showCreateButtons" class="tree-width">
+      <form data-bind="visible: operation" class="tree-width">
         <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'" class="btn btn-primary btn-wizard" data-test-id="test-create-inforequest-btn"></button>
         <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" class="btn btn-primary btn-wizard" data-test-id="test-create-application-btn"></button>
       </form>

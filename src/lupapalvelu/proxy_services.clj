@@ -105,7 +105,7 @@
 (defn point-by-property-id-proxy [request]
   (let [[status features] (-> request (:query-params) (get "property-id") (point-by-property-id))]
     (if (= status :ok)
-      (resp/json (map wfs/feature-to-position features))
+      (resp/json {:data (map wfs/feature-to-position features)})
       (do
         (error "Failed to get point by 'property-id': %s" features)
         (resp/status 503 "Service temporarily unavailable")))))
