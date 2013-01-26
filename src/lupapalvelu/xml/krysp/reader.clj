@@ -60,14 +60,6 @@
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
-(defn sample-)
-(defn sample [schema]
-  (postwalk-map (fn [m] {:name (:name m)}) schema))
-
-;;
-;;
-;;
-
 (def translations {:rakennustunnus :building
                    :kiinttun :propertyId
                    :aanestysalue nil
