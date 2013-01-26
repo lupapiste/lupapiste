@@ -270,7 +270,7 @@
 
 (defpage "/api/data-table/municipality-applications" []
   (let [user (current-user)]
-    (if (and (logged-in?) (= (:role user) "authority"))
+    (if (and user (= (:role user) "authority"))
       (->>
         (application/applications-for-municipality user (:query-params (request/ring-request)))
         (resp/json)
