@@ -14,7 +14,8 @@
                        "jquery.ba-hashchange.js"
                        "jquery.pnotify.min.js"
                        "jquery.metadata-2.1.js"
-                       "jquery.autocomplete.js"]}
+                       "jquery.autocomplete.js"
+                       "jquery.dataTables.js"]}
    :knockout     {:js ["knockout-2.1.0.debug.js"
                        "knockout.mapping-2.3.2.js"
                        "knockout.validation.js"]}
