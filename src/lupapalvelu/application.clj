@@ -281,3 +281,33 @@
             buildings (krysp/get-buildings kryspxml)]
         (ok :data buildings))
       (fail :no_legacy_available))))
+
+;;
+;; Service point for jQuery dataTables:
+;;
+
+(defn make-row [x]
+  {"DT_RowId" (str "app-id-" x)
+   "DT_RowClass" (if (odd? x) "application" "inforequest")
+   "0" (str "a" x)
+   "1" (str "b" x)
+   "2" (str "c" x)
+   "3" (str "d" x)
+   "4" (str "e" x)
+   "5" (str "f" x)
+   "6" (str "g" x)
+   "7" (str "j" x)})
+
+(defn applications-for-user [user query-params]
+  (println "user:" (:id user) "search:" (query-params "sSearch"))
+  {:sEcho (query-params "sEcho")
+   :iTotalRecords 20
+   :iTotalDisplayRecords 10,
+   :aaData (map make-row (range 10))})
+
+(defn applications-for-municipality [user municipality query-params]
+  (println "user:" (:id user) "municipality" municipality "search:" (query-params "sSearch"))
+  {:sEcho (query-params "sEcho")
+   :iTotalRecords 20
+   :iTotalDisplayRecords 10,
+   :aaData (map make-row (range 10))})

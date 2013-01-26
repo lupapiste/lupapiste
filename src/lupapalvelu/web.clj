@@ -15,7 +15,8 @@
                          [security :as security]
                          [attachment :as attachment]
                          [proxy-services :as proxy-services]
-                         [municipality]]
+                         [municipality]
+                         [application :as application]]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
@@ -259,26 +260,22 @@
 ;; jQuery dataTables support:
 ;;
 
+(defpage "/api/data-table/user-applications" []
+  (if-let [user (current-user)]
+    (->>
+      (application/applications-for-user user (:query-params (request/ring-request)))
+      (resp/json)
+      (resp/status 200))
+    {:status 401}))
 
-(defn make-row [x]
-  {"DT_RowId" (str "app-id-" x)
-   "DT_RowClass" (if (odd? x) "application" "inforequest")
-   "0" (str "a" x)
-   "1" (str "b" x)
-   "2" (str "c" x)
-   "3" (str "d" x)
-   "4" (str "e" x)
-   "5" (str "f" x)
-   "6" (str "g" x)
-   "7" (str "j" x)})
-
-(defpage "/api/applications" []
-  (->> {:sEcho ((:query-params (request/ring-request)) "sEcho")
-        :iTotalRecords 20
-        :iTotalDisplayRecords 10,
-        :aaData (map make-row (range 10))}
-    (resp/json)
-    (resp/status 200)))
+(defpage "/api/data-table/municipality-applications" []
+  (let [user (current-user)]
+    (if (and (logged-in?) (= (:role user) "authority"))
+      (->>
+        (application/applications-for-municipality user (:query-params (request/ring-request)))
+        (resp/json)
+        (resp/status 200))
+      {:status 401})))
 
 ;;
 ;; dev utils:
