@@ -27,8 +27,8 @@
                    :schema "hakija"
                    :f (fn [doc]
                         (let [data (get-in doc [:body :henkilo :henkilotiedot])]
-                          {:firstName (:etunimi data)
-                           :lastName (:sukunimi data)}))}])
+                          {:firstName (:firstName data)
+                           :lastName (:lastName data)}))}])
 
 (defn search-doc [app schema]
   (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
@@ -286,24 +286,43 @@
 ;; Service point for jQuery dataTables:
 ;;
 
-(defn make-row [x]
-  {"DT_RowId" (str "app-id-" x)
-   "DT_RowClass" (if (odd? x) "application" "inforequest")
-   "0" (str "a" x)
-   "1" (str "b" x)
-   "2" (str "c" x)
-   "3" (str "d" x)
-   "4" (str "e" x)
-   "5" (str "f" x)
-   "6" (str "g" x)
-   "7" (str "j" x)})
+(def col-map {:infoRequest "0"
+              :address     "1"
+              :title       "2"
+              :applicant   "3"
+              :created     "4"
+              :modified    "5"
+              :state       "6"
+              :permitType  "7"})
+
+(defn add-field [application data [app-field data-field]]
+  (assoc data data-field (get application app-field)))
+
+(defn make-row [application]
+  (let [kind (if (:infoRequest application) "inforequest" "application")
+        base {"DT_RowId" (str "applications-list-row" \: kind \: (:id application))
+              "DT_RowClass" kind}]
+    (reduce (partial add-field application) base col-map)))
+
+(defn make-query [user-query params]
+  (let [skip (Integer/parseInt (params "iDisplayStart"))
+        limit (Integer/parseInt (params "iDisplayLength"))
+        search (params "sSearch")]
+    ; TODO
+    user-query))
 
 (defn applications-for-user [user query-params]
-  (println "user:" (:id user) "search:" (query-params "sSearch"))
-  {:sEcho (query-params "sEcho")
-   :iTotalRecords 20
-   :iTotalDisplayRecords 10,
-   :aaData (map make-row (range 10))})
+  (let [echo (str (Integer/parseInt (query-params "sEcho"))) ; Prevent XSS
+        user-query (application-query-for user)
+        query (make-query user-query query-params)
+        total-all (mongo/count :applications user-query)
+        total-query (mongo/count :applications query)
+        apps (mongo/select :applications query)
+        rows (->> apps (map with-meta-fields) (map make-row))]
+    {:sEcho echo
+     :iTotalRecords total-all
+     :iTotalDisplayRecords total-query
+     :aaData rows}))
 
 (defn applications-for-municipality [user municipality query-params]
   (println "user:" (:id user) "municipality" municipality "search:" (query-params "sSearch"))
@@ -311,3 +330,10 @@
    :iTotalRecords 20
    :iTotalDisplayRecords 10,
    :aaData (map make-row (range 10))})
+
+(def a (first (mongo/select :applications {:_id "5103dde8f828a5a4b95d2a5e"})))
+(get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
+(comment
+  (:applicant (with-meta-fields ))
+  (mongo/count :applications {:state "openz"})
+  (mongo/select :applications (application-query-for user)))
