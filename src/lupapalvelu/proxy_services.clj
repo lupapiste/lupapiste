@@ -14,7 +14,7 @@
 ;;
 
 (defn- trim [s]
-  (if (s/blank? s) nil (s/trim s)))
+  (when-not (s/blank? s) (s/trim s)))
 
 (defn- parse-address [query]
   (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*(.+))?" query)
