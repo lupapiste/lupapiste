@@ -52,22 +52,10 @@
                   :js ["application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html"]}
 
-   :tablesorter  {:depends [:jquery]
-                  :js ["jquery.tablesorter-2.0.5b.js" "lupapiste.tablesorter.js"]
-                  :css ["tablesorter.css"]}
-
-   :applications-common {:depends [:tablesorter :invites]
-                         :html ["applications.html"]
-                         :js ["applications.js"]}
-
-   :applications {:depends [:common :repository :applications-common]
-                  :js ["applications-config.js"]
-                  :css ["applications.css"]
-                  :html []}
-
-   :authority-applications {:depends [:common :repository :applications-common]
-                            :js ["applications-config.js"]
-                            :html ["applications.html"]}
+   :applications {:depends [:common :repository :invites]
+                  :html ["applications.html"]
+                  :js ["applications.js"]
+                  :css ["applications.css"]}
 
    :attachment   {:depends [:common :repository]
                   :js ["attachment.js"]
