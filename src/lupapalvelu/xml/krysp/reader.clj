@@ -50,7 +50,7 @@
     xml))
 
 ;;
-;; don't use this, deprecated
+;; don't use this deprecated
 ;;
 
 (defn building-info [server id]
@@ -93,20 +93,20 @@
                                                           :sukunimi nil}
                                           :osoite {:katu nil
                                                    :postinumero nil
-                                                   :postitoimipaikka nil},
+                                                   :postitoimipaikka nil}
                                           :yhteystiedot {:email nil
                                                          :fax nil
-                                                         :puhelin nil}},
+                                                         :puhelin nil}}
                                 :yritys {:liikeJaYhteisoTunnus nil
                                          :osoite {:katu nil
                                                   :postinumero nil
-                                                  :postitoimipaikka nil},
+                                                  :postitoimipaikka nil}
                                          :yhteyshenkilo {:henkilotiedot {:etunimi nil
-                                                                         :sukunimi nil},
+                                                                         :sukunimi nil}
                                                          :yhteystiedot {:email nil
                                                                         :fax nil
-                                                                        :puhelin nil}},
-                                         :yritysnimi nil}}},
+                                                                        :puhelin nil}}
+                                         :yritysnimi nil}}}
      :kaytto {:kayttotarkoitus nil
               :rakentajaTyyppi nil}
      :luokitus {:energialuokka nil
@@ -131,13 +131,13 @@
                  :saunoja nil
                  :hissiKytkin nil
                  :koneellinenilmastointiKytkin nil
-                 :aurinkopaneeliKytkin nil},
+                 :aurinkopaneeliKytkin nil}
      :huoneistot {:0 {:huoneistoTunnus {:huoneistonumero nil
                                         :jakokirjain nil
-                                        :porras nil},
+                                        :porras nil}
                       :huoneistonTyyppi {:huoneistoTyyppi nil
                                          :huoneistoala nil
-                                         :huoneluku nil},
+                                         :huoneluku nil}
                       :keittionTyyppi nil
                       :varusteet {:ammeTaiSuihku nil
                                   :lamminvesi nil
@@ -181,16 +181,16 @@
 (defn ->building [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
         body {:huoneistoTunnus
-              {:huoneistonumero nil, :jakokirjain nil, :porras nil},
+              {:huoneistonumero nil :jakokirjain nil :porras nil}
               :huoneistonTyyppi
-              {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi]),
-               :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala]),
-               :huoneluku (get-in data [:valmisHuoneisto :huoneluku])},
-              :keittionTyyppi nil,
+              {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi])
+               :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala])
+               :huoneluku (get-in data [:valmisHuoneisto :huoneluku])}
+              :keittionTyyppi nil
               :varusteet
-              {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin]),
-               :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin]),
-               :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin]),
-               :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin]),
+              {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin])
+               :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin])
+               :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin])
+               :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin])
                :wc (get-in data [:valmisHuoneisto :varusteet :WCKytkin])}}]
     (-> body strip-nils strip-empty-maps)))
