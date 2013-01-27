@@ -54,7 +54,7 @@ Admin front page should be open
 
 Number of visible applications on page
   [Arguments]  ${pageid}  ${amount}
-  Xpath Should Match X Times  //*[@id='${pageid}']//tr[@class='application-row']  ${amount}
+  Xpath Should Match X Times  //*[@id='${pageid}']//tr[contains(@class,'application')]  ${amount}
 
 Wait and click
   [Arguments]  ${element}
@@ -194,39 +194,29 @@ SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until page contains element  admin-header
 
+#
+# Helpers for cases when target element is identified by "data-test-id" attribute:
+#
+ 
 Input text by test id
   [Arguments]  ${id}  ${value}
+  Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Input text  xpath=//input[@data-test-id="${id}"]  ${value}
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
+  Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
 
-Click link by test id
+Click by test id
   [Arguments]  ${id}
-  Click link  xpath=//a[@data-test-id="${id}"]
+  Wait until  Page should contain element  xpath=//*[@data-test-id='${id}']
+  Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
+  Click element  xpath=//*[@data-test-id='${id}']
 
-Wait and click enabled button
+Click enabled by test id
   [Arguments]  ${id}
+  Wait until page contains element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
-  Wait and click  xpath=//button[@data-test-id="${id}"]
-
-Wait and click by test class
-  [Arguments]  ${class}
-  Wait and click  xpath=//*[@data-test-class="${class}"]
-
-Wait until page contains element by test class
-  [Arguments]  ${class}
-  Wait until page contains element  xpath=//*[@data-test-class="${class}"]
-
-Element should be visible by test class
-  [Arguments]  ${class}
-  Element should be visible  xpath=//*[@data-test-class="${class}"]
-
-Element should contain by test class
-  [Arguments]  ${class}  ${value}
-  Element should contain  xpath=//*[@data-test-class="${class}"]  ${value}
-
-Wait and click element by test id
-  [Arguments]  ${id}
-  Wait and click  xpath=//*[@data-test-id="${id}"]
+  Click element  xpath=//*[@data-test-id="${id}"]
+  
