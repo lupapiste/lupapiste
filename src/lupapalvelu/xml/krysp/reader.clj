@@ -66,10 +66,12 @@
                    :rakennusnro :buildingId})
 
 (defn translate
+  "translates a value against the dictionary. return nil if cant be translated."
   [dictionary k & {:keys [nils] :or {nils false}}]
   (or (dictionary k) (and nils k) nil))
 
 (defn translate-keys [dictionary m]
+  "translates all keys against the dictionary. loses all keys without translation."
   (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
 
 (defn ->buildingIds [m]
@@ -79,6 +81,60 @@
 
 (defn get-buildings [xml]
   (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
+
+(defn as-is [xml selector]
+  (-> (select1 xml selector) xml->edn strip-keys))
+
+(def xml (building-xml local-test-legacy nil))
+
+(def ...notfound... nil)
+(def ...notimplemented... nil)
+
+(defn ->rakennuksen-muttaminen [propertyId buildingId xml]
+  (let [rakennus (select1 xml [:rakval:Rakennus])]
+    (strip-empty-maps
+      (strip-nils
+        (merge {}
+               (as-is rakennus [:rakval:verkostoliittymat])
+               (as-is rakennus [:rakval:varusteet])
+               {:rakennuksenOmistajat ...notimplemented...
+                :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
+                         :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
+                :luokitus {:energialuokka ...notfound...
+                           :paloluokka ...notfound...}
+                :mitat {:kellarinpinta-ala ...notfound...
+                        :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
+                        :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
+                        :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
+                        :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
+                :rakenne {:julkisivu (-> rakennus (select1 [:rakval:julkisivumateriaali]) text)
+                          :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
+                          :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
+                :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
+                           :lammonlahde ...notimplemented...}
+                :muutostyolaji ...notimplemented...
+                :huoneistot ...notimplemented...})))))
+
+(defn ->building [xml]
+  (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
+        body {:huoneistoTunnus
+              {:huoneistonumero nil :jakokirjain nil :porras nil}
+              :huoneistonTyyppi
+              {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi])
+               :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala])
+               :huoneluku (get-in data [:valmisHuoneisto :huoneluku])}
+              :keittionTyyppi nil
+              :varusteet
+              {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin])
+               :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin])
+               :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin])
+               :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin])
+               :wc (get-in data [:valmisHuoneisto :varusteet :WCKytkin])}}]
+    (-> body strip-nils strip-empty-maps)))
+
+;;
+;; full mappings
+;;
 
 (defn ->rakennuksen-muttaminen-old [propertyId buildingId xml]
   (let [data (select1 xml [:rakval:Rakennus])]
@@ -145,52 +201,3 @@
                                   :sauna nil
                                   :wc nil}}}}))
 
-(defn as-is [xml selector]
-  (-> (select1 xml selector) xml->edn strip-keys))
-
-(def xml (building-xml local-test-legacy nil))
-
-(def ...notfound... nil)
-(def ...notimplemented... nil)
-
-(defn ->rakennuksen-muttaminen [propertyId buildingId xml]
-  (let [rakennus (select1 xml [:rakval:Rakennus])]
-    (strip-empty-maps
-      (strip-nils
-        (merge {}
-               (as-is rakennus [:rakval:verkostoliittymat])
-               (as-is rakennus [:rakval:varusteet])
-               {:rakennuksenOmistajat ...notimplemented...
-                :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
-                         :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-                :luokitus {:energialuokka ...notfound...
-                           :paloluokka ...notfound...}
-                :mitat {:kellarinpinta-ala ...notfound...
-                        :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
-                        :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
-                        :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
-                        :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
-                :rakenne {:julkisivu (-> rakennus (select1 [:rakval:julkisivumateriaali]) text)
-                          :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
-                          :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
-                :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
-                           :lammonlahde ...notimplemented...}
-                :muutostyolaji ...notimplemented...
-                :huoneistot ...notimplemented...})))))
-
-(defn ->building [xml]
-  (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
-        body {:huoneistoTunnus
-              {:huoneistonumero nil :jakokirjain nil :porras nil}
-              :huoneistonTyyppi
-              {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi])
-               :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala])
-               :huoneluku (get-in data [:valmisHuoneisto :huoneluku])}
-              :keittionTyyppi nil
-              :varusteet
-              {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin])
-               :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin])
-               :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin])
-               :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin])
-               :wc (get-in data [:valmisHuoneisto :varusteet :WCKytkin])}}]
-    (-> body strip-nils strip-empty-maps)))
