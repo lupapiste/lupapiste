@@ -86,9 +86,6 @@
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
-; for spiking purposes
-(def xml (building-xml local-test-legacy nil))
-
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
