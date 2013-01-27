@@ -42,9 +42,9 @@
   [dictionary k & {:keys [nils] :or {nils false}}]
   (or (dictionary k) (and nils k) nil))
 
-(defn translate-keys [dictionary m]
+(defn translate-keys
   "translates all keys against the dictionary. loses all keys without translation."
-  (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
+  [dictionary m] (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
 
 ;;
 ;; Read the Krysp from Legacy
@@ -73,11 +73,6 @@
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
-(def translations {:rakennustunnus :building
-                   :kiinttun :propertyId
-                   :aanestysalue nil
-                   :rakennusnro :buildingId})
-
 (defn ->buildingIds [m]
   {:building
    {:propertyId (get-in m [:rakennustunnus :kiinttun])
@@ -86,7 +81,8 @@
 (defn get-buildings [xml]
   (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
-(defn as-is [xml selector]
+(defn as-is
+  [xml selector]
   (-> (select1 xml selector) xml->edn strip-keys))
 
 (def xml (building-xml local-test-legacy nil))
