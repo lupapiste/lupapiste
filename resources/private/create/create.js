@@ -221,7 +221,7 @@
 
   $(function() {
 
-    model.setMap(gis.makeMap("create-inforequest-map").center(404168, 6840000, 1));
+    model.setMap(gis.makeMap("create-map").center(404168, 6840000, 1));
     ko.applyBindings(model, $("#create")[0]);
     
     $("#create-inforequest-address-search").autocomplete({

@@ -4,7 +4,7 @@
   <section class="page" id="create">
 
     <div class="breadcrumb">
-      <a href="#!/all-applications" id="test-inforequests" data-bind="ltext: 'request.requests'"></a>
+      <a href="#!/all-applications" data-bind="ltext: 'request.requests'"></a>
       /
       <span data-bind="ltext: 'request.new'"></span>
     </div>
@@ -13,11 +13,11 @@
 
     <p data-bind="ltext: 'newRequest.locationInfo'"></p>
 
-    <div id="create-inforequest-map" class="map map-large create-application-map" style="width: 848px; height: 400px;">
+    <div id="create-map" class="map map-large create-application-map" style="width: 848px; height: 400px;">
       <div class="create-application-search-box-container">
         <div class="create-application-search-box">
-          <input data-bind="value: search, valueUpdate: 'afterkeydown'" type="text" class="form-input text address-search" id="create-inforequest-address-search"/>
-          <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary map-search-button" data-test-id="create-inforequest-do-search">Hae</button>
+          <input data-bind="value: search, valueUpdate: 'afterkeydown'" type="text" class="form-input text address-search"/>
+          <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary map-search-button"></button>
         </div>
       </div>
     </div>
@@ -31,7 +31,7 @@
         </div>
         <input
           data-bind="value: address, valueUpdate: 'afterkeydown'"
-          data-test-id="create-inforequest-address"
+          data-test-id="create-address"
           type="text"
           class="form-input text long create-application-form">
       </div>
@@ -46,7 +46,7 @@
                      optionsValue: 'municipalityCode',
                      value: municipalityCode,
                      optionsCaption: loc('choose')"
-          data-test-id="create-inforequest-municipality-select"
+          data-test-id="create-municipality-select"
           class="form-input long create-application-form">
         </select>
       </div>
@@ -57,7 +57,7 @@
         </div>
         <input
           data-bind="value: propertyId"
-          data-test-id="create-inforequest-property-id"
+          data-test-id="create-property-id"
           type="text"
           class="form-input text long create-application-form"></input>
       </div>
@@ -66,7 +66,7 @@
         <button
             data-bind="enable: addressOk, click: showPart2.bind($data, true), ltext: 'continue'"
             class="btn btn-primary application-create btn-wizard"
-            data-test-id="test-inforequest-create-continue">
+            data-test-id="create-continue">
         </button>
       </div>
     </div>
@@ -87,8 +87,8 @@
       </div>
 
       <div data-bind="visible: operation" class="tree-width">
-        <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" class="btn btn-primary btn-wizard" data-test-id="test-create-application-btn"></button>
-        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'" class="btn btn-primary btn-wizard" data-test-id="test-create-inforequest-btn"></button>
+        <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" data-test-id="create-application-btn" class="btn btn-primary btn-wizard"></button>
+        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-inforequest-btn" class="btn btn-primary btn-wizard"></button>
       </div>
 
       <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
