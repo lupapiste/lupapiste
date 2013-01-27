@@ -5,6 +5,7 @@
         [lupapalvelu.action :only [application-query-for get-application-as]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
+            [monger.query :as query]
             [lupapalvelu.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
@@ -300,7 +301,7 @@
 
 (defn make-row [application]
   (let [kind (if (:infoRequest application) "inforequest" "application")
-        base {"DT_RowId" (str "applications-list-row" \: kind \: (:id application))
+        base {"DT_RowId" (str "applications-list-row" \: kind \: (:_id application))
               "DT_RowClass" kind}]
     (reduce (partial add-field application) base col-map)))
 
@@ -316,9 +317,10 @@
         query-total (mongo/count :applications query)
         skip        (Integer/parseInt (params "iDisplayStart"))
         limit       (Integer/parseInt (params "iDisplayLength"))
-        _           (println "SKIP:" skip "LIMIT:" limit "QUERY:" (merge query {$skip skip $limit limit}))
-        page-query  query ; (merge query {$skip skip $limit limit})
-        apps        (mongo/select :applications page-query)
+        apps        (query/with-collection "applications"
+                      (query/find query)
+                      (query/skip skip)
+                      (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
         echo        (str (Integer/parseInt (params "sEcho")))] ; Prevent XSS
     {:aaData                rows
@@ -326,12 +328,19 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
+
 (defn applications-for-municipality [user municipality query-params]
   (println "user:" (:id user) "municipality" municipality "search:" (query-params "sSearch")))
 
 (comment
+  (mc/aggregate :applications [{$skip 1 $limit 1}])
   (require '[monger.collection :as mc])
-  (mc/aggregate :applications [{$project {:state 1}}])
+  (query/with-collection "applications"
+    (query/find {:state "draft"})
+    (query/skip 1)
+    (query/limit 2)
+    (query/fields [:_id :state]))
+  (mc/aggregate :applications [{$skip 1 $limit 1} {$project {:state 1}}])
   (count (mongo/select :applications {} {:_id 1}))
   (get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
   (:applicant (with-meta-fields ))
