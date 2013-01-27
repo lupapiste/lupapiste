@@ -14,7 +14,7 @@
 (def local-test-legacy  (client/uri "/krysp/building.xml"))
 
 ;;
-;; Helpers
+;; Common
 ;;
 
 (defn strip-key
@@ -36,6 +36,19 @@
 (defn strip-empty-maps
   "removes recursively all keys from map which have empty map as value"
   [m] (postwalk-map (partial filter (comp (partial not= {}) val)) m))
+
+(defn translate
+  "translates a value against the dictionary. return nil if cant be translated."
+  [dictionary k & {:keys [nils] :or {nils false}}]
+  (or (dictionary k) (and nils k) nil))
+
+(defn translate-keys [dictionary m]
+  "translates all keys against the dictionary. loses all keys without translation."
+  (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
+
+;;
+;; Read the Krysp from Legacy
+;;
 
 (defn legacy-is-alive?
   "checks if the legacy system is Web Feature Service -enabled. kindof."
@@ -64,15 +77,6 @@
                    :kiinttun :propertyId
                    :aanestysalue nil
                    :rakennusnro :buildingId})
-
-(defn translate
-  "translates a value against the dictionary. return nil if cant be translated."
-  [dictionary k & {:keys [nils] :or {nils false}}]
-  (or (dictionary k) (and nils k) nil))
-
-(defn translate-keys [dictionary m]
-  "translates all keys against the dictionary. loses all keys without translation."
-  (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
 
 (defn ->buildingIds [m]
   {:building
