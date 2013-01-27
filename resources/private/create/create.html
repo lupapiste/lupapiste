@@ -87,8 +87,8 @@
       </div>
 
       <div data-bind="visible: operation" class="tree-width">
-        <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" data-test-id="create-application-btn" class="btn btn-primary btn-wizard"></button>
-        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-inforequest-btn" class="btn btn-primary btn-wizard"></button>
+        <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary btn-wizard"></button>
+        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary btn-wizard"></button>
       </div>
 
       <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
@@ -98,12 +98,12 @@
             data-bind="value: message, valueUpdate: 'afterkeydown'"
             rows="3"
             placeholder="Hankkeen oleelliset tiedot, kuten käyttötarkoitus, rakennuksen koko, jne."
-            data-test-id="test-create-inforequest-message">
+            data-test-id="create-inforequest-message">
         </textarea>
         <button
             data-bind="click: createInfoRequest, enable: message().length > 0"
             class="btn btn-primary"
-            data-test-id="test-create-inforequest-create-inforequest">
+            data-test-id="create-inforequest">
           Kysy neuvoa
         </button>
       </form>
