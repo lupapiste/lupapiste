@@ -184,7 +184,7 @@
   (let [make (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
         op-info               (operations/operations op)
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
-        required-schema-names (filter (complement existing-schema-names) (:required op-info))
+        required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
@@ -305,35 +305,35 @@
     (reduce (partial add-field application) base col-map)))
 
 (defn make-query [user-query params]
-  (let [skip (Integer/parseInt (params "iDisplayStart"))
-        limit (Integer/parseInt (params "iDisplayLength"))
-        search (params "sSearch")]
+  (let [search (params "sSearch")]
     ; TODO
     user-query))
 
-(defn applications-for-user [user query-params]
-  (let [echo (str (Integer/parseInt (query-params "sEcho"))) ; Prevent XSS
-        user-query (application-query-for user)
-        query (make-query user-query query-params)
-        total-all (mongo/count :applications user-query)
-        total-query (mongo/count :applications query)
-        apps (mongo/select :applications query)
-        rows (->> apps (map with-meta-fields) (map make-row))]
-    {:sEcho echo
-     :iTotalRecords total-all
-     :iTotalDisplayRecords total-query
-     :aaData rows}))
+(defn applications-for-user [user params]
+  (let [user-query  (application-query-for user)
+        user-total  (mongo/count :applications user-query)
+        query       (make-query user-query params)
+        query-total (mongo/count :applications query)
+        skip        (Integer/parseInt (params "iDisplayStart"))
+        limit       (Integer/parseInt (params "iDisplayLength"))
+        _           (println "SKIP:" skip "LIMIT:" limit "QUERY:" (merge query {$skip skip $limit limit}))
+        page-query  query ; (merge query {$skip skip $limit limit})
+        apps        (mongo/select :applications page-query)
+        rows        (map (comp make-row with-meta-fields) apps)
+        echo        (str (Integer/parseInt (params "sEcho")))] ; Prevent XSS
+    {:aaData                rows
+     :iTotalRecords         user-total
+     :iTotalDisplayRecords  query-total
+     :sEcho                 echo}))
 
 (defn applications-for-municipality [user municipality query-params]
-  (println "user:" (:id user) "municipality" municipality "search:" (query-params "sSearch"))
-  {:sEcho (query-params "sEcho")
-   :iTotalRecords 20
-   :iTotalDisplayRecords 10,
-   :aaData (map make-row (range 10))})
+  (println "user:" (:id user) "municipality" municipality "search:" (query-params "sSearch")))
 
-(def a (first (mongo/select :applications {:_id "5103dde8f828a5a4b95d2a5e"})))
-(get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
 (comment
+  (require '[monger.collection :as mc])
+  (mc/aggregate :applications [{$project {:state 1}}])
+  (count (mongo/select :applications {} {:_id 1}))
+  (get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
   (:applicant (with-meta-fields ))
   (mongo/count :applications {:state "openz"})
   (mongo/select :applications (application-query-for user)))
