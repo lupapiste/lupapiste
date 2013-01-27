@@ -81,8 +81,8 @@
     </div>
     <div class="sidebar">
       <aside class="instructions">
-          <h3 data-bind="ltext: ''">Ohje</h3>
-          <p data-bind="ltext: ''">T&auml;ss&auml; n&auml;kym&auml;ss&auml; voit
+          <h3 data-bind="ltext: 'application.help'">Ohje</h3>
+          <p data-bind="ltext: 'application.helpText'">T&auml;ss&auml; n&auml;kym&auml;ss&auml; voit
           k&auml;sitell&auml; hakemuksen tietoja. Voit kysy&auml; tarvittaessa
           neuvoa rakennusvalvonnasta keskusteluketjussa. Voit j&auml;tt&auml;&auml;
           valmiin hakemuksen k&auml;sittelyyn painamalla "J&auml;t&auml; hakemus"
@@ -100,7 +100,7 @@
 
         <div class="application_section" data-bind="with: application">
           <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick">
-            <span class="font-icon icon-expanded"></span> <span data-bind="ltext: ''">Hakemuksen perustiedot</span></h2>
+            <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
           <div class="application_section_content content_expanded">
             <div>
               <h3 data-bind="ltext: ''">Valtuutetut</h3>
@@ -152,7 +152,7 @@
       </div>
 
       <div class="tab-content" id="conversation_tab" data-bind="with: $root.comment">
-        <p data-bind="ltext: ''" class="tab-info">
+        <p data-bind="ltext: 'application.conversationDesc'" class="tab-info">
         T&auml;&auml;ll&auml; voit keskustella hakemuksesta viranomaisten ja valtuutettujen,
         kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen n&auml;kee hakemuksesi
         ja voi vastata esitt&auml;miisi kysymyksiin. N&auml;in voitte yhdess&auml; valmistella
@@ -174,11 +174,11 @@
             </tbody>
           </table>
           <form>
-            <h3 data-bind="ltext: ''">Kirjoita viesti:</h3>
+            <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
             <textarea class="form-input textarea" id="commentText"
               data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
             <button id="application.addComment"
-              data-bind="ltext: '', disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
+              data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
           </form>
         </div>
       </div>
@@ -192,7 +192,7 @@
       </div>
 
       <div class="tab-content" id="attachments_tab">
-        <p data-bind="ltext: ''" class="tab-info">T&auml;nne voit lis&auml;t&auml;
+        <p data-bind="ltext: 'application.attachmentsDesc'" class="tab-info">T&auml;nne voit lis&auml;t&auml;
           hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml;
           sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n
           taulukossa punaisella lipulla.</p>
@@ -205,11 +205,11 @@
                   <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
                 </tr>
                 <tr>
-                  <th data-bind="ltext: ''">Tila</th>
-                  <th data-bind="ltext: ''">Tyyppi</th>
-                  <th data-bind="ltext: ''">Tiedosto</th>
-                  <th data-bind="ltext: ''">Versio</th>
-                  <th data-bind="ltext: ''">Muokattu</th>
+                  <th data-bind="ltext: 'application.attachmentState'">Tila</th>
+                  <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+                  <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                  <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
+                  <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                   <th></th>
                 </tr>
                 <!-- ko foreach: attachments -->
@@ -252,7 +252,7 @@
 
           </div>
           <div data-bind="ifnot: attachmentsByGroup.length">
-            <i data-bind="ltext: 'attachments.none'">Ei liitteit&auml;</i>
+            <i data-bind="ltext: 'application.attachmentsEmpty'">Ei liitteit&auml;</i>
           </div>
           <button
               id="add-attachment"
