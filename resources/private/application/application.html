@@ -17,26 +17,26 @@
 
         <div class="application_summary_info">
           <div>
-            <p data-bind="ltext: ''">K&auml;sittelytunnus:</p>
+            <p data-bind="ltext: 'application.id'">K&auml;sittelytunnus:</p>
             <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id"
                   data-bind="text: id, attr: {'data-test-value': id}"></span>
           </div>
           <div>
-            <p data-bind="ltext: ''">Tila:</p>
+            <p data-bind="ltext: 'application.state'">Tila:</p>
             <span id="test-application-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
           <div>
-            <p data-bind="ltext: ''">Lupatyyppi:</p>
+            <p data-bind="ltext: 'application.type'">Lupatyyppi:</p>
             <span class="application_summary_text" data-bind="ltext: permitType"></span>
           </div>
           <div>
-            <p data-bind="ltext: ''">Kiinteistötunnus:</p>
+            <p data-bind="ltext: 'application.property'">Kiinteistötunnus:</p>
             <span class="application_summary_text" data-bind="text: propertyId" data-test-id="application-property-id"></span>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
-              <p data-bind="ltext: ''">Käsittelijä:</p>
+              <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
               <span id="test-application-assignee" class="application_summary_text">
                 <select data-bind="options: $root.authorities,
                                    optionsText: function(item) {
@@ -49,7 +49,7 @@
             </div>
           <!-- /ko -->
           <div>
-            <p data-bind="ltext: ''">Toimenpiteet:</p>
+            <p data-bind="ltext: 'application.operations'">Toimenpiteet:</p>
             <ul data-bind="foreach: operations">
               <li>
                 <span data-bind="ltext: operation" data-test-id="test-application-operation"></span>
@@ -57,24 +57,24 @@
             </ul>
           </div>
           <div data-bind="with: $root.applicationModel.data">
-            <p data-bind="ltext: ''">Hakemus j&auml;tetty:</p>
+            <p data-bind="ltext: 'application.submissionDate'">Hakemus j&auml;tetty:</p>
             <span data-bind="if: $data.submitted"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: submitted"></span></span>
           </div>
         </div>
         <div class="application_actions">
-          <button data-bind="ltext: '', click: submitApplication,  enable: $root.authorization.ok('submit-application')"  type="submit" class="btn btn-primary"  id="test-submit-application" >Jätä hakemus käsiteltäväksi</button>
-          <button data-bind="ltext: '', click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  data-test-id="approve-application">Siirrä kuntarekisteriin</button>
-          <button data-bind="ltext: 'create-inforequest.inforequest', enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
-          <button data-bind="ltext: '', click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
-          <button data-bind="ltext: '', click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
+          <button data-bind="ltext: 'application.submitApplication', click: submitApplication,  enable: $root.authorization.ok('submit-application')"  type="submit" class="btn btn-primary"  id="test-submit-application" >Jätä hakemus käsiteltäväksi</button>
+          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  data-test-id="approve-application">Siirrä kuntarekisteriin</button>
+          <button data-bind="ltext: 'application.startConversation', enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
+          <button data-bind="ltext: 'application.addOperation', click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
+          <button data-bind="ltext: 'application.cancelApplication', click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   data-test-id="attachments-tab"  >Suunnitelmat ja liitteet</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
+            <li><a data-bind="ltext: 'application.tabDocuments', click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
+            <li><a data-bind="ltext: 'application.tabParties', click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
+            <li><a data-bind="ltext: 'application.tabAttachments', click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   data-test-id="attachments-tab"  >Suunnitelmat ja liitteet</a></li>
+            <li><a data-bind="ltext: 'application.tabVerdict', click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
+            <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
           </ul>
         </div>
       </div>
