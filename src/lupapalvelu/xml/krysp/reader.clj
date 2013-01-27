@@ -148,68 +148,35 @@
 (defn as-is [xml selector]
   (-> (select1 xml selector) xml->edn strip-keys))
 
+(def xml (building-xml local-test-legacy nil))
+
+(def ...notfound... nil)
+(def ...notimplemented... nil)
+
 (defn ->rakennuksen-muttaminen [propertyId buildingId xml]
   (let [rakennus (select1 xml [:rakval:Rakennus])]
-    (merge {}
-           (as-is rakennus [:rakval:verkostoliittymat])
-           {
-     :rakennuksenOmistajat {:0 {:_selected "henkilo"
-                                :henkilo {:henkilotiedot {:etunimi nil
-                                                          :hetu nil
-                                                          :sukunimi nil}
-                                          :osoite {:katu nil
-                                                   :postinumero nil
-                                                   :postitoimipaikka nil},
-                                          :yhteystiedot {:email nil
-                                                         :fax nil
-                                                         :puhelin nil}},
-                                :yritys {:liikeJaYhteisoTunnus nil
-                                         :osoite {:katu nil
-                                                  :postinumero nil
-                                                  :postitoimipaikka nil},
-                                         :yhteyshenkilo {:henkilotiedot {:etunimi nil
-                                                                         :sukunimi nil},
-                                                         :yhteystiedot {:email nil
-                                                                        :fax nil
-                                                                        :puhelin nil}},
-                                         :yritysnimi nil}}},
-     :kaytto {:kayttotarkoitus nil
-              :rakentajaTyyppi nil}
-     :luokitus {:energialuokka nil
-                :paloluokka nil}
-     :mitat {:kellarinpinta-ala nil
-             :kerrosala nil
-             :kerrosluku nil
-             :kokonaisala nil
-             :tilavuus nil}
-     :rakenne {:julkisivu nil
-               :kantavaRakennusaine nil
-               :rakentamistapa nil}
-     :lammitys {:lammitystapa nil
-                :lammonlahde nil}
-     :muutostyolaji nil
-     :varusteet {:kaasuKytkin nil
-                 :lamminvesiKytkin nil
-                 :sahkoKytkin nil
-                 :vaestonsuoja nil
-                 :vesijohtoKytkin nil
-                 :viemariKytkin nil
-                 :saunoja nil
-                 :hissiKytkin nil
-                 :koneellinenilmastointiKytkin nil
-                 :aurinkopaneeliKytkin nil},
-     :huoneistot {:0 {:huoneistoTunnus {:huoneistonumero nil
-                                        :jakokirjain nil
-                                        :porras nil},
-                      :huoneistonTyyppi {:huoneistoTyyppi nil
-                                         :huoneistoala nil
-                                         :huoneluku nil},
-                      :keittionTyyppi nil
-                      :varusteet {:ammeTaiSuihku nil
-                                  :lamminvesi nil
-                                  :parvekeTaiTerassi nil
-                                  :sauna nil
-                                  :wc nil}}}}))
+    (strip-empty-maps
+      (strip-nils
+        (merge {}
+               (as-is rakennus [:rakval:verkostoliittymat])
+               (as-is rakennus [:rakval:varusteet])
+               {:rakennuksenOmistajat ...notimplemented...
+                :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
+                         :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
+                :luokitus {:energialuokka ...notfound...
+                           :paloluokka ...notfound...}
+                :mitat {:kellarinpinta-ala ...notfound...
+                        :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
+                        :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
+                        :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
+                        :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
+                :rakenne {:julkisivu (-> rakennus (select1 [:rakval:julkisivumateriaali]) text)
+                          :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
+                          :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
+                :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
+                           :lammonlahde ...notimplemented...}
+                :muutostyolaji ...notimplemented...
+                :huoneistot ...notimplemented...})))))
 
 (defn ->building [xml]
   (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
