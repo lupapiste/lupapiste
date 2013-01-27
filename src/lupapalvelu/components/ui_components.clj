@@ -20,6 +20,7 @@
                        "knockout.mapping-2.3.2.js"
                        "knockout.validation.js"]}
    :underscore   {:js ["underscore.js"]}
+   :moment       {:js ["moment.min.js"]}
    :init         {:js ["hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
@@ -27,7 +28,7 @@
 
    :debug        (if (env/dev-mode?) debugjs {})
 
-   :common       {:depends [:init :jquery :knockout :underscore :debug]
+   :common       {:depends [:init :jquery :knockout :underscore :moment :debug]
                   :js ["event.js" "pageutil.js" "loc.js" "notify.js" "ajax.js"
                        "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
