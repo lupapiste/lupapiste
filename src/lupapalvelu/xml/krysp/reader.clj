@@ -46,21 +46,35 @@
   "translates all keys against the dictionary. loses all keys without translation."
   [dictionary m] (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
 
+(defn as-is
+  "read stuff from xml with enlive selector, convert to edn and strip namespaces."
+  [xml selector]
+  (-> (select1 xml selector) xml->edn strip-keys))
+
 ;;
 ;; Read the Krysp from Legacy
 ;;
 
 (defn legacy-is-alive?
   "checks if the legacy system is Web Feature Service -enabled. kindof."
-  [url] (try
-          (-> url (http/get {:query-param {:request :GetCapabilities} :throw-exceptions false}) :status (= 200))
-          (catch Exception e false)))
+  [url]
+  (try
+    (-> url (http/get {:query-param {:request :GetCapabilities} :throw-exceptions false}) :status (= 200))
+    (catch Exception e false)))
 
 (defn building-xml [server id]
   (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")
         raw (:body (http/get url))
         xml (parse raw)]
     xml))
+
+(defn ->buildingIds [m]
+  {:building
+   {:propertyId (get-in m [:rakennustunnus :kiinttun])
+    :buildingId (get-in m [:rakennustunnus :rakennusnro])}})
+
+(defn get-buildings [xml]
+  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
 ;;
 ;; don't use this deprecated
@@ -73,18 +87,7 @@
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
-(defn ->buildingIds [m]
-  {:building
-   {:propertyId (get-in m [:rakennustunnus :kiinttun])
-    :buildingId (get-in m [:rakennustunnus :rakennusnro])}})
-
-(defn get-buildings [xml]
-  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
-
-(defn as-is
-  [xml selector]
-  (-> (select1 xml selector) xml->edn strip-keys))
-
+; for spiking purposes
 (def xml (building-xml local-test-legacy nil))
 
 (def ...notfound... nil)
@@ -114,23 +117,6 @@
                            :lammonlahde ...notimplemented...}
                 :muutostyolaji ...notimplemented...
                 :huoneistot ...notimplemented...})))))
-
-(defn ->building [xml]
-  (let [data (get-in xml [:Rakennusvalvonta :valmisRakennustieto :ValmisRakennus :rakennustieto :Rakennus :rakennuksenTiedot :asuinhuoneistot])
-        body {:huoneistoTunnus
-              {:huoneistonumero nil :jakokirjain nil :porras nil}
-              :huoneistonTyyppi
-              {:huoneistoTyyppi (get-in data [:valmisHuoneisto :huoneistonTyyppi])
-               :huoneistoala (get-in data [:valmisHuoneisto :huoneistoala])
-               :huoneluku (get-in data [:valmisHuoneisto :huoneluku])}
-              :keittionTyyppi nil
-              :varusteet
-              {:ammeTaiSuihku (get-in data [:valmisHuoneisto :varusteet :ammeTaiSuihkuKytkin])
-               :lamminvesi (get-in data [:valmisHuoneisto :varusteet :lamminvesiKytkin])
-               :parvekeTaiTerassi (get-in data [:valmisHuoneisto :varusteet :parvekeTaiTerassiKytkin])
-               :sauna (get-in data [:valmisHuoneisto :varusteet :saunaKytkin])
-               :wc (get-in data [:valmisHuoneisto :varusteet :WCKytkin])}}]
-    (-> body strip-nils strip-empty-maps)))
 
 ;;
 ;; full mappings
