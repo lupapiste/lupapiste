@@ -68,12 +68,11 @@
         xml (parse raw)]
     xml))
 
-(defn ->buildingIds [m]
-  {:building
-   {:propertyId (get-in m [:rakennustunnus :kiinttun])
-    :buildingId (get-in m [:rakennustunnus :rakennusnro])}})
+(defn- ->buildingIds [m]
+  {:propertyId (get-in m [:rakennustunnus :kiinttun])
+   :buildingId (get-in m [:rakennustunnus :rakennusnro])})
 
-(defn get-buildings [xml]
+(defn ->buildings [xml]
   (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
 ;;
@@ -122,7 +121,7 @@
 ;; full mappings
 ;;
 
-(defn ->rakennuksen-muttaminen-old [propertyId buildingId xml]
+#_(defn ->rakennuksen-muttaminen-old [propertyId buildingId xml]
   (let [data (select1 xml [:rakval:Rakennus])]
     {:verkostoliittymat {:kaapeliKytkin nil
                          :maakaasuKytkin nil
