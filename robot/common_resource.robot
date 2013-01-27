@@ -194,6 +194,11 @@ SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until page contains element  admin-header
 
+Number of requests on page
+  [Arguments]  ${request-type}  ${amount}
+  Xpath Should Match X Times  //section[@id='applications']//tr[contains(@class,'${request-type}')]  ${amount}
+
+
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
