@@ -30,7 +30,7 @@
     m))
 
 (defn create-id []
-  (.toString (ObjectId.)))
+  (str (ObjectId.)))
 
 ;;
 ;; Database Api
