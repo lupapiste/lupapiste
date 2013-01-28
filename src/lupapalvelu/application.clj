@@ -252,17 +252,17 @@
 ;;
 
 (defquery "merge-details-from-krysp"
-  {:parameters [:id]
+  {:parameters [:id :propertyId :buildingId]
    :roles-in   [:applicant :authority]}
-  [{{:keys [id]} :data :as command}]
+  [{{:keys [id propertyId buildingId]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
       (if-let [legacy (municipality/get-legacy municipality)]
-        (let [doc-name     "huoneisto"
+        (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
-              kryspxml     (krysp/building-info legacy "24500301050006")
-              new-body     (krysp/->building kryspxml)
+              kryspxml     (krysp/building-xml legacy propertyId)
+              new-body     (krysp/->rakennuksen-muttaminen kryspxml buildingId)
               merged       (merge old-body new-body)]
           (mongo/update
             :applications
@@ -281,7 +281,7 @@
   (let [municipality  (municipality/municipality-by-propertyId propertyId)]
     (if-let [legacy   (municipality/get-legacy municipality)]
       (let [kryspxml  (krysp/building-xml legacy propertyId)
-            buildings (krysp/get-buildings kryspxml)]
+            buildings (krysp/->buildings kryspxml)]
         (ok :data buildings))
       (fail :no_legacy_available))))
 
