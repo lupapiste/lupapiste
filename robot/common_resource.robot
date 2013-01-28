@@ -74,8 +74,9 @@ Go to page
   [Arguments]  ${page}
   Click link  test-${page}-link
 
-Open application
-  Wait and click by test class  application-link
+Open some application
+  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Lupahakemus']
+  Wait Until  Element should be visible  application
 
 # Open nth inforequest in list, n begins from 1
 Open nth inforequest
@@ -88,8 +89,8 @@ Open any inforequest
   Open nth inforequest  1
 
 Open attachment tab
-  Wait and click by test class  application-link
-  Wait and click element by test id  attachments-tab
+  Open some application
+  Click by test id  application-open-attachments-tab
 
 Logout
   Go to  ${LOGIN URL}
@@ -202,7 +203,7 @@ Number of requests on page
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
- 
+
 Input text by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
@@ -224,4 +225,3 @@ Click enabled by test id
   Wait until page contains element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
   Click element  xpath=//*[@data-test-id="${id}"]
-  

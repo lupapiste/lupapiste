@@ -9,14 +9,14 @@ Resource        ../../common_resource.robot
 Sonja can't submit application
   [Tags]  fail
   Sonja logs in
-  Wait and click by test class  application-link
+  Open some application
   Wait until  Element should be disabled  test-submit-application
   Logout
 
 Mikko could submit application
   [Tags]  fail
   Mikko logs in
-  Wait and click by test class  application-link
+  Open some application
   Wait Until  Element should be enabled  test-submit-application
 
 Submit date is not be visible
