@@ -16,7 +16,7 @@ Mikko goes to application page
   Wait Until  Element should be visible  application
   
 Application is in draft state
-  Applicantion state is  Luonnos
+  Wait until  Applicantion state is  Luonnos
   Click by test id  application-open-conversation-tab
   Wait Until  Element should be visible  application-conversation-tab
   Comment count is  0
@@ -27,7 +27,7 @@ Mikko adds a comment
   Wait Until  Comment count is  1
 
 Application is now in stage valmisteilla
-  Applicantion state is  Valmisteilla
+  Wait until  Applicantion state is  Valmisteilla
   Logout
 
 Sonja should see one (Sipoo) application
