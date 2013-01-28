@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 Mikko opens application to see verdict
   [Tags]  fail
   Mikko logs in
-  Open some application
+  Open the application
   Sleep  1
 
 Application does not have verdict
@@ -32,7 +32,7 @@ Solita Admin can log in and gives verdict
 Mikko opens application
   [Tags]  fail
   Mikko logs in
-  Open some application
+  Open the application
   
 Application verdict is visible to applicant
   [Tags]  fail
@@ -43,7 +43,7 @@ Application verdict is visible to applicant
 Sonja opens application
   [Tags]  fail
   Sonja logs in
-  Open some application
+  Open the application
 
 Application verdict is visible to authority
   [Tags]  fail
