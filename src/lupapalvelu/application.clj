@@ -262,7 +262,7 @@
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (krysp/->rakennuksen-muttaminen kryspxml buildingId)
               merged       (merge old-body new-body)]
-          #_(mongo/update
+          (mongo/update
             :applications
             {:_id (:id application)
              :documents {$elemMatch {:schema.info.name doc-name}}}
