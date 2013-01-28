@@ -83,12 +83,14 @@
         roles-in-the-end (:roles assigned-app)]
     (count roles-before-assignation) => 1
     (count roles-in-the-end) => 1))
-(comment
-  ; Do 30 applications:
-  (doseq [muni ["753" "837" "186"]
-          address (map (partial str "Katu ") (range 1 11))]
-    (create-app :municipality muni :address address)))
 
+(comment
+  (apply-remote-minimal)
+  ; Do 70 applications in each municipality:
+  (doseq [muni ["753" "837" "186"]
+          address-type ["Katu " "Kuja " "V\u00E4yl\u00E4 " "Tie " "Polku " "H\u00E4meentie " "H\u00E4meenkatu "]
+          address (map (partial str address-type) (range 1 11))]
+    (create-app :municipality muni :address address)))
 
 (comment
   ; Should rewrite this as a couple of unit tests
