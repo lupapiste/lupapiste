@@ -13,6 +13,8 @@
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
+            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.util :as util]
             [lupapalvelu.util :as util]
             [lupapalvelu.operations :as operations]))
 
@@ -171,23 +173,26 @@
         (ok :id id)))))
 
 (defn- make-attachments [created op]
-  (for [[type-group type-ids] (partition 2 (:attachments (operations/operations op) []))
+  (for [[type-group type-ids] (partition 2 (:attachments (operations/operations op)))
         type-id type-ids]
     {:id (mongo/create-id)
-     :type {:type-group type-group
-            :type-id type-id}
+     :type {:type-group type-group :type-id type-id}
      :state :requires_user_action
      :modified created
      :versions []}))
 
-(defn- make-documents [user created op]
-  (letfn [(make [schema-name] {:id (mongo/create-id)
-                               :created created
-                               :schema (schemas/schemas schema-name)
-                               :body {}})]
-    (conj (map make (:required (operations/operations op) []))
-          (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
-          (update-in (make (:schema (operations/operations op))) [:schema :info] merge {:op true :removable true}))))
+(defn- make-documents [user created existing-documents op]
+  (let [make (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
+        op-info               (operations/operations op)
+        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+        required-schema-names (filter (complement existing-schema-names) (:required op-info))
+        required-docs         (map make required-schema-names)
+        op-schema-name        (:schema op-info)
+        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        new-docs              (cons op-doc required-docs)]
+    (if user
+      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user)) new-docs)
+      new-docs)))
 
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
@@ -211,7 +216,7 @@
        :title         (:address data)
        :roles         {:applicant owner}
        :auth          [owner]
-       :documents     (make-documents user created op)
+       :documents     (make-documents user created nil op)
        :attachments   (make-attachments created op)
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
@@ -233,23 +238,16 @@
   [command]
   (with-application command
     (fn [application]
-      (let [data       (:data command)
-            id         (:id data)
-            op         (:operation data)
-            doc-id     (mongo/create-id)
-            operation  {:operation op :doc-id doc-id}
-            document   {:id doc-id
-                        :created (:created command)
-                        :schema (schemas/schemas op)
-                        :body {}}
-            document   (update-in document [:schema :info] merge {:op true :removable true})]
-        (mongo/update-by-id :applications id {$push {:operations operation
-                                                     :documents document}})))))
+      (let [id         (get-in command [:data :id])
+            created    (:created command)
+            documents  (:documents application)
+            op         (keyword (get-in command [:data :operation]))
+            new-docs   (make-documents nil created documents op)]
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}})))))
 
-(defn get-legacy [municipality-id]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
-        legacy       (:legacy municipality)]
-    (when-not (s/blank? legacy) legacy)))
+;;
+;; krysp enrichment
+;;
 
 (defquery "merge-details-from-krysp"
   {:parameters [:id]
@@ -257,12 +255,12 @@
   [{{:keys [id]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
-      (if-let [legacy (get-legacy municipality)]
+      (if-let [legacy (municipality/get-legacy municipality)]
         (let [doc-name     "huoneisto"
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
               kryspxml     (krysp/building-info legacy "24500301050006")
-              new-body     (krysp/building-document kryspxml)
+              new-body     (krysp/->building kryspxml)
               merged       (merge old-body new-body)]
           (mongo/update
             :applications
@@ -272,3 +270,15 @@
                    :modified (:created command)}})
           (ok :old old-body :new new-body :merged merged))
         (fail :no_legacy_available)))))
+
+(defquery "get-building-info-from-legacy"
+  {:parameters [:propertyId]
+   ;;:authenticated true
+   }
+  [{{:keys [propertyId]} :data}]
+  (let [municipality  (municipality/municipality-by-propertyId propertyId)]
+    (if-let [legacy   (municipality/get-legacy municipality)]
+      (let [kryspxml  (krysp/building-xml legacy propertyId)
+            buildings (krysp/get-buildings kryspxml)]
+        (ok :data buildings))
+      (fail :no_legacy_available))))

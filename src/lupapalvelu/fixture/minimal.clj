@@ -131,7 +131,8 @@
                                :url "http://sipoo.fi"}
                               {:nameFin "Rakennusvalvonta"
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                      :legacy "http://212.213.116.162/geoserver/wfs"}
+                      ;;:legacy "http://212.213.116.162/geoserver/wfs"}
+                      :legacy "http://localhost:8000/krysp/building.xml"}
                      {:id "837"
                       :nameFin "Tampere"
                       :nameSve "Tammerfors"
