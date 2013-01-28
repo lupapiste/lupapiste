@@ -304,9 +304,8 @@
   (assoc data data-field (if (keyword? app-field) (get application app-field) (app-field application))))
 
 (defn make-row [application]
-  (let [kind (if (:infoRequest application) "inforequest" "application")
-        base {"DT_RowId" (str "applications-list-row" \: kind \: (:_id application))
-              "DT_RowClass" kind}]
+  (let [base {"id" (:_id application)
+              "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
 (defn make-query [user-query params]
