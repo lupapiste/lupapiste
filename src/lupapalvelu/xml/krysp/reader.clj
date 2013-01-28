@@ -121,7 +121,21 @@
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
                     :lammonlahde ...notimplemented...}
          :muutostyolaji ...notimplemented...
-         :huoneistot ...notimplemented...}))))
+         :huoneistot (->>
+                       (select rakennus [:rakval:valmisHuoneisto])
+                       (map (fn [huoneisto]
+                              {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:rakval:huoneistonumero]) text)
+                                                 :jakokirjain ...notfound...
+                                                 :porras (-> huoneisto (select1 [:rakval:porras]) text)}
+                               :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:rakval:huoneistonTyyppi]) text)
+                                                  :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
+                                                  :huoneluku (-> huoneisto (select1 [:rakval:huoneluku]) text)}
+                               :keittionTyyppi (-> huoneisto (select1 [:rakval:keittionTyyppi]) text)
+                               :varusteet {:ammeTaiSuihku (-> huoneisto (select1 [:rakval:ammeTaiSuihkuKytkin]) text)
+                                           :lamminvesi (-> huoneisto (select1 [:rakval:lamminvesiKytkin]) text)
+                                           :parvekeTaiTerassi (-> huoneisto (select1 [:rakval:parvekeTaiTerassiKytkin]) text)
+                                           :sauna (-> huoneisto (select1 [:rakval:saunaKytkin]) text)
+                                           :wc (-> huoneisto (select1 [:rakval:WCKytkin]) text)}})))}))))
 
 ;;
 ;; full mappings

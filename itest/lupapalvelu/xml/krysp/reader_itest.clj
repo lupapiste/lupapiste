@@ -32,26 +32,29 @@
     (fact "valid buildingid returns mapped document"
       (let [building1 (->rakennuksen-muuttaminen xml "001")]
         building1 => truthy
-        building1 => (just
-                       {:verkostoliittymat {:viemariKytkin true
-                                            :maakaasuKytkin false
-                                            :sahkoKytkin true
-                                            :vesijohtoKytkin true
-                                            :kaapeliKytkin false}
-                        :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
-                        :mitat {:kerrosluku "5"
-                                :kokonaisala "2582"
-                                :tilavuus "8240"}
-                        :rakenne {:julkisivu "betoni"
-                                  :kantavaRakennusaine "betoni"
-                                  :rakentamistapa "elementti"}
-                        :lammitys {:lammitystapa "vesikeskus"}
-                        :varusteet {:kaasuKytkin false
-                                    :lamminvesiKytkin true
-                                    :sahkoKytkin true
-                                    :vaestonsuoja "54"
-                                    :vesijohtoKytkin true
-                                    :viemariKytkin true
-                                    :hissiKytkin false
-                                    :koneellinenilmastointiKytkin true
-                                    :aurinkopaneeliKytkin false}})))))
+
+        (fact "without :huoneistot everything matches"
+          (dissoc building1 :huoneistot)
+            => (just
+                 {:verkostoliittymat {:viemariKytkin true
+                                      :maakaasuKytkin false
+                                      :sahkoKytkin true
+                                      :vesijohtoKytkin true
+                                      :kaapeliKytkin false}
+                  :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
+                  :mitat {:kerrosluku "5"
+                          :kokonaisala "2582"
+                          :tilavuus "8240"}
+                  :rakenne {:julkisivu "betoni"
+                            :kantavaRakennusaine "betoni"
+                            :rakentamistapa "elementti"}
+                  :lammitys {:lammitystapa "vesikeskus"}
+                  :varusteet {:kaasuKytkin false
+                              :lamminvesiKytkin true
+                              :sahkoKytkin true
+                              :vaestonsuoja "54"
+                              :vesijohtoKytkin true
+                              :viemariKytkin true
+                              :hissiKytkin false
+                              :koneellinenilmastointiKytkin true
+                              :aurinkopaneeliKytkin false}}))))))
