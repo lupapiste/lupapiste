@@ -317,7 +317,7 @@
       (condp = kind
         "applications" {:infoRequest false}
         "inforequests" {:infoRequest true}
-        {})
+        nil)
       (when-not (blank? search)
         {:title {$regex search $options "i"}}))))
 
