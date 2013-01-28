@@ -2,7 +2,8 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.action :only [application-query-for get-application-as]])
+        [lupapalvelu.action :only [application-query-for get-application-as]]
+        [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
@@ -221,12 +222,13 @@
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types))
-       :comments      (if-let [message (:message data)]
-                        [{:text message
-                          :target  {:type "application"}
-                          :created created
-                          :user    (security/summary user)}]
-                        [])
+       :comments      (let [message (:message data)]
+                        (if-not (blank? message)
+                          [{:text message
+                            :target   {:type "application"}
+                            :created  created
+                            :user     (security/summary user)}]
+                          []))
        :permitType     (keyword (:permitType data))})
     (ok :id id)))
 
