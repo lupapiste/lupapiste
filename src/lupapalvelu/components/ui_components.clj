@@ -74,15 +74,13 @@
                   :js ["create.js"]
                   :html ["create.html"]}
 
-   :applicant    {:depends [:common :map :applications
-                            :application :attachment
-                            :docgen :create :buildinfo :mypage]
+   :applicant    {:depends [:common :map :applications :application :attachment
+                            :buildinfo :docgen :create :mypage]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :map :application
-                            :authority-applications :attachment :buildinfo :docgen
-                            :mypage]
+   :authority    {:depends [:common :map :applications :application :attachment
+                            :buildinfo :docgen :mypage]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -114,8 +112,13 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}})
 
-; Make sure that all resources are available:
+; Make sure all dependencies are resolvable:
+(doseq [[component {dependencies :depends}] ui-components
+        dependency dependencies]
+  (if-not (contains? ui-components dependency)
+    (throw (Exception. (format "Component '%s' has dependency to missing component '%s'" component dependency)))))
 
+; Make sure that all resources are available:
 (doseq [c (keys ui-components)
         r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
   (if (not (fn? r))
