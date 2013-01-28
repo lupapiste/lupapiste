@@ -1,4 +1,5 @@
 (ns lupapalvelu.mongo
+  (:refer-clojure :exclude [count])
   (:use monger.operators
         lupapalvelu.log)
   (:require [monger.core :as m]
@@ -29,7 +30,7 @@
     m))
 
 (defn create-id []
-  (.toString (ObjectId.)))
+  (str (ObjectId.)))
 
 ;;
 ;; Database Api
@@ -105,6 +106,13 @@
      :content-length (.getLength attachment)
      :file-name (.getFilename attachment)
      :application (.getString (.getMetaData attachment) "application")}))
+
+(defn count
+  "returns count of objects in collection"
+  ([collection]
+    (mc/count collection))
+  ([collection query]
+    (mc/count collection query)))
 
 ;;
 ;; Bootstrappin'

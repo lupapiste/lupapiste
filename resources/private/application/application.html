@@ -4,16 +4,16 @@
   <section class="page" id="application">
 
     <div class="breadcrumb" data-bind="with: application">
-      <a href="#!/applications" id="test-applications" data-bind="ltext: 'permitApplications'">Lupahakemukset</a>
-       / <span data-bind="text: title"></span>
+      <a href="#!/applications" data-bind="ltext: 'requests'" data-test-id="application-requests"></a>
+      <span>/</span>
+      <span data-bind="text: title" data-test-id="application-title"></span>
     </div>
 
     <div class="application_summary">
       <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
 
       <div data-bind="with: application">
-        <h1 data-bind="text: address">
-        </h1>
+        <h1 data-bind="text: address"></h1>
 
         <div class="application_summary_info">
           <div>
@@ -23,7 +23,7 @@
           </div>
           <div>
             <p data-bind="ltext: ''">Tila:</p>
-            <span id="test-application-state" class="application_summary_text" data-bind="ltext: state"></span>
+            <span data-bind="ltext: state" data-test-id="application-state" class="application_summary_text"></span>
           </div>
           <div>
             <p data-bind="ltext: ''">Lupatyyppi:</p>
@@ -37,14 +37,14 @@
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
               <p data-bind="ltext: ''">Käsittelijä:</p>
-              <span id="test-application-assignee" class="application_summary_text">
-                <select data-bind="options: $root.authorities,
-                                   optionsText: function(item) {
-                                    return item.firstName + ' ' + item.lastName;
-                                   },
-                                   optionsValue: 'id',
-                                   value: $root.application.assignee,
-                                   optionsCaption: loc('choose')"></select>
+              <span class="application_summary_text">
+                <select
+                  data-bind="options: $root.authorities,
+                             optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                             optionsValue: 'id',
+                             value: $root.application.assignee,
+                             optionsCaption: loc('choose')"
+                   data-test-id="application-assigneed-authority"></select>
                </span>
             </div>
           <!-- /ko -->
@@ -66,37 +66,30 @@
           <button data-bind="ltext: '', click: approveApplication, enable: $root.authorization.ok('approve-application')" type="submit" class="btn btn-primary"  data-test-id="approve-application">Siirrä kuntarekisteriin</button>
           <button data-bind="ltext: 'create-inforequest.inforequest', enable:false" class="todo btn action-bar-button">Kysy neuvoa</button>
           <button data-bind="ltext: '', click: addOperation, enable: $root.authorization.ok('add-operation')" class="todo btn action-bar-button">Lisää toimenpide</button>
-          <button data-bind="ltext: '', click: cancelApplication, enable: $root.authorization.ok('cancel-application')" class="btn action-bar-button" data-test-id="cancel-application-btn">Peruuta hakemus</button>
+          <button data-bind="ltext: '', click: cancelApplication, enable: $root.authorization.ok('cancel-application')" data-test-id="application-cancel-btn" class="btn action-bar-button">Peruuta hakemus</button>
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application_tab"   id="test-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#parties_tab"       id="test-parties-tab"      >Osapuolet</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#attachments_tab"   data-test-id="attachments-tab"  >Suunnitelmat ja liitteet</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#decision_tab"      id="test-verdict-tab"      >Päätös</a></li>
-            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#conversation_tab"  id="test-conversation-tab" >Keskusteluketju</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application-application-tab"   data-test-id="application-open-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application-parties-tab"       data-test-id="application-open-parties-tab"      >Osapuolet</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application-attachments-tab"   data-test-id="application-open-attachments-tab"  >Suunnitelmat ja liitteet</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application-decision-tab"      data-test-id="application-open-verdict-tab"      >Päätös</a></li>
+            <li><a data-bind="ltext: '', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" >Keskusteluketju</a></li>
           </ul>
         </div>
       </div>
     </div>
+    
     <div class="sidebar">
       <aside class="instructions">
           <h3 data-bind="ltext: ''">Ohje</h3>
-          <p data-bind="ltext: ''">T&auml;ss&auml; n&auml;kym&auml;ss&auml; voit
-          k&auml;sitell&auml; hakemuksen tietoja. Voit kysy&auml; tarvittaessa
-          neuvoa rakennusvalvonnasta keskusteluketjussa. Voit j&auml;tt&auml;&auml;
-          valmiin hakemuksen k&auml;sittelyyn painamalla "J&auml;t&auml; hakemus"
-          nappia. T&auml;ll&auml;in rakennusvirannomainen tarkistaa hakemuksesi ja
-          ottaa sen k&auml;sittelyyn. Tehty&auml;&auml;n p&auml;&auml;t&auml;ksen
-          rakennusviranomainen siirt&auml;&auml; hakemuksen tilaan hyv&auml;ksytty
-          tai ev&auml;tty. Varsinaisen p&auml;&auml;t&auml;sp&auml;yt&auml;kirjan
-          l&auml;yd&auml;t "P&auml;&auml;t&auml;s"-v&auml;lilehdelt&auml;</p>
+          <p data-bind="ltext: ''"></p>
       </aside>
     </div>
 
     <div class="tab-content-container container">
 
-      <div class="tab-content" id="application_tab" style="display: block;">
+      <div id="application-application-tab" class="tab-content" style="display: block;">
 
         <div data-bind="with: $root.application.propertyId">
           <div style="border: 3px coral solid;">
@@ -124,9 +117,11 @@
                 </ul>
               </div>
               <br/>
-              <a href="#"  id="test-add-invite"
-                 data-window-id="dialog-valtuutus" class="modal"
-                 data-bind="ltext: '', visible: $root.authorization.ok('invite')">Lis&auml;&auml; valtuutus</a>
+              <a href="#"
+                data-bind="ltext: '', visible: $root.authorization.ok('invite')" 
+                data-test-id="application-add-invite"
+                data-window-id="dialog-valtuutus"
+                class="modal"></a>
             </div>
             <h3 data-bind="ltext: ''">Kutsutut</h3>
 
@@ -151,7 +146,7 @@
         </div>
       </div>
 
-      <div class="tab-content" id="parties_tab" style="display: block;">
+      <div id="application-parties-tab" class="tab-content" style="display: block;">
         <!-- docgen generated content: -->
         <div class="application_section">
           <div id="partiesDocgen">
@@ -160,14 +155,10 @@
         </div>
       </div>
 
-      <div class="tab-content" id="conversation_tab" data-bind="with: $root.comment">
-        <p data-bind="ltext: ''" class="tab-info">
-        T&auml;&auml;ll&auml; voit keskustella hakemuksesta viranomaisten ja valtuutettujen,
-        kuten suunnittelijan kanssa. Kun kirjoitat viestin, viranomainen n&auml;kee hakemuksesi
-        ja voi vastata esitt&auml;miisi kysymyksiin. N&auml;in voitte yhdess&auml; valmistella
-        hakemusta ennen sen j&auml;tt&auml;mist&auml;.</p>
+      <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
+        <p data-bind="ltext: ''" class="tab-info"></p>
         <div class="tab-wrapper">
-          <table class="table table-striped conversation">
+          <table class="table table-striped conversation" data-test-id="application-comments-table">
             <tbody data-bind="foreach: comments">
               <tr class="comment">
                 <td class="comment-party commenttd">
@@ -184,15 +175,23 @@
           </table>
           <form>
             <h3 data-bind="ltext: ''">Kirjoita viesti:</h3>
-            <textarea class="form-input textarea" id="commentText"
-              data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
-            <button id="application.addComment"
-              data-bind="ltext: '', disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
+            <textarea
+              data-bind="value: text, valueUpdate: 'afterkeydown'"
+              data-test-id="application-new-comment-text"
+              class="form-input textarea"
+              rows="3"
+              placeholder="Kirjoita viesti">
+            </textarea>
+            <button
+              data-bind="ltext: '', disable: disabled, click: submit"
+              data-test-id="application-new-comment-btn"
+              type="submit"
+              class="btn btn-primary"></button>
           </form>
         </div>
       </div>
 
-      <div class="tab-content" id="decision_tab" data-bind="with: application">
+      <div id="application-decision-tab" class="tab-content" data-bind="with: application">
         <div class="tab-wrapper">
           <div class="row" data-bind="with: verdict">
             <span id="test-application-verdict" data-bind="text: text"></span>
@@ -200,7 +199,7 @@
         </div>
       </div>
 
-      <div class="tab-content" id="attachments_tab">
+      <div id="application-attachments-tab" class="tab-content">
         <p data-bind="ltext: ''" class="tab-info">T&auml;nne voit lis&auml;t&auml;
           hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml;
           sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n

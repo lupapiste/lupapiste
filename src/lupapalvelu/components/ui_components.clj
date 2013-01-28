@@ -14,11 +14,13 @@
                        "jquery.ba-hashchange.js"
                        "jquery.pnotify.min.js"
                        "jquery.metadata-2.1.js"
-                       "jquery.autocomplete.js"]}
+                       "jquery.autocomplete.js"
+                       "jquery.dataTables.js"]}
    :knockout     {:js ["knockout-2.1.0.debug.js"
                        "knockout.mapping-2.3.2.js"
                        "knockout.validation.js"]}
    :underscore   {:js ["underscore.js"]}
+   :moment       {:js ["moment.min.js"]}
    :init         {:js ["hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
@@ -26,11 +28,10 @@
 
    :debug        (if (env/dev-mode?) debugjs {})
 
-   :common       {:depends [:init :jquery :knockout :underscore :debug]
+   :common       {:depends [:init :jquery :knockout :underscore :moment :debug]
                   :js ["event.js" "pageutil.js" "loc.js" "notify.js" "ajax.js"
                        "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "comment.js" "authorization.js"
-                       "address.js"]
+                       "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
@@ -51,22 +52,10 @@
                   :js ["application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html"]}
 
-   :tablesorter  {:depends [:jquery]
-                  :js ["jquery.tablesorter-2.0.5b.js" "lupapiste.tablesorter.js"]
-                  :css ["tablesorter.css"]}
-
-   :applications-common {:depends [:tablesorter :invites]
-                         :html ["inforequests.html" "all-applications.html"]
-                         :js ["applications.js" "inforequests-config.js"]}
-
-   :applications {:depends [:common :repository :applications-common]
-                  :js ["applications-config.js"]
-                  :css ["applications.css"]
-                  :html ["applications.html"]}
-
-   :authority-applications {:depends [:common :repository :applications-common]
-                            :js ["applications-config.js"]
-                            :html ["applications.html"]}
+   :applications {:depends [:common :repository :invites]
+                  :html ["applications.html"]
+                  :js ["applications.js"]
+                  :css ["applications.css"]}
 
    :attachment   {:depends [:common :repository]
                   :js ["attachment.js"]
@@ -81,24 +70,17 @@
                   :js ["docgen.js"]
                   :css ["docgen.css"]}
 
-   :create-application  {:depends [:common :tree]
-                         :js ["create-application.js"]
-                         :html (map (partial format "create-application-%02d.html") (range 1 (inc 3)))}
+   :create       {:depends [:common]
+                  :js ["create.js"]
+                  :html ["create.html"]}
 
-   :create-inforequest  {:depends [:common]
-                         :js ["create-inforequest.js"]
-                         :html ["create-inforequest.html" "create-inforequest-2.html"]}
-
-   :applicant    {:depends [:common :map :applications
-                            :application :attachment :create-application :docgen
-                            :create-inforequest :buildinfo
-                            :mypage]
+   :applicant    {:depends [:common :map :applications :application :attachment
+                            :buildinfo :docgen :create :mypage]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :map :application
-                            :authority-applications :attachment :buildinfo :docgen
-                            :mypage]
+   :authority    {:depends [:common :map :applications :application :attachment
+                            :buildinfo :docgen :mypage]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -130,8 +112,13 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}})
 
-; Make sure that all resources are available:
+; Make sure all dependencies are resolvable:
+(doseq [[component {dependencies :depends}] ui-components
+        dependency dependencies]
+  (if-not (contains? ui-components dependency)
+    (throw (Exception. (format "Component '%s' has dependency to missing component '%s'" component dependency)))))
 
+; Make sure that all resources are available:
 (doseq [c (keys ui-components)
         r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
   (if (not (fn? r))

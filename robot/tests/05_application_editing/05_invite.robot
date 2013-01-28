@@ -6,57 +6,41 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
+Mikko creates a new application
+  Mikko logs in
+  Create application  Latokuja 5, Sipoo  753  75341600250025
+  Wait until  Element should contain     xpath=//section[@id='application']//span[@data-test-id='application-title']  Latokuja 5, Sipoo
+  
+Mikko can see invitation button
+  Element should be visible  xpath=//*[@data-test-id='application-add-invite']
+
+Mikko adds comment so thate application will be visible to admin
+  Click by test id  application-open-conversation-tab
+  Wait Until  Element should be visible  application-conversation-tab
+  Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  foo
+  Click by test id  application-new-comment-btn
+
+Mikko logs out and got to nearest bar
+  Logout
+  
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
-  Open application
-  Element should not be visible  test-add-invite
+  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 5, Sipoo']
+  Wait until  Element should contain     xpath=//section[@id='application']//span[@data-test-id='application-title']  Latokuja 5, Sipoo
+  Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   Logout
-
-Mikko (the Applicant) is allowed to invite people
-  Mikko logs in
-  Open application
-  Wait until  element should be visible  test-add-invite
-
-Weird jump via tabs to get the app awake
-  Click element  test-conversation-tab
-  Click element  test-application-tab
-
-#Mikko invites Teppo
-#  [Tags]  fail
-#  Invite count is  0
-#  Click element  test-add-invite
-#  Input Text  invite-email  teppo@example.com
-#  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
-#  Click element  test-ask-for-planner
-#  Wait until  Element should be visible  xpath=//a[@class='remove-invite']
-#  Invite count is  1
-
-#Mikko can't reinvite Teppo
-#  [Tags]  fail
-#  Click element  test-add-invite
-#  Input Text  invite-email  teppo@example.com
-#  Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
-#  Click element  test-ask-for-planner
-  # TODO: print some error?
-#  Invite count is  1
-
-#Mikko can't invite himself
-#  [Tags]  fail
-#  Click element  test-add-invite
-#  Input Text  invite-email  mikko@example.com
-#  Input Text  invite-text  Voinko kutsua itseni?
-#  Click element  test-ask-for-planner
-  # TODO: print some error?
-#  Invite count is  0
-
-#Mikko removes Teppo's invite
-#  [Tags]  fail
-#  Click element  xpath=//a[@class='remove-invite']
-#  Wait until  Element should not be visible  xpath=//a[@class='remove-invite']
-#  Wait until  Invite count is  0
 
 *** Keywords ***
 
-Invite count is
-  [Arguments]  ${amount}
-  Xpath Should Match X Times  //li[@class='user-invite']  ${amount}
+Create application
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Click by test id  applications-create-new
+  Input text by test id  create-address  ${address}
+  Select From List by test id  create-municipality-select  ${municipality}  
+  Input text by test id  create-property-id  ${propertyId}
+  Click by test id  create-continue
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+  Click by test id  create-application
+  Wait Until  Element should be visible  application
