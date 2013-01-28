@@ -9,8 +9,6 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   Mikko logs in
   Create application  Latokuja 5, Sipoo  753  75341600250025
-  Wait until  Element should be visible  xpath=//section[@id='application']
-  Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
   Wait until  Element should contain     xpath=//section[@id='application']//span[@data-test-id='application-title']  Latokuja 5, Sipoo
   
 Mikko can see invitation button
@@ -27,11 +25,7 @@ Mikko logs out and got to nearest bar
   
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
-  Wait Until  Element should be visible  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 5, Sipoo']
   Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 5, Sipoo']
-  Sleep  1
-  Wait until  Element should be visible  xpath=//section[@id='application']
-  Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-id='application-title']
   Wait until  Element should contain     xpath=//section[@id='application']//span[@data-test-id='application-title']  Latokuja 5, Sipoo
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   Logout
