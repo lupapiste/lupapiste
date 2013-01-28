@@ -8,6 +8,9 @@
 (defn attr [xml] (:attrs xml))
 (defn text [xml] (-> xml :content first))
 
+(def has enlive/has)
+(defn has-text [text] (enlive/text-pred (partial = text)))
+
 (defn select [xml & path] (enlive/select xml (-> path vector flatten)))
 (defn select1 [xml & path] (first (apply select xml path)))
 

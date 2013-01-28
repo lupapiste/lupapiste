@@ -7,6 +7,7 @@ Resource        ../../common_resource.robot
 *** Test Cases ***
 
 Authority assigns an inforequest to herself and then back to no-one
+  [Tags]  fail
   Sonja logs in
   Click link  test-from-applications-to-inforequests-tab
   Wait until  No inforequest is assigned to  Sonja
@@ -18,6 +19,7 @@ Authority assigns an inforequest to herself and then back to no-one
   Logout
   
 Applicant marks inforequest answered
+  [Tags]  fail
   Mikko logs in
   Wait and click  test-from-applications-to-inforequests-tab
   Wait until  Number of visible applications on page  inforequests  2

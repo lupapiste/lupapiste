@@ -2,9 +2,11 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.action :only [application-query-for get-application-as]])
+        [lupapalvelu.action :only [application-query-for get-application-as]]
+        [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
+            [monger.query :as query]
             [lupapalvelu.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
@@ -14,7 +16,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
-            [lupapalvelu.util :as util]
             [lupapalvelu.util :as util]
             [lupapalvelu.operations :as operations]))
 
@@ -28,8 +29,8 @@
                    :schema "hakija"
                    :f (fn [doc]
                         (let [data (get-in doc [:body :henkilo :henkilotiedot])]
-                          {:firstName (:etunimi data)
-                           :lastName (:sukunimi data)}))}])
+                          {:firstName (:firstName data)
+                           :lastName (:lastName data)}))}])
 
 (defn search-doc [app schema]
   (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
@@ -185,7 +186,7 @@
   (let [make (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
         op-info               (operations/operations op)
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
-        required-schema-names (filter (complement existing-schema-names) (:required op-info))
+        required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
@@ -221,12 +222,13 @@
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types))
-       :comments      (if-let [message (:message data)]
-                        [{:text message
-                          :target  {:type "application"}
-                          :created created
-                          :user    (security/summary user)}]
-                        [])
+       :comments      (let [message (:message data)]
+                        (if-not (blank? message)
+                          [{:text message
+                            :target   {:type "application"}
+                            :created  created
+                            :user     (security/summary user)}]
+                          []))
        :permitType     (keyword (:permitType data))})
     (ok :id id)))
 
@@ -250,17 +252,17 @@
 ;;
 
 (defquery "merge-details-from-krysp"
-  {:parameters [:id]
+  {:parameters [:id :propertyId :buildingId]
    :roles-in   [:applicant :authority]}
-  [{{:keys [id]} :data :as command}]
+  [{{:keys [id propertyId buildingId]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
       (if-let [legacy (municipality/get-legacy municipality)]
-        (let [doc-name     "huoneisto"
+        (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
-              kryspxml     (krysp/building-info legacy "24500301050006")
-              new-body     (krysp/->building kryspxml)
+              kryspxml     (krysp/building-xml legacy propertyId)
+              new-body     (krysp/->rakennuksen-muttaminen kryspxml buildingId)
               merged       (merge old-body new-body)]
           (mongo/update
             :applications
@@ -279,6 +281,68 @@
   (let [municipality  (municipality/municipality-by-propertyId propertyId)]
     (if-let [legacy   (municipality/get-legacy municipality)]
       (let [kryspxml  (krysp/building-xml legacy propertyId)
-            buildings (krysp/get-buildings kryspxml)]
+            buildings (krysp/->buildings kryspxml)]
         (ok :data buildings))
       (fail :no_legacy_available))))
+
+;;
+;; Service point for jQuery dataTables:
+;;
+
+(def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
+                  :address
+                  :title
+                  :applicant
+                  :created
+                  :modified
+                  :state
+                  (comp :authority :roles)])
+
+(def col-map (zipmap col-sources (map str (range))))
+
+(defn add-field [application data [app-field data-field]]
+  (assoc data data-field (if (keyword? app-field) (get application app-field) (app-field application))))
+
+(defn make-row [application]
+  (let [kind (if (:infoRequest application) "inforequest" "application")
+        base {"DT_RowId" (str "applications-list-row" \: kind \: (:_id application))
+              "DT_RowClass" kind}]
+    (reduce (partial add-field application) base col-map)))
+
+(defn make-query [user-query params]
+  (let [search (params "sSearch")]
+    ; TODO
+    user-query))
+
+(defn applications-for-user [user params]
+  (let [user-query  (application-query-for user)
+        user-total  (mongo/count :applications user-query)
+        query       (make-query user-query params)
+        query-total (mongo/count :applications query)
+        skip        (Integer/parseInt (params "iDisplayStart"))
+        limit       (Integer/parseInt (params "iDisplayLength"))
+        apps        (query/with-collection "applications"
+                      (query/find query)
+                      (query/skip skip)
+                      (query/limit limit))
+        rows        (map (comp make-row with-meta-fields) apps)
+        echo        (str (Integer/parseInt (params "sEcho")))] ; Prevent XSS
+    {:aaData                rows
+     :iTotalRecords         user-total
+     :iTotalDisplayRecords  query-total
+     :sEcho                 echo}))
+
+(comment
+  (mc/aggregate :applications [{$skip 1 $limit 1}])
+  (require '[monger.collection :as mc])
+  (query/with-collection "applications"
+    (query/find {:state "draft"})
+    (query/skip 1)
+    (query/limit 2)
+    (query/fields [:_id :state]))
+  (mc/aggregate :applications [{$skip 1 $limit 1} {$project {:state 1}}])
+  (count (mongo/select :applications {} {:_id 1}))
+  (get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
+  (:applicant (with-meta-fields ))
+  (mongo/count :applications {:state "openz"})
+  (mongo/select :applications (application-query-for user)))
