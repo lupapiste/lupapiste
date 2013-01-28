@@ -289,7 +289,7 @@
 ;; Service point for jQuery dataTables:
 ;;
 
-(def col-sources [:infoRequest
+(def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   :address
                   :title
                   :applicant
