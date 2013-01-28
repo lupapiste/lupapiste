@@ -13,11 +13,9 @@ ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
 ${LOGIN URL}                    ${SERVER}/fi/welcome#!/login
-${LOGOUT URL}                    ${SERVER}/logout
+${LOGOUT URL}                   ${SERVER}/fi/logout
 ${APPLICATIONS PATH}            /fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /fi/authority#!/applications
-${INFOREQUESTS URL}   			${SERVER}/fi/applicant#!/inforequests
-${AUTHORITY INFOREQUESTS URL}   ${SERVER}/fi/authority#!/inforequests
 ${FIXTURE URL}                  ${SERVER}/fixture
 
 ${SELENIUM}                     ${EMPTY}
