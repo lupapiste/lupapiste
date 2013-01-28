@@ -11,13 +11,6 @@ Application is not assigned
   Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
   Application is not assigned
 
-Testing
-  Sleep  1
-  ${label} =  Get Selected List Label  xpath=//select[@data-test-id='application-assigneed-authority']
-  ${value} =  Get Selected List Value  xpath=//select[@data-test-id='application-assigneed-authority']
-  Log  Label is ${label}
-  Log  Value is ${value}
-  
 Sonja assign application to herself
   Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sonja Sibbo
   
