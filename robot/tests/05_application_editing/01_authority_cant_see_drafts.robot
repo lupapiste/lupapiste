@@ -17,6 +17,8 @@ Mikko goes to application page
   
 Application is in draft state
   Wait until  Applicantion state is  Luonnos
+  
+There are no comments yet
   Click by test id  application-open-conversation-tab
   Wait Until  Element should be visible  application-conversation-tab
   Comment count is  0
