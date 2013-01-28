@@ -260,22 +260,13 @@
 ;; jQuery dataTables support:
 ;;
 
-(defpage "/api/data-table/user-applications" []
+(defpage "/api/data-table/applications" []
   (if-let [user (current-user)]
     (->>
       (application/applications-for-user user (:query-params (request/ring-request)))
       (resp/json)
       (resp/status 200))
     {:status 401}))
-
-(defpage "/api/data-table/municipality-applications" []
-  (let [user (current-user)]
-    (if (and user (= (:role user) "authority"))
-      (->>
-        (application/applications-for-municipality user (:query-params (request/ring-request)))
-        (resp/json)
-        (resp/status 200))
-      {:status 401})))
 
 ;;
 ;; dev utils:

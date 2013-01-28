@@ -328,10 +328,6 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
-
-(defn applications-for-municipality [user municipality query-params]
-  (println "user:" (:id user) "municipality" municipality "search:" (query-params "sSearch")))
-
 (comment
   (mc/aggregate :applications [{$skip 1 $limit 1}])
   (require '[monger.collection :as mc])
