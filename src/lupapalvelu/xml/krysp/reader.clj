@@ -98,7 +98,7 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn ->rakennuksen-muttaminen [xml buildingId]
+(defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [rakennus (select1 xml [:rakval:rakennustieto :> (enlive/has [:rakval:rakennusnro (enlive/text-pred (partial = buildingId))])])
         polished (comp strip-empty-maps strip-nils convert-booleans (partial merge {}))]
     (when rakennus
@@ -127,7 +127,7 @@
 ;; full mappings
 ;;
 
-#_(defn ->rakennuksen-muttaminen-old [propertyId buildingId xml]
+#_(defn ->rakennuksen-muuttaminen-old [propertyId buildingId xml]
   (let [data (select1 xml [:rakval:Rakennus])]
     {:verkostoliittymat {:kaapeliKytkin nil
                          :maakaasuKytkin nil

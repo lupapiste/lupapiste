@@ -27,10 +27,10 @@
     xml => truthy
 
     (fact "invalid buildingid returns nil"
-      (->rakennuksen-muttaminen xml "007") => nil)
+      (->rakennuksen-muuttaminen xml "007") => nil)
 
     (fact "valid buildingid returns mapped document"
-      (let [building1 (->rakennuksen-muttaminen xml "001")]
+      (let [building1 (->rakennuksen-muuttaminen xml "001")]
         building1 => truthy
         building1 => (just
                        {:verkostoliittymat {:viemariKytkin true

@@ -262,7 +262,7 @@
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (krysp/->rakennuksen-muttaminen kryspxml buildingId)
+              new-body     (krysp/->rakennuksen-muuttaminen kryspxml buildingId)
               merged       (merge old-body new-body)]
           (mongo/update
             :applications
