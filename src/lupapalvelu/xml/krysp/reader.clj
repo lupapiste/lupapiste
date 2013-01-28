@@ -92,13 +92,6 @@
   (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
 ;;
-;; don't use this deprecated
-;;
-
-(defn building-info [server id]
-  (-> (building-xml server id) xml->edn strip-keys))
-
-;;
 ;; Mappings from KRYSP to Lupapiste domain
 ;;
 
