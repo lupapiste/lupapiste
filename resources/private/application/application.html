@@ -13,8 +13,7 @@
       <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
 
       <div data-bind="with: application">
-        <h1 data-bind="text: address">
-        </h1>
+        <h1 data-bind="text: address" data-test-id="application-name"></h1>
 
         <div class="application_summary_info">
           <div>
@@ -109,9 +108,11 @@
                 </ul>
               </div>
               <br/>
-              <a href="#"  id="test-add-invite"
-                 data-window-id="dialog-valtuutus" class="modal"
-                 data-bind="ltext: '', visible: $root.authorization.ok('invite')">Lis&auml;&auml; valtuutus</a>
+              <a href="#"
+                data-bind="ltext: '', visible: $root.authorization.ok('invite')" 
+                data-test-id="application-add-invite"
+                data-window-id="dialog-valtuutus"
+                class="modal"></a>
             </div>
             <h3 data-bind="ltext: ''">Kutsutut</h3>
 
