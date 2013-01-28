@@ -41,17 +41,17 @@
           <label data-bind="ltext: 'newRequest.municipality'"></label>
         </div>
         <select
-          data-bind="options: municipalities,
+                data-bind="options: municipalities,
                      optionsText: getMunicipalityName,
-                     optionsValue: 'municipalityCode',
-                     value: municipalityCode,
+                           optionsValue: 'municipalityCode',
+                           value: municipalityCode,
                      optionsCaption: loc('choose')"
           data-test-id="create-municipality-select"
           class="form-input long create-application-form">
         </select>
       </div>
 
-      <div>
+    <div>
         <div class="label-container">
           <label data-bind="ltext: 'newRequest.propertyId'"></label>
         </div>
@@ -60,14 +60,14 @@
           data-test-id="create-property-id"
           type="text"
           class="form-input text long create-application-form"></input>
-      </div>
+    </div>
 
       <div class="create-application-actions">
         <button
             data-bind="enable: addressOk, click: showPart2.bind($data, true), ltext: 'continue'"
             class="btn btn-primary application-create btn-wizard"
             data-test-id="create-continue">
-        </button>
+    </button>
       </div>
     </div>
     
