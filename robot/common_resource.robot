@@ -74,8 +74,9 @@ Go to page
   [Arguments]  ${page}
   Click link  test-${page}-link
 
-Open some application
-  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Lupahakemus']
+Open the application
+  # Must open the same application (Latokuja 1) every time so that the tests are deterministic
+  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
   Wait Until  Element should be visible  application
 
 # Open nth inforequest in list, n begins from 1
@@ -89,7 +90,7 @@ Open any inforequest
   Open nth inforequest  1
 
 Open attachment tab
-  Open some application
+  Open the application
   Click by test id  application-open-attachments-tab
 
 Logout

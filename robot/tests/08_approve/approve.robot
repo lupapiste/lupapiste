@@ -8,14 +8,14 @@ Resource        ../../common_resource.robot
 Mikko can't approve application
   [Tags]  fail
   Mikko logs in
-  Open some application
+  Open the application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id="approve-application"]
   Logout
 
 Sonja logs in for approval
   [Tags]  fail
   Sonja logs in
-  Open some application
+  Open the application
 
 Sonja approves application
   [Tags]  fail
