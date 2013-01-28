@@ -52,9 +52,13 @@ Authority-admin front page should be open
 Admin front page should be open
   Wait until page contains element  admin-header
 
-Number of visible applications on page
-  [Arguments]  ${pageid}  ${amount}
-  Xpath Should Match X Times  //*[@id='${pageid}']//tr[contains(@class,'application')]  ${amount}
+Number of visible applications
+  [Arguments]  ${amount}
+  Xpath Should Match X Times  //section[@id='applications']//tr[contains(@class,'application')]  ${amount}
+
+Number of visible inforequests
+  [Arguments]  ${amount}
+  Xpath Should Match X Times  //section[@id='applications']//tr[contains(@class,'inforequest')]  ${amount}
 
 Wait and click
   [Arguments]  ${element}
@@ -79,15 +83,10 @@ Open the application
   Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
   Wait Until  Element should be visible  application
 
-# Open nth inforequest in list, n begins from 1
-Open nth inforequest
-  [Arguments]  ${Index}
-  Go to  ${AUTHORITY INFOREQUESTS URL}
-  Wait until page contains element  //tr[@data-test-class="inforequest-row"]
-  Click element  //tr[@data-test-class="inforequest-row"][${Index}]
-
-Open any inforequest
-  Open nth inforequest  1
+Open the inforequest
+  # Must open the same inforequest (Latokuja 2) every time so that the tests are deterministic
+  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'inforequest')]//td[text()='Latokuja 2, Sipoo']
+  Wait Until  Element should be visible  inforequest
 
 Open attachment tab
   Open the application
