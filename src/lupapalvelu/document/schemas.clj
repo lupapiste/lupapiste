@@ -82,29 +82,29 @@
                             })) ; TODO miten liitteet hanskataan
 
 (def huoneisto-body [{:name "huoneistoTunnus" :type :group
-              :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
-                     {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
-                     {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
-             {:name "huoneistonTyyppi"
-              :type :group
-              :body [{:name "huoneistoTyyppi" :type :select
-                      :body [{:name "asuinhuoneisto"}
-                             {:name "toimitila"}
+                      :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
+                             {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                             {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
+                     {:name "huoneistonTyyppi"
+                      :type :group
+                      :body [{:name "huoneistoTyyppi" :type :select
+                              :body [{:name "asuinhuoneisto"}
+                                     {:name "toimitila"}
+                                     {:name "ei tiedossa"}]}
+                             {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
+                             {:name "huoneluku" :type :string :size "m"}]}
+                     {:name "keittionTyyppi" :type :select
+                      :body [{:name "keittio"}
+                             {:name "keittokomero"}
+                             {:name "keittotila"}
+                             {:name "tupakeittio"}
                              {:name "ei tiedossa"}]}
-                      {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
-                      {:name "huoneluku" :type :string :size "m"}]}
-             {:name "keittionTyyppi" :type :select
-              :body [{:name "keittio"}
-                     {:name "keittokomero"}
-                     {:name "keittotila"}
-                     {:name "tupakeittio"}
-                     {:name "ei tiedossa"}]}
-             {:name "varusteet" :type :choice
-              :body [{:name "wc" :type :checkbox}
-                     {:name "ammeTaiSuihku" :type :checkbox}
-                     {:name "sauna" :type :checkbox}
-                     {:name "parvekeTaiTerassi" :type :checkbox}
-                     {:name "lamminvesi" :type :checkbox}]}])
+                     {:name "varusteet" :type :choice
+                      :body [{:name "wc" :type :checkbox}
+                             {:name "ammeTaiSuihku" :type :checkbox}
+                             {:name "sauna" :type :checkbox}
+                             {:name "parvekeTaiTerassi" :type :checkbox}
+                             {:name "lamminvesi" :type :checkbox}]}])
 
 (def rakennuksen-tiedot [
              {:name "kaytto"
@@ -271,17 +271,17 @@
 
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
-                          :type :group :repeating true
-                          :body party-body}])
+                             :type :group :repeating true
+                             :body party-body}])
 
 (def muutostyonlaji [{:name :muutostyolaji :type :select
-                               :body
-                               [{:name "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t"}
-                                {:name "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"}
-                                {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
-                               )
+                      :body
+                      [{:name "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t"}
+                       {:name "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"}
+                       {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
+  )
 
-(def rakennuksen-muuttaminen (into muutostyonlaji (into rakennuksen-omistajat rakennuksen-tiedot)))
+(def rakennuksen-muuttaminen (concat muutostyonlaji rakennuksen-omistajat rakennuksen-tiedot))
 
 (def schemas
   (to-map-by-name
@@ -327,9 +327,9 @@
 
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
-     
+
      ; Rest are templates for future. Just guessing...
-     
+
      {:info {:name "asuinrakennus"}
       :body [{:name "foo" :type :string}]}
      {:info {:name "vapaa-ajan-asuinrakennus"}
@@ -378,4 +378,3 @@
       :body [{:name "foo" :type :string}]}
      {:info {:name "muu-maisema-toimenpide"}
       :body [{:name "foo" :type :string}]}]))
-
