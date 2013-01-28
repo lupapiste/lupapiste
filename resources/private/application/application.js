@@ -411,7 +411,6 @@
       var id = application.id();
       var buildingId = model.buildingId();
       var propertyId = model.propertyId();
-      console.log(id,buildingId,propertyId);
       ajax
         .command("merge-details-from-krysp", {id: id, buildingId: buildingId, propertyId: propertyId})
         .success(function() { hub.send("load-application", {id: id});})
