@@ -289,17 +289,19 @@
 ;; Service point for jQuery dataTables:
 ;;
 
-(def col-map {:infoRequest "0"
-              :address     "1"
-              :title       "2"
-              :applicant   "3"
-              :created     "4"
-              :modified    "5"
-              :state       "6"
-              :permitType  "7"})
+(def col-sources [:infoRequest
+                  :address
+                  :title
+                  :applicant
+                  :created
+                  :modified
+                  :state
+                  (comp :authority :roles)])
+
+(def col-map (zipmap col-sources (map str (range))))
 
 (defn add-field [application data [app-field data-field]]
-  (assoc data data-field (get application app-field)))
+  (assoc data data-field (if (keyword? app-field) (get application app-field) (app-field application))))
 
 (defn make-row [application]
   (let [kind (if (:infoRequest application) "inforequest" "application")
