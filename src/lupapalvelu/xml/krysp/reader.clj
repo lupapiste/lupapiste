@@ -4,6 +4,7 @@
             [sade.client :as client]
             [clojure.walk :refer [postwalk postwalk-demo]]
             [lupapalvelu.document.schemas :as schema]
+            [net.cgrand.enlive-html :as enlive]
             [clj-http.client :as http]))
 
 ;;
@@ -18,8 +19,8 @@
 ;;
 
 (defn strip-key
-  "removes namespacey part of a keyword key of a map entry"
-  [[k v]] (if (keyword? k) [(-> k name (s/split #":") last keyword) v] [k v]))
+  "removes namespacey part of a keyword key"
+  [k] (if (keyword? k) (-> k name (s/split #":") last keyword) k))
 
 (defn postwalk-map
   "traverses m and applies f to all maps within"
@@ -27,7 +28,7 @@
 
 (defn strip-keys
   "removes recursively all namespacey parts from map keywords keys"
-  [m] (postwalk-map (partial map strip-key) m))
+  [m] (postwalk-map (partial map (fn [[k v]] [(strip-key k) v])) m))
 
 (defn strip-nils
   "removes recursively all keys from map which have value of nil"
@@ -36,6 +37,21 @@
 (defn strip-empty-maps
   "removes recursively all keys from map which have empty map as value"
   [m] (postwalk-map (partial filter (comp (partial not= {}) val)) m))
+
+(defn to-boolean
+  "converts 'true' and 'false' strings to booleans. returns others as-are."
+  [v] (condp = v
+        "true" true
+        "false" false
+        v))
+
+(defn convert-booleans
+  "changes recursively all stringy boolean values to booleans"
+  [m] (postwalk-map (partial map (fn [[k v]] [k (to-boolean v)])) m))
+
+(defn strip-xml-namespaces
+  "strips namespace-part of xml-element-keys"
+  [xml] (postwalk-map (partial map (fn [[k v]] [k (if (= :tag k) (strip-key v) v)])) xml))
 
 (defn translate
   "translates a value against the dictionary. return nil if cant be translated."
@@ -89,30 +105,30 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn ->rakennuksen-muttaminen [propertyId buildingId xml]
-  (let [rakennus (select1 xml [:rakval:Rakennus])]
-    (strip-empty-maps
-      (strip-nils
-        (merge {}
-               (as-is rakennus [:rakval:verkostoliittymat])
-               (as-is rakennus [:rakval:varusteet])
-               {:rakennuksenOmistajat ...notimplemented...
-                :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
-                         :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-                :luokitus {:energialuokka ...notfound...
-                           :paloluokka ...notfound...}
-                :mitat {:kellarinpinta-ala ...notfound...
-                        :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
-                        :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
-                        :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
-                        :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
-                :rakenne {:julkisivu (-> rakennus (select1 [:rakval:julkisivumateriaali]) text)
-                          :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
-                          :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
-                :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
-                           :lammonlahde ...notimplemented...}
-                :muutostyolaji ...notimplemented...
-                :huoneistot ...notimplemented...})))))
+(defn ->rakennuksen-muttaminen [xml buildingId]
+  (let [rakennus (select1 xml [:rakval:rakennustieto :> (enlive/has [:rakval:rakennusnro (enlive/text-pred (partial = buildingId))])])
+        polished (comp strip-empty-maps strip-nils convert-booleans (partial merge {}))]
+    (when rakennus
+      (polished
+        (as-is rakennus [:rakval:verkostoliittymat])
+        (as-is rakennus [:rakval:varusteet])
+        {:rakennuksenOmistajat ...notimplemented...
+         :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
+                  :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
+         :luokitus {:energialuokka ...notfound...
+                    :paloluokka ...notfound...}
+         :mitat {:kellarinpinta-ala ...notfound...
+                 :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
+                 :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
+                 :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
+                 :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
+         :rakenne {:julkisivu (-> rakennus (select1 [:rakval:julkisivumateriaali]) text)
+                   :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
+                   :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
+         :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
+                    :lammonlahde ...notimplemented...}
+         :muutostyolaji ...notimplemented...
+         :huoneistot ...notimplemented...}))))
 
 ;;
 ;; full mappings
