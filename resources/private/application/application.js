@@ -406,6 +406,18 @@
           .call();
       }
     };
+
+    self.merge = function(model) {
+      var id = application.id();
+      var buildingId = model.buildingId();
+      var propertyId = model.propertyId();
+      console.log(id,buildingId,propertyId);
+      ajax
+        .command("merge-details-from-krysp", {id: id, buildingId: buildingId, propertyId: propertyId})
+        .call();
+      return false;
+    };
+
   }
 
 
