@@ -279,6 +279,6 @@
   (let [municipality  (municipality/municipality-by-propertyId propertyId)]
     (if-let [legacy   (municipality/get-legacy municipality)]
       (let [kryspxml  (krysp/building-xml legacy propertyId)
-            buildings (krysp/get-buildings kryspxml)]
+            buildings (krysp/->buildings kryspxml)]
         (ok :data buildings))
       (fail :no_legacy_available))))
