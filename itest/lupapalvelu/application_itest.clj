@@ -5,42 +5,39 @@
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.document.schemas :as schemas]))
 
+(defn- create-app [& args]
+  (let [args (->> args
+               (apply hash-map)
+               (merge {:permitType "buildingPermit"
+                       :operation "asuinrakennus"
+                       :propertyId "1"
+                       :x 444444 :y 6666666
+                       :address "foo 42, bar"
+                       :municipality "753"})
+               (mapcat seq))]
+    (apply command pena :create-application args)))
+
 (fact "creating application without message"
   (apply-remote-minimal)
-  (let [resp            (command pena :create-application
-                                 :permitType "buildingPermit"
-                                 :operation "asuinrakennus"
-                                 :propertyId "1"
-                                 :x 444444 :y 6666666
-                                 :address "foo 42, bar"
-                                 :municipality "753")
-        application-id  (:id resp)
-        resp            (query pena :application :id application-id)
-        application     (:application resp)]
-    application => (contains {:id application-id
-                              :state "draft"
-                              :location {:x 444444 :y 6666666}
-                              :permitType "buildingPermit"})
-    (count (:comments application)) => 0
-    (first (:auth application)) => (contains
-                                     {:firstName "Pena"
-                                      :lastName "Panaani"
-                                      :type "owner"
-                                      :role "owner"})
-    (:allowedAttachmentTypes application) => (complement empty?)))
+  (let [resp  (create-app)
+        id    (:id resp)
+        resp  (query pena :application :id id)
+        app   (:application resp)]
+    app => (contains {:id id
+                      :state "draft"
+                      :location {:x 444444 :y 6666666}
+                      :permitType "buildingPermit"
+                      :municipality "753"})
+    (count (:comments app)) => 0
+    (first (:auth app)) => (contains
+                             {:firstName "Pena"
+                              :lastName "Panaani"
+                              :type "owner"
+                              :role "owner"})
+    (:allowedAttachmentTypes app) => (complement empty?)))
 
-(defn- create-app []
-  (command pena :create-application
-           :permitType "buildingPermit"
-           :operation "asuinrakennus"
-           :propertyId "1"
-           :x 444444 :y 6666666
-           :address "foo 42, bar"
-           :municipality "753"
-           :message "hello"))
-
-(fact "creating application message"
-  (let [resp            (create-app)
+(fact "creating application with message"
+  (let [resp            (create-app :message "hello")
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
         application     (:application resp)
@@ -86,6 +83,12 @@
         roles-in-the-end (:roles assigned-app)]
     (count roles-before-assignation) => 1
     (count roles-in-the-end) => 1))
+(comment
+  ; Do 30 applications:
+  (doseq [muni ["753" "837" "186"]
+          address (map (partial str "Katu ") (range 1 11))]
+    (create-app :municipality muni :address address)))
+
 
 (comment
   ; Should rewrite this as a couple of unit tests
@@ -98,14 +101,7 @@
                         (schemas/schemas "b")      => {:info {:name "b"}, :body []}
                         (schemas/schemas "bar")    => {:info {:name "bar"}, :body []}
                         (schemas/schemas "c")      => {:info {:name "c"}, :body []})
-    (let [id (:id (command pena :create-application
-                           :operation "foo"
-                           :permitType "buildingPermit"
-                           :propertyId "1"
-                           :x 444444 :y 6666666
-                           :address "foo 42, bar"
-                           :municipality "753"
-                           :message "hello"))
+    (let [id (:id (create-app :operation "foo"))
           app (:application (query pena :application :id id))
           docs (:documents app)
           find-by-schema? (fn [docs schema-name] (some (fn [doc] (if (= schema-name (-> doc :schema :info :name)) doc)) docs))]
