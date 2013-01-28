@@ -7,26 +7,32 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Admin adds new municipality link
+  [Tags]  fail
   Sipoo logs in
   Add link  fancy-link  http://reddit.com
   
 Mikko asks information and sees the new link
+  [Tags]  fail
   Mikko logs in
   User sees link  fancy-link  http://reddit.com
 
 Admin changes link target
+  [Tags]  fail
   Sipoo logs in
   Update link  fancy-link  http://slashdot.org
   
 Mikko asks information and sees updated link
+  [Tags]  fail
   Mikko logs in
   User sees link  fancy-link  http://slashdot.org
 
 Admin removes the link
+  [Tags]  fail
   Sipoo logs in
   Remove link  fancy-link
   
 Mikko asks information and does not see link
+  [Tags]  fail
   Mikko logs in
   User does not see link  fancy-link
   
