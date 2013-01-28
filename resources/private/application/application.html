@@ -98,10 +98,9 @@
 
       <div class="tab-content" id="application_tab" style="display: block;">
 
-
         <div data-bind="with: $root.application.propertyId">
           <div style="border: 3px coral solid;">
-            Rakennuksen tietojen valinta
+            hae rakennuksen tiedot <a href="#" data-bind="click: $root.buildingsModel.load">Kryspistä</a><br>
             <ul data-bind="foreach: $root.buildingsModel.data">
               <li><a href="#" data-bind="text: 'rakennus '+buildingId(), click: $root.buildingsModel.merge"></a></li>
             </ul>

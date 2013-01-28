@@ -290,8 +290,6 @@
       applicationMap.clear().add(x, y).center(x, y, 10);
       inforequestMap.clear().add(x, y).center(x, y, 10);
 
-      buildingsModel.load();
-
       // docgen:
 
       var save = function(path, value, callback, data) {
@@ -405,6 +403,7 @@
           .success(function(d) { self.data(ko.mapping.fromJS(d.data));})
           .call();
       }
+      return false;
     };
 
     self.merge = function(model) {
