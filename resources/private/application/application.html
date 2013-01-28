@@ -38,14 +38,14 @@
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
               <p data-bind="ltext: ''">Käsittelijä:</p>
-              <span id="test-application-assignee" class="application_summary_text">
-                <select data-bind="options: $root.authorities,
-                                   optionsText: function(item) {
-                                    return item.firstName + ' ' + item.lastName;
-                                   },
-                                   optionsValue: 'id',
-                                   value: $root.application.assignee,
-                                   optionsCaption: loc('choose')"></select>
+              <span class="application_summary_text">
+                <select
+                  data-bind="options: $root.authorities,
+                             optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                             optionsValue: 'id',
+                             value: $root.application.assignee,
+                             optionsCaption: loc('choose')"
+                   data-test-id="application-assigneed-authority"></select>
                </span>
             </div>
           <!-- /ko -->
