@@ -79,6 +79,11 @@ Open the application
   Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
   Wait Until  Element should be visible  application
 
+Open the info request
+  # Must open the same info request (Latokuja 2) every time so that the tests are deterministic
+  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'inforequest')]//td[text()='Latokuja 2, Sipoo']
+  Wait Until  Element should be visible  application
+
 # Open nth inforequest in list, n begins from 1
 Open nth inforequest
   [Arguments]  ${Index}

@@ -12,12 +12,12 @@ Sonja should not see applications at this stage
 
 Mikko goes to application page
   Mikko logs in
-  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
+  Open the application
   Wait Until  Element should be visible  application
-  
+
 Application is in draft state
   Wait until  Applicantion state is  Luonnos
-  
+
 There are no comments yet
   Click by test id  application-open-conversation-tab
   Wait Until  Element should be visible  application-conversation-tab
