@@ -312,10 +312,14 @@
   (let [search (params :sSearch)
         kind (params :kind)]
     (println "Search:" search "Kind:" kind)
-    (condp = kind
-      "applications" (assoc query :infoRequest false)
-      "inforequests" (assoc query :infoRequest true)
-      query)))
+    (merge
+      query
+      (condp = kind
+        "applications" {:infoRequest false}
+        "inforequests" {:infoRequest true}
+        {})
+      (when-not (blank? search)
+        {:title {$regex search $options "i"}}))))
 
 (defn applications-for-user [user params]
   (let [user-query  (application-query-for user)
