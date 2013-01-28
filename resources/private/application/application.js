@@ -9,6 +9,7 @@
   var commentModel = comments.create();
   var applicationMap;
   var inforequestMap;
+  var buildingsModel = new BuildingsModel();
 
   var removeDocModel = new function() {
     var self = this;
@@ -289,6 +290,8 @@
       applicationMap.clear().add(x, y).center(x, y, 10);
       inforequestMap.clear().add(x, y).center(x, y, 10);
 
+      buildingsModel.load();
+
       // docgen:
 
       var save = function(path, value, callback, data) {
@@ -389,6 +392,23 @@
     };
   }
 
+  function BuildingsModel() {
+    var self = this;
+
+    self.data = ko.observableArray();
+
+    self.load = function() {
+      var propertyId = application.propertyId();
+      if(propertyId) {
+        ajax
+          .query("get-building-info-from-legacy", {propertyId: propertyId})
+          .success(function(d) { self.data(ko.mapping.fromJS(d.data));})
+          .call();
+      }
+    };
+  }
+
+
   var tab = {
     tabClick: function(data, event) {
       var target = event.target;
@@ -443,7 +463,8 @@
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian,
-      removeDocModel: removeDocModel
+      removeDocModel: removeDocModel,
+      buildingsModel: buildingsModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);

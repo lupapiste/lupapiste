@@ -98,6 +98,10 @@
 
       <div class="tab-content" id="application_tab" style="display: block;">
 
+        <ul data-bind="foreach: $root.buildingsModel.data">
+          <li><a href="#" data-bind="text: buildingId, click: $root.buildingsModel.merge"></a></li>
+        </ul>
+
         <div class="application_section" data-bind="with: application">
           <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick">
             <span class="font-icon icon-expanded"></span> <span data-bind="ltext: ''">Hakemuksen perustiedot</span></h2>
@@ -304,7 +308,7 @@
         </div>
       </div>
     </div>
-    
+
     </div>
   </section>
 </body>
