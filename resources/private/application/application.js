@@ -12,19 +12,19 @@
 
   var removeDocModel = new function() {
     var self = this;
-    
+
     self.appId = ko.observable();
     self.docId = ko.observable();
     self.docName = ko.observable();
     self.callback = null;
-    
+
     self.init = function(appId, docId, docName, callback) {
       self.appId(appId).docId(docId).docName(docName);
       self.callback = callback;
       LUPAPISTE.ModalDialog.open("#dialog-remove-doc");
       return self;
     };
-    
+
     self.ok = function() {
       ajax
         .command("remove-doc", {id: self.appId(), docId: self.docId()})
@@ -32,11 +32,11 @@
         .call();
       return false;
     };
-    
+
     self.cancel = function() { return true; };
 
   };
-  
+
   function ApplicationModel() {
     var self = this;
 
@@ -164,7 +164,7 @@
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     },
-    
+
     cancelApplication: function() {
       var id = application.id();
       ajax
@@ -185,7 +185,7 @@
   function getLatestVersion(attachment) {
     return _.last(attachment.versions || []);
   }
-  
+
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
@@ -247,25 +247,25 @@
     isInitializing = true;
     debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
-      
+
       // new data mapping
-      
+
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
       // Operations:
-      
+
       // FIXME: scan from documents
       application.operations([{operation: "foo"}, {operation: "bar"}]);
-      
+
       // Comments:
-      
+
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
 
       // Attachments:
-      
+
       var statuses = {
         requires_user_action: "missing",
         requires_authority_action: "new",
