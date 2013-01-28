@@ -390,6 +390,7 @@
     };
   }
 
+  // TODO: has dependency on scoped application. should go via models!
   function BuildingsModel() {
     var self = this;
 
@@ -413,6 +414,7 @@
       console.log(id,buildingId,propertyId);
       ajax
         .command("merge-details-from-krysp", {id: id, buildingId: buildingId, propertyId: propertyId})
+        .success(function() { hub.send("load-application", {id: id});})
         .call();
       return false;
     };
