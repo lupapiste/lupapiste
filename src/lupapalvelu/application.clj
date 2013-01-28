@@ -259,7 +259,7 @@
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
-              kryspxml     (krysp/building-info legacy propertyId)
+              kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (krysp/->rakennuksen-muttaminen kryspxml buildingId)
               merged       (merge old-body new-body)]
           #_(mongo/update
