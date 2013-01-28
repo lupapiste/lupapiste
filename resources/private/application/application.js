@@ -9,22 +9,23 @@
   var commentModel = comments.create();
   var applicationMap;
   var inforequestMap;
+  var buildingsModel = new BuildingsModel();
 
   var removeDocModel = new function() {
     var self = this;
-    
+
     self.appId = ko.observable();
     self.docId = ko.observable();
     self.docName = ko.observable();
     self.callback = null;
-    
+
     self.init = function(appId, docId, docName, callback) {
       self.appId(appId).docId(docId).docName(docName);
       self.callback = callback;
       LUPAPISTE.ModalDialog.open("#dialog-remove-doc");
       return self;
     };
-    
+
     self.ok = function() {
       ajax
         .command("remove-doc", {id: self.appId(), docId: self.docId()})
@@ -32,11 +33,11 @@
         .call();
       return false;
     };
-    
+
     self.cancel = function() { return true; };
 
   };
-  
+
   function ApplicationModel() {
     var self = this;
 
@@ -164,7 +165,7 @@
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     },
-    
+
     cancelApplication: function() {
       var id = application.id();
       ajax
@@ -185,7 +186,7 @@
   function getLatestVersion(attachment) {
     return _.last(attachment.versions || []);
   }
-  
+
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
@@ -247,14 +248,24 @@
     isInitializing = true;
     debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
+
       // new data mapping
+
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
-      // comments
+      // Operations:
+
+      // FIXME: scan from documents
+      application.operations([{operation: "foo"}, {operation: "bar"}]);
+
+      // Comments:
+
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
+
+      // Attachments:
 
       var statuses = {
         requires_user_action: "missing",
@@ -379,6 +390,38 @@
     };
   }
 
+  // TODO: has dependency on scoped application. should go via models!
+  function BuildingsModel() {
+    var self = this;
+
+    self.data = ko.observableArray();
+
+    self.load = function() {
+      var propertyId = application.propertyId();
+      if(propertyId) {
+        ajax
+          .query("get-building-info-from-legacy", {propertyId: propertyId})
+          .success(function(d) { self.data(ko.mapping.fromJS(d.data));})
+          .call();
+      }
+      return false;
+    };
+
+    self.merge = function(model) {
+      var id = application.id();
+      var buildingId = model.buildingId();
+      var propertyId = model.propertyId();
+      console.log(id,buildingId,propertyId);
+      ajax
+        .command("merge-details-from-krysp", {id: id, buildingId: buildingId, propertyId: propertyId})
+        .success(function() { hub.send("load-application", {id: id});})
+        .call();
+      return false;
+    };
+
+  }
+
+
   var tab = {
     tabClick: function(data, event) {
       var target = event.target;
@@ -433,7 +476,8 @@
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian,
-      removeDocModel: removeDocModel
+      removeDocModel: removeDocModel,
+      buildingsModel: buildingsModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);

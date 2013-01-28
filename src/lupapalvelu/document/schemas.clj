@@ -82,45 +82,31 @@
                             })) ; TODO miten liitteet hanskataan
 
 (def huoneisto-body [{:name "huoneistoTunnus" :type :group
-              :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
-                     {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
-                     {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
-             {:name "huoneistonTyyppi"
-              :type :group
-              :body [{:name "huoneistoTyyppi" :type :select
-                      :body [{:name "asuinhuoneisto"}
-                             {:name "toimitila"}
+                      :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
+                             {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
+                             {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
+                     {:name "huoneistonTyyppi"
+                      :type :group
+                      :body [{:name "huoneistoTyyppi" :type :select
+                              :body [{:name "asuinhuoneisto"}
+                                     {:name "toimitila"}
+                                     {:name "ei tiedossa"}]}
+                             {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
+                             {:name "huoneluku" :type :string :size "m"}]}
+                     {:name "keittionTyyppi" :type :select
+                      :body [{:name "keittio"}
+                             {:name "keittokomero"}
+                             {:name "keittotila"}
+                             {:name "tupakeittio"}
                              {:name "ei tiedossa"}]}
-                      {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
-                      {:name "huoneluku" :type :string :size "m"}]}
-             {:name "keittionTyyppi" :type :select
-              :body [{:name "keittio"}
-                     {:name "keittokomero"}
-                     {:name "keittotila"}
-                     {:name "tupakeittio"}
-                     {:name "ei tiedossa"}]}
-             {:name "varusteet" :type :choice
-              :body [{:name "wc" :type :checkbox}
-                     {:name "ammeTaiSuihku" :type :checkbox}
-                     {:name "sauna" :type :checkbox}
-                     {:name "parvekeTaiTerassi" :type :checkbox}
-                     {:name "lamminvesi" :type :checkbox}]}])
+                     {:name "varusteet" :type :choice
+                      :body [{:name "wc" :type :checkbox}
+                             {:name "ammeTaiSuihku" :type :checkbox}
+                             {:name "sauna" :type :checkbox}
+                             {:name "parvekeTaiTerassi" :type :checkbox}
+                             {:name "lamminvesi" :type :checkbox}]}])
 
-
-;{:name "rakennuksenOmistajat"
- ;             :type :group
-  ;            :repeating true
-   ;           :body party-body}
-
-(def schemas
-  (to-map-by-name
-    [{:info {:name "uusiRakennus"}
-      :body [
-
-             {:name "toimenpiteenKuvaus"
-              :type :group
-              :body [{:name "kuvaus" :type :text :size "l"}
-                     {:name "poikkeamiset" :type :text :size "l"}]}
+(def rakennuksen-tiedot [
              {:name "kaytto"
               :type :group
               :body [{:name "rakentajaTyyppi" :type "select"
@@ -216,46 +202,46 @@
              {:name "rakenne"
               :type :group
               :body [{:name "rakentamistapa" :type :select
-                      :body [{:name "elementti" :type :checkbox}
-                             {:name "paikalla" :type :checkbox}
-                             {:name "ei tiedossa" :type :checkbox}]}
+                      :body [{:name "elementti"}
+                             {:name "paikalla"}
+                             {:name "ei tiedossa"}]}
                      {:name "kantavaRakennusaine" :type :select
-                      :body [{:name "betoni" :type :checkbox}
-                             {:name "tiili" :type :checkbox}
-                             {:name "teras" :type :checkbox}
-                             {:name "puu" :type :checkbox}
+                      :body [{:name "betoni"}
+                             {:name "tiili"}
+                             {:name "teras"}
+                             {:name "puu"}
                              {:name "muurakennusaine" :type :string :size "s"}
-                             {:name "ei tiedossa" :type :checkbox}]}
+                             {:name "ei tiedossa"}]}
                      {:name "julkisivu" :type :select
-                      :body [{:name "betoni" :type :checkbox}
-                             {:name "tiili" :type :checkbox}
-                             {:name "metallilevy" :type :checkbox}
-                             {:name "kivi" :type :checkbox}
-                             {:name "puu" :type :checkbox}
-                             {:name "lasi" :type :checkbox}
+                      :body [{:name "betoni"}
+                             {:name "tiili"}
+                             {:name "metallilevy"}
+                             {:name "kivi"}
+                             {:name "puu"}
+                             {:name "lasi"}
                              {:name "muumateriaali" :type :string :size "s"}
-                             {:name "ei tiedossa" :type :checkbox}]}]}
+                             {:name "ei tiedossa"}]}]}
              {:name "lammitys"
               :type :group
               :body [{:name "lammitystapa" :type :select
-                      :body [{:name "vesikeskus" :type :checkbox}
-                             {:name "ilmakeskus" :type :checkbox}
-                             {:name "suorasahko" :type :checkbox}
-                             {:name "uuni" :type :checkbox}
-                             {:name "eiLammitysta" :type :checkbox}
-                             {:name "ei tiedossa" :type :checkbox}]}
+                      :body [{:name "vesikeskus"}
+                             {:name "ilmakeskus"}
+                             {:name "suorasahko"}
+                             {:name "uuni"}
+                             {:name "eiLammitysta"}
+                             {:name "ei tiedossa"}]}
                      {:name "lammonlahde" :type :select
-                      :body [{:name "kauko tai aluel\u00e4mp\u00f6" :type :checkbox}
-                             {:name "kevyt poltto\u00f6ljy" :type :checkbox}
-                             {:name "raskas poltto\u00f6ljy" :type :checkbox}
-                             {:name "s\u00e4hk\u00f6" :type :checkbox}
-                             {:name "kaasu" :type :checkbox}
-                             {:name "kiviihiili koksi tms" :type :checkbox}
-                             {:name "turve" :type :checkbox}
-                             {:name "maal\u00e4mp\u00f6" :type :checkbox}
-                             {:name "puu" :type :checkbox}
-                             {:name "muu" :type :string :size "s"}
-                             {:name "ei tiedossa" :type :checkbox}]}]}
+                      :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
+                             {:name "kevyt poltto\u00f6ljy"}
+                             {:name "raskas poltto\u00f6ljy"}
+                             {:name "s\u00e4hk\u00f6"}
+                             {:name "kaasu"}
+                             {:name "kiviihiili koksi tms"}
+                             {:name "turve"}
+                             {:name "maal\u00e4mp\u00f6"}
+                             {:name "puu"}
+                             {:name "muu" :type :string :size "s"} ;TODO tukii tekstille
+                             {:name "ei tiedossa"}]}]}
              {:name "verkostoliittymat" :type :choice
               :body [{:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
@@ -280,7 +266,30 @@
              {:name "huoneistot"
               :type :group
               :repeating true
-              :body huoneisto-body}]}
+              :body huoneisto-body}])
+
+
+
+(def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
+                             :type :group :repeating true
+                             :body party-body}])
+
+(def muutostyonlaji [{:name :muutostyolaji :type :select
+                      :body
+                      [{:name "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t"}
+                       {:name "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"}
+                       {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
+  )
+
+(def rakennuksen-muuttaminen (concat muutostyonlaji rakennuksen-omistajat rakennuksen-tiedot))
+
+(def schemas
+  (to-map-by-name
+    [{:info {:name "uusiRakennus"}
+      :body rakennuksen-tiedot}
+
+     {:info {:name "rakennuksen-muuttaminen"}
+      :body rakennuksen-muuttaminen}
 
      {:info {:name "hakija" :repeating true}
       :body party-body}
@@ -318,9 +327,9 @@
 
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
-     
+
      ; Rest are templates for future. Just guessing...
-     
+
      {:info {:name "asuinrakennus"}
       :body [{:name "foo" :type :string}]}
      {:info {:name "vapaa-ajan-asuinrakennus"}
@@ -369,4 +378,3 @@
       :body [{:name "foo" :type :string}]}
      {:info {:name "muu-maisema-toimenpide"}
       :body [{:name "foo" :type :string}]}]))
-

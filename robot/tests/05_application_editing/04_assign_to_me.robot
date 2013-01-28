@@ -7,19 +7,24 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-Sonja can assign a non-assigned application
-  Wait Until  Application is not assigned
-  Wait and click by test class  assign-to-me
+Application is not assigned
+  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
+  Application is not assigned
 
+Sonja assign application to herself
+  Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sonja Sibbo
+  
 Assignee has changed
-  Wait Until  Application is assigned  Sonja Sibbo
-
+  Wait Until  Application is assigned to  Sonja Sibbo
+  
 *** Keywords ***
 
+Application is assigned to
+  [Arguments]  ${to}
+  Wait until  Element should be visible  xpath=//select[@data-test-id='application-assigneed-authority']
+  ${assignee} =  Get selected list label  xpath=//select[@data-test-id='application-assigneed-authority']
+  Should be equal  ${assignee}  ${to}
+
 Application is not assigned
-  Element should be visible by test class  assign-to-me
+  Application is assigned to  Valitse..
   
-Application is assigned
-  [Arguments]  ${whom}
-  Wait until page contains element by test class  assigned-to-me
-  Element should contain by test class  assigned-to-me  Sonja Sibbo

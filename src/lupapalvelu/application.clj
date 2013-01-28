@@ -3,9 +3,10 @@
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.action :only [application-query-for get-application-as]]
-        [lupapalvelu.operations :only [operation->initial-schema-names operation->initial-attachemnt-types operation->allowed-attachemnt-types]])
+        [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
+            [monger.query :as query]
             [lupapalvelu.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
@@ -14,7 +15,9 @@
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
-            [lupapalvelu.util :as util]))
+            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.util :as util]
+            [lupapalvelu.operations :as operations]))
 
 ;;
 ;; Meta-fields:
@@ -26,8 +29,8 @@
                    :schema "hakija"
                    :f (fn [doc]
                         (let [data (get-in doc [:body :henkilo :henkilotiedot])]
-                          {:firstName (:etunimi data)
-                           :lastName (:sukunimi data)}))}])
+                          {:firstName (:firstName data)
+                           :lastName (:lastName data)}))}])
 
 (defn search-doc [app schema]
   (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
@@ -170,9 +173,27 @@
           {$set {:comments (:comments inforequest)}})
         (ok :id id)))))
 
-(def default-schemas {:infoRequest []
-                      :buildingPermit ["hakija" "paasuunnittelija" "suunnittelija" "maksaja"
-                                       "rakennuspaikka" "uusiRakennus" "lisatiedot"]})
+(defn- make-attachments [created op]
+  (for [[type-group type-ids] (partition 2 (:attachments (operations/operations op)))
+        type-id type-ids]
+    {:id (mongo/create-id)
+     :type {:type-group type-group :type-id type-id}
+     :state :requires_user_action
+     :modified created
+     :versions []}))
+
+(defn- make-documents [user created existing-documents op]
+  (let [make (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
+        op-info               (operations/operations op)
+        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+        required-schema-names (remove existing-schema-names (:required op-info))
+        required-docs         (map make required-schema-names)
+        op-schema-name        (:schema op-info)
+        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        new-docs              (cons op-doc required-docs)]
+    (if user
+      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user)) new-docs)
+      new-docs)))
 
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
@@ -182,17 +203,7 @@
         id            (mongo/create-id)
         owner         (role user :owner :type :owner)
         op            (keyword (:operation data))
-        op-doc-id     (mongo/create-id)
-        info-request? (if (:infoRequest data) true false)
-        make-doc      (fn [schema-name] {:id (mongo/create-id)
-                                         :created created
-                                         :schema (schemas/schemas schema-name)
-                                         :body {}})
-        make-att      (fn [type-group type-id] {:id (mongo/create-id)
-                                                :type {:type-group type-group :type-id type-id}
-                                                :state :requires_user_action
-                                                :modified created
-                                                :versions []})]
+        info-request? (if (:infoRequest data) true false)]
     (mongo/insert :applications
       {:id            id
        :created       created
@@ -206,24 +217,18 @@
        :title         (:address data)
        :roles         {:applicant owner}
        :auth          [owner]
-       :operations    [{:operation op :doc-id op-doc-id}]
-       :documents     (conj (map make-doc (operation->initial-schema-names op []))
-                            (update-in (make-doc "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user))
-                            (-> (make-doc (name op))
-                              (assoc :id op-doc-id)
-                              (update-in [:schema :info] merge {:op true :removable true})))
-       :attachments   (for [[group types] (partition 2 (operation->initial-attachemnt-types op []))
-                            kind types]
-                        (make-att group kind))
+       :documents     (make-documents user created nil op)
+       :attachments   (make-attachments created op)
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types))
-       :comments      (if-let [message (:message data)]
-                        [{:text message
-                          :target  {:type "application"}
-                          :created created
-                          :user    (security/summary user)}]
-                        [])
+       :comments      (let [message (:message data)]
+                        (if-not (blank? message)
+                          [{:text message
+                            :target   {:type "application"}
+                            :created  created
+                            :user     (security/summary user)}]
+                          []))
        :permitType     (keyword (:permitType data))})
     (ok :id id)))
 
@@ -235,36 +240,29 @@
   [command]
   (with-application command
     (fn [application]
-      (let [data       (:data command)
-            id         (:id data)
-            op         (:operation data)
-            doc-id     (mongo/create-id)
-            operation  {:operation op :doc-id doc-id}
-            document   {:id doc-id
-                        :created (:created command)
-                        :schema (schemas/schemas op)
-                        :body {}}
-            document   (update-in document [:schema :info] merge {:op true :removable true})]
-        (mongo/update-by-id :applications id {$push {:operations operation
-                                                     :documents document}})))))
+      (let [id         (get-in command [:data :id])
+            created    (:created command)
+            documents  (:documents application)
+            op         (keyword (get-in command [:data :operation]))
+            new-docs   (make-documents nil created documents op)]
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}})))))
 
-(defn get-legacy [municipality-id]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id})
-        legacy       (:legacy municipality)]
-    (when-not (s/blank? legacy) legacy)))
+;;
+;; krysp enrichment
+;;
 
 (defquery "merge-details-from-krysp"
-  {:parameters [:id]
+  {:parameters [:id :propertyId :buildingId]
    :roles-in   [:applicant :authority]}
-  [{{:keys [id]} :data :as command}]
+  [{{:keys [id propertyId buildingId]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
-      (if-let [legacy (get-legacy municipality)]
-        (let [doc-name     "huoneisto"
+      (if-let [legacy (municipality/get-legacy municipality)]
+        (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
-              kryspxml     (krysp/building-info legacy "24500301050006")
-              new-body     (krysp/building-document kryspxml)
+              kryspxml     (krysp/building-xml legacy propertyId)
+              new-body     (krysp/->rakennuksen-muttaminen kryspxml buildingId)
               merged       (merge old-body new-body)]
           (mongo/update
             :applications
@@ -274,3 +272,77 @@
                    :modified (:created command)}})
           (ok :old old-body :new new-body :merged merged))
         (fail :no_legacy_available)))))
+
+(defquery "get-building-info-from-legacy"
+  {:parameters [:propertyId]
+   ;;:authenticated true
+   }
+  [{{:keys [propertyId]} :data}]
+  (let [municipality  (municipality/municipality-by-propertyId propertyId)]
+    (if-let [legacy   (municipality/get-legacy municipality)]
+      (let [kryspxml  (krysp/building-xml legacy propertyId)
+            buildings (krysp/->buildings kryspxml)]
+        (ok :data buildings))
+      (fail :no_legacy_available))))
+
+;;
+;; Service point for jQuery dataTables:
+;;
+
+(def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
+                  :address
+                  :title
+                  :applicant
+                  :created
+                  :modified
+                  :state
+                  (comp :authority :roles)])
+
+(def col-map (zipmap col-sources (map str (range))))
+
+(defn add-field [application data [app-field data-field]]
+  (assoc data data-field (if (keyword? app-field) (get application app-field) (app-field application))))
+
+(defn make-row [application]
+  (let [kind (if (:infoRequest application) "inforequest" "application")
+        base {"DT_RowId" (str "applications-list-row" \: kind \: (:_id application))
+              "DT_RowClass" kind}]
+    (reduce (partial add-field application) base col-map)))
+
+(defn make-query [user-query params]
+  (let [search (params "sSearch")]
+    ; TODO
+    user-query))
+
+(defn applications-for-user [user params]
+  (let [user-query  (application-query-for user)
+        user-total  (mongo/count :applications user-query)
+        query       (make-query user-query params)
+        query-total (mongo/count :applications query)
+        skip        (Integer/parseInt (params "iDisplayStart"))
+        limit       (Integer/parseInt (params "iDisplayLength"))
+        apps        (query/with-collection "applications"
+                      (query/find query)
+                      (query/skip skip)
+                      (query/limit limit))
+        rows        (map (comp make-row with-meta-fields) apps)
+        echo        (str (Integer/parseInt (params "sEcho")))] ; Prevent XSS
+    {:aaData                rows
+     :iTotalRecords         user-total
+     :iTotalDisplayRecords  query-total
+     :sEcho                 echo}))
+
+(comment
+  (mc/aggregate :applications [{$skip 1 $limit 1}])
+  (require '[monger.collection :as mc])
+  (query/with-collection "applications"
+    (query/find {:state "draft"})
+    (query/skip 1)
+    (query/limit 2)
+    (query/fields [:_id :state]))
+  (mc/aggregate :applications [{$skip 1 $limit 1} {$project {:state 1}}])
+  (count (mongo/select :applications {} {:_id 1}))
+  (get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
+  (:applicant (with-meta-fields ))
+  (mongo/count :applications {:state "openz"})
+  (mongo/select :applications (application-query-for user)))

@@ -14,7 +14,7 @@
 ;;
 
 (defn- trim [s]
-  (if (s/blank? s) nil (s/trim s)))
+  (when-not (s/blank? s) (s/trim s)))
 
 (defn- parse-address [query]
   (let [[[_ street number city]] (re-seq #"([^,\d]+)\s*(\d+)?\s*(?:,\s*(.+))?" query)
@@ -105,7 +105,7 @@
 (defn point-by-property-id-proxy [request]
   (let [[status features] (-> request (:query-params) (get "property-id") (point-by-property-id))]
     (if (= status :ok)
-      (resp/json (map wfs/feature-to-position features))
+      (resp/json {:data (map wfs/feature-to-position features)})
       (do
         (error "Failed to get point by 'property-id': %s" features)
         (resp/status 503 "Service temporarily unavailable")))))

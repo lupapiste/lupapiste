@@ -18,14 +18,14 @@
             <span data-bind="text: loc(name())"></span>
           </span>
           <span data-bind="if: latestVersion">
-            <span data-bind="ltext: ''">versio</span>
+            <span data-bind="ltext: 'attachment.version'">versio</span>
             <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
-            <span data-bind="ltext: ''">muokattu</span>
+            <span data-bind="ltext: 'attachment.editDate'">muokattu</span>
             <span data-bind="dateTimeString: latestVersion().created"></span>
           </span>
         </h1>
         <div class="form-entry">
-          <label data-bind="ltext: ''" class="form-label">Vaihda liitteen tyyppi</label>
+          <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <select data-bind="value: attachmentType, foreach: attachment.regroupAttachmentTypeList(allowedAttachmentTypes())">
             <optgroup data-bind="attr: {label: loc('attachmentType.' + group + '._group_label')}, foreach: types">
               <option data-bind="text: loc('attachmentType.' + $parent.group + '.' + name), value: $parent.group + '.' + name"></option>
@@ -48,7 +48,7 @@
       </div>
 
       <div id="test-txt-file-preview" class="file-preview" data-bind="visible: !hasPreview()">
-        <p data-bind="ltext: ''">Esikatselua ei saatavilla.</p>
+        <p data-bind="ltext: 'attachment.noPreview'">Esikatselua ei saatavilla.</p>
       </div>
 
       <div class="attachment-file-versions">
@@ -56,14 +56,14 @@
           <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
           <button id="test-attachment-reject" data-bind="click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
         </div>
-        <h3 data-bind="ltext: ''">Versiohistoria:</h3>
+        <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
         <table class="table table-striped">
           <thead>
             <tr>
-              <th data-bind="ltext: ''">Tiedosto</th>
-              <th data-bind="ltext: ''">Versio</th>
-              <th data-bind="ltext: ''">Muokattu</th>
-              <th data-bind="ltext: ''">Muokkaaja</th>
+              <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
+              <th data-bind="ltext: 'attachment.version'">Versio</th>
+              <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
+              <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: versions()">
@@ -83,13 +83,13 @@
             id="add-new-attachment-version"
             class="btn"
             data-window-id="upload-dialog"
-            data-bind="click: newAttachmentVersion">
+            data-bind="click: newAttachmentVersion, ltext: 'attachment.addVersion'">
           Lisää uusi versio
         </button>
       </div>
 
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
-          <h3 data-bind="ltext: ''">Keskustele liitteestä:</h3>
+          <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
             <table class="table table-striped">
               <tbody data-bind="foreach: comments">
                 <tr class="comment" data-bind="attr: {'class': 'comment ' + $parent.category($data)}">
@@ -110,7 +110,7 @@
             <form>
               <textarea class="conversation-input" id="attachment.commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
               <button id="attachment.addComment"
-                  data-bind="disable: disabled, click: submit"
+                  data-bind="disable: disabled, click: submit, ltext: 'attachment.send'"
                   type="submit" class="btn btn-primary">Lähetä viesti</button>
             </form>
           </div>

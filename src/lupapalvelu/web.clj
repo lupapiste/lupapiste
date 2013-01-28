@@ -15,7 +15,8 @@
                          [security :as security]
                          [attachment :as attachment]
                          [proxy-services :as proxy-services]
-                         [municipality]]
+                         [municipality]
+                         [application :as application]]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
@@ -251,13 +252,21 @@
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (if (env/dev-mode?)
-    (do
-      (debug "Rejecting proxy: %s" srv)
-      {:status 201})
-    (if (logged-in?)
-      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
-      {:status 401})))
+  (if (logged-in?)
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
+    {:status 401}))
+
+;;
+;; jQuery dataTables support:
+;;
+
+(defpage "/api/data-table/applications" []
+  (if-let [user (current-user)]
+    (->>
+      (application/applications-for-user user (:query-params (request/ring-request)))
+      (resp/json)
+      (resp/status 200))
+    {:status 401}))
 
 ;;
 ;; dev utils:
