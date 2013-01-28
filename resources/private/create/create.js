@@ -17,15 +17,15 @@
     self.municipality = ko.observable("");
     self.municipalityCode = ko.observable(null);
     self.propertyId = ko.observable("");
-    
+
     self.operation = ko.observable();
     self.message = ko.observable("");
     self.links = ko.observableArray();
     self.operations = ko.observable(null);
     self.requestType = ko.observable();
-    
+
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
-    self.showPart2 = ko.observable(false);    
+    self.showPart2 = ko.observable(false);
     self.showInfoRequestMessage = ko.observable(false);
     self.proceedToInfoRequest = self.showInfoRequestMessage.bind(self, true);
 
@@ -96,13 +96,13 @@
 
     self.searchNow = function() { self.beginUpdateRequest().searchPointByAddressOrPropertyId(self.search()); return false; };
     self.searchSoon = _.debounce(self.searchNow, 500);
-    
+
     self.search.subscribe(function(v) {
       self.resetXY().setAddress(null).setPropertyId("").setMunicipality("");
       if (!isBlank(v)) self.searchSoon();
       return false;
     });
-    
+
     self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
@@ -139,7 +139,7 @@
         }
       });
     };
-    
+
     self.makeSuccess = function(requestId, fn) {
       return function(result) { if (requestId === self.updateRequestId) fn(result); };
     };
@@ -223,7 +223,7 @@
 
     model.setMap(gis.makeMap("create-map").center(404168, 6840000, 1));
     ko.applyBindings(model, $("#create")[0]);
-    
+
     $("#create-inforequest-address-search").autocomplete({
       serviceUrl:      "/proxy/find-address",
       deferRequestBy:  500,
@@ -236,9 +236,9 @@
         $("#create .tree-breadcrumbs"),
         model.operation,
         generateInfo);
-    
+
     model.operations.subscribe(tree.reset);
-    
+
   });
 
 })();
