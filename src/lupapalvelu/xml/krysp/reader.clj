@@ -18,13 +18,13 @@
 ;; Common
 ;;
 
-(defn strip-key
-  "removes namespacey part of a keyword key"
-  [k] (if (keyword? k) (-> k name (s/split #":") last keyword) k))
-
 (defn postwalk-map
   "traverses m and applies f to all maps within"
   [f m] (postwalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
+
+(defn strip-key
+  "removes namespacey part of a keyword key"
+  [k] (if (keyword? k) (-> k name (s/split #":") last keyword) k))
 
 (defn strip-keys
   "removes recursively all namespacey parts from map keywords keys"
@@ -108,9 +108,9 @@
         {:rakennuksenOmistajat ...notimplemented...
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-         :luokitus {:energialuokka ...notfound...
-                    :paloluokka ...notfound...}
-         :mitat {:kellarinpinta-ala ...notfound...
+         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
+                    :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}               ;; does-not-exist in test
+         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)     ;; does-not-exist in test
                  :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
                  :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
                  :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
