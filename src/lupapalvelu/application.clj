@@ -309,7 +309,7 @@
     (reduce (partial add-field application) base col-map)))
 
 (defn make-query [user-query params]
-  (let [search (params "sSearch")]
+  (let [search (params :sSearch)]
     ; TODO
     user-query))
 
@@ -318,18 +318,23 @@
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
         query-total (mongo/count :applications query)
-        skip        (Integer/parseInt (params "iDisplayStart"))
-        limit       (Integer/parseInt (params "iDisplayLength"))
+        skip        (params :iDisplayStart)
+        limit       (params :iDisplayLength)
         apps        (query/with-collection "applications"
                       (query/find query)
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
-        echo        (str (Integer/parseInt (params "sEcho")))] ; Prevent XSS
+        echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
+
+(defcommand "applications-for-datatables"
+  {:parameters [:params]}
+  [{user :user {params :params} :data}]
+  (ok :data (applications-for-user user params)))
 
 (comment
   (mc/aggregate :applications [{$skip 1 $limit 1}])
