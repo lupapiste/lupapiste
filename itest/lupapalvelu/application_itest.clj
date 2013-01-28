@@ -6,6 +6,7 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (fact "creating application without message"
+  (apply-remote-minimal)
   (let [resp            (command pena :create-application
                                  :permitType "buildingPermit"
                                  :operation "asuinrakennus"
