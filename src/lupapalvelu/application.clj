@@ -308,10 +308,14 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [user-query params]
-  (let [search (params :sSearch)]
-    ; TODO
-    user-query))
+(defn make-query [query params]
+  (let [search (params :sSearch)
+        kind (params :kind)]
+    (println "Search:" search "Kind:" kind)
+    (condp = kind
+      "applications" (assoc query :infoRequest false)
+      "inforequests" (assoc query :infoRequest true)
+      query)))
 
 (defn applications-for-user [user params]
   (let [user-query  (application-query-for user)
