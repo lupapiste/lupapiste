@@ -36,6 +36,19 @@
         rakennus => truthy
 
         (fact "there are 21 huoneisto" (count (keys huoneistot)) => 21)
+
+        (fact "first huoneisto is mapped correctly"
+          (:0 huoneistot) => {:huoneistoTunnus {:huoneistonumero "016"
+                                                :porras "A"}
+                              :huoneistonTyyppi {:huoneistoTyyppi "asuinhuoneisto"
+                                                 :huoneistoala "86", :huoneluku "3"}
+                              :keittionTyyppi "keittio"
+                              :varusteet {:ammeTaiSuihku true
+                                          :lamminvesi true
+                                          :parvekeTaiTerassi true
+                                          :sauna true
+                                          :wc true}})
+
         (fact "without :huoneistot everything matches"
           (dissoc rakennus :huoneistot)
             => (just
