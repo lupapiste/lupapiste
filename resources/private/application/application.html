@@ -226,11 +226,11 @@
                   <td data-bind="attr: {'class': statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
                   <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                     <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
-                      <span data-bind="if: type != null">
+                      <span data-bind="if: type">
                         <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
                       </span>
-                      <span data-bind="if: type == null">
-                        <i data-bind="ltext: ''">Nimet&ouml;n</i>
+                      <span data-bind="if: !type">
+                        <i data-bind="ltext: 'attachment.noName'">Nimet&ouml;n</i>
                       </span>
                     </a>
                   </td>
@@ -260,7 +260,7 @@
             </table>
 
           </div>
-          <div data-bind="ifnot: attachmentsByGroup.length">
+          <div data-bind="ifnot: attachmentsByGroup().length">
             <i data-bind="ltext: 'application.attachmentsEmpty'">Ei liitteit&auml;</i>
           </div>
           <button
