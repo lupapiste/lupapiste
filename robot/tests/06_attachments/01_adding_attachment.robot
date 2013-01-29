@@ -10,8 +10,7 @@ Variables      variables.py
 
 Mikko goes to empty attachments tab
   [Tags]  attachments
-  Wait and click by test class  application-link
-  Wait and click element by test id  attachments-tab
+  Open attachment tab
 
 Mikko adds txt attachment
   [Tags]  attachments
