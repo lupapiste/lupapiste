@@ -108,7 +108,8 @@
               </tbody>
             </table>
             <form>
-              <textarea class="conversation-input" id="attachment.commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
+              <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+                        class="conversation-input" id="attachment.commentText" rows="3"></textarea>
               <button id="attachment.addComment"
                   data-bind="disable: disabled, click: submit, ltext: 'attachment.send'"
                   type="submit" class="btn btn-primary">Lähetä viesti</button>
