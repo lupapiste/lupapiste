@@ -4,7 +4,6 @@
   var isInitializing = true;
   var currentId;
   var authorizationModel = authorization.create();
-  var inviteModel = new InviteModel();
   var commentModel = comments.create();
   var applicationMap;
   var inforequestMap;
@@ -357,7 +356,7 @@
     }
   });
 
-  function InviteModel() {
+  var inviteModel = function InviteModel() {
     var self = this;
 
     self.email = ko.observable();
@@ -382,7 +381,7 @@
         .call();
       return false;
     };
-  }
+  };
 
   var tab = {
     tabClick: function(data, event) {
