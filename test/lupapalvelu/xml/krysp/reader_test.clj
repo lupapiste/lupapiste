@@ -42,7 +42,10 @@
     (fact (translate-keys translations {:a 1 :b 2}) => {:A 1 :B 2})
     (fact (translate-keys translations {:a 1 :c 2}) => {:A 1})))
 
-(facts "map indexing"
+(facts "map-indexing"
+  (map-index [:a :b :c]) => {:1 :a :2 :b :3 :c})
+
+(facts "index-mapping"
   (fact (index-maps {:a {:b [{:c 1}
                              {:c 2}
                              {:c 3}]}}) => {:a {:b {:1 {:c 1}

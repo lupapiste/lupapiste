@@ -67,8 +67,11 @@
   [xml selector]
   (-> (select1 xml selector) xml->edn strip-keys))
 
+(defn map-index
+  [v] (into {} (map (fn [[k v]] (println k v) [(keyword (str k)) v]) (map-indexed vector v))))
+
 (defn index-maps
-  [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (into {} (map-indexed vector v)) v)])) m))
+  [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
 ;;
 ;; Read the Krysp from Legacy
