@@ -223,3 +223,36 @@ Click enabled by test id
   Wait until page contains element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
   Click element  xpath=//*[@data-test-id="${id}"]
+
+#
+# Helpser for creating new inforequest and application:
+#
+
+Create application
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  Click by test id  create-application
+  Wait Until  Element should be visible  application
+  Wait Until  Element should contain  xpath=//span[@data-test-id='application-title']  ${address}
+
+Create inforequest
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  Click by test id  create-proceed-to-inforequest
+  Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
+  Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
+  Click by test id  create-inforequest
+  Wait Until  Element should be visible  inforequest
+  Wait Until  Element should contain  xpath=//span[@data-test-id='inforequest-title']  ${address}
+
+Prepare new request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Execute Javascript  window.location.hash = "!/applications";
+  Click by test id  applications-create-new
+  Input text by test id  create-address  ${address}
+  Select From List by test id  create-municipality-select  ${municipality}  
+  Input text by test id  create-property-id  ${propertyId}
+  Click by test id  create-continue
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
