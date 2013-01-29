@@ -4,17 +4,19 @@
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]])
-  (:require (noir  [request :as request]
+  (:require [noir  [request :as request]
                    [response :as resp]
                    [session :as session]
-                   [server :as server])
-            (lupapalvelu [env :as env]
+                   [server :as server]]
+            [lupapalvelu [env :as env]
                          [core :as core]
                          [action :as action]
                          [singlepage :as singlepage]
                          [security :as security]
                          [attachment :as attachment]
-                         [proxy-services :as proxy-services])
+                         [proxy-services :as proxy-services]
+                         [municipality]
+                         [application :as application]]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
@@ -109,6 +111,8 @@
     {"Cache-Control" "no-cache"}
     {"Cache-Control" "public, max-age=86400"}))
 
+(def default-lang "fi")
+
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     (->>
@@ -125,8 +129,8 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:app" :app apps-pattern]] {app :app}
-  (single-resource :html (keyword app) (resp/redirect "/welcome#")))
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
+  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
 
 ;;
 ;; Login/logout:
@@ -151,6 +155,9 @@
       (info "login: failed: username=%s" username)
       (fail :error.login))))
 
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" lang "/welcome")))
+
 (defjson [:post "/api/logout"] []
   (session/clear!)
   (ok))
@@ -159,12 +166,16 @@
   (session/clear!)
   (resp/redirect "/"))
 
+(defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
+  (session/clear!)
+  (redirect-to-frontpage lang))
+
 (defpage "/" []
   (if (logged-in?)
     (if-let [application-page (applicationpage-for (:role (current-user)))]
-      (resp/redirect application-page)
-      (resp/redirect "/welcome#"))
-    (resp/redirect "/welcome#")))
+      (resp/redirect (str "/" default-lang application-page))
+      (redirect-to-frontpage default-lang))
+    (redirect-to-frontpage default-lang)))
 
 ;;
 ;; FROM SADE
@@ -243,6 +254,18 @@
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
     ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
+    {:status 401}))
+
+;;
+;; jQuery dataTables support:
+;;
+
+(defpage "/api/data-table/applications" []
+  (if-let [user (current-user)]
+    (->>
+      (application/applications-for-user user (:query-params (request/ring-request)))
+      (resp/json)
+      (resp/status 200))
     {:status 401}))
 
 ;;

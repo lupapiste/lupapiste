@@ -7,20 +7,17 @@ Resource        ../../common_resource.robot
 
 Mikko can't approve application
   Mikko logs in
-  Click element    test-application-link
-  Wait until  Element should be disabled  test-approve-application
+  Open the application
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id="approve-application"]
   Logout
 
-Sonja could approve application
+Sonja logs in for approval
   Sonja logs in
-  Click element  test-application-link
-  Wait until page contains element  application-page-is-ready
-  Element should be enabled  test-approve-application
+  Open the application
 
 Sonja approves application
-  Click element  test-approve-application
+  Click enabled by test id  approve-application
 
 Sonja cant re-approve application
-  Wait until  page should contain element  application-page-is-ready
-  Wait until  Element should be disabled  test-approve-application
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id="approve-application"]
   Logout

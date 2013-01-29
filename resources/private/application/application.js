@@ -9,6 +9,34 @@
   var commentModel = comments.create();
   var applicationMap;
   var inforequestMap;
+  var buildingsModel = new BuildingsModel();
+
+  var removeDocModel = new function() {
+    var self = this;
+
+    self.appId = ko.observable();
+    self.docId = ko.observable();
+    self.docName = ko.observable();
+    self.callback = null;
+
+    self.init = function(appId, docId, docName, callback) {
+      self.appId(appId).docId(docId).docName(docName);
+      self.callback = callback;
+      LUPAPISTE.ModalDialog.open("#dialog-remove-doc");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax
+        .command("remove-doc", {id: self.appId(), docId: self.docId()})
+        .success(self.callback)
+        .call();
+      return false;
+    };
+
+    self.cancel = function() { return true; };
+
+  };
 
   function ApplicationModel() {
     var self = this;
@@ -45,6 +73,7 @@
     attachments: ko.observableArray(),
     address: ko.observable(),
     verdict: ko.observable(),
+    operations: ko.observable(),
 
     assignee: ko.observable(),
 
@@ -136,7 +165,7 @@
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     },
-    
+
     cancelApplication: function() {
       var id = application.id();
       ajax
@@ -154,14 +183,14 @@
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
-  function getAttachmentsByGroup(attachments) {
-    var grouped = _.groupBy(attachments, function(attachment) {
-      return attachment.type['type-group'];
-    });
-    var result = _.map(grouped, function(value, key) {
-      return {group: key, attachments: value};
-    });
-    return result;
+  function getLatestVersion(attachment) {
+    return _.last(attachment.versions || []);
+  }
+
+  function getAttachmentsByGroup(source) {
+    var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
+    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
+    return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
 
   var AuthorityInfo = function(id, firstName, lastName) {
@@ -187,14 +216,10 @@
 
     debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {
-      })
-      .error(function(e) {
-        error(e);
-      })
-      .fail(function(e) {
-        error(e);
-      }).call();
+      .success(function() {})
+      .error(function(e) { error(e); })
+      .fail(function(e) { error(e); })
+      .call();
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
@@ -223,27 +248,36 @@
     isInitializing = true;
     debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
+
       // new data mapping
+
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
-      // comments
+      // Operations:
+
+      // FIXME: scan from documents
+      application.operations([{operation: "foo"}, {operation: "bar"}]);
+
+      // Comments:
+
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
 
+      // Attachments:
+
       var statuses = {
-        requires_user_action: {statusName: "missing"},
-        requires_authority_action: {statusName: "new"},
-        ok:{statusName: "ok"}
+        requires_user_action: "missing",
+        requires_authority_action: "new",
+        ok: "ok"
       };
 
-      attachments.removeAll();
-      _.each(app.attachments || [], function(a) {
-        var s = statuses[a.state];
-        a.statusName = s.statusName || "unknown";
-        attachments.push(a);
-      });
+      attachments(_.map(app.attachments || [], function(a) {
+        a.statusName = statuses[a.state] || "unknown";
+        a.latestVersion = _.last(a.versions);
+        return a;
+      }));
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 
@@ -274,19 +308,15 @@
 
       function displayDocuments(containerSelector, documents) {
 
-        var groupedDocs = _.groupBy(documents, function (doc) {
-          return doc.schema.info.name;
-      });
+        var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
 
         var displayOrder = ["rakennuspaikka", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) {
-          return _.indexOf(displayOrder, docGroup[0].schema.info.name)
-        });
+        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name) });
 
         var docgenDiv = $(containerSelector).empty();
         _.each(sortedDocs, function(docGroup) {
           _.each(docGroup, function(doc) {
-            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, doc.id, application.id()).element);
+            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
           });
 
           var schema = docGroup[0].schema;
@@ -300,7 +330,7 @@
                 .command("create-doc", {schema: schema.info.name, id: application.id()})
                 .success(function(data) {
                   var newDocId = data.doc;
-                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, newDocId, application.id()).element;
+                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application.id()).element;
                   $(self).before(newElem);
                 })
                 .call();
@@ -323,9 +353,7 @@
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
 
-      debug("set isInitializing to false");
       isInitializing = false;
-      pageutil.setPageReady("application");
     });
   }
 
@@ -361,6 +389,37 @@
       return false;
     };
   }
+
+  // TODO: has dependency on scoped application. should go via models!
+  function BuildingsModel() {
+    var self = this;
+
+    self.data = ko.observableArray();
+
+    self.load = function() {
+      var propertyId = application.propertyId();
+      if(propertyId) {
+        ajax
+          .query("get-building-info-from-legacy", {propertyId: propertyId})
+          .success(function(d) { self.data(ko.mapping.fromJS(d.data));})
+          .call();
+      }
+      return false;
+    };
+
+    self.merge = function(model) {
+      var id = application.id();
+      var buildingId = model.buildingId();
+      var propertyId = model.propertyId();
+      ajax
+        .command("merge-details-from-krysp", {id: id, buildingId: buildingId, propertyId: propertyId})
+        .success(function() { hub.send("load-application", {id: id});})
+        .call();
+      return false;
+    };
+
+  }
+
 
   var tab = {
     tabClick: function(data, event) {
@@ -415,7 +474,9 @@
       invite: inviteModel,
       authorization: authorizationModel,
       tab: tab,
-      accordian: accordian
+      accordian: accordian,
+      removeDocModel: removeDocModel,
+      buildingsModel: buildingsModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);

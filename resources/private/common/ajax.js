@@ -3,11 +3,12 @@ var ajax = (function() {
 
   var nop = function() { };
 
-  function Call(url, type) {
-    pageutil.setPageNotReady();
+  var callId = 0;
 
+  function Call(url, type) {
     var self = this;
 
+    self.callId = callId++;
     self.request = {
       url:       url,
       type:      type,
@@ -19,6 +20,7 @@ var ajax = (function() {
       success: function(e) {
         var handler = (self.rawData || e.ok) ? self.successHandler : self.errorHandler;
         handler(e);
+        onAjaxCallSuccess(self);
       },
       error: function(jqXHR, textStatus, errorThrown) {
         self.failHandler(jqXHR, textStatus, errorThrown);
@@ -104,6 +106,7 @@ var ajax = (function() {
     };
 
     self.call = function() {
+      onAjaxRequestCall(self);
       $.ajax(self.request);
       return self;
     };
@@ -127,6 +130,14 @@ var ajax = (function() {
 
   function query(name, data) {
     return new Call("/api/query/" + name, "GET").params(data);
+  }
+
+  function onAjaxRequestCall(c) {
+    $('.ajax-calls').append('<span class="ajax-call" data-ajax-call-id="'+c.callId+'">Ajax: '+c.request.url+'</span><br/>');
+  }
+
+  function onAjaxCallSuccess(c) {
+    $('.ajax-calls').children('span[data-ajax-call-id="'+c.callId+'"]').remove();
   }
 
   return {

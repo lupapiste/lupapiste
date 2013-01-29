@@ -2,24 +2,29 @@
 
 Documentation  Sonja can assign application to herself
 Suite setup    Sonja logs in
-Test teardown  Logout
+Suite teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-Sonja can assign a non-assigned application
-  Wait until page contains element  test-assign-to-me
+Application is not assigned
+  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
   Application is not assigned
-  Click element  test-assign-to-me
-  Wait until page contains element  applications-page-is-ready
-  Application is assigned  Sonja Sibbo
 
+Sonja assign application to herself
+  Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sonja Sibbo
+  
+Assignee has changed
+  Wait Until  Application is assigned to  Sonja Sibbo
+  
 *** Keywords ***
 
+Application is assigned to
+  [Arguments]  ${to}
+  Wait until  Element should be visible  xpath=//select[@data-test-id='application-assigneed-authority']
+  ${assignee} =  Get selected list label  xpath=//select[@data-test-id='application-assigneed-authority']
+  Should be equal  ${assignee}  ${to}
+
 Application is not assigned
-  Element should be visible  test-assign-to-me
+  Application is assigned to  Valitse..
   
-Application is assigned
-  [Arguments]  ${whom}
-  Wait until page contains element  test-assigned-to-me
-  Element should contain  test-assigned-to-me  Sonja Sibbo
