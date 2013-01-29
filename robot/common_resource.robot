@@ -74,21 +74,12 @@ Wait until
 
 Go to page
   [Arguments]  ${page}
-  Click link  test-${page}-link
-
-Open the application
-  # Must open the same application (Latokuja 1) every time so that the tests are deterministic
-  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
-  Wait Until  Element should be visible  application
-
-Open the inforequest
-  # Must open the same inforequest (Latokuja 2) every time so that the tests are deterministic
-  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'inforequest')]//td[text()='Latokuja 2, Sipoo']
-  Wait Until  Element should be visible  inforequest
+  Execute Javascript  window.location.hash = "!/${page}";
 
 Open attachment tab
   Open the application
   Click by test id  application-open-attachments-tab
+  Wait until  Element should be visible  application-attachments-tab
 
 Logout
   Go to  ${LOGIN URL}
@@ -229,6 +220,7 @@ Click enabled by test id
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Go to page  applications
   Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-application
   Wait Until  Element should be visible  application
