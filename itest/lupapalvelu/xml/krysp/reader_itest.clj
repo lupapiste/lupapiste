@@ -52,7 +52,8 @@
         (fact "without :huoneistot everything matches"
           (dissoc rakennus :huoneistot)
             => (just
-                 {:verkostoliittymat {:viemariKytkin true
+                 {:rakennusnro "001"
+                  :verkostoliittymat {:viemariKytkin true
                                       :maakaasuKytkin false
                                       :sahkoKytkin true
                                       :vesijohtoKytkin true
