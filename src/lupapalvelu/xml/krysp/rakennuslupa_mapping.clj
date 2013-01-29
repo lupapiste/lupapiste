@@ -120,6 +120,6 @@
   (let [
         canonical (application-to-canonical application)
         xml (element-to-xml canonical rakennuslupa_to_krysp )]
-    (with-open [out-file (writer "/Users/terotu/example-krysp.xml" )]
-      (emit xml out-file))
+    ;(with-open [out-file (writer "/Users/terotu/example-krysp.xml" )]
+     ; (emit xml out-file))
     ))
