@@ -8,7 +8,7 @@
   var applicationMap;
   var inforequestMap;
 
-  var removeDocModel = function() {
+  var removeDocModel = new function() {
     var self = this;
 
     self.appId = ko.observable();
@@ -33,9 +33,9 @@
 
     self.cancel = function() { return true; };
 
-  };
+  }();
 
-  var applicationModel = function ApplicationModel() {
+  var applicationModel = new function() {
     var self = this;
 
     self.data = ko.observable();
@@ -55,7 +55,7 @@
       }
       return value;
     }, self);
-  };
+  }();
 
   var application = {
     id: ko.observable(),
@@ -356,7 +356,7 @@
     }
   });
 
-  var inviteModel = function InviteModel() {
+  var inviteModel = new function() {
     var self = this;
 
     self.email = ko.observable();
@@ -381,7 +381,7 @@
         .call();
       return false;
     };
-  };
+  }();
 
   var tab = {
     tabClick: function(data, event) {
