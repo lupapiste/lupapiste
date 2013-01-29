@@ -309,7 +309,7 @@
         var docgenDiv = $(containerSelector).empty();
         _.each(sortedDocs, function(docGroup) {
           _.each(docGroup, function(doc) {
-            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
+            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id(),application.propertyId()).element);
           });
 
           var schema = docGroup[0].schema;
@@ -323,7 +323,7 @@
                 .command("create-doc", {schema: schema.info.name, id: application.id()})
                 .success(function(data) {
                   var newDocId = data.doc;
-                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application.id()).element;
+                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application.id(),application.propertyId()).element;
                   $(self).before(newElem);
                 })
                 .call();
