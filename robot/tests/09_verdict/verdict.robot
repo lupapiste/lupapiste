@@ -13,7 +13,7 @@ Mikko opens application to see verdict
 Application does not have verdict
   Open verdict tab
   Element should not be visible  test-application-verdict
-  ${ID} =  Get Element Attribute  xpath=//*[@data-bind-test-id='application-id']@data-test-value
+  ${ID} =  Get Element Attribute  xpath=//*[@data-test-id='inforequest-application-id']@data-test-value
   Set suite variable  ${APPLICATION ID}  ${ID}
   Logout
 
