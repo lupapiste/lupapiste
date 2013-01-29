@@ -4,6 +4,8 @@ if (typeof LUPAPISTE === "undefined") {
 
 LUPAPISTE.DOMUtils = {
   makeButton: function (id, label) {
+    "use strict";
+
     var appendButton = document.createElement("button");
     appendButton.id = id;
     appendButton.className = "btn";
@@ -104,7 +106,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
 
     var type = (spec.subtype === "email") ? "email" : "text";
     var sizeClass = self.sizeClasses[spec.size] || "";
-    var input = makeInput(type, myPath, model[spec.name], save, sizeClass)
+    var input = makeInput(type, myPath, model[spec.name], save, sizeClass);
 
     if (spec.unit) {
       var inputAndUnit = document.createElement("span");
@@ -246,7 +248,19 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var select = document.createElement("select");
     select.name = myPath;
     select.className = "form-input combobox";
-    select.onchange = function() { console.log("jeah"); };
+    select.onchange = function(event) {
+      var target = getEvent(event).target;
+      var buildingId = target.value;
+      var propertyId = "75300301050006";
+      ajax
+        .command("merge-details-from-krysp", {id: appId, buildingId: buildingId, propertyId: propertyId})
+        .success(function() {
+          save(event);
+          hub.send("load-application", {id: appId});
+        })
+        .call();
+      return false;
+    };
 
     var selectedOption = model[spec.name] || "";
 
@@ -258,18 +272,21 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     }
     select.appendChild(option);
 
-    var buildings = [{name: "001"},{name: "002"}];
-
-    $.each(buildings, function (i, o) {
-      var name = o.name;
-      var option = document.createElement("option");
-      option.value = name;
-      option.appendChild(document.createTextNode(o.name));
-      if (selectedOption === name) {
-        option.selected = "selected";
-      }
-      select.appendChild(option);
-    });
+    ajax
+      .query("get-building-info-from-legacy", {propertyId: "75300301050006"})
+      .success(function(data) {
+        $.each(data.data, function (i, building) {
+          var name = building.buildingId;
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(name));
+          if (selectedOption === name) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
+        });
+      })
+      .call();
 
     var span = makeEntrySpan();
     span.appendChild(makeLabel("select", myPath, specId, true));
