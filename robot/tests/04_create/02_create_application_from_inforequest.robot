@@ -9,18 +9,21 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new inforequest
   Create inforequest  Latokuja 10, Sipoo  753  75341600250030  Jiihaa
-  Log  jiihaa
   
 There are no attachments at this stage
-  Log  jiihaa
+  Element should not be visible  xpath=//*[@data-test-id='inforequest-attachments-table']
+  Element should be visible  xpath=//*[@data-test-id='inforequest-attachments-no-attachments']
 
 Mikko creates new application from inforequest
   Click by test id  inforequest-convert-to-application
   Wait until  Element should be visible  application
   Wait until  Element should contain  xpath=//span[@data-test-id='application-title']  Latokuja 10, Sipoo
   
-Proper attachment templates and documents are present
-  Log  jiihaa
+Proper attachment templates are present
+  Click by test id  application-open-application-tab
+  Wait until  Element should be visible  application-attachments-tab
+  Element should be visible  xpath=//*[@data-test-id='application-attachments-table']
+  Element should not be visible  xpath=//*[@data-test-id='application-attachments-no-attachments']
 
 Mikko closes application
   Click by test id  application-cancel-btn
