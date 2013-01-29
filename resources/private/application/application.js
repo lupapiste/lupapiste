@@ -287,8 +287,8 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
-      applicationMap.clear().add(x, y).center(x, y, 10);
-      inforequestMap.clear().add(x, y).center(x, y, 10);
+      applicationMap.clear().add(x, y).center(x, y, 11);
+      inforequestMap.clear().add(x, y).center(x, y, 11);
 
       // docgen:
 

@@ -21,7 +21,9 @@ var gis = (function() {
       projection: new OpenLayers.Projection("EPSG:3067"),
       units: "m",
       maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
-      resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
+      resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
+      controls: [ new OpenLayers.Control.Zoom(),         
+                  new OpenLayers.Control.Navigation({ zoomWheelEnabled: false }) ]
     });
 
     var wmsServers = ["/proxy/nls"];
