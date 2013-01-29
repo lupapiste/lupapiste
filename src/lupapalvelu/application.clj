@@ -254,11 +254,11 @@
 ;;
 
 (defquery "merge-details-from-krysp"
-  {:parameters [:id :propertyId :buildingId]
+  {:parameters [:id :buildingId]
    :roles-in   [:applicant :authority]}
-  [{{:keys [id propertyId buildingId]} :data :as command}]
+  [{{:keys [id buildingId]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality] :as application}]
+    (fn [{:keys [municipality propertyId] :as application}]
       (if-let [legacy (municipality/get-legacy municipality)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
@@ -275,15 +275,16 @@
         (fail :no_legacy_available)))))
 
 (defquery "get-building-info-from-legacy"
-  {:parameters [:propertyId]
-   :authenticated true}
-  [{{:keys [propertyId]} :data}]
-  (let [municipality  (municipality/municipality-by-propertyId propertyId)]
-    (if-let [legacy   (municipality/get-legacy municipality)]
-      (let [kryspxml  (krysp/building-xml legacy propertyId)
-            buildings (krysp/->buildings kryspxml)]
-        (ok :data buildings))
-      (fail :no_legacy_available))))
+  {:parameters [:id]
+   :roles-in   [:applicant :authority]}
+  [{{:keys [id]} :data :as command}]
+  (with-application command
+    (fn [{:keys [municipality propertyId] :as application}]
+      (if-let [legacy   (municipality/get-legacy municipality)]
+        (let [kryspxml  (krysp/building-xml legacy propertyId)
+              buildings (krysp/->buildings kryspxml)]
+          (ok :data buildings))
+        (fail :no_legacy_available)))))
 
 ;;
 ;; Service point for jQuery dataTables:

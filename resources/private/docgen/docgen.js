@@ -14,7 +14,7 @@ LUPAPISTE.DOMUtils = {
   }
 };
 
-LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, appId,propertyId) {
+LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, appId) {
   "use strict";
 
   // Magic key: if schema contains "_selected" radioGroup,
@@ -252,7 +252,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       var target = getEvent(event).target;
       var buildingId = target.value;
       ajax
-        .command("merge-details-from-krysp", {id: appId, buildingId: buildingId, propertyId: propertyId})
+        .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
         .success(function() {
           save(event);
           hub.send("load-application", {id: appId});
@@ -272,7 +272,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     select.appendChild(option);
 
     ajax
-      .query("get-building-info-from-legacy", {propertyId: propertyId})
+      .query("get-building-info-from-legacy", {id: appId})
       .success(function(data) {
         $.each(data.data, function (i, building) {
           var name = building.buildingId;
