@@ -181,10 +181,6 @@
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
 
-  function getLatestVersion(attachment) {
-    return _.last(attachment.versions || []);
-  }
-
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
