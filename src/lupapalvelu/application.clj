@@ -17,7 +17,8 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
             [lupapalvelu.util :as util]
-            [lupapalvelu.operations :as operations]))
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 ;;
 ;; Meta-fields:
@@ -114,6 +115,7 @@
     (fn [application]
       (if (nil? (-> application :roles :authority))
         (executed "assign-to-me" command))
+      (rl-mapping/get-application-as-krysp application)
       (mongo/update
         :applications {:_id (:id application) :state :submitted}
         {$set {:state :sent}}))))
