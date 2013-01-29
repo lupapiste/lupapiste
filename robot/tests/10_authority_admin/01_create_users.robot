@@ -58,4 +58,3 @@ Create user
   Input text       user-password  ${password}
   Click element    test-create-user-save
   Wait Until  Element Should Not Be Visible  dialog-add-user
-  

@@ -2,7 +2,7 @@ var ajax = (function() {
   "use strict";
 
   var nop = function() { };
-  
+
   var callId = 0;
 
   function Call(url, type) {
@@ -127,7 +127,7 @@ var ajax = (function() {
   function command(name, data) {
     return new Call("/api/command/" + name, "POST").json(data);
   }
-  
+
   function query(name, data) {
     return new Call("/api/query/" + name, "GET").params(data);
   }
@@ -135,7 +135,7 @@ var ajax = (function() {
   function onAjaxRequestCall(c) {
     $('.ajax-calls').append('<span class="ajax-call" data-ajax-call-id="'+c.callId+'">Ajax: '+c.request.url+'</span><br/>');
   }
-  
+
   function onAjaxCallSuccess(c) {
     $('.ajax-calls').children('span[data-ajax-call-id="'+c.callId+'"]').remove();
   }

@@ -67,15 +67,15 @@ var gis = (function() {
       self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
-    
+
     self.getZoom = function() {
       return self.map.zoom;
     }
-    
+
     self.getMaxZoom = function() {
       return 11;
     }
-    
+
     self.centerWithMaxZoom = function(x, y) {
       return self.center(x, y, self.getMaxZoom());
     }

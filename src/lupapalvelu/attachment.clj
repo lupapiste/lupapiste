@@ -111,7 +111,7 @@
   ([application-id attachment-id file-id filename content-type size now user]
     (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
   ([application-id attachment-id file-id filename content-type size now user retry-limit]
-    (if (> retry-limit 0)
+    (if (pos? retry-limit)
       (when-let [application (mongo/by-id :applications application-id)]
         (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
               next-version (next-attachment-version latest-version user)
@@ -137,7 +137,7 @@
                                     :attachments.$.latestVersion version-model}
                               $push {:attachments.$.versions version-model}})]
           ; Check return value and try again with new version number
-          (if (> result-count 0)
+          (if (pos? result-count)
             (assoc version-model :id attachment-id)
             (do
               (warn

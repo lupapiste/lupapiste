@@ -1,4 +1,5 @@
-(ns lupapalvelu.operations)
+(ns lupapalvelu.operations
+  (:require [lupapalvelu.document.schemas :as schemas]))
 
 (def default-description "Hankkeesi vaatii todenn\u00E4k\u00F6isesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa my\u00F6s tutustua alla listattuihin sivustoihin, joilta l\u00F6yd\u00E4t lis\u00E4\u00E4 tietoa rakennusvalvonnasta. Voit my\u00F6s kysy\u00E4 lis\u00E4\u00E4 aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekem\u00E4ll\u00E4 neuvontapyynn\u00F6n.")
 
@@ -35,7 +36,7 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas ["maksaja" "rakennuspaikka" "lisatiedot"])
+(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot"])
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
@@ -113,5 +114,11 @@
                                  :required common-schemas
                                  :attachments []}
    :muu-maisema-toimenpide      {:schema "muu-maisema-toimenpide"
-                                 :required common-schemas
+                                 :required  common-schemas
                                  :attachments []}})
+
+; Sanity checks:
+
+(doseq [[op info] operations
+        schema (cons (:schema info) (:required info))]
+  (if-not (schemas/schemas schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))

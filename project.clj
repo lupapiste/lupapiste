@@ -21,10 +21,10 @@
                                                                       org.clojure/tools.logging]]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
-                             [lein-nitpicker "0.3.0"]]}
+                             [lein-nitpicker "0.3.0"]]
+                   :resource-paths ["dev-resources"]}
              :itest {:test-paths ^:replace ["itest"]}
              :stest {:test-paths ^:replace ["stest"]}
-             :ftest {:test-paths ^:replace ["ftest"]}
              :lupadev {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
 

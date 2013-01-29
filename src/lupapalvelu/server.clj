@@ -49,18 +49,17 @@
     (:major *clojure-version*)
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
-  (if env/perf-mon-on
-    (do
-      (warn "*** Instrumenting performance monitoring")
-      (perf-mon/instrument-ns
-        'lupapalvelu.action
-        'lupapalvelu.application
-        'lupapalvelu.attachment
-        'lupapalvelu.authority-admin
-        'lupapalvelu.core
-        'lupapalvelu.mongo
-        'lupapalvelu.security
-        'lupapalvelu.tepa)))
+  (when env/perf-mon-on
+    (warn "*** Instrumenting performance monitoring")
+    (perf-mon/instrument-ns
+      'lupapalvelu.action
+      'lupapalvelu.application
+      'lupapalvelu.attachment
+      'lupapalvelu.authority-admin
+      'lupapalvelu.core
+      'lupapalvelu.mongo
+      'lupapalvelu.security
+      'lupapalvelu.tepa))
   (mongo/connect!)
   (server/add-middleware apply-custom-content-types)
   (server/start env/port {:mode env/mode
