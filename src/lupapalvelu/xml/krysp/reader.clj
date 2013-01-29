@@ -119,7 +119,7 @@
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
                     :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}               ;; does-not-exist in test
          :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)     ;; does-not-exist in test
-                 :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
+                 :kerrosala (-> rakennus (select1 [:rakval:kerrosala]) text)
                  :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
                  :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
                  :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}

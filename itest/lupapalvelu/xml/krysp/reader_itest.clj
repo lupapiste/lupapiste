@@ -59,6 +59,7 @@
                                       :kaapeliKytkin false}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
                   :mitat {:kerrosluku "5"
+                          :kerrosala "1785"
                           :kokonaisala "2582"
                           :tilavuus "8240"}
                   :rakenne {:julkisivu "betoni"
