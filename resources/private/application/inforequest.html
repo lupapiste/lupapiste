@@ -57,12 +57,12 @@
     <div class="sidebar">
       <aside class="instructions">
         <h3 data-bind="ltext: 'help'">Ohje</h3>
-        <p data-bind="ltext: ''">Tässä näkymässä voit käsitellä neuvontapyynnön tietoja.</p>
+        <p data-bind="ltext: 'inforequest.helpText'"></p>
       </aside>
     </div>
 
     <div class="container">
-      <p class="tab-info" data-bind="ltext: ''">Liitteet</p>
+      <h3 class="tab-info" data-bind="ltext: 'inforequest.attachments'">Liitteet</h3>
       <div data-bind="if: attachments().length">
 
         <table class="table">
@@ -104,8 +104,8 @@
           data-window-id="upload-dialog"></button>
     </div>
 
-    <div data-bind="with: $root.comment">
-        <p class="tab-info" data-bind="ltext: 'inforequest.comments'"></p>
+    <div data-bind="with: $root.comment" class="container">
+        <h3 class="tab-info" data-bind="ltext: 'inforequest.comments'"></h3>
         <div class="tab-wrapper">
           <table data-test-id="comments-table" class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
@@ -124,7 +124,7 @@
             </tbody>
           </table>
           <form>
-            <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
+            <h4 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h4>
             <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
                       class="form-input textarea" id="commentText" rows="3"></textarea>
             <button data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
