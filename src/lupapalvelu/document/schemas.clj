@@ -282,7 +282,7 @@
   )
 
 (def rakennuksen-valitsin
-  [{:name :rakennus :type :string}])
+  [{:name :rakennus :type :buildingSelector}])
 
 (def rakennuksen-muuttaminen (concat rakennuksen-valitsin muutostyonlaji rakennuksen-omistajat rakennuksen-tiedot))
 
