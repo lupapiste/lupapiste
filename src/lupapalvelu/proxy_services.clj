@@ -22,7 +22,7 @@
         city (trim city)]
     [street number city]))
 
-(defn get-addresses [[street number city]]
+(defn get-addresses [street number city]
   (wfs/execute wfs/maasto
     (wfs/query {"typeName" "oso:Osoitenimi"}
       (wfs/sort-by "oso:katunumero")
@@ -37,7 +37,7 @@
 (defn get-addresses-proxy [request]
   (let [query (get (:query-params request) "query")
         address (parse-address query)
-        [status response] (get-addresses address)]
+        [status response] (apply get-addresses address)]
     (if (= status :ok)
       (let [features (take 10 response)]
         (resp/json {:query query
@@ -45,7 +45,7 @@
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn find-addresses [[street number city]]
+(defn find-addresses [street number city]
   (wfs/execute wfs/maasto
     (cond
       (and (s/blank? number) (s/blank? city)) (wfs/query {"typeName" "oso:Osoitenimi"}
@@ -82,7 +82,7 @@
 (defn find-addresses-proxy [request]
   (let [query (get (:query-params request) "query")
         address (parse-address query)
-        [status response] (find-addresses address)
+        [status response] (apply find-addresses address)
         feature->string (wfs/feature-to-address-string address)]
     (if (= status :ok)
       (let [features (take 10 response)]
