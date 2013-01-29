@@ -30,14 +30,14 @@
       (->rakennuksen-muuttaminen xml "007") => nil)
 
     (fact "valid buildingid returns mapped document"
-      (let [huoneisto  (->rakennuksen-muuttaminen xml "001")
-            huoneistot (:huoneistot huoneisto)]
+      (let [rakennus  (->rakennuksen-muuttaminen xml "001")
+            huoneistot (:huoneistot rakennus)]
 
-        huoneisto => truthy
+        rakennus => truthy
 
         (fact "there are 21 huoneisto" (count (keys huoneistot)) => 21)
         (fact "without :huoneistot everything matches"
-          (dissoc huoneisto :huoneistot)
+          (dissoc rakennus :huoneistot)
             => (just
                  {:verkostoliittymat {:viemariKytkin true
                                       :maakaasuKytkin false
