@@ -3,7 +3,6 @@
 
   var isInitializing = true;
   var currentId;
-  var applicationModel = new ApplicationModel();
   var authorizationModel = authorization.create();
   var inviteModel = new InviteModel();
   var commentModel = comments.create();
@@ -37,7 +36,7 @@
 
   };
 
-  function ApplicationModel() {
+  var applicationModel = function ApplicationModel() {
     var self = this;
 
     self.data = ko.observable();
@@ -57,7 +56,7 @@
       }
       return value;
     }, self);
-  }
+  };
 
   var application = {
     id: ko.observable(),
