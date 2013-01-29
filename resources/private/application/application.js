@@ -310,7 +310,7 @@
 
         var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
 
-        var displayOrder = ["rakennuspaikka", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+        var displayOrder = ["hankkeen-kuvaus", "rakennuspaikka", "purku", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
         var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name) });
 
         var docgenDiv = $(containerSelector).empty();
@@ -411,7 +411,6 @@
       var id = application.id();
       var buildingId = model.buildingId();
       var propertyId = model.propertyId();
-      console.log(id,buildingId,propertyId);
       ajax
         .command("merge-details-from-krysp", {id: id, buildingId: buildingId, propertyId: propertyId})
         .success(function() { hub.send("load-application", {id: id});})

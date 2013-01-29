@@ -6,24 +6,21 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Authority assigns an inforequest to herself and then back to no-one
-  [Tags]  fail
+Authority assigns an inforequest to herself
   Sonja logs in
-  Click link  test-from-applications-to-inforequests-tab
+  Wait until  Number of visible inforequests  1
   Wait until  No inforequest is assigned to  Sonja
-  Open any inforequest
+  Open the inforequest
   Wait until page contains element  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
-  Click link  xpath=//a[@data-test-id="test-inforequests"]
+  Click by test id  inforequest-requests
   Wait until  Number of assigned inforequests  Sonja  1
   Logout
-  
+
 Applicant marks inforequest answered
-  [Tags]  fail
   Mikko logs in
-  Wait and click  test-from-applications-to-inforequests-tab
-  Wait until  Number of visible applications on page  inforequests  2
-  Wait and click  test-inforequest-link
+  Wait until  Number of visible inforequests  1
+  Open the inforequest
   Wait until  Inforequest state is  Avoin
   Wait and click  test-mark-inforequest-answered
   Wait until  Inforequest state is  Vastattu
@@ -35,14 +32,11 @@ Inforequest state is
   [Arguments]  ${state}
   Wait until   Element should contain  test-inforequest-state  ${state}
 
-Nth inforequest is assigned to
-  [Arguments]  ${Index}  ${Assignee name}
-  Element should contain  xpath=//tr[@data-test-class="inforequest-row"][${Index}]/td[@data-test-class="inforequest-assignee"]  ${Assignee name}
-
 No inforequest is assigned to
   [Arguments]  ${Assignee name}
   Number of assigned inforequests  ${Assignee name}  0
-  
+
 Number of assigned inforequests
   [Arguments]  ${Assignee name}  ${Count}
-  Xpath Should Match X Times  //td[@data-test-class="inforequest-assignee" and contains(text(), "${Assignee name}")]  ${Count}
+  ## FIXME should match that td is actually in the assignee column
+  Xpath Should Match X Times  //section[@id='applications']//tr[contains(@class,'inforequest')]/td[contains(text(), '${Assignee name}')]  ${Count}

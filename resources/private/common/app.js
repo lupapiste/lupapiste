@@ -21,6 +21,44 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
 
+  this.createLogo = function() {
+    var href = "#!/" + self.startPage;
+    var link$ = $("<a class='brand' href='" +href+ "'></a>");
+    return link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
+  };
+
+  this.createConnectionErrorContainer = function() {
+    var span$ = $("<span class='connection-error' style='display: none;'></span>");
+    return span$.text(loc("connection-error"));
+  };
+
+  this.createUserMenu = function() {
+    return $("<ul class='user-menu'><li><a href='#!/mypage'><span id='user-name'></span></a></li></ul><br/>");
+  };
+
+  this.createNaviLinks = function() {
+    var naviLinks$ = $("<span>").attr("id", "navi-right");
+
+    _.each(loc.getSupportedLanguages(), function(lang) {
+      if (lang !== loc.getCurrentLanguage()) {
+        naviLinks$.append(
+            $("<a>").attr("href", "#").text(loc("in_"  + lang))
+            .click(function(e) {
+              hub.send("change-lang", {lang: lang});
+              e.preventDefault();
+              }));
+      }
+    });
+
+    if (!self.allowAnonymous) {
+      naviLinks$.append(" ");
+      naviLinks$.append($("<a>")
+        .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
+        .text(loc("logout")));
+    }
+    return naviLinks$;
+  };
+
   /**
    * Complete the App initialization after DOM is loaded.
    */
@@ -35,27 +73,11 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
       LUPAPISTE.ModalDialog.init();
     }
 
-    var naviLinks = $("<span>").attr("id", "navi-right");
-
-    _.each(loc.getSupportedLanguages(), function(lang) {
-      if (lang !== loc.getCurrentLanguage()) {
-        naviLinks.append(
-            $("<a>").attr("href", "#").text(loc("in_"  + lang))
-            .click(function(e) {
-              hub.send("change-lang", {lang: lang});
-              e.preventDefault();
-              }));
-      }
-    });
-
+    $("nav").append(self.createLogo()).append(self.createConnectionErrorContainer());
     if (!self.allowAnonymous) {
-      naviLinks.append(" ");
-      naviLinks.append($("<a>")
-        .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
-        .text(loc("logout")));
+      $("nav").append(self.createUserMenu());
     }
-
-    $("nav").append(naviLinks);
+    $("nav").append(self.createNaviLinks());
   };
   $(this.domReady);
 
