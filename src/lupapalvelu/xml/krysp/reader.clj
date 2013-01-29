@@ -108,7 +108,7 @@
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [rakennus (select1 xml [:rakval:rakennustieto :> (enlive/has [:rakval:rakennusnro (enlive/text-pred (partial = buildingId))])])
-        polished (comp strip-empty-maps strip-nils convert-booleans (partial merge {}))]
+        polished (comp index-maps strip-empty-maps strip-nils convert-booleans (partial merge {}))]
     (when rakennus
       (polished
         (as-is rakennus [:rakval:verkostoliittymat])
