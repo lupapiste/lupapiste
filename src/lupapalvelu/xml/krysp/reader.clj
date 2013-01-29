@@ -113,7 +113,8 @@
       (polished
         (as-is rakennus [:rakval:verkostoliittymat])
         (as-is rakennus [:rakval:varusteet])
-        {:rakennuksenOmistajat ...notimplemented...
+        {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+         :rakennuksenOmistajat ...notimplemented...
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
