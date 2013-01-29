@@ -277,8 +277,7 @@
 
 (defquery "get-building-info-from-legacy"
   {:parameters [:propertyId]
-   ;;:authenticated true
-   }
+   :authenticated true}
   [{{:keys [propertyId]} :data}]
   (let [municipality  (municipality/municipality-by-propertyId propertyId)]
     (if-let [legacy   (municipality/get-legacy municipality)]
