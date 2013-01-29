@@ -127,8 +127,8 @@
             <h3 data-bind="if: invites && invites.length"><span data-bind="ltext: 'application.invites'"></span></h3>
             <ul data-bind="foreach: invites">
               <li class="user-invite">
-                <span data-bind="text: user.username"></span>
-                (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                <span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>
+                (<span data-bind="text: user.username"></span>)
                 - <span data-bind="text: text"></span>
                 <a class="remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
               </li>
@@ -283,9 +283,9 @@
           <div data-bind="with: $root.invite">
             <label data-bind="ltext: 'email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
-            <label data-bind="ltext: ''" class="form-label" for="invite-text">Viesti</label>
+            <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
-            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
+            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
           </div>
         </div>
       </div>
