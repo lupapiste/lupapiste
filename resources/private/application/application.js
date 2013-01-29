@@ -10,7 +10,7 @@
   var applicationMap;
   var inforequestMap;
 
-  var removeDocModel = new function() {
+  var removeDocModel = function() {
     var self = this;
 
     self.appId = ko.observable();
