@@ -126,9 +126,11 @@
             </tbody>
           </table>
           <form>
-            <h3 data-bind="ltext: ''">Kirjoita viesti:</h3>
-            <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
-            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
+            <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
+            <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+                      class="form-input textarea" id="commentText" rows="3"></textarea>
+            <button data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
+                    id="application.addComment" type="submit" class="btn btn-primary"></button>
           </form>
         </div>
       </div>
