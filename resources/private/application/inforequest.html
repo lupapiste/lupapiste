@@ -27,7 +27,7 @@
           </div>
           <div data-bind="with: $root.applicationModel.data">
             <p data-bind="ltext: ''">Luotu:</p>
-            <span data-bind="if: $data.created"><span class="application_summary_text" id="test-application-submitted" data-bind="dateString: created"></span></span>
+            <span data-bind="if: $data.created"><span class="application_summary_text" data-bind="dateString: created"></span></span>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
@@ -63,9 +63,9 @@
 
     <div class="container">
       <p class="tab-info" data-bind="ltext: ''">Liitteet</p>
+      
       <div data-bind="if: attachments().length">
-
-        <table class="table">
+        <table class="table" data-test-id="inforequest-attachments-table">
           <tbody>
             <tr>
               <th data-bind="ltext: ''">Tiedosto</th>
@@ -93,11 +93,12 @@
             <!-- /ko -->
           </tbody>
         </table>
-
       </div>
+      
       <div data-bind="ifnot: attachments().length">
-        <i data-bind="ltext: ''">Ei liitteit&auml;</i>
+        <i data-bind="ltext: ''" data-test-id="inforequest-attachments-no-attachments">Ei liitteit&auml;</i>
       </div>
+      
       <button
           class="btn btn-primary modal"
           data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
