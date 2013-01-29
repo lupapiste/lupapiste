@@ -68,18 +68,17 @@
         <table class="table">
           <tbody>
             <tr>
-              <th data-bind="ltext: ''">Tiedosto</th>
-              <th data-bind="ltext: ''">Muokattu</th>
+              <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+              <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
               <th></th>
             </tr>
             <!-- ko foreach: attachments -->
+            <!-- ko if: latestVersion && latestVersion.filename -->
             <tr>
               <td>
-                <span data-bind="if: latestVersion && latestVersion.filename">
                   <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
                   <i data-bind="ltext: latestVersion.contentType"></i>
                   <i data-bind="size: latestVersion.size"></i>
-                </span>
               </td>
               <td>
                 <span data-bind="dateString: modified"></span>
@@ -91,19 +90,18 @@
               </td>
             </tr>
             <!-- /ko -->
+            <!-- /ko -->
           </tbody>
         </table>
 
       </div>
       <div data-bind="ifnot: attachments().length">
-        <i data-bind="ltext: ''">Ei liitteit&auml;</i>
+        <i data-bind="ltext: 'application.attachmentsEmpty'">Ei liitteit&auml;</i>
       </div>
       <button
           class="btn btn-primary modal"
-          data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
-          data-window-id="upload-dialog">
-        Lis&auml;&auml; liite
-      </button>
+          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
+          data-window-id="upload-dialog"></button>
     </div>
 
     <div data-bind="with: $root.comment">
