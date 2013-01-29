@@ -68,9 +68,11 @@
   (-> (select1 xml selector) xml->edn strip-keys))
 
 (defn map-index
+  "transform a collection into keyord-indexed map (starting from 0)."
   [c] (into {} (map (fn [[k v]] [(keyword (str k)) v]) (map-indexed vector c))))
 
 (defn index-maps
+  "transform a form with replacing all sequential collections with keyword-indexed maps."
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
 ;;
