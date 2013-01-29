@@ -68,7 +68,7 @@
   (-> (select1 xml selector) xml->edn strip-keys))
 
 (defn map-index
-  [v] (into {} (map (fn [[k v]] (println k v) [(keyword (str k)) v]) (map-indexed vector v))))
+  [c] (into {} (map (fn [[k v]] [(keyword (str k)) v]) (map-indexed vector c))))
 
 (defn index-maps
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
