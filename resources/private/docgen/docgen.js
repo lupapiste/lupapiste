@@ -240,6 +240,43 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return partsDiv;
   }
 
+  function buildBuildingSelector(spec, model, path, save, specId) {
+    var myPath = path.join(".");
+
+    var select = document.createElement("select");
+    select.name = myPath;
+    select.className = "form-input combobox";
+    select.onchange = function() { console.log("jeah"); };
+
+    var selectedOption = model[spec.name] || "";
+
+    var option = document.createElement("option");
+    option.value = "";
+    option.appendChild(document.createTextNode(loc("selectone")));
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
+    select.appendChild(option);
+
+    var buildings = [{name: "001"},{name: "002"}];
+
+    $.each(buildings, function (i, o) {
+      var name = o.name;
+      var option = document.createElement("option");
+      option.value = name;
+      option.appendChild(document.createTextNode(o.name));
+      if (selectedOption === name) {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
+    });
+
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("select", myPath, specId, true));
+    span.appendChild(select);
+    return span;
+  }
+
   function buildUnknown(spec, model, path) {
     error("Unknown element type:", spec.type, path);
     var div = document.createElement("div");
@@ -257,6 +294,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     radioGroup: buildRadioGroup,
     date: buildDate,
     element: buildElement,
+    buildingSelector: buildBuildingSelector,
     unknown: buildUnknown
   };
 
