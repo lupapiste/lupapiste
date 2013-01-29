@@ -20,8 +20,8 @@ Mikko creates new application from inforequest
   Wait until  Element should contain  xpath=//span[@data-test-id='application-title']  Latokuja 10, Sipoo
   
 Proper attachment templates are present
-  Click by test id  application-open-application-tab
-  Wait until  Element should be visible  application-attachments-tab
+  [Tags]  fail
+  Open attachment tab
   Element should be visible  xpath=//*[@data-test-id='application-attachments-table']
   Element should not be visible  xpath=//*[@data-test-id='application-attachments-no-attachments']
 
