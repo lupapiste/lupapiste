@@ -53,8 +53,8 @@
 
       <div class="attachment-file-versions">
         <div data-bind="with: $root.approve">
-          <button id="test-attachment-approve" data-bind="click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
-          <button id="test-attachment-reject" data-bind="click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+          <button id="test-attachment-approve" data-bind="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
         </div>
         <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
         <table class="table table-striped">
