@@ -264,15 +264,14 @@
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (krysp/->rakennuksen-muuttaminen kryspxml buildingId)
-              merged       (merge old-body new-body)]
+              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})]
           (mongo/update
             :applications
             {:_id (:id application)
              :documents {$elemMatch {:schema.info.name doc-name}}}
-            {$set {:documents.$.body merged
+            {$set {:documents.$.body new-body
                    :modified (:created command)}})
-          (ok :old old-body :new new-body :merged merged))
+          (ok))
         (fail :no_legacy_available)))))
 
 (defquery "get-building-info-from-legacy"
