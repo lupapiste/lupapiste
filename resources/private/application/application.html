@@ -70,11 +70,11 @@
         </div>
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="ltext: 'application.tabDocuments', click: $root.tab.tabClick, clickBubble: false"  href="#application-application-tab"   data-test-id="application-open-application-tab" class="active-as-default">Hakemuksen tiedot</a></li>
-            <li><a data-bind="ltext: 'application.tabParties', click: $root.tab.tabClick, clickBubble: false"  href="#application-parties-tab"       data-test-id="application-open-parties-tab"      >Osapuolet</a></li>
-            <li><a data-bind="ltext: 'application.tabAttachments', click: $root.tab.tabClick, clickBubble: false"  href="#application-attachments-tab"   data-test-id="application-open-attachments-tab"  >Suunnitelmat ja liitteet</a></li>
-            <li><a data-bind="ltext: 'application.tabVerdict', click: $root.tab.tabClick, clickBubble: false"  href="#application-decision-tab"      data-test-id="application-open-verdict-tab"      >Päätös</a></li>
-            <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" >Keskusteluketju</a></li>
+            <li><a data-bind="ltext: 'application.tabDocuments',    click: $root.tab.tabClick, clickBubble: false"  href="#application-application-tab"   data-test-id="application-open-application-tab" class="active-as-default"></a></li>
+            <li><a data-bind="ltext: 'application.tabParties',      click: $root.tab.tabClick, clickBubble: false"  href="#application-parties-tab"       data-test-id="application-open-parties-tab"      ></a></li>
+            <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.tab.tabClick, clickBubble: false"  href="#application-attachments-tab"   data-test-id="application-open-attachments-tab"  ></a></li>
+            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.tab.tabClick, clickBubble: false"  href="#application-decision-tab"      data-test-id="application-open-verdict-tab"      ></a></li>
+            <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
         </div>
       </div>
@@ -200,12 +200,9 @@
       </div>
 
       <div id="application-attachments-tab" class="tab-content">
-        <p data-bind="ltext: 'application.attachmentsDesc'" class="tab-info">T&auml;nne voit lis&auml;t&auml;
-          hakemukseen kuuluvia liitteit&auml;. Viranomainen voi my&ouml;s pyyt&auml;&auml;
-          sinulta tarpeellisia liitteit&auml;. N&auml;m&auml; pyynn&ouml;t merkit&auml;&auml;n
-          taulukossa punaisella lipulla.</p>
+        <p data-bind="ltext: 'application.attachmentsDesc'" class="tab-info"></p>
         <div class="tab-wrapper">
-          <div data-bind="if: attachmentsByGroup().length">
+          <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
 
             <table class="table">
               <tbody data-bind="foreach: attachmentsByGroup">
@@ -229,7 +226,7 @@
                         <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
                       </span>
                       <span data-bind="if: type == null">
-                        <i data-bind="ltext: ''">Nimet&ouml;n</i>
+                        <i data-bind="ltext: ''"></i>
                       </span>
                     </a>
                   </td>
@@ -260,14 +257,13 @@
 
           </div>
           <div data-bind="ifnot: attachmentsByGroup.length">
-            <i data-bind="ltext: 'application.attachmentsEmpty'">Ei liitteit&auml;</i>
+            <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
           </div>
           <button
               id="add-attachment"
               class="btn btn-primary modal"
               data-window-id="upload-dialog"
               data-bind="ltext: '', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
-            Lis&auml;&auml; liite
           </button>
         </div>
       </div>
