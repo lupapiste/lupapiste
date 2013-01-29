@@ -52,14 +52,12 @@ var ajax = (function() {
     };
 
     self.params = function(data) {
-      for (var key in data) {
-        self.param(key, data[key]);
-      }
+      if (data) _.each(data, function(v, k) { self.param(k, v); });
       return self;
     };
 
     self.json = function(data) {
-      self.request.data = JSON.stringify(data);
+      self.request.data = data ? JSON.stringify(data) : null;
       self.request.contentType = "application/json";
       return self;
     };
