@@ -5,42 +5,39 @@
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.document.schemas :as schemas]))
 
+(defn- create-app [& args]
+  (let [args (->> args
+               (apply hash-map)
+               (merge {:permitType "buildingPermit"
+                       :operation "asuinrakennus"
+                       :propertyId "1"
+                       :x 444444 :y 6666666
+                       :address "foo 42, bar"
+                       :municipality "753"})
+               (mapcat seq))]
+    (apply command pena :create-application args)))
+
 (fact "creating application without message"
   (apply-remote-minimal)
-  (let [resp            (command pena :create-application
-                                 :permitType "buildingPermit"
-                                 :operation "asuinrakennus"
-                                 :propertyId "1"
-                                 :x 444444 :y 6666666
-                                 :address "foo 42, bar"
-                                 :municipality "753")
-        application-id  (:id resp)
-        resp            (query pena :application :id application-id)
-        application     (:application resp)]
-    application => (contains {:id application-id
-                              :state "draft"
-                              :location {:x 444444 :y 6666666}
-                              :permitType "buildingPermit"})
-    (count (:comments application)) => 0
-    (first (:auth application)) => (contains
-                                     {:firstName "Pena"
-                                      :lastName "Panaani"
-                                      :type "owner"
-                                      :role "owner"})
-    (:allowedAttachmentTypes application) => (complement empty?)))
+  (let [resp  (create-app)
+        id    (:id resp)
+        resp  (query pena :application :id id)
+        app   (:application resp)]
+    app => (contains {:id id
+                      :state "draft"
+                      :location {:x 444444 :y 6666666}
+                      :permitType "buildingPermit"
+                      :municipality "753"})
+    (count (:comments app)) => 0
+    (first (:auth app)) => (contains
+                             {:firstName "Pena"
+                              :lastName "Panaani"
+                              :type "owner"
+                              :role "owner"})
+    (:allowedAttachmentTypes app) => (complement empty?)))
 
-(defn- create-app []
-  (command pena :create-application
-           :permitType "buildingPermit"
-           :operation "asuinrakennus"
-           :propertyId "1"
-           :x 444444 :y 6666666
-           :address "foo 42, bar"
-           :municipality "753"
-           :message "hello"))
-
-(fact "creating application message"
-  (let [resp            (create-app)
+(fact "creating application with message"
+  (let [resp            (create-app :message "hello")
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
         application     (:application resp)
@@ -88,6 +85,14 @@
     (count roles-in-the-end) => 1))
 
 (comment
+  (apply-remote-minimal)
+  ; Do 70 applications in each municipality:
+  (doseq [muni ["753" "837" "186"]
+          address-type ["Katu " "Kuja " "V\u00E4yl\u00E4 " "Tie " "Polku " "H\u00E4meentie " "H\u00E4meenkatu "]
+          address (map (partial str address-type) (range 1 11))]
+    (create-app :municipality muni :address address)))
+
+(comment
   ; Should rewrite this as a couple of unit tests
   (fact "Assert that proper documents are created"
     (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
@@ -98,14 +103,7 @@
                         (schemas/schemas "b")      => {:info {:name "b"}, :body []}
                         (schemas/schemas "bar")    => {:info {:name "bar"}, :body []}
                         (schemas/schemas "c")      => {:info {:name "c"}, :body []})
-    (let [id (:id (command pena :create-application
-                           :operation "foo"
-                           :permitType "buildingPermit"
-                           :propertyId "1"
-                           :x 444444 :y 6666666
-                           :address "foo 42, bar"
-                           :municipality "753"
-                           :message "hello"))
+    (let [id (:id (create-app :operation "foo"))
           app (:application (query pena :application :id id))
           docs (:documents app)
           find-by-schema? (fn [docs schema-name] (some (fn [doc] (if (= schema-name (-> doc :schema :info :name)) doc)) docs))]
@@ -113,7 +111,7 @@
       (find-by-schema? docs "foo") => truthy
       (find-by-schema? docs "a") => truthy
       (find-by-schema? docs "b") => truthy
-      (-> (find-by-schema? docs "foo") :schema :info) => (contains {:op "foo" :removable true}) 
+      (-> (find-by-schema? docs "foo") :schema :info) => (contains {:op "foo" :removable true})
       ; Add operation:
       (command pena :add-operation :id id :operation "bar")
       (let [app (:application (query pena :application :id id))

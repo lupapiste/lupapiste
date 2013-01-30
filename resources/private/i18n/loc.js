@@ -29,7 +29,7 @@ var loc;
   var terms = {"fi": {}, "sv": {}};
   function registerTerms(lang, localizedTerms) {
     terms[lang] = _.extend(terms[lang], localizedTerms);
-  }
+      }
 
   function getIn(m, keyArray) {
     if (m && keyArray && keyArray.length > 0) {
@@ -51,19 +51,14 @@ var loc;
     }
   });
 
-  loc = function() {
-    var args = Array.prototype.slice.call(arguments);
+  function getTerm(key) {
+    if (!key) { return; }
+    var keyArray = key.split(/\./);
+    return getIn(terms[currentLanguage], keyArray);
+  }
 
-    var key = args[0];
-    if (!key) {
-      return;
-    }
-    var keyArray = [key];
-    if (key.indexOf(".") > -1) {
-      keyArray = key.split(/\./);
-    }
-
-    var term = getIn(terms[currentLanguage], keyArray);
+  loc = function(key) {
+    var term = getTerm(key);
     if (term === undefined) {
       debug("Missing localization key", key);
       return "$$NOT_FOUND$$" + key;
@@ -71,6 +66,9 @@ var loc;
     return term;
   };
 
+  loc.termExists = function(key) {
+    return getTerm(key) !== undefined;
+  };
 
   loc.toMap = function() { return terms[currentLanguage].error; };
 

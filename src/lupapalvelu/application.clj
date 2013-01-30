@@ -17,7 +17,8 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
             [lupapalvelu.util :as util]
-            [lupapalvelu.operations :as operations]))
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 ;;
 ;; Meta-fields:
@@ -114,6 +115,7 @@
     (fn [application]
       (if (nil? (-> application :roles :authority))
         (executed "assign-to-me" command))
+      (rl-mapping/get-application-as-krysp application)
       (mongo/update
         :applications {:_id (:id application) :state :submitted}
         {$set {:state :sent}}))))
@@ -252,38 +254,37 @@
 ;;
 
 (defquery "merge-details-from-krysp"
-  {:parameters [:id :propertyId :buildingId]
+  {:parameters [:id :buildingId]
    :roles-in   [:applicant :authority]}
-  [{{:keys [id propertyId buildingId]} :data :as command}]
+  [{{:keys [id buildingId]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality] :as application}]
+    (fn [{:keys [municipality propertyId] :as application}]
       (if-let [legacy (municipality/get-legacy municipality)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
               old-body     (:body document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (krysp/->rakennuksen-muttaminen kryspxml buildingId)
-              merged       (merge old-body new-body)]
+              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})]
           (mongo/update
             :applications
             {:_id (:id application)
              :documents {$elemMatch {:schema.info.name doc-name}}}
-            {$set {:documents.$.body merged
+            {$set {:documents.$.body new-body
                    :modified (:created command)}})
-          (ok :old old-body :new new-body :merged merged))
+          (ok))
         (fail :no_legacy_available)))))
 
 (defquery "get-building-info-from-legacy"
-  {:parameters [:propertyId]
-   ;;:authenticated true
-   }
-  [{{:keys [propertyId]} :data}]
-  (let [municipality  (municipality/municipality-by-propertyId propertyId)]
-    (if-let [legacy   (municipality/get-legacy municipality)]
-      (let [kryspxml  (krysp/building-xml legacy propertyId)
-            buildings (krysp/->buildings kryspxml)]
-        (ok :data buildings))
-      (fail :no_legacy_available))))
+  {:parameters [:id]
+   :roles-in   [:applicant :authority]}
+  [{{:keys [id]} :data :as command}]
+  (with-application command
+    (fn [{:keys [municipality propertyId] :as application}]
+      (if-let [legacy   (municipality/get-legacy municipality)]
+        (let [kryspxml  (krysp/building-xml legacy propertyId)
+              buildings (krysp/->buildings kryspxml)]
+          (ok :data buildings))
+        (fail :no_legacy_available)))))
 
 ;;
 ;; Service point for jQuery dataTables:
@@ -304,33 +305,45 @@
   (assoc data data-field (if (keyword? app-field) (get application app-field) (app-field application))))
 
 (defn make-row [application]
-  (let [kind (if (:infoRequest application) "inforequest" "application")
-        base {"DT_RowId" (str "applications-list-row" \: kind \: (:_id application))
-              "DT_RowClass" kind}]
+  (let [base {"id" (:_id application)
+              "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [user-query params]
-  (let [search (params "sSearch")]
-    ; TODO
-    user-query))
+(defn make-query [query params]
+  (let [search (params :sSearch)
+        kind (params :kind)]
+    (println "Search:" search "Kind:" kind)
+    (merge
+      query
+      (condp = kind
+        "applications" {:infoRequest false}
+        "inforequests" {:infoRequest true}
+        nil)
+      (when-not (blank? search)
+        {:title {$regex search $options "i"}}))))
 
 (defn applications-for-user [user params]
   (let [user-query  (application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
         query-total (mongo/count :applications query)
-        skip        (Integer/parseInt (params "iDisplayStart"))
-        limit       (Integer/parseInt (params "iDisplayLength"))
+        skip        (params :iDisplayStart)
+        limit       (params :iDisplayLength)
         apps        (query/with-collection "applications"
                       (query/find query)
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
-        echo        (str (Integer/parseInt (params "sEcho")))] ; Prevent XSS
+        echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
+
+(defcommand "applications-for-datatables"
+  {:parameters [:params]}
+  [{user :user {params :params} :data}]
+  (ok :data (applications-for-user user params)))
 
 (comment
   (mc/aggregate :applications [{$skip 1 $limit 1}])

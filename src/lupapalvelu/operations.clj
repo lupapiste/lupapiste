@@ -36,7 +36,7 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas ["maksaja" "rakennuspaikka" "lisatiedot"])
+(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot"])
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
@@ -104,7 +104,7 @@
    :muu-rakentaminen            {:schema "muu-rakentaminen"
                                  :required common-schemas
                                  :attachments []}
-   :purkaminen                  {:schema "purkaminen"
+   :purkaminen                  {:schema "purku"
                                  :required common-schemas
                                  :attachments []}
    :kaivuu                      {:schema "kaivuu"

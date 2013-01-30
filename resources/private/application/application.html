@@ -89,7 +89,7 @@
 
     <div class="sidebar">
       <aside class="instructions">
-          <h3 data-bind="ltext: 'application.help'">Ohje</h3>
+          <h3 data-bind="ltext: 'help'">Ohje</h3>
           <p data-bind="ltext: 'application.helpText'"></p>
       </aside>
     </div>
@@ -98,50 +98,43 @@
 
       <div id="application-application-tab" class="tab-content" style="display: block;">
 
-        <div data-bind="with: $root.application.propertyId">
-          <div style="border: 3px coral solid;">
-            hae rakennuksen tiedot <a href="#" data-bind="click: $root.buildingsModel.load">Kryspistä</a><br>
-            <ul data-bind="foreach: $root.buildingsModel.data">
-              <li><a href="#" data-bind="text: 'rakennus '+buildingId(), click: $root.buildingsModel.merge"></a></li>
-            </ul>
-          </div>
-        </div>
-
         <div class="application_section" data-bind="with: application">
           <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick">
             <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
           <div class="application_section_content content_expanded">
             <div>
-              <h3 data-bind="ltext: ''">Valtuutetut</h3>
+              <h3 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h3>
               <div data-bind="with: $root.applicationModel">
                 <ul data-bind="foreach: auth">
                   <li>
                     <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                     (<span data-bind="text: username"></span>)
                     <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                    <a class="remove-read" href="#" data-bind="ltext: '', click: $root.application.removeAuth">Poista</a>
+                    <a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a>
                   </li>
                 </ul>
               </div>
               <br/>
               <a href="#"
-                data-bind="ltext: '', visible: $root.authorization.ok('invite')"
+                data-bind="ltext: 'application.addInvite', visible: $root.authorization.ok('invite')"
                 data-test-id="application-add-invite"
                 data-window-id="dialog-valtuutus"
                 class="modal"></a>
             </div>
-            <h3 data-bind="ltext: ''">Kutsutut</h3>
 
+            <h3 data-bind="if: invites && invites.length"><span data-bind="ltext: 'application.invites'"></span></h3>
             <ul data-bind="foreach: invites">
               <li class="user-invite">
-                <span data-bind="text: user.username"></span>
-                (<span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>)
+                <span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>
+                (<span data-bind="text: user.username"></span>)
                 - <span data-bind="text: text"></span>
-                <a class="remove-invite" href="#" data-bind="click: $root.application.removeInvite">Poista</a>
+                <a class="remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
               </li>
             </ul>
+            <!--
             <button data-bind="ltext: '', disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">
               ole p&auml;&auml;suunnittelija</button>
+             -->
           </div>
         </div>
 
@@ -183,11 +176,10 @@
           <form>
             <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
             <textarea
-              data-bind="value: text, valueUpdate: 'afterkeydown'"
+              data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
               data-test-id="application-new-comment-text"
               class="form-input textarea"
-              rows="3"
-              placeholder="Kirjoita viesti">
+              rows="3">
             </textarea>
             <button
               data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
@@ -232,11 +224,11 @@
                   <td data-bind="attr: {'class': statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
                   <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                     <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
-                      <span data-bind="if: type != null">
+                      <span data-bind="if: type">
                         <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
                       </span>
-                      <span data-bind="if: type == null">
-                        <i data-bind="ltext: ''">Nimet&ouml;n</i>
+                      <span data-bind="if: !type">
+                        <i data-bind="ltext: 'attachment.noName'">Nimet&ouml;n</i>
                       </span>
                     </a>
                   </td>
@@ -266,16 +258,14 @@
             </table>
 
           </div>
-          <div data-bind="ifnot: attachmentsByGroup.length">
+          <div data-bind="ifnot: attachmentsByGroup().length">
             <i data-bind="ltext: 'application.attachmentsEmpty'">Ei liitteit&auml;</i>
           </div>
           <button
               id="add-attachment"
               class="btn btn-primary modal"
               data-window-id="upload-dialog"
-              data-bind="ltext: '', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
-            Lis&auml;&auml; liite
-          </button>
+              data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"></button>
         </div>
       </div>
 
@@ -284,18 +274,16 @@
     <div id="boxes">
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
-          &auml;
-          <p data-bind="ltext: ''">Lis&auml;&auml; valtuutus</p>
-          &auml;
+          <p data-bind="ltext: 'application.addInvite'">Lis&auml;&auml; valtuutus</p>
           <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content">
           <div data-bind="with: $root.invite">
-            <label data-bind="ltext: ''" class="form-label" for="invite-email">S&auml;hk&ouml;postiosoite</label>
+            <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
-            <label data-bind="ltext: ''" class="form-label" for="invite-text">Viesti</label>
+            <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
-            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit">Kutsu</button>
+            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
           </div>
         </div>
       </div>

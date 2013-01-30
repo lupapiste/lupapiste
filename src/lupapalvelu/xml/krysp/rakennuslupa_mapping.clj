@@ -1,7 +1,9 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
   (:use  [lupapalvelu.xml.krysp.yhteiset]
          [clojure.data.xml]
-         [clojure.java.io]))
+         [clojure.java.io]
+         [lupapalvelu.document.krysp :only [application-to-canonical]]
+         [lupapalvelu.xml.emit :only [element-to-xml]]))
 
 ;RakVal
 (def tunnus-children [{:tag :valtakunnallinenNumero}
@@ -113,3 +115,11 @@
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
                                                {:tag :rakennelmatieto}]}]}]}]}]})
+
+(defn get-application-as-krysp [application]
+  (let [
+        canonical (application-to-canonical application)
+        xml (element-to-xml canonical rakennuslupa_to_krysp )]
+    ;(with-open [out-file (writer "/Users/terotu/example-krysp.xml" )]
+     ; (emit xml out-file))
+    ))
