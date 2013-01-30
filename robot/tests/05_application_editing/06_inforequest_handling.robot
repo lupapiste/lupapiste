@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Inforequest state handling
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 

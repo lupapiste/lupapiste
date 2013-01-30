@@ -5,41 +5,42 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
+Mikko creates application
+  Mikko logs in
+  Create application  authority-cant-see-drafts  753  75341600250030
+  Logout
+  
 Sonja should not see applications at this stage
   Sonja logs in
-  Wait until  Number of requests on page  application  0
+  Request should not be visible  authority-cant-see-drafts
   Logout
 
 Mikko goes to application page
   Mikko logs in
-  Open the application
-  Wait Until  Element should be visible  application
+  Open the application  authority-cant-see-drafts
 
 Application is in draft state
-  Wait until  Applicantion state is  Luonnos
+  Applicantion state is  Luonnos
 
 There are no comments yet
-  Click by test id  application-open-conversation-tab
-  Wait Until  Element should be visible  application-conversation-tab
+  Open tab  conversation
   Comment count is  0
 
 Mikko adds a comment
-  Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  foo
-  Click by test id  application-new-comment-btn
-  Wait Until  Comment count is  1
+  Add comment  huba huba
 
 Application is now in stage valmisteilla
-  Wait until  Applicantion state is  Valmisteilla
+  Applicantion state is  Valmisteilla
   Logout
 
 Sonja should see one (Sipoo) application
   Sonja logs in
-  Wait until  Number of requests on page  application  1
+  Request should be visible  authority-cant-see-drafts
   Logout
 
 Veikko should see only zero (Tampere) applications
   Veikko logs in
-  Wait until  Number of requests on page  application  0
+  Request should not be visible  authority-cant-see-drafts
   Logout
 
 *** Keywords ***
