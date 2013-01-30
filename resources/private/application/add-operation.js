@@ -83,7 +83,8 @@
         $("#add-operation .tree-content"),
         $("#add-operation .tree-breadcrumbs"),
         model.operation,
-        model.generateLast);
+        model.generateLast,
+        "operations");
     model.tree = tree;
     ko.applyBindings(model, $("#add-operation")[0]);
   });

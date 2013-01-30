@@ -219,8 +219,8 @@
        :title         (:address data)
        :roles         {:applicant owner}
        :auth          [owner]
-       :documents     (make-documents user created nil op)
-       :attachments   (make-attachments created op)
+       :documents     (if info-request? [] (make-documents user created nil op))
+       :attachments   (if info-request? [] (make-attachments created op))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types))

@@ -1,14 +1,20 @@
 *** Settings ***
 
 Documentation  Sonja can assign application to herself
-Suite setup    Sonja logs in
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
+Mikko creates an application
+  Mikko logs in
+  Create application  assign-to-me  753  75341600250030
+  Add comment  hojo-hojo
+  Logout
+  
 Application is not assigned
-  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
+  Sonja logs in
+  Open the application  assign-to-me
   Application is not assigned
 
 Sonja assign application to herself

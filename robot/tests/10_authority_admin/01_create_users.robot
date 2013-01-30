@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation  Authority admin creates users
+Documentation   Authority admin creates users
 Suite setup     Sipoo logs in
 Suite teardown  Logout
 Resource       ../../common_resource.robot

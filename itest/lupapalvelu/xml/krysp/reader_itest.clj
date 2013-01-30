@@ -17,13 +17,14 @@
       (fact "first building has correct data"
         (first buildings) => {:propertyId "75300301050006"
                               :buildingId "001"
-                              :usage      "039 muut asuinkerrostalot"})
+                              :usage      "039 muut asuinkerrostalot"
+                              :created    "1962"})
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId "75300301050006"
                                :buildingId "002"
-                               :usage      "021 rivitalot"}))))
-
+                               :usage      "021 rivitalot"
+                               :created    "1998"}))))
 
 (fact "converting krysp to lupapiste domain model"
   (let [xml (building-xml local-test-legacy id)]
