@@ -74,21 +74,14 @@ Wait until
 
 Go to page
   [Arguments]  ${page}
-  Click link  test-${page}-link
+  Execute Javascript  window.location.hash = "!/${page}";
+  Wait until  Element should be visible  ${page}
+  Sleep  1
 
-Open the application
-  # Must open the same application (Latokuja 1) every time so that the tests are deterministic
-  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'application')]//td[text()='Latokuja 1, Sipoo']
-  Wait Until  Element should be visible  application
-
-Open the inforequest
-  # Must open the same inforequest (Latokuja 2) every time so that the tests are deterministic
-  Wait until  Click element  xpath=//section[@id='applications']//tr[contains(@class,'inforequest')]//td[text()='Latokuja 2, Sipoo']
-  Wait Until  Element should be visible  inforequest
-
-Open attachment tab
-  Open the application
-  Click by test id  application-open-attachments-tab
+Open tab
+  [Arguments]  ${name}
+  Click by test id  application-open-${name}-tab
+  Wait until  Element should be visible  application-${name}-tab
 
 Logout
   Go to  ${LOGIN URL}
@@ -197,7 +190,6 @@ Number of requests on page
   [Arguments]  ${request-type}  ${amount}
   Xpath Should Match X Times  //section[@id='applications']//tr[contains(@class,'${request-type}')]  ${amount}
 
-
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
@@ -223,3 +215,83 @@ Click enabled by test id
   Wait until page contains element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
   Click element  xpath=//*[@data-test-id="${id}"]
+
+#
+# Helpser for creating new inforequest and application:
+#
+
+Create application
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Go to page  applications
+  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  Click by test id  create-application
+  Wait Until  Element should be visible  application
+  Wait Until  Element should contain  xpath=//span[@data-test-id='application-title']  ${address}
+
+Create inforequest
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  Click by test id  create-proceed-to-inforequest
+  Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
+  Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
+  Click by test id  create-inforequest
+  Wait Until  Element should be visible  inforequest
+  Wait Until  Element should contain  xpath=//span[@data-test-id='inforequest-title']  ${address}
+
+Prepare new request
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Execute Javascript  window.location.hash = "!/applications";
+  Click by test id  applications-create-new
+  Input text by test id  create-address  ${address}
+  Select From List by test id  create-municipality-select  ${municipality}  
+  Input text by test id  create-property-id  ${propertyId}
+  Click by test id  create-continue
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+
+#
+# Jump to application or inforequest:
+#
+
+Open the request
+  [Arguments]  ${address}
+  Go to page  applications
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+
+Open the application
+  [Arguments]  ${address}
+  Open the request  ${address}
+  Wait until  Element should contain  xpath=//span[@data-test-id='application-title']  ${address}
+
+Open the inforequest
+  [Arguments]  ${address}
+  Open the request  ${address}
+  Wait until  Element should contain  xpath=//span[@data-test-id='inforequest-title']  ${address}
+
+Request should be visible
+  [Arguments]  ${address}
+  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+
+Request should not be visible
+  [Arguments]  ${address}
+  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+
+#
+# Comments:
+#
+
+Add comment
+  [Arguments]  ${message}
+  Open tab  conversation
+  Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click by test id  application-new-comment-btn
+  Wait until  Element should be visible  xpath=//table[@data-test-id='application-comments-table']//td[text()='${message}']
+
+#
+# Quick, jettison the db...
+#
+
+Apply minimal fixture now
+  Click element  debug-apply-minimal
+  Wait until  Element should be visible  debug-apply-done

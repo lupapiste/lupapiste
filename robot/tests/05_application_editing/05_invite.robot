@@ -29,18 +29,3 @@ Sonja (the Authority) is not allowed to invite people
   Wait until  Element should contain     xpath=//section[@id='application']//span[@data-test-id='application-title']  Latokuja 5, Sipoo
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   Logout
-
-*** Keywords ***
-
-Create application
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Click by test id  applications-create-new
-  Input text by test id  create-address  ${address}
-  Select From List by test id  create-municipality-select  ${municipality}  
-  Input text by test id  create-property-id  ${propertyId}
-  Click by test id  create-continue
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
-  Click by test id  create-application
-  Wait Until  Element should be visible  application
