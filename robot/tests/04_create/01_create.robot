@@ -8,19 +8,19 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   Mikko logs in
   Create application  create-app  753  75341600250021
-  
+
 Mikko sees application in list
   Go to page  applications
   Request should be visible  create-app
 
 Mikko creates a new inforequest
   Create inforequest  create-info  753  75341600250022  Hoblaa
-  
+
 Mikko sees one application and one inforequest
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info
-  
+
 Mikko is really hungry and runs to Selvi for some delicious liha-annos
   Logout
 
@@ -37,7 +37,7 @@ Mikko comes back and sees his application and inforequest
 
 Mikko inspects inforequest and sees his initial comments
   Open inforequest  create-info
-  Wait until  Xpath Should Match X Times  //section[@id='inforequest']//table[@data-test-id='comments-table']//td[text()='Hoblaa']  1 
+  Wait until  Xpath Should Match X Times  //section[@id='inforequest']//table[@data-test-id='comments-table']//td[text()='Hoblaa']  1
 
 Mikko creates new application
   Go to page  applications
@@ -57,8 +57,9 @@ Mikko closes application at Latokuja 3
 
 Mikko decides to submit create-app
   Open application  create-app
+  Wait until  Application state should be  draft
   Click by test id  application-submit-btn
-  Wait until  Application state should be  submitted   
+  Wait until  Application state should be  submitted
 
 Mikko still sees the submitted app in applications list
   Go to page  applications
