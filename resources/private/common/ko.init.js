@@ -43,7 +43,11 @@
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       $(element).text(value && (value.length > 0) ? loc(value) : "$$EMPTY_LTEXT$$");
-      if(!loc.termExists(value)) { $(element).addClass("form-error");}
+      if(!loc.termExists(value)) {
+        $(element).addClass("ltext-error");
+      } else {
+        $(element).removeClass("ltext-error");
+      }
     }
   };
 
