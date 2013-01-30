@@ -14,7 +14,7 @@ Mikko creates an application
   
 Application is not assigned
   Sonja logs in
-  Open the application  assign-to-me
+  Open application  assign-to-me
   Application is not assigned
 
 Sonja assign application to herself

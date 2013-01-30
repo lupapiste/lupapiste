@@ -24,7 +24,7 @@ Mikko remembers that it is his turn to pick the kids from day care
 
 Sonja logs in for approval
   Sonja logs in
-  Open the application  approve-app
+  Open application  approve-app
 
 Sonja approves application
   Click by test id  approve-application

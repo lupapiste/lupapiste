@@ -17,7 +17,7 @@ Sonja should not see applications at this stage
 
 Mikko goes to application page
   Mikko logs in
-  Open the application  authority-cant-see-drafts
+  Open application  authority-cant-see-drafts
 
 Application is in draft state
   Applicantion state is  Luonnos
