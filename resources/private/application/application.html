@@ -18,12 +18,14 @@
         <div class="application_summary_info">
           <div>
             <p data-bind="ltext: 'application.id'">K&auml;sittelytunnus:</p>
-            <span class="application_summary_text" id="test-application-id" data-bind-test-id="application-id"
-                  data-bind="text: id, attr: {'data-test-value': id}"></span>
+            <span
+              data-bind="text: id, attr: {'data-test-value': id}"
+              data-test-id="application-id"
+              class="application_summary_text"></span>
           </div>
           <div>
             <p data-bind="ltext: 'application.state'">Tila:</p>
-            <span data-bind="ltext: state" data-test-id="application-state" class="application_summary_text"></span>
+            <span data-bind="ltext: state, attr: {'data-test-state': state}" data-test-id="application-state" class="application_summary_text"></span>
           </div>
           <div>
             <p data-bind="ltext: 'application.type'">Lupatyyppi:</p>
@@ -57,25 +59,30 @@
             </ul>
           </div>
           <div data-bind="with: $root.applicationModel.data">
-            <p data-bind="ltext: 'application.submissionDate'">Hakemus j&auml;tetty:</p>
-            <span data-bind="if: $data.submitted"><span class="application_summary_text" data-bind="dateString: submitted"></span></span>
+            <p data-bind="ltext: 'application.submissionDate'"></p>
+            <span data-bind="if: $data.submitted">
+              <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
+            </span>
           </div>
         </div>
+        
         <div class="application_actions">
           <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary" ></button>
           <button data-bind="ltext: 'application.approveApplication', click: approveApplication, enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
           <button data-bind="ltext: 'application.addOperation',       click: addOperation,       enable: $root.authorization.ok('add-operation')"                                              class="todo btn action-bar-button"></button>
           <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn action-bar-button"></button>
         </div>
+        
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
             <li><a data-bind="ltext: 'application.tabDocuments',    click: $root.tab.tabClick, clickBubble: false"  href="#application-application-tab"   data-test-id="application-open-application-tab" class="active-as-default"></a></li>
             <li><a data-bind="ltext: 'application.tabParties',      click: $root.tab.tabClick, clickBubble: false"  href="#application-parties-tab"       data-test-id="application-open-parties-tab"      ></a></li>
             <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.tab.tabClick, clickBubble: false"  href="#application-attachments-tab"   data-test-id="application-open-attachments-tab"  ></a></li>
-            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.tab.tabClick, clickBubble: false"  href="#application-decision-tab"      data-test-id="application-open-verdict-tab"      ></a></li>
+            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.tab.tabClick, clickBubble: false"  href="#application-verdict-tab"       data-test-id="application-open-verdict-tab"      ></a></li>
             <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
         </div>
+        
       </div>
     </div>
 
@@ -190,10 +197,10 @@
         </div>
       </div>
 
-      <div id="application-decision-tab" class="tab-content" data-bind="with: application">
+      <div id="application-verdict-tab" class="tab-content" data-bind="with: application">
         <div class="tab-wrapper">
           <div class="row" data-bind="with: verdict">
-            <span id="test-application-verdict" data-bind="text: text"></span>
+            <span data-bind="text: text" data-test-id="application-verdict"></span>
           </div>
         </div>
       </div>
