@@ -1,16 +1,18 @@
 (ns lupapalvelu.operations
   (:require [lupapalvelu.document.schemas :as schemas]))
 
-(def default-description "Hankkeesi vaatii todenn\u00E4k\u00F6isesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa my\u00F6s tutustua alla listattuihin sivustoihin, joilta l\u00F6yd\u00E4t lis\u00E4\u00E4 tietoa rakennusvalvonnasta. Voit my\u00F6s kysy\u00E4 lis\u00E4\u00E4 aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekem\u00E4ll\u00E4 neuvontapyynn\u00F6n.")
+;; Key in applications_[fi|sv].js
+(def default-description "operations.default-description")
 
 (def ^:private operations-tree
+  ;; These keys as localized in applications_[fi|sv].js
   [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" {:op :asuinrakennus :text default-description}]
                                                                      ["Vapaa-ajan asuinrakennus" {:op :vapaa-ajan-asuinrakennus :text default-description}]
                                                                      ["Varasto, sauna, autotalli tai muu talousrakennus" {:op :varasto-tms :text default-description}]
                                                                      ["Julkinen rakennus" {:op :julkinen-rakennus :text default-description}]
                                                                      ["Muu" {:op :muu-uusi-rakentaminen :text default-description}]]]
                                   ["Rakennuksen laajentaminen tai muuttaminen" [["Rakennuksen laajentaminen tai korjaaminen" {:op :laajentaminen :text default-description}]
-                                                                                ["Kayttotarkoituksen muutos, esim loma-asunnon muuttaminen pysyvaan kayttoon" {:op :kayttotark-muutos :text default-description}]
+                                                                                ["Kayttotarkoituksen muutos" {:op :kayttotark-muutos :text default-description}]
                                                                                 ["Rakennuksen julkisivun tai katon materiaalin, varin tai muodon muuttaminen" {:op :julkisivu-muutos :text default-description}]
                                                                                 ["Asuinhuoneiston jakaminen tai yhdistaminen" {:op :jakaminen-tai-yhdistaminen :text default-description}]
                                                                                 ["Markatilan laajentaminen" {:op :markatilan-laajentaminen :text default-description}]

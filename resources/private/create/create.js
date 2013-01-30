@@ -200,14 +200,14 @@
   };
 
   function toLink(l) {
-    return "<li><a href='" + l.url + "' target='_blank'>" + l.nameFin + "</li>";
+    return "<li><a href='" + l.url + "' target='_blank'>" + l.nameFin + "</li>"; // TODO i18n
   }
 
   function generateInfo(value) {
     var e = document.createElement("div");
     e.setAttribute("class", "tree-result");
     $(e).html(
-        "<p>" + value.text + "</p>" +
+        "<p>" + loc(value.text) + "</p>" +
         "<ul>" + _.map(model.links(), toLink).join("") + "</ul>");
     return e;
   }
@@ -235,7 +235,8 @@
         $("#create .tree-content"),
         $("#create .tree-breadcrumbs"),
         model.operation,
-        generateInfo);
+        generateInfo,
+        "operations");
 
     model.operations.subscribe(tree.reset);
 

@@ -18,7 +18,7 @@
   ko.validation.localize(loc.toMap());
 
   ko.bindingHandlers.dateString = {
-    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+    update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var date = new Date(value);
       $(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear());
@@ -30,7 +30,7 @@
   }
 
   ko.bindingHandlers.dateTimeString = {
-    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+    update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var date = new Date(value);
       var hours = withLeadinngZero(date.getHours());
@@ -40,27 +40,32 @@
   };
 
   ko.bindingHandlers.ltext = {
-    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+    update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       $(element).text(value && (value.length > 0) ? loc(value) : "$$EMPTY_LTEXT$$");
+      if(!loc.termExists(value)) {
+        $(element).addClass("ltext-error");
+      } else {
+        $(element).removeClass("ltext-error");
+      }
     }
   };
 
   ko.bindingHandlers.fullName = {
-    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+    update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var fullName = "";
       if (value) {
-        if (value.firstName) fullName = _.isFunction(value.firstName) ? value.firstName() : value.firstName;
-        if (value.firstName && value.lastName) fullName += "\u00a0";
-        if (value.lastName) fullName += _.isFunction(value.lastName) ? value.lastName() : value.lastName;
+        if (value.firstName) { fullName = _.isFunction(value.firstName) ? value.firstName() : value.firstName; }
+        if (value.firstName && value.lastName) { fullName += "\u00a0"; }
+        if (value.lastName) { fullName += _.isFunction(value.lastName) ? value.lastName() : value.lastName; }
       }
       $(element).html(fullName);
     }
   };
 
   ko.bindingHandlers.size = {
-    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+    update: function(element, valueAccessor) {
       var v = ko.utils.unwrapObservable(valueAccessor());
 
       if (!v || v.length === 0) {
@@ -98,7 +103,7 @@
   };
 
   ko.bindingHandlers.version = {
-    update: function(element, valueAccessor, allBindingsAccessor, viewModel) {
+    update: function(element, valueAccessor) {
       var verValue = ko.utils.unwrapObservable(valueAccessor());
 
       var version = "";

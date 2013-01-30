@@ -10,7 +10,7 @@
     </div>
 
     <div class="application_summary">
-      <div id="inforequest-map" class="map map-large" style="width: 280px; height: 280px;"></div>
+      <div id="inforequest-map" class="map map-large" style="width: 320px; height: 320px;"></div>
 
       <div data-bind="with: application">
         <h1 data-bind="text: address">
@@ -18,21 +18,23 @@
 
         <div class="application_summary_info">
           <div>
-            <p data-bind="ltext: ''">Käsittelytunnus:</p>
+            <p data-bind="ltext: 'application.id'"></p>
             <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>
           </div>
           <div data-bind="if: state">
-            <p data-bind="ltext: ''">Tila:</p>
+            <p data-bind="ltext: 'application.state'"></p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
           </div>
           <div data-bind="with: $root.applicationModel.data">
-            <p data-bind="ltext: ''">Luotu:</p>
-            <span data-bind="if: $data.created"><span class="application_summary_text" data-bind="dateString: created"></span></span>
+            <p data-bind="ltext: 'inforequest.created'"></p>
+            <span data-bind="if: $data.created">
+              <span class="application_summary_text" data-bind="dateString: created"></span>
+            </span>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
-              <p data-bind="ltext: ''">Käsittelijä:</p>
+              <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
               <span id="test-inforequest-assignee" class="application_summary_text">
 
                 <select id="inforequest-assignee-select"
@@ -57,29 +59,27 @@
     <div class="sidebar">
       <aside class="instructions">
         <h3 data-bind="ltext: 'help'">Ohje</h3>
-        <p data-bind="ltext: ''">Tässä näkymässä voit käsitellä neuvontapyynnön tietoja.</p>
+        <p data-bind="ltext: 'inforequest.helpText'"></p>
       </aside>
     </div>
 
     <div class="container">
-      <p class="tab-info" data-bind="ltext: ''">Liitteet</p>
-      
+      <h3 class="tab-info" data-bind="ltext: 'inforequest.attachments'"></h3>
       <div data-bind="if: attachments().length">
         <table class="table" data-test-id="inforequest-attachments-table">
           <tbody>
             <tr>
-              <th data-bind="ltext: ''">Tiedosto</th>
-              <th data-bind="ltext: ''">Muokattu</th>
+              <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+              <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
               <th></th>
             </tr>
             <!-- ko foreach: attachments -->
+            <!-- ko if: latestVersion && latestVersion.filename -->
             <tr>
               <td>
-                <span data-bind="if: latestVersion && latestVersion.filename">
                   <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download/' + latestVersion.fileId}"></a><br/>
                   <i data-bind="ltext: latestVersion.contentType"></i>
                   <i data-bind="size: latestVersion.size"></i>
-                </span>
               </td>
               <td>
                 <span data-bind="dateString: modified"></span>
@@ -91,24 +91,23 @@
               </td>
             </tr>
             <!-- /ko -->
+            <!-- /ko -->
           </tbody>
         </table>
       </div>
       
       <div data-bind="ifnot: attachments().length">
-        <i data-bind="ltext: ''" data-test-id="inforequest-attachments-no-attachments">Ei liitteit&auml;</i>
+        <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="inforequest-attachments-no-attachments"></i>
       </div>
       
       <button
           class="btn btn-primary modal"
-          data-bind="visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
-          data-window-id="upload-dialog">
-        Lis&auml;&auml; liite
-      </button>
+          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
+          data-window-id="upload-dialog"></button>
     </div>
 
-    <div data-bind="with: $root.comment">
-        <p class="tab-info" data-bind="ltext: 'inforequest.comments'"></p>
+    <div data-bind="with: $root.comment" class="container">
+        <h3 class="tab-info" data-bind="ltext: 'inforequest.comments'"></h3>
         <div class="tab-wrapper">
           <table data-test-id="comments-table" class="table table-striped conversation">
             <tbody data-bind="foreach: comments">
@@ -127,9 +126,11 @@
             </tbody>
           </table>
           <form>
-            <h3 data-bind="ltext: ''">Kirjoita viesti:</h3>
-            <textarea class="form-input textarea" id="commentText" data-bind="value: text, valueUpdate: 'afterkeydown'" rows="3" placeholder="Kirjoita viesti"></textarea>
-            <button id="application.addComment" data-bind="disable: disabled, click: submit" type="submit" class="btn btn-primary">L&auml;het&auml; viesti</button>
+            <h4 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h4>
+            <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+                      class="form-input textarea" id="commentText" rows="3"></textarea>
+            <button data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
+                    id="application.addComment" type="submit" class="btn btn-primary"></button>
           </form>
         </div>
       </div>

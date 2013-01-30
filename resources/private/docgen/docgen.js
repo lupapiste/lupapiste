@@ -4,6 +4,8 @@ if (typeof LUPAPISTE === "undefined") {
 
 LUPAPISTE.DOMUtils = {
   makeButton: function (id, label) {
+    "use strict";
+
     var appendButton = document.createElement("button");
     appendButton.id = id;
     appendButton.className = "btn";
@@ -104,7 +106,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
 
     var type = (spec.subtype === "email") ? "email" : "text";
     var sizeClass = self.sizeClasses[spec.size] || "";
-    var input = makeInput(type, myPath, model[spec.name], save, sizeClass)
+    var input = makeInput(type, myPath, model[spec.name], save, sizeClass);
 
     if (spec.unit) {
       var inputAndUnit = document.createElement("span");
@@ -240,6 +242,59 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return partsDiv;
   }
 
+  function buildBuildingSelector(spec, model, path, save, specId) {
+    var myPath = path.join(".");
+
+    var select = document.createElement("select");
+    select.name = myPath;
+    select.className = "form-input combobox";
+    select.onchange = function(event) {
+      var target = getEvent(event).target;
+      var buildingId = target.value;
+      ajax
+        .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
+        .success(function() {
+          save(event);
+          hub.send("load-application", {id: appId});
+        })
+        .call();
+      return false;
+    };
+
+    var selectedOption = model[spec.name] || "";
+
+    var option = document.createElement("option");
+    option.value = "";
+    option.appendChild(document.createTextNode(loc("selectone")));
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
+    select.appendChild(option);
+
+    ajax
+      .query("get-building-info-from-legacy", {id: appId})
+      .success(function(data) {
+        $.each(data.data, function (i, building) {
+          var name = building.buildingId;
+          var usage = building.usage;
+          var created = building.created;
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(name+" ("+usage+") - "+created));
+          if (selectedOption === name) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
+        });
+      })
+      .call();
+
+    var span = makeEntrySpan();
+    span.appendChild(makeLabel("select", myPath, specId, true));
+    span.appendChild(select);
+    return span;
+  }
+
   function buildUnknown(spec, model, path) {
     error("Unknown element type:", spec.type, path);
     var div = document.createElement("div");
@@ -257,6 +312,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     radioGroup: buildRadioGroup,
     date: buildDate,
     element: buildElement,
+    buildingSelector: buildBuildingSelector,
     unknown: buildUnknown
   };
 
