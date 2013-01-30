@@ -5,7 +5,18 @@
             [clojure.walk :refer [postwalk postwalk-demo]]
             [lupapalvelu.document.schemas :as schema]
             [net.cgrand.enlive-html :as enlive]
+            [clj-time.format :as timeformat]
             [clj-http.client :as http]))
+
+;;
+;; parsing time (TODO: might be copy-pasted from krysp)
+;;
+
+(defn parse-datetime [s]
+  (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss'Z'") s))
+
+(defn unparse-datetime [format dt]
+  (timeformat/unparse (timeformat/formatters format) dt))
 
 ;;
 ;; Test urls
@@ -93,12 +104,14 @@
     xml))
 
 (defn- ->buildingIds [m]
-  {:propertyId (get-in m [:rakennuksenTiedot :rakennustunnus :kiinttun])
-   :buildingId (get-in m [:rakennuksenTiedot :rakennustunnus :rakennusnro])
-   :usage      (get-in m [:rakennuksenTiedot :kayttotarkoitus])})
+  {:propertyId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun])
+   :buildingId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro])
+   :usage      (get-in m [:Rakennus :rakennuksenTiedot :kayttotarkoitus])
+   :created    (-> m (get-in [:Rakennus :alkuHetki]) parse-datetime (->> (unparse-datetime :year)))
+   })
 
 (defn ->buildings [xml]
-  (-> xml (select [:rakval:rakennuksenTiedot]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
+  (-> xml (select [:rakval:Rakennus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
