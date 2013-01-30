@@ -215,7 +215,7 @@
   }
 
   hub.onPageChange("create", model.clear);
-
+ 
   ajax
     .query("municipalities")
     .success(function(data) { model.municipalities(data.municipalities); })
