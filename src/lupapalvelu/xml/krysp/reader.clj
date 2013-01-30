@@ -18,13 +18,13 @@
 ;; Common
 ;;
 
-(defn strip-key
-  "removes namespacey part of a keyword key"
-  [k] (if (keyword? k) (-> k name (s/split #":") last keyword) k))
-
 (defn postwalk-map
   "traverses m and applies f to all maps within"
   [f m] (postwalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
+
+(defn strip-key
+  "removes namespacey part of a keyword key"
+  [k] (if (keyword? k) (-> k name (s/split #":") last keyword) k))
 
 (defn strip-keys
   "removes recursively all namespacey parts from map keywords keys"
@@ -67,6 +67,14 @@
   [xml selector]
   (-> (select1 xml selector) xml->edn strip-keys))
 
+(defn map-index
+  "transform a collection into keyord-indexed map (starting from 0)."
+  [c] (into {} (map (fn [[k v]] [(keyword (str k)) v]) (map-indexed vector c))))
+
+(defn index-maps
+  "transform a form with replacing all sequential collections with keyword-indexed maps."
+  [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
+
 ;;
 ;; Read the Krysp from Legacy
 ;;
@@ -98,20 +106,21 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn ->rakennuksen-muttaminen [xml buildingId]
+(defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [rakennus (select1 xml [:rakval:rakennustieto :> (enlive/has [:rakval:rakennusnro (enlive/text-pred (partial = buildingId))])])
-        polished (comp strip-empty-maps strip-nils convert-booleans (partial merge {}))]
+        polished (comp index-maps strip-empty-maps strip-nils convert-booleans (partial merge {}))]
     (when rakennus
       (polished
         (as-is rakennus [:rakval:verkostoliittymat])
         (as-is rakennus [:rakval:varusteet])
-        {:rakennuksenOmistajat ...notimplemented...
+        {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+         :rakennuksenOmistajat ...notimplemented...
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-         :luokitus {:energialuokka ...notfound...
-                    :paloluokka ...notfound...}
-         :mitat {:kellarinpinta-ala ...notfound...
-                 :kerrosala (-> rakennus (select1 [:rakval:kerrosalas]) text)
+         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
+                    :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}               ;; does-not-exist in test
+         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)     ;; does-not-exist in test
+                 :kerrosala (-> rakennus (select1 [:rakval:kerrosala]) text)
                  :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
                  :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
                  :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
@@ -121,13 +130,27 @@
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
                     :lammonlahde ...notimplemented...}
          :muutostyolaji ...notimplemented...
-         :huoneistot ...notimplemented...}))))
+         :huoneistot (->>
+                       (select rakennus [:rakval:valmisHuoneisto])
+                       (map (fn [huoneisto]
+                              {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:rakval:huoneistonumero]) text)
+                                                 :jakokirjain ...notfound...
+                                                 :porras (-> huoneisto (select1 [:rakval:porras]) text)}
+                               :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:rakval:huoneistonTyyppi]) text)
+                                                  :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
+                                                  :huoneluku (-> huoneisto (select1 [:rakval:huoneluku]) text)}
+                               :keittionTyyppi (-> huoneisto (select1 [:rakval:keittionTyyppi]) text)
+                               :varusteet {:ammeTaiSuihku (-> huoneisto (select1 [:rakval:ammeTaiSuihkuKytkin]) text)
+                                           :lamminvesi (-> huoneisto (select1 [:rakval:lamminvesiKytkin]) text)
+                                           :parvekeTaiTerassi (-> huoneisto (select1 [:rakval:parvekeTaiTerassiKytkin]) text)
+                                           :sauna (-> huoneisto (select1 [:rakval:saunaKytkin]) text)
+                                           :wc (-> huoneisto (select1 [:rakval:WCKytkin]) text)}})))}))))
 
 ;;
 ;; full mappings
 ;;
 
-#_(defn ->rakennuksen-muttaminen-old [propertyId buildingId xml]
+#_(defn ->rakennuksen-muuttaminen-old [propertyId buildingId xml]
   (let [data (select1 xml [:rakval:Rakennus])]
     {:verkostoliittymat {:kaapeliKytkin nil
                          :maakaasuKytkin nil
