@@ -45,6 +45,10 @@
 (defmethod validate :radioGroup [elem v]
   nil)
 
+;; FIXME
+(defmethod validate :buildingSelector [elem v]
+  nil)
+
 (defmethod validate nil [_ _]
   [:err "illegal-key"])
 

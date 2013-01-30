@@ -257,18 +257,6 @@
     {:status 401}))
 
 ;;
-;; jQuery dataTables support:
-;;
-
-(defpage "/api/data-table/applications" []
-  (if-let [user (current-user)]
-    (->>
-      (application/applications-for-user user (:query-params (request/ring-request)))
-      (resp/json)
-      (resp/status 200))
-    {:status 401}))
-
-;;
 ;; dev utils:
 ;;
 

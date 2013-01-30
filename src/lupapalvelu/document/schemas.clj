@@ -281,15 +281,34 @@
                        {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
   )
 
-(def rakennuksen-muuttaminen (concat muutostyonlaji rakennuksen-omistajat rakennuksen-tiedot))
+(def rakennuksen-valitsin
+  [{:name :rakennusnro :type :buildingSelector}])
+
+(def rakennuksen-muuttaminen (concat rakennuksen-valitsin muutostyonlaji rakennuksen-omistajat rakennuksen-tiedot))
+
+(def purku (into [{:name "poistumanSyy" :type :select
+                   :body [{:name "purettu uudisrakentamisen vuoksi"}
+                          {:name "purettu muusta syyst\u00e4"}
+                          {:name "tuhoutunut"}
+                          {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                          {:name "poistaminen"}]}
+                  {:name "poistumanAjankohta" :type :string}] (into rakennuksen-omistajat rakennuksen-tiedot)))
 
 (def schemas
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
       :body rakennuksen-tiedot}
 
+     {:info {:name "hankkeen-kuvaus"}
+      :body [{:name "kuvaus" :type :text}
+             {:name "poikkeamat" :type :text}]}
+
+
      {:info {:name "rakennuksen-muuttaminen"}
       :body rakennuksen-muuttaminen}
+
+     {:info {:name "purku"}
+      :body purku}
 
      {:info {:name "hakija" :repeating true}
       :body party-body}
