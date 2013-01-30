@@ -40,18 +40,6 @@ Mikko sees that the application has verdict
 Application verdict is visible to authority
   Sonja logs in
   Open the application  verdict-app
-  Open verdict tab
+  Open tab  verdict
   Element should be visible  xpath=//span[@data-test-id='application-verdict']
   Logout
-
-*** Keywords ***
-
-Open verdict tab
-  Click by test id  application-open-verdict-tab
-
-Application state should be
-  [Arguments]  ${state}
-  ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
-  Should be equal  ${s}  ${state}
-
-  
