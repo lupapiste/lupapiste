@@ -62,7 +62,7 @@
     :email "pekka.borga@porvoo.fi"
     :enabled true
     :role :authority
-    :municipality "613"
+    :municipality "638"
     :personId "kunta333"
     :firstName "Pekka"
     :lastName "Borga"
@@ -164,10 +164,10 @@
                                :url "http://www.jarvenpaa.fi"}
                               {:nameFin "Rakennusvalvonta"
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
-                     {:id "613"
+                     {:id "638"
                       :nameFin "Porvoo"
                       :nameSve "Porv\u00E5\u00E5"
-                      :municipalityCode "613"
+                      :municipalityCode "638"
                       :links [{:nameFin "Porvoo"
                                :url "http://www.porvoo.fi"}
                               {:nameFin "Rakennusvalvonta"
