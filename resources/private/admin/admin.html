@@ -15,8 +15,9 @@
       </ul>
       <h3>P&auml;&auml;t&ouml;kset</h3>
       <ul data-bind="foreach: applications.data">
-        <li><a href="#" data-bind="text: id, click: $root.applications.giveVerdict"></a></li>
+        <li><a href="#" data-bind="text: id, click: $root.applications.giveVerdict, attr: {'data-test-id': id}"></a></li>
       </ul>
+      <b data-bind="text: applications.verdictResult" data-test-id="admin-verdict-result"></b>
       <h3>Aktivoi tili</h3>
       <ul data-bind="foreach: activations.data">
         <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>

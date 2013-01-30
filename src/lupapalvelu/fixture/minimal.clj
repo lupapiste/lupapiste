@@ -43,7 +43,7 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
-   ;; Sonja Sibbo - Sipoon lupa-arkkitehti
+   ;; Ronja Sibbo - Sipoon lupa-arkkitehti
    ;; ronja / sonja
    {:id "777777777777777777000024"
     :email "ronja.sibbo@sipoo.fi"
@@ -58,6 +58,19 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
+  {:id "777777777777777777000033"
+    :email "pekka.borga@porvoo.fi"
+    :enabled true
+    :role :authority
+    :municipality "613"
+    :personId "kunta333"
+    :firstName "Pekka"
+    :lastName "Borga"
+    :phone "121212"
+    :username "pekka"
+    :private {:password "$2a$10$C65v2OgWcCzo4SVDtofawuP8xXDnZn5.URbODSpeOWmRABxUU01k6"
+              :salt "$2a$10$C65v2OgWcCzo4SVDtofawu"
+              :apikey "4761896258863737181711425832653651926670"}}
    ;; sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
     :email "admin@sipoo.fi"
@@ -147,7 +160,15 @@
                       :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                                :url "http://www.jarvenpaa.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}])
+                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
+                     {:id "613"
+                      :nameFin "Porvoo"
+                      :nameSve "Porv\u00E5\u00E5"
+                      :municipalityCode "613"
+                      :links [{:nameFin "Porvoo"
+                               :url "http://www.porvoo.fi"}
+                              {:nameFin "Rakennusvalvonta"
+                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
