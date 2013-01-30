@@ -93,11 +93,12 @@
     xml))
 
 (defn- ->buildingIds [m]
-  {:propertyId (get-in m [:rakennustunnus :kiinttun])
-   :buildingId (get-in m [:rakennustunnus :rakennusnro])})
+  {:propertyId (get-in m [:rakennuksenTiedot :rakennustunnus :kiinttun])
+   :buildingId (get-in m [:rakennuksenTiedot :rakennustunnus :rakennusnro])
+   :usage      (get-in m [:rakennuksenTiedot :kayttotarkoitus])})
 
 (defn ->buildings [xml]
-  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
+  (-> xml (select [:rakval:rakennuksenTiedot]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
