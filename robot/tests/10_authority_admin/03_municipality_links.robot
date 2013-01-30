@@ -7,7 +7,6 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Admin adds new municipality link
-  Open browser to login page
   Sipoo logs in
   Add link  fancy-link  http://reddit.com
 
@@ -63,7 +62,6 @@ User sees link
 User does not see link
   [Arguments]  ${name}
   Begin inforequest
-  Sleep  5
   Element should not be visible  //a[text()='${name} fi']
 
 Begin inforequest
