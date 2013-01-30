@@ -146,35 +146,6 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defcommand "convert-to-application"
-  {:parameters [:id]
-   :roles      [:applicant]
-   :roles-in   [:applicant]
-   :states     [:draft :open]}
-  [command]
-  (with-application command
-    (fn [inforequest]
-      ; Mark source info-request as answered:
-      (mongo/update
-        :applications
-        {:_id (:id inforequest)}
-        {$set {:state :answered
-               :modified (:created command)}})
-      ; Create application with comments from info-request:
-      (let [result (executed
-                     (lupapalvelu.core/command
-                       "create-application"
-                       (:user command)
-                       (assoc
-                         (util/sub-map inforequest [:x :y :municipality :address])
-                         :permitType "buildingPermit")))
-            id (:id result)]
-        (mongo/update-by-id
-          :applications
-          id
-          {$set {:comments (:comments inforequest)}})
-        (ok :id id)))))
-
 (defn- make-attachments [created op]
   (for [[type-group type-ids] (partition 2 (:attachments (operations/operations op)))
         type-id type-ids]
@@ -249,6 +220,35 @@
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
         (mongo/update-by-id :applications id {$pushAll {:documents new-docs}})))))
+
+(defcommand "convert-to-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [inforequest]
+      ; Mark source info-request as answered:
+      (mongo/update
+        :applications
+        {:_id (:id inforequest)}
+        {$set {:state :answered
+               :modified (:created command)}})
+      ; Create application with comments from info-request:
+      (let [result (executed
+                     (lupapalvelu.core/command
+                       "create-application"
+                       (:user command)
+                       (assoc
+                         (util/sub-map inforequest [:x :y :municipality :address])
+                         :permitType "buildingPermit")))
+            id (:id result)]
+        (mongo/update-by-id
+          :applications
+          id
+          {$set {:comments (:comments inforequest)}})
+        (ok :id id)))))
 
 ;;
 ;; krysp enrichment
