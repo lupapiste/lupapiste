@@ -55,5 +55,14 @@ Mikko closes application at Latokuja 3
   Request should be visible  create-info
   Request should not be visible  create-app-2
 
+Mikko decides to submit create-app
+  Open the application  create-app
+  Click by test id  application-submit-btn
+  Wait until  Application state should be  submitted   
+
+Mikko still sees the submitted app in applications list
+  Go to page  applications
+  Request should be visible  create-app
+
 Mikko has worked really hard and now he needs some strong coffee
   Logout
