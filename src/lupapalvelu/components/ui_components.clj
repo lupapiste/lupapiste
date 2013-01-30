@@ -32,7 +32,7 @@
                   :js (into ["loc.js"]
                             (flatten
                               (for [lang ["fi" "sv"]]
-                                (for [file ["common", "docgen", "applications", "attachments", "welcome", "mypage"]]
+                                (for [file ["common", "docgen", "applications", "attachments", "welcome", "mypage", "auth-admin"]]
                                   (str file "_" lang ".js")))))}
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
