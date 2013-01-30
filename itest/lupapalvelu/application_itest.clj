@@ -111,7 +111,7 @@
       (find-by-schema? docs "foo") => truthy
       (find-by-schema? docs "a") => truthy
       (find-by-schema? docs "b") => truthy
-      (-> (find-by-schema? docs "foo") :schema :info) => (contains {:op "foo" :removable true}) 
+      (-> (find-by-schema? docs "foo") :schema :info) => (contains {:op "foo" :removable true})
       ; Add operation:
       (command pena :add-operation :id id :operation "bar")
       (let [app (:application (query pena :application :id id))
