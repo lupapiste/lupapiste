@@ -18,7 +18,7 @@ var selectionTree = (function () {
     };
   }
 
-  function Tree(content, breadcrumbs, callback, contentFactory) {
+  function Tree(content, breadcrumbs, callback, contentFactory, locKeyPrefix) {
     var self = this;
 
     self.data = null;
@@ -26,6 +26,7 @@ var selectionTree = (function () {
     self.breadcrumbs = $(breadcrumbs);
     self.callback = callback;
     self.makeTerminalElement = contentFactory || defaultContentFactory;
+    self.prefix = locKeyPrefix || "tree";
 
     self.width = content.parent().width();
     self.speed = self.width / 2; // magical, but good.
@@ -96,7 +97,7 @@ var selectionTree = (function () {
         event.preventDefault();
         event.stopPropagation();
 
-        self.crumbs.push(key);
+        self.crumbs.push(loc(self.prefix + "." + key));
         self.breadcrumbs.html(self.crumbs.join(" / "));
 
         var terminal = !_.isArray(val);
@@ -149,7 +150,7 @@ var selectionTree = (function () {
 
     self.makeLink = function(key, val, d) {
       var link = document.createElement("a");
-      link.innerHTML = key;
+      link.innerHTML = loc(self.prefix + "." + key);
       link.href = "#";
       link.onclick = self.makeHandler(key, val, d);
       return link;
@@ -158,8 +159,8 @@ var selectionTree = (function () {
   }
 
   return {
-    create: function (content, breadcrumbs, callback, contentFactory) {
-      return new Tree(content, breadcrumbs, callback, contentFactory);
+    create: function (content, breadcrumbs, callback, contentFactory, locKeyPrefix) {
+      return new Tree(content, breadcrumbs, callback, contentFactory, locKeyPrefix);
     }
   };
 
