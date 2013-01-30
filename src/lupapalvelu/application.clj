@@ -215,7 +215,8 @@
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
         (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
-                                              :modified command})))))
+                                              :modified command})
+        (ok)))))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
@@ -225,26 +226,16 @@
   [command]
   (with-application command
     (fn [inforequest]
-      ; Mark source info-request as answered:
-      (mongo/update
-        :applications
-        {:_id (:id inforequest)}
-        {$set {:state :answered
-               :modified (:created command)}})
-      ; Create application with comments from info-request:
-      (let [result (executed
-                     (lupapalvelu.core/command
-                       "create-application"
-                       (:user command)
-                       (assoc
-                         (util/sub-map inforequest [:x :y :municipality :address])
-                         :permitType "buildingPermit")))
-            id (:id result)]
-        (mongo/update-by-id
-          :applications
-          id
-          {$set {:comments (:comments inforequest)}})
-        (ok :id id)))))
+      (let [id       (get-in command [:data :id])
+            created  (:created command)
+            op       (-> inforequest :operations first :operation)]
+        (mongo/update-by-id :applications id {$set {:infoRequest false
+                                                    :state :open
+                                                    :allowedAttachmentTypes (partition 2 attachment/attachment-types)
+                                                    :documents (make-documents nil created (:documents inforequest) op)
+                                                    :modified command}
+                                              $pushAll {:attachments (make-attachments created op)}})
+        (ok)))))
 
 ;;
 ;; krysp enrichment

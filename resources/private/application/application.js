@@ -112,12 +112,11 @@
     },
 
     convertToApplication: function() {
-      var applicationId = application.id();
-      ajax.command("convert-to-application", {id: applicationId})
-        .success(function(d) {
-          repository.reloadApplication(applicationId);
-          repository.reloadApplication(d.id);
-          window.location.hash = "!/application/" + d.id;
+      var id = application.id();
+      ajax.command("convert-to-application", {id: id})
+        .success(function() {
+          repository.reloadApplication(id);
+          window.location.hash = "!/application/" + id;
         })
         .call();
       return false;
