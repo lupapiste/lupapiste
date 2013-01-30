@@ -276,9 +276,10 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       .success(function(data) {
         $.each(data.data, function (i, building) {
           var name = building.buildingId;
+          var usage = building.usage;
           var option = document.createElement("option");
           option.value = name;
-          option.appendChild(document.createTextNode(name));
+          option.appendChild(document.createTextNode(name+" ("+usage+")"));
           if (selectedOption === name) {
             option.selected = "selected";
           }

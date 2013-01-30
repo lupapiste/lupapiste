@@ -15,12 +15,15 @@
        (count buildings) => 2)
 
       (fact "first building has correct data"
-        (-> buildings first :propertyId) => "75300301050006"
-        (-> buildings first :buildingId) => "001")
+        (first buildings) => {:propertyId "75300301050006"
+                              :buildingId "001"
+                              :usage      "039 muut asuinkerrostalot"})
 
       (fact "second building has correct data"
-        (-> buildings second :propertyId) => "75300301050006"
-        (-> buildings second :buildingId) => "002"))))
+        (second buildings) => {:propertyId "75300301050006"
+                               :buildingId "002"
+                               :usage      "021 rivitalot"}))))
+
 
 (fact "converting krysp to lupapiste domain model"
   (let [xml (building-xml local-test-legacy id)]
