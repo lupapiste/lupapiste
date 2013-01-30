@@ -187,7 +187,7 @@
         x: self.x(),
         address: self.address(),
         propertyId: self.propertyId(),
-        message: self.message(),
+        messages: isBlank(self.message()) ? [] : [self.message()],
         municipality: self.municipalityCode()
       })
       .success(function(data) {

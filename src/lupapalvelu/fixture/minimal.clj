@@ -62,7 +62,7 @@
     :email "pekka.borga@porvoo.fi"
     :enabled true
     :role :authority
-    :municipality "613"
+    :municipality "638"
     :personId "kunta333"
     :firstName "Pekka"
     :lastName "Borga"
@@ -71,7 +71,7 @@
     :private {:password "$2a$10$C65v2OgWcCzo4SVDtofawuP8xXDnZn5.URbODSpeOWmRABxUU01k6"
               :salt "$2a$10$C65v2OgWcCzo4SVDtofawu"
               :apikey "4761896258863737181711425832653651926670"}}
-   ;; sipoo / sipoo
+    ;; sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
     :email "admin@sipoo.fi"
     :enabled true
@@ -161,9 +161,9 @@
                                :url "http://www.jarvenpaa.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
-                     {:id "613"
+                     {:id "638"
                       :name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
-                      :municipalityCode "613"
+                      :municipalityCode "638"
                       :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
                                :url "http://www.porvoo.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}

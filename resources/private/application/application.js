@@ -258,9 +258,8 @@
       ko.mapping.fromJS(app, {}, application);
 
       // Operations:
-
-      // FIXME: scan from documents
-      application.operations([{operation: "foo"}, {operation: "bar"}]);
+      
+      application.operations(app.operations);
 
       // Comments:
 
