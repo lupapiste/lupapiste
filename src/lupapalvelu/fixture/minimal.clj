@@ -162,12 +162,11 @@
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
                      {:id "613"
-                      :nameFin "Porvoo"
-                      :nameSve "Porv\u00E5\u00E5"
+                      :name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
                       :municipalityCode "613"
-                      :links [{:nameFin "Porvoo"
+                      :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
                                :url "http://www.porvoo.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}])
 
 (deffixture "minimal" {}
