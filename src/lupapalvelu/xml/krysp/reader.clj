@@ -107,8 +107,11 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
+(defn- ->rakennuksen-omistajat [xml]
+  )
+
 (defn ->rakennuksen-muuttaminen [xml buildingId]
-  (let [rakennus (select1 xml [:rakval:rakennustieto :> (enlive/has [:rakval:rakennusnro (enlive/text-pred (partial = buildingId))])])
+  (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
         polished (comp index-maps strip-empty-maps strip-nils convert-booleans (partial merge {}))]
     (when rakennus
       (polished
