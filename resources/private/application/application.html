@@ -78,7 +78,7 @@
             <p data-bind="ltext: 'application.operations'"></p>
             <ul data-bind="foreach: operations">
               <li>
-                <span data-bind="ltext: operation" data-test-id="test-application-operation"></span>
+                <span data-bind="ltext: 'operations.' + operation" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
