@@ -214,7 +214,8 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}})))))
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
+                                              :modified command})))))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
