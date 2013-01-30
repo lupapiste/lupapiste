@@ -14,7 +14,7 @@ $(function() {
   $("#debug-hidden").click(function() { $(".page").toggleClass("visible"); });
   $("#debug-events").click(function() { hub.send("toggle-show-events"); });
   $("#debug-apply-minimal").click(function(e) {
-    ajax.get("http://localhost:8000/api/query/apply-fixture")
+    ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
       .param("name", "minimal")
       .success(function() { if (window["repository"]) repository.reloadAllApplications(); $("#debug-apply-done").show(); })
       .call();
@@ -22,7 +22,7 @@ $(function() {
   });
 
   hub.subscribe("page-change", function() { $("#debug-apply-done").hide(); });
-  
+
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
 
