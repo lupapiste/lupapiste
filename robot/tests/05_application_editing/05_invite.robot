@@ -23,7 +23,7 @@ Mikko decides to go to the desert, put on his ipod, and listen some some British
   
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
-  Wait until  Element is visible  xpath=//section[@id='applications']//td[text()='invite-app']
+  Wait until  Element should be visible  xpath=//section[@id='applications']//td[text()='invite-app']
   Click element  xpath=//section[@id='applications']//td[text()='invite-app']
   Wait until  Element should contain  xpath=//section[@id='application']//span[@data-test-id='application-title']  invite-app
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
