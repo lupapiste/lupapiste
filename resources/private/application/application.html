@@ -10,10 +10,16 @@
     </div>
 
     <div class="application_summary">
-      <div id="application-map" class="map map-large" style="width: 280px; height: 280px;"></div>
-      <a href="#">Avaa kartta</a>
-
+      <div class="application-map-container">
+        <div id="application-map" class="map map-large" style="width: 320px; height: 320px;"></div>
+        <div class="application-map-actions" data-bind="with: application">
+          <!-- ko if: location() -->
+            <button data-bind="click: openOskariMap, ltext: 'application.mapActionOpen'" class="btn btn-primary map-search-button"></button>
+          <!-- /ko -->
+        </div>
+      </div>
       <div data-bind="with: application">
+        
         <h1 data-bind="text: address"></h1>
 
         <div class="application_summary_info">

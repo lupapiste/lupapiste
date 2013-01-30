@@ -13,7 +13,7 @@ var gis = (function() {
 
   var defaultIcon = makeIcon("/img/marker-blue.png", 21, 25);
 
-  function Map(element) {
+  function Map(element, zoomWheelEnabled) {
     var self = this;
 
     self.map = new OpenLayers.Map(element, {
@@ -23,7 +23,7 @@ var gis = (function() {
       maxExtent: new OpenLayers.Bounds(0,0,10000000,10000000),
       resolutions : [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25],
       controls: [ new OpenLayers.Control.Zoom(),         
-                  new OpenLayers.Control.Navigation({ zoomWheelEnabled: false }) ]
+                  new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
     });
 
     var wmsServers = ["/proxy/nls"];
@@ -118,7 +118,7 @@ var gis = (function() {
   }
 
   return {
-    makeMap: function(element) { return new Map(element); }
+    makeMap: function(element, zoomWheelEnabled) { return new Map(element, zoomWheelEnabled); }
   };
 
 })();
