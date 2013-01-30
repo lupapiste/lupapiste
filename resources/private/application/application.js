@@ -83,6 +83,15 @@
     // all data in here
     data: ko.observable(),
 
+    openOskariMap: function(model) {
+      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
+      window.open(url);
+      
+      hub.subscribe("map-draw-done", function(e) {
+        debug(""+e.data.drawing);
+      });
+    },
+
     submitApplication: function(model) {
       var applicationId = application.id();
       ajax.command("submit-application", { id: applicationId})
@@ -287,8 +296,8 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
-      applicationMap.clear().add(x, y).center(x, y, 10);
-      inforequestMap.clear().add(x, y).center(x, y, 10);
+      applicationMap.clear().add(x, y).center(x, y, 11);
+      inforequestMap.clear().add(x, y).center(x, y, 11);
 
       // docgen:
 
@@ -461,8 +470,8 @@
   hub.onPageChange("inforequest", initApplication);
 
   $(function() {
-    applicationMap = gis.makeMap("application-map").center([{x: 404168, y: 6693765}], 7);
-    inforequestMap = gis.makeMap("inforequest-map").center([{x: 404168, y: 6693765}], 7);
+    applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
+    inforequestMap = gis.makeMap("inforequest-map", false).center([{x: 404168, y: 6693765}], 12);
 
     var bindings = {
       application: application,
@@ -482,5 +491,5 @@
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
   });
-
+  
 })();
