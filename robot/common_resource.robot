@@ -75,11 +75,13 @@ Wait until
 Go to page
   [Arguments]  ${page}
   Execute Javascript  window.location.hash = "!/${page}";
+  Wait until  Element should be visible  ${page}
+  Sleep  1
 
-Open attachment tab
-  Open the application
-  Click by test id  application-open-attachments-tab
-  Wait until  Element should be visible  application-attachments-tab
+Open tab
+  [Arguments]  ${name}
+  Click by test id  application-open-${name}-tab
+  Wait until  Element should be visible  application-${name}-tab
 
 Logout
   Go to  ${LOGIN URL}
@@ -247,3 +249,49 @@ Prepare new request
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+
+#
+# Jump to application or inforequest:
+#
+
+Open the request
+  [Arguments]  ${address}
+  Go to page  applications
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
+
+Open the application
+  [Arguments]  ${address}
+  Open the request  ${address}
+  Wait until  Element should contain  xpath=//span[@data-test-id='application-title']  ${address}
+
+Open the inforequest
+  [Arguments]  ${address}
+  Open the request  ${address}
+  Wait until  Element should contain  xpath=//span[@data-test-id='inforequest-title']  ${address}
+
+Request should be visible
+  [Arguments]  ${address}
+  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+
+Request should not be visible
+  [Arguments]  ${address}
+  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+
+#
+# Comments:
+#
+
+Add comment
+  [Arguments]  ${message}
+  Open tab  conversation
+  Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click by test id  application-new-comment-btn
+  Wait until  Element should be visible  xpath=//table[@data-test-id='application-comments-table']//td[text()='${message}']
+
+#
+# Quick, jettison the db...
+#
+
+Apply minimal fixture now
+  Click element  debug-apply-minimal
+  Wait until  Element should be visible  debug-apply-done
