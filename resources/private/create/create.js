@@ -174,7 +174,9 @@
         .searchPropertyId(data.x, data.y);
     };
 
-    self.getMunicipalityName = function(m) { return m.nameFin; }; // TODO: Choose by lang
+    self.getMunicipalityName = function(m) {
+      return m.name[loc.getCurrentLanguage()];
+    };
 
     self.create = function(infoRequest) {
       ajax.command("create-application", {
@@ -200,16 +202,16 @@
   };
 
   function toLink(l) {
-    return "<li><a href='" + l.url + "' target='_blank'>" + l.nameFin + "</li>"; // TODO i18n
+    return $("<li>")
+      .append($("<a>").attr("href", l.url).attr("target", "_blank")
+              .text(l.name[loc.getCurrentLanguage()]));
   }
 
   function generateInfo(value) {
-    var e = document.createElement("div");
-    e.setAttribute("class", "tree-result");
-    $(e).html(
-        "<p>" + loc(value.text) + "</p>" +
-        "<ul>" + _.map(model.links(), toLink).join("") + "</ul>");
-    return e;
+    var e$ = $("<div>").attr("class", "tree-result").append($("<p>").text(loc(value.text)));
+    var ul$ = $("<ul>");
+    _.each(_.map(model.links(), toLink), function (l) {ul$.append(l);});
+    return e$.append(ul$)[0];
   }
 
   hub.onPageChange("create", model.clear);
