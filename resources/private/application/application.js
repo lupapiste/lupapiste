@@ -3,13 +3,10 @@
 
   var isInitializing = true;
   var currentId;
-  var applicationModel = new ApplicationModel();
   var authorizationModel = authorization.create();
-  var inviteModel = new InviteModel();
   var commentModel = comments.create();
   var applicationMap;
   var inforequestMap;
-  var buildingsModel = new BuildingsModel();
 
   var removeDocModel = new function() {
     var self = this;
@@ -36,9 +33,9 @@
 
     self.cancel = function() { return true; };
 
-  };
+  }();
 
-  function ApplicationModel() {
+  var applicationModel = new function() {
     var self = this;
 
     self.data = ko.observable();
@@ -58,7 +55,7 @@
       }
       return value;
     }, self);
-  }
+  }();
 
   var application = {
     id: ko.observable(),
@@ -182,10 +179,6 @@
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
-
-  function getLatestVersion(attachment) {
-    return _.last(attachment.versions || []);
-  }
 
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
@@ -311,7 +304,7 @@
         var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
 
         var displayOrder = ["hankkeen-kuvaus", "rakennuspaikka", "purku", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name) });
+        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name); });
 
         var docgenDiv = $(containerSelector).empty();
         _.each(sortedDocs, function(docGroup) {
@@ -363,7 +356,7 @@
     }
   });
 
-  function InviteModel() {
+  var inviteModel = new function() {
     var self = this;
 
     self.email = ko.observable();
@@ -388,38 +381,7 @@
         .call();
       return false;
     };
-  }
-
-  // TODO: has dependency on scoped application. should go via models!
-  function BuildingsModel() {
-    var self = this;
-
-    self.data = ko.observableArray();
-
-    self.load = function() {
-      var propertyId = application.propertyId();
-      if(propertyId) {
-        ajax
-          .query("get-building-info-from-legacy", {propertyId: propertyId})
-          .success(function(d) { self.data(ko.mapping.fromJS(d.data));})
-          .call();
-      }
-      return false;
-    };
-
-    self.merge = function(model) {
-      var id = application.id();
-      var buildingId = model.buildingId();
-      var propertyId = model.propertyId();
-      ajax
-        .command("merge-details-from-krysp", {id: id, buildingId: buildingId, propertyId: propertyId})
-        .success(function() { hub.send("load-application", {id: id});})
-        .call();
-      return false;
-    };
-
-  }
-
+  }();
 
   var tab = {
     tabClick: function(data, event) {
@@ -475,8 +437,7 @@
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian,
-      removeDocModel: removeDocModel,
-      buildingsModel: buildingsModel
+      removeDocModel: removeDocModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
