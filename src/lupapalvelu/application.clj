@@ -176,7 +176,8 @@
         id            (mongo/create-id)
         owner         (role user :owner :type :owner)
         op            (keyword (:operation data))
-        info-request? (if (:infoRequest data) true false)]
+        info-request? (if (:infoRequest data) true false)
+        make-comment  (partial assoc {:target {:type "application"} :created created :user (security/summary user)} :text)]
     (mongo/insert :applications
       {:id            id
        :created       created
@@ -196,14 +197,8 @@
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types))
-       :comments      (let [message (:message data)]
-                        (if-not (blank? message)
-                          [{:text message
-                            :target   {:type "application"}
-                            :created  created
-                            :user     (security/summary user)}]
-                          []))
-       :permitType     (keyword (:permitType data))})
+       :comments      (map make-comment (:messages data))
+       :permitType    (keyword (:permitType data))})
     (ok :id id)))
 
 (defcommand "add-operation"
