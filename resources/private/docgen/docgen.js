@@ -247,7 +247,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
 
     var select = document.createElement("select");
     select.name = myPath;
-    select.className = "form-input combobox";
+    select.className = "form-input combobox really-long";
     select.onchange = function(event) {
       var target = getEvent(event).target;
       var buildingId = target.value;
