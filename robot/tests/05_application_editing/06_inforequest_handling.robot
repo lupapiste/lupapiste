@@ -15,7 +15,7 @@ Mikko creates a new inforequest
 Authority assigns an inforequest to herself
   Sonja logs in
   Inforequest is not assigned  inforequest-handling
-  Open the inforequest  inforequest-handling
+  Open inforequest  inforequest-handling
   Wait until  Element should be visible  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
 
@@ -29,7 +29,7 @@ Mikko sees Sonja as authority
   Inforequest is assigned to  inforequest-handling  Sonja Sibbo
 
 Applicant marks inforequest answered
-  Open the inforequest  inforequest-handling
+  Open inforequest  inforequest-handling
   Wait until  Inforequest state is  Avoin
   Click by test id  inforequest-mark-answered
   Wait until  Inforequest state is  Vastattu

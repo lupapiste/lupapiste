@@ -259,12 +259,12 @@ Open the request
   Go to page  applications
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
 
-Open the application
+Open application
   [Arguments]  ${address}
   Open the request  ${address}
   Wait until  Element should contain  xpath=//span[@data-test-id='application-title']  ${address}
 
-Open the inforequest
+Open inforequest
   [Arguments]  ${address}
   Open the request  ${address}
   Wait until  Element should contain  xpath=//span[@data-test-id='inforequest-title']  ${address}
@@ -295,3 +295,12 @@ Add comment
 Apply minimal fixture now
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
+
+#
+# Application state check:
+#
+
+Application state should be
+  [Arguments]  ${state}
+  ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
+  Should be equal  ${s}  ${state}
