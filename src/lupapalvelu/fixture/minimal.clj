@@ -138,39 +138,35 @@
 
 (def municipalities [{:id "753"
                       :municipalityCode "753"
-                      :nameFin "Sipoo"
-                      :nameSve "Sibbo"
-                      :links [{:nameFin "Sipoo"
+                      :name {:fi "Sipoo" :sv "Sibbo"}
+                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                :url "http://sipoo.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                       ;;:legacy "http://212.213.116.162/geoserver/wfs"}
                       :legacy "http://localhost:8000/krysp/building.xml"}
                      {:id "837"
-                      :nameFin "Tampere"
-                      :nameSve "Tammerfors"
+                      :name {:fi "Tampere" :sv "Tammerfors"}
                       :municipalityCode "837"
-                      :links [{:nameFin "Tampere"
+                      :links [{:name {:fi "Tampere" :sv "Tammerfors"}
                                :url "http://tampere.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
-                              {:nameFin "Lomakkeet"
+                              {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
                      {:id "186"
-                      :nameFin "J\u00E4rvenp\u00E4\u00E4"
-                      :nameSve "Tr\u00E4skenda"
+                      :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                       :municipalityCode "186"
-                      :links [{:nameFin "J\u00E4rvenp\u00E4\u00E4"
+                      :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                                :url "http://www.jarvenpaa.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
                      {:id "638"
-                      :nameFin "Porvoo"
-                      :nameSve "Porv\u00E5\u00E5"
+                      :name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
                       :municipalityCode "638"
-                      :links [{:nameFin "Porvoo"
+                      :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
                                :url "http://www.porvoo.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}])
 
 (deffixture "minimal" {}
