@@ -219,6 +219,7 @@
        :title         (:address data)
        :roles         {:applicant owner}
        :auth          [owner]
+       :operations    [op]
        :documents     (if info-request? [] (make-documents user created nil op))
        :attachments   (if info-request? [] (make-attachments created op))
        :allowedAttachmentTypes (if info-request?

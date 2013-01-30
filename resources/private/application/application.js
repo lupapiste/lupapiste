@@ -257,11 +257,6 @@
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
-      // Operations:
-
-      // FIXME: scan from documents
-      application.operations([{operation: "foo"}, {operation: "bar"}]);
-
       // Comments:
 
       commentModel.setApplicationId(app.id);
