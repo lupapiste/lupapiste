@@ -36,7 +36,7 @@ Mikko comes back and sees his application and inforequest
   Request should be visible  create-info
 
 Mikko inspects inforequest and sees his initial comments
-  Open the inforequest  create-info
+  Open inforequest  create-info
   Wait until  Xpath Should Match X Times  //section[@id='inforequest']//table[@data-test-id='comments-table']//td[text()='Hoblaa']  1 
 
 Mikko creates new application
@@ -48,7 +48,7 @@ Mikko creates new application
   Request should be visible  create-app-2
 
 Mikko closes application at Latokuja 3
-  Open the application  create-app-2
+  Open application  create-app-2
   Click by test id  application-cancel-btn
   Go to page  applications
   Request should be visible  create-app
@@ -56,7 +56,7 @@ Mikko closes application at Latokuja 3
   Request should not be visible  create-app-2
 
 Mikko decides to submit create-app
-  Open the application  create-app
+  Open application  create-app
   Click by test id  application-submit-btn
   Wait until  Application state should be  submitted   
 
