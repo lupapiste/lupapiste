@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application  invite-app  753  75341600250025
+  Create application the fast way  invite-app  753  75341600250025
   Wait until  Element should contain  xpath=//section[@id='application']//span[@data-test-id='application-title']  invite-app
   
 Mikko can see invitation button
