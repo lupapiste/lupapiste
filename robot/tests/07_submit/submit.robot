@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application  submit-app  753  75341600250030
+  Create application the fast way  submit-app  753  75341600250030
   Add comment  huba huba
   Logout
   

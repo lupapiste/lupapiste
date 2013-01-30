@@ -8,7 +8,7 @@ Resource       ../../common_resource.robot
 
 Mikko creates an application
   Mikko logs in
-  Create application  assign-to-me  753  75341600250030
+  Create application the fast way  assign-to-me  753  75341600250030
   Add comment  hojo-hojo
   Logout
   

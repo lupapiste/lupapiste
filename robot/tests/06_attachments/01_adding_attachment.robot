@@ -10,7 +10,8 @@ Variables      variables.py
 
 Mikko goes to empty attachments tab
   [Tags]  attachments
-  Open attachment tab
+  Create application the fast way  attachments  753  75341600250030
+  Open tab  attachments
 
 Mikko adds txt attachment
   [Tags]  attachments

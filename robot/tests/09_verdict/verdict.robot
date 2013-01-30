@@ -7,7 +7,7 @@ Resource        ../../common_resource.robot
 
 Mikko opens creates application
   Mikko logs in
-  Create application  verdict-app  753  75341600250030
+  Create application the fast way  verdict-app  753  75341600250030
 
 Application does not have verdict
   Open tab  verdict

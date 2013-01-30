@@ -21,58 +21,79 @@
       <div data-bind="with: application">
 
         <h1 data-bind="text: address"></h1>
-
+        
         <div class="application_summary_info">
+        
+          <!-- ID: -->
           <div>
-            <p data-bind="ltext: 'application.id'">K&auml;sittelytunnus:</p>
+            <p data-bind="ltext: 'application.id'"></p>
             <span
               data-bind="text: id, attr: {'data-test-value': id}"
               data-test-id="application-id"
-              class="application_summary_text"></span>
+              class="application_summary_text">
+            </span>
           </div>
+
+          <!-- State: -->
           <div>
             <p data-bind="ltext: 'application.state'">Tila:</p>
-            <span data-bind="ltext: state, attr: {'data-test-state': state}" data-test-id="application-state" class="application_summary_text"></span>
+            <span
+              data-bind="ltext: state, attr: {'data-test-state': state}"
+              data-test-id="application-state"
+              class="application_summary_text">
+            </span>
           </div>
+
+          <!-- Permit type: -->
           <div>
-            <p data-bind="ltext: 'application.type'">Lupatyyppi:</p>
+            <p data-bind="ltext: 'application.type'"></p>
             <span class="application_summary_text" data-bind="ltext: permitType"></span>
           </div>
+
+          <!-- Property ID: -->
           <div>
-            <p data-bind="ltext: 'application.property'">Kiinteistötunnus:</p>
+            <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="text: propertyId" data-test-id="application-property-id"></span>
           </div>
 
+          <!-- Authorities: -->
           <!-- ko if: $root.authorization.ok('assign-application') -->
-            <div>
-              <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
-              <span class="application_summary_text">
-                <select
-                  data-bind="options: $root.authorities,
-                             optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
-                                   optionsValue: 'id',
-                                   value: $root.application.assignee,
-                             optionsCaption: loc('choose')"
-                   data-test-id="application-assigneed-authority"></select>
-               </span>
-            </div>
-          <!-- /ko -->
           <div>
-            <p data-bind="ltext: 'application.operations'">Toimenpiteet:</p>
+            <p data-bind="ltext: 'application.assignee'"></p>
+            <span class="application_summary_text">
+              <select
+                data-bind="options: $root.authorities,
+                           optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                           optionsValue: 'id',
+                           value: $root.application.assignee,
+                           optionsCaption: loc('choose')"
+                data-test-id="application-assigneed-authority">
+              </select>
+            </span>
+          </div>
+          <!-- /ko -->
+          
+          <!-- Operations: -->
+          <div>
+            <p data-bind="ltext: 'application.operations'"></p>
             <ul data-bind="foreach: operations">
               <li>
-                <span data-bind="ltext: operation" data-test-id="test-application-operation"></span>
+                <span data-bind="ltext: 'operations.' + operation" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
+
+          <!-- Submitted: -->
           <div data-bind="with: $root.applicationModel.data">
             <p data-bind="ltext: 'application.submissionDate'"></p>
             <span data-bind="if: $data.submitted">
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
             </span>
           </div>
+          
         </div>
         
+        <!-- Actions: -->
         <div class="application_actions">
           <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary" ></button>
           <button data-bind="ltext: 'application.approveApplication', click: approveApplication, enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
@@ -80,6 +101,7 @@
           <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn action-bar-button"></button>
         </div>
         
+        <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
             <li><a data-bind="ltext: 'application.tabDocuments',    click: $root.tab.tabClick, clickBubble: false"  href="#application-application-tab"   data-test-id="application-open-application-tab" class="active-as-default"></a></li>
