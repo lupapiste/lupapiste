@@ -2,13 +2,13 @@
   (:require [clojure.xml :as xml]
             [net.cgrand.enlive-html :as enlive]))
 
-(defn parse-string [#^java.lang.String s] (xml/parse (java.io.ByteArrayInputStream. (.getBytes s))))
+(defn parse-string [#^java.lang.String s] (xml/parse (java.io.ByteArrayInputStream. (.getBytes s "UTF-8"))))
 (defn parse [#^java.lang.String s] (if (.startsWith (.trim s) "<") (parse-string s) (xml/parse s)))
 
 (defn attr [xml] (:attrs xml))
 (defn text [xml] (-> xml :content first))
 
-(def has enlive/has)
+(def has* enlive/has)
 (defn has-text [text] (enlive/text-pred (partial = text)))
 
 (defn select [xml & path] (enlive/select xml (-> path vector flatten)))
