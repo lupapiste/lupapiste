@@ -3,7 +3,6 @@
 
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
   function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
-
   var model = new function() {
     var self = this;
 
