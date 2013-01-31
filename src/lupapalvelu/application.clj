@@ -229,7 +229,7 @@
     (fn [inforequest]
       (let [id       (get-in command [:data :id])
             created  (:created command)
-            op       (-> inforequest :operations first :operation)]
+            op       (-> inforequest :operations first :operation keyword)]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
