@@ -129,8 +129,8 @@
             :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
                      :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
                      :postitoimipaikka (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
-            :yhteyshenkilo {:henkilotiedot {:etunimi ...notfound...
-                                            :sukunimi ...notfound...}
+            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)                   ;; does-not-exist in test
+                                            :sukunimi ...notfound...} (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text) ;; does-not-exist in test
                             :yhteystiedot {:email ...notfound...
                                            :fax ...notfound...
                                            :puhelin ...notfound...}}
@@ -141,9 +141,8 @@
         polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        {:verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
-         :varusteet (-> rakennus (all-of [:rakval:varusteet]))
-         :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+        {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+         :verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
          :rakennuksenOmistajat (->>
                                  (select rakennus [:rakval:omistaja])
                                  (map ->rakennuksen-omistaja))
@@ -162,6 +161,7 @@
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
                     :lammonlahde ...notimplemented...}
          :muutostyolaji ...notimplemented...
+         :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :huoneistot (->>
                        (select rakennus [:rakval:valmisHuoneisto])
                        (map (fn [huoneisto]
