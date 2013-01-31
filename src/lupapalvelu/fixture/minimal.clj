@@ -184,7 +184,7 @@
                      {:id "564"
                       :name {:fi "Oulu", :sv "Ule\u00E5borg"}
                       :municipalityCode "564"
-                      :links [{:name {:fi "Oulun", :sv "Ule\u00E5borg"}
+                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
                                :url "http://www.ouka.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
                                :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}])
