@@ -87,7 +87,11 @@
         (fact "there are 2 omistaja" (count (keys omistajat)) => 2)
 
         (fact "first omistajat is mapped correctly"
-          (:0 omistajat) => {:_selected "yritys"
-                             :yritys {:liikeJaYhteisoTunnus "1234567-9"}})
-
+          (:0 omistajat) =>
+                    {:_selected "yritys"
+                     :yritys {:liikeJaYhteisoTunnus "1234567-9"
+                              :osoite {:katu "Testikatu 1 A 11477"
+                                       :postinumero "00380"
+                                       :postitoimipaikka "HELSINKI"}
+                              :yritysnimi "Testiyritys 11477"}})
         ))))

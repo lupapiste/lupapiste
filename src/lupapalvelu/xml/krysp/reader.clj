@@ -123,28 +123,18 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn- ->rakennuksen-omistaja [xml]
+(defn- ->rakennuksen-omistaja [omistaja]
   {:_selected "yritys"
-   :yritys {:liikeJaYhteisoTunnus (-> xml (select1 [:rakval:tunnus]) text)
-            :osoite {:katu nil
-                     :postinumero nil
-                     :postitoimipaikka nil}
-            :yhteyshenkilo {:henkilotiedot {:etunimi nil
-                                            :sukunimi nil}
-                            :yhteystiedot {:email nil
-                                           :fax nil
-                                           :puhelin nil}}
-            :yritysnimi nil}})
-
-(comment
-  {:tunnus "1234567-9",
-   :nimi "Testiyritys 11477",
-   :osoite
-   {:postinumero "00380",
-    :osoitenimi {:teksti "Testikatu 1 A 11477"},
-    :postitoimipaikannimi "HELSINKI"},
-   :omistajanlaji
-   {:omistajalaji "asunto-oy tai asunto-osuuskunta"}})
+   :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
+            :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
+                     :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
+                     :postitoimipaikka (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
+            :yhteyshenkilo {:henkilotiedot {:etunimi ...notfound...
+                                            :sukunimi ...notfound...}
+                            :yhteystiedot {:email ...notfound...
+                                           :fax ...notfound...
+                                           :puhelin ...notfound...}}
+            :yritysnimi (-> omistaja (select1 [:rakval:nimi]) text)}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
