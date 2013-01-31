@@ -1,48 +1,45 @@
 *** Settings ***
 
 Documentation   Application gets verdict
-Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko opens application to see verdict
+Mikko opens creates application
   Mikko logs in
-  Open the application
+  Create application the fast way  verdict-app  753  75341600250030
 
 Application does not have verdict
-  Open verdict tab
-  Element should not be visible  test-application-verdict
-  ${ID} =  Get Element Attribute  xpath=//*[@data-bind-test-id='application-id']@data-test-value
+  Open tab  verdict
+  Element should not be visible  application-verdict
+  ${ID} =  Get Element Attribute  xpath=//*[@data-test-id='application-id']@data-test-value
   Set suite variable  ${APPLICATION ID}  ${ID}
+
+Mikko submits application
+  Click by test id  application-submit-btn
+  Wait until  Application state should be  submitted
+  
+Mikko goes for lunch
   Logout
 
 Solita Admin can log in and gives verdict
   SolitaAdmin logs in
-  Wait until page contains element  admin-header
-  Log  ${APPLICATION ID}
-  Wait until  page should contain link  ${APPLICATION ID}
-  Click link  ${APPLICATION ID}
+  Wait until  Element should be visible  admin-header
+  Wait until  Element should be visible  xpath=//a[@data-test-id='${APPLICATION ID}']
+  Click element  xpath=//a[@data-test-id='${APPLICATION ID}']
+  Wait until  Element Text Should Be  xpath=//*[@data-test-id='admin-verdict-result']  OK
   Logout
 
-Mikko opens application
+Mikko sees that the application has verdict
   Mikko logs in
-  Open the application
-
-Application verdict is visible to applicant
-  Open verdict tab
-  Wait Until  Element should be visible  test-application-verdict
+  Open application  verdict-app
+  Open tab  verdict 
+  Element Text Should Be  xpath=//span[@data-test-id='application-verdict']  onneksi olkoon!
   Logout
-
-Sonja opens application
-  Sonja logs in
-  Open the application
 
 Application verdict is visible to authority
-  Open verdict tab
-  Wait Until  Element should be visible  test-application-verdict
-
-*** Keywords ***
-
-Open verdict tab
-  Click by test id  application-open-verdict-tab
+  Sonja logs in
+  Open application  verdict-app
+  Open tab  verdict
+  Element should be visible  xpath=//span[@data-test-id='application-verdict']
+  Logout

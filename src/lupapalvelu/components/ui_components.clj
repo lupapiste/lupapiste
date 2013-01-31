@@ -30,11 +30,10 @@
 
    :i18n         {:depends [:jquery :underscore]
                   :js (into ["loc.js"]
-                            (flatten
-                              (for [lang ["fi" "sv"]]
-                                (for [file ["common", "docgen", "applications", "attachments", "welcome", "mypage"]]
-                                  (str file "_" lang ".js")))))}
-
+                            (for [lang ["fi" "sv"]
+                                  file ["common" "docgen" "applications" "attachments" "welcome" "mypage" "auth-admin"]]
+                              (str file "_" lang ".js")))}
+   
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js"
                        "app.js" "nav.js" "combobox.js"

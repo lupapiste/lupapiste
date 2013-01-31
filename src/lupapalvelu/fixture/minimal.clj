@@ -43,7 +43,7 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
-   ;; Sonja Sibbo - Sipoon lupa-arkkitehti
+   ;; Ronja Sibbo - Sipoon lupa-arkkitehti
    ;; ronja / sonja
    {:id "777777777777777777000024"
     :email "ronja.sibbo@sipoo.fi"
@@ -58,7 +58,33 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
-   ;; sipoo / sipoo
+  {:id "777777777777777777000033"
+    :email "pekka.borga@porvoo.fi"
+    :enabled true
+    :role :authority
+    :municipality "638"
+    :personId "kunta333"
+    :firstName "Pekka"
+    :lastName "Borga"
+    :phone "121212"
+    :username "pekka"
+    :private {:password "$2a$10$C65v2OgWcCzo4SVDtofawuP8xXDnZn5.URbODSpeOWmRABxUU01k6"
+              :salt "$2a$10$C65v2OgWcCzo4SVDtofawu"
+              :apikey "4761896258863737181711425832653651926670"}}
+  {:id "777777777777777777000034"
+    :email "olli.uleaborg@ouka.fi"
+    :enabled true
+    :role :authority
+    :municipality "564"
+    :personId "kunta564"
+    :firstName "Olli"
+    :lastName "Ule\u00E5borg"
+    :phone "121212"
+    :username "olli"
+    :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
+              :salt "$2a$10$JXFA55BPpNDpI/jDuPv76u"
+              :apikey "7634919923210010829057754770828315568705"}}
+    ;; sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
     :email "admin@sipoo.fi"
     :enabled true
@@ -125,32 +151,43 @@
 
 (def municipalities [{:id "753"
                       :municipalityCode "753"
-                      :nameFin "Sipoo"
-                      :nameSve "Sibbo"
-                      :links [{:nameFin "Sipoo"
+                      :name {:fi "Sipoo" :sv "Sibbo"}
+                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                :url "http://sipoo.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                       ;;:legacy "http://212.213.116.162/geoserver/wfs"}
                       :legacy "http://localhost:8000/krysp/building.xml"}
                      {:id "837"
-                      :nameFin "Tampere"
-                      :nameSve "Tammerfors"
+                      :name {:fi "Tampere" :sv "Tammerfors"}
                       :municipalityCode "837"
-                      :links [{:nameFin "Tampere"
+                      :links [{:name {:fi "Tampere" :sv "Tammerfors"}
                                :url "http://tampere.fi"}
-                              {:nameFin "Rakennusvalvonta"
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
-                              {:nameFin "Lomakkeet"
+                              {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
                      {:id "186"
-                      :nameFin "J\u00E4rvenp\u00E4\u00E4"
-                      :nameSve "Tr\u00E4skenda"
+                      :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                       :municipalityCode "186"
-                      :links [{:nameFin "J\u00E4rvenp\u00E4\u00E4"
+                      :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                                :url "http://www.jarvenpaa.fi"}
-                              {:nameFin "Rakennusvalvonta"
-                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}])
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
+                     {:id "638"
+                      :name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
+                      :municipalityCode "638"
+                      :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
+                               :url "http://www.porvoo.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                     {:id "564"
+                      :name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                      :municipalityCode "564"
+                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                               :url "http://www.ouka.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
+                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)

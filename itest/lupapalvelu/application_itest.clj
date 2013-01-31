@@ -37,7 +37,7 @@
     (:allowedAttachmentTypes app) => (complement empty?)))
 
 (fact "creating application with message"
-  (let [resp            (create-app :message "hello")
+  (let [resp            (create-app :messages ["hello"])
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
         application     (:application resp)

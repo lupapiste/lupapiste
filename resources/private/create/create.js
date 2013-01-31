@@ -3,7 +3,6 @@
 
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
   function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
-
   var model = new function() {
     var self = this;
 
@@ -174,7 +173,9 @@
         .searchPropertyId(data.x, data.y);
     };
 
-    self.getMunicipalityName = function(m) { return m.nameFin; }; // TODO: Choose by lang
+    self.getMunicipalityName = function(m) {
+      return m.name[loc.getCurrentLanguage()];
+    };
 
     self.create = function(infoRequest) {
       ajax.command("create-application", {
@@ -185,7 +186,7 @@
         x: self.x(),
         address: self.address(),
         propertyId: self.propertyId(),
-        message: self.message(),
+        messages: isBlank(self.message()) ? [] : [self.message()],
         municipality: self.municipalityCode()
       })
       .success(function(data) {
@@ -200,20 +201,20 @@
   };
 
   function toLink(l) {
-    return "<li><a href='" + l.url + "' target='_blank'>" + l.nameFin + "</li>";
+    return $("<li>")
+      .append($("<a>").attr("href", l.url).attr("target", "_blank")
+              .text(l.name[loc.getCurrentLanguage()]));
   }
 
   function generateInfo(value) {
-    var e = document.createElement("div");
-    e.setAttribute("class", "tree-result");
-    $(e).html(
-        "<p>" + value.text + "</p>" +
-        "<ul>" + _.map(model.links(), toLink).join("") + "</ul>");
-    return e;
+    var e$ = $("<div>").attr("class", "tree-result").append($("<p>").text(loc(value.text)));
+    var ul$ = $("<ul>");
+    _.each(_.map(model.links(), toLink), function (l) {ul$.append(l);});
+    return e$.append(ul$)[0];
   }
 
   hub.onPageChange("create", model.clear);
-
+ 
   ajax
     .query("municipalities")
     .success(function(data) { model.municipalities(data.municipalities); })
@@ -221,7 +222,7 @@
 
   $(function() {
 
-    model.setMap(gis.makeMap("create-map").center(404168, 6840000, 1));
+    model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
     ko.applyBindings(model, $("#create")[0]);
 
     $("#create-search").autocomplete({
@@ -235,7 +236,8 @@
         $("#create .tree-content"),
         $("#create .tree-breadcrumbs"),
         model.operation,
-        generateInfo);
+        generateInfo,
+        "operations");
 
     model.operations.subscribe(tree.reset);
 

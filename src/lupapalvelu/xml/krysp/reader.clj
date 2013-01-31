@@ -5,7 +5,18 @@
             [clojure.walk :refer [postwalk postwalk-demo]]
             [lupapalvelu.document.schemas :as schema]
             [net.cgrand.enlive-html :as enlive]
+            [clj-time.format :as timeformat]
             [clj-http.client :as http]))
+
+;;
+;; parsing time (TODO: might be copy-pasted from krysp)
+;;
+
+(defn parse-datetime [s]
+  (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss'Z'") s))
+
+(defn unparse-datetime [format dt]
+  (timeformat/unparse (timeformat/formatters format) dt))
 
 ;;
 ;; Test urls
@@ -63,9 +74,12 @@
   [dictionary m] (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
 
 (defn as-is
-  "read stuff from xml with enlive selector, convert to edn and strip namespaces."
-  [xml selector]
-  (-> (select1 xml selector) xml->edn strip-keys))
+  "read one element from xml with enlive selector, converts to edn and strip namespaces."
+  [xml selector] (-> (select1 xml selector) xml->edn strip-keys))
+
+(defn all-of
+  "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
+  [xml selector] (-> xml (as-is selector) vals first))
 
 (defn map-index
   "transform a collection into keyord-indexed map (starting from 0)."
@@ -93,11 +107,14 @@
     xml))
 
 (defn- ->buildingIds [m]
-  {:propertyId (get-in m [:rakennustunnus :kiinttun])
-   :buildingId (get-in m [:rakennustunnus :rakennusnro])})
+  {:propertyId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun])
+   :buildingId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :rakennusnro])
+   :usage      (get-in m [:Rakennus :rakennuksenTiedot :kayttotarkoitus])
+   :created    (-> m (get-in [:Rakennus :alkuHetki]) parse-datetime (->> (unparse-datetime :year)))
+   })
 
 (defn ->buildings [xml]
-  (-> xml (select [:rakval:rakennustunnus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
+  (-> xml (select [:rakval:Rakennus]) (->> (map (comp ->buildingIds strip-keys xml->edn)))))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
@@ -106,15 +123,29 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
+(defn- ->rakennuksen-omistaja [omistaja]
+  {:_selected "yritys"
+   :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
+            :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
+                     :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
+                     :postitoimipaikka (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
+            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)       ;; does-not-exist in test
+                                            :sukunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text)     ;; does-not-exist in test
+                            :yhteystiedot {:email ...notfound...
+                                           :fax ...notfound...
+                                           :puhelin ...notfound...}}}
+            :yritysnimi (-> omistaja (select1 [:rakval:nimi]) text)}})
+
 (defn ->rakennuksen-muuttaminen [xml buildingId]
-  (let [rakennus (select1 xml [:rakval:rakennustieto :> (enlive/has [:rakval:rakennusnro (enlive/text-pred (partial = buildingId))])])
-        polished (comp index-maps strip-empty-maps strip-nils convert-booleans (partial merge {}))]
+  (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
+        polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        (as-is rakennus [:rakval:verkostoliittymat])
-        (as-is rakennus [:rakval:varusteet])
         {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
-         :rakennuksenOmistajat ...notimplemented...
+         :verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
+         :rakennuksenOmistajat (->>
+                                 (select rakennus [:rakval:omistaja])
+                                 (map ->rakennuksen-omistaja))
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
@@ -130,6 +161,7 @@
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
                     :lammonlahde ...notimplemented...}
          :muutostyolaji ...notimplemented...
+         :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :huoneistot (->>
                        (select rakennus [:rakval:valmisHuoneisto])
                        (map (fn [huoneisto]
@@ -140,11 +172,7 @@
                                                   :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
                                                   :huoneluku (-> huoneisto (select1 [:rakval:huoneluku]) text)}
                                :keittionTyyppi (-> huoneisto (select1 [:rakval:keittionTyyppi]) text)
-                               :varusteet {:ammeTaiSuihku (-> huoneisto (select1 [:rakval:ammeTaiSuihkuKytkin]) text)
-                                           :lamminvesi (-> huoneisto (select1 [:rakval:lamminvesiKytkin]) text)
-                                           :parvekeTaiTerassi (-> huoneisto (select1 [:rakval:parvekeTaiTerassiKytkin]) text)
-                                           :sauna (-> huoneisto (select1 [:rakval:saunaKytkin]) text)
-                                           :wc (-> huoneisto (select1 [:rakval:WCKytkin]) text)}})))}))))
+                               :varusteet (-> huoneisto (all-of [:rakval:varusteet]))})))}))))
 
 ;;
 ;; full mappings
@@ -209,9 +237,9 @@
                                          :huoneistoala nil
                                          :huoneluku nil}
                       :keittionTyyppi nil
-                      :varusteet {:ammeTaiSuihku nil
-                                  :lamminvesi nil
-                                  :parvekeTaiTerassi nil
-                                  :sauna nil
-                                  :wc nil}}}}))
+                      :varusteet {:ammeTaiSuihkuKytkin nil
+                                  :lamminvesiKytkin nil
+                                  :parvekeTaiTerassiKytkin nil
+                                  :saunaKytkin nil
+                                  :WCKytkin nil}}}}))
 
