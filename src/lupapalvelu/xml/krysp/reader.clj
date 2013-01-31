@@ -128,12 +128,12 @@
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
-        polished (comp index-maps strip-empty-maps strip-nils convert-booleans (partial merge {}))]
+        polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        (as-is rakennus [:rakval:verkostoliittymat])
-        (as-is rakennus [:rakval:varusteet])
-        {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+        {:verkostoliittymat (all-of rakennus [:rakval:verkostoliittymat])
+         :varusteet (all-of rakennus [:rakval:varusteet])
+         :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
          :rakennuksenOmistajat (->rakennuksen-omistajat (-> rakennus (select [:rakval:omistaja])))
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
