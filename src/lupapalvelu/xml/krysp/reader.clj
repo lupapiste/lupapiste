@@ -124,16 +124,17 @@
 (def ...notimplemented... nil)
 
 (defn- ->rakennuksen-omistaja [omistaja]
+  (println omistaja)
   {:_selected "yritys"
    :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
             :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
                      :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
                      :postitoimipaikka (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
-            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)                   ;; does-not-exist in test
-                                            :sukunimi ...notfound...} (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text) ;; does-not-exist in test
+            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)       ;; does-not-exist in test
+                                            :sukunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text)     ;; does-not-exist in test
                             :yhteystiedot {:email ...notfound...
                                            :fax ...notfound...
-                                           :puhelin ...notfound...}}
+                                           :puhelin ...notfound...}}}
             :yritysnimi (-> omistaja (select1 [:rakval:nimi]) text)}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
