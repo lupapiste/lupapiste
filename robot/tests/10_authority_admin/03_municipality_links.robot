@@ -57,7 +57,7 @@ Remove link
 User sees link
   [Arguments]  ${name}  ${url}
   Begin inforequest
-  Element should contain  xpath=//a[@href='${url}']  ${name} fi
+  Element Text Should Be  xpath=//a[@href='${url}']  ${name} fi
 
 User does not see link
   [Arguments]  ${name}

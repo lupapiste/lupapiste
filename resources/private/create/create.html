@@ -9,103 +9,93 @@
       <span data-bind="ltext: 'request.new'"></span>
     </div>
 
-    <h1 data-bind="ltext: 'newRequest.title'"></h1>
-
-    <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-
-    <div id="create-map" class="map map-large create-application-map" style="width: 848px; height: 400px;">
-      <div class="create-application-search-box-container">
-        <div class="create-application-search-box">
-          <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search"/>
-          <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary map-search-button"></button>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-container create-application-details">
-      <h3 data-bind="ltext: 'newRequest.location'"></h3>
-
-      <div>
-        <div class="label-container">
-          <label data-bind="ltext: 'newRequest.address'"></label>
-        </div>
-        <input
-          data-bind="value: address, valueUpdate: 'afterkeydown'"
-          data-test-id="create-address"
-          type="text"
-          class="form-input text long create-application-form">
-      </div>
-
-      <div>
-        <div class="label-container">
-          <label data-bind="ltext: 'newRequest.municipality'"></label>
-        </div>
-        <select
+    <div class="container">
+      <h2 class="application_section_header" onclick="accordion.toggle();" data-bind="ltext: 'newRequest.title'" id="location-accordion"><span class="font-icon icon-expanded"></span></h2>
+      <div class="application_section_content content_expanded">
+        <p data-bind="ltext: 'newRequest.locationInfo'"></p>
+        <div id="create-map" class="map map-large create-application-map" style="width: 100%; height: 600px;">
+          <div class="create-application-search-box-container">
+            <div class="create-application-search-box">
+              <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search"/>
+              <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary map-search-button"></button>
+            </div>
+          </div>
+          <div class="map-select-info">
+            <h3>Valittu sijainti:</h3>
+            <div class="form-entry">
+              <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
+              <input
+                data-bind="value: address, valueUpdate: 'afterkeydown'"
+                data-test-id="create-address"
+                type="text"
+                class="form-input text long"></input>
+            </div>
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
+              <select
                 data-bind="options: municipalities,
-                     optionsText: getMunicipalityName,
+                           optionsText: getMunicipalityName,
                            optionsValue: 'municipalityCode',
                            value: municipalityCode,
-                     optionsCaption: loc('choose')"
-          data-test-id="create-municipality-select"
-          class="form-input long create-application-form">
-        </select>
-      </div>
-
-    <div>
-        <div class="label-container">
-          <label data-bind="ltext: 'newRequest.propertyId'"></label>
-        </div>
-        <input
-          data-bind="value: propertyId"
-          data-test-id="create-property-id"
-          type="text"
-          class="form-input text long create-application-form"></input>
-    </div>
-
-      <div class="create-application-actions">
-        <button
-            data-bind="enable: addressOk, click: showPart2.bind($data, true), ltext: 'continue'"
-            class="btn btn-primary application-create btn-wizard"
-            data-test-id="create-continue">
-    </button>
-      </div>
-    </div>
-
-    <!-- Phase 2: -->
-
-    <div data-bind="visible: showPart2" class="form-container">
-      <h2 data-bind="ltext: 'newRequest.descTitle'"></h2>
-      <p data-bind="ltext: 'newRequest.descInfo'"></p>
-
-      <div class="tree" data-bind="visible: operations">
-        <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
-        <div class="tree-content">
+                           optionsCaption: loc('choose')"
+                data-test-id="create-municipality-select"
+                class="form-select form-input combobox long">
+              </select>
+            </div>
+            <div class="form-entry">
+              <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
+              <input
+                data-bind="value: propertyId"
+                data-test-id="create-property-id"
+                type="text"
+                class="form-input text long"></input>
+            </div>
+            <button
+                data-bind="enable: addressOk, click: showPart2.bind($data, true), ltext: 'continue'"
+                class="btn btn-primary"
+                data-test-id="create-continue"
+                id="create-location-continue">
+            </button>
+          </div>
         </div>
       </div>
-      <div class="tree" data-bind="visible: !operations()">
-        <img src="/img/ajax-loader.gif"/>
-      </div>
+      <!-- Phase 2: -->
+      <h2 class="application_section_header" onclick="accordion.toggle();" data-bind="ltext: 'newRequest.descTitle', visible: showPart2"><span class="font-icon icon-expanded"></span></h2>
+      <div class="application_section_content content_expanded" data-bind="visible: showPart2">
+        <p data-bind="ltext: 'newRequest.descInfo'"></p>
 
-      <div data-bind="visible: operation" class="tree-width">
-        <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary btn-wizard"></button>
-        <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary btn-wizard"></button>
-      </div>
+        <div class="tree" data-bind="visible: operations">
+          <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
+          <div class="tree-content">
+          </div>
+        </div>
+        <div class="tree" data-bind="visible: !operations()">
+          <img src="/img/ajax-loader.gif" alt="loading"/>
+        </div>
 
-      <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
-        <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
-        <textarea
-            class="form-input tree-width"
-            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, value: message, valueUpdate: 'afterkeydown'"
-            rows="3"
-            data-test-id="create-inforequest-message">
-        </textarea>
-        <button
-            data-bind="ltext: 'application.startConversation', click: createInfoRequest, enable: message().length > 0"
-            class="btn btn-primary"
-            data-test-id="create-inforequest"></button>
-      </form>
+        <div data-bind="visible: operation">
+          <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary btn-wizard"></button>
+          <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary btn-wizard"></button>
+        </div>
+      </div>
+      <h2 class="application_section_header" onclick="accordion.toggle();" data-bind="ltext: 'createApplication.project-description-header', visible: showInfoRequestMessage"><span class="font-icon icon-expanded"></span></h2>
+      <div class="application_section_content content_expanded" data-bind="visible: showInfoRequestMessage">
+        <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
+          <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
+          <textarea
+              class="form-input tree-width"
+              data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, value: message, valueUpdate: 'afterkeydown'"
+              rows="3"
+              data-test-id="create-inforequest-message">
+          </textarea>
+          <button
+              data-bind="ltext: 'application.startConversation', click: createInfoRequest, enable: message().length > 0"
+              class="btn btn-primary"
+              data-test-id="create-inforequest">
+          </button>
+        </form>
+      </div>
     </div>
-
   </section>
 </body>
 </html>

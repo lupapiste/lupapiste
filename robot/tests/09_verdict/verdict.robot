@@ -27,14 +27,14 @@ Solita Admin can log in and gives verdict
   Wait until  Element should be visible  admin-header
   Wait until  Element should be visible  xpath=//a[@data-test-id='${APPLICATION ID}']
   Click element  xpath=//a[@data-test-id='${APPLICATION ID}']
-  Wait until  Element should contain  xpath=//*[@data-test-id='admin-verdict-result']  OK
+  Wait until  Element Text Should Be  xpath=//*[@data-test-id='admin-verdict-result']  OK
   Logout
 
 Mikko sees that the application has verdict
   Mikko logs in
   Open application  verdict-app
   Open tab  verdict 
-  Element should contain  xpath=//span[@data-test-id='application-verdict']  onneksi olkoon!
+  Element Text Should Be  xpath=//span[@data-test-id='application-verdict']  onneksi olkoon!
   Logout
 
 Application verdict is visible to authority

@@ -51,4 +51,4 @@ Comment count is
 
 Applicantion state is
   [Arguments]  ${state}
-  Element should contain  xpath=//section[@id='application']//span[@data-test-id='application-state']  ${state}
+  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-state']  ${state}

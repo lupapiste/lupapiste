@@ -71,6 +71,19 @@
     :private {:password "$2a$10$C65v2OgWcCzo4SVDtofawuP8xXDnZn5.URbODSpeOWmRABxUU01k6"
               :salt "$2a$10$C65v2OgWcCzo4SVDtofawu"
               :apikey "4761896258863737181711425832653651926670"}}
+  {:id "777777777777777777000034"
+    :email "olli.uleaborg@ouka.fi"
+    :enabled true
+    :role :authority
+    :municipality "564"
+    :personId "kunta564"
+    :firstName "Olli"
+    :lastName "Ule\u00E5borg"
+    :phone "121212"
+    :username "olli"
+    :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
+              :salt "$2a$10$JXFA55BPpNDpI/jDuPv76u"
+              :apikey "7634919923210010829057754770828315568705"}}
     ;; sipoo / sipoo
    {:id "50ac77ecc2e6c2ea6e73f83e" ;; Simo Sippo
     :email "admin@sipoo.fi"
@@ -167,7 +180,14 @@
                       :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
                                :url "http://www.porvoo.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}])
+                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                     {:id "564"
+                      :name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                      :municipalityCode "564"
+                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                               :url "http://www.ouka.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
+                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)

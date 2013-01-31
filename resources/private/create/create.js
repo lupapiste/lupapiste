@@ -3,7 +3,6 @@
 
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
   function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
-
   var model = new function() {
     var self = this;
 
@@ -223,7 +222,7 @@
 
   $(function() {
 
-    model.setMap(gis.makeMap("create-map").center(404168, 6840000, 1));
+    model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
     ko.applyBindings(model, $("#create")[0]);
 
     $("#create-search").autocomplete({
