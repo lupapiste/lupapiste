@@ -241,10 +241,10 @@
     (attachment/output-attachment attachment-id (current-user) download?)
     (resp/status 401 "Unauthorized\r\n")))
 
-(defpage "/api/view/:attachmentId" {attachment-id :attachmentId}
+(defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id false))
 
-(defpage "/api/download/:attachmentId" {attachment-id :attachmentId}
+(defpage "/api/download-attachment/:attachment0id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
 
 ;;
