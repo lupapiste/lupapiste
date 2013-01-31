@@ -124,7 +124,6 @@
 (def ...notimplemented... nil)
 
 (defn- ->rakennuksen-omistaja [omistaja]
-  (println omistaja)
   {:_selected "yritys"
    :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
             :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
