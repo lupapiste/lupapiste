@@ -86,4 +86,8 @@
 
         (fact "there are 2 omistaja" (count (keys omistajat)) => 2)
 
+        (fact "first omistajat is mapped correctly"
+          (:0 omistajat) => {:_selected "yritys"
+                             :yritys {:liikeJaYhteisoTunnus "1234567-9"}})
+
         ))))

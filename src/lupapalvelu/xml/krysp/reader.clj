@@ -125,7 +125,7 @@
 
 (defn- ->rakennuksen-omistaja [xml]
   {:_selected "yritys"
-   :yritys {:liikeJaYhteisoTunnus nil
+   :yritys {:liikeJaYhteisoTunnus (-> xml (select1 [:rakval:tunnus]) text)
             :osoite {:katu nil
                      :postinumero nil
                      :postitoimipaikka nil}
