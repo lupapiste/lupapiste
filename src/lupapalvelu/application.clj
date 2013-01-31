@@ -272,7 +272,7 @@
             {$set {:documents.$.body new-body
                    :modified (:created command)}})
           (ok))
-        (fail :no_legacy_available)))))
+        (fail :no-legacy-available)))))
 
 (defquery "get-building-info-from-legacy"
   {:parameters [:id]
@@ -284,7 +284,7 @@
         (let [kryspxml  (krysp/building-xml legacy propertyId)
               buildings (krysp/->buildings kryspxml)]
           (ok :data buildings))
-        (fail :no_legacy_available)))))
+        (fail :no-legacy-available)))))
 
 ;;
 ;; Service point for jQuery dataTables:
