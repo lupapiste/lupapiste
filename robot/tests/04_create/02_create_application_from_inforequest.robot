@@ -17,7 +17,7 @@ There are no attachments at this stage
 Mikko creates new application from inforequest
   Click by test id  inforequest-convert-to-application
   Wait until  Element should be visible  application
-  Wait until  Element should contain  xpath=//span[@data-test-id='application-title']  create-app-from-info
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  create-app-from-info
 
 Proper attachment templates are present
   Open tab  attachments

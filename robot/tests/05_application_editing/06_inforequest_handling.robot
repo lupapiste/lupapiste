@@ -39,7 +39,7 @@ Applicant marks inforequest answered
 
 Inforequest state is
   [Arguments]  ${state}
-  Wait until   Element should contain  test-inforequest-state  ${state}
+  Wait until   Element Text Should Be  test-inforequest-state  ${state}
 
 Inforequest is not assigned
   [Arguments]  ${address}
