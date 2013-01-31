@@ -124,17 +124,23 @@
 (def ...notimplemented... nil)
 
 (defn- ->rakennuksen-omistajat [xml]
-  )
+  {:tunnus "1234567-9",
+   :nimi "Testiyritys 11477",
+   :osoite
+   {:postinumero "00380",
+    :osoitenimi {:teksti "Testikatu 1 A 11477"},
+    :postitoimipaikannimi "HELSINKI"},
+   :omistajanlaji
+   {:omistajalaji "asunto-oy tai asunto-osuuskunta"}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
         polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        {:verkostoliittymat (all-of rakennus [:rakval:verkostoliittymat])
-         :varusteet (all-of rakennus [:rakval:varusteet])
+        {:verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
+         :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
-         :rakennuksenOmistajat (->rakennuksen-omistajat (-> rakennus (select [:rakval:omistaja])))
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
