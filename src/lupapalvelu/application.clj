@@ -165,7 +165,7 @@
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)]
     (if user
-      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge (security/summary user)) new-docs)
+      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge user) new-docs)
       new-docs)))
 
 (defcommand "create-application"
@@ -173,11 +173,12 @@
    :roles      [:applicant]}
   [command]
   (let [{:keys [user created data]} command
+        user-summary  (security/summary user)
         id            (mongo/create-id)
         owner         (role user :owner :type :owner)
         op            (keyword (:operation data))
         info-request? (if (:infoRequest data) true false)
-        make-comment  (partial assoc {:target {:type "application"} :created created :user (security/summary user)} :text)]
+        make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
     (mongo/insert :applications
       {:id            id
        :created       created
@@ -192,7 +193,7 @@
        :roles         {:applicant owner}
        :auth          [owner]
        :operations    [{:operation op :created created}]
-       :documents     (if info-request? [] (make-documents user created nil op))
+       :documents     (if info-request? [] (make-documents user-summary created nil op))
        :attachments   (if info-request? [] (make-attachments created op))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
@@ -233,7 +234,7 @@
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents nil created (:documents inforequest) op)
-                                                    :modified command}
+                                                    :modified created}
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))
 
