@@ -78,11 +78,11 @@
                               :huoneistonTyyppi {:huoneistoTyyppi "asuinhuoneisto"
                                                  :huoneistoala "86", :huoneluku "3"}
                               :keittionTyyppi "keittio"
-                              :varusteet {:ammeTaiSuihku true
-                                          :lamminvesi true
-                                          :parvekeTaiTerassi true
-                                          :sauna true
-                                          :wc true}})
+                              :varusteet {:ammeTaiSuihkuKytkin true
+                                          :lamminvesiKytkin true
+                                          :parvekeTaiTerassiKytkin true
+                                          :saunaKytkin true
+                                          :WCKytkin true}})
 
         (fact "there are 2 omistaja" (count (keys omistajat)) => 2)
 
