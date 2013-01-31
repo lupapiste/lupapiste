@@ -123,7 +123,20 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn- ->rakennuksen-omistajat [xml]
+(defn- ->rakennuksen-omistaja [xml]
+  {:_selected "yritys"
+   :yritys {:liikeJaYhteisoTunnus nil
+            :osoite {:katu nil
+                     :postinumero nil
+                     :postitoimipaikka nil}
+            :yhteyshenkilo {:henkilotiedot {:etunimi nil
+                                            :sukunimi nil}
+                            :yhteystiedot {:email nil
+                                           :fax nil
+                                           :puhelin nil}}
+            :yritysnimi nil}})
+
+(comment
   {:tunnus "1234567-9",
    :nimi "Testiyritys 11477",
    :osoite
@@ -141,6 +154,9 @@
         {:verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
          :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+         :rakennuksenOmistajat (->>
+                                 (select rakennus [:rakval:omistaja])
+                                 (map ->rakennuksen-omistaja))
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
