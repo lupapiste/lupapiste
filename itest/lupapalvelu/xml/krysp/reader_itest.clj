@@ -34,27 +34,16 @@
       (->rakennuksen-muuttaminen xml "007") => nil)
 
     (fact "valid buildingid returns mapped document"
-      (let [rakennus  (->rakennuksen-muuttaminen xml "001")
-            huoneistot (:huoneistot rakennus)]
+      (let [rakennus   (->rakennuksen-muuttaminen xml "001")
+            huoneistot (:huoneistot rakennus)
+            omistajat  (:rakennuksenOmistajat rakennus)]
 
-        rakennus => truthy
+        (fact "rakennus is not empty" rakennus => truthy)
+        (fact "huoneistot is not empty" huoneistot => truthy)
+        (fact "omistajat is not empty" omistajat => truthy)
 
-        (fact "there are 21 huoneisto" (count (keys huoneistot)) => 21)
-
-        (fact "first huoneisto is mapped correctly"
-          (:0 huoneistot) => {:huoneistoTunnus {:huoneistonumero "016"
-                                                :porras "A"}
-                              :huoneistonTyyppi {:huoneistoTyyppi "asuinhuoneisto"
-                                                 :huoneistoala "86", :huoneluku "3"}
-                              :keittionTyyppi "keittio"
-                              :varusteet {:ammeTaiSuihku true
-                                          :lamminvesi true
-                                          :parvekeTaiTerassi true
-                                          :sauna true
-                                          :wc true}})
-
-        (fact "without :huoneistot everything matches"
-          (dissoc rakennus :huoneistot)
+        (fact "without :huoneistot and :omistajat everything matches"
+          (dissoc rakennus :huoneistot :rakennuksenOmistajat)
             => (just
                  {:rakennusnro "001"
                   :verkostoliittymat {:viemariKytkin true
@@ -79,4 +68,30 @@
                               :viemariKytkin true
                               :hissiKytkin false
                               :koneellinenilmastointiKytkin true
-                              :aurinkopaneeliKytkin false}}))))))
+                              :aurinkopaneeliKytkin false}}))
+
+        (fact "there are 21 huoneisto" (count (keys huoneistot)) => 21)
+
+        (fact "first huoneisto is mapped correctly"
+          (:0 huoneistot) => {:huoneistoTunnus {:huoneistonumero "016"
+                                                :porras "A"}
+                              :huoneistonTyyppi {:huoneistoTyyppi "asuinhuoneisto"
+                                                 :huoneistoala "86", :huoneluku "3"}
+                              :keittionTyyppi "keittio"
+                              :varusteet {:ammeTaiSuihku true
+                                          :lamminvesi true
+                                          :parvekeTaiTerassi true
+                                          :sauna true
+                                          :wc true}})
+
+        (fact "there are 2 omistaja" (count (keys omistajat)) => 2)
+
+        (fact "first omistajat is mapped correctly"
+          (:0 omistajat) =>
+                    {:_selected "yritys"
+                     :yritys {:liikeJaYhteisoTunnus "1234567-9"
+                              :osoite {:katu "Testikatu 1 A 11477"
+                                       :postinumero "00380"
+                                       :postitoimipaikka "HELSINKI"}
+                              :yritysnimi "Testiyritys 11477"}})
+        ))))

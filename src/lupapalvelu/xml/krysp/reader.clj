@@ -74,9 +74,12 @@
   [dictionary m] (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
 
 (defn as-is
-  "read stuff from xml with enlive selector, convert to edn and strip namespaces."
-  [xml selector]
-  (-> (select1 xml selector) xml->edn strip-keys))
+  "read one element from xml with enlive selector, converts to edn and strip namespaces."
+  [xml selector] (-> (select1 xml selector) xml->edn strip-keys))
+
+(defn all-of
+  "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
+  [xml selector] (-> xml (as-is selector) vals first))
 
 (defn map-index
   "transform a collection into keyord-indexed map (starting from 0)."
@@ -120,18 +123,29 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn- ->rakennuksen-omistajat [xml]
-  )
+(defn- ->rakennuksen-omistaja [omistaja]
+  {:_selected "yritys"
+   :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
+            :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
+                     :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
+                     :postitoimipaikka (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
+            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)       ;; does-not-exist in test
+                                            :sukunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text)     ;; does-not-exist in test
+                            :yhteystiedot {:email ...notfound...
+                                           :fax ...notfound...
+                                           :puhelin ...notfound...}}}
+            :yritysnimi (-> omistaja (select1 [:rakval:nimi]) text)}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
-        polished (comp index-maps strip-empty-maps strip-nils convert-booleans (partial merge {}))]
+        polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        (as-is rakennus [:rakval:verkostoliittymat])
-        (as-is rakennus [:rakval:varusteet])
         {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
-         :rakennuksenOmistajat (->rakennuksen-omistajat (-> rakennus (select [:rakval:omistaja])))
+         :verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
+         :rakennuksenOmistajat (->>
+                                 (select rakennus [:rakval:omistaja])
+                                 (map ->rakennuksen-omistaja))
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
@@ -147,6 +161,7 @@
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
                     :lammonlahde ...notimplemented...}
          :muutostyolaji ...notimplemented...
+         :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :huoneistot (->>
                        (select rakennus [:rakval:valmisHuoneisto])
                        (map (fn [huoneisto]
