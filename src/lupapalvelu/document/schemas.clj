@@ -100,11 +100,11 @@
                              {:name "tupakeittio"}
                              {:name "ei tiedossa"}]}
                      {:name "varusteet" :type :choice
-                      :body [{:name "wc" :type :checkbox}
-                             {:name "ammeTaiSuihku" :type :checkbox}
-                             {:name "sauna" :type :checkbox}
-                             {:name "parvekeTaiTerassi" :type :checkbox}
-                             {:name "lamminvesi" :type :checkbox}]}])
+                      :body [{:name "WCKytkin" :type :checkbox}
+                             {:name "ammeTaiSuihkuKytkin" :type :checkbox}
+                             {:name "saunaKytkin" :type :checkbox}
+                             {:name "parvekeTaiTerassiKytkin" :type :checkbox}
+                             {:name "lamminvesiKytkin" :type :checkbox}]}])
 
 (def rakennuksen-tiedot [
              {:name "kaytto"

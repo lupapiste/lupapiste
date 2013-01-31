@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates an application
   Mikko logs in
-  Create application  approve-app  753  75341600250030
+  Create application the fast way  approve-app  753  75341600250030
 
 Mikko can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']

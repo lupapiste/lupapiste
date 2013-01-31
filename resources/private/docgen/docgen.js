@@ -287,6 +287,15 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
           select.appendChild(option);
         });
       })
+      .error(function(error) {
+        var text = error.text;
+        var option = document.createElement("option");
+        option.value = name;
+        option.appendChild(document.createTextNode(loc("error."+text)));
+        option.selected = "selected";
+        select.appendChild(option);
+        select.setAttribute("disabled", true);
+      })
       .call();
 
     var span = makeEntrySpan();

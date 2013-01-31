@@ -9,9 +9,9 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new inforequest
   Mikko logs in
-  Create inforequest  inforequest-handling  753  75341600250030  Jiihaa
+  Create inforequest the fast way  inforequest-handling  753  75341600250030  Jiihaa
   Logout
-  
+
 Authority assigns an inforequest to herself
   Sonja logs in
   Inforequest is not assigned  inforequest-handling
@@ -44,7 +44,7 @@ Inforequest state is
 Inforequest is not assigned
   [Arguments]  ${address}
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${EMPTY}
-  
+
 Inforequest is assigned to
   [Arguments]  ${address}  ${name}
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${name}

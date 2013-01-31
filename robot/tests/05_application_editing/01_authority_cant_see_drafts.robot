@@ -7,9 +7,9 @@ Resource       ../../common_resource.robot
 
 Mikko creates application
   Mikko logs in
-  Create application  authority-cant-see-drafts  753  75341600250030
+  Create application the fast way  authority-cant-see-drafts  753  75341600250030
   Logout
-  
+
 Sonja should not see applications at this stage
   Sonja logs in
   Request should not be visible  authority-cant-see-drafts
