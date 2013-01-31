@@ -75,8 +75,7 @@
 
 (defn as-is
   "read stuff from xml with enlive selector, convert to edn and strip namespaces."
-  [xml selector]
-  (-> (select1 xml selector) xml->edn strip-keys))
+  [xml selector] (-> (select1 xml selector) xml->edn strip-keys))
 
 (defn map-index
   "transform a collection into keyord-indexed map (starting from 0)."
