@@ -70,14 +70,16 @@
           </div>
         </div>
         <div class="tree" data-bind="visible: !operations()">
-          <img src="/img/ajax-loader.gif"/>
+          <img src="/img/ajax-loader.gif" alt="loading"/>
         </div>
 
         <div data-bind="visible: operation" class="tree-width">
           <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary btn-wizard"></button>
           <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary btn-wizard"></button>
         </div>
-
+      </div>
+      <h2 class="application_section_header" onclick="accordion.toggle();" data-bind="ltext: 'createApplication.project-description-header', visible: showInfoRequestMessage"><span class="font-icon icon-expanded"></span></h2>
+      <div class="application_section_content content_expanded" data-bind="visible: showInfoRequestMessage">
         <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
           <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
           <textarea
@@ -89,7 +91,8 @@
           <button
               data-bind="ltext: 'application.startConversation', click: createInfoRequest, enable: message().length > 0"
               class="btn btn-primary"
-              data-test-id="create-inforequest"></button>
+              data-test-id="create-inforequest">
+          </button>
         </form>
       </div>
     </div>
