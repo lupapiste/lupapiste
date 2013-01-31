@@ -17,9 +17,9 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.municipality]
             [lupapalvelu.application :as application]
-            [lupapalvelu.sade.security :as sadesecurity]
-            [lupapalvelu.cheshire.core :as json]
-            [lupapalvelu.clj-http.client :as client]))
+            [sade.security :as sadesecurity]
+            [cheshire.core :as json]
+            [clj-http.client :as client]))
 
 ;;
 ;; Helpers
@@ -244,8 +244,11 @@
 (defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id false))
 
-(defpage "/api/download-attachment/:attachment0id" {attachment-id :attachment-id}
+(defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
+
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
+  (attachment/output-all-attachments application-id (current-user)))
 
 ;;
 ;; Proxy
