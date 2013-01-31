@@ -172,11 +172,7 @@
                                                   :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
                                                   :huoneluku (-> huoneisto (select1 [:rakval:huoneluku]) text)}
                                :keittionTyyppi (-> huoneisto (select1 [:rakval:keittionTyyppi]) text)
-                               :varusteet {:ammeTaiSuihkuKytkin (-> huoneisto (select1 [:rakval:ammeTaiSuihkuKytkin]) text)
-                                           :lamminvesiKytkin (-> huoneisto (select1 [:rakval:lamminvesiKytkin]) text)
-                                           :parvekeTaiTerassiKytkin (-> huoneisto (select1 [:rakval:parvekeTaiTerassiKytkin]) text)
-                                           :saunaKytkin (-> huoneisto (select1 [:rakval:saunaKytkin]) text)
-                                           :WCKytkin (-> huoneisto (select1 [:rakval:WCKytkin]) text)}})))}))))
+                               :varusteet (-> huoneisto (all-of [:rakval:varusteet]))})))}))))
 
 ;;
 ;; full mappings
