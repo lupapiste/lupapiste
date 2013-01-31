@@ -84,6 +84,6 @@
                                           :sauna true
                                           :wc true}})
 
-        (fact "there are  huoneisto" (count (keys huoneistot)) => 21)
+        (fact "there are 2 omistaja" (count (keys omistajat)) => 2)
 
         ))))
