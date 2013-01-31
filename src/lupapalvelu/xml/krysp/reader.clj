@@ -79,7 +79,7 @@
 
 (defn all-of
   "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
-  [xml selector] (val (all-of xml selector)))
+  [xml selector] (-> xml (as-is selector) vals first))
 
 (defn map-index
   "transform a collection into keyord-indexed map (starting from 0)."
