@@ -146,35 +146,6 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defcommand "convert-to-application"
-  {:parameters [:id]
-   :roles      [:applicant]
-   :roles-in   [:applicant]
-   :states     [:draft :open]}
-  [command]
-  (with-application command
-    (fn [inforequest]
-      ; Mark source info-request as answered:
-      (mongo/update
-        :applications
-        {:_id (:id inforequest)}
-        {$set {:state :answered
-               :modified (:created command)}})
-      ; Create application with comments from info-request:
-      (let [result (executed
-                     (lupapalvelu.core/command
-                       "create-application"
-                       (:user command)
-                       (assoc
-                         (util/sub-map inforequest [:x :y :municipality :address])
-                         :permitType "buildingPermit")))
-            id (:id result)]
-        (mongo/update-by-id
-          :applications
-          id
-          {$set {:comments (:comments inforequest)}})
-        (ok :id id)))))
-
 (defn- make-attachments [created op]
   (for [[type-group type-ids] (partition 2 (:attachments (operations/operations op)))
         type-id type-ids]
@@ -205,7 +176,8 @@
         id            (mongo/create-id)
         owner         (role user :owner :type :owner)
         op            (keyword (:operation data))
-        info-request? (if (:infoRequest data) true false)]
+        info-request? (if (:infoRequest data) true false)
+        make-comment  (partial assoc {:target {:type "application"} :created created :user (security/summary user)} :text)]
     (mongo/insert :applications
       {:id            id
        :created       created
@@ -219,19 +191,14 @@
        :title         (:address data)
        :roles         {:applicant owner}
        :auth          [owner]
-       :documents     (make-documents user created nil op)
-       :attachments   (make-attachments created op)
+       :operations    [{:operation op :created created}]
+       :documents     (if info-request? [] (make-documents user created nil op))
+       :attachments   (if info-request? [] (make-attachments created op))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
                                  (partition 2 attachment/attachment-types))
-       :comments      (let [message (:message data)]
-                        (if-not (blank? message)
-                          [{:text message
-                            :target   {:type "application"}
-                            :created  created
-                            :user     (security/summary user)}]
-                          []))
-       :permitType     (keyword (:permitType data))})
+       :comments      (map make-comment (:messages data))
+       :permitType    (keyword (:permitType data))})
     (ok :id id)))
 
 (defcommand "add-operation"
@@ -247,7 +214,28 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}})))))
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
+                                              $set {:modified command}})
+        (ok)))))
+
+(defcommand "convert-to-application"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (with-application command
+    (fn [inforequest]
+      (let [id       (get-in command [:data :id])
+            created  (:created command)
+            op       (-> inforequest :operations first :operation)]
+        (mongo/update-by-id :applications id {$set {:infoRequest false
+                                                    :state :open
+                                                    :allowedAttachmentTypes (partition 2 attachment/attachment-types)
+                                                    :documents (make-documents nil created (:documents inforequest) op)
+                                                    :modified command}
+                                              $pushAll {:attachments (make-attachments created op)}})
+        (ok)))))
 
 ;;
 ;; krysp enrichment
@@ -272,7 +260,7 @@
             {$set {:documents.$.body new-body
                    :modified (:created command)}})
           (ok))
-        (fail :no_legacy_available)))))
+        (fail :no-legacy-available)))))
 
 (defquery "get-building-info-from-legacy"
   {:parameters [:id]
@@ -284,7 +272,7 @@
         (let [kryspxml  (krysp/building-xml legacy propertyId)
               buildings (krysp/->buildings kryspxml)]
           (ok :data buildings))
-        (fail :no_legacy_available)))))
+        (fail :no-legacy-available)))))
 
 ;;
 ;; Service point for jQuery dataTables:

@@ -1,14 +1,32 @@
 $(function() {
   "use strict";
 
-  $("footer").prepend('<label class="checkbox"><input type="checkbox" id="todo" checked="checked">N\u00e4yt\u00e4 toteuttamattomat</label>' +
-      '<label class="checkbox"><input type="checkbox" id="hidden">K\u00e4\u00e4nn\u00e4 piilotetut</label>'+
-      '<label class="checkbox"><input type="checkbox" id="events">N\u00e4yt\u00e4 eventit</label>');
+  $("footer")
+    .append("<div class=\"dev-debug\">"+
+            "<h3><u>Development</u></h3>"+
+            "<input type='checkbox' id='debug-todo' checked='checked'>Toteuttamattomat<br/>"+
+            "<input type='checkbox' id='debug-hidden'>K&auml;&auml;nn&auml; piilotetut<br/>"+
+            "<input type='checkbox' id='debug-events'>N&auml;yt&auml; eventit<br/>"+
+            "<a id='debug-apply-minimal' href='#' style='margin-left: 10px'>Apply minimal</a>"+
+            "<span id='debug-apply-done' style='display: none'> DONE!</span><br/>"+
+            "</div>");
 
   $(".todo").addClass("todo-off");
-  $("#todo").click(function() { $(".todo").toggleClass("todo-off"); });
-  $("#hidden").click(function() { $(".page").toggleClass("visible"); });
-  $("#events").click(function() { hub.send("toggle-show-events"); });
+  $("#debug-todo").click(function() { $(".todo").toggleClass("todo-off"); });
+  $("#debug-hidden").click(function() { $(".page").toggleClass("visible"); });
+  $("#debug-events").click(function() { hub.send("toggle-show-events"); });
+  $("#debug-apply-minimal").click(function() {
+    ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
+      .param("name", "minimal")
+      .success(function() {
+        if (window.repository) { repository.reloadAllApplications(); }
+        $("#debug-apply-done").show();
+      })
+      .call();
+    return false;
+  });
+
+  hub.subscribe("page-change", function() { $("#debug-apply-done").hide(); });
 
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };

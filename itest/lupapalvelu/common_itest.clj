@@ -3,7 +3,7 @@
         [midje.sweet]
         [clojure.pprint :only [pprint]]))
 
-(fact "minimal fixture has 3 municipalities"
+(fact "minimal fixture has at least 4 municipalities"
   (apply-remote-minimal)
-  (let [resp    (query pena :municipalities)]
-    (count (:municipalities resp)) => 3))
+  (let [resp (query pena :municipalities)]
+    (count (:municipalities resp)) => (partial <= 4)))
