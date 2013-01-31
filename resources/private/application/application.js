@@ -83,9 +83,18 @@
     openOskariMap: function(model) {
       var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
       window.open(url);
+      var applicationId = application.id();
       
       hub.subscribe("map-draw-done", function(e) {
-        debug(""+e.data.drawing);
+        var drawing = "" + e.data.drawing;
+        debug("save shape:" + drawing);
+        debug("app id" + applicationId);
+        ajax.command("save-application-shape", {id: applicationId, shape: drawing})
+        .success(function() {
+          debug("save shape success");
+          repository.reloadApplication(applicationId);
+        })
+        .call();
       });
     },
 
