@@ -74,8 +74,12 @@
   [dictionary m] (postwalk-map (partial map (fn [[k v]] (when-let [translation (translate dictionary k)] [translation v]))) m))
 
 (defn as-is
-  "read stuff from xml with enlive selector, convert to edn and strip namespaces."
+  "read one element from xml with enlive selector, converts to edn and strip namespaces."
   [xml selector] (-> (select1 xml selector) xml->edn strip-keys))
+
+(defn all-of
+  "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
+  [xml selector] (val (all-of xml selector)))
 
 (defn map-index
   "transform a collection into keyord-indexed map (starting from 0)."
