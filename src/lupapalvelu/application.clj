@@ -233,7 +233,7 @@
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
-                                                    :documents (make-documents nil created (:documents inforequest) op)
+                                                    :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))
