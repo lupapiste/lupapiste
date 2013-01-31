@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:use [lupapalvelu.xml.krysp.reader]
+        [sade.xml]
         [midje.sweet]))
 
 (facts "strip-keys"
@@ -51,3 +52,11 @@
                              {:c 3}]}}) => {:a {:b {:0 {:c 1}
                                                     :1 {:c 2}
                                                     :2 {:c 3}}}}))
+
+(fact "as-is"
+  (as-is (parse "<a:a>
+                   <a:b>
+                     <a:c>1</a:c>
+                     <a:d>2</a:d>
+                   </a:b>
+                 </a:a>") [:a:b]) => {:b {:c "1", :d "2"}})
