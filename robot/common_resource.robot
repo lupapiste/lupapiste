@@ -186,10 +186,6 @@ SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until page contains element  admin-header
 
-Number of requests on page
-  [Arguments]  ${request-type}  ${amount}
-  Xpath Should Match X Times  //section[@id='applications']//tr[contains(@class,'${request-type}')]  ${amount}
-
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
@@ -212,7 +208,7 @@ Click by test id
 
 Click enabled by test id
   [Arguments]  ${id}
-  Wait until page contains element  xpath=//*[@data-test-id="${id}"]
+  Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
   Click element  xpath=//*[@data-test-id="${id}"]
 
