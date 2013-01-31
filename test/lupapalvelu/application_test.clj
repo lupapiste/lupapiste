@@ -1,0 +1,61 @@
+(ns lupapalvelu.application-test
+  (:use [lupapalvelu.application]
+        [midje.sweet])
+  (:require [lupapalvelu.operations :as operations]
+            [lupapalvelu.document.schemas :as schemas]))
+
+(def make-documents #'lupapalvelu.application/make-documents)
+
+(defn find-by-schema? [docs schema-name]
+  (some (fn [doc] (when (= schema-name (-> doc :schema :info :name)) doc)) docs))
+
+(defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
+
+(facts
+  (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
+                      (operations/operations :bar) => {:schema "bar" :required ["b" "c"] :attachments []}
+                      (schemas/schemas "hakija")   => {:info {:name "hakija"}, :body []}
+                      (schemas/schemas "foo")      => {:info {:name "foo"}, :body []}
+                      (schemas/schemas "a")        => {:info {:name "a"}, :body []}
+                      (schemas/schemas "b")        => {:info {:name "b"}, :body []}
+                      (schemas/schemas "bar")      => {:info {:name "bar"}, :body []}
+                      (schemas/schemas "c")        => {:info {:name "c"}, :body []})
+  (let [user {:name "foo"}
+        created 12345]
+    (let [docs (make-documents user created nil :foo)]
+      (count docs) => 4
+      (find-by-schema? docs "hakija") => (contains {:body {:henkilo {:henkilotiedot user}}})
+      docs => (has-schema? "foo")
+      docs => (has-schema? "a")
+      docs => (has-schema? "b"))
+    ; use-case: "create-application"
+    (let [docs (make-documents user created [{:schema {:name "hakija"}}] :foo)]
+      (count docs) => 4)
+    ; use-case "add-operation"
+    (let [docs (make-documents user created nil :foo)
+          docs (make-documents nil created docs :bar)]
+      (count docs) => 2
+      docs => (has-schema? "bar")
+      docs => (has-schema? "c"))))
+
+(comment
+  ; Should rewrite this as a couple of unit tests
+  (fact "Assert that proper documents are created"
+    
+    (let [id (:id (create-app :operation "foo"))
+          app (:application (query pena :application :id id))
+          docs (:documents app)
+          find-by-schema? (fn [docs schema-name] (some (fn [doc] (if (= schema-name (-> doc :schema :info :name)) doc)) docs))]
+      (count docs) => 4 ; foo, a, b and "hakija".
+      (find-by-schema? docs "foo") => truthy
+      (find-by-schema? docs "a") => truthy
+      (find-by-schema? docs "b") => truthy
+      (-> (find-by-schema? docs "foo") :schema :info) => (contains {:op "foo" :removable true})
+      ; Add operation:
+      (command pena :add-operation :id id :operation "bar")
+      (let [app (:application (query pena :application :id id))
+            docs (:documents app)]
+        (count docs) => 6 ; foo, a, b and "hakija" + bar and c
+        (find-by-schema? docs "bar") => truthy
+        (find-by-schema? docs "c") => truthy
+        (-> (find-by-schema? docs "bar") :schema :info) => (contains {:op "bar" :removable true})))))
