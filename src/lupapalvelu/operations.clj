@@ -43,12 +43,12 @@
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
                                  :required common-schemas
-                                 :attachments [:hakija [:valtakirja
-                                                        :rakennuspaikka [:ote_alueen_peruskartasta]
-                                                        :paapiirustus [:asemapiirros
-                                                                       :pohjapiirros
-                                                                       :julkisivupiirros]
-                                                        :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]]}
+                                 :attachments [:hakija [:valtakirja]
+                                               :rakennuspaikka [:ote_alueen_peruskartasta]
+                                               :paapiirustus [:asemapiirros
+                                                              :pohjapiirros
+                                                              :julkisivupiirros]
+                                               :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]}
    :vapaa-ajan-asuinrakennus    {:schema "vapaa-ajan-asuinrakennus"
                                  :required common-schemas
                                  :attachments []}
