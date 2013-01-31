@@ -7,8 +7,8 @@ $(function() {
             "<input type='checkbox' id='debug-todo' checked='checked'>Toteuttamattomat<br/>"+
             "<input type='checkbox' id='debug-hidden'>K&auml;&auml;nn&auml; piilotetut<br/>"+
             "<input type='checkbox' id='debug-events'>N&auml;yt&auml; eventit<br/>"+
-            "<a id='debug-apply-minimal' href='#' style='margin-left: 10px'>Apply minimal</a><br>"+
-            "<span id='debug-apply-done' style='display: none'> DONE</span>"+
+            "<a id='debug-apply-minimal' href='#' style='margin-left: 10px'>Apply minimal</a>"+
+            "<span id='debug-apply-done' style='display: none'> DONE!</span><br/>"+
             "</div>");
 
   $(".todo").addClass("todo-off");
