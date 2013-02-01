@@ -144,9 +144,7 @@
     (fn [application]
       (mongo/update
         :applications {:_id (:id application)}
-          {$set {:shapes [{:shape shape}]}})))))
-
-;       :operations    [{:operation op :created created}]
+          {$set {:shapes [shape]}})))))
 
 (defcommand "mark-inforequest-answered"
   {:parameters [:id]

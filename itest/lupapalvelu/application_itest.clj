@@ -84,6 +84,15 @@
     (count roles-before-assignation) => 1
     (count roles-in-the-end) => 1))
 
+(fact "Applicaton shape is saved"
+  (apply-remote-minimal)
+  (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
+        application-id (:id (create-app))
+        resp (command pena :save-application-shape :id application-id :shape shape)
+        resp (query pena :application :id application-id)
+        app   (:application resp)]
+    (first (:shapes app)) => shape))
+
 (comment
   (apply-remote-minimal)
   ; Do 70 applications in each municipality:
