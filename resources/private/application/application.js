@@ -68,6 +68,7 @@
     created: ko.observable(),
     documents: ko.observable(),
     attachments: ko.observableArray(),
+    hasAttachment: ko.observable(false),
     address: ko.observable(),
     verdict: ko.observable(),
     operations: ko.observable(),
@@ -273,9 +274,12 @@
         ok: "ok"
       };
 
+      application.hasAttachment(false);
+      
       attachments(_.map(app.attachments || [], function(a) {
         a.statusName = statuses[a.state] || "unknown";
         a.latestVersion = _.last(a.versions);
+        if (a.versions && a.versions.length) application.hasAttachment(true);
         return a;
       }));
 
