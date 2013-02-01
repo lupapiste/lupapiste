@@ -180,6 +180,11 @@
         })
         .call();
       return false;
+    },
+    
+    exportPdf: function() {
+      window.open("/api/pdf-export/" + application.id(), "_blank");
+      return false;
     }
 
   };
