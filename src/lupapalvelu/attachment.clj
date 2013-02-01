@@ -2,13 +2,16 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [lupapalvelu.log]
-        [lupapalvelu.action :only [get-application-as]]
-        [clojure.java.io :only [reader file]]
+        [lupapalvelu.action :only [get-application-as application-query-for]]
         [clojure.string :only [split join trim]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.strings :as strings]
-            [lupapalvelu.mime :as mime]))
+            [lupapalvelu.mime :as mime]
+            [clojure.java.io :as io])
+  (:import [java.util.zip ZipOutputStream ZipEntry]
+           [java.io File OutputStream]
+           [org.apache.commons.io IOUtils]))
 
 ;;
 ;; Constants
@@ -249,7 +252,7 @@
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
-            (.delete (file tempfile))
+            (.delete (io/file tempfile))
             (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
               (executed (assoc (command "add-comment"
                                         {:id id
@@ -302,3 +305,29 @@
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
+
+(defn- append-attachment [zip latest]
+  (when latest
+    (.putNextEntry zip (ZipEntry. (:filename latest)))
+    (with-open [in ((-> latest :fileId mongo/download :content))]
+      (IOUtils/copy in zip))))
+
+(defn- get-all-attachments [attachments]
+  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+    (debug "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
+    (with-open [out (io/output-stream temp-file)]
+      (let [zip (ZipOutputStream. out)]
+        (doseq [attachment attachments]
+          (append-attachment zip (-> attachment :versions last)))
+        (.finish zip)))
+    (io/input-stream temp-file)))
+
+(defn output-all-attachments [application-id user]
+  (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]} {:attachments 1})]
+    {:body (get-all-attachments (:attachments application))
+     :status 200
+     :headers {"Content-Type" "application/octet-stream"
+               "Content-Disposition" "attachment;filename=\"liitteet.zip\""}}
+    {:body "404"
+     :status 404
+     :headers {"Content-Type" "text/plain"}}))
