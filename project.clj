@@ -5,6 +5,7 @@
                  [com.novemberain/monger "1.4.2"]
                  [enlive "1.0.1" :exclusions [org.clojure/clojure]]
                  [org.clojure/tools.nrepl "0.2.1"]
+                 [org.jasypt/jasypt "1.9.0"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [clj-http "0.6.3" :exclusions [commons-codec]]
                  [digest "1.4.2"]
