@@ -15,6 +15,9 @@
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.9.2"]
                  [org.clojure/data.xml "0.0.7"]
+                 [com.yahoo.platform.yui/yuicompressor "2.4.7"
+                   ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
+                   :exclusions [rhino/js]]
                  [fi.sito/oskari "0.9.5"]]
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
                                   [clj-webdriver "0.6.0-beta2" :exclusions [[cheshire/cheshire]
