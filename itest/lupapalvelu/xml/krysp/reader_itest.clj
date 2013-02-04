@@ -56,7 +56,8 @@
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
                   :mitat {:kerrosluku "5"
                           :kerrosala "1785"
-                          :kokonaisala "2582"
+                          :kokonaisala "2682"
+                          :kellarinpinta-ala "100"
                           :tilavuus "8240"}
                   :rakenne {:julkisivu "betoni"
                             :kantavaRakennusaine "betoni"
