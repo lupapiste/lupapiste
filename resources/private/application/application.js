@@ -298,6 +298,12 @@
       var y = location.y();
       applicationMap.clear().add(x, y).center(x, y, 11);
       inforequestMap.clear().add(x, y).center(x, y, 11);
+      
+      // draw shapes
+      if(application.shapes().length > 0) {
+        applicationMap.drawShape(application.shapes()[0]);
+        inforequestMap.drawShape(application.shapes()[0]);
+      }
 
       // docgen:
 
