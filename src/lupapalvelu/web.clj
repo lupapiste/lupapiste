@@ -4,19 +4,19 @@
         [lupapalvelu.log]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]])
-  (:require [noir  [request :as request]
-                   [response :as resp]
-                   [session :as session]
-                   [server :as server]]
-            [lupapalvelu [env :as env]
-                         [core :as core]
-                         [action :as action]
-                         [singlepage :as singlepage]
-                         [security :as security]
-                         [attachment :as attachment]
-                         [proxy-services :as proxy-services]
-                         [municipality]
-                         [application :as application]]
+  (:require [noir.request :as request]
+            [noir.response :as resp]
+            [noir.session :as session]
+            [noir.server :as server]
+            [lupapalvelu.env :as env]
+            [lupapalvelu.core :as core]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.singlepage :as singlepage]
+            [lupapalvelu.security :as security]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.proxy-services :as proxy-services]
+            [lupapalvelu.municipality]
+            [lupapalvelu.application :as application]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
@@ -241,11 +241,14 @@
     (attachment/output-attachment attachment-id (current-user) download?)
     (resp/status 401 "Unauthorized\r\n")))
 
-(defpage "/api/view/:attachmentId" {attachment-id :attachmentId}
+(defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id false))
 
-(defpage "/api/download/:attachmentId" {attachment-id :attachmentId}
+(defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
+
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
+  (attachment/output-all-attachments application-id (current-user)))
 
 ;;
 ;; Proxy

@@ -141,16 +141,17 @@
         polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+        {:muutostyolaji ...notimplemented...
+         :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
          :verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
          :rakennuksenOmistajat (->>
                                  (select rakennus [:rakval:omistaja])
                                  (map ->rakennuksen-omistaja))
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
-                    :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}               ;; does-not-exist in test
-         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)     ;; does-not-exist in test
+         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)
+                    :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}
+         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)
                  :kerrosala (-> rakennus (select1 [:rakval:kerrosala]) text)
                  :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
                  :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
@@ -159,14 +160,13 @@
                    :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
                    :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
-                    :lammonlahde ...notimplemented...}
-         :muutostyolaji ...notimplemented...
+                    :lammonlahde (-> rakennus (select1 [:rakval:polttoaine]) text)}
          :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :huoneistot (->>
                        (select rakennus [:rakval:valmisHuoneisto])
                        (map (fn [huoneisto]
                               {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:rakval:huoneistonumero]) text)
-                                                 :jakokirjain ...notfound...
+                                                 :jakokirjain (-> huoneisto (select1 [:rakval:jakokirjain]) text)
                                                  :porras (-> huoneisto (select1 [:rakval:porras]) text)}
                                :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:rakval:huoneistonTyyppi]) text)
                                                   :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)

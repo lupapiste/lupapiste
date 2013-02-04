@@ -37,13 +37,13 @@
       <!-- Preview images and pdf files only -->
       <div class="file-preview" data-bind="visible: hasPreview()">
         <div class="file-preview-image" data-bind="if: isImage()">
-          <a data-bind="attr: {href: '/api/view/' + latestVersion().fileId}">
-            <img data-bind="attr: {src: '/api/view/' + latestVersion().fileId}" />
+          <a data-bind="attr: {href: '/api/view-attachment/' + latestVersion().fileId}">
+            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" />
           </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
 
-          <iframe id="file-preview-iframe" data-bind="attr: {src: '/api/view/' + latestVersion().fileId}"></iframe>
+          <iframe id="file-preview-iframe" data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}"></iframe>
         </div>
       </div>
 
@@ -68,7 +68,7 @@
           </thead>
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
-              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/download/' + $data.fileId}"></a></td>
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/download-attachment/' + $data.fileId}"></a></td>
               <td data-bind="version: version"></td>
               <td data-bind="dateString: created">31.10.2012</td>
               <td>
@@ -100,7 +100,7 @@
                   </td>
                   <td class="comment-text">
                     <span data-bind="if: $parent.category($data) == 'category-new-attachment-version'" class="new-attachment-version-details">
-                       <span data-bind="ltext: 'newAttachmentVersion'"></span> <span data-bind="version: target.version"></span>: <a data-bind="text: target.filename, attr: {href: '/api/download/' + target.fileId()}"></a>
+                       <span data-bind="ltext: 'newAttachmentVersion'"></span> <span data-bind="version: target.version"></span>: <a data-bind="text: target.filename, attr: {href: '/api/download-attachment/' + target.fileId()}"></a>
                     </span>
                     <span data-bind="text: text"></span>
                   </td>
