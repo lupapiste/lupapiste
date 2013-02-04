@@ -160,7 +160,7 @@
                    :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
                    :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
-                    :lammonlahde (-> rakennus (select1 [:rakval:polttoaine]) text)}             ;; does-not-exist in test
+                    :lammonlahde (-> rakennus (select1 [:rakval:polttoaine]) text)}
          :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :huoneistot (->>
                        (select rakennus [:rakval:valmisHuoneisto])
