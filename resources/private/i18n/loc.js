@@ -1,79 +1,61 @@
 var loc;
 
 ;(function() {
-  "use strict";
-
-  var defaultLanguage = "fi";
-  var supportedLanguages = ["fi", "sv"];
-
-  function resolveLanguage() {
-    var url = location.pathname;
-    if (window.parent) {
-      url = window.parent.location.pathname;
-    }
-
-    var langEndI = url.indexOf("/", 1);
-    if (langEndI > 0) {
-      var lang = url.substring(1, langEndI);
-      if (_.contains(supportedLanguages, lang)) {
-        return lang;
-      }
-    }
-    // TODO remove
-    debug("Returning default language", defaultLanguage);
-    return defaultLanguage;
-  }
-
-  var currentLanguage = resolveLanguage();
-
-  var terms = {"fi": {}, "sv": {}};
-  
-  function registerTerms(lang, localizedTerms) {
-    terms[lang] = _.extend(terms[lang], localizedTerms);
-  }
-
-  function getIn(m, keyArray) {
-    if (m && keyArray && keyArray.length > 0) {
-      var key = keyArray[0];
-      var val = m[key];
-      if (typeof val === "string") {
-        return val;
-      }
-      return getIn(val, keyArray.splice(1, keyArray.length - 1));
-    }
-  }
-
-  hub.subscribe("change-lang", function(e) {
-    var lang = e.lang;
-    if (_.contains(supportedLanguages, lang)) {
-      var pattern = "\/" + currentLanguage + "\/";
-      var url = location.href.replace(pattern, "/" + lang + "/");
-      window.location = url;
-    }
-  });
-
-  function getTerm(key) {
-    if (!key) { return; }
-    var keyArray = key.split(/\./);
-    return getIn(terms[currentLanguage], keyArray);
-  }
 
   loc = function(key) {
-    var term = getTerm(key);
+    var term = loc.terms[key];
     if (term === undefined) {
       debug("Missing localization key", key);
       return "$$NOT_FOUND$$" + key;
     }
     return term;
   };
+  
+  loc.terms = {}; // Will be overwritten by i18n.clj generated content.
+  loc.supported = [];
+
+  var defaultLanguage = "fi";
+  var currentLanguage = null;
+
+  loc.setTerms = function(newTerms) {
+    loc.supported = _.keys(newTerms);
+      
+    var url = location.pathname;
+    if (window.parent) url = window.parent.location.pathname;
+
+    var lang = null;
+    
+    var langEndI = url.indexOf("/", 1);
+    if (langEndI > 0) {
+      var l = url.substring(1, langEndI);
+      lang = _.contains(loc.supported, l) ? l : null;
+    }
+
+    if (lang == null) {
+      debug("Returning default language", defaultLanguage);
+      lang = defaultLanguage;
+    }
+
+    loc.terms = newTerms[lang];
+  }
+
+  hub.subscribe("change-lang", function(e) {
+    var lang = e.lang;
+    if (loc.terms[lang]) {
+      var pattern = "/" + currentLanguage + "/";
+      var url = location.href.replace(pattern, "/" + lang + "/");
+      window.location = url;
+    }
+  });
 
   loc.termExists = function(key) {
-    return getTerm(key) !== undefined;
+    return loc.terms[key] !== undefined;
   };
 
-  loc.toMap = function() { return terms[currentLanguage].error; };
+  // FIXME: Called before lang is set, and does not react to lang changes.
+  loc.toMap = function() { return loc.terms[currentLanguage] ? loc.terms["error"] : {}; };
 
-  loc.getCurrentLanguage = function() {return currentLanguage;};
-  loc.getSupportedLanguages = function() {return supportedLanguages;};
-  loc.registerTerms = registerTerms;
+  loc.getCurrentLanguage = function() { return currentLanguage; };
+  loc.getSupportedLanguages = function() { return loc.supported; };
+  
 })();
