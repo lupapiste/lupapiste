@@ -17,6 +17,12 @@
                (mapcat seq))]
     (apply command pena :create-application args)))
 
+(fact "can't inject js in 'x' or 'y' params"
+  (create-app :x ";alert(\"foo\");" :y "what ever") => (contains {:ok false})
+  (create-app :x "0.1x" :y "1.0") => (contains {:ok false})
+  (create-app :x "1x2" :y "1.0") => (contains {:ok false})
+  (create-app :x "2" :y "1.0") => (contains {:ok true}))
+
 (fact "creating application without message"
   (apply-remote-minimal)
   (let [resp  (create-app)
@@ -25,7 +31,7 @@
         app   (:application resp)]
     app => (contains {:id id
                       :state "draft"
-                      :location {:x 444444 :y 6666666}
+                      :location {:x 444444.0 :y 6666666.0}
                       :permitType "buildingPermit"
                       :municipality "753"})
     (count (:comments app)) => 0
