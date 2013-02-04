@@ -5,11 +5,11 @@
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
-(def simple-osoite [{:name "osoite"
-                     :type :group
-                     :body [{:name "katu" :type :string}
-                            {:name "postinumero" :type :string :size "s"}
-                            {:name "postitoimipaikannimi" :type :string :size "m"}]}])
+(def simple-osoite {:name "osoite"
+                    :type :group
+                    :body [{:name "katu" :type :string}
+                           {:name "postinumero" :type :string :size "s"}
+                           {:name "postitoimipaikannimi" :type :string :size "m"}]})
 
 (def full-osoite [{:name "osoite"
                    :type :group
