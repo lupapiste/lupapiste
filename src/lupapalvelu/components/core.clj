@@ -1,4 +1,5 @@
-(ns lupapalvelu.components.core)
+(ns lupapalvelu.components.core
+  (:use [clojure.string :only [join]]))
 
 (defn get-component
   "Return component c from components. Throws exception if component c is missing"
@@ -37,3 +38,5 @@
    of :js, :html or :css."
   [components kind c]
   (mapcat (partial component-resources components kind) (get-dependencies components c)))
+
+(defn path [& dir] (str "private/" (join "/" dir)))

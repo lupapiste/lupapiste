@@ -1,11 +1,7 @@
 (ns lupapalvelu.components.ui-components
   (:use [lupapalvelu.log])
-  (:require [clojure.string :as s]
-            [lupapalvelu.components.core :as c]
-            [lupapalvelu.env :as env]
-            [lupapalvelu.i18n :as i18n]))
-
-(defn path [& dir] (str "private/" (s/join "/" dir)))
+  (:require [lupapalvelu.components.core :as c]
+            [lupapalvelu.env :as env]))
 
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
@@ -129,7 +125,7 @@
 (doseq [c (keys ui-components)
         r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
   (if (not (fn? r))
-    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (path r))]
+    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path r))]
       (if resource
         (.close resource)
         (throw (Exception. (str "Resource missing: " r)))))))
