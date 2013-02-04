@@ -89,7 +89,8 @@ var gis = (function() {
     
     self.drawShape = function(shape) {
       self.vectorLayer.removeAllFeatures();
-      self.vectorLayer.addFeatures([new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(shape))]);
+      var vector = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(shape), {}, {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"});
+      self.vectorLayer.addFeatures([vector]);
     };
 
     self.addClickHandler = function(handler) {
