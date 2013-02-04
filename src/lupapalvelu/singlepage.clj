@@ -8,6 +8,8 @@
            [java.util.zip GZIPOutputStream]
            [org.apache.commons.io IOUtils]))
 
+(def utf8 (java.nio.charset.Charset/forName "UTF-8"))
+
 (defn write-header [out name]
   (.write out (.getBytes (format "\n/*\n * %s\n */\n\n" name)))
   out)
@@ -16,12 +18,10 @@
   (let [out (ByteArrayOutputStream.)]
     (doseq [src (c/get-resources ui-components kind component)]
       (if (fn? src)
-        (.write (write-header out (str "fn: " 'src)) (.getBytes (src)))
+        (.write (write-header out (str "fn: " (-> src str (.replace \$ \/) (.split "@") first))) (.getBytes (src) utf8))
         (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))]
           (IOUtils/copy resource (write-header out src)))))
     (.toByteArray out)))
-
-(def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
 (defn parse-html-resource [c resource]
   (let [h (enlive/html-resource resource)]
