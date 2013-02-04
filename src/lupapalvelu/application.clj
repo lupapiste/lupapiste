@@ -301,7 +301,6 @@
 (defn make-query [query params]
   (let [search (params :sSearch)
         kind (params :kind)]
-    (println "Search:" search "Kind:" kind)
     (merge
       query
       (condp = kind
