@@ -148,15 +148,15 @@
                                  (select rakennus [:rakval:omistaja])
                                  (map ->rakennuksen-omistaja))
          :osoite {:kunta            (-> rakennus (select1 [:yht:kunta]) text)
-                  :lahiosoite       nil
+                  :lahiosoite       (-> rakennus (select1 [:yht:osoitenimi :yht:teksti]) text)
                   :osoitenumero     (-> rakennus (select1 [:yht:osoitenumero]) text)
                   :osoitenumero2    (-> rakennus (select1 [:yht:osoitenumero2]) text)
                   :jakokirjain      (-> rakennus (select1 [:yht:jakokirjain]) text)
                   :jakokirjain2     (-> rakennus (select1 [:yht:jakokirjain2]) text)
-                  :porras           nil
-                  :huoneisto        nil
-                  :postinumero      nil
-                  :postitoimipaikka nil
+                  :porras           (-> rakennus (select1 [:yht:porras]) text)
+                  :huoneisto        (-> rakennus (select1 [:yht:huoneisto]) text)
+                  :postinumero      (-> rakennus (select1 [:yht:postinumero]) text)
+                  :postitoimipaikka (-> rakennus (select1 [:yht:postitoimipaikannimi]) text)
                   :pistesijanti     nil}
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
