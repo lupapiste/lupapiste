@@ -75,6 +75,7 @@
 
         (fact "first huoneisto is mapped correctly"
           (:0 huoneistot) => {:huoneistoTunnus {:huoneistonumero "016"
+                                                :jakokirjain     "a"
                                                 :porras "A"}
                               :huoneistonTyyppi {:huoneistoTyyppi "asuinhuoneisto"
                                                  :huoneistoala "86", :huoneluku "3"}

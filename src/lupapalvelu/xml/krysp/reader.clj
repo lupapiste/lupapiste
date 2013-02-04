@@ -166,9 +166,7 @@
                        (select rakennus [:rakval:valmisHuoneisto])
                        (map (fn [huoneisto]
                               {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:rakval:huoneistonumero]) text)
-                                                 :jakokirjain (or
-                                                                (-> huoneisto (select1 [:rakval:jakokirjain]) text)
-                                                                (-> huoneisto (select1 [:rakval:jakokirjain2]) text))
+                                                 :jakokirjain (-> huoneisto (select1 [:rakval:jakokirjain]) text)
                                                  :porras (-> huoneisto (select1 [:rakval:porras]) text)}
                                :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:rakval:huoneistonTyyppi]) text)
                                                   :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
