@@ -51,6 +51,13 @@
                                       :sahkoKytkin true
                                       :vesijohtoKytkin true
                                       :kaapeliKytkin false}
+                  :osoite {:kunta "245"
+                           :lahiosoite "Vehkalantie"
+                           :osoitenumero "2"
+                           :jakokirjain2 "a"
+                           :postinumero "04200"
+                           :postitoimipaikka "KERAVA"
+                           }
                   :luokitus {:energialuokka "10"
                              :paloluokka "P1 / P2"}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
