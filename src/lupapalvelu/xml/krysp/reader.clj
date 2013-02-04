@@ -151,7 +151,7 @@
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)
                     :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}
-         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)     ;; does-not-exist in test
+         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)
                  :kerrosala (-> rakennus (select1 [:rakval:kerrosala]) text)
                  :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
                  :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
