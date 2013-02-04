@@ -157,7 +157,7 @@
                   :huoneisto        (-> rakennus (select1 [:yht:huoneisto]) text)
                   :postinumero      (-> rakennus (select1 [:yht:postinumero]) text)
                   :postitoimipaikka (-> rakennus (select1 [:yht:postitoimipaikannimi]) text)
-                  :pistesijanti     nil}
+                  :pistesijanti     ...notimplemented...}
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)

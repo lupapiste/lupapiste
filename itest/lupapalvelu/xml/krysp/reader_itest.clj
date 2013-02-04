@@ -54,10 +54,13 @@
                   :osoite {:kunta "245"
                            :lahiosoite "Vehkalantie"
                            :osoitenumero "2"
-                           :jakokirjain2 "a"
+                           :osoitenumero2 "3"
+                           :jakokirjain "a"
+                           :jakokirjain2 "b"
+                           :porras "G"
+                           :huoneisto "99"
                            :postinumero "04200"
-                           :postitoimipaikka "KERAVA"
-                           }
+                           :postitoimipaikka "KERAVA"}
                   :luokitus {:energialuokka "10"
                              :paloluokka "P1 / P2"}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
