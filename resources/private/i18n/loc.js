@@ -27,9 +27,10 @@ var loc;
   var currentLanguage = resolveLanguage();
 
   var terms = {"fi": {}, "sv": {}};
+  
   function registerTerms(lang, localizedTerms) {
     terms[lang] = _.extend(terms[lang], localizedTerms);
-      }
+  }
 
   function getIn(m, keyArray) {
     if (m && keyArray && keyArray.length > 0) {
