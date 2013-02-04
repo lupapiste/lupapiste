@@ -168,6 +168,10 @@
       (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge user) new-docs)
       new-docs)))
 
+(defn- ->double [v]
+  (let [v (str v)]
+    (if (s/blank? v) 0.0 (Double/parseDouble v))))
+
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
@@ -186,7 +190,7 @@
        :infoRequest   info-request?
        :state         (if info-request? :open :draft)
        :municipality  (:municipality data)
-       :location      {:x (Double/parseDouble (:x data "0")) :y (Double/parseDouble (:y data "0"))}
+       :location      {:x (->double (:x data)) :y (->double (:y data))}
        :address       (:address data)
        :propertyId    (:propertyId data)
        :title         (:address data)
