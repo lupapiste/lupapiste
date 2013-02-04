@@ -149,7 +149,7 @@
                                  (map ->rakennuksen-omistaja))
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;; does-not-exist in test
+         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)          ;;
                     :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}               ;; does-not-exist in test
          :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)     ;; does-not-exist in test
                  :kerrosala (-> rakennus (select1 [:rakval:kerrosala]) text)
