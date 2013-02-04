@@ -1,7 +1,11 @@
 (ns lupapalvelu.components.ui-components
   (:use [lupapalvelu.log])
-  (:require [lupapalvelu.components.core :as c]
-            [lupapalvelu.env :as env]))
+  (:require [clojure.string :as s]
+            [lupapalvelu.components.core :as c]
+            [lupapalvelu.env :as env]
+            [lupapalvelu.i18n :as i18n]))
+
+(defn path [& dir] (str "private/" (s/join "/" dir)))
 
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
@@ -29,10 +33,7 @@
    :debug        (if (env/dev-mode?) debugjs {})
 
    :i18n         {:depends [:jquery :underscore]
-                  :js (into ["loc.js"]
-                            (for [lang ["fi" "sv"]
-                                  file ["common" "docgen" "applications" "attachments" "welcome" "mypage" "auth-admin"]]
-                              (str file "_" lang ".js")))}
+                  :js ["loc.js" i18n/loc->js]}
    
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js"
@@ -128,7 +129,7 @@
 (doseq [c (keys ui-components)
         r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
   (if (not (fn? r))
-    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path r))]
+    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (path r))]
       (if resource
         (.close resource)
         (throw (Exception. (str "Resource missing: " r)))))))
