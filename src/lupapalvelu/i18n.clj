@@ -14,11 +14,14 @@
     (io/resource "i18n.xlsx")
     (xls/load-workbook)
     (map read-sheet)
-    (apply concat)
-    (filter (fn [row] (= (count row) 3)))))
+    (apply concat)))
 
 (defn- add-term [row result lang]
-  (assoc-in result [lang (get row :key)] (get row lang)))
+  (let [k (get row :key)
+        t (get row lang)]
+    (if (and k t)
+      (assoc-in result [lang k] t)
+      result)))
 
 (defn- process-row [languages result row]
   (reduce (partial add-term row) result languages))
@@ -32,5 +35,3 @@
 
 (defn loc->js []
   (str ";loc.setTerms(" (json/generate-string (parse)) ");"))
-
-(loc->js)
