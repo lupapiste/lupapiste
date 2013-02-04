@@ -51,7 +51,8 @@
                                       :sahkoKytkin true
                                       :vesijohtoKytkin true
                                       :kaapeliKytkin false}
-                  :luokitus {:energialuokka "10"}
+                  :luokitus {:energialuokka "10"
+                             :paloluokka "P1 / P2"}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
                   :mitat {:kerrosluku "5"
                           :kerrosala "1785"
