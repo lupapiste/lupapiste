@@ -51,6 +51,16 @@
                                       :sahkoKytkin true
                                       :vesijohtoKytkin true
                                       :kaapeliKytkin false}
+                  :osoite {:kunta "245"
+                           :lahiosoite "Vehkalantie"
+                           :osoitenumero "2"
+                           :osoitenumero2 "3"
+                           :jakokirjain "a"
+                           :jakokirjain2 "b"
+                           :porras "G"
+                           :huoneisto "99"
+                           :postinumero "04200"
+                           :postitoimipaikannimi "KERAVA"}
                   :luokitus {:energialuokka "10"
                              :paloluokka "P1 / P2"}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
@@ -97,6 +107,6 @@
                      :yritys {:liikeJaYhteisoTunnus "1234567-9"
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
-                                       :postitoimipaikka "HELSINKI"}
+                                       :postitoimipaikannimi "HELSINKI"}
                               :yritysnimi "Testiyritys 11477"}})
         ))))
