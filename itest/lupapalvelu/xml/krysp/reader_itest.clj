@@ -59,7 +59,8 @@
                   :rakenne {:julkisivu "betoni"
                             :kantavaRakennusaine "betoni"
                             :rakentamistapa "elementti"}
-                  :lammitys {:lammitystapa "vesikeskus"}
+                  :lammitys {:lammitystapa "vesikeskus"
+                             :lammonlahde  "kauko tai aluel\u00e4mp\u00f6"}
                   :varusteet {:kaasuKytkin false
                               :lamminvesiKytkin true
                               :sahkoKytkin true

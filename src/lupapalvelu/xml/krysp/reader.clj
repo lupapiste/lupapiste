@@ -141,7 +141,8 @@
         polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        {:rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
+        {:muutostyolaji ...notimplemented...
+         :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
          :verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
          :rakennuksenOmistajat (->>
                                  (select rakennus [:rakval:omistaja])
@@ -159,14 +160,13 @@
                    :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
                    :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
          :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
-                    :lammonlahde ...notimplemented...}
-         :muutostyolaji ...notimplemented...
+                    :lammonlahde (-> rakennus (select1 [:rakval:polttoaine]) text)}             ;; does-not-exist in test
          :varusteet (-> rakennus (all-of [:rakval:varusteet]))
          :huoneistot (->>
                        (select rakennus [:rakval:valmisHuoneisto])
                        (map (fn [huoneisto]
                               {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:rakval:huoneistonumero]) text)
-                                                 :jakokirjain ...notfound...
+                                                 :jakokirjain (-> huoneisto (select1 [:rakval:jakokirjain]) text)              ;; does-not-exist in test
                                                  :porras (-> huoneisto (select1 [:rakval:porras]) text)}
                                :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:rakval:huoneistonTyyppi]) text)
                                                   :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
