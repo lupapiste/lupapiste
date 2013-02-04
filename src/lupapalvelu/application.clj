@@ -186,7 +186,7 @@
        :infoRequest   info-request?
        :state         (if info-request? :open :draft)
        :municipality  (:municipality data)
-       :location      {:x (:x data) :y (:y data)}
+       :location      {:x (Double/parseDouble (:x data "0")) :y (Double/parseDouble (:y data "0"))}
        :address       (:address data)
        :propertyId    (:propertyId data)
        :title         (:address data)
