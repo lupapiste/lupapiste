@@ -147,6 +147,17 @@
          :rakennuksenOmistajat (->>
                                  (select rakennus [:rakval:omistaja])
                                  (map ->rakennuksen-omistaja))
+         :osoite {:postinumero      nil
+                  :huoneisto        nil
+                  :osoitenumero     (-> rakennus (select1 [:yht:osoitenumero]) text)
+                  :osoitenumero2    (-> rakennus (select1 [:yht:osoitenumero2]) text)
+                  :kunta            (-> rakennus (select1 [:yht:kunta]) text)
+                  :lahiosoite       nil
+                  :postitoimipaikka nil
+                  :jakokirjain      (-> rakennus (select1 [:yht:jakokirjain]) text)
+                  :jakokirjain2     (-> rakennus (select1 [:yht:jakokirjain2]) text)
+                  :pistesijanti     nil
+                  :porras           nil}}
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)
