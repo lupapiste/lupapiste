@@ -87,7 +87,7 @@
       var applicationId = application.id();
       
       hub.subscribe("map-initialized", function(e) {
-        if(application.shapes().length > 0) {
+        if(application.shapes && application.shapes().length > 0) {
           oskariDrawShape(application.shapes()[0]);
         }
         oskariSetMarker(application.location().x(), application.location().y());
@@ -323,7 +323,7 @@
       inforequestMap.clear().add(x, y).center(x, y, 11);
       
       // draw shapes
-      if(application.shapes().length > 0) {
+      if(application.shapes && application.shapes().length > 0) {
         applicationMap.drawShape(application.shapes()[0]);
         inforequestMap.drawShape(application.shapes()[0]);
       }
