@@ -6,22 +6,52 @@
         [lupapalvelu.components.ui-components :only [ui-components]])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
-           [org.apache.commons.io IOUtils]))
-
-(defn write-header [out name]
-  (.write out (.getBytes (format "\n/*\n * %s\n */\n\n" name)))
-  out)
-
-(defn compose-resource [kind component]
-  (let [out (ByteArrayOutputStream.)]
-    (doseq [src (c/get-resources ui-components kind component)]
-      (if (fn? src)
-        (.write (write-header out (str "fn: " 'src)) (.getBytes (src)))
-        (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))]
-          (IOUtils/copy resource (write-header out src)))))
-    (.toByteArray out)))
+           [org.apache.commons.io IOUtils]
+           [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
+           [org.mozilla.javascript ErrorReporter EvaluatorException]))
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
+
+(defn write-header [out name]
+  (when (env/dev-mode?) (.write out (format "\n\n/*\n * %s\n */\n" name)))
+  out)
+
+(def error-reporter
+  (reify ErrorReporter
+    (^void warning [this ^String message, ^String sourceName,
+                    ^int line, ^String lineSource, ^int lineOffset]
+      (warn message))
+    (^void error [this ^String message, ^String sourceName,
+                    ^int line, ^String lineSource, ^int lineOffset]
+      (error message))
+    (^EvaluatorException runtimeError [this ^String message, ^String sourceName,
+                    ^int line, ^String lineSource, ^int lineOffset]
+      (error message) (EvaluatorException. message))))
+
+(defn- minified [kind in out]
+  (cond
+    (env/dev-mode?) (IOUtils/copy in out)
+    (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
+                   ; no linebreaks, obfuscate locals, no verbose,
+                   (.compress c out -1 true false
+                     ; preserve semicolons, disable optimizations
+                     true true))
+    (= kind :css) (let [c (CssCompressor. in)]
+                    ; no linebreaks
+                    (.compress c out -1))))
+
+(defn compose-resource [kind component]
+  (let [stream (ByteArrayOutputStream.)]
+    (with-open [out (clojure.java.io/writer stream)]
+      (doseq [src (c/get-resources ui-components kind component)]
+        (if (fn? src)
+          (.write (write-header out (str "fn: " 'src)) (src))
+          (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))
+                      in (clojure.java.io/reader resource)]
+            (if (.contains src ".min.")
+              (IOUtils/copy in (write-header out src))
+              (minified kind in (write-header out src)))))))
+    (.toByteArray stream)))
 
 (defn parse-html-resource [c resource]
   (let [h (enlive/html-resource resource)]
@@ -31,6 +61,9 @@
       :footer (concat (:footer c) (enlive/select h [:footer]))
       :page   (concat (:page  c)  (enlive/select h [:section.page])))))
 
+(defn- resource-url [component kind]
+  (str (kind (:cdn env/config)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
+
 (defn inject-content [t {:keys [header nav page footer]} component]
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
@@ -38,8 +71,8 @@
                   (enlive/transform [:nav] (constantly (first nav)))
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (constantly (first footer)))
-                  (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (str "/" (name component) ".js")) e)))
-                  (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (str "/" (name component) ".css")) e))))))
+                  (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
+                  (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e))))))
 
 (defn compose-html [component]
   (let [out (ByteArrayOutputStream.)]

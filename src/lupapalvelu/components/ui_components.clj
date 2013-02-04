@@ -1,27 +1,33 @@
 (ns lupapalvelu.components.ui-components
   (:use [lupapalvelu.log])
   (:require [lupapalvelu.components.core :as c]
-            [lupapalvelu.env :as env]))
+            [lupapalvelu.env :as env]
+            [lupapalvelu.util :as util]
+            [cheshire.core :as json]))
 
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
               :name "common"})
 
+(defn- conf []
+  (let [js-conf (util/sub-map env/config [:maps])
+        json (json/generate-string js-conf)]
+    (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " json ";")))
+
 (def ui-components
-  {:jquery       {:css ["jquery.pnotify.default.css"]
-                  :js ["jquery-1.8.0.min.js"
-                       "jquery-ui-1.9.0.custom.min.js"
+  {:jquery       {:js [;"jquery-1.8.0.min.js"
+                       ;"jquery-ui-1.9.0.custom.min.js"
                        "jquery.ba-hashchange.js"
-                       "jquery.pnotify.min.js"
                        "jquery.metadata-2.1.js"
                        "jquery.autocomplete.js"
-                       "jquery.dataTables.js"]}
-   :knockout     {:js ["knockout-2.1.0.debug.js"
+                       ;"jquery.dataTables.js"
+                       ]}
+   :knockout     {:js [;"knockout-2.1.0.debug.js"
                        "knockout.mapping-2.3.2.js"
                        "knockout.validation.js"]}
    :underscore   {:js ["underscore.js"]}
    :moment       {:js ["moment.min.js"]}
-   :init         {:js ["hub.js" "log.js"]}
+   :init         {:js [conf "hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
                   :js ["openlayers.2.12.js" "gis.js"]}
@@ -33,7 +39,7 @@
                             (for [lang ["fi" "sv"]
                                   file ["common" "docgen" "applications" "attachments" "welcome" "mypage" "auth-admin"]]
                               (str file "_" lang ".js")))}
-   
+
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js"
                        "app.js" "nav.js" "combobox.js"
