@@ -5,25 +5,25 @@
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
-(def simple-osoite {:name "osoite"
-                    :type :group
-                    :body [{:name "katu" :type :string}
-                           {:name "postinumero" :type :string :size "s"}
-                           {:name "postitoimipaikka" :type :string :size "m"}]})
+(def simple-osoite [{:name "osoite"
+                     :type :group
+                     :body [{:name "katu" :type :string}
+                            {:name "postinumero" :type :string :size "s"}
+                            {:name "postitoimipaikka" :type :string :size "m"}]}])
 
-(def full-osoite {:name "osoite"
-                  :type :group
-                  :body [{:name "kunta" :type :string}
-                         {:name "lahiosoite" :type :string}
-                         {:name "osoitenumero" :type :string}
-                         {:name "osoitenumero2" :type :string}
-                         {:name "jakokirjain" :type :string :size "s"}
-                         {:name "jakokirjain2" :type :string :size "s"}
-                         {:name "porras" :type :string :size "s"}
-                         {:name "huoneisto" :type :string :size "s"}
-                         {:name "postinumero" :type :string :size "s"}
-                         {:name "postitoimipaikka" :type :string :size "m"}
-                         {:name "pistesijanti" :type :string}]})
+(def full-osoite [{:name "osoite"
+                   :type :group
+                   :body [{:name "kunta" :type :string}
+                          {:name "lahiosoite" :type :string}
+                          {:name "osoitenumero" :type :string}
+                          {:name "osoitenumero2" :type :string}
+                          {:name "jakokirjain" :type :string :size "s"}
+                          {:name "jakokirjain2" :type :string :size "s"}
+                          {:name "porras" :type :string :size "s"}
+                          {:name "huoneisto" :type :string :size "s"}
+                          {:name "postinumero" :type :string :size "s"}
+                          {:name "postitoimipaikka" :type :string :size "m"}
+                          {:name "pistesijanti" :type :string}]}])
 
 (def yhteystiedot-body [{:name "puhelin" :type :string :subtype :tel}
                         {:name "email" :type :string :subtype :email}
