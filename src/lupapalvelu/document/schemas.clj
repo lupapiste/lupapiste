@@ -284,15 +284,19 @@
 (def rakennuksen-valitsin
   [{:name :rakennusnro :type :buildingSelector}])
 
-(def rakennuksen-muuttaminen (concat rakennuksen-valitsin muutostyonlaji rakennuksen-omistajat rakennuksen-tiedot))
+;; kaeytae tata, TODO.
+(def olemassaoleva-rakennus (concat rakennuksen-valitsin rakennuksen-omistajat full-osoite-body rakennuksen-tiedot))
 
-(def purku (into [{:name "poistumanSyy" :type :select
-                   :body [{:name "purettu uudisrakentamisen vuoksi"}
-                          {:name "purettu muusta syyst\u00e4"}
-                          {:name "tuhoutunut"}
-                          {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
-                          {:name "poistaminen"}]}
-                  {:name "poistumanAjankohta" :type :string}] (into rakennuksen-omistajat rakennuksen-tiedot)))
+(def rakennuksen-muuttaminen (concat muutostyonlaji olemassaoleva-rakennus))
+
+(def purku (concat [{:name "poistumanSyy" :type :select
+                     :body [{:name "purettu uudisrakentamisen vuoksi"}
+                            {:name "purettu muusta syyst\u00e4"}
+                            {:name "tuhoutunut"}
+                            {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                            {:name "poistaminen"}]}
+                    {:name "poistumanAjankohta" :type :string}]
+                   olemassaoleva-rakennus))
 
 (def schemas
   (to-map-by-name
