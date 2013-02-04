@@ -34,9 +34,6 @@
                             (-> body :yritys :yritysnimi)
                             (str (-> body :henkilo :henkilotiedot :etunimi) \space (-> body :henkilo :henkilotiedot :sukunimi)))))}])
 
-
-(:applicant (with-meta-fields (mongo/by-id :applications "510fc67295ca1d7498255505")))
-
 (defn search-doc [app schema]
   (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
 
