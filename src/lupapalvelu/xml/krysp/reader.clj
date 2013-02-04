@@ -128,7 +128,7 @@
    :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
             :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
                      :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
-                     :postitoimipaikka (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
+                     :postitoimipaikannimi (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
             :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)       ;; does-not-exist in test
                                             :sukunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text)     ;; does-not-exist in test
                             :yhteystiedot {:email ...notfound...
@@ -147,6 +147,17 @@
          :rakennuksenOmistajat (->>
                                  (select rakennus [:rakval:omistaja])
                                  (map ->rakennuksen-omistaja))
+         :osoite {:kunta            (-> rakennus (select1 [:yht:kunta]) text)
+                  :lahiosoite       (-> rakennus (select1 [:yht:osoitenimi :yht:teksti]) text)
+                  :osoitenumero     (-> rakennus (select1 [:yht:osoitenumero]) text)
+                  :osoitenumero2    (-> rakennus (select1 [:yht:osoitenumero2]) text)
+                  :jakokirjain      (-> rakennus (select1 [:yht:jakokirjain]) text)
+                  :jakokirjain2     (-> rakennus (select1 [:yht:jakokirjain2]) text)
+                  :porras           (-> rakennus (select1 [:yht:porras]) text)
+                  :huoneisto        (-> rakennus (select1 [:yht:huoneisto]) text)
+                  :postinumero      (-> rakennus (select1 [:yht:postinumero]) text)
+                  :postitoimipaikannimi (-> rakennus (select1 [:yht:postitoimipaikannimi]) text)
+                  :pistesijanti     ...notimplemented...}
          :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
                   :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
          :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)
@@ -191,14 +202,14 @@
                                                           :sukunimi nil}
                                           :osoite {:katu nil
                                                    :postinumero nil
-                                                   :postitoimipaikka nil}
+                                                   :postitoimipaikannimi nil}
                                           :yhteystiedot {:email nil
                                                          :fax nil
                                                          :puhelin nil}}
                                 :yritys {:liikeJaYhteisoTunnus nil
                                          :osoite {:katu nil
                                                   :postinumero nil
-                                                  :postitoimipaikka nil}
+                                                  :postitoimipaikannimi nil}
                                          :yhteyshenkilo {:henkilotiedot {:etunimi nil
                                                                          :sukunimi nil}
                                                          :yhteystiedot {:email nil
