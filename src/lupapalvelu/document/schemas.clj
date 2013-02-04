@@ -9,7 +9,7 @@
                      :type :group
                      :body [{:name "katu" :type :string}
                             {:name "postinumero" :type :string :size "s"}
-                            {:name "postitoimipaikka" :type :string :size "m"}]}])
+                            {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def full-osoite [{:name "osoite"
                    :type :group
@@ -22,7 +22,7 @@
                           {:name "porras" :type :string :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
                           {:name "postinumero" :type :string :size "s"}
-                          {:name "postitoimipaikka" :type :string :size "m"}
+                          {:name "postitoimipaikannimi" :type :string :size "m"}
                           {:name "pistesijanti" :type :string}]}])
 
 (def yhteystiedot-body [{:name "puhelin" :type :string :subtype :tel}
