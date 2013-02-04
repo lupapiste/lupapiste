@@ -13,7 +13,7 @@
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.9.2"]
                  [org.clojure/data.xml "0.0.7"]
-                 [fi.sito/oskari "0.9.5"]]
+                 [fi.sito/oskari "0.9.6"]]
   :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
                                   [clj-webdriver "0.6.0-beta2" :exclusions [[cheshire/cheshire]
                                                                             [com.google.guava/guava]]]

@@ -133,6 +133,19 @@
           {$set {:state :submitted
                  :submitted (:created command) }}))))
 
+(defcommand "save-application-shape"
+  {:parameters [:id :shape]
+   :roles      [:applicant :authority]
+   :roles-in   [:applicant]
+   :states     [:draft :open]}
+  [command]
+  (let [shape (:shape (:data command))]
+  (with-application command
+    (fn [application]
+      (mongo/update
+        :applications {:_id (:id application)}
+          {$set {:shapes [shape]}})))))
+
 (defcommand "mark-inforequest-answered"
   {:parameters [:id]
    :roles      [:applicant :authority]

@@ -40,12 +40,12 @@ var gis = (function() {
     var taustakartta_8m = new OpenLayers.Layer.WMS("taustakartta_8m", wmsServers, {layers: "taustakartta_8m", format: "image/png"}, {isBaseLayer: false, maxScale: 4000001, minScale: 1.5E7});
     var kiinteistorajat = new OpenLayers.Layer.WMS("kiinteistorajat", wmsServers, {layers: "ktj_kiinteistorajat", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 20000});
     var kiinteistotunnukset = new OpenLayers.Layer.WMS("kiinteistotunnukset", wmsServers, {layers: "ktj_kiinteistotunnukset", format: "image/png", transparent: true}, {isBaseLayer: false, maxScale: 1, minScale: 10000});
-
-    self.map.addLayers([base, taustakartta_5k, taustakartta_10k, taustakartta_20k, taustakartta_40k, taustakartta_160k, taustakartta_320k, taustakartta_800k, taustakartta_2m, taustakartta_4m, taustakartta_8m, kiinteistorajat, kiinteistotunnukset]);
+    self.vectorLayer = new OpenLayers.Layer.Vector("Vector layer");
+    self.map.addLayers([base, taustakartta_5k, taustakartta_10k, taustakartta_20k, taustakartta_40k, taustakartta_160k, taustakartta_320k, taustakartta_800k, taustakartta_2m, taustakartta_4m, taustakartta_8m, kiinteistorajat, kiinteistotunnukset, self.vectorLayer]);
 
     self.markerLayer = new OpenLayers.Layer.Markers("Markers");
     self.map.addLayer(self.markerLayer);
-
+    
     self.markers = [];
 
     self.clear = function() {
@@ -85,6 +85,12 @@ var gis = (function() {
     self.updateSize = function() {
       self.map.updateSize();
       return self;
+    };
+    
+    self.drawShape = function(shape) {
+      self.vectorLayer.removeAllFeatures();
+      var vector = new OpenLayers.Feature.Vector(OpenLayers.Geometry.fromWKT(shape), {}, {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"});
+      self.vectorLayer.addFeatures([vector]);
     };
 
     self.addClickHandler = function(handler) {
