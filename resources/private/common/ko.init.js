@@ -42,11 +42,13 @@
   ko.bindingHandlers.ltext = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text(value && (value.length > 0) ? loc(value) : "$$EMPTY_LTEXT$$");
-      if(!loc.termExists(value)) {
-        $(element).addClass("ltext-error");
+      var v = loc(value);
+      var e$ = $(element);
+      e$.text(value && value.length ? v : "$$EMPTY_LTEXT$$");
+      if (v) {
+        e$.removeClass("ltext-error");
       } else {
-        $(element).removeClass("ltext-error");
+        e$.addClass("ltext-error");
       }
     }
   };
