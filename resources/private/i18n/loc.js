@@ -11,51 +11,35 @@ var loc;
     return term;
   };
   
-  loc.terms = {}; // Will be overwritten by i18n.clj generated content.
   loc.supported = [];
-
-  var defaultLanguage = "fi";
-  var currentLanguage = null;
-
+  loc.currentLanguage = null;
+  loc.terms = {};
+  
+  function resolveLang() {
+    var url = window.parent ? window.parent.location.pathname : location.pathname;
+    var langEndI = url.indexOf("/", 1);
+    var lang = langEndI > 0 ? url.substring(1, langEndI) : null;
+    return _.contains(loc.supported, lang) ? lang : "fi";
+  }
+  
   loc.setTerms = function(newTerms) {
     loc.supported = _.keys(newTerms);
-      
-    var url = location.pathname;
-    if (window.parent) url = window.parent.location.pathname;
-
-    var lang = null;
-    
-    var langEndI = url.indexOf("/", 1);
-    if (langEndI > 0) {
-      var l = url.substring(1, langEndI);
-      lang = _.contains(loc.supported, l) ? l : null;
-    }
-
-    if (lang == null) {
-      debug("Returning default language", defaultLanguage);
-      lang = defaultLanguage;
-    }
-
-    loc.terms = newTerms[lang];
+    loc.currentLanguage = resolveLang();
+    loc.terms = newTerms[loc.currentLanguage];
   }
 
   hub.subscribe("change-lang", function(e) {
     var lang = e.lang;
-    if (loc.terms[lang]) {
-      var pattern = "/" + currentLanguage + "/";
-      var url = location.href.replace(pattern, "/" + lang + "/");
+    if (_.contains(loc.supported, lang)) {
+      var url = location.href.replace("/" + loc.currentLanguage + "/", "/" + lang + "/");
       window.location = url;
     }
   });
 
-  loc.termExists = function(key) {
-    return loc.terms[key] !== undefined;
-  };
+  // FIXME: This does not work with new localizations.
+  loc.toMap = function() { return loc.terms["error"]; };
 
-  // FIXME: Called before lang is set, and does not react to lang changes.
-  loc.toMap = function() { return loc.terms[currentLanguage] ? loc.terms["error"] : {}; };
-
-  loc.getCurrentLanguage = function() { return currentLanguage; };
+  loc.getCurrentLanguage = function() { return loc.currentLanguage; };
   loc.getSupportedLanguages = function() { return loc.supported; };
   
 })();
