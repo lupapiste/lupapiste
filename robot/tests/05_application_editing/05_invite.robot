@@ -1,15 +1,13 @@
 *** Settings ***
 
 Documentation   Application invites
-#Suite setup     Apply minimal fixture now
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
 Mikko creates a new application
-  Open browser to login page
-  Apply minimal fixture now
   Mikko logs in
   Create application the fast way  invite-app  753  75341600250025
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-title']  invite-app
