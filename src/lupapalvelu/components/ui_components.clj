@@ -1,7 +1,8 @@
 (ns lupapalvelu.components.ui-components
   (:use [lupapalvelu.log])
   (:require [lupapalvelu.components.core :as c]
-            [lupapalvelu.env :as env]))
+            [lupapalvelu.env :as env]
+            [lupapalvelu.i18n :as i18n]))
 
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
