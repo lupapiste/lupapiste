@@ -304,65 +304,13 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return span;
   }
 
-  function buildPersonSelector(spec, model, path, save, specId) {
+  function buildPersonSelector(spec, model, path) {
     var myPath = path.join(".");
-
-    var select = document.createElement("select");
-    select.name = myPath;
-    select.className = "form-input combobox really-long";
-    select.onchange = function(event) {
-      var target = getEvent(event).target;
-      var buildingId = target.value;
-      ajax
-        .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
-        .success(function() {
-          save(event);
-          hub.send("load-application", {id: appId});
-        })
-        .call();
-      return false;
-    };
-
-    var selectedOption = model[spec.name] || "";
-
-    var option = document.createElement("option");
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") {
-      option.selected = "selected";
-    }
-    select.appendChild(option);
-
-    ajax
-      .query("get-building-info-from-legacy", {id: appId})
-      .success(function(data) {
-        $.each(data.data, function (i, building) {
-          var name = building.buildingId;
-          var usage = building.usage;
-          var created = building.created;
-          var option = document.createElement("option");
-          option.value = name;
-          option.appendChild(document.createTextNode(name+" ("+usage+") - "+created));
-          if (selectedOption === name) {
-            option.selected = "selected";
-          }
-          select.appendChild(option);
-        });
-      })
-      .error(function(error) {
-        var text = error.text;
-        var option = document.createElement("option");
-        option.value = name;
-        option.appendChild(document.createTextNode(loc("error."+text)));
-        option.selected = "selected";
-        select.appendChild(option);
-        select.setAttribute("disabled", true);
-      })
-      .call();
-
+    var link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.onclick = function() {console.log("clicked:", myPath);}
     var span = makeEntrySpan();
-    span.appendChild(makeLabel("select", myPath, specId, true));
-    span.appendChild(select);
+    span.appendChild(link);
     return span;
   }
 
