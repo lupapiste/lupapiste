@@ -41,12 +41,21 @@
 
   ko.bindingHandlers.ltext = {
     update: function(element, valueAccessor) {
+      var e$ = $(element);
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text(value && (value.length > 0) ? loc(value) : "$$EMPTY_LTEXT$$");
-      if(!loc.termExists(value)) {
-        $(element).addClass("ltext-error");
+      if (value) {
+        var v = loc(value);
+        e$.text(v ? v : "$$EMPTY_LTEXT$$");
+        if (v) {
+          e$.removeClass("ltext-error");
+        } else {
+          e$.addClass("ltext-error");
+        }
       } else {
-        $(element).removeClass("ltext-error");
+        // value is null or undefined, show it as empty string. Note that this
+        // does not mean that the localization would be missing. It's just that
+        // the actual value to use for localization is not available at this time.
+        e$.text("").removeClass("ltext-error");
       }
     }
   };

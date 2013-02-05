@@ -68,6 +68,7 @@
     created: ko.observable(),
     documents: ko.observable(),
     attachments: ko.observableArray(),
+    hasAttachment: ko.observable(false),
     address: ko.observable(),
     verdict: ko.observable(),
     operations: ko.observable(),
@@ -83,9 +84,23 @@
     openOskariMap: function(model) {
       var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
       window.open(url);
-      
+      var applicationId = application.id();
+
+      hub.subscribe("map-initialized", function(e) {
+        if(application.shapes && application.shapes().length > 0) {
+          oskariDrawShape(application.shapes()[0]);
+        }
+
+        oskariSetMarker(application.location().x(), application.location().y());
+      });
+
       hub.subscribe("map-draw-done", function(e) {
-        debug(""+e.data.drawing);
+        var drawing = "" + e.data.drawing;
+        ajax.command("save-application-shape", {id: applicationId, shape: drawing})
+        .success(function() {
+          repository.reloadApplication(applicationId);
+        })
+        .call();
       });
     },
 
@@ -223,6 +238,21 @@
       .call();
   }
 
+  function oskariDrawShape(shape) {
+    hub.send("map-viewvectors", {
+      drawing: shape,
+      style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
+      clear: false
+    });
+  }
+
+  function oskariSetMarker(x, y) {
+    hub.send("documents-map",{
+      data:  [ {location: {x: x, y: y}} ],
+      clear: true
+      });
+  }
+
   application.assignee.subscribe(function(v) { updateAssignee(v); });
 
   function resolveApplicationAssignee(roles) {
@@ -257,7 +287,7 @@
       ko.mapping.fromJS(app, {}, application);
 
       // Operations:
-      
+
       application.operations(app.operations);
 
       // Comments:
@@ -273,9 +303,12 @@
         ok: "ok"
       };
 
+      application.hasAttachment(false);
+
       attachments(_.map(app.attachments || [], function(a) {
         a.statusName = statuses[a.state] || "unknown";
         a.latestVersion = _.last(a.versions);
+        if (a.versions && a.versions.length) application.hasAttachment(true);
         return a;
       }));
 
@@ -289,6 +322,14 @@
       var y = location.y();
       applicationMap.clear().add(x, y).center(x, y, 11);
       inforequestMap.clear().add(x, y).center(x, y, 11);
+
+      // draw shapes NOOOT
+      /*
+      if(application.shapes && application.shapes().length > 0) {
+        applicationMap.drawShape(application.shapes()[0]);
+        inforequestMap.drawShape(application.shapes()[0]);
+      }
+      */
 
       // docgen:
 
@@ -450,5 +491,5 @@
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
   });
-  
+
 })();
