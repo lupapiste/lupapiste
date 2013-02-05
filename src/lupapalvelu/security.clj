@@ -83,7 +83,7 @@
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
     (mongo/update :users {:email email} {$set {:private.salt  salt
-                                                    :private.password hashed-password}})))
+                                               :private.password hashed-password}})))
 
 (defn get-or-create-user-by-email [email]
   (or
