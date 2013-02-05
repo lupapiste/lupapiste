@@ -7,6 +7,10 @@
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
+(def henkilon-valitsin [{:name :email :type :personSelector}])
+
+(def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
+
 (def simple-osoite {:name "osoite"
                     :type :group
                     :body [{:name "katu" :type :string}
@@ -287,9 +291,6 @@
                        {:name "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"}
                        {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
   )
-
-(def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
-(def henkilon-valitsin [{:name :email :type :personSelector}])
 
 (def olemassaoleva-rakennus (concat rakennuksen-valitsin rakennuksen-omistajat full-osoite rakennuksen-tiedot))
 
