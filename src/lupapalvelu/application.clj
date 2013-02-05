@@ -29,9 +29,10 @@
 (def meta-fields [{:field :applicant
                    :schema "hakija"
                    :f (fn [doc]
-                        (let [data (get-in doc [:body :henkilo :henkilotiedot])]
-                          {:firstName (:firstName data)
-                           :lastName (:lastName data)}))}])
+                        (let [body (:body doc)]
+                          (if (= (:_selected body) "yritys")
+                            (-> body :yritys :yritysnimi)
+                            (str (-> body :henkilo :henkilotiedot :etunimi) \space (-> body :henkilo :henkilotiedot :sukunimi)))))}])
 
 (defn search-doc [app schema]
   (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
@@ -178,8 +179,12 @@
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)]
     (if user
-      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge user) new-docs)
+      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge {:etunimi (:firstName user) :sukunimi (:lastName user)}) new-docs)
       new-docs)))
+
+(defn- ->double [v]
+  (let [v (str v)]
+    (if (s/blank? v) 0.0 (Double/parseDouble v))))
 
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
@@ -199,7 +204,7 @@
        :infoRequest   info-request?
        :state         (if info-request? :open :draft)
        :municipality  (:municipality data)
-       :location      {:x (:x data) :y (:y data)}
+       :location      {:x (->double (:x data)) :y (->double (:y data))}
        :address       (:address data)
        :propertyId    (:propertyId data)
        :title         (:address data)
@@ -296,7 +301,7 @@
                   :address
                   :title
                   :applicant
-                  :created
+                  :submitted
                   :modified
                   :state
                   (comp :authority :roles)])
@@ -337,6 +342,7 @@
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
         echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
+    
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
