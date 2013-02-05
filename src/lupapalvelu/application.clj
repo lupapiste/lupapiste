@@ -319,7 +319,6 @@
 (defn make-query [query params]
   (let [search (params :sSearch)
         kind (params :kind)]
-    (println "Search:" search "Kind:" kind)
     (merge
       query
       (condp = kind
@@ -342,7 +341,7 @@
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
         echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
-    
+
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
