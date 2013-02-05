@@ -21,9 +21,9 @@
       <div data-bind="with: application">
 
         <h1 data-bind="text: address"></h1>
-        
+
         <div class="application_summary_info">
-        
+
           <!-- ID: -->
           <div>
             <p data-bind="ltext: 'application.id'"></p>
@@ -72,7 +72,7 @@
             </span>
           </div>
           <!-- /ko -->
-          
+
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
@@ -90,9 +90,9 @@
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
             </span>
           </div>
-          
+
         </div>
-        
+
         <!-- Actions: -->
         <div class="application_actions">
           <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary" ></button>
@@ -100,7 +100,7 @@
           <button data-bind="ltext: 'application.addOperation',       click: addOperation,       enable: $root.authorization.ok('add-operation')"                                              class="todo btn action-bar-button"></button>
           <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn action-bar-button"></button>
         </div>
-        
+
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
@@ -111,7 +111,7 @@
             <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
         </div>
-        
+
       </div>
     </div>
 
@@ -244,7 +244,7 @@
                   <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                   <th></th>
                 </tr>
-                
+
                 <!-- ko foreach: attachments -->
                 <tr style="cursor: pointer;">
                   <td data-bind="attr: {'class': statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
@@ -280,7 +280,7 @@
                   </td>
                 </tr>
               <!-- /ko -->
-              
+
               </tbody>
             </table>
 
@@ -318,25 +318,25 @@
         </div>
       </div>
 
-    <div id="dialog-remove-doc" class="window autosized">
-      <div data-bind="with: $root.removeDocModel">
-        <div class="dialog-header">
-          <p data-bind="ltext: 'removeDoc.sure'"></p>
-          <p class="dialog-close close">X</p>
-        </div>
-        <div class="dialog-content">
-          <div>
-            <span data-bind="ltext: 'removeDoc.message1'"></span>
-            <strong data-bind="text: docName"></strong>
+      <div id="dialog-remove-doc" class="window autosized">
+        <div data-bind="with: $root.removeDocModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'removeDoc.sure'"></p>
+            <p class="dialog-close close">X</p>
           </div>
-          <div>
-            <span data-bind="ltext: 'removeDoc.message2'"></span>
+          <div class="dialog-content">
+            <div>
+              <span data-bind="ltext: 'removeDoc.message1'"></span>
+              <strong data-bind="text: docName"></strong>
+            </div>
+            <div>
+              <span data-bind="ltext: 'removeDoc.message2'"></span>
+            </div>
+            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close"></button>
+            <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
           </div>
-          <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close"></button>
-          <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
         </div>
       </div>
-    </div>
 
     </div>
   </section>
