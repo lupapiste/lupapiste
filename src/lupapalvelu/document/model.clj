@@ -46,6 +46,7 @@
   nil)
 
 (defmethod validate :buildingSelector [elem v] nil)
+(defmethod validate :personSelector [elem v] nil)
 
 (defmethod validate nil [_ _]
   [:err "illegal-key"])
