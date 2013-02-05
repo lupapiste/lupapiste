@@ -10,7 +10,11 @@
     </div>
 
     <div class="container">
-      <h2 class="application_section_header" onclick="accordion.toggle();" data-bind="ltext: 'newRequest.title'" id="location-accordion"><span class="font-icon icon-expanded"></span></h2>
+      
+      <h2 id="create-accordion-1" data-bind="ltext: 'newRequest.title'" class="application_section_header" >
+        <span class="font-icon icon-expanded"></span>
+      </h2>
+      
       <div class="application_section_content content_expanded">
         <p data-bind="ltext: 'newRequest.locationInfo'"></p>
         <div id="create-map" class="map map-large create-application-map" style="width: 100%; height: 600px;">
@@ -59,8 +63,13 @@
           </div>
         </div>
       </div>
+      
       <!-- Phase 2: -->
-      <h2 class="application_section_header" onclick="accordion.toggle();" data-bind="ltext: 'newRequest.descTitle', visible: showPart2"><span class="font-icon icon-expanded"></span></h2>
+       
+      <h2 id="create-accordion-2" data-bind="ltext: 'newRequest.descTitle', visible: showPart2" class="application_section_header">
+        <span class="font-icon icon-expanded"></span>
+      </h2>
+      
       <div class="application_section_content content_expanded" data-bind="visible: showPart2">
         <p data-bind="ltext: 'newRequest.descInfo'"></p>
 
@@ -78,7 +87,13 @@
           <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary btn-wizard"></button>
         </div>
       </div>
-      <h2 class="application_section_header" onclick="accordion.toggle();" data-bind="ltext: 'createApplication.project-description-header', visible: showInfoRequestMessage"><span class="font-icon icon-expanded"></span></h2>
+      
+      <!-- Phase 3: -->
+      
+      <h2 id="create-accordion-2" data-bind="ltext: 'createApplication.project-description-header', visible: showInfoRequestMessage" class="application_section_header">
+        <span class="font-icon icon-expanded"></span>
+      </h2>
+      
       <div class="application_section_content content_expanded" data-bind="visible: showInfoRequestMessage">
         <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
           <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
@@ -95,6 +110,7 @@
           </button>
         </form>
       </div>
+      
     </div>
   </section>
 </body>

@@ -4,6 +4,68 @@ var accordion = (function() {
   var animationTime = 200;
   var animationEasing = "easeInOutCubic";
 
+  function open(event) {
+    var e = getEvent(event);
+    e.preventDefault();
+    e.stopPropagation();
+    var target = $(e.target);
+
+    if (target.is("span")) target = target.parent();
+
+    var content = target.next();
+
+    var state = content.attr("data-accordion-state");
+    var height = content.attr("data-accordion-height");
+
+    if (!height) {
+      // No saved height. Get the current height and save it.
+      height = content.height() + "px";
+      content.attr("data-accordion-height", height).css("height", height);
+    }
+
+    if (state === "closed") {
+      state = "open";
+      content.addClass("content_expanded");
+      target.children(".font-icon").removeClass("icon-collapsed").addClass("icon-expanded");
+      content
+        .attr("data-accordion-state", state)
+        .animate({ height: height }, animationTime, animationEasing);
+    }
+
+    return false;
+  }
+
+  function close(event) {
+    var e = getEvent(event);
+    e.preventDefault();
+    e.stopPropagation();
+    var target = $(e.target);
+
+    if (target.is("span")) target = target.parent();
+
+    var content = target.next();
+
+    var state = content.attr("data-accordion-state");
+    var height = content.attr("data-accordion-height");
+
+    if (!height) {
+      // No saved height. Get the current height and save it.
+      height = content.height() + "px";
+      content.attr("data-accordion-height", height).css("height", height);
+    }
+
+    if (state === "closed") {
+      state = "open";
+      content.addClass("content_expanded");
+      target.children(".font-icon").removeClass("icon-collapsed").addClass("icon-expanded");
+      content
+        .attr("data-accordion-state", state)
+        .animate({ height: height }, animationTime, animationEasing);
+    }
+
+    return false;
+  }
+
   function toggle(event) {
     var e = getEvent(event);
     e.preventDefault();
