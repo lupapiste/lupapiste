@@ -42,7 +42,8 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
-(defn- create-any-user [{:keys [email password userid role firstname lastname phone address enabled municipality] :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone address enabled municipality]
+                         :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
         id                (mongo/create-id)
@@ -63,8 +64,8 @@
     (info "register user: %s" (dissoc user :password))
     (if (= "dummy" (:role old-user))
       (do
-        (info "rewriting over dummy user: %s" (:id old-user))
-        (mongo/update-by-id :users (:id old-user) new-user))
+        (info "rewriting over dummy user:" (:id old-user))
+        (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
       (do
         (info "creating new user")
         (mongo/insert :users new-user)))
