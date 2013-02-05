@@ -9,10 +9,10 @@
       <span data-bind="ltext: 'request.new'"></span>
     </div>
 
-    <div class="container">
-      
-      <h2 id="create-accordion-1" data-bind="ltext: 'newRequest.title'" class="application_section_header" >
-        <span class="font-icon icon-expanded"></span>
+    <div id="create-part-1">
+    
+      <h2 onclick="accordion.click();" class="application_section_header" >
+        <span data-bind="ltext: 'newRequest.title'" class="font-icon icon-expanded"></span>
       </h2>
       
       <div class="application_section_content content_expanded">
@@ -55,7 +55,7 @@
                 class="form-input text long"></input>
             </div>
             <button
-                data-bind="enable: addressOk, click: showPart2.bind($data, true), ltext: 'continue'"
+                data-bind="enable: addressOk, click: goPhase2, ltext: 'continue'"
                 class="btn btn-primary"
                 data-test-id="create-continue"
                 id="create-location-continue">
@@ -63,14 +63,18 @@
           </div>
         </div>
       </div>
+
+    </div>      
+
+    <!-- Phase 2: -->
+     
+    <div id="create-part-2">
       
-      <!-- Phase 2: -->
-       
-      <h2 id="create-accordion-2" data-bind="ltext: 'newRequest.descTitle', visible: showPart2" class="application_section_header">
-        <span class="font-icon icon-expanded"></span>
+      <h2 onclick="accordion.click();" class="application_section_header">
+        <span data-bind="ltext: 'newRequest.descTitle'" class="font-icon icon-expanded"></span>
       </h2>
       
-      <div class="application_section_content content_expanded" data-bind="visible: showPart2">
+      <div class="application_section_content content_expanded">
         <p data-bind="ltext: 'newRequest.descInfo'"></p>
 
         <div class="tree" data-bind="visible: operations">
@@ -82,20 +86,24 @@
           <img src="/img/ajax-loader.gif" alt="loading"/>
         </div>
 
-        <div data-bind="visible: operation">
-          <button data-bind="click: createApplication, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary btn-wizard"></button>
-          <button data-bind="click: proceedToInfoRequest, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary btn-wizard"></button>
+        <div>
+          <button data-bind="click: createApplication, enable: operation, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary btn-wizard"></button>
+          <button data-bind="click: goPhase3, enable: operation, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary btn-wizard"></button>
         </div>
       </div>
       
-      <!-- Phase 3: -->
-      
-      <h2 id="create-accordion-2" data-bind="ltext: 'createApplication.project-description-header', visible: showInfoRequestMessage" class="application_section_header">
-        <span class="font-icon icon-expanded"></span>
+    </div>
+    
+    <!-- Phase 3: -->
+    
+    <div id="create-part-3">
+
+      <h2 onclick="accordion.click();" class="application_section_header">
+        <span data-bind="ltext: 'createApplication.project-description-header'" class="font-icon icon-expanded"></span>
       </h2>
       
-      <div class="application_section_content content_expanded" data-bind="visible: showInfoRequestMessage">
-        <form data-bind="visible: showInfoRequestMessage" class="tree-intend">
+      <div class="application_section_content content_expanded">
+        <form class="tree-intend">
           <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
           <textarea
               class="form-input tree-width"
@@ -112,6 +120,7 @@
       </div>
       
     </div>
+      
   </section>
 </body>
 </html>
