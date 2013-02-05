@@ -51,15 +51,29 @@
                                       :sahkoKytkin true
                                       :vesijohtoKytkin true
                                       :kaapeliKytkin false}
+                  :osoite {:kunta "245"
+                           :lahiosoite "Vehkalantie"
+                           :osoitenumero "2"
+                           :osoitenumero2 "3"
+                           :jakokirjain "a"
+                           :jakokirjain2 "b"
+                           :porras "G"
+                           :huoneisto "99"
+                           :postinumero "04200"
+                           :postitoimipaikannimi "KERAVA"}
+                  :luokitus {:energialuokka "10"
+                             :paloluokka "P1 / P2"}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
                   :mitat {:kerrosluku "5"
                           :kerrosala "1785"
-                          :kokonaisala "2582"
+                          :kokonaisala "2682"
+                          :kellarinpinta-ala "100"
                           :tilavuus "8240"}
                   :rakenne {:julkisivu "betoni"
                             :kantavaRakennusaine "betoni"
                             :rakentamistapa "elementti"}
-                  :lammitys {:lammitystapa "vesikeskus"}
+                  :lammitys {:lammitystapa "vesikeskus"
+                             :lammonlahde  "kauko tai aluel\u00e4mp\u00f6"}
                   :varusteet {:kaasuKytkin false
                               :lamminvesiKytkin true
                               :sahkoKytkin true
@@ -74,6 +88,7 @@
 
         (fact "first huoneisto is mapped correctly"
           (:0 huoneistot) => {:huoneistoTunnus {:huoneistonumero "016"
+                                                :jakokirjain     "a"
                                                 :porras "A"}
                               :huoneistonTyyppi {:huoneistoTyyppi "asuinhuoneisto"
                                                  :huoneistoala "86", :huoneluku "3"}
@@ -92,6 +107,6 @@
                      :yritys {:liikeJaYhteisoTunnus "1234567-9"
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
-                                       :postitoimipaikka "HELSINKI"}
+                                       :postitoimipaikannimi "HELSINKI"}
                               :yritysnimi "Testiyritys 11477"}})
         ))))

@@ -68,7 +68,8 @@
                                           :ssl-port 8443
                                           :keystore "./keystore"
                                           :key-password "lupapiste"}
-                          :ns 'lupapalvelu.web})
+                          :ns 'lupapalvelu.web
+                          :session-cookie-attrs (:cookie env/config)})
   (info "Server running")
   (env/in-dev
     (warn "*** Applying test fixture")

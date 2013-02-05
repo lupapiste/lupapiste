@@ -5,21 +5,25 @@
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
-(def simple-osoite-body [{:name "katu" :type :string}
-                         {:name "postinumero" :type :string :size "s"}
-                         {:name "postitoimipaikka" :type :string :size "m"}])
+(def simple-osoite {:name "osoite"
+                    :type :group
+                    :body [{:name "katu" :type :string}
+                           {:name "postinumero" :type :string :size "s"}
+                           {:name "postitoimipaikannimi" :type :string :size "m"}]})
 
-(def full-osoite-body [{:name "kunta" :type :string}
-                       {:name "lahiosoite" :type :string}
-                       {:name "osoitenumero" :type :string}
-                       {:name "osoitenumero2" :type :string}
-                       {:name "jakokirjain" :type :string :size "s"}
-                       {:name "jakokirjain2" :type :string :size "s"}
-                       {:name "porras" :type :string :size "s"}
-                       {:name "huoneisto" :type :string :size "s"}
-                       {:name "postinumero" :type :string :size "s"}
-                       {:name "postitoimipaikka" :type :string :size "m"}
-                       {:name "pistesijanti" :type :string}])
+(def full-osoite [{:name "osoite"
+                   :type :group
+                   :body [{:name "kunta" :type :string}
+                          {:name "lahiosoite" :type :string}
+                          {:name "osoitenumero" :type :string}
+                          {:name "osoitenumero2" :type :string}
+                          {:name "jakokirjain" :type :string :size "s"}
+                          {:name "jakokirjain2" :type :string :size "s"}
+                          {:name "porras" :type :string :size "s"}
+                          {:name "huoneisto" :type :string :size "s"}
+                          {:name "postinumero" :type :string :size "s"}
+                          {:name "postitoimipaikannimi" :type :string :size "m"}
+                          {:name "pistesijanti" :type :string}]}])
 
 (def yhteystiedot-body [{:name "puhelin" :type :string :subtype :tel}
                         {:name "email" :type :string :subtype :email}
@@ -32,14 +36,14 @@
   (conj henkilotiedot-minimal-body {:name "hetu" :type :string}))
 
 (def henkilo-body [{:name "henkilotiedot" :type :group :body henkilotiedot-body}
-                   {:name "osoite" :type :group :body simple-osoite-body}
+                   simple-osoite
                    {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
 
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
                    {:name "liikeJaYhteisoTunnus" :type :string}])
 
 (def yritys-body (conj yritys-minimal-body
-                       {:name "osoite" :type :group :body simple-osoite-body}
+                       simple-osoite
                        {:name "yhteyshenkilo" :type :group
                         :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                                {:name "yhteystiedot" :type :group :body yhteystiedot-body}]}))
@@ -58,7 +62,7 @@
 
 (def designer-basic [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                      {:name "yritys" :type :group :body yritys-minimal-body}
-                     {:name "osoite" :type :group :body simple-osoite-body}
+                     simple-osoite
                      {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
 
 (def paasuunnittelija-body (conj
@@ -284,15 +288,18 @@
 (def rakennuksen-valitsin
   [{:name :rakennusnro :type :buildingSelector}])
 
-(def rakennuksen-muuttaminen (concat rakennuksen-valitsin muutostyonlaji rakennuksen-omistajat rakennuksen-tiedot))
+(def olemassaoleva-rakennus (concat rakennuksen-valitsin rakennuksen-omistajat full-osoite rakennuksen-tiedot))
 
-(def purku (into [{:name "poistumanSyy" :type :select
-                   :body [{:name "purettu uudisrakentamisen vuoksi"}
-                          {:name "purettu muusta syyst\u00e4"}
-                          {:name "tuhoutunut"}
-                          {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
-                          {:name "poistaminen"}]}
-                  {:name "poistumanAjankohta" :type :string}] (into rakennuksen-omistajat rakennuksen-tiedot)))
+(def rakennuksen-muuttaminen (concat muutostyonlaji olemassaoleva-rakennus))
+
+(def purku (concat [{:name "poistumanSyy" :type :select
+                     :body [{:name "purettu uudisrakentamisen vuoksi"}
+                            {:name "purettu muusta syyst\u00e4"}
+                            {:name "tuhoutunut"}
+                            {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                            {:name "poistaminen"}]}
+                    {:name "poistumanAjankohta" :type :string}]
+                   olemassaoleva-rakennus))
 
 (def schemas
   (to-map-by-name
@@ -341,8 +348,9 @@
                      {:name "eiKaavaa"}
                      {:name "ei tiedossa"}]}]}
 
+     ;; not used...
      {:info {:name "osoite"}
-      :body full-osoite-body}
+      :body full-osoite}
 
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}

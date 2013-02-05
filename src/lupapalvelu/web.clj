@@ -77,7 +77,7 @@
 ;;
 
 (defjson "/api/buildinfo" []
-  (ok :data (assoc (read-string (slurp (.getResourceAsStream (clojure.lang.RT/baseLoader) "buildinfo.clj"))) :server-mode env/mode)))
+  (ok :data (assoc env/buildinfo :server-mode env/mode)))
 
 (defjson "/api/ping" [] (ok))
 
@@ -96,8 +96,8 @@
 ;;
 
 (def content-type {:html "text/html; charset=utf-8"
-                   :js   "application/javascript"
-                   :css  "text/css"})
+                   :js   "application/javascript; charset=utf-8"
+                   :css  "text/css; charset=utf-8"})
 
 (def auth-methods {:init anyone
                    :welcome anyone

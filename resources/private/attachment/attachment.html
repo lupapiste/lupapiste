@@ -9,14 +9,12 @@
         <span data-bind="text: application.title"></span>
       </a>
       /
-      <span data-bind="text: loc(name())"></span>
+      <span data-bind="ltext: name"></span>
     </div>
     <div>
       <div class="attachment-info">
         <h1>
-          <span data-bind="if: type">
-            <span data-bind="text: loc(name())"></span>
-          </span>
+          <span data-bind="ltext: name"></span>
           <span data-bind="if: latestVersion">
             <span data-bind="ltext: 'attachment.version'">versio</span>
             <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
