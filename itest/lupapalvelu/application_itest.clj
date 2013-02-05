@@ -45,7 +45,7 @@
     (:state application) => "draft"
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
-    (-> hakija :body :henkilo :henkilotiedot) => (contains {:firstName "Pena" :lastName "Panaani" :role "applicant"})))
+    (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (apply-remote-minimal)
