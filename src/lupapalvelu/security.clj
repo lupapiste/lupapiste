@@ -88,4 +88,4 @@
 (defn get-or-create-user-by-email [email]
   (or
     (get-user-by-email email)
-    (create-user {:email email})))
+    (create-any-user {:email email})))
