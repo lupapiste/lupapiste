@@ -166,7 +166,7 @@
                 <span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>
                 (<span data-bind="text: user.username"></span>)
                 - <span data-bind="text: text"></span>
-                <a class="remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
+                <a data-test-id="application-remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
               </li>
             </ul>
             <!--
@@ -314,7 +314,7 @@
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
-            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
+            <button class="btn btn-primary btn-dialog close"  data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
           </div>
         </div>
       </div>
