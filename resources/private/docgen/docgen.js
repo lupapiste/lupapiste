@@ -311,7 +311,11 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     $('<a>',{
         text: 'lisaa paasuunnittelija',
         href: '#',
-        click: function() {console.log("clicked:", myPath); return false; }
+        click: function() {
+          LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+          console.log("clicked:", myPath);
+          return false;
+        }
     }).appendTo(span);
 
     return span;
