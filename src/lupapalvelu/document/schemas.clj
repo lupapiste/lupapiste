@@ -1,5 +1,7 @@
 (ns lupapalvelu.document.schemas)
 
+(defn group [name boby] {:name name :type :group :body body})
+
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
   [docs]
