@@ -306,11 +306,14 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
 
   function buildPersonSelector(spec, model, path) {
     var myPath = path.join(".");
-    var link = document.createElement("a");
-    link.setAttribute("href", "#");
-    link.onclick = function() {console.log("clicked:", myPath);}
     var span = makeEntrySpan();
-    span.appendChild(link);
+
+    $('<a>',{
+        text: 'lisaa paasuunnittelija',
+        href: '#',
+        click: function() {console.log("clicked:", myPath); return false; }
+    }).appendTo(span);
+
     return span;
   }
 
