@@ -3,21 +3,8 @@
             [ontodev.excel :as xls]
             [cheshire.core :as json]))
 
-(defn- read-sheet [sheet] 
-  (let [rows    (seq sheet)
-        headers (map xls/to-keyword (xls/read-row (first rows))) 
-        data    (map xls/read-row (rest rows))]
-    (map (partial zipmap headers) data)))
-
-(defn- load-i18n []
-  (->>
-    (io/resource "i18n.xlsx")
-    (xls/load-workbook)
-    (map read-sheet)
-    (apply concat)))
-
 (defn- add-term [row result lang]
-  (let [k (get row :key)
+  (let [k (get row "key")
         t (get row lang)]
     (if (and k t)
       (assoc-in result [lang k] t)
@@ -26,9 +13,19 @@
 (defn- process-row [languages result row]
   (reduce (partial add-term row) result languages))
 
+(defn- read-sheet [headers sheet]
+  (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
+
+(defn- load-i18n []
+  (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
+    (let [wb      (xls/load-workbook in)
+          langs   (-> wb seq first first xls/read-row rest)
+          headers (cons "key" langs)
+          data    (->> wb (map (partial read-sheet headers)) (apply concat))]
+      [langs data])))
+
 (defn- parse []
-  (let [data (load-i18n)
-        languages (-> data first (dissoc :key) keys)]
+  (let [[languages data] (load-i18n)]
     (reduce (partial process-row languages) {} data)))
 
 (def loc (parse))
