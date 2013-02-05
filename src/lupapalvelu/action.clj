@@ -35,7 +35,7 @@
   (let [filter     {:invites {$elemMatch {:user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select :applications filter projection)
-        invites    (flatten (map (comp :invites) data))]
+        invites    (flatten (map :invites data))]
     (ok :invites invites)))
 
 (defn invite-body [user id host]
