@@ -51,7 +51,7 @@
     (:state application) => "draft"
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
-    (-> hakija :body :henkilo :henkilotiedot) => (contains {:firstName "Pena" :lastName "Panaani" :role "applicant"})))
+    (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (apply-remote-minimal)
@@ -89,6 +89,15 @@
         roles-in-the-end (:roles assigned-app)]
     (count roles-before-assignation) => 1
     (count roles-in-the-end) => 1))
+
+(fact "Applicaton shape is saved"
+  (apply-remote-minimal)
+  (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
+        application-id (:id (create-app))
+        resp (command pena :save-application-shape :id application-id :shape shape)
+        resp (query pena :application :id application-id)
+        app   (:application resp)]
+    (first (:shapes app)) => shape))
 
 (comment
   (apply-remote-minimal)

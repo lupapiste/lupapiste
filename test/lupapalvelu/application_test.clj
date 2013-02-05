@@ -11,6 +11,7 @@
 
 (defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
 
+(comment
 (facts
   (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
                       (operations/operations :bar) => {:schema "bar" :required ["b" "c"] :attachments []}
@@ -36,7 +37,7 @@
           docs (make-documents nil created docs :bar)]
       (count docs) => 2
       docs => (has-schema? "bar")
-      docs => (has-schema? "c"))))
+      docs => (has-schema? "c")))))
 
 (comment
   ; Should rewrite this as a couple of unit tests
