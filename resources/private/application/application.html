@@ -80,7 +80,7 @@
             <p data-bind="ltext: 'application.operations'"></p>
             <ul data-bind="foreach: operations">
               <li>
-                <span data-bind="ltext: 'operations.' + operation" data-test-id="test-application-operation"></span>
+                <span data-bind="ltext: 'operations.' + operation()" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
@@ -140,7 +140,7 @@
                   <li>
                     <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                     (<span data-bind="text: username"></span>)
-                    <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                    <i><span data-bind="foreach: roles"><span data-bind="ltext: $data"></span> </span></i>
                     <a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a>
                   </li>
                 </ul>
