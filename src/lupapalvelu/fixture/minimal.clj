@@ -147,7 +147,14 @@
     :phone "0102030405"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
-              :apikey "602cb9e58426c613c8b85abc"}}])
+              :apikey "602cb9e58426c613c8b85abc"}}
+   {:id  "51112424c26b7342d92acf3c"
+    :enabled  false
+    :username  "dummy"
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
+              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
+              :apikey "602cb9e58426c613c8b85abc"} ; Dummy user has apikey, should not actually happen
+    :role  "applicant"}])
 
 (def municipalities [{:id "753"
                       :municipalityCode "753"
