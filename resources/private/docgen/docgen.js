@@ -310,10 +310,10 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     $(title)
         .append($("<button>", {
             class: "icon-remove",
-            html: loc("personSelector.invite"),
+            html: "["+loc("personSelector.invite")+"]",
             click: function() {
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-              console.log("clicked:", myPath);
+              console.log("clicked:", myPath, "-->", specId);
               return false;
             }}));
 
