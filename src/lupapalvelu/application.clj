@@ -182,6 +182,10 @@
       (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge {:etunimi (:firstName user) :sukunimi (:lastName user)}) new-docs)
       new-docs)))
 
+(defn- ->double [v]
+  (let [v (str v)]
+    (if (s/blank? v) 0.0 (Double/parseDouble v))))
+
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
    :roles      [:applicant]}
@@ -200,7 +204,7 @@
        :infoRequest   info-request?
        :state         (if info-request? :open :draft)
        :municipality  (:municipality data)
-       :location      {:x (:x data) :y (:y data)}
+       :location      {:x (->double (:x data)) :y (->double (:y data))}
        :address       (:address data)
        :propertyId    (:propertyId data)
        :title         (:address data)

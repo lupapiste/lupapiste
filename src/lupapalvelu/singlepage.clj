@@ -1,9 +1,10 @@
 (ns lupapalvelu.singlepage
-  (:require [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.env :as env]
-            [lupapalvelu.components.core :as c])
   (:use [lupapalvelu.log]
         [lupapalvelu.components.ui-components :only [ui-components]])
+  (:require [clojure.java.io :as io]
+            [net.cgrand.enlive-html :as enlive]
+            [lupapalvelu.env :as env]
+            [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
            [org.apache.commons.io IOUtils]
@@ -12,8 +13,9 @@
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
-(defn write-header [out name]
-  (when (env/dev-mode?) (.write out (format "\n\n/*\n * %s\n */\n" name)))
+(defn write-header [out n]
+  (when (env/dev-mode?)
+    (.write out (format "\n\n/*\n * %s\n */\n" n)))
   out)
 
 (def error-reporter
@@ -40,14 +42,16 @@
                     ; no linebreaks
                     (.compress c out -1))))
 
+(defn- fn-name [f]
+  (-> f str (.replace \$ \/) (.split "@") first))
+
 (defn compose-resource [kind component]
   (let [stream (ByteArrayOutputStream.)]
-    (with-open [out (clojure.java.io/writer stream)]
+    (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components kind component)]
         (if (fn? src)
-          (.write (write-header out (str "fn: " 'src)) (src))
-          (with-open [resource (clojure.lang.RT/resourceAsStream nil (c/path src))
-                      in (clojure.java.io/reader resource)]
+          (.write (write-header out (str "fn: " (fn-name src))) (src))
+          (with-open [in (-> src c/path io/resource io/input-stream)]
             (if (.contains src ".min.")
               (IOUtils/copy in (write-header out src))
               (minified kind in (write-header out src)))))))
