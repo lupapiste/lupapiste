@@ -109,7 +109,8 @@
     :postalCode "33200"
     :username "teppo@example.com"
     :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe"
-              :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"}
+              :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
+              :apikey "502cb9e58426c613c8b85abb"}
     :phone "0505503171"
     :email "teppo@example.com"
     :personId "210281-0001"
