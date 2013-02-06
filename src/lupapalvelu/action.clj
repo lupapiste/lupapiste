@@ -60,8 +60,8 @@
         (future
           (info "sending email to %s" email)
           (if (not (= (suffix email "@") "example.com"))
-          (if (email/send-email email (:title application) (invite-body user application-id host))
-            (info "email was sent successfully")
+            (if (email/send-email email (:title application) (invite-body user application-id host))
+              (info "email was sent successfully")
               (error "email could not be delivered."))
             (debug "...not really")))
         nil))))
