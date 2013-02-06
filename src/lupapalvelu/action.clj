@@ -178,7 +178,7 @@
                   :puhelin        (:phone user)}
    :osoite {:katu                 (:street user)
             :postinumero          (:zip user)
-            :postitoimipaikannimi nil}})
+            :postitoimipaikannimi (:city user)}})
 
 
 (defcommand "set-user-to-document"
