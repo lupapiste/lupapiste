@@ -198,6 +198,8 @@
     }
 
   };
+  
+  application.firstOperation = ko.computed(function() { var ops = application.operations(); return ops && ops.length ? ops[0]["operation"]() : ""; });
 
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
@@ -272,10 +274,6 @@
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
-
-      // Operations:
-
-      application.operations(app.operations);
 
       // Comments:
 
