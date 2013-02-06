@@ -36,13 +36,14 @@
     id))
 
 (defcommand "invite"
-  {:parameters [:id :email :title :text]
+  {:parameters [:id :email :title :text :document]
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text]} :data {:keys [host]} :web :as command}]
+    {:keys [id email title text document]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
+      ;; TODO: check if invited or has already role
       (let [invited (security/get-or-create-user-by-email email)]
         (mongo/update :applications
           {:_id application-id
@@ -50,6 +51,7 @@
           {$push {:invites {:title       title
                             :application application-id
                             :text        text
+                            :document    document
                             :created     created
                             :email       email
                             :user        (security/summary invited)
@@ -58,8 +60,8 @@
         (future
           (info "sending email to %s" email)
           (if (not (= (suffix email "@") "example.com"))
-            (if (email/send-email email (:title application) (invite-body user application-id host))
-              (info "email was sent successfully")
+          (if (email/send-email email (:title application) (invite-body user application-id host))
+            (info "email was sent successfully")
               (error "email could not be delivered."))
             (debug "...not really")))
         nil))))
@@ -69,10 +71,13 @@
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{application-id :id}]
-      (mongo/update :applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+    (fn [{application-id :id invites :invites}]
+      (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
+        (executed "set-user-to-document" (assoc-in command [:data :name] (:document my-invite)))
+        (mongo/update :applications
+                      {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
         {$push {:auth         (role user :writer)}
-         $pull {:invites      {:user.id (:id user)}}}))))
+                       $pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -115,6 +120,7 @@
   [{data :data}]
   (let [vetuma   (client/json-get (str "/vetuma/stamp/" (:stamp data)))
         userdata (merge data vetuma)]
+    (println userdata)
     (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
     (if-let [user (security/create-user userdata)]
       (do
@@ -154,11 +160,21 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-;; FIXME should take document ID as parameter to support repeating documents
-(defcommand "user-to-document"
+(defn user2paasuunnittelija [user]
+  {:henkilotiedot {:etunimi       (:firstName user)
+                   :sukunimi      (:lastName user)}
+   :yhteystiedot {:email          (:email user)
+                  :puhelin        (:phone user)}
+   :osoite {:katu                 (:street user)
+            :postinumero          (:zip user)
+            :postitoimipaikannimi (:city user)}})
+
+
+(defcommand "set-user-to-document"
   {:parameters [:id :name]
    :authenticated true}
   [{{:keys [name]} :data user :user :as command}]
+  (println "!!!" command)
   (with-application command
     (fn [application]
       (let [document       (domain/get-document-by-name application name)
@@ -172,9 +188,5 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
-              ;; FIXME Handle yritys/yhteyshenkilo
-              {$set {:documents.$.body.henkilo.henkilotiedot.etunimi  (:firstName user)
-                     :documents.$.body.henkilo.henkilotiedot.sukunimi (:lastName user)
-                     :documents.$.body.yhteystiedot.email    (:email user)
-                     :documents.$.body.yhteystiedot.puhelin  (:phone user)
+              {$set {:documents.$.body (user2paasuunnittelija user)
                      :modified (:created command)}})))))))

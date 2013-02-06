@@ -272,7 +272,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     select.appendChild(option);
 
     ajax
-      .query("get-building-info-from-legacy", {id: appId})
+      .command("get-building-info-from-legacy", {id: appId})
       .success(function(data) {
         $.each(data.data, function (i, building) {
           var name = building.buildingId;
@@ -313,6 +313,8 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
             "data-test-id": "application-invite-"+specId,
             html: "["+loc("personSelector.invite")+"]",
             click: function() {
+              // TODO: dirty dependecy via DOM to application
+              $("#invite-document").val(specId).change();
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
               return false;
             }}));
@@ -509,7 +511,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       $(title)
         .append($("<button>")
           .addClass("icon-remove")
-          .html("[X]")
+          .text("[X]")
           .click(removeDoc));
     }
 

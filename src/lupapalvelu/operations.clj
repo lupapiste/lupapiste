@@ -38,12 +38,11 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot"])
-(def ^:private common-schemas-with-planner (conj common-schemas "paasuunnittelija"))
+(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija"])
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
-                                 :required common-schemas-with-planner
+                                 :required common-schemas
                                  :attachments [:hakija [:valtakirja]
                                                :rakennuspaikka [:ote_alueen_peruskartasta]
                                                :paapiirustus [:asemapiirros
@@ -51,19 +50,19 @@
                                                               :julkisivupiirros]
                                                :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]}
    :vapaa-ajan-asuinrakennus    {:schema "vapaa-ajan-asuinrakennus"
-                                 :required common-schemas-with-planner
+                                 :required common-schemas
                                  :attachments []}
    :varasto-tms                 {:schema "varasto-tms"
-                                 :required common-schemas-with-planner
+                                 :required common-schemas
                                  :attachments []}
    :julkinen-rakennus           {:schema "julkinen-rakennus"
-                                 :required common-schemas-with-planner
+                                 :required common-schemas
                                  :attachments []}
    :muu-uusi-rakentaminen       {:schema "muu-uusi-rakentaminen"
-                                 :required common-schemas-with-planner
+                                 :required common-schemas
                                  :attachments []}
    :laajentaminen               {:schema "rakennuksen-muuttaminen"
-                                 :required common-schemas-with-planner
+                                 :required common-schemas
                                  :attachments []}
    :kayttotark-muutos           {:schema "kayttotark-muutos"
                                  :required common-schemas

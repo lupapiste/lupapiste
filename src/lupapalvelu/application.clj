@@ -21,26 +21,29 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 ;;
+;;
+;; Common helpers:
+;;
+
+(defn get-applicant-name [app]
+  (if (:infoRequest app)
+    (let [{first-name :firstName last-name :lastName} (:creator app)]
+      (str first-name \space last-name))
+    (when-let [body (:body (search-doc app "hakija"))]
+      (if (= (:_selected body) "yritys")
+        (get-in body [:yritys :yritysnimi])
+        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+          (str first-name \space last-name))))))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant
-                   :schema "hakija"
-                   :f (fn [doc]
-                        (let [body (:body doc)]
-                          (if (= (:_selected body) "yritys")
-                            (-> body :yritys :yritysnimi)
-                            (str (-> body :henkilo :henkilotiedot :etunimi) \space (-> body :henkilo :henkilotiedot :sukunimi)))))}])
+(def meta-fields [{:field :applicant :fn get-applicant-name}])
 
 (defn with-meta-fields [app]
-  (reduce (fn [app {:keys [field schema f]}]
-            (if-let [doc (domain/get-document-by-name app schema)]
-              (assoc app field (f doc))
-              app))
-          app
-          meta-fields))
+  (reduce (fn [app {field :field f :fn}] (assoc app field (f app))) app meta-fields))
 
 ;;
 ;; Query application:
@@ -197,6 +200,7 @@
     (mongo/insert :applications
       {:id            id
        :created       created
+       :creator       user-summary
        :modified      created
        :infoRequest   info-request?
        :state         (if info-request? :open :draft)
@@ -257,7 +261,7 @@
 ;; krysp enrichment
 ;;
 
-(defquery "merge-details-from-krysp"
+(defcommand "merge-details-from-krysp"
   {:parameters [:id :buildingId]
    :roles-in   [:applicant :authority]}
   [{{:keys [id buildingId]} :data :as command}]
@@ -278,7 +282,7 @@
           (ok))
         (fail :no-legacy-available)))))
 
-(defquery "get-building-info-from-legacy"
+(defcommand "get-building-info-from-legacy"
   {:parameters [:id]
    :roles-in   [:applicant :authority]}
   [{{:keys [id]} :data :as command}]
@@ -297,7 +301,7 @@
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   :address
                   :title
-                  :applicant
+                  get-applicant-name
                   :submitted
                   :modified
                   :state
@@ -349,17 +353,4 @@
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
 
-(comment
-  (mc/aggregate :applications [{$skip 1 $limit 1}])
-  (require '[monger.collection :as mc])
-  (query/with-collection "applications"
-    (query/find {:state "draft"})
-    (query/skip 1)
-    (query/limit 2)
-    (query/fields [:_id :state]))
-  (mc/aggregate :applications [{$skip 1 $limit 1} {$project {:state 1}}])
-  (count (mongo/select :applications {} {:_id 1}))
-  (get-in (domain/get-document-by-name a "hakija") [:body :henkilo :henkilotiedot])
-  (:applicant (with-meta-fields ))
-  (mongo/count :applications {:state "openz"})
-  (mongo/select :applications (application-query-for user)))
+

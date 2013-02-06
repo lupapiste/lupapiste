@@ -72,7 +72,7 @@
     address: ko.observable(),
     verdict: ko.observable(),
     operations: ko.observable(),
-
+    applicant: ko.observable(),
     assignee: ko.observable(),
 
     // new stuff
@@ -139,7 +139,7 @@
 
     setMeAsPaasuunnittelija: function(model) {
       var applicationId = application.id();
-      ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
+      ajax.command("set-user-to-document", { id: applicationId, name: "paasuunnittelija"})
       .success(function() {
         notify.success("tiedot tallennettu",model);
         repository.reloadApplication(applicationId);
@@ -198,7 +198,7 @@
     }
 
   };
-
+  
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -216,10 +216,8 @@
   };
 
   function updateAssignee(value) {
-    debug("updateAssignee called, assigneeId: ", value);
     // do not update assignee if page is still initializing
     if (isInitializing) {
-      debug("isInitializing, return");
       return;
     }
 
@@ -230,7 +228,6 @@
 
     var assigneeId = value ? value : null;
 
-    debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
       .success(function() {})
       .error(function(e) { error(e); })
@@ -256,15 +253,7 @@
   application.assignee.subscribe(function(v) { updateAssignee(v); });
 
   function resolveApplicationAssignee(roles) {
-    debug("resolveApplicationAssignee called, roles: ", roles);
-    if (roles && roles.authority) {
-      var auth = new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName);
-      debug("resolved authority: ", auth);
-      return auth;
-    } else {
-      debug("not assigned");
-      return null;
-    }
+    return (roles && roles.authority) ? new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName) : null;
   }
 
   function initAuthoritiesSelectList(data) {
@@ -275,9 +264,7 @@
   }
 
   function showApplication(applicationDetails) {
-    debug("set isInitializing to true");
     isInitializing = true;
-    debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
 
       // new data mapping
@@ -285,10 +272,6 @@
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
-
-      // Operations:
-
-      application.operations(app.operations);
 
       // Comments:
 
@@ -409,12 +392,15 @@
 
     self.email = ko.observable();
     self.text = ko.observable();
+    self.document = ko.observable();
 
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
+      var document = model.document();
       var id = application.id();
       ajax.command("invite", { id: id,
+                               document: document,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})

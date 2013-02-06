@@ -31,3 +31,6 @@
   "returns first document from application by name"
   [{documents :documents} name]
   (first (filter #(= name (get-in % [:schema :info :name])) documents)))
+
+(defn is-invited [{invites :invites} user-id]
+  (or (some #(= user-id (-> % :user :id)) invites) false))

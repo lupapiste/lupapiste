@@ -20,3 +20,7 @@
   (let [application {:documents [{:id 1 :data "jee" :schema {:info {:name "kukka"}}}]}]
     (fact (get-document-by-name application "kukka") => {:id 1 :data "jee" :schema {:info {:name "kukka"}}})
     (fact (get-document-by-name application "") => nil)))
+
+(facts
+  (fact (is-invited {:invites [{:user {:id "1"}}]} "1") => true)
+  (fact (is-invited {:invites [{:user {:id "1"}}]} "2") => false))
