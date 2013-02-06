@@ -153,14 +153,9 @@
                 </ul>
               </div>
               <br/>
-              <a href="#"
-                data-bind="ltext: 'application.addInvite', visible: $root.authorization.ok('invite')"
-                data-test-id="application-add-invite"
-                data-window-id="dialog-valtuutus"
-                class="modal"></a>
             </div>
 
-            <h3 data-bind="if: invites && invites.length"><span data-bind="ltext: 'application.invites'"></span></h3>
+            <h3 data-bind="if: invites"><span data-bind="ltext: 'application.invites'"></span></h3>
             <ul data-bind="foreach: invites">
               <li class="user-invite">
                 <span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>
