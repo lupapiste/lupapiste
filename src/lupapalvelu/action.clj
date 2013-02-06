@@ -81,14 +81,15 @@
 (defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
-  [{{user-id :id} :user :as command}]
+  [{user :user :as command}]
   (with-application command
     (fn [{application-id :id invites :invites}]
-      (when-let [my-invite (first (filter #(= (-> % :user :id) user-id) invites))]
+      (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
         (executed "set-user-to-document" (assoc-in command [:data :name] (:document my-invite)))
-        #_(mongo/update :applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
-          {$push {:auth         (role user :writer)}
-           $pull {:invites      {:user.id (:id user)}}})))))
+        (mongo/update :applications
+                      {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+                      {$push {:auth         (role user :writer)}
+                       $pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -191,7 +192,6 @@
       (let [document       (domain/get-document-by-name application name)
             schema-name    (get-in document [:schema :info :name])
             schema         (get schemas/schemas schema-name)]
-        (println "!!")
         (if (nil? document)
           (fail :error.document-not-found)
           (do
