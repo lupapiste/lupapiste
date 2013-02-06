@@ -216,6 +216,12 @@ Click enabled by test id
 # Helpser for creating new inforequest and application:
 #
 
+Create application the fast way
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Reload Page
+  Open application  ${address}
+
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Go to page  applications
@@ -224,17 +230,14 @@ Create application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
 
-Create application the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
-  Reload Page
-  Open application  ${address}
-
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-proceed-to-inforequest
+  # Needed for animation to finish.
+  Sleep  1
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
+  Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
   Wait Until  Element should be visible  inforequest
@@ -257,6 +260,8 @@ Prepare new request
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+  # Needed for animation to finish.
+  Sleep  1
 
 #
 # Jump to application or inforequest:
