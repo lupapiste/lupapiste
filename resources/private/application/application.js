@@ -199,8 +199,6 @@
 
   };
   
-  application.firstOperation = ko.computed(function() { var ops = application.operations(); return ops && ops.length ? ops[0]["operation"]() : ""; });
-
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
