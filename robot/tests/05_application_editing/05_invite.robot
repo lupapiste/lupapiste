@@ -1,15 +1,13 @@
 *** Settings ***
 
 Documentation   Application invites
-#Suite setup     Apply minimal fixture now
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
 Mikko creates a new application
-  Open browser to login page
-  Apply minimal fixture now
   Mikko logs in
   Create application the fast way  invite-app  753  75341600250025
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-title']  invite-app
@@ -21,6 +19,7 @@ Mikko can see invite paasuunnittelija button
 Mikko invites Teppo
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
+  Wait until  Element should be visible  invite-email
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Click by test id  application-invite-submit
@@ -29,6 +28,7 @@ Mikko invites Teppo
 
 Mikko can't reinvite Teppo
   Click by test id  application-invite-paasuunnittelija
+  Wait until  Element should be visible  invite-email
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
   Click by test id  application-invite-submit
