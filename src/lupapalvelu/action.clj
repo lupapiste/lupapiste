@@ -55,7 +55,7 @@
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text name]} :data {:keys [host]} :web :as command}]
+    {:keys [id email title text document]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (let [invited (security/get-or-create-user-by-email email)]
@@ -65,7 +65,7 @@
           {$push {:invites {:title       title
                             :application application-id
                             :text        text
-                            :document    name
+                            :document    document
                             :created     created
                             :email       email
                             :user        (security/summary invited)
