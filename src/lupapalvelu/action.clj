@@ -14,20 +14,6 @@
 
 (defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
 
-(defn application-query-for [user]
-  (case (keyword (:role user))
-    :applicant {:auth.id (:id user)
-                :state {$ne "canceled"}}
-    :authority {:municipality (:municipality user)
-                $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
-    :admin     {:state {$ne "canceled"}}
-    (do
-      (warn "invalid role to get applications")
-      {:_id "-1"} ))) ; should not yield any results
-
-(defn get-application-as [application-id user]
-  (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]}))
-
 (defquery "invites"
   {:authenticated true}
   [{{:keys [id]} :user}]
