@@ -71,8 +71,8 @@
     hasAttachment: ko.observable(false),
     address: ko.observable(),
     verdict: ko.observable(),
-    operations: ko.observableArray(null),
-
+    operations: ko.observable(),
+    applicant: ko.observable(),
     assignee: ko.observable(),
 
     // new stuff
@@ -203,7 +203,7 @@
     }
 
   };
-
+  
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -438,11 +438,7 @@
     $(selected_tab).fadeIn();
   }
 
-  var accordian = {
-    accordianClick: function(data, event) {
-      accordion.toggle(event);
-    }
-  };
+  var accordian = function(data, event) { accordion.toggle(event); };
 
   var initApplication = function(e) {
     currentId = e.pagePath[0];

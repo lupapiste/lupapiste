@@ -3,9 +3,37 @@
 
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
   function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
+  
   var model = new function() {
     var self = this;
 
+    self.goPhase1 = function() {
+      $("#create")
+        .find("#create-part-1")
+          .find("h2").accordionOpen().end()
+          .show().end()
+        .find("#create-part-2")
+          .find("h2").accordionClose().end()
+          .hide().end()
+        .find("#create-part-3")
+          .find("h2").accordionClose().end()
+          .hide();
+    };
+    
+    var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
+    
+    self.goPhase2 = function() {
+      $("#create-part-1")
+        .find("h2")
+        .accordionClose(open("#create-part-2"));
+    };
+    
+    self.goPhase3 = function() {
+      $("#create-part-2")
+        .find("h2")
+        .accordionClose(open("#create-part-3"));
+    };
+    
     self.municipalities = ko.observableArray([]);
     self.map = null;
 
@@ -24,10 +52,7 @@
     self.requestType = ko.observable();
 
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
-    self.showPart2 = ko.observable(false);
-    self.showInfoRequestMessage = ko.observable(false);
-    self.proceedToInfoRequest = self.showInfoRequestMessage.bind(self, true);
-
+    
     self.clear = function() {
       if (self.map) self.map.clear().updateSize();
       return self
@@ -41,8 +66,7 @@
         .operation(null)
         .message("")
         .requestType(null)
-        .showPart2(false)
-        .showInfoRequestMessage(false);
+        .goPhase1();
     };
 
     self.setMap = function(map) {
@@ -221,7 +245,7 @@
     .call();
 
   $(function() {
-
+    
     model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
     ko.applyBindings(model, $("#create")[0]);
 
@@ -240,7 +264,7 @@
         "operations");
 
     model.operations.subscribe(tree.reset);
-
+    
   });
 
 })();

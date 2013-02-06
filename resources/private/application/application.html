@@ -23,9 +23,9 @@
       <div data-bind="with: application">
 
         <h1 data-bind="text: address"></h1>
-        
+
         <div class="application_summary_info">
-        
+
           <!-- ID: -->
           <div>
             <p data-bind="ltext: 'application.id'"></p>
@@ -74,7 +74,7 @@
             </span>
           </div>
           <!-- /ko -->
-          
+
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
@@ -92,9 +92,9 @@
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
             </span>
           </div>
-          
+
         </div>
-        
+
         <!-- Actions: -->
         <div class="application_actions">
           <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary" ></button>
@@ -103,7 +103,7 @@
           <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn action-bar-button"></button>
           <button data-bind="ltext: 'application.pdf',                click: exportPdf"                                                                 data-test-id="application-pdf-btn"     class="btn action-bar-button"></button>
         </div>
-        
+
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
@@ -114,7 +114,7 @@
             <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
         </div>
-        
+
       </div>
     </div>
 
@@ -129,8 +129,18 @@
 
       <div id="application-application-tab" class="tab-content" style="display: block;">
 
+        <!-- docgen generated content: -->
+        <div class="application_section">
+          <div id="applicationDocgen">
+            <!-- This is where generated document will be placed. -->
+          </div>
+        </div>
+      </div>
+
+      <div id="application-parties-tab" class="tab-content" style="display: block;">
+
         <div class="application_section" data-bind="with: application">
-          <h2 class="application_section_header " data-bind="click: $root.accordian.accordianClick">
+          <h2 class="application_section_header " onclick="accordion.click();">
             <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
           <div class="application_section_content content_expanded">
             <div>
@@ -146,20 +156,15 @@
                 </ul>
               </div>
               <br/>
-              <a href="#"
-                data-bind="ltext: 'application.addInvite', visible: $root.authorization.ok('invite')"
-                data-test-id="application-add-invite"
-                data-window-id="dialog-valtuutus"
-                class="modal"></a>
             </div>
 
-            <h3 data-bind="if: invites && invites.length"><span data-bind="ltext: 'application.invites'"></span></h3>
+            <h3 data-bind="if: invites"><span data-bind="ltext: 'application.invites'"></span></h3>
             <ul data-bind="foreach: invites">
               <li class="user-invite">
                 <span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>
                 (<span data-bind="text: user.username"></span>)
                 - <span data-bind="text: text"></span>
-                <a class="remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
+                <a data-test-id="application-remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
               </li>
             </ul>
             <!--
@@ -169,15 +174,6 @@
           </div>
         </div>
 
-        <!-- docgen generated content: -->
-        <div class="application_section">
-          <div id="applicationDocgen">
-            <!-- This is where generated document will be placed. -->
-          </div>
-        </div>
-      </div>
-
-      <div id="application-parties-tab" class="tab-content" style="display: block;">
         <!-- docgen generated content: -->
         <div class="application_section">
           <div id="partiesDocgen">
@@ -247,7 +243,7 @@
                   <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                   <th></th>
                 </tr>
-                
+
                 <!-- ko foreach: attachments -->
                 <tr style="cursor: pointer;">
                   <td data-bind="attr: {'class': statusName, 'data-icon': loc('attachmentState_' + state), 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id']}" class="attachment-state"></td>
@@ -283,7 +279,7 @@
                   </td>
                 </tr>
               <!-- /ko -->
-              
+
               </tbody>
             </table>
 
@@ -316,30 +312,30 @@
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
-            <button class="btn btn-primary btn-dialog close" id="test-ask-for-planner" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
+            <button class="btn btn-primary btn-dialog close"  data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
           </div>
         </div>
       </div>
 
-    <div id="dialog-remove-doc" class="window autosized">
-      <div data-bind="with: $root.removeDocModel">
-        <div class="dialog-header">
-          <p data-bind="ltext: 'removeDoc.sure'"></p>
-          <p class="dialog-close close">X</p>
-        </div>
-        <div class="dialog-content">
-          <div>
-            <span data-bind="ltext: 'removeDoc.message1'"></span>
-            <strong data-bind="text: docName"></strong>
+      <div id="dialog-remove-doc" class="window autosized">
+        <div data-bind="with: $root.removeDocModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'removeDoc.sure'"></p>
+            <p class="dialog-close close">X</p>
           </div>
-          <div>
-            <span data-bind="ltext: 'removeDoc.message2'"></span>
+          <div class="dialog-content">
+            <div>
+              <span data-bind="ltext: 'removeDoc.message1'"></span>
+              <strong data-bind="text: docName"></strong>
+            </div>
+            <div>
+              <span data-bind="ltext: 'removeDoc.message2'"></span>
+            </div>
+            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close"></button>
+            <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
           </div>
-          <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close"></button>
-          <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
         </div>
       </div>
-    </div>
 
     </div>
   </section>
