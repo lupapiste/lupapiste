@@ -415,9 +415,9 @@
       var email = model.email();
       var text = model.text();
       var document = model.document();
-      console.log(document);
       var id = application.id();
       ajax.command("invite", { id: id,
+                               document: document,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
