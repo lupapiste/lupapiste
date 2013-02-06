@@ -189,9 +189,11 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
-              {$set {:documents.$.body.henkilotiedot.etunimi  (:firstName user)
-                     :documents.$.body.henkilotiedot.sukunimi (:lastName user)
-                     :documents.$.body.yhteystiedot.email    (:email user)
-                     :documents.$.body.yhteystiedot.puhelin  (:phone user)
+              {$set {:documents.$.body.henkilotiedot.etunimi       (:firstName user)
+                     :documents.$.body.henkilotiedot.sukunimi      (:lastName user)
+                     :documents.$.body.yhteystiedot.email          (:email user)
+                     :documents.$.body.yhteystiedot.puhelin        (:phone user)
+                     :documents.$.body.osoite.katu                 (:street user)
+                     :documents.$.body.osoite.postinumero          (:zip user)
+                     :documents.$.body.osoite.postitoimipaikannimi nil
                      :modified (:created command)}})))))))
-
