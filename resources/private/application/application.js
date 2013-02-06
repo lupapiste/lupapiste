@@ -139,7 +139,7 @@
 
     setMeAsPaasuunnittelija: function(model) {
       var applicationId = application.id();
-      ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
+      ajax.command("set-user-to-document", { id: applicationId, name: "paasuunnittelija"})
       .success(function() {
         notify.success("tiedot tallennettu",model);
         repository.reloadApplication(applicationId);
@@ -392,12 +392,15 @@
 
     self.email = ko.observable();
     self.text = ko.observable();
+    self.document = ko.observable();
 
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
+      var document = model.document();
       var id = application.id();
       ajax.command("invite", { id: id,
+                               document: document,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})

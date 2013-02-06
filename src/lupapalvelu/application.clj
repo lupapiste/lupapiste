@@ -264,7 +264,7 @@
 ;; krysp enrichment
 ;;
 
-(defquery "merge-details-from-krysp"
+(defcommand "merge-details-from-krysp"
   {:parameters [:id :buildingId]
    :roles-in   [:applicant :authority]}
   [{{:keys [id buildingId]} :data :as command}]
@@ -285,7 +285,7 @@
           (ok))
         (fail :no-legacy-available)))))
 
-(defquery "get-building-info-from-legacy"
+(defcommand "get-building-info-from-legacy"
   {:parameters [:id]
    :roles-in   [:applicant :authority]}
   [{{:keys [id]} :data :as command}]

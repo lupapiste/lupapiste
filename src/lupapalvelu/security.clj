@@ -5,8 +5,7 @@
             [lupapalvelu.util :as util])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
-(defn non-private [map]
-  (dissoc map :private))
+(defn non-private [map] (dissoc map :private))
 
 (defn get-hash [password salt] (BCrypt/hashpw password salt))
 (defn dispense-salt ([] (dispense-salt 10)) ([n] (BCrypt/gensalt n)))
@@ -42,7 +41,7 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
-(defn- create-any-user [{:keys [email password userid role firstname lastname phone address enabled municipality]
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled municipality]
                          :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
@@ -56,7 +55,9 @@
                            :firstName    firstname
                            :lastName     lastname
                            :phone        phone
-                           :address      address
+                           :city         city
+                           :street       street
+                           :zip          zip
                            :municipality municipality
                            :enabled      enabled
                            :private      {:salt salt
