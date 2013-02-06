@@ -15,5 +15,5 @@
   [{documents :documents} name]
   (first (filter #(= name (get-in % [:schema :info :name])) documents)))
 
-(defn invited? [{invites :invites} user-id]
-  (or (some #(= user-id (-> % :user :email)) invites) false))
+(defn invited? [{invites :invites} email]
+  (or (some #(= email (-> % :user :username)) invites) false))
