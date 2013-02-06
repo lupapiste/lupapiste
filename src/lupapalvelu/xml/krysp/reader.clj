@@ -125,65 +125,66 @@
 
 (defn- ->rakennuksen-omistaja [omistaja]
   {:_selected "yritys"
-   :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
-            :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
-                     :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
-                     :postitoimipaikannimi (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
-            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)       ;; does-not-exist in test
-                                            :sukunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text)     ;; does-not-exist in test
+   :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:tunnus]) text)
+            :osoite {:katu (-> omistaja (select1 [:osoitenimi :teksti]) text)
+                     :postinumero (-> omistaja (select1 [:postinumero]) text)
+                     :postitoimipaikannimi (-> omistaja (select1 [:postitoimipaikannimi]) text)}
+            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:henkilonnimi :etunimi]) text)       ;; does-not-exist in test
+                                            :sukunimi (-> omistaja (select1 [:henkilonnimi :sukunimi]) text)     ;; does-not-exist in test
                             :yhteystiedot {:email ...notfound...
                                            :fax ...notfound...
                                            :puhelin ...notfound...}}}
-            :yritysnimi (-> omistaja (select1 [:rakval:nimi]) text)}})
+            :yritysnimi (-> omistaja (select1 [:nimi]) text)}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
-  (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
-        polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
+  (let [stripped  (strip-xml-namespaces xml)
+        rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
+        polished  (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
         {:muutostyolaji ...notimplemented...
-         :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
-         :verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
+         :rakennusnro (-> rakennus (select1 [:rakennusnro]) text)
+         :verkostoliittymat (-> rakennus (all-of [:verkostoliittymat]))
          :rakennuksenOmistajat (->>
-                                 (select rakennus [:rakval:omistaja])
+                                 (select rakennus [:omistaja])
                                  (map ->rakennuksen-omistaja))
-         :osoite {:kunta            (-> rakennus (select1 [:yht:kunta]) text)
-                  :lahiosoite       (-> rakennus (select1 [:yht:osoitenimi :yht:teksti]) text)
-                  :osoitenumero     (-> rakennus (select1 [:yht:osoitenumero]) text)
-                  :osoitenumero2    (-> rakennus (select1 [:yht:osoitenumero2]) text)
-                  :jakokirjain      (-> rakennus (select1 [:yht:jakokirjain]) text)
-                  :jakokirjain2     (-> rakennus (select1 [:yht:jakokirjain2]) text)
-                  :porras           (-> rakennus (select1 [:yht:porras]) text)
-                  :huoneisto        (-> rakennus (select1 [:yht:huoneisto]) text)
-                  :postinumero      (-> rakennus (select1 [:yht:postinumero]) text)
-                  :postitoimipaikannimi (-> rakennus (select1 [:yht:postitoimipaikannimi]) text)
+         :osoite {:kunta            (-> rakennus (select1 [:kunta]) text)
+                  :lahiosoite       (-> rakennus (select1 [:osoitenimi :teksti]) text)
+                  :osoitenumero     (-> rakennus (select1 [:osoitenumero]) text)
+                  :osoitenumero2    (-> rakennus (select1 [:osoitenumero2]) text)
+                  :jakokirjain      (-> rakennus (select1 [:jakokirjain]) text)
+                  :jakokirjain2     (-> rakennus (select1 [:jakokirjain2]) text)
+                  :porras           (-> rakennus (select1 [:porras]) text)
+                  :huoneisto        (-> rakennus (select1 [:huoneisto]) text)
+                  :postinumero      (-> rakennus (select1 [:postinumero]) text)
+                  :postitoimipaikannimi (-> rakennus (select1 [:postitoimipaikannimi]) text)
                   :pistesijanti     ...notimplemented...}
-         :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
-                  :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)
-                    :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}
-         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)
-                 :kerrosala (-> rakennus (select1 [:rakval:kerrosala]) text)
-                 :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
-                 :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
-                 :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
-         :rakenne {:julkisivu (-> rakennus (select1 [:rakval:julkisivumateriaali]) text)
-                   :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
-                   :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
-         :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
-                    :lammonlahde (-> rakennus (select1 [:rakval:polttoaine]) text)}
-         :varusteet (-> rakennus (all-of [:rakval:varusteet]))
+         :kaytto {:kayttotarkoitus (-> rakennus (select1 [:kayttotarkoitus]) text)
+                  :rakentajaTyyppi (-> rakennus (select1 [:rakentajaTyyppi]) text)}
+         :luokitus {:energialuokka (-> rakennus (select1 [:energialuokka]) text)
+                    :paloluokka (-> rakennus (select1 [:paloluokka]) text)}
+         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:kellarinpinta-ala]) text)
+                 :kerrosala (-> rakennus (select1 [:kerrosala]) text)
+                 :kerrosluku (-> rakennus (select1 [:kerrosluku]) text)
+                 :kokonaisala (-> rakennus (select1 [:kokonaisala]) text)
+                 :tilavuus (-> rakennus (select1 [:tilavuus]) text)}
+         :rakenne {:julkisivu (-> rakennus (select1 [:julkisivumateriaali]) text)
+                   :kantavaRakennusaine (-> rakennus (select1 [:rakennusaine]) text)
+                   :rakentamistapa (-> rakennus (select1 [:rakentamistapa]) text)}
+         :lammitys {:lammitystapa (-> rakennus (select1 [:lammitystapa]) text)
+                    :lammonlahde (-> rakennus (select1 [:polttoaine]) text)}
+         :varusteet (-> rakennus (all-of [:varusteet]))
          :huoneistot (->>
-                       (select rakennus [:rakval:valmisHuoneisto])
+                       (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
-                              {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:rakval:huoneistonumero]) text)
-                                                 :jakokirjain (-> huoneisto (select1 [:rakval:jakokirjain]) text)
-                                                 :porras (-> huoneisto (select1 [:rakval:porras]) text)}
-                               :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:rakval:huoneistonTyyppi]) text)
-                                                  :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
-                                                  :huoneluku (-> huoneisto (select1 [:rakval:huoneluku]) text)}
-                               :keittionTyyppi (-> huoneisto (select1 [:rakval:keittionTyyppi]) text)
-                               :varusteet (-> huoneisto (all-of [:rakval:varusteet]))})))}))))
+                              {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:huoneistonumero]) text)
+                                                 :jakokirjain (-> huoneisto (select1 [:jakokirjain]) text)
+                                                 :porras (-> huoneisto (select1 [:porras]) text)}
+                               :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:huoneistonTyyppi]) text)
+                                                  :huoneistoala (-> huoneisto (select1 [:huoneistoala]) text)
+                                                  :huoneluku (-> huoneisto (select1 [:huoneluku]) text)}
+                               :keittionTyyppi (-> huoneisto (select1 [:keittionTyyppi]) text)
+                               :varusteet (-> huoneisto (all-of [:varusteet]))})))}))))
 
 ;;
 ;; full mappings
