@@ -127,16 +127,16 @@
 
 (defn- ->rakennuksen-omistaja [omistaja]
   {:_selected "yritys"
-   :yritys {:liikeJaYhteisoTunnus (get-text omistaja :tunnus)
-            :osoite {:katu (get-text omistaja :osoitenimi :teksti)
-                     :postinumero (get-text omistaja :postinumero)
-                     :postitoimipaikannimi (get-text omistaja :postitoimipaikannimi)}
-            :yhteyshenkilo {:henkilotiedot {:etunimi (get-text omistaja :henkilonnimi :etunimi)       ;; does-not-exist in test
+   :yritys {:liikeJaYhteisoTunnus                     (get-text omistaja :tunnus)
+            :osoite {:katu                            (get-text omistaja :osoitenimi :teksti)
+                     :postinumero                     (get-text omistaja :postinumero)
+                     :postitoimipaikannimi            (get-text omistaja :postitoimipaikannimi)}
+            :yhteyshenkilo {:henkilotiedot {:etunimi  (get-text omistaja :henkilonnimi :etunimi)      ;; does-not-exist in test
                                             :sukunimi (get-text omistaja :henkilonnimi :sukunimi)     ;; does-not-exist in test
-                            :yhteystiedot {:email ...notfound...
-                                           :fax ...notfound...
-                                           :puhelin ...notfound...}}}
-            :yritysnimi (get-text omistaja :nimi)}})
+                            :yhteystiedot {:email     ...notfound...
+                                           :fax       ...notfound...
+                                           :puhelin   ...notfound...}}}
+            :yritysnimi                               (get-text omistaja :nimi)}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [stripped  (strip-xml-namespaces xml)
