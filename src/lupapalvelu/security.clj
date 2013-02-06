@@ -5,8 +5,7 @@
             [lupapalvelu.util :as util])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
-(defn non-private [map]
-  (dissoc map :private))
+(defn non-private [map] (dissoc map :private))
 
 (defn get-hash [password salt] (BCrypt/hashpw password salt))
 (defn dispense-salt ([] (dispense-salt 10)) ([n] (BCrypt/gensalt n)))
@@ -42,7 +41,8 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
-(defn- create-any-user [{:keys [email password userid role firstname lastname phone address enabled municipality] :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled municipality]
+                         :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
         id                (mongo/create-id)
@@ -55,7 +55,9 @@
                            :firstName    firstname
                            :lastName     lastname
                            :phone        phone
-                           :address      address
+                           :city         city
+                           :street       street
+                           :zip          zip
                            :municipality municipality
                            :enabled      enabled
                            :private      {:salt salt
@@ -63,8 +65,8 @@
     (info "register user: %s" (dissoc user :password))
     (if (= "dummy" (:role old-user))
       (do
-        (info "rewriting over dummy user: %s" (:id old-user))
-        (mongo/update-by-id :users (:id old-user) new-user))
+        (info "rewriting over dummy user:" (:id old-user))
+        (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
       (do
         (info "creating new user")
         (mongo/insert :users new-user)))
@@ -83,9 +85,9 @@
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
     (mongo/update :users {:email email} {$set {:private.salt  salt
-                                                    :private.password hashed-password}})))
+                                               :private.password hashed-password}})))
 
 (defn get-or-create-user-by-email [email]
   (or
     (get-user-by-email email)
-    (create-user {:email email})))
+    (create-any-user {:email email})))
