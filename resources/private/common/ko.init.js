@@ -65,7 +65,7 @@
         if (value.firstName && value.lastName) { fullName += "\u00a0"; }
         if (value.lastName) { fullName += _.isFunction(value.lastName) ? value.lastName() : value.lastName; }
       }
-      $(element).html(fullName);
+      $(element).text(fullName);
     }
   };
 
