@@ -150,43 +150,43 @@
          :rakennuksenOmistajat (->>
                                  (select rakennus [:omistaja])
                                  (map ->rakennuksen-omistaja))
-         :osoite {:kunta            (get-text rakennus :kunta)
-                  :lahiosoite       (get-text rakennus :osoitenimi :teksti)
-                  :osoitenumero     (get-text rakennus :osoitenumero)
-                  :osoitenumero2    (get-text rakennus :osoitenumero2)
-                  :jakokirjain      (get-text rakennus :jakokirjain)
-                  :jakokirjain2     (get-text rakennus :jakokirjain2)
-                  :porras           (get-text rakennus :porras)
-                  :huoneisto        (get-text rakennus :huoneisto)
-                  :postinumero      (get-text rakennus :postinumero)
+         :osoite {:kunta                (get-text rakennus :kunta)
+                  :lahiosoite           (get-text rakennus :osoitenimi :teksti)
+                  :osoitenumero         (get-text rakennus :osoitenumero)
+                  :osoitenumero2        (get-text rakennus :osoitenumero2)
+                  :jakokirjain          (get-text rakennus :jakokirjain)
+                  :jakokirjain2         (get-text rakennus :jakokirjain2)
+                  :porras               (get-text rakennus :porras)
+                  :huoneisto            (get-text rakennus :huoneisto)
+                  :postinumero          (get-text rakennus :postinumero)
                   :postitoimipaikannimi (get-text rakennus :postitoimipaikannimi)
-                  :pistesijanti     ...notimplemented...}
-         :kaytto {:kayttotarkoitus (get-text rakennus :kayttotarkoitus)
-                  :rakentajaTyyppi (get-text rakennus :rakentajaTyyppi)}
-         :luokitus {:energialuokka (get-text rakennus :energialuokka)
-                    :paloluokka (get-text rakennus :paloluokka)}
-         :mitat {:kellarinpinta-ala (get-text rakennus :kellarinpinta-ala)
-                 :kerrosala (get-text rakennus :kerrosala)
-                 :kerrosluku (get-text rakennus :kerrosluku)
-                 :kokonaisala (get-text rakennus :kokonaisala)
-                 :tilavuus (get-text rakennus :tilavuus)}
-         :rakenne {:julkisivu (get-text rakennus :julkisivumateriaali)
+                  :pistesijanti         ...notimplemented...}
+         :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
+                  :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
+         :luokitus {:energialuokka      (get-text rakennus :energialuokka)
+                    :paloluokka         (get-text rakennus :paloluokka)}
+         :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
+                 :kerrosala             (get-text rakennus :kerrosala)
+                 :kerrosluku            (get-text rakennus :kerrosluku)
+                 :kokonaisala           (get-text rakennus :kokonaisala)
+                 :tilavuus              (get-text rakennus :tilavuus)}
+         :rakenne {:julkisivu           (get-text rakennus :julkisivumateriaali)
                    :kantavaRakennusaine (get-text rakennus :rakennusaine)
-                   :rakentamistapa (get-text rakennus :rakentamistapa)}
-         :lammitys {:lammitystapa (get-text rakennus :lammitystapa)
-                    :lammonlahde (get-text rakennus :polttoaine)}
-         :varusteet (-> rakennus (all-of [:varusteet]))
+                   :rakentamistapa      (get-text rakennus :rakentamistapa)}
+         :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
+                    :lammonlahde        (get-text rakennus :polttoaine)}
+         :varusteet                     (all-of   rakennus [:varusteet])
          :huoneistot (->>
                        (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
-                              {:huoneistoTunnus {:huoneistonumero (get-text huoneisto :huoneistonumero)
-                                                 :jakokirjain (get-text huoneisto :jakokirjain)
-                                                 :porras (get-text huoneisto :porras)}
+                              {:huoneistoTunnus {:huoneistonumero  (get-text huoneisto :huoneistonumero)
+                                                 :jakokirjain      (get-text huoneisto :jakokirjain)
+                                                 :porras           (get-text huoneisto :porras)}
                                :huoneistonTyyppi {:huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
-                                                  :huoneistoala (get-text huoneisto :huoneistoala)
-                                                  :huoneluku (get-text huoneisto :huoneluku)}
-                               :keittionTyyppi (get-text huoneisto :keittionTyyppi)
-                               :varusteet (-> huoneisto (all-of [:varusteet]))})))}))))
+                                                  :huoneistoala    (get-text huoneisto :huoneistoala)
+                                                  :huoneluku       (get-text huoneisto :huoneluku)}
+                               :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
+                               :varusteet                          (all-of   huoneisto [:varusteet])})))}))))
 
 ;;
 ;; full mappings
