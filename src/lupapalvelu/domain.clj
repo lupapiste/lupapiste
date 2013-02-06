@@ -1,9 +1,7 @@
 (ns lupapalvelu.domain)
 
-(defn role-in-application [user-id {roles :roles}]
-  (some (fn [[role {id :id}]]
-          (if (= id user-id) role))
-        roles))
+(defn role-in-application [{roles :roles} user-id]
+  (some (fn [[role {id :id}]] (if (= id user-id) role)) roles))
 
 (defn get-document-by-id
   "returns first document from application with the document-id"

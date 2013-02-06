@@ -5,10 +5,10 @@
 
 (facts
   (let [application {:roles {:role-x {:id :user-x} :role-y {:id :user-y}}}]
-    (fact (role-in-application :user-x application) => :role-x)
-    (fact (role-in-application :user-y application) => :role-y)
-    (fact (role-in-application :user-z application) => nil)
-    (fact (role-in-application nil application) => nil)))
+    (fact (role-in-application application :user-x) => :role-x)
+    (fact (role-in-application application :user-y) => :role-y)
+    (fact (role-in-application application :user-z) => nil)
+    (fact (role-in-application application nil) => nil)))
 
 (facts
   (let [application {:documents [{:id 1 :data "jee"} {:id 2 :data "juu"} {:id 1 :data "hidden"}]}]
