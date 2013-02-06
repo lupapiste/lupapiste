@@ -8,21 +8,30 @@
     var self = this;
 
     self.goPhase1 = function() {
-      $("#create-part-1").find("h2").accordionOpen().end().show();
-      $("#create-part-2").find("h2").accordionClose().end().hide();
-      $("#create-part-3").find("h2").accordionClose().end().hide();
+      $("#create")
+        .find("#create-part-1")
+          .find("h2").accordionOpen().end()
+          .show().end()
+        .find("#create-part-2")
+          .find("h2").accordionClose().end()
+          .hide().end()
+        .find("#create-part-3")
+          .find("h2").accordionClose().end()
+          .hide();
     };
+    
+    var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
     
     self.goPhase2 = function() {
       $("#create-part-1")
         .find("h2")
-        .accordionClose(function() { $("#create-part-2").show().find("h2").accordionOpen(); });
+        .accordionClose(open("#create-part-2"));
     };
     
     self.goPhase3 = function() {
       $("#create-part-2")
         .find("h2")
-        .accordionClose(function() { $("#create-part-3").show().find("h2").accordionOpen(); });
+        .accordionClose(open("#create-part-3"));
     };
     
     self.municipalities = ko.observableArray([]);
@@ -236,9 +245,6 @@
     .call();
 
   $(function() {
-    $("#create-accordion-1").show().find("h2").accordionOpen();
-    $("#create-accordion-2").show().find("h2").accordionOpen();
-    $("#create-accordion-3").show().find("h2").accordionOpen();
     
     model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
     ko.applyBindings(model, $("#create")[0]);
@@ -258,6 +264,7 @@
         "operations");
 
     model.operations.subscribe(tree.reset);
+    
   });
 
 })();
