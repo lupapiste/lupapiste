@@ -22,5 +22,5 @@
     (fact (get-document-by-name application "") => nil)))
 
 (facts
-  (fact (is-invited {:invites [{:user {:id "1"}}]} "1") => true)
-  (fact (is-invited {:invites [{:user {:id "1"}}]} "2") => false))
+  (fact (is-invited {:invites [{:user {:email "mikko@example.com"}}]} "mikko@example.com") => true)
+  (fact (is-invited {:invites []} "mikko@example.com") => false))
