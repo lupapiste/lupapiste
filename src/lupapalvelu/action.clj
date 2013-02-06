@@ -131,6 +131,7 @@
   [{data :data}]
   (let [vetuma   (client/json-get (str "/vetuma/stamp/" (:stamp data)))
         userdata (merge data vetuma)]
+    (println userdata)
     (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
     (if-let [user (security/create-user userdata)]
       (do
@@ -170,6 +171,16 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
+(defn user2paasuunnittelija [user]
+  {:henkilotiedot {:etunimi       (:firstName user)
+                   :sukunimi      (:lastName user)}
+   :yhteystiedot {:email          (:email user)
+                  :puhelin        (:phone user)}
+   :osoite {:katu                 (:street user)
+            :postinumero          (:zip user)
+            :postitoimipaikannimi nil}})
+
+
 (defcommand "set-user-to-document"
   {:parameters [:id :name]
    :authenticated true}
@@ -189,11 +200,5 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
-              {$set {:documents.$.body.henkilotiedot.etunimi       (:firstName user)
-                     :documents.$.body.henkilotiedot.sukunimi      (:lastName user)
-                     :documents.$.body.yhteystiedot.email          (:email user)
-                     :documents.$.body.yhteystiedot.puhelin        (:phone user)
-                     :documents.$.body.osoite.katu                 (:street user)
-                     :documents.$.body.osoite.postinumero          (:zip user)
-                     :documents.$.body.osoite.postitoimipaikannimi nil
+              {$set {:documents.$.body (user2paasuunnittelija user)
                      :modified (:created command)}})))))))
