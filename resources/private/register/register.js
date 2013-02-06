@@ -25,7 +25,7 @@
   function submit(m) {
     ajax.command('register-user', json(m))
       .success(function() {
-        $('#register-email-error').html('&nbsp;');
+        $('#register-email-error').text('&nbsp;');
         confirmModel.email = model().email();
         reset(model());
         window.location.hash = "!/register3";
@@ -33,10 +33,10 @@
       .error(function(e) {
         // FIXME: DIRTY HACKS
         if (e.text.indexOf('lupapalvelu.users.$email_1') !== -1) {
-          $('#register-email-error').html('sahkopostiosoite on jo varattu.');
+          $('#register-email-error').text('sahkopostiosoite on jo varattu.');
         }
         if (e.text.indexOf('duplicate key error index: lupapalvelu.users.$personId_1') !== -1) {
-          $('#register-email-error').html('hetu on jo varattu.');
+          $('#register-email-error').text('hetu on jo varattu.');
         }
         error(e.text);
         // TODO: now what?
