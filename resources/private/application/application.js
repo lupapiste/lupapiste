@@ -198,7 +198,7 @@
     }
 
   };
-
+  
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -272,10 +272,6 @@
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
-
-      // Operations:
-
-      application.operations(app.operations);
 
       // Comments:
 
