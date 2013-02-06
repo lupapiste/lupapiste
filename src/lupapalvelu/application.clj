@@ -21,30 +21,32 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 ;;
+;;
+;; Common helpers:
+;;
+
+(defn search-doc [app schema]
+  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
+
+(defn get-applicant-name [app]
+  (if (:infoRequest app)
+    (let [{first-name :firstName last-name :lastName} (:creator app)]
+      (str first-name \space last-name))
+    (when-let [body (:body (search-doc app "hakija"))]
+      (if (= (:_selected body) "yritys")
+        (get-in body [:yritys :yritysnimi])
+        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+          (str first-name \space last-name))))))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant
-                   :schema "hakija"
-                   :f (fn [doc]
-                        (let [body (:body doc)]
-                          (if (= (:_selected body) "yritys")
-                            (-> body :yritys :yritysnimi)
-                            (let [userinfo (-> body :henkilo :henkilotiedot :etunimi)]
-                              (str (:etunimi userinfo) \space (:sukunimi userinfo))))))}])
-
-(defn search-doc [app schema]
-  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
+(def meta-fields [{:field :applicant :fn get-applicant-name}])
 
 (defn with-meta-fields [app]
-  (reduce (fn [app {:keys [field schema f]}]
-            (if-let [doc (search-doc app schema)]
-              (assoc app field (f doc))
-              app))
-          app
-          meta-fields))
+  (reduce (fn [app {field :field f :fn}] (assoc app field (f app))) app meta-fields))
 
 ;;
 ;; Query application:
@@ -201,6 +203,7 @@
     (mongo/insert :applications
       {:id            id
        :created       created
+       :creator       user-summary
        :modified      created
        :infoRequest   info-request?
        :state         (if info-request? :open :draft)
@@ -301,7 +304,7 @@
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   :address
                   :title
-                  :applicant
+                  get-applicant-name
                   :submitted
                   :modified
                   :state
