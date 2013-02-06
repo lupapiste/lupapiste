@@ -15,7 +15,7 @@
       {:_id "-1"} ))) ; should not yield any results
 
 (defn get-application-as [application-id user]
-  (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]}))
+  (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
 
 (defn role-in-application [user-id {roles :roles}]
   (some (fn [[role {id :id}]]
