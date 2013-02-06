@@ -75,11 +75,11 @@
 
 (defn as-is
   "read one element from xml with enlive selector, converts to edn and strip namespaces."
-  [xml selector] (-> (select1 xml selector) xml->edn strip-keys))
+  [xml & selector] (-> (select1 xml (-> selector vector flatten)) xml->edn strip-keys))
 
 (defn all-of
   "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
-  [xml selector] (-> xml (as-is selector) vals first))
+  [xml & selector] (-> xml (as-is (-> selector vector flatten)) vals first))
 
 (defn map-index
   "transform a collection into keyord-indexed map (starting from 0)."
@@ -175,7 +175,7 @@
                    :rakentamistapa      (get-text rakennus :rakentamistapa)}
          :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
                     :lammonlahde        (get-text rakennus :polttoaine)}
-         :varusteet                     (all-of   rakennus [:varusteet])
+         :varusteet                     (all-of   rakennus :varusteet)
          :huoneistot (->>
                        (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
@@ -186,7 +186,7 @@
                                                   :huoneistoala    (get-text huoneisto :huoneistoala)
                                                   :huoneluku       (get-text huoneisto :huoneluku)}
                                :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
-                               :varusteet                          (all-of   huoneisto [:varusteet])})))}))))
+                               :varusteet                          (all-of   huoneisto :varusteet)})))}))))
 
 ;;
 ;; full mappings
