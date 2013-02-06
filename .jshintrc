@@ -21,6 +21,7 @@
   "predef": [
     "$",
     "ko",
+    "moment",
     "_",
     "loc",
     "getEvent",

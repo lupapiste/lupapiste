@@ -1,16 +1,6 @@
 var repository = (function() {
   "use strict";
 
-  hub.subscribe("load-all-applications", function() {
-    ajax
-      .query("applications")
-      .success(function(data) {
-        debug("repository: load-all-applications: loaded " + data.applications.length + " applications");
-        hub.send("all-applications-loaded", {applications: data.applications});
-      })
-      .call();
-  });
-
   hub.subscribe("load-application", function(e) {
     ajax
       .query("application", {id: e.id})
