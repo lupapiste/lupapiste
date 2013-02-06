@@ -272,7 +272,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     select.appendChild(option);
 
     ajax
-      .query("get-building-info-from-legacy", {id: appId})
+      .command("get-building-info-from-legacy", {id: appId})
       .success(function(data) {
         $.each(data.data, function (i, building) {
           var name = building.buildingId;
