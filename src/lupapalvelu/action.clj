@@ -58,6 +58,7 @@
     {:keys [id email title text document]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
+      ;; TODO: check if invited or has already role
       (let [invited (security/get-or-create-user-by-email email)]
         (mongo/update :applications
           {:_id application-id
