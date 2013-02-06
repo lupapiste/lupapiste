@@ -191,7 +191,7 @@
                :documents {$elemMatch {:schema.info.name name}}}
               {$set {:documents.$.body.henkilotiedot.etunimi  (:firstName user)
                      :documents.$.body.henkilotiedot.sukunimi (:lastName user)
-                     :documents.$.body.henkilotiedot.email    (:email user)
-                     :documents.$.body.henkilotiedot.puhelin  (:phone user)
+                     :documents.$.body.yhteystiedot.email    (:email user)
+                     :documents.$.body.yhteystiedot.puhelin  (:phone user)
                      :modified (:created command)}})))))))
 
