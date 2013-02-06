@@ -44,14 +44,18 @@
     (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
-  (let [application-id (:id (create-app pena))
-        authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
-    (count authorities) => 2))
+  (let [created-resp (create-app pena :municipality sonja-muni)
+        id (:id created-resp)]
+    (success created-resp) => true
+    (comment-application id pena)
+    (let [query-resp   (query sonja :authorities-in-applications-municipality :id id)]
+      (success query-resp) => true
+      (count (:authorityInfo query-resp)) => 2)))
 
 (fact "Assign application to an authority"
   (let [application-id (:id (create-app pena :municipality sonja-muni))
         ;; add a comment to change state to open
-        comment (command pena :add-comment :id application-id :text "hello" :target "application")
+        _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
         roles-before-assignation (:roles application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
@@ -60,7 +64,6 @@
         assigned-app (:application (query sonja :application :id application-id))
         roles-after-assignation (:roles assigned-app)]
     application-id => truthy
-    (success comment) => true
     application => truthy
     (success resp) => true
     (count roles-before-assignation) => 1
@@ -69,7 +72,7 @@
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (:id (create-app pena :municipality sonja-muni))
         ;; add a comment change set state to open
-        comment (command pena :add-comment :id application-id :text "hello" :target "application")
+        _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
         roles-before-assignation (:roles application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))

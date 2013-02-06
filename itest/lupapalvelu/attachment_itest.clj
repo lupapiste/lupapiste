@@ -4,21 +4,16 @@
         [midje.sweet]))
 
 (fact
-  (let [resp            (command pena :create-application
-                                 :permitType "buildingPermit"
-                                 :operation "asuinrakennus"
-                                 :propertyId "1"
-                                 :x 408048 :y 6693225
-                                 :address "foo 42, bar"
-                                 :municipality veikko-muni)
-        application-id  (:id resp)
-        application     (:application (query pena :application :id application-id))
-        resp            (command veikko :create-attachment :id application-id :attachmentType {:type-group "tg" :type-id "tid"})
-        attachment-id   (:attachmentId resp)
-        application     (:application (query pena :application :id application-id))
-        attachment      (some #(if (= (:id %) attachment-id) %) (:attachments application))]
-    attachment => (contains
-                    {:type {:type-group "tg"
-                            :type-id "tid"}
-                     :state "requires_user_action"
-                     :versions []})))
+  (let [resp (create-app pena :municipality veikko-muni)
+        application-id  (:id resp)]
+    (success resp) => true
+
+    (comment-application application-id pena)
+
+    (let [resp            (command veikko :create-attachment :id application-id :attachmentType {:type-group "tg" :type-id "tid"})
+          attachment-id   (:attachmentId resp)
+          application     (:application (query pena :application :id application-id))
+          attachment      (some #(if (= (:id %) attachment-id) %) (:attachments application))]
+      (success resp) => true
+      attachment => (contains {:type {:type-group "tg" :type-id "tid"} :state "requires_user_action" :versions []}))))
+
