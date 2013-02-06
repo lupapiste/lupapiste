@@ -61,24 +61,28 @@
       (if (domain/invited? application email)
         (fail :already-invited)
         (let [invited (security/get-or-create-user-by-email email)]
-          (mongo/update :applications
-            {:_id application-id
-             :invites {$not {$elemMatch {:user.username email}}}}
-            {$push {:invites {:title       title
-                              :application application-id
-                              :text        text
-                              :document    document
-                              :created     created
-                              :email       email
-                              :user        (security/summary invited)
-                              :inviter     (security/summary user)}
-                    :auth (role invited :reader)}})
-          (future
-            (info "sending email to %s" email)
-            (if (email/send-email email (:title application) (invite-body user application-id host))
-              (info "email was sent successfully")
-              (error "email could not be delivered.")))
-          nil)))))
+          (if-not (domain/has-role? (:id invited))
+            (fail :already-has-role)
+            (do
+              (mongo/update
+                :applications
+                {:_id application-id
+                 :invites {$not {$elemMatch {:user.username email}}}}
+                {$push {:invites {:title       title
+                                  :application application-id
+                                  :text        text
+                                  :document    document
+                                  :created     created
+                                  :email       email
+                                  :user        (security/summary invited)
+                                  :inviter     (security/summary user)}
+                        :auth (role invited :reader)}})
+              (future
+                (info "sending email to %s" email)
+                (if (email/send-email email (:title application) (invite-body user application-id host))
+                  (info "email was sent successfully")
+                  (error "email could not be delivered.")))
+              nil)))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
