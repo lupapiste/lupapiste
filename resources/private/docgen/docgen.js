@@ -314,7 +314,6 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
             html: "["+loc("personSelector.invite")+"]",
             click: function() {
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-              console.log("clicked:", myPath, "-->", specId);
               return false;
             }}));
 
