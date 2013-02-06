@@ -72,7 +72,7 @@
     address: ko.observable(),
     verdict: ko.observable(),
     operations: ko.observable(),
-
+    applicant: ko.observable(),
     assignee: ko.observable(),
 
     // new stuff
@@ -216,10 +216,8 @@
   };
 
   function updateAssignee(value) {
-    debug("updateAssignee called, assigneeId: ", value);
     // do not update assignee if page is still initializing
     if (isInitializing) {
-      debug("isInitializing, return");
       return;
     }
 
@@ -230,7 +228,6 @@
 
     var assigneeId = value ? value : null;
 
-    debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
       .success(function() {})
       .error(function(e) { error(e); })
@@ -256,15 +253,7 @@
   application.assignee.subscribe(function(v) { updateAssignee(v); });
 
   function resolveApplicationAssignee(roles) {
-    debug("resolveApplicationAssignee called, roles: ", roles);
-    if (roles && roles.authority) {
-      var auth = new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName);
-      debug("resolved authority: ", auth);
-      return auth;
-    } else {
-      debug("not assigned");
-      return null;
-    }
+    return (roles && roles.authority) ? new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName) : null;
   }
 
   function initAuthoritiesSelectList(data) {
@@ -275,9 +264,7 @@
   }
 
   function showApplication(applicationDetails) {
-    debug("set isInitializing to true");
     isInitializing = true;
-    debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
 
       // new data mapping
