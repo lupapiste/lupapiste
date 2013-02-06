@@ -15,6 +15,8 @@ Mikko sees application in list
 
 Mikko creates a new inforequest
   Create inforequest  create-info  753  75341600250022  Hoblaa
+  Wait until  Element text should be  //span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
+  Wait until  Element text should be  //span[@data-test-id='inforequest-application-operation']  asuinrakennus
 
 Mikko sees one application and one inforequest
   Go to page  applications
