@@ -369,9 +369,7 @@
       displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
       displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
-      if(! isTabSelected('#applicationTabs')) {
-        selectDefaultTab('#applicationTabs');
-      }
+      if (!isTabSelected('#applicationTabs')) selectDefaultTab('#applicationTabs');
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.roles);
