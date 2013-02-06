@@ -123,20 +123,20 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn t* [xml & selector] (-> xml (select1 (-> selector vector flatten)) text))
+(defn get-text [xml & selector] (-> xml (select1 (-> selector vector flatten)) text))
 
 (defn- ->rakennuksen-omistaja [omistaja]
   {:_selected "yritys"
-   :yritys {:liikeJaYhteisoTunnus (t* omistaja :tunnus)
-            :osoite {:katu (t* omistaja :osoitenimi :teksti)
-                     :postinumero (t* omistaja :postinumero)
-                     :postitoimipaikannimi (t* omistaja :postitoimipaikannimi)}
-            :yhteyshenkilo {:henkilotiedot {:etunimi (t* omistaja :henkilonnimi :etunimi)       ;; does-not-exist in test
-                                            :sukunimi (t* omistaja :henkilonnimi :sukunimi)     ;; does-not-exist in test
+   :yritys {:liikeJaYhteisoTunnus (get-text omistaja :tunnus)
+            :osoite {:katu (get-text omistaja :osoitenimi :teksti)
+                     :postinumero (get-text omistaja :postinumero)
+                     :postitoimipaikannimi (get-text omistaja :postitoimipaikannimi)}
+            :yhteyshenkilo {:henkilotiedot {:etunimi (get-text omistaja :henkilonnimi :etunimi)       ;; does-not-exist in test
+                                            :sukunimi (get-text omistaja :henkilonnimi :sukunimi)     ;; does-not-exist in test
                             :yhteystiedot {:email ...notfound...
                                            :fax ...notfound...
                                            :puhelin ...notfound...}}}
-            :yritysnimi (t* omistaja :nimi)}})
+            :yritysnimi (get-text omistaja :nimi)}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [stripped  (strip-xml-namespaces xml)
@@ -145,47 +145,47 @@
     (when rakennus
       (polished
         {:muutostyolaji ...notimplemented...
-         :rakennusnro (t* rakennus :rakennusnro)
+         :rakennusnro (get-text rakennus :rakennusnro)
          :verkostoliittymat (-> rakennus (all-of [:verkostoliittymat]))
          :rakennuksenOmistajat (->>
                                  (select rakennus [:omistaja])
                                  (map ->rakennuksen-omistaja))
-         :osoite {:kunta            (t* rakennus :kunta)
-                  :lahiosoite       (t* rakennus :osoitenimi :teksti)
-                  :osoitenumero     (t* rakennus :osoitenumero)
-                  :osoitenumero2    (t* rakennus :osoitenumero2)
-                  :jakokirjain      (t* rakennus :jakokirjain)
-                  :jakokirjain2     (t* rakennus :jakokirjain2)
-                  :porras           (t* rakennus :porras)
-                  :huoneisto        (t* rakennus :huoneisto)
-                  :postinumero      (t* rakennus :postinumero)
-                  :postitoimipaikannimi (t* rakennus :postitoimipaikannimi)
+         :osoite {:kunta            (get-text rakennus :kunta)
+                  :lahiosoite       (get-text rakennus :osoitenimi :teksti)
+                  :osoitenumero     (get-text rakennus :osoitenumero)
+                  :osoitenumero2    (get-text rakennus :osoitenumero2)
+                  :jakokirjain      (get-text rakennus :jakokirjain)
+                  :jakokirjain2     (get-text rakennus :jakokirjain2)
+                  :porras           (get-text rakennus :porras)
+                  :huoneisto        (get-text rakennus :huoneisto)
+                  :postinumero      (get-text rakennus :postinumero)
+                  :postitoimipaikannimi (get-text rakennus :postitoimipaikannimi)
                   :pistesijanti     ...notimplemented...}
-         :kaytto {:kayttotarkoitus (t* rakennus :kayttotarkoitus)
-                  :rakentajaTyyppi (t* rakennus :rakentajaTyyppi)}
-         :luokitus {:energialuokka (t* rakennus :energialuokka)
-                    :paloluokka (t* rakennus :paloluokka)}
-         :mitat {:kellarinpinta-ala (t* rakennus :kellarinpinta-ala)
-                 :kerrosala (t* rakennus :kerrosala)
-                 :kerrosluku (t* rakennus :kerrosluku)
-                 :kokonaisala (t* rakennus :kokonaisala)
-                 :tilavuus (t* rakennus :tilavuus)}
-         :rakenne {:julkisivu (t* rakennus :julkisivumateriaali)
-                   :kantavaRakennusaine (t* rakennus :rakennusaine)
-                   :rakentamistapa (t* rakennus :rakentamistapa)}
-         :lammitys {:lammitystapa (t* rakennus :lammitystapa)
-                    :lammonlahde (t* rakennus :polttoaine)}
+         :kaytto {:kayttotarkoitus (get-text rakennus :kayttotarkoitus)
+                  :rakentajaTyyppi (get-text rakennus :rakentajaTyyppi)}
+         :luokitus {:energialuokka (get-text rakennus :energialuokka)
+                    :paloluokka (get-text rakennus :paloluokka)}
+         :mitat {:kellarinpinta-ala (get-text rakennus :kellarinpinta-ala)
+                 :kerrosala (get-text rakennus :kerrosala)
+                 :kerrosluku (get-text rakennus :kerrosluku)
+                 :kokonaisala (get-text rakennus :kokonaisala)
+                 :tilavuus (get-text rakennus :tilavuus)}
+         :rakenne {:julkisivu (get-text rakennus :julkisivumateriaali)
+                   :kantavaRakennusaine (get-text rakennus :rakennusaine)
+                   :rakentamistapa (get-text rakennus :rakentamistapa)}
+         :lammitys {:lammitystapa (get-text rakennus :lammitystapa)
+                    :lammonlahde (get-text rakennus :polttoaine)}
          :varusteet (-> rakennus (all-of [:varusteet]))
          :huoneistot (->>
                        (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
-                              {:huoneistoTunnus {:huoneistonumero (t* huoneisto :huoneistonumero)
-                                                 :jakokirjain (t* huoneisto :jakokirjain)
-                                                 :porras (t* huoneisto :porras)}
-                               :huoneistonTyyppi {:huoneistoTyyppi (t* huoneisto :huoneistonTyyppi)
-                                                  :huoneistoala (t* huoneisto :huoneistoala)
-                                                  :huoneluku (t* huoneisto :huoneluku)}
-                               :keittionTyyppi (t* huoneisto :keittionTyyppi)
+                              {:huoneistoTunnus {:huoneistonumero (get-text huoneisto :huoneistonumero)
+                                                 :jakokirjain (get-text huoneisto :jakokirjain)
+                                                 :porras (get-text huoneisto :porras)}
+                               :huoneistonTyyppi {:huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
+                                                  :huoneistoala (get-text huoneisto :huoneistoala)
+                                                  :huoneluku (get-text huoneisto :huoneluku)}
+                               :keittionTyyppi (get-text huoneisto :keittionTyyppi)
                                :varusteet (-> huoneisto (all-of [:varusteet]))})))}))))
 
 ;;
