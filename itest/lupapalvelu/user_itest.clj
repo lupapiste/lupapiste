@@ -22,8 +22,8 @@
   (success (command pena :save-user-info :firstName "f" :lastName "l" :street "s" :city "c" :zip "z" :phone "p")) => true
 
   (:user (query pena :user)) => (contains {:firstName "f"
-                                                    :lastName "l"
-                                                    :street "s"
-                                                    :city "c"
-                                                    :zip "z"
-                                                    :phone "p"}))
+                                           :lastName "l"
+                                           :street "s"
+                                           :city "c"
+                                           :zip "z"
+                                           :phone "p"}))
