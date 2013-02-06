@@ -1,9 +1,12 @@
 (ns lupapalvelu.application-itest
   (:use [lupapalvelu.itest-util]
+        [lupapalvelu.application :only [search-doc]]
         [midje.sweet]
         [clojure.pprint :only [pprint]])
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.document.schemas :as schemas]))
+
+(apply-remote-minimal)
 
 (fact "can't inject js in 'x' or 'y' params"
   (create-app pena :x ";alert(\"foo\");" :y "what ever") => (contains {:ok false})
@@ -12,7 +15,6 @@
   (create-app pena :x "2" :y "1.0") => (contains {:ok true}))
 
 (fact "creating application without message"
-  (apply-remote-minimal)
   (let [resp  (create-app pena)
         id    (:id resp)
         resp  (query pena :application :id id)
@@ -35,21 +37,19 @@
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
         application     (:application resp)
-        hakija          (some (fn [doc] (if (= (-> doc :schema :info :name) "hakija") doc)) (:documents application))]
+        hakija (search-doc application "hakija")]
     (:state application) => "draft"
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
     (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
-  (apply-remote-minimal)
   (let [application-id (:id (create-app pena))
         authorities  (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))]
     (count authorities) => 2))
 
 (fact "Assign application to an authority"
-  (apply-remote-minimal)
-  (let [application-id (:id (create-app pena))
+  (let [application-id (:id (create-app pena :municipality sonja-muni))
         ;; add a comment to change state to open
         comment (command pena :add-comment :id application-id :text "hello" :target "application")
         application (:application (query sonja :application :id application-id))
@@ -59,12 +59,15 @@
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         assigned-app (:application (query sonja :application :id application-id))
         roles-after-assignation (:roles assigned-app)]
+    application-id => truthy
+    (success comment) => true
+    application => truthy
+    (success resp) => true
     (count roles-before-assignation) => 1
     (count roles-after-assignation) => 2))
 
 (fact "Assign application to an authority and then to no-one"
-  (apply-remote-minimal)
-  (let [application-id (:id (create-app pena))
+  (let [application-id (:id (create-app pena :municipality sonja-muni))
         ;; add a comment change set state to open
         comment (command pena :add-comment :id application-id :text "hello" :target "application")
         application (:application (query sonja :application :id application-id))
@@ -79,7 +82,6 @@
     (count roles-in-the-end) => 1))
 
 (fact "Applicaton shape is saved"
-  (apply-remote-minimal)
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
         application-id (:id (create-app pena))
         resp (command pena :save-application-shape :id application-id :shape shape)
