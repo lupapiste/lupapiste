@@ -51,7 +51,7 @@
     id))
 
 (defcommand "invite"
-  {:parameters [:id :email :title :text :name]
+  {:parameters [:id :email :title :text :document]
    :roles      [:applicant]}
   [{created :created
     user    :user
@@ -81,12 +81,14 @@
 (defcommand "approve-invite"
   {:parameters [:id]
    :roles      [:applicant]}
-  [{user :user :as command}]
+  [{{user-id :id} :user :as command}]
   (with-application command
-    (fn [{application-id :id}]
-      (mongo/update :applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
-        {$push {:auth         (role user :writer)}
-         $pull {:invites      {:user.id (:id user)}}}))))
+    (fn [{application-id :id invites :invites}]
+      (when-let [my-invite (first (filter #(= (-> % :user :id) user-id) invites))]
+        (executed "set-user-to-document" (assoc-in command [:data :name] (:document my-invite)))
+        #_(mongo/update :applications {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+          {$push {:auth         (role user :writer)}
+           $pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -172,11 +174,13 @@
   {:parameters [:id :name]
    :authenticated true}
   [{{:keys [name]} :data user :user :as command}]
+  (println "!!!" command)
   (with-application command
     (fn [application]
       (let [document       (domain/get-document-by-name application name)
             schema-name    (get-in document [:schema :info :name])
             schema         (get schemas/schemas schema-name)]
+        (println "!!")
         (if (nil? document)
           (fail :error.document-not-found)
           (do
@@ -185,9 +189,9 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
-              {$set {:documents.$.body.etunimi  (:firstName user)
-                     :documents.$.body.sukunimi (:lastName user)
-                     :documents.$.body.email    (:email user)
-                     :documents.$.body.puhelin  (:phone user)
+              {$set {:documents.$.body.henkilotiedot.etunimi  (:firstName user)
+                     :documents.$.body.henkilotiedot.sukunimi (:lastName user)
+                     :documents.$.body.henkilotiedot.email    (:email user)
+                     :documents.$.body.henkilotiedot.puhelin  (:phone user)
                      :modified (:created command)}})))))))
 
