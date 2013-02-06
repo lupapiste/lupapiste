@@ -160,14 +160,15 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
+;; FIXME yritys?
 (defn user2paasuunnittelija [user]
-  {:henkilotiedot {:etunimi       (:firstName user)
-                   :sukunimi      (:lastName user)}
-   :yhteystiedot {:email          (:email user)
-                  :puhelin        (:phone user)}
-   :osoite {:katu                 (:street user)
-            :postinumero          (:zip user)
-            :postitoimipaikannimi (:city user)}})
+  {:henkilo {:henkilotiedot {:etunimi       (:firstName user)
+                             :sukunimi      (:lastName user)}
+             :yhteystiedot {:email          (:email user)
+                            :puhelin        (:phone user)}
+             :osoite {:katu                 (:street user)
+                      :postinumero          (:zip user)
+                      :postitoimipaikannimi (:city user)}}})
 
 
 (defcommand "set-user-to-document"
