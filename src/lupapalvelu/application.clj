@@ -29,7 +29,7 @@
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (:creator app)]
       (str first-name \space last-name))
-    (when-let [body (:body (search-doc app "hakija"))]
+    (when-let [body (:body (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
         (get-in body [:yritys :yritysnimi])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
