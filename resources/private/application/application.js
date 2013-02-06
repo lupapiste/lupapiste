@@ -66,7 +66,6 @@
     propertyId: ko.observable(),
     title: ko.observable(),
     created: ko.observable(),
-    creator: ko.observable(),
     documents: ko.observable(),
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
