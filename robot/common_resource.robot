@@ -223,6 +223,12 @@ Create application the fast way
   Reload Page
   Open application  ${address}
 
+Create inforequest the fast way
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"permitType":"infoRequest","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Reload Page
+  Open inforequest  ${address}
+
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Go to page  applications
@@ -243,12 +249,6 @@ Create inforequest
   Click by test id  create-inforequest
   Wait Until  Element should be visible  inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
-
-Create inforequest the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"permitType":"infoRequest","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
-  Reload Page
-  Open inforequest  ${address}
 
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}
