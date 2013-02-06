@@ -308,7 +308,7 @@
 
 (defn- append-attachment [zip latest]
   (when latest
-    (.putNextEntry zip (ZipEntry. (:filename latest)))
+    (.putNextEntry zip (ZipEntry. (encode-filename (:filename latest))))
     (with-open [in ((-> latest :fileId mongo/download :content))]
       (IOUtils/copy in zip))))
 
