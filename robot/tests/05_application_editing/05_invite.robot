@@ -23,6 +23,7 @@ Mikko invites Teppo
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Click by test id  application-invite-submit
+  Wait until  Element should not be visible  invite-email
   Wait until  Element should be visible  xpath=//*[@data-test-id='application-remove-invite']
   Invite count is  1
 
