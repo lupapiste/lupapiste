@@ -409,10 +409,13 @@
 
     self.email = ko.observable();
     self.text = ko.observable();
+    self.document = ko.observable();
 
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
+      var document = model.document();
+      console.log(document);
       var id = application.id();
       ajax.command("invite", { id: id,
                                email: email,
