@@ -506,7 +506,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     title.appendChild(document.createTextNode(loc(specId + "._group_label")));
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
-    title.onclick = accordion.toggle;
+    title.onclick = accordion.click;
     if (self.spec.info.removable) {
       $(title)
         .append($("<button>")

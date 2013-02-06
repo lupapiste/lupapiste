@@ -457,10 +457,8 @@
     $(selected_tab).fadeIn();
   }
 
-  var accordian = {
-    accordianClick: function(data, event) {
-      accordion.toggle(event);
-    }
+  var accordian = function(data, event) {
+    accordion.toggle(event);
   };
 
   var initApplication = function(e) {
