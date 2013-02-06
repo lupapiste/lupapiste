@@ -32,7 +32,8 @@
                         (let [body (:body doc)]
                           (if (= (:_selected body) "yritys")
                             (-> body :yritys :yritysnimi)
-                            (str (-> body :henkilo :henkilotiedot :etunimi) \space (-> body :henkilo :henkilotiedot :sukunimi)))))}])
+                            (let [userinfo (-> body :henkilo :henkilotiedot :etunimi)]
+                              (str (:etunimi userinfo) \space (:sukunimi userinfo))))))}])
 
 (defn search-doc [app schema]
   (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
@@ -352,17 +353,3 @@
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
 
-(comment
-  (mc/aggregate :applications [{$skip 1 $limit 1}])
-  (require '[monger.collection :as mc])
-  (query/with-collection "applications"
-    (query/find {:state "draft"})
-    (query/skip 1)
-    (query/limit 2)
-    (query/fields [:_id :state]))
-  (mc/aggregate :applications [{$skip 1 $limit 1} {$project {:state 1}}])
-  (count (mongo/select :applications {} {:_id 1}))
-  (get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
-  (:applicant (with-meta-fields ))
-  (mongo/count :applications {:state "openz"})
-  (mongo/select :applications (application-query-for user)))

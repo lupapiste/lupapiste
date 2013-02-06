@@ -72,7 +72,7 @@
     address: ko.observable(),
     verdict: ko.observable(),
     operations: ko.observable(),
-
+    applicant: ko.observable(),
     assignee: ko.observable(),
 
     // new stuff

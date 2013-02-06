@@ -35,6 +35,11 @@
             </span>
           </div>
 
+          <div>
+            <p data-bind="ltext: 'application.applicant'"></p>
+            <span data-bind="text: applicant" data-test-id="inforequest-application-applicant" class="application_summary_text"></span>
+          </div>
+          
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
               <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
