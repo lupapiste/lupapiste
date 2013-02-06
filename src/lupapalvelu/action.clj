@@ -165,6 +165,7 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
+;; FIXME should take document ID as parameter to support repeating documents
 (defcommand "user-to-document"
   {:parameters [:id :name]
    :authenticated true}
@@ -182,8 +183,9 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
-              {$set {:documents.$.body.etunimi  (:firstName user)
-                     :documents.$.body.sukunimi (:lastName user)
-                     :documents.$.body.email    (:email user)
-                     :documents.$.body.puhelin  (:phone user)
+              ;; FIXME Handle yritys/yhteyshenkilo
+              {$set {:documents.$.body.henkilo.henkilotiedot.etunimi  (:firstName user)
+                     :documents.$.body.henkilo.henkilotiedot.sukunimi (:lastName user)
+                     :documents.$.body.yhteystiedot.email    (:email user)
+                     :documents.$.body.yhteystiedot.puhelin  (:phone user)
                      :modified (:created command)}})))))))
