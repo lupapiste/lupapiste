@@ -11,8 +11,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
-(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
-
 (defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
 
 (defn application-query-for [user]
