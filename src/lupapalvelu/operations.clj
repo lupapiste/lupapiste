@@ -1,5 +1,7 @@
 (ns lupapalvelu.operations
-  (:require [lupapalvelu.document.schemas :as schemas]))
+  (:use [lupapalvelu.log])
+  (:require [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.i18n :as i18n]))
 
 ;; Key in applications_[fi|sv].js
 (def default-description "operations.default-description")
@@ -125,3 +127,7 @@
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
   (if-not (schemas/schemas schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+
+(doseq [[op] operations]
+  (let [term (str "operations." (name op))]
+    (if-not ((i18n/loc "fi") term) (warn "Missing localization: FI: '%s'" term))))
