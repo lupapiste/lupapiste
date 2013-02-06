@@ -251,8 +251,8 @@
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
   (attachment/output-all-attachments application-id (current-user)))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (pdf/export application-id (current-user)))
+(defpage [:get ["/api/pdf-export/:lang/:application-id" :lang #"[a-z]{2}"]] {lang :lang application-id :application-id}
+  (pdf/export application-id (current-user) lang))
 
 ;;
 ;; Proxy

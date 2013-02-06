@@ -198,7 +198,7 @@
     },
     
     exportPdf: function() {
-      window.open("/api/pdf-export/" + application.id(), "_blank");
+      window.open("/api/pdf-export/" + loc.currentLanguage + "/" + application.id(), "_blank");
       return false;
     }
 
