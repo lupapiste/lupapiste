@@ -203,13 +203,13 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return div;
   }
 
-  function buildGroup(spec, model, path, save, specId) {
+  function buildGroup(spec, model, path, save, specId, partOfChoice, title) {
     var myPath = path.join(".");
     var name = spec.name;
     var myModel = model[name] || {};
 
     var partsDiv = document.createElement("div");
-    appendElements(partsDiv, spec, myModel, path, save, specId);
+    appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice, title);
 
     var div = document.createElement("div");
     div.id = pathStrToGroupID(myPath);
@@ -304,6 +304,23 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return span;
   }
 
+  function buildPersonSelector(spec, model, path, save, specId, partOfChoice, title) {
+    var myPath = path.join(".");
+
+    $(title)
+        .append($("<button>", {
+            class: "icon-remove",
+            "data-test-id": "application-invite-"+specId,
+            html: "["+loc("personSelector.invite")+"]",
+            click: function() {
+              LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+              console.log("clicked:", myPath, "-->", specId);
+              return false;
+            }}));
+
+    return makeEntrySpan();
+  }
+
   function buildUnknown(spec, model, path) {
     error("Unknown element type:", spec.type, path);
     var div = document.createElement("div");
@@ -322,10 +339,11 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     date: buildDate,
     element: buildElement,
     buildingSelector: buildBuildingSelector,
+    personSelector: buildPersonSelector,
     unknown: buildUnknown
   };
 
-  function build(spec, model, path, save, specId, partOfChoice) {
+  function build(spec, model, path, save, specId, partOfChoice, title) {
 
     var myName = spec.name;
     var myPath = path.concat([myName]);
@@ -333,7 +351,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
-      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
+      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice, title);
       elem.setAttribute("data-repeating-id", repeatingId);
       elem.setAttribute("data-repeating-id-" + repeatingId, id);
       return elem;
@@ -367,7 +385,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       return elements;
     }
 
-    return builder(spec, model, myPath, save, specId, partOfChoice);
+    return builder(spec, model, myPath, save, specId, partOfChoice, title);
   }
 
   function getSelectOneOfDefinition(schema) {
@@ -382,7 +400,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return [];
   }
 
-  function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+  function appendElements(body, schema, model, path, save, specId, partOfChoice, title) {
 
     function toggleSelectedGroup(value) {
       $(body)
@@ -395,7 +413,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var selectOneOf = getSelectOneOfDefinition(schema);
 
     _.each(schema.body, function(spec) {
-        var children = build(spec, model, path, save, specId, partOfChoice);
+        var children = build(spec, model, path, save, specId, partOfChoice, title);
         if (!_.isArray(children)) {
           children = [children];
         }
@@ -500,7 +518,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     sectionContainer.className = "application_section_content content_expanded";
 
     var elements = document.createElement("article");
-    appendElements(elements, self.spec, self.model, [], save, specId);
+    appendElements(elements, self.spec, self.model, [], save, specId, undefined, title);
 
     sectionContainer.appendChild(elements);
     section.appendChild(title);

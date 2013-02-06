@@ -1,9 +1,15 @@
 (ns lupapalvelu.document.schemas)
 
+(defn group [name body] {:name name :type :group :body body})
+
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
+
+(def henkilon-valitsin [{:name :email :type :personSelector}])
+
+(def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
 
 (def simple-osoite {:name "osoite"
                     :type :group
@@ -65,9 +71,10 @@
                      simple-osoite
                      {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
 
-(def paasuunnittelija-body (conj
-                         designer-basic
-                         {:name "patevyys" :type :group :body patevyys}))
+(def paasuunnittelija-body (concat henkilon-valitsin
+                                   (conj
+                                     designer-basic
+                                     {:name "patevyys" :type :group :body patevyys})))
 
 (def suunnittelija-body (conj
                          designer-basic
@@ -284,9 +291,6 @@
                        {:name "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"}
                        {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
   )
-
-(def rakennuksen-valitsin
-  [{:name :rakennusnro :type :buildingSelector}])
 
 (def olemassaoleva-rakennus (concat rakennuksen-valitsin rakennuksen-omistajat full-osoite rakennuksen-tiedot))
 
