@@ -1,9 +1,9 @@
 (ns lupapalvelu.application-itest
   (:use [lupapalvelu.itest-util]
-        [lupapalvelu.application :only [search-doc]]
         [midje.sweet]
         [clojure.pprint :only [pprint]])
   (:require [lupapalvelu.operations :as operations]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
 (apply-remote-minimal)
@@ -37,7 +37,7 @@
         application-id  (:id resp)
         resp            (query pena :application :id application-id)
         application     (:application resp)
-        hakija (search-doc application "hakija")]
+        hakija (domain/get-document-by-name application "hakija")]
     (:state application) => "draft"
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"

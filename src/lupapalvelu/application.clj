@@ -34,12 +34,9 @@
                             (-> body :yritys :yritysnimi)
                             (str (-> body :henkilo :henkilotiedot :etunimi) \space (-> body :henkilo :henkilotiedot :sukunimi)))))}])
 
-(defn search-doc [app schema]
-  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
-
 (defn with-meta-fields [app]
   (reduce (fn [app {:keys [field schema f]}]
-            (if-let [doc (search-doc app schema)]
+            (if-let [doc (domain/get-document-by-name app schema)]
               (assoc app field (f doc))
               app))
           app
@@ -362,7 +359,7 @@
     (query/fields [:_id :state]))
   (mc/aggregate :applications [{$skip 1 $limit 1} {$project {:state 1}}])
   (count (mongo/select :applications {} {:_id 1}))
-  (get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
+  (get-in (domain/get-document-by-name a "hakija") [:body :henkilo :henkilotiedot])
   (:applicant (with-meta-fields ))
   (mongo/count :applications {:state "openz"})
   (mongo/select :applications (application-query-for user)))
