@@ -168,7 +168,7 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-(defcommand "user-to-document"
+(defcommand "set-user-to-document"
   {:parameters [:id :name]
    :authenticated true}
   [{{:keys [name]} :data user :user :as command}]
@@ -190,3 +190,4 @@
                      :documents.$.body.email    (:email user)
                      :documents.$.body.puhelin  (:phone user)
                      :modified (:created command)}})))))))
+

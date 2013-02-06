@@ -139,7 +139,7 @@
 
     setMeAsPaasuunnittelija: function(model) {
       var applicationId = application.id();
-      ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
+      ajax.command("set-user-to-document", { id: applicationId, name: "paasuunnittelija"})
       .success(function() {
         notify.success("tiedot tallennettu",model);
         repository.reloadApplication(applicationId);
