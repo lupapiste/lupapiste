@@ -92,7 +92,7 @@
   (with-application command
     (fn [{application-id :id invites :invites}]
       (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
-        (executed "set-user-to-document" (assoc-in command [:data :name] (:documentName my-invite)))
+        (executed "set-user-to-document" (assoc-in command [:data :documentId] (:documentId my-invite)))
         (mongo/update :applications
                       {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
                       ;; TODO: should refresh the data - for new invites to get full names
@@ -180,12 +180,12 @@
         {$set {:roles.authority (security/summary user)}}))))
 
 (defcommand "set-user-to-document"
-  {:parameters [:id :name]
+  {:parameters [:id :documentId]
    :authenticated true}
-  [{{:keys [name]} :data user :user :as command}]
+  [{{:keys [documentId]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (let [document       (domain/get-document-by-name application name)
+      (let [document       (domain/get-document-by-id application documentId)
             schema-name    (get-in document [:schema :info :name])
             schema         (get schemas/schemas schema-name)]
         (if (nil? document)
@@ -195,6 +195,6 @@
             (mongo/update
               :applications
               {:_id (:id application)
-               :documents {$elemMatch {:schema.info.name name}}}
+               :documents {$elemMatch {:id documentId}}}
               {$set {:documents.$.body (domain/user2henkilo user)
                      :modified (:created command)}})))))))
