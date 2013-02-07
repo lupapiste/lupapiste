@@ -164,10 +164,6 @@
                   <a data-test-id="application-remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
               </li>
             </ul>
-            <!--
-            <button data-bind="ltext: '', disable: !$root.authorization.ok('invite'), click: setMeAsPaasuunnittelija" type="submit">
-              ole p&auml;&auml;suunnittelija</button>
-             -->
           </div>
         </div>
 
@@ -306,7 +302,8 @@
         <div class="dialog-content">
           <form data-bind="with: $root.invite">
             <label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label>
-            <input class="form-input text long" id="invite-document" disabled="true" type="text" data-bind="value: document" />
+            <input class="form-input text long" id="invite-document-name" disabled="true" type="text" data-bind="value: documentName" />
+            <input class="form-input text long" id="invite-document-id" disabled="true" type="hidden" data-bind="value: documentId" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
