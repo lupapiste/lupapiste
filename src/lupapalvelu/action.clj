@@ -94,6 +94,7 @@
         (executed "set-user-to-document" (assoc-in command [:data :name] (:document my-invite)))
         (mongo/update :applications
                       {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
+                      ;; TODO: should refresh the data - for new invites to get full names
                       {$pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
