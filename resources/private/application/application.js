@@ -81,7 +81,7 @@
     self.cancel = function() { return true; };
   }();
 
-  
+
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -206,6 +206,10 @@
       return false;
     },
 
+    isNotOwner: function(model) {
+      return model.role() !== "owner";
+    },
+
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
@@ -223,7 +227,7 @@
     }
 
   };
-  
+
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -408,6 +412,7 @@
     self.email = ko.observable();
     self.text = ko.observable();
     self.document = ko.observable();
+    self.error = ko.observable();
 
     self.submit = function(model) {
       var email = model.email();
@@ -422,10 +427,12 @@
         .success(function() {
           self.email(undefined);
           self.text(undefined);
+          self.error(undefined);
           repository.reloadApplication(id);
+          LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
-          notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
+          self.error(d.text);
         })
         .call();
       return false;
