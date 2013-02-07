@@ -35,6 +35,7 @@
     "comments",
     "trace",
     "error",
+    "warn",
     "repository",
     "notify",
     "ajax",
