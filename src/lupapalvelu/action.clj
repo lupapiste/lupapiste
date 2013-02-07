@@ -68,15 +68,15 @@
                 :applications
                 {:_id application-id
                  :invites {$not {$elemMatch {:user.username email}}}}
-                {$push {:invites {:title       title
-                                  :application application-id
-                                  :text        text
-                                  :document    documentName
-                                  :documentId  documentId
-                                  :created     created
-                                  :email       email
-                                  :user        (security/summary invited)
-                                  :inviter     (security/summary user)}
+                {$push {:invites {:title        title
+                                  :application  application-id
+                                  :text         text
+                                  :documentName documentName
+                                  :documentId   documentId
+                                  :created      created
+                                  :email        email
+                                  :user         (security/summary invited)
+                                  :inviter      (security/summary user)}
                         :auth (role invited :writer)}})
               (future
                 (info "sending email to %s" email)
@@ -92,7 +92,7 @@
   (with-application command
     (fn [{application-id :id invites :invites}]
       (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
-        (executed "set-user-to-document" (assoc-in command [:data :name] (:document my-invite)))
+        (executed "set-user-to-document" (assoc-in command [:data :name] (:documentName my-invite)))
         (mongo/update :applications
                       {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
                       ;; TODO: should refresh the data - for new invites to get full names
@@ -183,7 +183,6 @@
   {:parameters [:id :name]
    :authenticated true}
   [{{:keys [name]} :data user :user :as command}]
-  (println "!!!" command)
   (with-application command
     (fn [application]
       (let [document       (domain/get-document-by-name application name)
