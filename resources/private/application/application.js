@@ -423,7 +423,7 @@
       var documentId = model.documentId();
       var id = application.id();
       ajax.command("invite", { id: id,
-                               document: documentName,
+                               documentName: documentName,
                                documentId: documentId,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
