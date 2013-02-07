@@ -60,7 +60,7 @@
                   :css ["applications.css"]}
 
    :attachment   {:depends [:common :repository]
-                  :js ["attachment.js"]
+                  :js ["attachment.js" "attachmentTypeSelect.js"]
                   :html ["attachment.html" "upload.html"]}
 
    :register     {:depends [:common]

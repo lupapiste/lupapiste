@@ -132,6 +132,8 @@ var attachment = (function() {
     model.attachmentType(type);
     model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
+    
+    attachmentTypeSelect.initSelect($('#attachment-type-select-list'), application.allowedAttachmentTypes);
 
     model.application.id(applicationId);
     model.application.title(application.title);
