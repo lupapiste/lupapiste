@@ -311,7 +311,8 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
             "data-test-id": "application-invite-"+specId,
             html: "["+loc("personSelector.invite")+"]",
             click: function() {
-              $("#invite-document").val(specId).change();
+              $("#invite-document-name").val(specId).change();
+              $("#invite-document-id").val(self.docId).change();
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
               return false;
             }}));
