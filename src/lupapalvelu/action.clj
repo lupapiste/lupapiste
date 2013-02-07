@@ -178,16 +178,6 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-(defn user2paasuunnittelija [user]
-  {:henkilotiedot {:etunimi       (:firstName user)
-                   :sukunimi      (:lastName user)}
-   :yhteystiedot {:email          (:email user)
-                  :puhelin        (:phone user)}
-   :osoite {:katu                 (:street user)
-            :postinumero          (:zip user)
-            :postitoimipaikannimi (:city user)}})
-
-
 (defcommand "set-user-to-document"
   {:parameters [:id :name]
    :authenticated true}
@@ -206,5 +196,5 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
-              {$set {:documents.$.body (user2paasuunnittelija user)
+              {$set {:documents.$.body (domain/user2henkilo user)
                      :modified (:created command)}})))))))
