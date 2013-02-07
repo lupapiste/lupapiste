@@ -61,8 +61,8 @@
       (if (domain/invited? application email)
         (fail :already-invited)
         (let [invited (security/get-or-create-user-by-email email)]
-          (if-not (domain/has-role? (:id invited))
-            (fail :already-has-role)
+          (if (domain/has-auth? application (:id invited))
+            (fail :already-has-auth)
             (do
               (mongo/update
                 :applications
