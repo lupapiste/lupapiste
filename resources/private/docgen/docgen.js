@@ -305,8 +305,6 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
   }
 
   function buildPersonSelector(spec, model, path, save, specId, partOfChoice, title) {
-    var myPath = path.join(".");
-
     $(title)
         .append($("<button>", {
             class: "icon-remove",
@@ -318,7 +316,6 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
               return false;
             }}));
-
     return makeEntrySpan();
   }
 
