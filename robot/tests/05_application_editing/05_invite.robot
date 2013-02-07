@@ -37,6 +37,9 @@ Mikko can't reinvite Teppo
   Click by test id  application-invite-submit
   Invite count is  1
 
+# TODO: cant remove auth for owner
+# TODO: can remove auth for someone else
+
 Mikko removes Teppo's invite
   [Tags]  fail
   Click by test id  application-remove-invite

@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.action :only [application-query-for get-application-as]]
+        [lupapalvelu.domain :only [application-query-for get-application-as]]
         [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -25,14 +25,11 @@
 ;; Common helpers:
 ;;
 
-(defn search-doc [app schema]
-  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
-
 (defn get-applicant-name [app]
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (:creator app)]
       (str first-name \space last-name))
-    (when-let [body (:body (search-doc app "hakija"))]
+    (when-let [body (:body (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
         (get-in body [:yritys :yritysnimi])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
@@ -173,16 +170,17 @@
      :versions []}))
 
 (defn- make-documents [user created existing-documents op]
-  (let [make (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
+  (let [make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
         op-info               (operations/operations op)
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
-        new-docs              (cons op-doc required-docs)]
+        new-docs              (cons op-doc required-docs)
+        hakija                (make "hakija")]
     (if user
-      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge {:etunimi (:firstName user) :sukunimi (:lastName user)}) new-docs)
+      (cons #_hakija (assoc-in hakija [:body :henkilo] (domain/user2henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
@@ -215,7 +213,7 @@
        :roles         {:applicant owner}
        :auth          [owner]
        :operations    [{:operation op :created created}]
-       :documents     (if info-request? [] (make-documents user-summary created nil op))
+       :documents     (if info-request? [] (make-documents user created nil op))
        :attachments   (if info-request? [] (make-attachments created op))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
@@ -355,4 +353,5 @@
   {:parameters [:params]}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
+
 

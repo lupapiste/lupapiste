@@ -75,11 +75,11 @@
 
 (defn as-is
   "read one element from xml with enlive selector, converts to edn and strip namespaces."
-  [xml selector] (-> (select1 xml selector) xml->edn strip-keys))
+  [xml & selector] (-> (select1 xml (-> selector vector flatten)) xml->edn strip-keys))
 
 (defn all-of
   "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
-  [xml selector] (-> xml (as-is selector) vals first))
+  [xml & selector] (-> xml (as-is (-> selector vector flatten)) vals first))
 
 (defn map-index
   "transform a collection into keyord-indexed map (starting from 0)."
@@ -123,134 +123,67 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
+(defn get-text [xml & selector] (-> xml (select1 (-> selector vector flatten)) text))
+
 (defn- ->rakennuksen-omistaja [omistaja]
   {:_selected "yritys"
-   :yritys {:liikeJaYhteisoTunnus (-> omistaja (select1 [:rakval:tunnus]) text)
-            :osoite {:katu (-> omistaja (select1 [:yht:osoitenimi :yht:teksti]) text)
-                     :postinumero (-> omistaja (select1 [:yht:postinumero]) text)
-                     :postitoimipaikannimi (-> omistaja (select1 [:yht:postitoimipaikannimi]) text)}
-            :yhteyshenkilo {:henkilotiedot {:etunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:etunimi]) text)       ;; does-not-exist in test
-                                            :sukunimi (-> omistaja (select1 [:yht:henkilonnimi :yht:sukunimi]) text)     ;; does-not-exist in test
-                            :yhteystiedot {:email ...notfound...
-                                           :fax ...notfound...
-                                           :puhelin ...notfound...}}}
-            :yritysnimi (-> omistaja (select1 [:rakval:nimi]) text)}})
+   :yritys {:liikeJaYhteisoTunnus                     (get-text omistaja :tunnus)
+            :osoite {:katu                            (get-text omistaja :osoitenimi :teksti)
+                     :postinumero                     (get-text omistaja :postinumero)
+                     :postitoimipaikannimi            (get-text omistaja :postitoimipaikannimi)}
+            :yhteyshenkilo {:henkilotiedot {:etunimi  (get-text omistaja :henkilonnimi :etunimi)      ;; does-not-exist in test
+                                            :sukunimi (get-text omistaja :henkilonnimi :sukunimi)     ;; does-not-exist in test
+                            :yhteystiedot {:email     ...notfound...
+                                           :fax       ...notfound...
+                                           :puhelin   ...notfound...}}}
+            :yritysnimi                               (get-text omistaja :nimi)}})
 
 (defn ->rakennuksen-muuttaminen [xml buildingId]
-  (let [rakennus (select1 xml [:rakval:rakennustieto :> (under [:rakval:rakennusnro (has-text buildingId)])])
-        polished (comp index-maps strip-empty-maps strip-nils convert-booleans)]
+  (let [stripped  (strip-xml-namespaces xml)
+        rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
+        polished  (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
         {:muutostyolaji ...notimplemented...
-         :rakennusnro (-> rakennus (select1 [:rakval:rakennusnro]) text)
-         :verkostoliittymat (-> rakennus (all-of [:rakval:verkostoliittymat]))
+         :rakennusnro (get-text rakennus :rakennusnro)
+         :verkostoliittymat (-> rakennus (all-of [:verkostoliittymat]))
          :rakennuksenOmistajat (->>
-                                 (select rakennus [:rakval:omistaja])
+                                 (select rakennus [:omistaja])
                                  (map ->rakennuksen-omistaja))
-         :osoite {:kunta            (-> rakennus (select1 [:yht:kunta]) text)
-                  :lahiosoite       (-> rakennus (select1 [:yht:osoitenimi :yht:teksti]) text)
-                  :osoitenumero     (-> rakennus (select1 [:yht:osoitenumero]) text)
-                  :osoitenumero2    (-> rakennus (select1 [:yht:osoitenumero2]) text)
-                  :jakokirjain      (-> rakennus (select1 [:yht:jakokirjain]) text)
-                  :jakokirjain2     (-> rakennus (select1 [:yht:jakokirjain2]) text)
-                  :porras           (-> rakennus (select1 [:yht:porras]) text)
-                  :huoneisto        (-> rakennus (select1 [:yht:huoneisto]) text)
-                  :postinumero      (-> rakennus (select1 [:yht:postinumero]) text)
-                  :postitoimipaikannimi (-> rakennus (select1 [:yht:postitoimipaikannimi]) text)
-                  :pistesijanti     ...notimplemented...}
-         :kaytto {:kayttotarkoitus (-> rakennus (select1 [:rakval:kayttotarkoitus]) text)
-                  :rakentajaTyyppi (-> rakennus (select1 [:rakval:rakentajaTyyppi]) text)}
-         :luokitus {:energialuokka (-> rakennus (select1 [:rakval:energialuokka]) text)
-                    :paloluokka (-> rakennus (select1 [:rakval:paloluokka]) text)}
-         :mitat {:kellarinpinta-ala (-> rakennus (select1 [:rakval:kellarinpinta-ala]) text)
-                 :kerrosala (-> rakennus (select1 [:rakval:kerrosala]) text)
-                 :kerrosluku (-> rakennus (select1 [:rakval:kerrosluku]) text)
-                 :kokonaisala (-> rakennus (select1 [:rakval:kokonaisala]) text)
-                 :tilavuus (-> rakennus (select1 [:rakval:tilavuus]) text)}
-         :rakenne {:julkisivu (-> rakennus (select1 [:rakval:julkisivumateriaali]) text)
-                   :kantavaRakennusaine (-> rakennus (select1 [:rakval:rakennusaine]) text)
-                   :rakentamistapa (-> rakennus (select1 [:rakval:rakentamistapa]) text)}
-         :lammitys {:lammitystapa (-> rakennus (select1 [:rakval:lammitystapa]) text)
-                    :lammonlahde (-> rakennus (select1 [:rakval:polttoaine]) text)}
-         :varusteet (-> rakennus (all-of [:rakval:varusteet]))
+         :osoite {:kunta                (get-text rakennus :kunta)
+                  :lahiosoite           (get-text rakennus :osoitenimi :teksti)
+                  :osoitenumero         (get-text rakennus :osoitenumero)
+                  :osoitenumero2        (get-text rakennus :osoitenumero2)
+                  :jakokirjain          (get-text rakennus :jakokirjain)
+                  :jakokirjain2         (get-text rakennus :jakokirjain2)
+                  :porras               (get-text rakennus :porras)
+                  :huoneisto            (get-text rakennus :huoneisto)
+                  :postinumero          (get-text rakennus :postinumero)
+                  :postitoimipaikannimi (get-text rakennus :postitoimipaikannimi)
+                  :pistesijanti         ...notimplemented...}
+         :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
+                  :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
+         :luokitus {:energialuokka      (get-text rakennus :energialuokka)
+                    :paloluokka         (get-text rakennus :paloluokka)}
+         :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
+                 :kerrosala             (get-text rakennus :kerrosala)
+                 :kerrosluku            (get-text rakennus :kerrosluku)
+                 :kokonaisala           (get-text rakennus :kokonaisala)
+                 :tilavuus              (get-text rakennus :tilavuus)}
+         :rakenne {:julkisivu           (get-text rakennus :julkisivumateriaali)
+                   :kantavaRakennusaine (get-text rakennus :rakennusaine)
+                   :rakentamistapa      (get-text rakennus :rakentamistapa)}
+         :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
+                    :lammonlahde        (get-text rakennus :polttoaine)}
+         :varusteet                     (all-of   rakennus :varusteet)
          :huoneistot (->>
-                       (select rakennus [:rakval:valmisHuoneisto])
+                       (select rakennus [:valmisHuoneisto])
                        (map (fn [huoneisto]
-                              {:huoneistoTunnus {:huoneistonumero (-> huoneisto (select1 [:rakval:huoneistonumero]) text)
-                                                 :jakokirjain (-> huoneisto (select1 [:rakval:jakokirjain]) text)
-                                                 :porras (-> huoneisto (select1 [:rakval:porras]) text)}
-                               :huoneistonTyyppi {:huoneistoTyyppi (-> huoneisto (select1 [:rakval:huoneistonTyyppi]) text)
-                                                  :huoneistoala (-> huoneisto (select1 [:rakval:huoneistoala]) text)
-                                                  :huoneluku (-> huoneisto (select1 [:rakval:huoneluku]) text)}
-                               :keittionTyyppi (-> huoneisto (select1 [:rakval:keittionTyyppi]) text)
-                               :varusteet (-> huoneisto (all-of [:rakval:varusteet]))})))}))))
-
-;;
-;; full mappings
-;;
-
-#_(defn ->rakennuksen-muuttaminen-old [propertyId buildingId xml]
-  (let [data (select1 xml [:rakval:Rakennus])]
-    {:verkostoliittymat {:kaapeliKytkin nil
-                         :maakaasuKytkin nil
-                         :sahkoKytkin nil
-                         :vesijohtoKytkin nil
-                         :viemariKytkin nil}
-     :rakennuksenOmistajat {:0 {:_selected "henkilo"
-                                :henkilo {:henkilotiedot {:etunimi nil
-                                                          :hetu nil
-                                                          :sukunimi nil}
-                                          :osoite {:katu nil
-                                                   :postinumero nil
-                                                   :postitoimipaikannimi nil}
-                                          :yhteystiedot {:email nil
-                                                         :fax nil
-                                                         :puhelin nil}}
-                                :yritys {:liikeJaYhteisoTunnus nil
-                                         :osoite {:katu nil
-                                                  :postinumero nil
-                                                  :postitoimipaikannimi nil}
-                                         :yhteyshenkilo {:henkilotiedot {:etunimi nil
-                                                                         :sukunimi nil}
-                                                         :yhteystiedot {:email nil
-                                                                        :fax nil
-                                                                        :puhelin nil}}
-                                         :yritysnimi nil}}}
-     :kaytto {:kayttotarkoitus nil
-              :rakentajaTyyppi nil}
-     :luokitus {:energialuokka nil
-                :paloluokka nil}
-     :mitat {:kellarinpinta-ala nil
-             :kerrosala nil
-             :kerrosluku nil
-             :kokonaisala nil
-             :tilavuus nil}
-     :rakenne {:julkisivu nil
-               :kantavaRakennusaine nil
-               :rakentamistapa nil}
-     :lammitys {:lammitystapa nil
-                :lammonlahde nil}
-     :muutostyolaji nil
-     :varusteet {:kaasuKytkin nil
-                 :lamminvesiKytkin nil
-                 :sahkoKytkin nil
-                 :vaestonsuoja nil
-                 :vesijohtoKytkin nil
-                 :viemariKytkin nil
-                 :saunoja nil
-                 :hissiKytkin nil
-                 :koneellinenilmastointiKytkin nil
-                 :aurinkopaneeliKytkin nil}
-     :huoneistot {:0 {:huoneistoTunnus {:huoneistonumero nil
-                                        :jakokirjain nil
-                                        :porras nil}
-                      :huoneistonTyyppi {:huoneistoTyyppi nil
-                                         :huoneistoala nil
-                                         :huoneluku nil}
-                      :keittionTyyppi nil
-                      :varusteet {:ammeTaiSuihkuKytkin nil
-                                  :lamminvesiKytkin nil
-                                  :parvekeTaiTerassiKytkin nil
-                                  :saunaKytkin nil
-                                  :WCKytkin nil}}}}))
-
+                              {:huoneistoTunnus {:huoneistonumero  (get-text huoneisto :huoneistonumero)
+                                                 :jakokirjain      (get-text huoneisto :jakokirjain)
+                                                 :porras           (get-text huoneisto :porras)}
+                               :huoneistonTyyppi {:huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
+                                                  :huoneistoala    (get-text huoneisto :huoneistoala)
+                                                  :huoneluku       (get-text huoneisto :huoneluku)}
+                               :keittionTyyppi                     (get-text huoneisto :keittionTyyppi)
+                               :varusteet                          (all-of   huoneisto :varusteet)})))}))))
