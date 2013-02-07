@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.schemas)
 
-(defn group [name body] {:name name :type :group :body body})
+(defn group [name & body] {:name name :type :group :body (-> body vector flatten vec)})
 
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
@@ -55,7 +55,8 @@
                         :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                                yhteystiedot]}))
 
-(def party-body [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+(def party-body [henkilon-valitsin
+                 {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
                  {:name "henkilo" :type :group :body henkilo-body}
                  {:name "yritys" :type :group :body yritys-body}])
 
