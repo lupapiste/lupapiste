@@ -419,6 +419,8 @@
                                text: text})
         .success(function() {
           self.email(undefined);
+          self.documentName(undefined);
+          self.documentId(undefined);
           self.text(undefined);
           self.error(undefined);
           repository.reloadApplication(id);
