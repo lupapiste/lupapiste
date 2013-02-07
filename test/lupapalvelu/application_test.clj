@@ -2,12 +2,13 @@
   (:use [lupapalvelu.application]
         [midje.sweet])
   (:require [lupapalvelu.operations :as operations]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
 (def make-documents #'lupapalvelu.application/make-documents)
 
 (defn find-by-schema? [docs schema-name]
-  (some (fn [doc] (when (= schema-name (-> doc :schema :info :name)) doc)) docs))
+  (domain/get-document-by-name {:documents docs} schema-name))
 
 (defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
 
@@ -42,11 +43,10 @@
 (comment
   ; Should rewrite this as a couple of unit tests
   (fact "Assert that proper documents are created"
-    
+
     (let [id (:id (create-app :operation "foo"))
           app (:application (query pena :application :id id))
-          docs (:documents app)
-          find-by-schema? (fn [docs schema-name] (some (fn [doc] (if (= schema-name (-> doc :schema :info :name)) doc)) docs))]
+          docs (:documents app)]
       (count docs) => 4 ; foo, a, b and "hakija".
       (find-by-schema? docs "foo") => truthy
       (find-by-schema? docs "a") => truthy
