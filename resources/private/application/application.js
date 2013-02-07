@@ -81,7 +81,7 @@
     self.cancel = function() { return true; };
   }();
 
-  
+
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
