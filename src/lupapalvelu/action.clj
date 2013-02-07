@@ -51,11 +51,11 @@
     id))
 
 (defcommand "invite"
-  {:parameters [:id :email :title :text :document]
+  {:parameters [:id :email :title :text :documentName :documentId]
    :roles      [:applicant]}
   [{created :created
     user    :user
-    {:keys [id email title text document]} :data {:keys [host]} :web :as command}]
+    {:keys [id email title text documentName documentId]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
@@ -71,7 +71,8 @@
                 {$push {:invites {:title       title
                                   :application application-id
                                   :text        text
-                                  :document    document
+                                  :document    documentName
+                                  :documentId  documentId
                                   :created     created
                                   :email       email
                                   :user        (security/summary invited)
