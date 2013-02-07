@@ -148,7 +148,7 @@
                     <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                     (<span data-bind="text: username"></span>)
                     <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                    <a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a>
+                    <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
                   </li>
                 </ul>
               </div>
@@ -161,7 +161,7 @@
                 <span data-bind="text: user.firstName"></span> <span data-bind="text: user.lastName"></span>
                 (<span data-bind="text: user.username"></span>)
                 - <span data-bind="text: text"></span>
-                <a data-test-id="application-remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
+                  <a data-test-id="application-remove-invite" href="#" data-bind="ltext: 'remove', click: $root.application.removeInvite"></a>
               </li>
             </ul>
             <!--
@@ -304,15 +304,16 @@
           <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content">
-          <div data-bind="with: $root.invite">
+          <form data-bind="with: $root.invite">
             <label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label>
             <input class="form-input text long" id="invite-document" disabled="true" type="text" data-bind="value: document" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
-            <button class="btn btn-primary btn-dialog close"  data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
-          </div>
+            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
+            <h1 class="form-error" data-bind="visible: error, text: error"></h1>
+          </form>
         </div>
       </div>
 

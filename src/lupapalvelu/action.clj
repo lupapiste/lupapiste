@@ -43,9 +43,14 @@
     {:keys [id email title text document]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
-      ;; TODO: check if invited or has already role
+      (if (domain/invited? application email)
+        (fail :already-invited)
       (let [invited (security/get-or-create-user-by-email email)]
-        (mongo/update :applications
+          (if (domain/has-auth? application (:id invited))
+            (fail :already-has-auth)
+            (do
+              (mongo/update
+                :applications
           {:_id application-id
            :invites {$not {$elemMatch {:user.username email}}}}
           {$push {:invites {:title       title
@@ -56,15 +61,15 @@
                             :email       email
                             :user        (security/summary invited)
                             :inviter     (security/summary user)}
-                  :auth (role invited :reader)}})
+                        :auth (role invited :writer)}})
         (future
           (info "sending email to %s" email)
           (if (not (= (suffix email "@") "example.com"))
-            (if (email/send-email email (:title application) (invite-body user application-id host))
-              (info "email was sent successfully")
+          (if (email/send-email email (:title application) (invite-body user application-id host))
+            (info "email was sent successfully")
               (error "email could not be delivered."))
             (debug "...not really")))
-        nil))))
+              nil)))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -76,8 +81,8 @@
         (executed "set-user-to-document" (assoc-in command [:data :name] (:document my-invite)))
         (mongo/update :applications
                       {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
-        {$push {:auth         (role user :writer)}
-                       $pull {:invites      {:user.id (:id user)}}})))))
+                      ;; TODO: should refresh the data - for new invites to get full names
+                      {$pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -160,17 +165,6 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
-;; FIXME yritys?
-(defn user2paasuunnittelija [user]
-  {:henkilo {:henkilotiedot {:etunimi       (:firstName user)
-                             :sukunimi      (:lastName user)}
-             :yhteystiedot {:email          (:email user)
-                            :puhelin        (:phone user)}
-             :osoite {:katu                 (:street user)
-                      :postinumero          (:zip user)
-                      :postitoimipaikannimi (:city user)}}})
-
-
 (defcommand "set-user-to-document"
   {:parameters [:id :name]
    :authenticated true}
@@ -189,5 +183,5 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:schema.info.name name}}}
-              {$set {:documents.$.body (user2paasuunnittelija user)
+              {$set {:documents.$.body (domain/user2henkilo user)
                      :modified (:created command)}})))))))

@@ -17,17 +17,17 @@
         </h1>
 
         <div class="application_summary_info">
-        
+
           <div>
             <p data-bind="ltext: 'application.id'"></p>
             <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>
           </div>
-        
+
           <div data-bind="if: state">
             <p data-bind="ltext: 'application.state'"></p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
           </div>
-        
+
           <div data-bind="with: $root.applicationModel.data">
             <p data-bind="ltext: 'inforequest.created'"></p>
             <span data-bind="if: $data.created">
@@ -39,7 +39,7 @@
             <p data-bind="ltext: 'application.applicant'"></p>
             <span data-bind="text: applicant" data-test-id="inforequest-application-applicant" class="application_summary_text"></span>
           </div>
-          
+
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
@@ -114,11 +114,11 @@
           </tbody>
         </table>
       </div>
-      
+
       <div data-bind="ifnot: attachments().length">
         <i data-bind="ltext: 'inforequest.attachmentsEmpty'" data-test-id="inforequest-attachments-no-attachments"></i>
       </div>
-      
+
       <button
           class="btn btn-primary modal"
           data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
