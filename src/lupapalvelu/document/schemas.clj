@@ -40,12 +40,12 @@
 (def henkilotiedot-minimal-body [{:name "etunimi" :type :string}
                                  {:name "sukunimi" :type :string}])
 
-(def henkilotiedot-body
-  (conj henkilotiedot-minimal-body {:name "hetu" :type :string}))
+(def henkilotiedot {:name "henkilotiedot"
+                    :type :group
+                    :body [henkilotiedot-minimal-body
+                           {:name "hetu" :type :string}]})
 
-(def henkilo-body [{:name "henkilotiedot" :type :group :body henkilotiedot-body}
-                   simple-osoite
-                   yhteystiedot])
+(def henkilo-body [henkilotiedot simple-osoite yhteystiedot])
 
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
                    {:name "liikeJaYhteisoTunnus" :type :string}])
