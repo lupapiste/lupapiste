@@ -18,7 +18,7 @@
 (def ui-components
   {:jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js"]}
-   :underscore   {:js ["underscore.js"]}
+   :underscore   {:js ["underscore.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
    
    :init         {:js [conf "hub.js" "log.js"]}

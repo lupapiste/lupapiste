@@ -511,7 +511,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       $(title)
         .append($("<button>")
           .addClass("icon-remove")
-          .html("[X]")
+          .text("[X]")
           .click(removeDoc));
     }
 
