@@ -206,6 +206,10 @@
       return false;
     },
 
+    isNotOwner: function(model) {
+      return model.role() !== "owner";
+    },
+
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
