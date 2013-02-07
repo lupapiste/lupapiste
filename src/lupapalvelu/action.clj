@@ -76,7 +76,7 @@
                                   :email       email
                                   :user        (security/summary invited)
                                   :inviter     (security/summary user)}
-                        :auth (role invited :reader)}})
+                        :auth (role invited :writer)}})
               (future
                 (info "sending email to %s" email)
                 (if (email/send-email email (:title application) (invite-body user application-id host))
@@ -94,8 +94,7 @@
         (executed "set-user-to-document" (assoc-in command [:data :name] (:document my-invite)))
         (mongo/update :applications
                       {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
-                      {$push {:auth         (role user :writer)}
-                       $pull {:invites      {:user.id (:id user)}}})))))
+                      {$pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
