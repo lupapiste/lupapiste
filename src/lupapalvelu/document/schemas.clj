@@ -42,8 +42,7 @@
 
 (def henkilotiedot {:name "henkilotiedot"
                     :type :group
-                    :body [henkilotiedot-minimal-body
-                           {:name "hetu" :type :string}]})
+                    :body (conj henkilotiedot-minimal-body {:name "hetu" :type :string})})
 
 (def henkilo-body [henkilotiedot simple-osoite yhteystiedot])
 

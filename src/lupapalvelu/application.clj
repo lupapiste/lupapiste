@@ -180,9 +180,10 @@
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
-        new-docs              (cons op-doc required-docs)]
+        new-docs              (cons op-doc required-docs)
+        hakija                (make "hakija")]
     (if user
-      (cons (update-in (make "hakija") (domain/user2henkilo user)) new-docs)
+      (cons #_hakija (assoc-in hakija [:body :henkilo] (domain/user2henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
