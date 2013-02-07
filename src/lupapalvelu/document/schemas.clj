@@ -55,10 +55,10 @@
                         :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                                yhteystiedot]}))
 
-(def party-body (concat henkilon-valitsin
-                        {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                        {:name "henkilo" :type :group :body henkilo-body}
-                        {:name "yritys" :type :group :body yritys-body}))
+(def party-body (conj henkilon-valitsin
+                      {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                      {:name "henkilo" :type :group :body henkilo-body}
+                      {:name "yritys" :type :group :body yritys-body}))
 
 (def patevyys [{:name "koulutus" :type :string}
                {:name "patevyysluokka" :type :select
