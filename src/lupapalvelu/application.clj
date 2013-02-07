@@ -216,7 +216,7 @@
        :roles         {:applicant owner}
        :auth          [owner]
        :operations    [{:operation op :created created}]
-       :documents     (if info-request? [] (make-documents user-summary created nil op))
+       :documents     (if info-request? [] (make-documents user created nil op))
        :attachments   (if info-request? [] (make-attachments created op))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
