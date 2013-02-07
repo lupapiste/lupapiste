@@ -81,7 +81,7 @@
     self.cancel = function() { return true; };
   }();
 
-  
+
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -204,6 +204,10 @@
         })
         .call();
       return false;
+    },
+
+    isNotOwner: function(model) {
+      return model.role() !== "owner";
     },
 
     addOperation: function() {
