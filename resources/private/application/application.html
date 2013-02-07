@@ -337,6 +337,21 @@
         </div>
       </div>
 
+    <div id="dialog-confirm" class="window autosized">
+      <div data-bind="with: $root.removeApplicationModel">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'areyousure'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+        <div>
+          <span data-bind="ltext: 'areyousure.message'"></span>
+        </div>
+        <div class="dialog-content">
+          <button data-bind="click: ok, ltext: 'yes'" class="btn btn-primary btn-dialog close" data-test-id="confirm-delete-yes"></button>
+          <button data-bind="click: cancel, ltext: 'no'" class="btn btn-dialog close" data-test-id="confirm-delete-no"></button>
+        </div>
+      </div>
+    </div>
     </div>
   </section>
 </body>

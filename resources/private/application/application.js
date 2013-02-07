@@ -57,6 +57,31 @@
     }, self);
   }();
 
+  var removeApplicationModel = new function() {
+    var self = this;
+
+    self.applicationId = ko.observable();
+
+    self.init = function(applicationId) {
+      self.applicationId(applicationId);
+      LUPAPISTE.ModalDialog.open("#dialog-confirm");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax
+        .command("cancel-application", {id: this.applicationId()})
+        .success(function() {
+          window.location.hash = "!/applications";
+        })
+        .call();
+      return false;
+    };
+
+    self.cancel = function() { return true; };
+  }();
+
+  
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -188,12 +213,7 @@
 
     cancelApplication: function() {
       var id = application.id();
-      ajax
-        .command("cancel-application", {id: id})
-        .success(function() {
-          window.location.hash = "!/applications";
-        })
-        .call();
+      removeApplicationModel.init(id);
       return false;
     }
 
@@ -306,16 +326,12 @@
       applicationMap.clear().add(x, y).center(x, y, 11);
       inforequestMap.clear().add(x, y).center(x, y, 11);
 
-      // draw shapes NOOOT
-      /*
       if(application.shapes && application.shapes().length > 0) {
         applicationMap.drawShape(application.shapes()[0]);
         inforequestMap.drawShape(application.shapes()[0]);
       }
-      */
 
       // docgen:
-
       var save = function(path, value, callback, data) {
         ajax
           .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
@@ -472,7 +488,8 @@
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian,
-      removeDocModel: removeDocModel
+      removeDocModel: removeDocModel,
+      removeApplicationModel: removeApplicationModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);

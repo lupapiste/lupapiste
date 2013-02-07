@@ -214,7 +214,7 @@ Click enabled by test id
   Click element  xpath=//*[@data-test-id="${id}"]
 
 #
-# Helpser for creating new inforequest and application:
+# Helpser for inforequest and application crud operations:
 #
 
 Create application the fast way
@@ -263,6 +263,13 @@ Prepare new request
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
   # Needed for animation to finish.
   Sleep  1
+
+# Closes the application that is currently open by clicking cancel button
+Close current application
+  Click by test id  application-cancel-btn
+  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-delete-yes"]
+  Click by test id  confirm-delete-yes
+  Wait Until  Element Should Not Be Visible  dialog-confirm
 
 #
 # Jump to application or inforequest:

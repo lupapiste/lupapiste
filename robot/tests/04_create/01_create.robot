@@ -51,8 +51,7 @@ Mikko creates new application
 
 Mikko closes application at Latokuja 3
   Open application  create-app-2
-  Click by test id  application-cancel-btn
-  Go to page  applications
+  Close current application
   Request should be visible  create-app
   Request should be visible  create-info
   Request should not be visible  create-app-2
