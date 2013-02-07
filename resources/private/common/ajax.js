@@ -1,8 +1,6 @@
 var ajax = (function() {
   "use strict";
 
-  var nop = function() { };
-
   var callId = 0;
 
   function Call(url, type) {
