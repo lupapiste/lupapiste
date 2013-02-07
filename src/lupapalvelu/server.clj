@@ -57,6 +57,7 @@
       'lupapalvelu.attachment
       'lupapalvelu.authority-admin
       'lupapalvelu.core
+      'lupapalvelu.domain
       'lupapalvelu.mongo
       'lupapalvelu.security
       'lupapalvelu.tepa))

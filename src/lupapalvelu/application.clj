@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.action :only [application-query-for get-application-as]]
+        [lupapalvelu.domain :only [application-query-for get-application-as]]
         [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -25,14 +25,11 @@
 ;; Common helpers:
 ;;
 
-(defn search-doc [app schema]
-  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
-
 (defn get-applicant-name [app]
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (:creator app)]
       (str first-name \space last-name))
-    (when-let [body (:body (search-doc app "hakija"))]
+    (when-let [body (:body (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
         (get-in body [:yritys :yritysnimi])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
@@ -356,4 +353,5 @@
   {:parameters [:params]}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
+
 

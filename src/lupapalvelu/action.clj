@@ -1,6 +1,7 @@
 (ns lupapalvelu.action
   (:use [monger.operators]
         [lupapalvelu.log]
+        [lupapalvelu.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
@@ -11,23 +12,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
-(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
-
 (defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
-
-(defn application-query-for [user]
-  (case (keyword (:role user))
-    :applicant {:auth.id (:id user)
-                :state {$ne "canceled"}}
-    :authority {:municipality (:municipality user)
-                $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
-    :admin     {:state {$ne "canceled"}}
-    (do
-      (warn "invalid role to get applications")
-      {:_id "-1"} ))) ; should not yield any results
-
-(defn get-application-as [application-id user]
-  (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]}))
 
 (defquery "invites"
   {:authenticated true}
@@ -60,7 +45,7 @@
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
         (fail :already-invited)
-        (let [invited (security/get-or-create-user-by-email email)]
+      (let [invited (security/get-or-create-user-by-email email)]
           (if (domain/has-auth? application (:id invited))
             (fail :already-has-auth)
             (do
@@ -78,11 +63,13 @@
                                   :user         (security/summary invited)
                                   :inviter      (security/summary user)}
                         :auth (role invited :writer)}})
-              (future
-                (info "sending email to %s" email)
-                (if (email/send-email email (:title application) (invite-body user application-id host))
-                  (info "email was sent successfully")
-                  (error "email could not be delivered.")))
+        (future
+          (info "sending email to %s" email)
+          (if (not (= (suffix email "@") "example.com"))
+          (if (email/send-email email (:title application) (invite-body user application-id host))
+            (info "email was sent successfully")
+              (error "email could not be delivered."))
+            (debug "...not really")))
               nil)))))))
 
 (defcommand "approve-invite"
