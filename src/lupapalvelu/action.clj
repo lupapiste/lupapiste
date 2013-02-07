@@ -36,7 +36,7 @@
     id))
 
 (defcommand "invite"
-  {:parameters [:id :email :title :text :documentName :documentId]
+  {:parameters [:id :email :title :text :documentName]
    :roles      [:applicant]}
   [{created :created
     user    :user
