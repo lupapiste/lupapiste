@@ -48,7 +48,7 @@
     this.save = makeSaveFn("save-user-info", ["firstName", "lastName", "street", "city", "zip", "phone"]);
 
     this.updateUserName = function() {
-      $("#user-name").html(this.firstName() + " " + this.lastName());
+      $("#user-name").text(this.firstName() + " " + this.lastName());
       $("#user-name").attr("data-test-role", this.role());
       return this;
     };

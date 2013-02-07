@@ -25,5 +25,5 @@ Proper attachment templates are present
   # Element should not be visible  xpath=//*[@data-test-id='application-attachments-no-attachments']
 
 Mikko closes application
-  Click by test id  application-cancel-btn
+  Close current application
   Wait Until  Element should be visible  applications
