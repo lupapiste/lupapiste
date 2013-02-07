@@ -22,6 +22,7 @@
     "$",
     "ko",
     "moment",
+    "OpenLayers",
     "_",
     "loc",
     "getEvent",
