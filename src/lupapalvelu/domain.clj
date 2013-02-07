@@ -6,6 +6,9 @@
 (defn has-role? [application user-id]
   (not (nil? (role-in-application application user-id))))
 
+(defn has-auth? [{auth :auth} user-id]
+  (or (some (partial = user-id) (map :id auth)) false))
+
 (defn get-document-by-id
   "returns first document from application with the document-id"
   [{documents :documents} document-id]
