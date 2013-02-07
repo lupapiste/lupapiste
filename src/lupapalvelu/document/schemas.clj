@@ -72,26 +72,29 @@
                      simple-osoite
                      yhteystiedot])
 
-(def paasuunnittelija-body (concat henkilon-valitsin
-                                   (conj
-                                     designer-basic
-                                     {:name "patevyys" :type :group :body patevyys})))
+(def paasuunnittelija-body (concat
+                             henkilon-valitsin
+                             (conj
+                               designer-basic
+                               {:name "patevyys" :type :group :body patevyys})))
 
-(def suunnittelija-body (conj
-                         designer-basic
-                         {:name "patevyys" :type :group
-                          :body
-                          (cons {:name "kuntaRoolikoodi" :type :select
-                                  :body [{:name "GEO-suunnittelija"}
-                                         {:name "LVI-suunnittelija"}
-                                         {:name "IV-suunnittelija"}
-                                         {:name "KVV-suunnittelija"}
-                                         {:name "RAK-rakennesuunnittelija"}
-                                         {:name "ARK-rakennussuunnittelija"}
-                                         {:name "ei tiedossa"}
-                                         {:name "Vaikeiden t\u00F6iden suunnittelija"}]
-                                  } patevyys)
-                            })) ; TODO miten liitteet hanskataan
+(def suunnittelija-body (concat
+                          henkilon-valitsin
+                          (conj
+                            designer-basic
+                            {:name "patevyys" :type :group
+                             :body
+                             (cons {:name "kuntaRoolikoodi" :type :select
+                                    :body [{:name "GEO-suunnittelija"}
+                                           {:name "LVI-suunnittelija"}
+                                           {:name "IV-suunnittelija"}
+                                           {:name "KVV-suunnittelija"}
+                                           {:name "RAK-rakennesuunnittelija"}
+                                           {:name "ARK-rakennussuunnittelija"}
+                                           {:name "ei tiedossa"}
+                                           {:name "Vaikeiden t\u00F6iden suunnittelija"}]
+                                    } patevyys)
+                             }))) ; TODO miten liitteet hanskataan
 
 (def huoneisto-body [{:name "huoneistoTunnus" :type :group
                       :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
