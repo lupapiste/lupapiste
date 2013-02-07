@@ -72,8 +72,6 @@
                           :session-cookie-attrs (:cookie env/config)})
   (info "Server running")
   (env/in-dev
-    (warn "*** Applying test fixture")
-    (fixture/apply-fixture "minimal")
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
   ; Sensible return value for -main for repl use.
