@@ -31,19 +31,20 @@
                           {:name "postitoimipaikannimi" :type :string :size "m"}
                           {:name "pistesijanti" :type :string}]}])
 
-(def yhteystiedot-body [{:name "puhelin" :type :string :subtype :tel}
-                        {:name "email" :type :string :subtype :email}
-                        {:name "fax" :type :string :subtype :tel}])
+(def yhteystiedot {:name "yhteystiedot"
+                   :type :group
+                   :body [{:name "puhelin" :type :string :subtype :tel}
+                          {:name "email" :type :string :subtype :email}
+                          {:name "fax" :type :string :subtype :tel}]})
 
 (def henkilotiedot-minimal-body [{:name "etunimi" :type :string}
                                  {:name "sukunimi" :type :string}])
 
-(def henkilotiedot-body
-  (conj henkilotiedot-minimal-body {:name "hetu" :type :string}))
+(def henkilotiedot {:name "henkilotiedot"
+                    :type :group
+                    :body (conj henkilotiedot-minimal-body {:name "hetu" :type :string})})
 
-(def henkilo-body [{:name "henkilotiedot" :type :group :body henkilotiedot-body}
-                   simple-osoite
-                   {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
+(def henkilo-body [henkilotiedot simple-osoite yhteystiedot])
 
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
                    {:name "liikeJaYhteisoTunnus" :type :string}])
@@ -52,7 +53,7 @@
                        simple-osoite
                        {:name "yhteyshenkilo" :type :group
                         :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
-                               {:name "yhteystiedot" :type :group :body yhteystiedot-body}]}))
+                               yhteystiedot]}))
 
 (def party-body [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
                  {:name "henkilo" :type :group :body henkilo-body}
@@ -69,7 +70,7 @@
 (def designer-basic [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                      {:name "yritys" :type :group :body yritys-minimal-body}
                      simple-osoite
-                     {:name "yhteystiedot" :type :group :body yhteystiedot-body}])
+                     yhteystiedot])
 
 (def paasuunnittelija-body (concat henkilon-valitsin
                                    (conj
