@@ -48,3 +48,18 @@
                                   :osoite {:katu "katu"
                                            :postinumero "123"
                                            :postitoimipaikannimi "tampere"}})))
+
+(facts
+  (let [app {:documents [{:schema {:info {:name "foo"}}
+                          :body "foo"}
+                         {:schema {:info {:name "bar"}}
+                          :body "bar1"}
+                         {:schema {:info {:name "bar"}}
+                          :body "bar2"}]}]
+    (get-document-by-name app "foo") => (contains {:body "foo"})
+    (get-document-by-name app "bar") => (contains {:body "bar1"})
+    (get-document-by-name app "boz") => nil
+    (get-documents-by-name app "foo") => (just [(contains {:body "foo"})])
+    (get-documents-by-name app "bar") => (just [(contains {:body "bar1"}) (contains {:body "bar2"})])
+    (get-documents-by-name app "boz") => ()))
+
