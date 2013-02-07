@@ -32,3 +32,19 @@
 (facts
   (fact (invited? {:invites [{:user {:username "mikko@example.com"}}]} "mikko@example.com") => true)
   (fact (invited? {:invites []} "mikko@example.com") => false))
+
+(facts
+  (let [user {:firstName "kari"
+              :lastName  "tapio"
+              :email     "kari.tapio@example.com"
+              :phone     "050"
+              :street    "katu"
+              :zip       "123"
+              :city      "tampere"}]
+    (fact (user2henkilo user) => {:henkilotiedot {:etunimi "kari"
+                                                  :sukunimi "tapio"}
+                                  :yhteystiedot {:email "kari.tapio@example.com"
+                                                 :puhelin "050"}
+                                  :osoite {:katu "katu"
+                                           :postinumero "123"
+                                           :postitoimipaikannimi "tampere"}})))
