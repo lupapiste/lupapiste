@@ -182,7 +182,7 @@
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)]
     (if user
-      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge {:etunimi (:firstName user) :sukunimi (:lastName user)}) new-docs)
+      (cons (update-in (make "hakija") (domain/user2henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
