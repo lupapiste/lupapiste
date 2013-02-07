@@ -62,6 +62,9 @@
 (defn by-id [collection id]
   (with-id (mc/find-one-as-map collection {:_id id})))
 
+(defn exists? [collection id]
+  (= id (:_id (mc/find-one-as-map collection {:_id id} [:_id]))))
+
 (defn select
   "returns multiple entries by matching the monger query"
   ([collection]
