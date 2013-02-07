@@ -22,17 +22,17 @@
       var id = application.id;
       ajax
         .query("municipality", {municipality: application.municipality})
-        .success(function (data) { if (self.application.id === id) self.setOperations(data.operations).treeReady(true); })
+        .success(function (data) { if (self.application.id === id) { self.setOperations(data.operations).treeReady(true); }})
         .call();
       return self;
     };
 
     self.setOperations = function(operations) {
-      if (self.tree) self.tree.reset(operations);
+      if (self.tree) { self.tree.reset(operations); }
       return self;
     };
 
-    self.generateLast = function(val, key) {
+    self.generateLast = function(val) {
       var e = $("<div>").addClass("tree-magic");
       e.append($("<a>")
         .addClass("tree-action")
@@ -47,7 +47,8 @@
               target
                 .parent()
                 .empty()
-                .append($("<img>").attr("src", "/img/ajax-loader.gif"))
+                .append($("<img>")
+                  .attr("src", "/img/ajax-loader.gif"));
             }, 200);
           return false;
         }));
@@ -75,7 +76,7 @@
 
   hub.subscribe("application-loaded", function(e) {
     var application = e.applicationDetails.application;
-    if (currentId === application.id) model.init(application);
+    if (currentId === application.id) { model.init(application); }
   });
 
   $(function() {

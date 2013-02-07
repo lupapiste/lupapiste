@@ -106,12 +106,12 @@
     // all data in here
     data: ko.observable(),
 
-    openOskariMap: function(model) {
+    openOskariMap: function() {
       var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
       window.open(url);
       var applicationId = application.id();
 
-      hub.subscribe("map-initialized", function(e) {
+      hub.subscribe("map-initialized", function() {
         if(application.shapes && application.shapes().length > 0) {
           oskariDrawShape(application.shapes()[0]);
         }

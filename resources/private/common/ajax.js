@@ -33,7 +33,7 @@ var ajax = (function() {
     self.successHandler = function(e) { notify.success("ok",e); };
     self.errorHandler = function(e) { notify.error("error",e); };
     self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
-    self.completeHandler = function(jqXHR, textStatus) { };
+    self.completeHandler = function() { };
 
     self.raw = function(v) {
       self.rawData = (v === undefined) ? true : v;
@@ -51,7 +51,7 @@ var ajax = (function() {
     };
 
     self.params = function(data) {
-      if (data) _.each(data, function(v, k) { self.param(k, v); });
+      if (data) { _.each(data, function(v, k) { self.param(k, v); }); }
       return self;
     };
 

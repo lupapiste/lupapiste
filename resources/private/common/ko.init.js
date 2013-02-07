@@ -24,10 +24,6 @@
     }
   };
 
-  function withLeadinngZero(n) {
-    return (n < 10) ? "0" + n : n;
-  }
-
   ko.bindingHandlers.dateTimeString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
