@@ -8,7 +8,7 @@
 
 (defcommand "change-passwd"
   {:parameters [:oldPassword :newPassword]
-   :roles      [:applicant :authority]}
+   :authenticated true}
   [{{:keys [oldPassword newPassword]} :data user :user}]
   (let [user-id (:id user)
         user-data (mongo/by-id :users user-id)]
@@ -21,14 +21,11 @@
         (warn "Password change: failed: old password does not match: user-id=%s" user-id)
         (fail :old-password-does-not-match)))))
 
-(defquery "get-user-info"
-  {:roles [:applicant :authority]}
-  [{user :user}]
-  (ok :user user))
+(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
 (defcommand "save-user-info"
   {:parameters [:firstName :lastName :street :city :zip :phone]
-   :roles      [:applicant :authority]}
+   :authenticated true}
   [{data :data user :user}]
   (let [user-id (:id user)]
     (mongo/update-by-id

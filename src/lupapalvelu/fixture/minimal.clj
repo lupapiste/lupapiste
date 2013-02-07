@@ -42,7 +42,7 @@
     :username "sonja"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
-              :apikey "5056e6d3aa24a1c901e6b9dd"}}
+              :apikey "5056e6d3aa24a1c901e6b9d1"}}
    ;; Ronja Sibbo - Sipoon lupa-arkkitehti
    ;; ronja / sonja
    {:id "777777777777777777000024"
@@ -109,7 +109,8 @@
     :postalCode "33200"
     :username "teppo@example.com"
     :private {:salt "$2a$10$KKBZSYTFTEFlRrQPa.PYPe"
-              :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"}
+              :password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
+              :apikey "502cb9e58426c613c8b85abb"}
     :phone "0505503171"
     :email "teppo@example.com"
     :personId "210281-0001"
@@ -147,7 +148,29 @@
     :phone "0102030405"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
-              :apikey "602cb9e58426c613c8b85abc"}}])
+              :apikey "502cb9e58426c613c8b85abd"}}
+   {:id  "51112424c26b7342d92acf3c"
+    :enabled  false
+    :username  "dummy"
+    :email  "dummy@example.com"
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
+              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
+              :apikey "602cb9e58426c613c8b85abe"} ; Dummy user has apikey, should not actually happen
+    :role  "applicant"}
+   {:id  "51112424c26b7342d92acf3d"
+    :enabled  false
+    :username  "dummy2"
+    :email  "dummy2@example.com"
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
+              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
+    :role  "applicant"}
+   {:id  "51112424c26b7342d92acf3e"
+    :enabled  false
+    :username  "dummy3"
+    :email  "dummy3@example.com"
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
+              :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
+    :role  "applicant"}])
 
 (def municipalities [{:id "753"
                       :municipalityCode "753"

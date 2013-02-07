@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [lupapalvelu.log]
-        [lupapalvelu.action :only [get-application-as application-query-for]]
+        [lupapalvelu.domain :only [get-application-as application-query-for]]
         [clojure.string :only [split join trim]])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
