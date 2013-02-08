@@ -211,6 +211,7 @@ Click enabled by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
+  Wait Until  Element should be visible  xpath=//*[@data-test-id="${id}"]
   Click element  xpath=//*[@data-test-id="${id}"]
 
 #
