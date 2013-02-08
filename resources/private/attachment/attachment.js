@@ -171,10 +171,6 @@ var attachment = (function() {
     resetUploadIframe();
   });
 
-  function toApplication() {
-    window.location.href = "#!/application/" + model.application.id();
-  }
-
   $(function() {
     ko.applyBindings({
       attachment: model,
