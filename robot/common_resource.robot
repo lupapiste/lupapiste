@@ -268,9 +268,9 @@ Prepare new request
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
-  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-delete-yes"]
-  Click by test id  confirm-delete-yes
-  Wait Until  Element Should Not Be Visible  dialog-confirm
+  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-yes"]
+  Click by test id  confirm-yes
+  Wait Until  Element Should Not Be Visible  dialog-confirm-cancel
 
 #
 # Jump to application or inforequest:
