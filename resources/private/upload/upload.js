@@ -12,6 +12,7 @@ LUPAPISTE.Upload = {
 };
 
 LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage) {
+  "use strict";
   LUPAPISTE.Upload.applicationId(applicationId);
   LUPAPISTE.Upload.attachmentId(attachmentId);
   LUPAPISTE.Upload.attachmentType(attachmentType);
@@ -20,6 +21,7 @@ LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
+  "use strict";
   if (applicationId) {
     ajax
       .query("attachment-types",{id: applicationId})
@@ -34,11 +36,13 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
 };
 
 LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector) {
+  "use strict";
   LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null);
   LUPAPISTE.Upload.loadTypes(applicationId);
 };
 
 LUPAPISTE.Upload.initFromURLParams = function() {
+  "use strict";
   if (location.search) {
     var applicationId = pageutil.getURLParameter("applicationId");
     LUPAPISTE.Upload.setModel(applicationId,

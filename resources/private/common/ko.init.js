@@ -20,22 +20,14 @@
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      var date = new Date(value);
-      $(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear());
+      $(element).text(moment(value).format("D.M.YYYY"));
     }
   };
-
-  function withLeadinngZero(n) {
-    return (n < 10) ? "0" + n : n;
-  }
 
   ko.bindingHandlers.dateTimeString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      var date = new Date(value);
-      var hours = withLeadinngZero(date.getHours());
-      var mins = withLeadinngZero(date.getMinutes());
-      $(element).text(date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + hours + ":" + mins);
+      $(element).text(moment(value).format("D.M.YYYY HH:mm"));
     }
   };
 
@@ -69,7 +61,7 @@
         if (value.firstName && value.lastName) { fullName += "\u00a0"; }
         if (value.lastName) { fullName += _.isFunction(value.lastName) ? value.lastName() : value.lastName; }
       }
-      $(element).html(fullName);
+      $(element).text(fullName);
     }
   };
 

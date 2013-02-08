@@ -40,7 +40,7 @@ var selectionTree = (function () {
         $(d).animate({ "margin-left": self.width }, self.speed, function () { d.parentNode.removeChild(d); });
         $(n).animate({ "margin-left": 0 }, self.speed);
         self.crumbs.pop();
-        self.breadcrumbs.html(self.crumbs.join(" / "));
+        self.breadcrumbs.text(self.crumbs.join(" / "));
       }
       return self;
     };
@@ -49,7 +49,7 @@ var selectionTree = (function () {
       if (self.stack.length > 0) {
         var d = self.stack.pop();
         $(d).animate({ "margin-left": self.width }, self.speed, self.gostart2);
-        self.breadcrumbs.animate({ "opacity": 0.0 }, self.speed, function () { self.breadcrumbs.html("").css("opacity", 1.0); });
+        self.breadcrumbs.animate({ "opacity": 0.0 }, self.speed, function () { self.breadcrumbs.text("").css("opacity", 1.0); });
         var p = d.parentNode;
         _.each(self.stack, function (n) { p.removeChild(n); });
       } else {
@@ -78,9 +78,9 @@ var selectionTree = (function () {
       }
       self.crumbs = [];
       self.stack = [];
-      self.breadcrumbs.html("");
+      self.breadcrumbs.text("");
       self.content.empty();
-      if (newData) self.data = newData;
+      if (newData) { self.data = newData; }
       if (self.data) {
         var n = self.make(self.data);
         self.stack.push(n);
@@ -98,7 +98,7 @@ var selectionTree = (function () {
         event.stopPropagation();
 
         self.crumbs.push(loc(self.prefix + "." + key));
-        self.breadcrumbs.html(self.crumbs.join(" / "));
+        self.breadcrumbs.text(self.crumbs.join(" / "));
 
         var terminal = !_.isArray(val);
         var next = terminal ? self.makeTerminalElement(val, key) : self.make(val);
@@ -118,11 +118,12 @@ var selectionTree = (function () {
     self.make = function(t) {
       var d = document.createElement("div");
       var link;
+      var icon;
       d.setAttribute("class", "tree-magic");
       _.each(t, function (v) { d.appendChild(self.makeLink(v[0], v[1], d)); });
 
       if (self.stack.length > 0) {
-        var icon = document.createElement("span");
+        icon = document.createElement("span");
         icon.className = "font-icon icon-tree-back";
         link = document.createElement("a");
         link.className = "tree-back";
@@ -134,7 +135,7 @@ var selectionTree = (function () {
       }
 
       if (self.stack.length > 1) {
-        var icon = document.createElement("span");
+        icon = document.createElement("span");
         icon.className = "font-icon icon-tree-start";
         link = document.createElement("a");
         link.className = "tree-start";

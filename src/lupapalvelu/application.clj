@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.log]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.action :only [application-query-for get-application-as]]
+        [lupapalvelu.domain :only [application-query-for get-application-as]]
         [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -21,29 +21,29 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 ;;
+;;
+;; Common helpers:
+;;
+
+(defn get-applicant-name [app]
+  (if (:infoRequest app)
+    (let [{first-name :firstName last-name :lastName} (:creator app)]
+      (str first-name \space last-name))
+    (when-let [body (:body (domain/get-document-by-name app "hakija"))]
+      (if (= (:_selected body) "yritys")
+        (get-in body [:yritys :yritysnimi])
+        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+          (str first-name \space last-name))))))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant
-                   :schema "hakija"
-                   :f (fn [doc]
-                        (let [body (:body doc)]
-                          (if (= (:_selected body) "yritys")
-                            (-> body :yritys :yritysnimi)
-                            (str (-> body :henkilo :henkilotiedot :etunimi) \space (-> body :henkilo :henkilotiedot :sukunimi)))))}])
-
-(defn search-doc [app schema]
-  (some (fn [doc] (if (= schema (-> doc :schema :info :name)) doc)) (:documents app)))
+(def meta-fields [{:field :applicant :fn get-applicant-name}])
 
 (defn with-meta-fields [app]
-  (reduce (fn [app {:keys [field schema f]}]
-            (if-let [doc (search-doc app schema)]
-              (assoc app field (f doc))
-              app))
-          app
-          meta-fields))
+  (reduce (fn [app {field :field f :fn}] (assoc app field (f app))) app meta-fields))
 
 ;;
 ;; Query application:
@@ -170,16 +170,17 @@
      :versions []}))
 
 (defn- make-documents [user created existing-documents op]
-  (let [make (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
+  (let [make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
         op-info               (operations/operations op)
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
-        new-docs              (cons op-doc required-docs)]
+        new-docs              (cons op-doc required-docs)
+        hakija                (make "hakija")]
     (if user
-      (cons (update-in (make "hakija") [:body :henkilo :henkilotiedot] merge {:etunimi (:firstName user) :sukunimi (:lastName user)}) new-docs)
+      (cons #_hakija (assoc-in hakija [:body :henkilo] (domain/user2henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
@@ -200,6 +201,7 @@
     (mongo/insert :applications
       {:id            id
        :created       created
+       :creator       user-summary
        :modified      created
        :infoRequest   info-request?
        :state         (if info-request? :open :draft)
@@ -211,7 +213,7 @@
        :roles         {:applicant owner}
        :auth          [owner]
        :operations    [{:operation op :created created}]
-       :documents     (if info-request? [] (make-documents user-summary created nil op))
+       :documents     (if info-request? [] (make-documents user created nil op))
        :attachments   (if info-request? [] (make-attachments created op))
        :allowedAttachmentTypes (if info-request?
                                  [[:muut [:muu]]]
@@ -260,7 +262,7 @@
 ;; krysp enrichment
 ;;
 
-(defquery "merge-details-from-krysp"
+(defcommand "merge-details-from-krysp"
   {:parameters [:id :buildingId]
    :roles-in   [:applicant :authority]}
   [{{:keys [id buildingId]} :data :as command}]
@@ -281,7 +283,7 @@
           (ok))
         (fail :no-legacy-available)))))
 
-(defquery "get-building-info-from-legacy"
+(defcommand "get-building-info-from-legacy"
   {:parameters [:id]
    :roles-in   [:applicant :authority]}
   [{{:keys [id]} :data :as command}]
@@ -300,7 +302,7 @@
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   :address
                   :title
-                  :applicant
+                  get-applicant-name
                   :submitted
                   :modified
                   :state
@@ -319,7 +321,6 @@
 (defn make-query [query params]
   (let [search (params :sSearch)
         kind (params :kind)]
-    (println "Search:" search "Kind:" kind)
     (merge
       query
       (condp = kind
@@ -342,7 +343,7 @@
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
         echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
-    
+
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
@@ -353,17 +354,4 @@
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
 
-(comment
-  (mc/aggregate :applications [{$skip 1 $limit 1}])
-  (require '[monger.collection :as mc])
-  (query/with-collection "applications"
-    (query/find {:state "draft"})
-    (query/skip 1)
-    (query/limit 2)
-    (query/fields [:_id :state]))
-  (mc/aggregate :applications [{$skip 1 $limit 1} {$project {:state 1}}])
-  (count (mongo/select :applications {} {:_id 1}))
-  (get-in (search-doc a "hakija") [:body :henkilo :henkilotiedot])
-  (:applicant (with-meta-fields ))
-  (mongo/count :applications {:state "openz"})
-  (mongo/select :applications (application-query-for user)))
+

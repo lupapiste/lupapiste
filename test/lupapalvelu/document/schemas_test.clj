@@ -11,3 +11,7 @@
         =>
           {"a" {:info {:name "a"}}
            "b" {:info {:name "b"}}}))
+
+(facts "group"
+  (fact (group "a" 1 2 3) => {:name "a", :type :group, :body [1 2 3]})
+  (fact (group "a" [1 [2 [3]]]) => {:name "a", :type :group, :body [1 2 3]}))

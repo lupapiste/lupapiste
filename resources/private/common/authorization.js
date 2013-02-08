@@ -14,7 +14,7 @@ var authorization = (function() {
       ajax.query("allowed-actions", {id: application.id})
         .success(function(d) {
           self.data(d.actions);
-          if (callback) callback();
+          if (callback) { callback(); }
         })
         .call();
     };

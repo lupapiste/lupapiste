@@ -33,7 +33,7 @@ var attachment = (function() {
     self.rejectAttachment = function() {
       var id = self.application.id;
       ajax.command("reject-attachment", { id: id, attachmentId: self.attachmentId})
-        .success(function(d) {
+        .success(function() {
           notify.success("liite hyl\u00E4tty",model);
           repository.reloadApplication(id);
         })
@@ -44,7 +44,7 @@ var attachment = (function() {
     self.approveAttachment = function() {
       var id = self.application.id;
       ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
-        .success(function(d) {
+        .success(function() {
           notify.success("liite hyv\u00E4ksytty",model);
           repository.reloadApplication(id);
         })
@@ -73,20 +73,20 @@ var attachment = (function() {
 
     isImage: function() {
       var version = this.latestVersion();
-      if (!version) return false;
+      if (!version) { return false; }
       var contentType = version.contentType;
       return contentType && contentType.indexOf('image/') === 0;
     },
 
     isPdf: function() {
       var version = this.latestVersion();
-      if (!version) return false;
+      if (!version) { return false; }
       return version.contentType === "application/pdf";
     },
 
     isPlainText: function() {
       var version = this.latestVersion();
-      if (!version) return false;
+      if (!version) { return false; }
       return version.contentType === "text/plain";
     },
 
@@ -102,7 +102,7 @@ var attachment = (function() {
   model.attachmentType.subscribe(function(attachmentType) {
     var type = model.type();
     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
-    if (prevAttachmentType != attachmentType) {
+    if (prevAttachmentType !== attachmentType) {
       ajax
         .command("set-attachment-type",
           {id:              model.application.id(),
@@ -116,7 +116,7 @@ var attachment = (function() {
   });
 
   function showAttachment(application) {
-    if (!applicationId || !attachmentId) return;
+    if (!applicationId || !attachmentId) { return; }
     var attachment = _.filter(application.attachments, function(value) {return value.id === attachmentId;})[0];
     if (!attachment) {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
@@ -132,6 +132,8 @@ var attachment = (function() {
     model.attachmentType(type);
     model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
+    
+    attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'), application.allowedAttachmentTypes, model.attachmentType());
 
     model.application.id(applicationId);
     model.application.title(application.title);
@@ -155,7 +157,7 @@ var attachment = (function() {
 
   hub.subscribe("application-loaded", function(data) {
     var app = data.applicationDetails.application;
-    if (applicationId === app.id) showAttachment(app);
+    if (applicationId === app.id) { showAttachment(app); }
   });
 
   function resetUploadIframe() {
@@ -165,7 +167,7 @@ var attachment = (function() {
 
   hub.subscribe("upload-cancelled", LUPAPISTE.ModalDialog.close);
 
-  hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function(e) {
+  hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
   });
 

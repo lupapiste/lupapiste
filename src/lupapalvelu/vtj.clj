@@ -1,14 +1,61 @@
 (ns lupapalvelu.vtj
-  (:use [ring.util.codec :only [url-decode]])
-  (:require [clojure.string :as string]
-            [net.cgrand.enlive-html :as enlive]))
+  (:require [ring.util.codec :refer [form-decode]]
+            [lupapalvelu.xml.krysp.reader :refer [get-text strip-xml-namespaces]]
+            [sade.xml :refer :all]))
 
-(defn- strip-ns [s] (string/replace s #"ns\d*:" ""))
-(defn- strip-plus [s] (string/replace s #"\+" " "))
-(defn- content [t] (-> t first :content first))
-(defn- select [d & path] (-> d (enlive/select path) content))
-(defn- parse [s] (-> s (url-decode "ISO-8859-1") strip-ns strip-plus enlive/xml-resource))
+(defn parse-vtj [s]
+  (let [encoding "ISO-8859-1"]
+    (-> s
+      (form-decode encoding)
+      (parse :encoding encoding)
+      strip-xml-namespaces)))
 
-(defn extract [s m]
-  (let [parsed (parse s)]
-    (into {} (for [[k v] m] [k (apply select parsed v)]))))
+(defn extract-vtj [s]
+  (let [xml (parse-vtj s)]
+    {:firstName   (get-text xml :NykyisetEtunimet :Etunimet)
+     :lastName    (get-text xml :NykyinenSukunimi :Sukunimi)
+     :street      (get-text xml :VakinainenKotimainenLahiosoite :LahiosoiteS)
+     :zip         (get-text xml :VakinainenKotimainenLahiosoite :Postinumero)
+     :city        (get-text xml :VakinainenKotimainenLahiosoite :PostitoimipaikkaS)}))
+
+(comment "Osuuuspankki test dude"
+         {:VTJHenkiloVastaussanoma
+          {:Henkilo
+           {:Kuolintiedot {:Kuolinpvm nil},
+            :NykyisetEtunimet {:Etunimet "Sylvi Sofie"},
+            :VakinainenUlkomainenLahiosoite
+            {:AsuminenAlkupvm nil,
+             :UlkomainenPaikkakuntaJaValtioS nil,
+             :Valtiokoodi3 nil,
+             :UlkomainenLahiosoite nil,
+             :AsuminenLoppupvm nil,
+             :UlkomainenPaikkakuntaJaValtioR nil,
+             :UlkomainenPaikkakuntaJaValtioSelvakielinen nil},
+            :Kotikunta
+            {:KuntasuhdeAlkupvm "20050525",
+             :Kuntanumero "297",
+             :KuntaS "Kuopio",
+             :KuntaR "Kuopio"},
+            :Henkilotunnus "081181-9984",
+            :Aidinkieli
+            {:KieliS "suomi",
+             :KieliR "finska",
+             :Kielikoodi "fi",
+             :KieliSelvakielinen nil},
+            :VakinainenKotimainenLahiosoite
+            {:AsuminenAlkupvm "20050525",
+             :Postinumero "70100",
+             :LahiosoiteS "Sep\u00e4nkatu 11 A 5",
+             :LahiosoiteR nil,
+             :AsuminenLoppupvm nil,
+             :PostitoimipaikkaR "KUOPIO",
+             :PostitoimipaikkaS "KUOPIO"},
+            :SuomenKansalaisuusTietokoodi "1",
+            :NykyinenSukunimi {:Sukunimi "Marttila"}},
+           :Paluukoodi "Haku onnistui",
+           :Asiakasinfo
+           {:InfoE "08.02.2013 00:36",
+            :InfoS "08.02.2013 00:36",
+            :InfoR "08.02.2013 00:36"},
+           :Hakuperusteet
+           {:Henkilotunnus "081181-9984", :SahkoinenAsiointitunnus nil}}})

@@ -13,19 +13,6 @@ var notify = (function() {
     env.level = level;
   }
 
-  function getMessage(type, title, data) {
-    var msg = {
-      type : type,
-      title : title,
-      animate_speed : 1000,
-      delay : 5000
-    };
-    if (env.level === level.DEBUG) {
-      msg.text = JSON.stringify(data);
-    }
-    return msg;
-  }
-
   function success(title, data) {
     debug(title, data);
   }

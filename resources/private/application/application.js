@@ -57,6 +57,31 @@
     }, self);
   }();
 
+  var removeApplicationModel = new function() {
+    var self = this;
+
+    self.applicationId = ko.observable();
+
+    self.init = function(applicationId) {
+      self.applicationId(applicationId);
+      LUPAPISTE.ModalDialog.open("#dialog-confirm");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax
+        .command("cancel-application", {id: this.applicationId()})
+        .success(function() {
+          window.location.hash = "!/applications";
+        })
+        .call();
+      return false;
+    };
+
+    self.cancel = function() { return true; };
+  }();
+
+
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -72,7 +97,7 @@
     address: ko.observable(),
     verdict: ko.observable(),
     operations: ko.observable(),
-
+    applicant: ko.observable(),
     assignee: ko.observable(),
 
     // new stuff
@@ -81,12 +106,12 @@
     // all data in here
     data: ko.observable(),
 
-    openOskariMap: function(model) {
+    openOskariMap: function() {
       var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
       window.open(url);
       var applicationId = application.id();
 
-      hub.subscribe("map-initialized", function(e) {
+      hub.subscribe("map-initialized", function() {
         if(application.shapes && application.shapes().length > 0) {
           oskariDrawShape(application.shapes()[0]);
         }
@@ -137,17 +162,6 @@
       return false;
     },
 
-    setMeAsPaasuunnittelija: function(model) {
-      var applicationId = application.id();
-      ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
-      .success(function() {
-        notify.success("tiedot tallennettu",model);
-        repository.reloadApplication(applicationId);
-      })
-      .call();
-      return false;
-    },
-
     approveApplication: function(model) {
       var applicationId = application.id();
       ajax.command("approve-application", { id: applicationId})
@@ -181,6 +195,10 @@
       return false;
     },
 
+    isNotOwner: function(model) {
+      return model.role() !== "owner";
+    },
+
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
@@ -188,12 +206,7 @@
 
     cancelApplication: function() {
       var id = application.id();
-      ajax
-        .command("cancel-application", {id: id})
-        .success(function() {
-          window.location.hash = "!/applications";
-        })
-        .call();
+      removeApplicationModel.init(id);
       return false;
     }
 
@@ -216,10 +229,8 @@
   };
 
   function updateAssignee(value) {
-    debug("updateAssignee called, assigneeId: ", value);
     // do not update assignee if page is still initializing
     if (isInitializing) {
-      debug("isInitializing, return");
       return;
     }
 
@@ -230,7 +241,6 @@
 
     var assigneeId = value ? value : null;
 
-    debug("Setting application " + currentId + " assignee to " + assigneeId);
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
       .success(function() {})
       .error(function(e) { error(e); })
@@ -256,15 +266,7 @@
   application.assignee.subscribe(function(v) { updateAssignee(v); });
 
   function resolveApplicationAssignee(roles) {
-    debug("resolveApplicationAssignee called, roles: ", roles);
-    if (roles && roles.authority) {
-      var auth = new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName);
-      debug("resolved authority: ", auth);
-      return auth;
-    } else {
-      debug("not assigned");
-      return null;
-    }
+    return (roles && roles.authority) ? new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName) : null;
   }
 
   function initAuthoritiesSelectList(data) {
@@ -275,9 +277,7 @@
   }
 
   function showApplication(applicationDetails) {
-    debug("set isInitializing to true");
     isInitializing = true;
-    debug("showApplication called", applicationDetails);
     authorizationModel.refresh(applicationDetails.application,function() {
 
       // new data mapping
@@ -285,10 +285,6 @@
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
-
-      // Operations:
-
-      application.operations(app.operations);
 
       // Comments:
 
@@ -323,16 +319,12 @@
       applicationMap.clear().add(x, y).center(x, y, 11);
       inforequestMap.clear().add(x, y).center(x, y, 11);
 
-      // draw shapes NOOOT
-      /*
       if(application.shapes && application.shapes().length > 0) {
         applicationMap.drawShape(application.shapes()[0]);
         inforequestMap.drawShape(application.shapes()[0]);
       }
-      */
 
       // docgen:
-
       var save = function(path, value, callback, data) {
         ajax
           .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
@@ -409,22 +401,33 @@
 
     self.email = ko.observable();
     self.text = ko.observable();
+    self.documentName = ko.observable();
+    self.documentId = ko.observable();
+    self.error = ko.observable();
 
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
+      var documentName = model.documentName();
+      var documentId = model.documentId();
       var id = application.id();
       ajax.command("invite", { id: id,
+                               documentName: documentName,
+                               documentId: documentId,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
         .success(function() {
           self.email(undefined);
+          self.documentName(undefined);
+          self.documentId(undefined);
           self.text(undefined);
+          self.error(undefined);
           repository.reloadApplication(id);
+          LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
-          notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
+          self.error(d.text);
         })
         .call();
       return false;
@@ -454,10 +457,8 @@
     $(selected_tab).fadeIn();
   }
 
-  var accordian = {
-    accordianClick: function(data, event) {
-      accordion.toggle(event);
-    }
+  var accordian = function(data, event) {
+    accordion.toggle(event);
   };
 
   var initApplication = function(e) {
@@ -485,7 +486,8 @@
       authorization: authorizationModel,
       tab: tab,
       accordian: accordian,
-      removeDocModel: removeDocModel
+      removeDocModel: removeDocModel,
+      removeApplicationModel: removeApplicationModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
