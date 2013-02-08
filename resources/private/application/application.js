@@ -468,7 +468,6 @@
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
     if(newId !== currentId) {
-      debug("reload application(old,new)",currentId,newId);
       currentId = newId;
       applicationMap.updateSize();
       inforequestMap.updateSize();
