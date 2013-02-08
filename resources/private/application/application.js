@@ -125,7 +125,7 @@
         var drawing = "" + e.data.drawing;
         ajax.command("save-application-shape", {id: applicationId, shape: drawing})
         .success(function() {
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       });
@@ -136,7 +136,7 @@
       ajax.command("submit-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus j\u00E4tetty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -147,7 +147,7 @@
       ajax.command("mark-inforequest-answered", {id: applicationId})
         .success(function() {
           notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -157,7 +157,7 @@
       var id = application.id();
       ajax.command("convert-to-application", {id: id})
         .success(function() {
-          repository.reloadApplication(id);
+          repository.load(id);
           window.location.hash = "!/application/" + id;
         })
         .call();
@@ -169,7 +169,7 @@
       ajax.command("approve-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -180,7 +180,7 @@
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function() {
           notify.success("kutsu poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -191,7 +191,7 @@
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function() {
           notify.success("oikeus poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -210,8 +210,11 @@
       var id = application.id();
       removeApplicationModel.init(id);
       return false;
-    }
+    },
 
+    tabUri: function(name) {
+      return "#!/application/"+application.id()+"/"+name;
+    }
   };
 
   var authorities = ko.observableArray([]);
@@ -392,7 +395,7 @@
     });
   }
 
-  hub.subscribe("application-loaded", function(e) {
+  repository.loaded(function(e) {
     if (!currentId || (currentId === e.applicationDetails.application.id)) {
       showApplication(e.applicationDetails);
     }
@@ -425,7 +428,7 @@
           self.documentId(undefined);
           self.text(undefined);
           self.error(undefined);
-          repository.reloadApplication(id);
+          repository.load(id);
           LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
@@ -439,7 +442,7 @@
   var tab = {
     tabClick: function(data, event) {
       var target = event.target;
-     setSelectedTab('#applicationTabs', target);
+      setSelectedTab('#applicationTabs', target);
     }
   };
 
@@ -464,10 +467,15 @@
   };
 
   var initApplication = function(e) {
-    currentId = e.pagePath[0];
-    applicationMap.updateSize();
-    inforequestMap.updateSize();
-    hub.send("load-application", {id: currentId});
+    var newId = e.pagePath[0];
+    var tab = e.pagePath[1];
+    if(newId !== currentId) {
+      currentId = newId;
+      applicationMap.updateSize();
+      inforequestMap.updateSize();
+      repository.load(currentId);
+    }
+    debug("tab:",tab);
   };
 
   hub.onPageChange("application", initApplication);

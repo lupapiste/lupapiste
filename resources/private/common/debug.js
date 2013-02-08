@@ -19,7 +19,6 @@ $(function() {
     ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
       .param("name", "minimal")
       .success(function() {
-        if (window.repository) { repository.reloadAllApplications(); }
         $("#debug-apply-done").show();
       })
       .call();
