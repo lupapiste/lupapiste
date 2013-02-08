@@ -1,7 +1,7 @@
 var repository = (function() {
   "use strict";
 
-  function reloadApplication(id) {
+  function load(id) {
     ajax
       .query("application", {id: id})
       .success(function(data) {
@@ -12,12 +12,12 @@ var repository = (function() {
       .call();
   }
 
-  function applicationLoaded(f) {
+  function loaded(f) {
     hub.subscribe("application-loaded",f);
   }
 
   return {
-    reloadApplication: reloadApplication,
-    applicationLoaded: applicationLoaded
+    load: load,
+    loaded: loaded
   };
 })();

@@ -75,7 +75,7 @@
     }
   });
 
-  hub.subscribe("application-loaded", function(e) {
+  repository.loaded(function(e) {
     var application = e.applicationDetails.application;
     if (currentId === application.id) { model.init(application); }
   });

@@ -155,8 +155,8 @@ var attachment = (function() {
     repository.load(applicationId);
   });
 
-  hub.subscribe("application-loaded", function(data) {
-    var app = data.applicationDetails.application;
+  repository.loaded(function(e) {
+    var app = e.applicationDetails.application;
     if (applicationId === app.id) { showAttachment(app); }
   });
 
