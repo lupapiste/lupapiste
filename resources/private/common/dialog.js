@@ -79,12 +79,15 @@ LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized">'
 LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
 LUPAPISTE.ModalDialog.dynamicDialogs = [];
 
-LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle) {
+LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle, noHandler) {
   var dialog$ = $(LUPAPISTE.Modal.YesNoTemplate).attr("id", id);
   dialog$.find(".dialog-title").text(title);
   dialog$.find(".dialog-content p").text(content);
   dialog$.find("[data-test-id='confirm-yes']").click(yesHandler).text(yesTitle);
   dialog$.find("[data-test-id='confirm-no']").text(noTitle);
+  if (noHandler) {
+    dialog$.find("[data-test-id='confirm-no']").click(noHandler);
+  }
   LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
   return dialog$;
 };

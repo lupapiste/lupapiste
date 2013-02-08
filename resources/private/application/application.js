@@ -80,7 +80,8 @@
 
     self.cancel = function() { return true; };
 
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", "title", "content", loc("yes"), self.ok, loc("no"));
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel",
+        loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
   }();
 
 
