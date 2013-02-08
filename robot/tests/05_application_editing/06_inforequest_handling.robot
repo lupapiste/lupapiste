@@ -7,9 +7,10 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko creates a new inforequest
+Mikko creates two new inforequests
   Mikko logs in
   Create inforequest the fast way  inforequest-handling  753  75341600250030  Jiihaa
+  Create inforequest the fast way  inforequest-cancelling  753  75341600250030  Jiihaa
   Logout
 
 Authority assigns an inforequest to herself
@@ -18,6 +19,7 @@ Authority assigns an inforequest to herself
   Open inforequest  inforequest-handling
   Wait until  Element should be visible  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
+  Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
 
 Now Sonja is marked as authority
   Go to page  applications
@@ -27,8 +29,12 @@ Now Sonja is marked as authority
 Mikko sees Sonja as authority
   Mikko logs in
   Inforequest is assigned to  inforequest-handling  Sonja Sibbo
+  Element should not be visible  //*[@data-test-id='inforequest-mark-answered']
+  Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
+  Logout
 
-Applicant marks inforequest answered
+Authority marks inforequest answered
+  Sonja logs in
   Open inforequest  inforequest-handling
   Wait until  Inforequest state is  Avoin
   Click by test id  inforequest-mark-answered

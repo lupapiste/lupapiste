@@ -149,8 +149,7 @@
 
 (defcommand "mark-inforequest-answered"
   {:parameters [:id]
-   :roles      [:applicant :authority]
-   :roles-in   [:applicant]
+   :roles      [:authority]
    :states     [:draft :open]}
   [command]
   (with-application command
