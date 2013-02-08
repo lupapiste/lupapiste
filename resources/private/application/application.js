@@ -462,10 +462,16 @@
   };
 
   var initApplication = function(e) {
-    currentId = e.pagePath[0];
-    applicationMap.updateSize();
-    inforequestMap.updateSize();
-    repository.load(currentId);
+    var newId = e.pagePath[0];
+    var tab = e.pagePath[1];
+    if(newId !== currentId) {
+      debug("reload application(old,new)",currentId,newId);
+      currentId = newId;
+      applicationMap.updateSize();
+      inforequestMap.updateSize();
+      repository.load(currentId);
+    }
+    debug("tab:",tab);
   };
 
   hub.onPageChange("application", initApplication);
