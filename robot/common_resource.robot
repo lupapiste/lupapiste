@@ -266,6 +266,7 @@ Prepare new request
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
   Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-delete-yes"]
   Click by test id  confirm-delete-yes
