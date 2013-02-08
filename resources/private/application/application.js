@@ -208,8 +208,11 @@
       var id = application.id();
       removeApplicationModel.init(id);
       return false;
-    }
+    },
 
+    tabUri: function(name) {
+      return "#!/application/"+application.id()+"/"+name;
+    }
   };
 
   var authorities = ko.observableArray([]);
@@ -437,7 +440,7 @@
   var tab = {
     tabClick: function(data, event) {
       var target = event.target;
-     setSelectedTab('#applicationTabs', target);
+      setSelectedTab('#applicationTabs', target);
     }
   };
 
