@@ -41,7 +41,10 @@
         .click(function(e) {
           ajax
             .command("add-operation", {id: self.application.id, operation: val.op})
-            .success(function() { window.location.hash = self.url(); })
+            .success(function() {
+                repository.load(self.application.id);
+                window.location.hash = self.url();
+            })
             .call();
           var target = $(e.target);
           setTimeout(function() {
