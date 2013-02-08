@@ -52,9 +52,9 @@ Mikko creates new application
 Mikko closes application at Latokuja 3
   Open application  create-app-2
   Close current application
-  Request should be visible  create-app
-  Request should be visible  create-info
-  Request should not be visible  create-app-2
+  Wait Until  Request should be visible  create-app
+  Wait Until  Request should be visible  create-info
+  Wait Until  Request should not be visible  create-app-2
 
 Mikko decides to submit create-app
   Open application  create-app
