@@ -92,6 +92,20 @@
         app   (:application resp)]
     (first (:shapes app)) => shape))
 
+
+(fact "Authority is able to create an application to own municipality"
+      (let [command-resp    (create-app sonja :municipality sonja-muni)
+            application-id  (:id command-resp)
+            query-resp      (query sonja :application :id application-id)
+            application     (:application query-resp)]
+        (success command-resp) => true
+        ;(success query-resp)   => true
+
+        ))
+
+(fact "Authority in unable to create an application to other municipality"
+      (unauthorized (create-app sonja :municipality veikko-muni)) => true)
+
 (comment
   (apply-remote-minimal)
   ; Do 70 applications in each municipality:
