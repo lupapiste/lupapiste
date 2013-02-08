@@ -205,10 +205,11 @@
         (mongo/insert :applications
                       {:id            id
                        :created       created
+                       :opened        (when (= :authority user-role) created)
                        :creator       user-summary
                        :modified      created
                        :infoRequest   info-request?
-                       :state         (if info-request? :open :draft)
+                       :state         (if (or info-request? (= :authority user-role)) :open :draft)
                        :municipality  (:municipality data)
                        :location      {:x (->double (:x data)) :y (->double (:y data))}
                        :address       (:address data)

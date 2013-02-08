@@ -39,6 +39,7 @@
         application     (:application resp)
         hakija (domain/get-document-by-name application "hakija")]
     (:state application) => "draft"
+    (:opened application) => nil
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
     (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
@@ -95,13 +96,16 @@
 
 (fact "Authority is able to create an application to own municipality"
       (let [command-resp    (create-app sonja :municipality sonja-muni)
-            application-id  (:id command-resp)
-            query-resp      (query sonja :application :id application-id)
-            application     (:application query-resp)]
+            application-id  (:id command-resp)]
         (success command-resp) => true
-        ;(success query-resp)   => true
-
-        ))
+        (fact "Application is open"
+              (let [query-resp      (query sonja :application :id application-id)
+                    application     (:application query-resp)]
+                (success query-resp)   => true
+                application => truthy
+                (:state application) => "open"
+                (:opened application) => truthy
+                (:opened application) => (:created application)))))
 
 (fact "Authority in unable to create an application to other municipality"
       (unauthorized (create-app sonja :municipality veikko-muni)) => true)
