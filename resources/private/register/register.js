@@ -108,6 +108,9 @@
       model().firstname(data.firstname);
       model().lastname(data.lastname);
       model().stamp(data.stamp);
+      if(data.city) { model().city(data.city); }
+      if(data.zip) { model().zip(data.zip); }
+      if(data.street) { model().street(data.street); }
       ko.applyBindings(model, $('#register2')[0]);
     });
   });
