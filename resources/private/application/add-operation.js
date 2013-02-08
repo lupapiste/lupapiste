@@ -71,7 +71,7 @@
     if (newId !== currentId) {
       currentId = newId;
       model.clear();
-      repository.reloadApplication(currentId);
+      repository.load(currentId);
     }
   });
 

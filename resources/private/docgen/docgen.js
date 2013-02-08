@@ -255,7 +255,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
         .success(function() {
           save(event);
-          repository.reloadApplication(appId);
+          repository.load(appId);
         })
         .call();
       return false;

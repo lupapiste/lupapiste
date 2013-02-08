@@ -35,7 +35,7 @@ var attachment = (function() {
       ajax.command("reject-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
           notify.success("liite hyl\u00E4tty",model);
-          repository.reloadApplication(id);
+          repository.load(id);
         })
         .call();
       return false;
@@ -46,7 +46,7 @@ var attachment = (function() {
       ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
           notify.success("liite hyv\u00E4ksytty",model);
-          repository.reloadApplication(id);
+          repository.load(id);
         })
         .call();
       return false;
@@ -152,7 +152,7 @@ var attachment = (function() {
   hub.onPageChange("attachment", function(e) {
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
-    repository.reloadApplication(applicationId);
+    repository.load(applicationId);
   });
 
   hub.subscribe("application-loaded", function(data) {
@@ -192,7 +192,7 @@ var attachment = (function() {
 
   function uploadDone() {
     if (uploadingApplicationId) {
-      repository.reloadApplication(uploadingApplicationId);
+      repository.load(uploadingApplicationId);
       LUPAPISTE.ModalDialog.close();
       uploadingApplicationId = null;
     }

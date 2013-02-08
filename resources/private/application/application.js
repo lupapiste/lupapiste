@@ -123,7 +123,7 @@
         var drawing = "" + e.data.drawing;
         ajax.command("save-application-shape", {id: applicationId, shape: drawing})
         .success(function() {
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       });
@@ -134,7 +134,7 @@
       ajax.command("submit-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus j\u00E4tetty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -145,7 +145,7 @@
       ajax.command("mark-inforequest-answered", {id: applicationId})
         .success(function() {
           notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -155,7 +155,7 @@
       var id = application.id();
       ajax.command("convert-to-application", {id: id})
         .success(function() {
-          repository.reloadApplication(id);
+          repository.load(id);
           window.location.hash = "!/application/" + id;
         })
         .call();
@@ -167,7 +167,7 @@
       ajax.command("approve-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -178,7 +178,7 @@
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function() {
           notify.success("kutsu poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -189,7 +189,7 @@
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function() {
           notify.success("oikeus poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -423,7 +423,7 @@
           self.documentId(undefined);
           self.text(undefined);
           self.error(undefined);
-          repository.reloadApplication(id);
+          repository.load(id);
           LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
@@ -465,7 +465,7 @@
     currentId = e.pagePath[0];
     applicationMap.updateSize();
     inforequestMap.updateSize();
-    hub.send("load-application", {id: currentId});
+    repository.load(currentId);
   };
 
   hub.onPageChange("application", initApplication);

@@ -12,7 +12,12 @@ var repository = (function() {
       .call();
   }
 
+  function applicationLoaded(f) {
+    hub.subscribe("application-loaded",f);
+  }
+
   return {
-    reloadApplication: reloadApplication
+    reloadApplication: reloadApplication,
+    applicationLoaded: applicationLoaded
   };
 })();
