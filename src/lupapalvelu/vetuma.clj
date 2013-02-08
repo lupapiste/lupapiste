@@ -10,6 +10,7 @@
   (:require [digest]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.vtj :as vtj]
             [noir.request :as request]
             [noir.session :as session]
             [clj-time.core :as time]
@@ -58,13 +59,11 @@
 (defn apply-template
   "changes all variables in braces {} with keywords with same name.
    for example (apply-template \"hi {name}\" {:name \"Teppo\"}) returns \"hi Teppo\""
-  [v m]
-  (string/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
+  [v m] (string/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
 
 (defn apply-templates
   "runs apply-template on all values, using the map as input"
-  [m]
-  (into {} (for [[k v] m] [k (apply-template v m)])))
+  [m] (into {} (for [[k v] m] [k (apply-template v m)])))
 
 ;;
 ;; Mac
@@ -98,6 +97,9 @@
     (rename-keys {:etunimi :firstname})
     (rename-keys {:sukunimi :lastname})))
 
+(defn- extract-vtjdata [{:keys [vtjdata]}]
+  (vtj/extract-vtj vtjdata))
+
 (defn- extract-userid [{s :extradata}]
   {:userid (last (string/split s #"="))})
 
@@ -106,6 +108,7 @@
 
 (defn- user-extracted [m]
   (merge (extract-subjectdata m)
+         (extract-vtjdata m)
          (extract-userid m)
          (extract-request-id m)))
 
@@ -129,12 +132,6 @@
     (assoc :key (:key constants))
     mac-verified
     (dissoc :key)))
-
-;;
-;; Persistent storage
-;;
-
-(defonce mem (atom {}))
 
 ;;
 ;; Web stuff
