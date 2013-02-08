@@ -20,7 +20,7 @@
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    :underscore   {:js ["underscore.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
-   
+
    :init         {:js [conf "hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
@@ -30,7 +30,7 @@
 
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" i18n/loc->js]}
-   
+
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
@@ -82,7 +82,7 @@
                   :html ["index.html"]}
 
    :authority    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :mypage]
+                            :buildinfo :docgen :create :mypage]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
