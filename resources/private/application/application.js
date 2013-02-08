@@ -106,12 +106,12 @@
     // all data in here
     data: ko.observable(),
 
-    openOskariMap: function(model) {
+    openOskariMap: function() {
       var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
       window.open(url);
       var applicationId = application.id();
 
-      hub.subscribe("map-initialized", function(e) {
+      hub.subscribe("map-initialized", function() {
         if(application.shapes && application.shapes().length > 0) {
           oskariDrawShape(application.shapes()[0]);
         }
@@ -159,17 +159,6 @@
           window.location.hash = "!/application/" + id;
         })
         .call();
-      return false;
-    },
-
-    setMeAsPaasuunnittelija: function(model) {
-      var applicationId = application.id();
-      ajax.command("set-user-to-document", { id: applicationId, name: "paasuunnittelija"})
-      .success(function() {
-        notify.success("tiedot tallennettu",model);
-        repository.reloadApplication(applicationId);
-      })
-      .call();
       return false;
     },
 
@@ -412,21 +401,26 @@
 
     self.email = ko.observable();
     self.text = ko.observable();
-    self.document = ko.observable();
+    self.documentName = ko.observable();
+    self.documentId = ko.observable();
     self.error = ko.observable();
 
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
-      var document = model.document();
+      var documentName = model.documentName();
+      var documentId = model.documentId();
       var id = application.id();
       ajax.command("invite", { id: id,
-                               document: document,
+                               documentName: documentName,
+                               documentId: documentId,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
         .success(function() {
           self.email(undefined);
+          self.documentName(undefined);
+          self.documentId(undefined);
           self.text(undefined);
           self.error(undefined);
           repository.reloadApplication(id);

@@ -22,6 +22,7 @@
     "$",
     "ko",
     "moment",
+    "OpenLayers",
     "_",
     "loc",
     "getEvent",
@@ -34,6 +35,7 @@
     "comments",
     "trace",
     "error",
+    "warn",
     "repository",
     "notify",
     "ajax",
@@ -41,6 +43,7 @@
     "LUPAPISTE",
     "invites",
     "applicationsConfig",
+    "selectionTree",
     "inforequestsConfig"
   ]
 }

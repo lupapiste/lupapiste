@@ -57,10 +57,10 @@
 
   function getPwQuality(password) {
     var l = password.length;
-    if (l <= 6)  return "poor";
-    if (l <= 8)  return "low";
-    if (l <= 10) return "average";
-    if (l <= 12) return "good";
+    if (l <= 6)  { return "poor"; }
+    if (l <= 8)  { return "low"; }
+    if (l <= 10) { return "average"; }
+    if (l <= 12) { return "good"; }
     return "excellent";
   }
 
@@ -96,7 +96,7 @@
 
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
 
-  ownInfo.saved.subscribe(function(v) { if (v) ownInfo.updateUserName(); });
+  ownInfo.saved.subscribe(function(v) { if (v) { ownInfo.updateUserName(); }});
 
   $(function() {
     ko.applyBindings(ownInfo, $("#own-info-form")[0]);

@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.schemas)
 
-(defn group [name body] {:name name :type :group :body body})
+(defn group [name & body] {:name name :type :group :body (-> body vector flatten vec)})
 
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
@@ -55,9 +55,10 @@
                         :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                                yhteystiedot]}))
 
-(def party-body [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                 {:name "henkilo" :type :group :body henkilo-body}
-                 {:name "yritys" :type :group :body yritys-body}])
+(def party-body (conj henkilon-valitsin
+                      {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                      {:name "henkilo" :type :group :body henkilo-body}
+                      {:name "yritys" :type :group :body yritys-body}))
 
 (def patevyys [{:name "koulutus" :type :string}
                {:name "patevyysluokka" :type :select
@@ -72,26 +73,29 @@
                      simple-osoite
                      yhteystiedot])
 
-(def paasuunnittelija-body (concat henkilon-valitsin
-                                   (conj
-                                     designer-basic
-                                     {:name "patevyys" :type :group :body patevyys})))
+(def paasuunnittelija-body (concat
+                             henkilon-valitsin
+                             (conj
+                               designer-basic
+                               {:name "patevyys" :type :group :body patevyys})))
 
-(def suunnittelija-body (conj
-                         designer-basic
-                         {:name "patevyys" :type :group
-                          :body
-                          (cons {:name "kuntaRoolikoodi" :type :select
-                                  :body [{:name "GEO-suunnittelija"}
-                                         {:name "LVI-suunnittelija"}
-                                         {:name "IV-suunnittelija"}
-                                         {:name "KVV-suunnittelija"}
-                                         {:name "RAK-rakennesuunnittelija"}
-                                         {:name "ARK-rakennussuunnittelija"}
-                                         {:name "ei tiedossa"}
-                                         {:name "Vaikeiden t\u00F6iden suunnittelija"}]
-                                  } patevyys)
-                            })) ; TODO miten liitteet hanskataan
+(def suunnittelija-body (concat
+                          henkilon-valitsin
+                          (conj
+                            designer-basic
+                            {:name "patevyys" :type :group
+                             :body
+                             (cons {:name "kuntaRoolikoodi" :type :select
+                                    :body [{:name "GEO-suunnittelija"}
+                                           {:name "LVI-suunnittelija"}
+                                           {:name "IV-suunnittelija"}
+                                           {:name "KVV-suunnittelija"}
+                                           {:name "RAK-rakennesuunnittelija"}
+                                           {:name "ARK-rakennussuunnittelija"}
+                                           {:name "ei tiedossa"}
+                                           {:name "Vaikeiden t\u00F6iden suunnittelija"}]
+                                    } patevyys)
+                             }))) ; TODO miten liitteet hanskataan
 
 (def huoneisto-body [{:name "huoneistoTunnus" :type :group
                       :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
