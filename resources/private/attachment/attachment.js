@@ -132,7 +132,7 @@ var attachment = (function() {
     model.attachmentType(type);
     model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
-    
+
     attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'), application.allowedAttachmentTypes, model.attachmentType());
 
     model.application.id(applicationId);
@@ -152,7 +152,7 @@ var attachment = (function() {
   hub.onPageChange("attachment", function(e) {
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
-    hub.send("load-application", {id: applicationId});
+    repository.reloadApplication(applicationId);
   });
 
   hub.subscribe("application-loaded", function(data) {

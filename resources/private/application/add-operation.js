@@ -18,6 +18,7 @@
 
     self.init = function(application) {
       self.application = application;
+
       self.operation(null).treeReady(false).title(application.title).url("#!/application/" + application.id);
       var id = application.id;
       ajax
@@ -70,7 +71,7 @@
     if (newId !== currentId) {
       currentId = newId;
       model.clear();
-      hub.send("load-application", {id: currentId});
+      repository.reloadApplication(currentId);
     }
   });
 
