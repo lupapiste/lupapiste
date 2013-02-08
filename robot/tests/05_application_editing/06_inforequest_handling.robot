@@ -29,6 +29,9 @@ Now Sonja is marked as authority
 Mikko sees Sonja as authority
   Mikko logs in
   Inforequest is assigned to  inforequest-handling  Sonja Sibbo
+
+Mikko should be able to cancel the inforequest but not mark it as answered
+  Open inforequest  inforequest-handling
   Element should not be visible  //*[@data-test-id='inforequest-mark-answered']
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
   Logout
@@ -39,7 +42,6 @@ Authority marks inforequest answered
   Wait until  Inforequest state is  Avoin
   Click by test id  inforequest-mark-answered
   Wait until  Inforequest state is  Vastattu
-  Logout
 
 *** Keywords ***
 
