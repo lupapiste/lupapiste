@@ -64,13 +64,13 @@
 
     self.init = function(applicationId) {
       self.applicationId(applicationId);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm");
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
       return self;
     };
 
     self.ok = function() {
       ajax
-        .command("cancel-application", {id: this.applicationId()})
+        .command("cancel-application", {id: self.applicationId()})
         .success(function() {
           window.location.hash = "!/applications";
         })
@@ -79,6 +79,8 @@
     };
 
     self.cancel = function() { return true; };
+
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", "title", "content", loc("yes"), self.ok, loc("no"));
   }();
 
 

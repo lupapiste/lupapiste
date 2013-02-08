@@ -66,11 +66,28 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
 };
 
+LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized">'
+  + '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>'
+  + '<div class="dialog-content"><p></p>'
+  + '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>'
+  + '<button class="btn btn-dialog close" data-test-id="confirm-no"></button></div></div>';
+
 /**
  * Lupapiste Modal Dialog window.
  * Call LUPAPISTE.ModalDialog.init() to activate.
  */
 LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
+LUPAPISTE.ModalDialog.dynamicDialogs = [];
+
+LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle) {
+  var dialog$ = $(LUPAPISTE.Modal.YesNoTemplate).attr("id", id);
+  dialog$.find(".dialog-title").text(title);
+  dialog$.find(".dialog-content p").text(content);
+  dialog$.find("[data-test-id='confirm-yes']").click(yesHandler).text(yesTitle);
+  dialog$.find("[data-test-id='confirm-no']").text(noTitle);
+  LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
+  return dialog$;
+};
 
 /**
  * Initializes modal dialog elements
@@ -79,6 +96,12 @@ LUPAPISTE.ModalDialog.init = function() {
   "use strict";
 
   this.createMask();
+
+  _.each(LUPAPISTE.ModalDialog.dynamicDialogs, function(d) {
+    if (!document.getElementById(d.attr("id"))) {
+      $("body").append(d);
+    }
+  });
 
   // Register default opener:
   // Click any element that has .modal class and data-windows-id that
