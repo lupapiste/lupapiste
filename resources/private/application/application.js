@@ -451,7 +451,8 @@
     $(id + " li").removeClass("active");
     $(element).parent().addClass("active");
     $(".tab-content").hide();
-    var selected_tab = $(element).attr("href");
+    var selected_tab = $("#application-"+id+"-tab");
+    debug("selected:",selected_tab);
     $(selected_tab).fadeIn();
   }
 
@@ -468,9 +469,7 @@
       inforequestMap.updateSize();
       repository.load(currentId);
     }
-    var tabSelector = "a[name='"+tab+"']";
-    debug("new tab:",tab,tabSelector);
-    setSelectedTab(tab, $(tabSelector));
+    setSelectedTab(tab, $("a[name='"+tab+"']"));
   };
 
   hub.onPageChange("application", initApplication);
