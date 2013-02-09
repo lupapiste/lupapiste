@@ -197,7 +197,7 @@ var attachment = (function() {
   hub.subscribe("upload-done", uploadDone);
 
   function newAttachment(m) {
-    var infoRequest = this.application.infoRequest();
+    var infoRequest = this.application.infoRequest(); //FIXME: MIHIN THIS:iin VIITATAAN???
     var type = infoRequest ? "muut.muu" : null;
     var selector = infoRequest ? false : true;
     initFileUpload(m.application.id(), null, type, selector);
