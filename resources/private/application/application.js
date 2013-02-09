@@ -468,7 +468,7 @@
       inforequestMap.updateSize();
       repository.load(currentId);
     }
-    var tabSelector = "a[name='"+tab+"'][0]";
+    var tabSelector = "a[name='"+tab+"']";
     debug("new tab:",tab,tabSelector);
     setSelectedTab(tab, $(tabSelector));
   };
