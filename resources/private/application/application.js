@@ -381,10 +381,6 @@
       displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
       displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
-      if(! isTabSelected('#applicationTabs')) {
-        selectDefaultTab('#applicationTabs');
-      }
-
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
@@ -437,14 +433,6 @@
       return false;
     };
   }();
-
-  function isTabSelected(id) {
-    return $(id + ' > li').hasClass("active");
-  }
-
-  function selectDefaultTab(id) {
-    setSelectedTab(id, $('.active-as-default'));
-  }
 
   function openTab(id) {
     $(".tab-content").hide();
