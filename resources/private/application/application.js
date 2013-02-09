@@ -446,9 +446,13 @@
     $("a[name='"+id+"']").parent().addClass("active");
   }
 
-  function setSelectedTab(id) {
-    markTabActive(id);
-    openTab(id);
+  function selectTab(id) {
+    if(id) {
+      markTabActive(id);
+      openTab(id);
+    } else {
+      window.location.hash = window.location.hash.concat("/application");
+    }
   }
 
   var accordian = function(data, event) {
@@ -458,13 +462,13 @@
   var initApplication = function(e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
+    selectTab(tab);
     if(newId !== currentId) {
       currentId = newId;
       applicationMap.updateSize();
       inforequestMap.updateSize();
       repository.load(currentId);
     }
-    setSelectedTab(tab);
   };
 
   hub.onPageChange("application", initApplication);
