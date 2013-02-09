@@ -438,13 +438,6 @@
     };
   }();
 
-  var tab = {
-    tabClick: function(data, event) {
-      var target = event.target;
-      setSelectedTab('#applicationTabs', target);
-    }
-  };
-
   function isTabSelected(id) {
     return $(id + ' > li').hasClass("active");
   }
@@ -454,7 +447,7 @@
   }
 
   function setSelectedTab(id, element) {
-    debug("tab: ",id);
+    debug("tab: ",id, element);
     $(id + " li").removeClass("active");
     $(element).parent().addClass("active");
     $(".tab-content").hide();
@@ -475,7 +468,9 @@
       inforequestMap.updateSize();
       repository.load(currentId);
     }
-    debug("tab:",tab);
+    var tabSelector = "a[name='"+tab+"'][0]";
+    debug("new tab:",tab,tabSelector);
+    setSelectedTab(tab, $(tabSelector));
   };
 
   hub.onPageChange("application", initApplication);
@@ -494,7 +489,6 @@
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
-      tab: tab,
       accordian: accordian,
       removeDocModel: removeDocModel,
       removeApplicationModel: removeApplicationModel
