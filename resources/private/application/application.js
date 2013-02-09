@@ -446,14 +446,23 @@
     setSelectedTab(id, $('.active-as-default'));
   }
 
-  function setSelectedTab(id, element) {
-    debug("tab: ",id, element);
-    $(id + " li").removeClass("active");
-    $(element).parent().addClass("active");
+  function openTab(id) {
     $(".tab-content").hide();
     var selected_tab = $("#application-"+id+"-tab");
     debug("selected:",selected_tab);
     $(selected_tab).fadeIn();
+  }
+
+  function markTabActive(id) {
+    var element = $("a[name='"+id+"']");
+    $("#applicationTabs li").removeClass("active");
+    $(element).parent().addClass("active");
+  }
+
+  function setSelectedTab(id) {
+    debug("tab: ",id);
+    markTabActive(id);
+    openTab(id);
   }
 
   var accordian = function(data, event) {
@@ -469,7 +478,7 @@
       inforequestMap.updateSize();
       repository.load(currentId);
     }
-    setSelectedTab(tab, $("a[name='"+tab+"']"));
+    setSelectedTab(tab);
   };
 
   hub.onPageChange("application", initApplication);
