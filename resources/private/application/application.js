@@ -434,17 +434,16 @@
     };
   }();
 
+   // tabs
+
   function openTab(id) {
     $(".tab-content").hide();
-    var selected_tab = $("#application-"+id+"-tab");
-    debug("selected:",selected_tab);
-    $(selected_tab).fadeIn();
+    $("#application-"+id+"-tab").fadeIn();
   }
 
   function markTabActive(id) {
-    var element = $("a[name='"+id+"']");
     $("#applicationTabs li").removeClass("active");
-    $(element).parent().addClass("active");
+    $("a[name='"+id+"']").parent().addClass("active");
   }
 
   function setSelectedTab(id) {
