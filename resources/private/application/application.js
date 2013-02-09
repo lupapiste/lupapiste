@@ -448,7 +448,6 @@
   }
 
   function setSelectedTab(id) {
-    debug("tab: ",id);
     markTabActive(id);
     openTab(id);
   }
