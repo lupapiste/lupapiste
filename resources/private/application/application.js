@@ -210,8 +210,9 @@
       return false;
     },
 
-    tabUri: function(name) {
-      return "#!/application/"+application.id()+"/"+name;
+    changeTab: function(model,event){
+      var element = event.target;
+      window.location.hash = "#!/application/"+application.id()+"/"+element.name;
     }
   };
 
@@ -453,6 +454,7 @@
   }
 
   function setSelectedTab(id, element) {
+    debug("tab: ",id);
     $(id + " li").removeClass("active");
     $(element).parent().addClass("active");
     $(".tab-content").hide();
