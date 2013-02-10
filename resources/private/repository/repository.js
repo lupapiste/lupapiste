@@ -5,7 +5,7 @@ var repository = (function() {
     ajax
       .query("application", {id: id})
       .success(function(data) {
-        debug("repository: load-application: loaded  " + data.application.id);
+        debug("loaded application "+data.application.id);
         hub.send("application-loaded", {applicationDetails: data});
       })
       .error(function() { window.location.hash = "!/404"; })
