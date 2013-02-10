@@ -45,11 +45,14 @@ Mikko cancels an inforequest
 Mikko waits until the first inforequest is answered
   Logout
 
-Authority can not cancel inforequest
+Authority can not cancel the inforequest
   Sonja logs in
   Open inforequest  inforequest-handling
   Wait until  Inforequest state is  Avoin
   Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
+
+Authority can not convert the inforequest to application
+  Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority marks inforequest answered
   Click by test id  inforequest-mark-answered
