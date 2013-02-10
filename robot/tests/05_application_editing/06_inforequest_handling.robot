@@ -34,12 +34,24 @@ Mikko should be able to cancel the inforequest but not mark it as answered
   Open inforequest  inforequest-handling
   Element should not be visible  //*[@data-test-id='inforequest-mark-answered']
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
+
+Mikko cancels an inforequest
+  Open inforequest  inforequest-cancelling
+  Click enabled by test id  inforequest-cancel-btn
+  Confirm closing
+  Wait until  Element should be visible  applications-list
+  Inforequest is not visible  inforequest-cancelling
+
+Mikko waits until the first inforequest is answered
   Logout
 
-Authority marks inforequest answered
+Authority can not cancel inforequest
   Sonja logs in
   Open inforequest  inforequest-handling
   Wait until  Inforequest state is  Avoin
+  Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
+
+Authority marks inforequest answered
   Click by test id  inforequest-mark-answered
   Wait until  Inforequest state is  Vastattu
 
@@ -48,6 +60,10 @@ Authority marks inforequest answered
 Inforequest state is
   [Arguments]  ${state}
   Wait until   Element Text Should Be  test-inforequest-state  ${state}
+
+Inforequest is not visible
+  [Arguments]  ${address}
+  Wait until  Page Should Not Contain Element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
 Inforequest is not assigned
   [Arguments]  ${address}
