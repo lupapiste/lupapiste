@@ -6,7 +6,7 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko changes hes name
+Mikko changes his name
   Mikko logs in
   Click Element  user-name
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
