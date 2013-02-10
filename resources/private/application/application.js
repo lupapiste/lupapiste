@@ -64,13 +64,13 @@
 
     self.init = function(applicationId) {
       self.applicationId(applicationId);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm");
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
       return self;
     };
 
     self.ok = function() {
       ajax
-        .command("cancel-application", {id: this.applicationId()})
+        .command("cancel-application", {id: self.applicationId()})
         .success(function() {
           window.location.hash = "!/applications";
         })
@@ -79,6 +79,9 @@
     };
 
     self.cancel = function() { return true; };
+
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel",
+        loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
   }();
 
 
@@ -246,9 +249,7 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {})
-      .error(function(e) { error(e); })
-      .fail(function(e) { error(e); })
+      .success(function() {authorizationModel.refresh(currentId);})
       .call();
   }
 

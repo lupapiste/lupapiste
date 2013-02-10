@@ -11,7 +11,7 @@
 
     <div id="create-part-1">
 
-      <h2 onclick="accordion.click();" class="application_section_header" >
+      <h2 onclick="accordion.click(this);" class="application_section_header" >
         <span data-bind="ltext: 'newRequest.title'" class="font-icon icon-expanded"></span>
       </h2>
 
@@ -25,7 +25,7 @@
             </div>
           </div>
           <div class="map-select-info">
-            <h3>Valittu sijainti:</h3>
+            <h3 data-bind="ltext: 'newRequest.chosenLocation'">Valittu sijainti:</h3>
             <div class="form-entry">
               <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
               <input
@@ -70,7 +70,7 @@
 
     <div id="create-part-2">
 
-      <h2 onclick="accordion.click();" class="application_section_header">
+      <h2 onclick="accordion.click(this);" class="application_section_header">
         <span data-bind="ltext: 'newRequest.descTitle'" class="font-icon icon-expanded"></span>
       </h2>
 
@@ -98,7 +98,7 @@
 
     <div id="create-part-3">
 
-      <h2 onclick="accordion.click();" class="application_section_header">
+      <h2 onclick="accordion.click(this);" class="application_section_header">
         <span data-bind="ltext: 'createApplication.project-description-header'" class="font-icon icon-expanded"></span>
       </h2>
 

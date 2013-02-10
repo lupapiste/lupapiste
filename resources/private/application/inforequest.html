@@ -70,8 +70,9 @@
 
         </div>
         <div class="application_actions">
-          <button data-bind="ltext: 'inforequest.markInforequestAnswered', enable: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" data-test-id="inforequest-mark-answered" type="submit" class="btn btn-primary">Merkitse vastatuksi</button>
-          <button data-bind="ltext: 'inforequest.convertToApplication', enable: $root.authorization.ok('convert-to-application'), click: convertToApplication" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">Aloita luvan hakeminen</button>
+          <button data-bind="ltext: 'inforequest.markInforequestAnswered', visible: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" data-test-id="inforequest-mark-answered" type="submit" class="btn btn-primary"></button>
+          <button data-bind="ltext: 'inforequest.convertToApplication', visible: $root.authorization.ok('convert-to-application'), click: convertToApplication" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary"></button>
+          <button data-bind="ltext: 'inforequest.cancelInforequest',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn btn-primary"></button>
         </div>
       </div>
     </div>
