@@ -27,7 +27,7 @@
         <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
         <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}" name="phone" type="text" class="form-input"></input>
       </div>
-      <button data-bind="ltext: 'save', click: save" type="button" class="btn btn-primary"></button>
+      <button data-bind="ltext: 'save', click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
       <span data-bind="visible: error() == null && saved, ltext: 'saved'" style="font-weight: bold; color: green;"></span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
