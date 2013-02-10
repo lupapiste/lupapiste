@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   User changes account details
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 
@@ -10,6 +11,9 @@ Mikko changes hes name
   Mikko logs in
   Click Element  user-name
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  # WIP...
+  Input Text  firstName  Mika
+  Input Text  lastName  Intola
+  Click enabled by test id  save-my-userinfo
+  User should be logged in  Mika Intola
 
 *** Keywords ***
