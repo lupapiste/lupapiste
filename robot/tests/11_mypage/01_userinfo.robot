@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   User changes account details
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 
@@ -19,5 +18,17 @@ Mikko changes hes name
 Name should have changed in Swedish page too
   Click link  På svenska
   User should be logged in  Mika Intola
+
+Mika changes the name back to Mikko Intonen
+  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Input Text  firstName  Mikko
+  Input Text  lastName  Intonen
+  Click enabled by test id  save-my-userinfo
+  User should be logged in  Mikko Intonen
+
+Name should have changed in Finnish page too
+  Click link  Suomeksi
+  User should be logged in  Mikko Intonen
+
 
 *** Keywords ***
