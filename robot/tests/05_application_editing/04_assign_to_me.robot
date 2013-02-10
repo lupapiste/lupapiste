@@ -10,6 +10,10 @@ Mikko creates an application
   Mikko logs in
   Create application the fast way  assign-to-me  753  75341600250030
   Add comment  hojo-hojo
+
+# LUPA-23
+Mikko could add an operation
+  It is possible to add operation
   Logout
 
 Application is not assigned
@@ -26,6 +30,10 @@ Assignee has changed
 # LUPA-23
 Sonja can not close the application
   Wait Until  Element Should Not Be Visible  xpath=//button[@data-test-id="application-cancel-btn"]
+
+# LUPA-23
+Sonja could add an operation
+  It is possible to add operation
 
 *** Keywords ***
 

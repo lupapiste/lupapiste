@@ -230,7 +230,7 @@
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :roles-in   [:applicant]
+   :roles-in   [:applicant :authority]
    :states     [:draft :open]}
   [command]
   (with-application command
