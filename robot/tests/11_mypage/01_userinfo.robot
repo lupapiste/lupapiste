@@ -13,6 +13,7 @@ Mikko changes his name
   Input Text  firstName  Mika
   Input Text  lastName  Intola
   Click enabled by test id  save-my-userinfo
+  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
   User should be logged in  Mika Intola
 
 Name should have changed in Swedish page too
@@ -24,6 +25,7 @@ Mika changes the name back to Mikko Intonen
   Input Text  firstName  Mikko
   Input Text  lastName  Intonen
   Click enabled by test id  save-my-userinfo
+  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
   User should be logged in  Mikko Intonen
 
 Name should have changed in Finnish page too
