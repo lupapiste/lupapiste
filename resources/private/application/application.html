@@ -95,10 +95,10 @@
 
         <!-- Actions: -->
         <div class="application_actions">
-          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary" ></button>
-          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
-          <button data-bind="ltext: 'application.addOperation',       click: addOperation,       enable: $root.authorization.ok('add-operation')"                                              class="todo btn action-bar-button"></button>
-          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn action-bar-button"></button>
+          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary"></button>
+          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
+          <button data-bind="ltext: 'application.addOperation',       click: addOperation,       visible: $root.authorization.ok('add-operation'),       enable: $root.authorization.ok('add-operation')"       data-test-id="add-operation"           class="btn btn-primary"></button>
+          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn btn-primary"></button>
         </div>
 
         <!-- Tabs: -->
@@ -334,21 +334,6 @@
         </div>
       </div>
 
-    <div id="dialog-confirm" class="window autosized">
-      <div data-bind="with: $root.removeApplicationModel">
-        <div class="dialog-header">
-          <p data-bind="ltext: 'areyousure'"></p>
-          <p class="dialog-close close">X</p>
-        </div>
-        <div>
-          <span data-bind="ltext: 'areyousure.message'"></span>
-        </div>
-        <div class="dialog-content">
-          <button data-bind="click: ok, ltext: 'yes'" class="btn btn-primary btn-dialog close" data-test-id="confirm-delete-yes"></button>
-          <button data-bind="click: cancel, ltext: 'no'" class="btn btn-dialog close" data-test-id="confirm-delete-no"></button>
-        </div>
-      </div>
-    </div>
     </div>
   </section>
 </body>

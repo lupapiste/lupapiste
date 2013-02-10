@@ -39,6 +39,7 @@
         application     (:application resp)
         hakija (domain/get-document-by-name application "hakija")]
     (:state application) => "draft"
+    (:opened application) => nil
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
     (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
@@ -91,6 +92,36 @@
         resp (query pena :application :id application-id)
         app   (:application resp)]
     (first (:shapes app)) => shape))
+
+
+(fact "Authority is able to create an application to own municipality"
+      (let [command-resp    (create-app sonja :municipality sonja-muni)
+            application-id  (:id command-resp)]
+        (success command-resp) => true
+        (fact "Application is open"
+              (let [query-resp      (query sonja :application :id application-id)
+                    application     (:application query-resp)]
+                (success query-resp)   => true
+                application => truthy
+                (:state application) => "open"
+                (:opened application) => truthy
+                (:opened application) => (:created application)))))
+
+(fact "Authority in unable to create an application to other municipality"
+      (unauthorized (create-app sonja :municipality veikko-muni)) => true)
+
+(facts "Add operations"
+  (let [command-resp (create-app mikko :municipality veikko-muni)
+        application-id  (:id command-resp)]
+    (success command-resp) => true
+    (success (command mikko  :open-application   :id application-id)) => true
+    (success (command veikko :assign-application :id application-id :assigneeId veikko-id)) => true
+
+    (fact "Applicant is able to add operation"
+          (success (command mikko :add-operation :id application-id :operation "varasto-tms")) => true)
+
+    (fact "Authority is able to add operation"
+          (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
 (comment
   (apply-remote-minimal)

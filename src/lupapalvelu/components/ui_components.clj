@@ -16,11 +16,12 @@
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
 (def ui-components
-  {:jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js"]}
+  {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.9.0.custom.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
+   :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js"]}
    :underscore   {:js ["underscore.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
-   
+
    :init         {:js [conf "hub.js" "log.js"]}
 
    :map          {:depends [:init :jquery]
@@ -30,7 +31,7 @@
 
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" i18n/loc->js]}
-   
+
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
@@ -82,7 +83,7 @@
                   :html ["index.html"]}
 
    :authority    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :mypage]
+                            :buildinfo :docgen :create :mypage]
                   :js ["authority.js"]
                   :html ["index.html"]}
 

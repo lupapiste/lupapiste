@@ -8,6 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   Mikko logs in
   Create application  create-app  753  75341600250021
+  It is possible to add operation
 
 Mikko sees application in list
   Go to page  applications
@@ -67,4 +68,20 @@ Mikko still sees the submitted app in applications list
   Request should be visible  create-app
 
 Mikko has worked really hard and now he needs some strong coffee
+  Logout
+
+# LUPA-23
+Authority (Veikko) can create an application
+  Veikko logs in
+  Create application  create-veikko-auth-app  837  75341600250021
+  Wait until  Application state should be  open
+  It is possible to add operation
+
+# LUPA-23
+Veikko can not submit the application
+  Wait Until  Element should not be visible  //*[@data-test-id='application-submit-btn']
+
+Veikko sees application in list
+  Go to page  applications
+  Request should be visible  create-veikko-auth-app
   Logout

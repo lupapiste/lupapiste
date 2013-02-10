@@ -99,6 +99,7 @@
                    :css  "text/css; charset=utf-8"})
 
 (def auth-methods {:init anyone
+                   :cdn-fallback anyone
                    :welcome anyone
                    :upload logged-in?
                    :applicant logged-in?

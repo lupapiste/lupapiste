@@ -211,6 +211,7 @@ Click enabled by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
+  Wait Until  Element should be visible  xpath=//*[@data-test-id="${id}"]
   Click element  xpath=//*[@data-test-id="${id}"]
 
 #
@@ -268,10 +269,15 @@ Prepare new request
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
-  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-delete-yes"]
-  Click by test id  confirm-delete-yes
-  Wait Until  Element Should Not Be Visible  dialog-confirm
+  Confirm closing
 
+Confirm closing
+  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-yes"]
+  Click by test id  confirm-yes
+  Wait Until  Element Should Not Be Visible  dialog-confirm-cancel
+
+It is possible to add operation
+  Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
 #
 # Jump to application or inforequest:
 #

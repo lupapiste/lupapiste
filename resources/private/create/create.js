@@ -240,7 +240,7 @@
   hub.onPageChange("create", model.clear);
 
   ajax
-    .query("municipalities")
+    .query("municipalities-for-new-application")
     .success(function(data) { model.municipalities(data.municipalities); })
     .call();
 
