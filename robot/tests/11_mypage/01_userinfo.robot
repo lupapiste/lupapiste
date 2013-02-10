@@ -29,6 +29,3 @@ Mika changes the name back to Mikko Intonen
 Name should have changed in Finnish page too
   Click link  Suomeksi
   User should be logged in  Mikko Intonen
-
-
-*** Keywords ***
