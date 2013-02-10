@@ -16,4 +16,8 @@ Mikko changes hes name
   Click enabled by test id  save-my-userinfo
   User should be logged in  Mika Intola
 
+Name should have changed in Swedish page too
+  Click link  På svenska
+  User should be logged in  Mika Intola
+
 *** Keywords ***
