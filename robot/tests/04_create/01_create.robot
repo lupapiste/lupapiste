@@ -8,6 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   Mikko logs in
   Create application  create-app  753  75341600250021
+  It is possible to add operation
 
 Mikko sees application in list
   Go to page  applications
@@ -74,6 +75,7 @@ Authority (Veikko) can create an application
   Veikko logs in
   Create application  create-veikko-auth-app  837  75341600250021
   Wait until  Application state should be  open
+  It is possible to add operation
 
 # LUPA-23
 Veikko can not submit the application

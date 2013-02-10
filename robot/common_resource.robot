@@ -276,6 +276,8 @@ Confirm closing
   Click by test id  confirm-yes
   Wait Until  Element Should Not Be Visible  dialog-confirm-cancel
 
+It is possible to add operation
+  Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
 #
 # Jump to application or inforequest:
 #
