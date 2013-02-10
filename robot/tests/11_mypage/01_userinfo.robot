@@ -15,6 +15,7 @@ Mikko changes his name
   Wait Until  Textfield Value Should Be  lastName  Intonen
   Input Text  firstName  Mika
   Input Text  lastName  Intola
+  Focus  street
   Click enabled by test id  save-my-userinfo
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
   User should be logged in  Mika Intola
@@ -29,6 +30,7 @@ Mika changes the name back to Mikko Intonen
   Wait Until  Textfield Value Should Be  lastName  Intola
   Input Text  firstName  Mikko
   Input Text  lastName  Intonen
+  Focus  street
   Click enabled by test id  save-my-userinfo
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
   User should be logged in  Mikko Intonen
