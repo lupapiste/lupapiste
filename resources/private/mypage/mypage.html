@@ -29,7 +29,7 @@
       </div>
       <button data-bind="ltext: 'save', click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
-      <span data-bind="visible: error() == null && saved, ltext: 'saved'" style="font-weight: bold; color: green;"></span>
+      <span data-bind="visible: error() == null && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
 
     </form>
