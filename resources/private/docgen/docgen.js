@@ -309,7 +309,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         .append($("<button>", {
             class: "icon-remove",
             "data-test-id": "application-invite-"+specId,
-            html: "["+loc("personSelector.invite")+"]",
+            text: "["+loc("personSelector.invite")+"]",
             click: function() {
               $("#invite-document-name").val(specId).change();
               $("#invite-document-id").val(self.docId).change();
