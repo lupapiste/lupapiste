@@ -8,24 +8,24 @@
       <h2 data-bind="ltext: 'mypage.title'"></h2>
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
-        <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}" name="firstName" type="text" class="form-input"></input>
+        <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}" id="firstName" type="text" class="form-input"></input>
       </div>
 
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
-        <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}" name="lastName" type="text" class="form-input"></input>
+        <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}" id="lastName" type="text" class="form-input"></input>
       </div>
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
-        <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}" name="street" type="text"  class="form-input"></input>
+        <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}" id="street" type="text"  class="form-input"></input>
         <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
-        <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}" name="city" type="text" class="form-input"></input>
+        <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}" id="city" type="text" class="form-input"></input>
         <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
-        <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}" name="zip" type="text" class="form-input"></input>
+        <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}" id="zip" type="text" class="form-input"></input>
       </div>
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
-        <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}" name="phone" type="text" class="form-input"></input>
+        <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}" id="phone" type="text" class="form-input"></input>
       </div>
       <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
@@ -39,14 +39,14 @@
       <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
 
       <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
-      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" name="oldPassword" type="password" class="form-input"></input>
+      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
 
       <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
-      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" name="newPassword" type="password" class="form-input"></input>
+      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
       <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
 
       <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
-      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" name="newPassword2" type="password" class="form-input"></input>
+      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
       <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
 
       <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
