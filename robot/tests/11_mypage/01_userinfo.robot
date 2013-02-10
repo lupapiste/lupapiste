@@ -10,6 +10,7 @@ Mikko changes his name
   Mikko logs in
   Click Element  user-name
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Wait Until  Textfield Value Should Be  firstName  Mikko
   Input Text  firstName  Mika
   Input Text  lastName  Intola
   Click enabled by test id  save-my-userinfo
