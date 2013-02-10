@@ -71,9 +71,13 @@ Mikko has worked really hard and now he needs some strong coffee
 
 # LUPA-23
 Authority (Veikko) can create an application
-   Veikko logs in
-   Create application  create-veikko-auth-app  837  75341600250021
-   Wait until  Application state should be  open
+  Veikko logs in
+  Create application  create-veikko-auth-app  837  75341600250021
+  Wait until  Application state should be  open
+
+# LUPA-23
+Veikko can not submit the application
+  Wait Until  Element should not be visible  //*[@data-test-id='application-submit-btn']
 
 Veikko sees application in list
   Go to page  applications
