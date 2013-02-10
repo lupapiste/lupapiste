@@ -104,18 +104,14 @@
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="ltext: 'application.tabDocuments',    click: $root.tab.tabClick, clickBubble: false"  href="#application-application-tab"   data-test-id="application-open-application-tab" class="active-as-default"></a></li>
-            <li><a data-bind="ltext: 'application.tabParties',      click: $root.tab.tabClick, clickBubble: false"  href="#application-parties-tab"       data-test-id="application-open-parties-tab"      ></a></li>
-            <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.tab.tabClick, clickBubble: false"  href="#application-attachments-tab"   data-test-id="application-open-attachments-tab"  ></a></li>
-            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.tab.tabClick, clickBubble: false"  href="#application-verdict-tab"       data-test-id="application-open-verdict-tab"      ></a></li>
-            <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" ></a></li>
+            <li><a data-bind="ltext: 'application.tabDocuments',    click: $root.application.changeTab" href="#" name="application"  data-test-id="application-open-application-tab"  ></a></li>
+            <li><a data-bind="ltext: 'application.tabParties',      click: $root.application.changeTab" href="#" name="parties"      data-test-id="application-open-parties-tab"      ></a></li>
+            <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.application.changeTab" href="#" name="attachments"  data-test-id="application-open-attachments-tab"  ></a></li>
+            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.application.changeTab" href="#" name="verdict"      data-test-id="application-open-verdict-tab"      ></a></li>
+            <li><a data-bind="ltext: 'application.tabConversation', click: $root.application.changeTab" href="#" name="conversation" data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
         </div>
-        <!--
-        <a data-bind="attr: {href: $root.application.tabUri('')}">kukka</a>
-        <a data-bind="attr: {href: $root.application.tabUri('kakka')}">kakka</a>
-        <a data-bind="attr: {href: $root.application.tabUri('kikka')}">kikka</a>
-        -->
+
       </div>
     </div>
 
@@ -128,7 +124,7 @@
 
     <div class="tab-content-container container">
 
-      <div id="application-application-tab" class="tab-content" style="display: block;">
+      <div id="application-application-tab" class="tab-content">
 
         <!-- docgen generated content: -->
         <div class="application_section">
@@ -138,7 +134,7 @@
         </div>
       </div>
 
-      <div id="application-parties-tab" class="tab-content" style="display: block;">
+      <div id="application-parties-tab" class="tab-content">
 
         <div class="application_section" data-bind="with: application">
           <h2 class="application_section_header " onclick="accordion.click();">

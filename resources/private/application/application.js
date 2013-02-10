@@ -213,8 +213,9 @@
       return false;
     },
 
-    tabUri: function(name) {
-      return "#!/application/"+application.id()+"/"+name;
+    changeTab: function(model,event){
+      var element = event.target;
+      window.location.hash = "#!/application/"+application.id()+"/"+element.name;
     }
   };
 
@@ -383,10 +384,6 @@
       displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
       displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
-      if(! isTabSelected('#applicationTabs')) {
-        selectDefaultTab('#applicationTabs');
-      }
-
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
@@ -440,27 +437,25 @@
     };
   }();
 
-  var tab = {
-    tabClick: function(data, event) {
-      var target = event.target;
-      setSelectedTab('#applicationTabs', target);
-    }
-  };
+   // tabs
 
-  function isTabSelected(id) {
-    return $(id + ' > li').hasClass("active");
-  }
-
-  function selectDefaultTab(id) {
-    setSelectedTab(id, $('.active-as-default'));
-  }
-
-  function setSelectedTab(id, element) {
-    $(id + " li").removeClass("active");
-    $(element).parent().addClass("active");
+  function openTab(id) {
     $(".tab-content").hide();
-    var selected_tab = $(element).attr("href");
-    $(selected_tab).fadeIn();
+    $("#application-"+id+"-tab").fadeIn();
+  }
+
+  function markTabActive(id) {
+    $("#applicationTabs li").removeClass("active");
+    $("a[name='"+id+"']").parent().addClass("active");
+  }
+
+  function selectTab(id) {
+    if(id) {
+      markTabActive(id);
+      openTab(id);
+    } else {
+      window.location.hash = window.location.hash.concat("/application");
+    }
   }
 
   var accordian = function(data, event) {
@@ -470,13 +465,13 @@
   var initApplication = function(e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
+    selectTab(tab);
     if(newId !== currentId) {
       currentId = newId;
       applicationMap.updateSize();
       inforequestMap.updateSize();
       repository.load(currentId);
     }
-    debug("tab:",tab);
   };
 
   hub.onPageChange("application", initApplication);
@@ -495,7 +490,6 @@
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
-      tab: tab,
       accordian: accordian,
       removeDocModel: removeDocModel,
       removeApplicationModel: removeApplicationModel
