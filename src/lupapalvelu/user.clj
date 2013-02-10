@@ -4,7 +4,8 @@
         [lupapalvelu.log])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.util :as util]))
+            [lupapalvelu.util :as util]
+            [noir.session :as session]))
 
 (defcommand "change-passwd"
   {:parameters [:oldPassword :newPassword]
@@ -32,4 +33,5 @@
       :users
       user-id
       {$set (util/sub-map data [:firstName :lastName :street :city :zip :phone])})
+    (session/put! :user (security/get-non-private-userinfo user-id))
     (ok)))
