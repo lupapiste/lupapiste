@@ -249,9 +249,7 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {})
-      .error(function(e) { error(e); })
-      .fail(function(e) { error(e); })
+      .success(function() {authorizationModel.refresh(currentId);})
       .call();
   }
 
