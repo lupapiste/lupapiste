@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   User changes account details
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 
@@ -11,6 +12,7 @@ Mikko changes his name
   Click Element  user-name
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
   Wait Until  Textfield Value Should Be  firstName  Mikko
+  Wait Until  Textfield Value Should Be  firstName  Intonen
   Input Text  firstName  Mika
   Input Text  lastName  Intola
   Click enabled by test id  save-my-userinfo
@@ -23,6 +25,8 @@ Name should have changed in Swedish page too
 
 Mika changes the name back to Mikko Intonen
   Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Wait Until  Textfield Value Should Be  firstName  Miko
+  Wait Until  Textfield Value Should Be  firstName  Intola
   Input Text  firstName  Mikko
   Input Text  lastName  Intonen
   Click enabled by test id  save-my-userinfo
