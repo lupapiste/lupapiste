@@ -42,7 +42,6 @@
           ajax
             .command("add-operation", {id: self.application.id, operation: val.op})
             .success(function() {
-                repository.load(self.application.id);
                 window.location.hash = self.url();
             })
             .call();

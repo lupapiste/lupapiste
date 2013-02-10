@@ -447,13 +447,9 @@
     $("a[name='"+id+"']").parent().addClass("active");
   }
 
-  function selectTab(id) {
-    if(id) {
-      markTabActive(id);
-      openTab(id);
-    } else {
-      window.location.hash = window.location.hash.concat("/application");
-    }
+  function selectTab(tab) {
+    markTabActive(tab);
+    openTab(tab);
   }
 
   var accordian = function(data, event) {
@@ -463,7 +459,13 @@
   var initApplication = function(e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
-    selectTab(tab);
+    if(tab) {
+      selectTab(tab);
+    } else {
+      // always reload application when enterping application page without tabs
+      repository.load(newId);
+      window.location.hash = window.location.hash.concat("/application");
+    }
     if(newId !== currentId) {
       currentId = newId;
       applicationMap.updateSize();
