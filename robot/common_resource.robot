@@ -93,6 +93,8 @@ Logout
 #
 
 User should not be logged in
+  # Wait for login query to complete
+  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
   Wait Until  User is not logged in
 
 User is not logged in
@@ -105,6 +107,11 @@ Login
   Input text  login-username  ${username}
   Input text  login-password  ${password}
   Click button  login-button
+
+Login fails
+  [Arguments]  ${username}  ${password}
+  Login  ${username}  ${password}
+  User should not be logged in
 
 User should be logged in
   [Arguments]  ${name}

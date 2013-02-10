@@ -1,7 +1,6 @@
 (ns lupapalvelu.xml.krysp.reader
   (:use sade.xml)
   (:require [clojure.string :as s]
-            [sade.client :as client]
             [clojure.walk :refer [postwalk postwalk-demo]]
             [lupapalvelu.document.schemas :as schema]
             [net.cgrand.enlive-html :as enlive]
@@ -23,7 +22,6 @@
 ;;
 
 (def logica-test-legacy "http://212.213.116.162/geoserver/wfs")
-(def local-test-legacy  (client/uri "/krysp/building.xml"))
 
 ;;
 ;; Common
