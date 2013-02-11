@@ -54,7 +54,7 @@
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
 
     self.clear = function() {
-      if (self.map) self.map.clear().updateSize();
+      if (self.map) { self.map.clear().updateSize(); }
       return self
         .search("")
         .x(0)
@@ -75,19 +75,19 @@
       return self;
     };
 
-    self.resetXY = function() { if (self.map) self.map.clear(); return self.x(0).y(0);  };
-    self.setXY = function(x, y) { if (self.map) self.map.clear().add(x, y); return self.x(x).y(y); };
-    self.center = function(x, y) { if (self.map) self.map.center(x, y); return self; };
+    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
+    self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
+    self.center = function(x, y) { if (self.map) { self.map.center(x, y); } return self; };
     self.setPropertyId = function(value) { return  self.propertyId(value); };
     self.setMunicipality = function(value) { return isBlank(value) ? self.municipalityCode(null).municipality("") : self.municipalityCode(value).municipality(loc("municipality." + value)); };
     self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
 
     self.municipalityCode.subscribe(function(v) {
       self.operations(null).links.removeAll();
-      if (!v || v.length === 0) return;
+      if (!v || v.length === 0) { return; }
       ajax
         .query("municipality", {municipality: v})
-        .success(function (data) { if (self.municipalityCode() === v) self.operations(data.operations).links(data.links); })
+        .success(function (data) { if (self.municipalityCode() === v) { self.operations(data.operations).links(data.links); }})
         .call();
     });
 
@@ -122,7 +122,7 @@
 
     self.search.subscribe(function(v) {
       self.resetXY().setAddress(null).setPropertyId("").setMunicipality("");
-      if (!isBlank(v)) self.searchSoon();
+      if (!isBlank(v)) { self.searchSoon(); }
       return false;
     });
 
@@ -164,7 +164,7 @@
     };
 
     self.makeSuccess = function(requestId, fn) {
-      return function(result) { if (requestId === self.updateRequestId) fn(result); };
+      return function(result) { if (requestId === self.updateRequestId) { fn(result); }};
     };
 
     self.searchMunicipality = function(x, y) {
@@ -172,7 +172,7 @@
       ajax
         .query("municipality-by-location", {x: x, y: y})
         .success(self.makeSuccess(requestId, function(data) { self.setMunicipality(data.result); }))
-        .error(function() { if (requestId === self.updateRequestId) self.setMunicipality(null); })
+        .error(function() { if (requestId === self.updateRequestId) { self.setMunicipality(null); }})
         .call();
       return self;
     };
@@ -205,7 +205,7 @@
       ajax.command("create-application", {
         infoRequest: infoRequest,
         permitType: infoRequest ? "infoRequest" : "buildingPermit", // FIXME: WTF this should be?
-        operation: self.operation()["op"],
+        operation: self.operation().op,
         y: self.y(),
         x: self.x(),
         address: self.address(),
@@ -222,7 +222,7 @@
     self.createApplication = self.create.bind(self, false);
     self.createInfoRequest = self.create.bind(self, true);
 
-  };
+  }();
 
   function toLink(l) {
     return $("<li>")
