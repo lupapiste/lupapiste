@@ -348,16 +348,30 @@
 
         var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
 
-        var displayOrder = ["hankkeen-kuvaus", "rakennuspaikka", "purku", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name); });
+        var displayOrderTop = ["hankkeen-kuvaus", "rakennuspaikka", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
+        var displayOrderBottom = ["lisatiedot"];
 
+        var sortedDocs = _.sortBy(documents, function (doc) {
+          var name = doc.schema.info.name;
+
+          var index = _.indexOf(displayOrderTop, name);
+          if(index != -1) {
+            return index;
+          }
+          
+          var index = _.indexOf(displayOrderBottom, name);
+          if(index != -1) {
+            return Number.MAX_VALUE;
+          }
+          
+          return doc.created;
+        });
+        
         var docgenDiv = $(containerSelector).empty();
-        _.each(sortedDocs, function(docGroup) {
-          _.each(docGroup, function(doc) {
-            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
-          });
+        _.each(sortedDocs, function(doc) {
+          docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
 
-          var schema = docGroup[0].schema;
+          var schema = doc.schema;
 
           if (schema.info.repeating) {
             var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
