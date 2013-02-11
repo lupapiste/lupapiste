@@ -299,7 +299,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       .call();
 
     var span = makeEntrySpan();
-    span.appendChild(makeLabel("select", myPath, specId, true));
+    span.appendChild(makeLabel("select", "", "buildingSelector", true));
     span.appendChild(select);
     return span;
   }
