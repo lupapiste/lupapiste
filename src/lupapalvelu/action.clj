@@ -179,7 +179,7 @@
         (if (nil? document)
           (fail :error.document-not-found)
           ;; FIXME: all users should be modelled the same way.
-          (let [path (if (= "hakija" schema-name) :documents.$.body.henkilo :documents.$.body)]
+          (let [path (if (or (= "maksaja" schema-name) (= "hakija" schema-name)) :documents.$.body.henkilo :documents.$.body)]
             (info "merging user %s with best effort into document %s" user name)
             (mongo/update
               :applications
