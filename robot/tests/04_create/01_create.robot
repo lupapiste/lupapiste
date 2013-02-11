@@ -78,8 +78,8 @@ Authority (Veikko) can create an application
   It is possible to add operation
 
 # LUPA-23
-Veikko can not submit the application
-  Wait Until  Element should not be visible  //*[@data-test-id='application-submit-btn']
+Veikko can submit the application he created
+  Wait Until  Element should be visible  //*[@data-test-id='application-submit-btn']
 
 Veikko sees application in list
   Go to page  applications
