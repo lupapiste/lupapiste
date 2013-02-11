@@ -307,7 +307,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
   function buildPersonSelector(spec, model, path, save, specId) {
     var span = makeEntrySpan();
 
-   // existing users
+    // existing users
     var myPath = path.join(".");
 
     var select = document.createElement("select");
@@ -317,7 +317,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     select.onchange = function(event) {
       var target = getEvent(event).target;
       var userId = target.value;
-      console.log(userId);
+      console.log("***",userId);
       ajax
         .command("set-user-to-document", {id: appId, documentId: docId})
         .success(function() {
@@ -343,6 +343,8 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
           var value = user.id;
           option.value = value;
           option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
+          console.log("***>", specId, value, selectedOption, value === selectedOption);
+
           if (selectedOption === value) {
             option.selected = "selected";
           }
