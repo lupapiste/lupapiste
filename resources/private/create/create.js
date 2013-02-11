@@ -111,7 +111,8 @@
         .setMunicipality("")
         .beginUpdateRequest()
         .searchMunicipality(x, y)
-        .searchPropertyId(x, y);
+        .searchPropertyId(x, y)
+        .searchAddress(x, y);
       return false;
     };
 
@@ -178,6 +179,17 @@
     };
 
     self.searchPropertyId = function(x, y) {
+      var requestId = self.updateRequestId;
+      ajax
+        .get("/proxy/property-id-by-point")
+        .param("x", x)
+        .param("y", y)
+        .success(self.makeSuccess(requestId, self.setPropertyId))
+        .call();
+      return self;
+    };
+    
+    self.searchAddress = function(x, y) {
       var requestId = self.updateRequestId;
       ajax
         .get("/proxy/property-id-by-point")
