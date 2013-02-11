@@ -320,8 +320,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       ajax
         .command("set-user-to-document", {id: appId, documentId: docId, userId: userId})
         .success(function() {
-          save(event);
-          window.setTimeout(function() {repository.load(appId);},100); //MORBID HACKsy.
+          save(event,function() { repository.load(appId); });
         })
         .call();
       return false;
@@ -495,7 +494,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
   }
 
   function makeSaverDelegate(save, eventData) {
-    return function (event) {
+    return function (event, callback) {
       var target = getEvent(event).target;
       var path = target.name;
       var value = target.value;
@@ -521,6 +520,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         } else if (status !== "ok") {
           error("Unknown status:", status, "path:", path);
         }
+        if(callback) { callback(); }
       }, eventData);
       // No return value or stoping the event propagation:
       // That would prevent moving to the next field with tab key in IE8.
