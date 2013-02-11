@@ -33,7 +33,7 @@
    :debug        (if (env/dev-mode?) debugjs {})
 
    :i18n         {:depends [:jquery :underscore]
-                  :js ["loc.js" i18n/loc->js]}
+                  :js ["loc.js" loc->js]}
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
