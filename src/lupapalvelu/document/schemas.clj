@@ -7,7 +7,7 @@
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
-(def henkilon-valitsin [{:name :email :type :personSelector}])
+(def henkilo-valitsin [{:name :email :type :personSelector}])
 
 (def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
 
@@ -55,7 +55,7 @@
                         :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                                yhteystiedot]}))
 
-(def party-body (conj henkilon-valitsin
+(def party-body (conj henkilo-valitsin
                       {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
                       {:name "henkilo" :type :group :body henkilo-body}
                       {:name "yritys" :type :group :body yritys-body}))
@@ -74,13 +74,13 @@
                      yhteystiedot])
 
 (def paasuunnittelija-body (concat
-                             henkilon-valitsin
+                             henkilo-valitsin
                              (conj
                                designer-basic
                                {:name "patevyys" :type :group :body patevyys})))
 
 (def suunnittelija-body (concat
-                          henkilon-valitsin
+                          henkilo-valitsin
                           (conj
                             designer-basic
                             {:name "patevyys" :type :group
