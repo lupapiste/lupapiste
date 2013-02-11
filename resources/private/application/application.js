@@ -460,7 +460,7 @@
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
     selectTab(tab || "info");
-    if(newId !== currentId || !tab) {
+    if(newId !== currentId || !tab) {
       currentId = newId;
       applicationMap.updateSize();
       inforequestMap.updateSize();
