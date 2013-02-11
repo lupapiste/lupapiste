@@ -301,8 +301,8 @@
         </div>
         <div class="dialog-content">
           <form data-bind="with: $root.invite">
-            <label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label>
-            <input class="form-input text long" id="invite-document-name" disabled="true" type="text" data-bind="value: documentName" />
+            <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
+            <input class="form-input text long" id="invite-document-name" disabled="true" type="hidden" data-bind="value: documentName" />
             <input class="form-input text long" id="invite-document-id" disabled="true" type="hidden" data-bind="value: documentId" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
