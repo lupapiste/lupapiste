@@ -13,6 +13,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
+            [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.municipality]
@@ -100,6 +101,7 @@
                    :css  "text/css; charset=utf-8"})
 
 (def auth-methods {:init anyone
+                   :cdn-fallback anyone
                    :welcome anyone
                    :upload logged-in?
                    :applicant logged-in?
@@ -137,25 +139,6 @@
 ;; Login/logout:
 ;;
 
-(def applicationpage-for {"applicant" "/applicant"
-                          "authority" "/authority"
-                          "authorityAdmin" "/authority-admin"
-                          "admin" "/admin"})
-
-(defjson [:post "/api/login"] {:keys [username password]}
-  (if-let [user (security/login username password)]
-    (do
-      (info "login: successful: username=%s" username)
-      (session/put! :user user)
-      (if-let [application-page (applicationpage-for (:role user))]
-        (ok :user user :applicationpage application-page)
-        (do
-          (error "Unknown user role: role=[%s]" (:role user))
-          (fail :error.login))))
-    (do
-      (info "login: failed: username=%s" username)
-      (fail :error.login))))
-
 (defn- redirect-to-frontpage [lang]
   (resp/redirect (str "/" lang "/welcome")))
 
@@ -173,7 +156,7 @@
 
 (defpage "/" []
   (if (logged-in?)
-    (if-let [application-page (applicationpage-for (:role (current-user)))]
+    (if-let [application-page (user/applicationpage-for (:role (current-user)))]
       (resp/redirect (str "/" default-lang application-page))
       (redirect-to-frontpage default-lang))
     (redirect-to-frontpage default-lang)))

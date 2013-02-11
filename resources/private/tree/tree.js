@@ -80,7 +80,7 @@ var selectionTree = (function () {
       self.stack = [];
       self.breadcrumbs.text("");
       self.content.empty();
-      if (newData) self.data = newData;
+      if (newData) { self.data = newData; }
       if (self.data) {
         var n = self.make(self.data);
         self.stack.push(n);
@@ -118,11 +118,12 @@ var selectionTree = (function () {
     self.make = function(t) {
       var d = document.createElement("div");
       var link;
+      var icon;
       d.setAttribute("class", "tree-magic");
       _.each(t, function (v) { d.appendChild(self.makeLink(v[0], v[1], d)); });
 
       if (self.stack.length > 0) {
-        var icon = document.createElement("span");
+        icon = document.createElement("span");
         icon.className = "font-icon icon-tree-back";
         link = document.createElement("a");
         link.className = "tree-back";
@@ -134,7 +135,7 @@ var selectionTree = (function () {
       }
 
       if (self.stack.length > 1) {
-        var icon = document.createElement("span");
+        icon = document.createElement("span");
         icon.className = "font-icon icon-tree-start";
         link = document.createElement("a");
         link.className = "tree-start";

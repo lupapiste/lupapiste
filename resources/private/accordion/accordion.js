@@ -6,15 +6,15 @@ var accordion = (function() {
 
   function set(t, toState, done) {
     var target = t;
-    if (target.is("span")) target = target.parent();
+    if (target.is("span")) { target = target.parent(); }
 
     var content = target.next();
-    
+
     var state = content.attr("data-accordion-state");
 
-    if (toState === state) return;
-    if (toState === "toggle") toState = (state !== "closed") ? "closed" : "open";
-    
+    if (toState === state) { return; }
+    if (toState === "toggle") { toState = (state !== "closed") ? "closed" : "open"; }
+
     var height = content.attr("data-accordion-height");
     if (!height) {
       var h = content.height();
@@ -35,7 +35,7 @@ var accordion = (function() {
       .children(".font-icon")
       .removeClass(toState === "closed" ? "icon-expanded" : "icon-collapsed")
       .addClass(toState === "closed" ? "icon-collapsed" : "icon-expanded");
-    
+
     content
       .attr("data-accordion-state", state)
       .animate({ height: height }, animationTime, animationEasing, function() {
@@ -45,16 +45,16 @@ var accordion = (function() {
           content.addClass("content_expanded");
         }
         target.trigger("accordion-" + state);
-        if (done) done(target);
+        if (done) { done(target); }
       });
 
     return t;
   }
-  
+
   function open(t, done)   { set(t, "open", done);   return t; }
   function close(t, done)  { set(t, "closed", done); return t; }
   function toggle(t, done) { set(t, "toggle", done); return t; }
-  
+
   function click(event) {
     var e = getEvent(event);
     e.preventDefault();
@@ -62,7 +62,7 @@ var accordion = (function() {
     toggle($(e.target));
     return false;
   }
-  
+
   $.fn.accordionOpen   = function(done) { return open(this, done); };
   $.fn.accordionClose  = function(done) { return close(this, done); };
   $.fn.accordionToggle = function(done) { return toggle(this, done); };
@@ -73,5 +73,5 @@ var accordion = (function() {
     toggle: toggle,
     click:  click
   };
-  
+
 })();

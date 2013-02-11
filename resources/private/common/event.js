@@ -9,9 +9,13 @@ function getEvent(event) {
   "use strict";
 
   var e = event || window.event;
+  if (!e) {
+    warn("Unable to determine event");
+    e = {};
+  }
 
   if (!e.target) {
-    e.target = e.srcElement;
+    e.target = e.srcElement || e;
   }
 
   if (typeof e.preventDefault !== "function") {

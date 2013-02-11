@@ -1,13 +1,13 @@
 (ns lupapalvelu.document.schemas)
 
-(defn group [name body] {:name name :type :group :body body})
+(defn group [name & body] {:name name :type :group :body (-> body vector flatten vec)})
 
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
-(def henkilon-valitsin [{:name :email :type :personSelector}])
+(def henkilo-valitsin [{:name :email :type :personSelector}])
 
 (def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
 
@@ -44,7 +44,7 @@
                     :type :group
                     :body (conj henkilotiedot-minimal-body {:name "hetu" :type :string})})
 
-(def henkilo-body [henkilotiedot simple-osoite yhteystiedot])
+(def henkilo-body (concat henkilo-valitsin [henkilotiedot simple-osoite yhteystiedot]))
 
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
                    {:name "liikeJaYhteisoTunnus" :type :string}])
@@ -73,13 +73,13 @@
                      yhteystiedot])
 
 (def paasuunnittelija-body (concat
-                             henkilon-valitsin
+                             henkilo-valitsin
                              (conj
                                designer-basic
                                {:name "patevyys" :type :group :body patevyys})))
 
 (def suunnittelija-body (concat
-                          henkilon-valitsin
+                          henkilo-valitsin
                           (conj
                             designer-basic
                             {:name "patevyys" :type :group

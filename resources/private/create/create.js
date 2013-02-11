@@ -3,7 +3,7 @@
 
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
   function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
-  
+
   var model = new function() {
     var self = this;
 
@@ -19,21 +19,21 @@
           .find("h2").accordionClose().end()
           .hide();
     };
-    
+
     var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
-    
+
     self.goPhase2 = function() {
       $("#create-part-1")
         .find("h2")
         .accordionClose(open("#create-part-2"));
     };
-    
+
     self.goPhase3 = function() {
       $("#create-part-2")
         .find("h2")
         .accordionClose(open("#create-part-3"));
     };
-    
+
     self.municipalities = ko.observableArray([]);
     self.map = null;
 
@@ -52,7 +52,7 @@
     self.requestType = ko.observable();
 
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
-    
+
     self.clear = function() {
       if (self.map) self.map.clear().updateSize();
       return self
@@ -238,14 +238,14 @@
   }
 
   hub.onPageChange("create", model.clear);
- 
+
   ajax
-    .query("municipalities")
+    .query("municipalities-for-new-application")
     .success(function(data) { model.municipalities(data.municipalities); })
     .call();
 
   $(function() {
-    
+
     model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
     ko.applyBindings(model, $("#create")[0]);
 
@@ -264,7 +264,7 @@
         "operations");
 
     model.operations.subscribe(tree.reset);
-    
+
   });
 
 })();

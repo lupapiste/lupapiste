@@ -123,7 +123,7 @@
 
 (defcommand "submit-application"
   {:parameters [:id]
-   :roles      [:applicant]
+   :roles      [:applicant :authority]
    :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
@@ -149,8 +149,7 @@
 
 (defcommand "mark-inforequest-answered"
   {:parameters [:id]
-   :roles      [:applicant :authority]
-   :roles-in   [:applicant]
+   :roles      [:authority]
    :states     [:draft :open]}
   [command]
   (with-application command
@@ -189,43 +188,49 @@
 
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]}
   [command]
   (let [{:keys [user created data]} command
-        user-summary  (security/summary user)
-        id            (mongo/create-id)
-        owner         (role user :owner :type :owner)
-        op            (keyword (:operation data))
-        info-request? (if (:infoRequest data) true false)
-        make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
-    (mongo/insert :applications
-      {:id            id
-       :created       created
-       :creator       user-summary
-       :modified      created
-       :infoRequest   info-request?
-       :state         (if info-request? :open :draft)
-       :municipality  (:municipality data)
-       :location      {:x (->double (:x data)) :y (->double (:y data))}
-       :address       (:address data)
-       :propertyId    (:propertyId data)
-       :title         (:address data)
-       :roles         {:applicant owner}
-       :auth          [owner]
-       :operations    [{:operation op :created created}]
-       :documents     (if info-request? [] (make-documents user created nil op))
-       :attachments   (if info-request? [] (make-attachments created op))
-       :allowedAttachmentTypes (if info-request?
-                                 [[:muut [:muu]]]
-                                 (partition 2 attachment/attachment-types))
-       :comments      (map make-comment (:messages data))
-       :permitType    (keyword (:permitType data))})
-    (ok :id id)))
+        user-role     (keyword (:role user))]
+    (if (or (= :applicant user-role)
+            (and (:municipality user) (= (:municipality data) (:municipality user))))
+      (let [
+            user-summary  (security/summary user)
+            id            (mongo/create-id)
+            owner         (role user :owner :type :owner)
+            op            (keyword (:operation data))
+            info-request? (if (:infoRequest data) true false)
+            make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
+        (mongo/insert :applications
+                      {:id            id
+                       :created       created
+                       :opened        (when (= :authority user-role) created)
+                       :creator       user-summary
+                       :modified      created
+                       :infoRequest   info-request?
+                       :state         (if (or info-request? (= :authority user-role)) :open :draft)
+                       :municipality  (:municipality data)
+                       :location      {:x (->double (:x data)) :y (->double (:y data))}
+                       :address       (:address data)
+                       :propertyId    (:propertyId data)
+                       :title         (:address data)
+                       :roles         {:applicant owner}
+                       :auth          [owner]
+                       :operations    [{:operation op :created created}]
+                       :documents     (if info-request? [] (make-documents user created nil op))
+                       :attachments   (if info-request? [] (make-attachments created op))
+                       :allowedAttachmentTypes (if info-request?
+                                                 [[:muut [:muu]]]
+                                                 (partition 2 attachment/attachment-types))
+                       :comments      (map make-comment (:messages data))
+                       :permitType    (keyword (:permitType data))})
+        (ok :id id))
+      (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :roles-in   [:applicant]
+   :roles-in   [:applicant :authority]
    :states     [:draft :open]}
   [command]
   (with-application command

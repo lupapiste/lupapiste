@@ -2,8 +2,8 @@
   (:require [clojure.xml :as xml]
             [net.cgrand.enlive-html :as enlive]))
 
-(defn parse-string [#^java.lang.String s] (xml/parse (java.io.ByteArrayInputStream. (.getBytes s "UTF-8"))))
-(defn parse [#^java.lang.String s] (if (.startsWith (.trim s) "<") (parse-string s) (xml/parse s)))
+(defn parse-string [#^java.lang.String s encoding] (xml/parse (java.io.ByteArrayInputStream. (.getBytes s encoding))))
+(defn parse [#^java.lang.String s & {:keys [encoding] :or {encoding "UTF-8"}}] (if (.startsWith (.trim s) "<") (parse-string s encoding) (xml/parse s)))
 
 (defn attr [xml] (:attrs xml))
 (defn text [xml] (-> xml :content first))

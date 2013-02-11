@@ -36,7 +36,7 @@
     id))
 
 (defcommand "invite"
-  {:parameters [:id :email :title :text :documentName :documentId]
+  {:parameters [:id :email :title :text :documentName]
    :roles      [:applicant]}
   [{created :created
     user    :user
@@ -177,11 +177,12 @@
             schema         (get schemas/schemas schema-name)]
         (if (nil? document)
           (fail :error.document-not-found)
-          (do
+          ;; FIXME: all users should be modelled the same way.
+          (let [path (if (= "hakija" schema-name) :documents.$.body.henkilo :documents.$.body)]
             (info "merging user %s with best effort into document %s" user name)
             (mongo/update
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:id documentId}}}
-              {$set {:documents.$.body (domain/user2henkilo user)
+              {$set {path (domain/user2henkilo user)
                      :modified (:created command)}})))))))
