@@ -54,7 +54,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     label.className = "form-label form-label-" + type;
 
     var path = groupLabel ? pathStr + "._group_label" : pathStr;
-    var locKey = specId + "." + path.replace(/\.\d+\./g, ".");
+    var locKey = (specId + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     label.innerHTML = loc(locKey);
     return label;
   }
@@ -304,19 +304,65 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return span;
   }
 
-  function buildPersonSelector(spec, model, path, save, specId, partOfChoice, title) {
-    $(title)
-        .append($("<button>", {
-            class: "icon-remove",
+  function buildPersonSelector(spec, model, path, save, specId) {
+    var span = makeEntrySpan();
+
+   // existing users
+    var myPath = path.join(".");
+
+    var select = document.createElement("select");
+    select.name = myPath;
+    select.className = "form-input combobox really-long";
+    var selectedOption = model[spec.name] || "";
+
+    var option = document.createElement("option");
+    option.value = "";
+    option.appendChild(document.createTextNode(loc("selectone")));
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
+    select.appendChild(option);
+
+    ajax
+      .command("get-users-in-application", {id: appId})
+      .success(function(data) {
+        $.each(data.users, function (i, user) {
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
+          if (selectedOption === name) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
+        });
+      })
+      .error(function(error) {
+        var text = error.text;
+        var option = document.createElement("option");
+        option.value = name;
+        option.appendChild(document.createTextNode(loc("error."+text)));
+        option.selected = "selected";
+        select.appendChild(option);
+        select.setAttribute("disabled", true);
+      })
+      .call();
+
+    span.appendChild(makeLabel("select", "", "personSelector", true));
+    span.appendChild(select);
+
+    // new invite
+    $("<button>", {
+            "class": "icon-remove",
             "data-test-id": "application-invite-"+specId,
-            text: "["+loc("personSelector.invite")+"]",
+            text: loc("personSelector.invite"),
             click: function() {
               $("#invite-document-name").val(specId).change();
               $("#invite-document-id").val(self.docId).change();
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
               return false;
-            }}));
-    return makeEntrySpan();
+            }}).appendTo(span);
+
+    return span;
   }
 
   function buildUnknown(spec, model, path) {

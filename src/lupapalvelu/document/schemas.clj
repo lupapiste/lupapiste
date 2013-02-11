@@ -7,7 +7,7 @@
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
-(def henkilon-valitsin [{:name :email :type :personSelector}])
+(def henkilo-valitsin [{:name :userId :type :personSelector}])
 
 (def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
 
@@ -44,7 +44,7 @@
                     :type :group
                     :body (conj henkilotiedot-minimal-body {:name "hetu" :type :string})})
 
-(def henkilo-body [henkilotiedot simple-osoite yhteystiedot])
+(def henkilo-body (concat henkilo-valitsin [henkilotiedot simple-osoite yhteystiedot]))
 
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
                    {:name "liikeJaYhteisoTunnus" :type :string}])
@@ -55,10 +55,9 @@
                         :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
                                yhteystiedot]}))
 
-(def party-body (conj henkilon-valitsin
-                      {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                      {:name "henkilo" :type :group :body henkilo-body}
-                      {:name "yritys" :type :group :body yritys-body}))
+(def party-body [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                 {:name "henkilo" :type :group :body henkilo-body}
+                 {:name "yritys" :type :group :body yritys-body}])
 
 (def patevyys [{:name "koulutus" :type :string}
                {:name "patevyysluokka" :type :select
@@ -74,13 +73,13 @@
                      yhteystiedot])
 
 (def paasuunnittelija-body (concat
-                             henkilon-valitsin
+                             henkilo-valitsin
                              (conj
                                designer-basic
                                {:name "patevyys" :type :group :body patevyys})))
 
 (def suunnittelija-body (concat
-                          henkilon-valitsin
+                          henkilo-valitsin
                           (conj
                             designer-basic
                             {:name "patevyys" :type :group
