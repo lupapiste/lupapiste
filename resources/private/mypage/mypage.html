@@ -8,24 +8,24 @@
       <h2 data-bind="ltext: 'mypage.title'"></h2>
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
-        <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}" id="firstName" type="text" class="form-input"></input>
+        <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'" id="firstName" type="text" class="form-input"></input>
       </div>
 
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
-        <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}" id="lastName" type="text" class="form-input"></input>
+        <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'" id="lastName" type="text" class="form-input"></input>
       </div>
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
-        <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}" id="street" type="text"  class="form-input"></input>
+        <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'" id="street" type="text"  class="form-input"></input>
         <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
-        <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}" id="city" type="text" class="form-input"></input>
+        <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
         <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
-        <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}" id="zip" type="text" class="form-input"></input>
+        <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'" id="zip" type="text" class="form-input"></input>
       </div>
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
-        <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}" id="phone" type="text" class="form-input"></input>
+        <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
       </div>
       <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
