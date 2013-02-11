@@ -459,14 +459,8 @@
   var initApplication = function(e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
-    if(tab) {
-      selectTab(tab);
-    } else {
-      // always reload application when enterping application page without tabs
-      repository.load(newId);
-      window.location.hash = window.location.hash.concat("/application");
-    }
-    if(newId !== currentId) {
+    selectTab(tab || "application");
+    if(newId !== currentId || !tab) {
       currentId = newId;
       applicationMap.updateSize();
       inforequestMap.updateSize();
