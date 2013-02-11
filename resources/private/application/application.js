@@ -343,29 +343,29 @@
           .fail(function(e) { error(e); callback("err"); })
           .call();
       };
+      
+      function getDocumentOrder(doc) {
+        var displayOrder = {
+            "hankkeen-kuvaus": 1, 
+            "rakennuspaikka": 2, 
+            "hakija": 3,
+            "paasuunnittelija": 4,
+            "suunnittelija": 5,
+            "maksaja": 6,
+            "DEFAULT": 7,
+            "lisatiedot": 100};
+          
+        var result = displayOrder[doc.schema.info.name];
+        if(!result) {
+          result = displayOrder["DEFAULT"];
+        }
+        
+        return result*10000000000 + Math.floor(doc.created/1000);
+      }
 
       function displayDocuments(containerSelector, documents) {
 
-        var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
-
-        var displayOrderTop = ["hankkeen-kuvaus", "rakennuspaikka", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var displayOrderBottom = ["lisatiedot"];
-
-        var sortedDocs = _.sortBy(documents, function (doc) {
-          var name = doc.schema.info.name;
-
-          var index = _.indexOf(displayOrderTop, name);
-          if(index != -1) {
-            return index;
-          }
-          
-          var index = _.indexOf(displayOrderBottom, name);
-          if(index != -1) {
-            return Number.MAX_VALUE;
-          }
-          
-          return doc.created;
-        });
+        var sortedDocs = _.sortBy(documents, function (doc) { return getDocumentOrder(doc) });
         
         var docgenDiv = $(containerSelector).empty();
         _.each(sortedDocs, function(doc) {
