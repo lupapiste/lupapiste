@@ -79,7 +79,9 @@
   (with-application command
     (fn [{application-id :id invites :invites}]
       (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
-        (executed "set-user-to-document" (assoc-in command [:data :documentId] (:documentId my-invite)))
+        (executed "set-user-to-document" (-> command
+                                           (assoc-in [:data :documentId] (:documentId my-invite))
+                                           (assoc-in [:data :userId      (:id user)])))
         (mongo/update :applications
                       {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
                       ;; TODO: should refresh the data - for new invites to get full names
@@ -168,9 +170,9 @@
 
 ;; FIXME: only for the current document
 (defcommand "set-user-to-document"
-  {:parameters [:id :documentId]
+  {:parameters [:id :documentId :userId]
    :authenticated true}
-  [{{:keys [documentId]} :data user :user :as command}]
+  [{{:keys [documentId userId]} :data user :user :as command}]
   (with-application command
     (fn [application]
       (let [document       (domain/get-document-by-id application documentId)
@@ -180,6 +182,7 @@
           (fail :error.document-not-found)
           ;; FIXME: all users should be modelled the same way.
           (let [path (if (or (= "maksaja" schema-name) (= "hakija" schema-name)) :documents.$.body.henkilo :documents.$.body)]
+            (println "*******" userId "*******")
             (info "merging user %s with best effort into document %s" user name)
             (mongo/update
               :applications

@@ -313,13 +313,14 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var select = document.createElement("select");
     select.name = myPath;
     select.className = "form-input combobox long";
+    console.log("-",path,spec.name,model[spec.name]);
     var selectedOption = model[spec.name] || "";
     select.onchange = function(event) {
       var target = getEvent(event).target;
       var userId = target.value;
-      console.log("***",userId);
+      console.log("about to save:",userId);
       ajax
-        .command("set-user-to-document", {id: appId, documentId: docId})
+        .command("set-user-to-document", {id: appId, documentId: docId, userId: userId})
         .success(function() {
           save(event);
           repository.load(appId);
@@ -350,15 +351,6 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
           }
           select.appendChild(option);
         });
-      })
-      .error(function(error) {
-        var text = error.text;
-        var option = document.createElement("option");
-        option.value = name;
-        option.appendChild(document.createTextNode(loc("error."+text)));
-        option.selected = "selected";
-        select.appendChild(option);
-        select.setAttribute("disabled", true);
       })
       .call();
 
