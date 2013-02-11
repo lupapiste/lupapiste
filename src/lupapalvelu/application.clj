@@ -123,8 +123,7 @@
 
 (defcommand "submit-application"
   {:parameters [:id]
-   :roles      [:applicant :authority]
-   :roles-in   [:applicant]
+   :roles      [:applicant]
    :states     [:draft :open]}
   [command]
   (with-application command
