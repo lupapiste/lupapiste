@@ -15,6 +15,9 @@
         data (json/generate-string js-conf)]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
+(defn loc->js []
+  (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
+
 (def ui-components
   {:jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js"]}
