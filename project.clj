@@ -12,7 +12,7 @@
                  [clj-time "0.4.4"]
                  [org.apache.commons/commons-lang3 "3.1"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
-                 [clj-pdf "1.0.5"]
+                 [clj-pdf "1.0.6-SNAPSHOT"]
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.9.2"]
                  [org.clojure/data.xml "0.0.7"]
@@ -30,7 +30,6 @@
   :warn-on-reflection true
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"\/jquery" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers" #"underscore"]}
-
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
