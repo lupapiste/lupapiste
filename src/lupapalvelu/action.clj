@@ -177,16 +177,16 @@
     (fn [application]
       (let [document       (domain/get-document-by-id application documentId)
             schema-name    (get-in document [:schema :info :name])
-            schema         (get schemas/schemas schema-name)]
+            schema         (get schemas/schemas schema-name)
+            subject        (security/get-non-private-userinfo userId)]
         (if (nil? document)
           (fail :error.document-not-found)
           ;; FIXME: all users should be modelled the same way.
           (let [path (if (or (= "maksaja" schema-name) (= "hakija" schema-name)) :documents.$.body.henkilo :documents.$.body)]
-            (println "*******" userId "*******")
-            (info "merging user %s with best effort into document %s" user name)
+            (info "merging user %s with best effort into document %s" subject name)
             (mongo/update
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:id documentId}}}
-              {$set {path (domain/user2henkilo user)
+              {$set {path (domain/user2henkilo subject)
                      :modified (:created command)}})))))))
