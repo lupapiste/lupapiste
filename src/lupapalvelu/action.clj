@@ -166,6 +166,7 @@
         :applications (:id application)
         {$set {:roles.authority (security/summary user)}}))))
 
+;; FIXME: only for the current document
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId]
    :authenticated true}
