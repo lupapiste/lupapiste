@@ -203,13 +203,13 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return div;
   }
 
-  function buildGroup(spec, model, path, save, specId, partOfChoice, title) {
+  function buildGroup(spec, model, path, save, specId, partOfChoice) {
     var myPath = path.join(".");
     var name = spec.name;
     var myModel = model[name] || {};
 
     var partsDiv = document.createElement("div");
-    appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice, title);
+    appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice);
 
     var div = document.createElement("div");
     div.id = pathStrToGroupID(myPath);
@@ -341,7 +341,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     unknown: buildUnknown
   };
 
-  function build(spec, model, path, save, specId, partOfChoice, title) {
+  function build(spec, model, path, save, specId, partOfChoice) {
 
     var myName = spec.name;
     var myPath = path.concat([myName]);
@@ -349,7 +349,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
-      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice, title);
+      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
       elem.setAttribute("data-repeating-id", repeatingId);
       elem.setAttribute("data-repeating-id-" + repeatingId, id);
       return elem;
@@ -383,7 +383,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       return elements;
     }
 
-    return builder(spec, model, myPath, save, specId, partOfChoice, title);
+    return builder(spec, model, myPath, save, specId, partOfChoice);
   }
 
   function getSelectOneOfDefinition(schema) {
@@ -398,7 +398,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return [];
   }
 
-  function appendElements(body, schema, model, path, save, specId, partOfChoice, title) {
+  function appendElements(body, schema, model, path, save, specId, partOfChoice) {
 
     function toggleSelectedGroup(value) {
       $(body)
@@ -411,7 +411,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var selectOneOf = getSelectOneOfDefinition(schema);
 
     _.each(schema.body, function(spec) {
-        var children = build(spec, model, path, save, specId, partOfChoice, title);
+        var children = build(spec, model, path, save, specId, partOfChoice);
         if (!_.isArray(children)) {
           children = [children];
         }
@@ -516,7 +516,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     sectionContainer.className = "application_section_content content_expanded";
 
     var elements = document.createElement("article");
-    appendElements(elements, self.spec, self.model, [], save, specId, undefined, title);
+    appendElements(elements, self.spec, self.model, [], save, specId);
 
     sectionContainer.appendChild(elements);
     section.appendChild(title);
