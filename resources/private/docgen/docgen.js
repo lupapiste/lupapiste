@@ -304,19 +304,19 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return span;
   }
 
-  function buildPersonSelector(spec, model, path, save, specId, partOfChoice, title) {
-    $(title)
-        .append($("<button>", {
+  function buildPersonSelector(spec, model, path, save, specId) {
+    var span = makeEntrySpan();
+    $("<button>", {
             class: "icon-remove",
             "data-test-id": "application-invite-"+specId,
-            text: "["+loc("personSelector.invite")+"]",
+            text: loc("personSelector.invite"),
             click: function() {
               $("#invite-document-name").val(specId).change();
               $("#invite-document-id").val(self.docId).change();
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
               return false;
-            }}));
-    return makeEntrySpan();
+            }}).appendTo(span);
+    return span;
   }
 
   function buildUnknown(spec, model, path) {
