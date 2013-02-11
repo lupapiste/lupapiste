@@ -81,7 +81,7 @@
       (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
         (executed "set-user-to-document" (-> command
                                            (assoc-in [:data :documentId] (:documentId my-invite))
-                                           (assoc-in [:data :userId      (:id user)])))
+                                           (assoc-in [:data :userId]     (:id user))))
         (mongo/update :applications
                       {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
                       ;; TODO: should refresh the data - for new invites to get full names
