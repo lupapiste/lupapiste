@@ -7,7 +7,7 @@
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
-(def henkilo-valitsin [{:name :email :type :personSelector}])
+(def henkilo-valitsin [{:name :userId :type :personSelector}])
 
 (def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
 
