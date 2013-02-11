@@ -323,7 +323,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         .command("set-user-to-document", {id: appId, documentId: docId, userId: userId})
         .success(function() {
           save(event);
-          repository.load(appId);
+          window.setTimeout(function() {repository.load(appId);},100); //MORBID HACKsy.
         })
         .call();
       return false;
