@@ -43,11 +43,12 @@
 ;; Conversion between Lupapiste and documents
 ;;
 
-(defn user2henkilo [user]
-  {:henkilotiedot {:etunimi       (:firstName user)
-                   :sukunimi      (:lastName user)}
-   :yhteystiedot {:email          (:email user)
-                  :puhelin        (:phone user)}
-   :osoite {:katu                 (:street user)
-            :postinumero          (:zip user)
-            :postitoimipaikannimi (:city user)}})
+(defn user2henkilo [{:keys [id firstName lastName email phone street zip city]}]
+  {:userId                        id
+   :henkilotiedot {:etunimi       firstName
+                   :sukunimi      lastName}
+   :yhteystiedot {:email          email
+                  :puhelin        phone}
+   :osoite {:katu                 street
+            :postinumero          zip
+            :postitoimipaikannimi city}})
