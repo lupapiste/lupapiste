@@ -7,7 +7,7 @@
 (def osoite (schemas/schemas "osoite"))
 (def rakennus (schemas/schemas "uusiRakennus"))
 
-(defn nil-values [x] nil)
+(defn nil-values [_] nil)
 
 (defn dummy-values [{:keys [type name body]}]
   (condp = type
@@ -24,10 +24,10 @@
   (walk/prewalk
     (fn [x]
       (if (map? x)
-        (let [k (:name x)
+        (let [k (-> x :name keyword)
               v (if (= :group (:type x)) (:body x) (f x))]
           {k v})
-        x))
+          x))
     body))
 
 (comment
