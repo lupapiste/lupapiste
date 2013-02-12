@@ -25,7 +25,7 @@
     (fn [x]
       (if (map? x)
         (let [k (:name x)
-              v (if (= :group (:type x)) (:body x) (f x))]
+              v (if (:body x) (:body x) (f x))]
           {k v})
         x))
     body))
