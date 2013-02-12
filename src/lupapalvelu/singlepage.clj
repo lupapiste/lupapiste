@@ -30,7 +30,7 @@
                     ^int line, ^String lineSource, ^int lineOffset]
       (error message) (EvaluatorException. message))))
 
-(defn- minified [kind in out]
+(defn- minified [kind ^java.io.Reader in ^java.io.Writer out]
   (cond
     (env/dev-mode?) (IOUtils/copy in out)
     (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
@@ -51,7 +51,7 @@
       (doseq [src (c/get-resources ui-components kind component)]
         (if (fn? src)
           (.write (write-header out (str "fn: " (fn-name src))) (src))
-          (with-open [in (-> src c/path io/resource io/input-stream)]
+          (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
             (if (.contains src ".min.")
               (IOUtils/copy in (write-header out src))
               (minified kind in (write-header out src)))))))
