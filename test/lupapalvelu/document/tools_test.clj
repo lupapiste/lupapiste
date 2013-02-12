@@ -1,21 +1,27 @@
 (ns lupapalvelu.document.model-test
-  (:require
-    [lupapalvelu.document.tools :refer :all]
-    [lupapalvelu.document.model-test :as model]
-    [midje.sweet :refer :all]))
+  (:use
+    [lupapalvelu.document.tools]
+    [midje.sweet]))
+
+(def schema
+  {:info {:name "band"},
+   :body
+   [{:name "band",
+     :type :group,
+     :body
+     [{:name "name", :type :string}
+      {:name "genre", :type :string}
+      {:name "members"
+       :type :group
+       :repeating true
+       :body [{:name "name", :type :string}
+              {:name "instrument", :type :string}]}]}]})
+
 
 (fact "simple schema"
   (-> schema
     (create nil-values)
-    flattened) => {:a {:aa nil
-                       :ab nil
-                       :b {:ba nil
-                           :bb nil}
-                       :c nil}})
-
-(fact "repeative schema"
-  (-> schema-with-repetition
-    (create nil-values)
-    flattened) => {:single nil
-                   :repeats {:0 {:repeats {:single2 nil
-                                           :repeats2 nil}}}})
+    flattened) => {:band {:name nil
+                          :genre nil
+                          :members {:0 {:members {:name nil
+                                                  :instrument nil}}}}})

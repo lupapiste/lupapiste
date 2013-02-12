@@ -42,21 +42,3 @@
                     (f x))]
             {k v})
           x)))))
-
-(comment
-  {:info {:name "osoite"},
-   :body
-   [{:name "osoite",
-     :type :group,
-     :body
-     [{:name "kunta", :type :string}
-      {:name "lahiosoite", :type :string}
-      {:name "osoitenumero", :type :string}
-      {:name "osoitenumero2", :type :string}
-      {:name "jakokirjain", :size "s", :type :string}
-      {:name "jakokirjain2", :size "s", :type :string}
-      {:name "porras", :size "s", :type :string}
-      {:name "huoneisto", :size "s", :type :string}
-      {:name "postinumero", :size "s", :type :string}
-      {:name "postitoimipaikannimi", :size "m", :type :string}
-      {:name "pistesijanti", :type :string}]}]})
