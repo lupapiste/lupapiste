@@ -344,21 +344,30 @@
           .fail(function(e) { error(e); callback("err"); })
           .call();
       };
+      
+      var displayOrder = {
+          "hankkeen-kuvaus": 1, 
+          "rakennuspaikka": 2, 
+          "hakija": 3,
+          "paasuunnittelija": 4,
+          "suunnittelija": 5,
+          "maksaja": 6,
+          "lisatiedot": 100};
+
+      function getDocumentOrder(doc) {
+        var num = displayOrder[doc.schema.info.name] || 7;
+        return num * 10000000000 + doc.created/1000;
+      }
 
       function displayDocuments(containerSelector, documents) {
 
-        var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
-
-        var displayOrder = ["hankkeen-kuvaus", "rakennuspaikka", "purku", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name); });
-
+        var sortedDocs = _.sortBy(documents, getDocumentOrder);
+        
         var docgenDiv = $(containerSelector).empty();
-        _.each(sortedDocs, function(docGroup) {
-          _.each(docGroup, function(doc) {
-            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
-          });
+        _.each(sortedDocs, function(doc) {
+          docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
 
-          var schema = docGroup[0].schema;
+          var schema = doc.schema;
 
           if (schema.info.repeating) {
             var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
