@@ -34,10 +34,16 @@
       (fn [x]
         (if (map? x)
           (let [k (-> x :name keyword)
-                v (if (= :group (:type x)) (:body x) (f x))]
+                b (:body x)
+                v (if (= :group (:type x))
+                    (if (:repeating x)
+                      {:name :0
+                       :type :group
+                       :body (dissoc x :repeating)}
+                      b)
+                    (f x))]
             {k v})
-          x)))
-    flattened))
+          x)))))
 
 (comment
   {:info {:name "osoite"},
