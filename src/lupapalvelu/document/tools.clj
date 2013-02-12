@@ -27,7 +27,7 @@
         (let [k (-> x :name keyword)
               v (if (= :group (:type x)) (:body x) (f x))]
           {k v})
-          x))
+        x))
     body))
 
 (comment
