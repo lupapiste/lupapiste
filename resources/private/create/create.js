@@ -165,7 +165,7 @@
     };
 
     self.makeSuccess = function(requestId, fn) {
-      return function(result) { if (requestId === self.updateRequestId) { fn(result); }};
+      return function(result) { if (requestId === self.updateRequestId) fn(result); };
     };
 
     self.searchMunicipality = function(x, y) {
@@ -192,10 +192,10 @@
     self.searchAddress = function(x, y) {
       var requestId = self.updateRequestId;
       ajax
-        .get("/proxy/property-id-by-point")
+        .get("/proxy/address-by-point")
         .param("x", x)
         .param("y", y)
-        .success(self.makeSuccess(requestId, self.setPropertyId))
+        .success(self.makeSuccess(requestId, self.setAddress))
         .call();
       return self;
     };
