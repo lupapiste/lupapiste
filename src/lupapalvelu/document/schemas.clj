@@ -312,7 +312,7 @@
 (def schemas
   (to-map-by-name
     [{:info {:name "uusiRakennus"}
-      :body rakennuksen-tiedot}
+      :body (concat rakennuksen-omistajat rakennuksen-tiedot)}
 
      {:info {:name "hankkeen-kuvaus"}
       :body [{:name "kuvaus" :type :text}
