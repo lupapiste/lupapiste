@@ -1,8 +1,7 @@
 (ns lupapalvelu.document.tools
-  (require
-    [clojure.walk :as walk]
-    [lupapalvelu.document.schemas :as schemas]
-    [lupapalvelu.document.model :as model]))
+  (:require [clojure.walk :as walk]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.model :as model]))
 
 (def osoite (schemas/schemas "osoite"))
 (def rakennus (schemas/schemas "uusiRakennus"))
@@ -21,12 +20,12 @@
     name))
 
 (defn flattened [col]
-  (walk/postwalk
-    (fn [x]
-      (if (and (vector? x) (-> x first map?))
-        (into {} x)
-        x))
-    col))
+  (->> col
+    (walk/postwalk
+      (fn [x]
+        (if (and (vector? x) (-> x first map?))
+          (into {} x)
+          x)))))
 
 (defn create [{body :body} f]
   (->> body
@@ -34,13 +33,12 @@
       (fn [x]
         (if (map? x)
           (let [k (-> x :name keyword)
-                b (:body x)
                 v (if (= :group (:type x))
                     (if (:repeating x)
                       {:name :0
                        :type :group
                        :body (dissoc x :repeating)}
-                      b)
+                      (:body x))
                     (f x))]
             {k v})
           x)))))
