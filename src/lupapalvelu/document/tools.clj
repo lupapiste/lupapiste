@@ -30,6 +30,14 @@
         x))
     body))
 
+(defn pimped [col]
+  (walk/postwalk
+    (fn [x]
+      (if (and (vector? x) (-> x first map?))
+        (into {} x)
+        x))
+    col))
+
 (comment
   {:info {:name "osoite"},
    :body
