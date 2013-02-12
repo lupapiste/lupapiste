@@ -12,11 +12,11 @@ Mikko creates a new application
   Create application the fast way  submit-app  753  75341600250030
   Add comment  huba huba
   Logout
-  
-Sonja can't submit application
+
+Sonja can submit application
   Sonja logs in
   Open application  submit-app
-  Wait until  Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
+  Wait until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Logout
 
 Mikko could submit application

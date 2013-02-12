@@ -98,7 +98,6 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
-   ;;:roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
   (mongo/update-by-id :applications (-> command :data :id)
@@ -124,7 +123,6 @@
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
-   :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
   (with-application command
@@ -137,7 +135,6 @@
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
    :roles      [:applicant :authority]
-   :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
   (let [shape (:shape (:data command))]
@@ -230,7 +227,6 @@
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   ;;:roles-in   [:applicant :authority]
    :states     [:draft :open]}
   [command]
   (with-application command
