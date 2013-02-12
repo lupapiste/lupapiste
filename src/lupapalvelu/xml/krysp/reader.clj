@@ -136,18 +136,21 @@
                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
 
+(with-xml [xml]
+  (let )
+  )
 (defn ->rakennuksen-muuttaminen [xml buildingId]
   (let [stripped  (strip-xml-namespaces xml)
         rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
         polished  (comp index-maps strip-empty-maps strip-nils convert-booleans)]
     (when rakennus
       (polished
-        {:muutostyolaji ...notimplemented...
-         :rakennusnro (get-text rakennus :rakennusnro)
-         :verkostoliittymat (-> rakennus (all-of [:verkostoliittymat]))
-         :rakennuksenOmistajat (->>
-                                 (select rakennus [:omistaja])
-                                 (map ->rakennuksen-omistaja))
+        {:muutostyolaji                 ...notimplemented...
+         :rakennusnro                   (get-text rakennus :rakennusnro)
+         :verkostoliittymat             (all-of rakennus [:verkostoliittymat])
+         :rakennuksenOmistajat          (->>
+                                          (select rakennus [:omistaja])
+                                          (map ->rakennuksen-omistaja))
          :osoite {:kunta                (get-text rakennus :kunta)
                   :lahiosoite           (get-text rakennus :osoitenimi :teksti)
                   :osoitenumero         (get-text rakennus :osoitenumero)
