@@ -5,27 +5,27 @@
     [lupapalvelu.document.model :as model]))
 
 (def osoite (schemas/schemas "osoite"))
+(def rakennus (schemas/schemas "uusiRakennus"))
 
 (defn nil-values [x] nil)
 
-(defn dummy-values [{:keys [type name]}]
-  (if (sequential? type)
-    "!!!"
-    (condp = type
-      :checkbox         true
-      :number           "42"
-      :email            "example@example.com"
-      :tel              "012 123 4567"
-      :letter           "\u00c5"
-      :kiinteistotunnus "09100200990013"
-      name)))
+(defn dummy-values [{:keys [type name body]}]
+  (condp = type
+    :select           (-> body first :name)
+    :checkbox         true
+    :number           "42"
+    :email            "example@example.com"
+    :tel              "012 123 4567"
+    :letter           "\u00c5"
+    :kiinteistotunnus "09100200990013"
+    name))
 
 (defn create [{body :body} f]
-  (walk/postwalk
+  (walk/prewalk
     (fn [x]
       (if (map? x)
         (let [k (:name x)
-              v (if (:body x) (:body x) (f x))]
+              v (if (= :group (:type x)) (:body x) (f x))]
           {k v})
         x))
     body))
