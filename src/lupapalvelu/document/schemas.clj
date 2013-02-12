@@ -114,7 +114,9 @@
                              {:name "keittotila"}
                              {:name "tupakeittio"}
                              {:name "ei tiedossa"}]}
-                     {:name "varusteet" :type :choice
+                     {:name "varusteet"
+                      :type :group
+                      :layout :vertical
                       :body [{:name "WCKytkin" :type :checkbox}
                              {:name "ammeTaiSuihkuKytkin" :type :checkbox}
                              {:name "saunaKytkin" :type :checkbox}
@@ -257,13 +259,17 @@
                              {:name "puu"}
                              {:name "muu" :type :string :size "s"} ;TODO tukii tekstille
                              {:name "ei tiedossa"}]}]}
-             {:name "verkostoliittymat" :type :choice
+             {:name   "verkostoliittymat"
+              :type   :group
+              :layout :vertical
               :body [{:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
                      {:name "sahkoKytkin" :type :checkbox}
                      {:name "maakaasuKytkin" :type :checkbox}
                      {:name "kaapeliKytkin" :type :checkbox}]}
-             {:name "varusteet" :type :choice
+             {:name   "varusteet"
+              :type   :group
+              :layout :vertical
               :body [{:name "sahkoKytkin" :type :checkbox}
                      {:name "kaasuKytkin" :type :checkbox}
                      {:name "viemariKytkin" :type :checkbox}
