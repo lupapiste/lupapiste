@@ -1,10 +1,6 @@
 (ns lupapalvelu.document.tools
   (:require [clojure.walk :as walk]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.model :as model]))
-
-(def osoite (schemas/schemas "osoite"))
-(def rakennus (schemas/schemas "uusiRakennus"))
 
 (defn nil-values [_] nil)
 
