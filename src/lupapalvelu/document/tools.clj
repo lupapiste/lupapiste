@@ -20,16 +20,6 @@
     :kiinteistotunnus "09100200990013"
     name))
 
-(defn create [{body :body} f]
-  (walk/prewalk
-    (fn [x]
-      (if (map? x)
-        (let [k (-> x :name keyword)
-              v (if (= :group (:type x)) (:body x) (f x))]
-          {k v})
-        x))
-    body))
-
 (defn pimped [col]
   (walk/postwalk
     (fn [x]
@@ -37,6 +27,17 @@
         (into {} x)
         x))
     col))
+
+(defn create [{body :body} f]
+  (->> body
+    (walk/prewalk
+      (fn [x]
+        (if (map? x)
+          (let [k (-> x :name keyword)
+                v (if (= :group (:type x)) (:body x) (f x))]
+            {k v})
+          x)))
+    pimped))
 
 (comment
   {:info {:name "osoite"},
