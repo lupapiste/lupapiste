@@ -130,6 +130,7 @@
 
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
 (def maasto "https://ws.nls.fi/maasto/wfs")
+(def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
 (defn execute
   "Takes a query (in XML) and returns a vector. If the first element of that
@@ -146,6 +147,14 @@
     timeout
     [:timeout]))
 
+(defn get-url
+  [url q]
+  (deref
+    (future
+      (let [response (client/get url 
+                                 {:query-params q
+                                  :basic-auth auth})]
+        [:ok response]))))
 ;;
 ;; Raster images:
 ;;

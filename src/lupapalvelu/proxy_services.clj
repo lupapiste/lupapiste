@@ -134,7 +134,7 @@
 (defn address-by-point-proxy [request]
   (let [x (get (:query-params request) "x")
         y (get (:query-params request) "y")
-        input-xml (:body (client/get (clojure.string/join "" ["https://ws.nls.fi/maasto/nearestfeature?NAMESPACE=xmlns%28oso%3Dhttp%3A%2F%2Fxml.nls.fi%2FOsoitteet%2FOsoitepiste%2F2011%2F02%29&TYPENAME=oso%3AOsoitepiste&COORDS=" x "%2C" y "%2CEPSG%3A3067&SRSNAME=EPSG%3A3067&MAXFEATURES=1&BUFFER=500"]) {:basic-auth auth}))
+        input-xml (:body (client/get (str "https://ws.nls.fi/maasto/nearestfeature?NAMESPACE=xmlns%28oso%3Dhttp%3A%2F%2Fxml.nls.fi%2FOsoitteet%2FOsoitepiste%2F2011%2F02%29&TYPENAME=oso%3AOsoitepiste&COORDS=" x "%2C" y "%2CEPSG%3A3067&SRSNAME=EPSG%3A3067&MAXFEATURES=1&BUFFER=500") {:basic-auth auth}))
         features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (clojure.string/replace input-xml "UTF-8" "ISO-8859-1")))))]
     (resp/json (first (->> (xml-> features :gml:featureMember)
                  (map (fn [feature] { (clojure.string/join "" ["katunimi" (first (xml-> feature :oso:Osoite :oso:kieli text))]) 
@@ -144,6 +144,74 @@
                                      :kuntanimiSv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))
                                      :x (first  (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" "))
                                      :y (second (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" ")) })))))))
+
+(comment
+(defn get-addresses [street number city]
+  (wfs/execute wfs/maasto
+    (wfs/query {"typeName" "oso:Osoitenimi"}
+      (wfs/sort-by "oso:katunumero")
+      (wfs/filter
+        (wfs/and
+          (wfs/property-is-like "oso:katunimi"     street)
+          (wfs/property-is-like "oso:katunumero"   number)
+          (wfs/or
+            (wfs/property-is-like "oso:kuntanimiFin" city)
+            (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
+
+(defn get-addresses-proxy [request]
+  (let [query (get (:query-params request) "query")
+        address (parse-address query)
+        [status response] (apply get-addresses address)]
+    (if (= status :ok)
+      (let [features (take 10 response)]
+        (resp/json {:query query
+                    :suggestions (map wfs/feature-to-simple-address-string features)
+                    :data (map wfs/feature-to-address features)}))
+      (resp/status 503 "Service temporarily unavailable")))))
+
+(defn get-address-by-point [x y]
+  (wfs/get-url wfs/nearestfeature
+               {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
+                :TYPENAME "oso:Osoitepiste"
+                :COORDS (str x "," y ",EPSG:3067")
+                :SRSNAME "EPSG:3067"
+                :MAXFEATURES "1"
+                :BUFFER "500"}))
+
+(get-addresses "Luhtaankatu" "10" "Tampere")
+(get-address-by-point 333168 6822000)
+
+(defn address-by-point-proxy2 [request]
+  (let [x (get (:query-params request) "x")
+        y (get (:query-params request) "y")
+        response (get-address-by-point x y)]
+    (println response)))
+
+;    (if (= status :ok)
+;      (resp/json {:foo "bar"})
+;      (resp/status 503 "Service temporarily unavailable"))))
+    
+
+(let [x 333168
+      y 6822000
+      request {:query-params {"x" x "y" y}}
+      response (address-by-point-proxy2 request)])
+
+
+  (comment
+    (defn address-by-point-proxy2 [request]
+      (let [x (get (:query-params request) "x")
+            y (get (:query-params request) "y")
+            input-xml (:body (client/get (clojure.string/join "" ["https://ws.nls.fi/maasto/nearestfeature?NAMESPACE=xmlns%28oso%3Dhttp%3A%2F%2Fxml.nls.fi%2FOsoitteet%2FOsoitepiste%2F2011%2F02%29&TYPENAME=oso%3AOsoitepiste&COORDS=" x "%2C" y "%2CEPSG%3A3067&SRSNAME=EPSG%3A3067&MAXFEATURES=1&BUFFER=500"]) {:basic-auth auth}))
+            features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (clojure.string/replace input-xml "UTF-8" "ISO-8859-1")))))]
+        (resp/json (first (->> (xml-> features :gml:featureMember)
+                            (map (fn [feature] { (clojure.string/join "" ["katunimi" (first (xml-> feature :oso:Osoite :oso:kieli text))]) 
+                                                (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+                                                :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
+                                                :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
+                                                :kuntanimiSv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))
+                                                :x (first  (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" "))
+                                                :y (second (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" ")) }))))))))
 
 ;
 ; Utils:
@@ -165,6 +233,7 @@
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
+               "address-by-point2" address-by-point-proxy2
                "find-address" find-addresses-proxy
-			   "osoitebypoint" osoitebypoint
+               "osoitebypoint" osoitebypoint
                "get-address" get-addresses-proxy})
