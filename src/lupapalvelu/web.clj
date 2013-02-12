@@ -18,7 +18,7 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.municipality]
             [lupapalvelu.application :as application]
-            [lupapalvelu.pdf :as pdf]
+            [lupapalvelu.ke6666 :as ke6666]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
@@ -235,7 +235,7 @@
   (attachment/output-all-attachments application-id (current-user)))
 
 (defpage [:get ["/api/pdf-export/:lang/:application-id" :lang #"[a-z]{2}"]] {lang :lang application-id :application-id}
-  (pdf/export application-id (current-user) lang))
+  (ke6666/export application-id (current-user) lang))
 
 ;;
 ;; Proxy
