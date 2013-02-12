@@ -44,7 +44,7 @@
       return this.saved(false).error(null);
     };
 
-    this.ok = ko.computed(function() { return isNotBlank(this.firstName()); }, this);
+    this.ok = ko.computed(function() { return isNotBlank(this.firstName()) && isNotBlank(this.lastName()); }, this);
     this.save = makeSaveFn("save-user-info", ["firstName", "lastName", "street", "city", "zip", "phone"]);
 
     this.updateUserName = function() {

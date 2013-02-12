@@ -35,7 +35,7 @@ var attachment = (function() {
       ajax.command("reject-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
           notify.success("liite hyl\u00E4tty",model);
-          repository.reloadApplication(id);
+          repository.load(id);
         })
         .call();
       return false;
@@ -46,7 +46,7 @@ var attachment = (function() {
       ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
           notify.success("liite hyv\u00E4ksytty",model);
-          repository.reloadApplication(id);
+          repository.load(id);
         })
         .call();
       return false;
@@ -132,7 +132,7 @@ var attachment = (function() {
     model.attachmentType(type);
     model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
-    
+
     attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'), application.allowedAttachmentTypes, model.attachmentType());
 
     model.application.id(applicationId);
@@ -152,11 +152,11 @@ var attachment = (function() {
   hub.onPageChange("attachment", function(e) {
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
-    hub.send("load-application", {id: applicationId});
+    repository.load(applicationId);
   });
 
-  hub.subscribe("application-loaded", function(data) {
-    var app = data.applicationDetails.application;
+  repository.loaded(function(e) {
+    var app = e.applicationDetails.application;
     if (applicationId === app.id) { showAttachment(app); }
   });
 
@@ -170,10 +170,6 @@ var attachment = (function() {
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
   });
-
-  function toApplication() {
-    window.location.href = "#!/application/" + model.application.id();
-  }
 
   $(function() {
     ko.applyBindings({
@@ -192,7 +188,7 @@ var attachment = (function() {
 
   function uploadDone() {
     if (uploadingApplicationId) {
-      repository.reloadApplication(uploadingApplicationId);
+      repository.load(uploadingApplicationId);
       LUPAPISTE.ModalDialog.close();
       uploadingApplicationId = null;
     }
@@ -201,7 +197,7 @@ var attachment = (function() {
   hub.subscribe("upload-done", uploadDone);
 
   function newAttachment(m) {
-    var infoRequest = this.application.infoRequest();
+    var infoRequest = this.application.infoRequest(); //FIXME: MIHIN THIS:iin VIITATAAN???
     var type = infoRequest ? "muut.muu" : null;
     var selector = infoRequest ? false : true;
     initFileUpload(m.application.id(), null, type, selector);

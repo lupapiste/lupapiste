@@ -4,7 +4,29 @@
         [lupapalvelu.log])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.util :as util]))
+            [lupapalvelu.util :as util]
+            [noir.session :as session]))
+
+(def applicationpage-for {"applicant" "/applicant"
+                          "authority" "/authority"
+                          "authorityAdmin" "/authority-admin"
+                          "admin" "/admin"})
+
+(defcommand "login"
+  {:parameters [:username :password]}
+  [{{:keys [username password]} :data}]
+  (if-let [user (security/login username password)]
+    (do
+      (info "login: successful: username=%s" username)
+      (session/put! :user user)
+      (if-let [application-page (applicationpage-for (:role user))]
+        (ok :user user :applicationpage application-page)
+        (do
+          (error "Unknown user role: role=[%s]" (:role user))
+          (fail :error.login))))
+    (do
+      (info "login: failed: username=%s" username)
+      (fail :error.login))))
 
 (defcommand "change-passwd"
   {:parameters [:oldPassword :newPassword]
@@ -32,4 +54,5 @@
       :users
       user-id
       {$set (util/sub-map data [:firstName :lastName :street :city :zip :phone])})
+    (session/put! :user (security/get-non-private-userinfo user-id))
     (ok)))

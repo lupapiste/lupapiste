@@ -11,7 +11,7 @@ var authorization = (function() {
     };
 
     self.refresh = function(application, callback) {
-      ajax.query("allowed-actions", {id: application.id})
+      ajax.query("allowed-actions", {id: (application.id || application)})
         .success(function(d) {
           self.data(d.actions);
           if (callback) { callback(); }

@@ -64,13 +64,13 @@
 
     self.init = function(applicationId) {
       self.applicationId(applicationId);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm");
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
       return self;
     };
 
     self.ok = function() {
       ajax
-        .command("cancel-application", {id: this.applicationId()})
+        .command("cancel-application", {id: self.applicationId()})
         .success(function() {
           window.location.hash = "!/applications";
         })
@@ -79,6 +79,9 @@
     };
 
     self.cancel = function() { return true; };
+
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel",
+        loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
   }();
 
 
@@ -123,7 +126,7 @@
         var drawing = "" + e.data.drawing;
         ajax.command("save-application-shape", {id: applicationId, shape: drawing})
         .success(function() {
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       });
@@ -134,7 +137,7 @@
       ajax.command("submit-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus j\u00E4tetty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -145,7 +148,7 @@
       ajax.command("mark-inforequest-answered", {id: applicationId})
         .success(function() {
           notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -155,7 +158,7 @@
       var id = application.id();
       ajax.command("convert-to-application", {id: id})
         .success(function() {
-          repository.reloadApplication(id);
+          repository.load(id);
           window.location.hash = "!/application/" + id;
         })
         .call();
@@ -167,7 +170,7 @@
       ajax.command("approve-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -178,7 +181,7 @@
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function() {
           notify.success("kutsu poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -189,7 +192,7 @@
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function() {
           notify.success("oikeus poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -208,8 +211,12 @@
       var id = application.id();
       removeApplicationModel.init(id);
       return false;
-    }
+    },
 
+    changeTab: function(model,event){
+      var element = event.target;
+      window.location.hash = "#!/application/"+application.id()+"/"+element.name;
+    }
   };
 
   var authorities = ko.observableArray([]);
@@ -242,9 +249,7 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {})
-      .error(function(e) { error(e); })
-      .fail(function(e) { error(e); })
+      .success(function() {authorizationModel.refresh(currentId);})
       .call();
   }
 
@@ -338,21 +343,30 @@
           .fail(function(e) { error(e); callback("err"); })
           .call();
       };
+      
+      var displayOrder = {
+          "hankkeen-kuvaus": 1, 
+          "rakennuspaikka": 2, 
+          "hakija": 3,
+          "paasuunnittelija": 4,
+          "suunnittelija": 5,
+          "maksaja": 6,
+          "lisatiedot": 100};
+
+      function getDocumentOrder(doc) {
+        var num = displayOrder[doc.schema.info.name] || 7;
+        return num * 10000000000 + doc.created/1000;
+      }
 
       function displayDocuments(containerSelector, documents) {
 
-        var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
-
-        var displayOrder = ["hankkeen-kuvaus", "rakennuspaikka", "purku", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name); });
-
+        var sortedDocs = _.sortBy(documents, getDocumentOrder);
+        
         var docgenDiv = $(containerSelector).empty();
-        _.each(sortedDocs, function(docGroup) {
-          _.each(docGroup, function(doc) {
-            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
-          });
+        _.each(sortedDocs, function(doc) {
+          docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
 
-          var schema = docGroup[0].schema;
+          var schema = doc.schema;
 
           if (schema.info.repeating) {
             var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -377,10 +391,6 @@
       displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
       displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
-      if(! isTabSelected('#applicationTabs')) {
-        selectDefaultTab('#applicationTabs');
-      }
-
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
@@ -390,7 +400,7 @@
     });
   }
 
-  hub.subscribe("application-loaded", function(e) {
+  repository.loaded(function(e) {
     if (!currentId || (currentId === e.applicationDetails.application.id)) {
       showApplication(e.applicationDetails);
     }
@@ -423,7 +433,7 @@
           self.documentId(undefined);
           self.text(undefined);
           self.error(undefined);
-          repository.reloadApplication(id);
+          repository.load(id);
           LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
@@ -434,27 +444,21 @@
     };
   }();
 
-  var tab = {
-    tabClick: function(data, event) {
-      var target = event.target;
-     setSelectedTab('#applicationTabs', target);
-    }
-  };
+   // tabs
 
-  function isTabSelected(id) {
-    return $(id + ' > li').hasClass("active");
-  }
-
-  function selectDefaultTab(id) {
-    setSelectedTab(id, $('.active-as-default'));
-  }
-
-  function setSelectedTab(id, element) {
-    $(id + " li").removeClass("active");
-    $(element).parent().addClass("active");
+  function openTab(id) {
     $(".tab-content").hide();
-    var selected_tab = $(element).attr("href");
-    $(selected_tab).fadeIn();
+    $("#application-"+id+"-tab").fadeIn();
+  }
+
+  function markTabActive(id) {
+    $("#applicationTabs li").removeClass("active");
+    $("a[name='"+id+"']").parent().addClass("active");
+  }
+
+  function selectTab(tab) {
+    markTabActive(tab);
+    openTab(tab);
   }
 
   var accordian = function(data, event) {
@@ -462,10 +466,15 @@
   };
 
   var initApplication = function(e) {
-    currentId = e.pagePath[0];
-    applicationMap.updateSize();
-    inforequestMap.updateSize();
-    hub.send("load-application", {id: currentId});
+    var newId = e.pagePath[0];
+    var tab = e.pagePath[1];
+    selectTab(tab || "info");
+    if(newId !== currentId || !tab) {
+      currentId = newId;
+      applicationMap.updateSize();
+      inforequestMap.updateSize();
+      repository.load(currentId);
+    }
   };
 
   hub.onPageChange("application", initApplication);
@@ -484,7 +493,6 @@
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
-      tab: tab,
       accordian: accordian,
       removeDocModel: removeDocModel,
       removeApplicationModel: removeApplicationModel

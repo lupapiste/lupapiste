@@ -98,7 +98,6 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
   (mongo/update-by-id :applications (-> command :data :id)
@@ -123,8 +122,7 @@
 
 (defcommand "submit-application"
   {:parameters [:id]
-   :roles      [:applicant]
-   :roles-in   [:applicant]
+   :roles      [:applicant :authority]
    :states     [:draft :open]}
   [command]
   (with-application command
@@ -137,7 +135,6 @@
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
    :roles      [:applicant :authority]
-   :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
   (let [shape (:shape (:data command))]
@@ -149,8 +146,7 @@
 
 (defcommand "mark-inforequest-answered"
   {:parameters [:id]
-   :roles      [:applicant :authority]
-   :roles-in   [:applicant]
+   :roles      [:authority]
    :states     [:draft :open]}
   [command]
   (with-application command
@@ -189,43 +185,48 @@
 
 (defcommand "create-application"
   {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]}
   [command]
   (let [{:keys [user created data]} command
-        user-summary  (security/summary user)
-        id            (mongo/create-id)
-        owner         (role user :owner :type :owner)
-        op            (keyword (:operation data))
-        info-request? (if (:infoRequest data) true false)
-        make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
-    (mongo/insert :applications
-      {:id            id
-       :created       created
-       :creator       user-summary
-       :modified      created
-       :infoRequest   info-request?
-       :state         (if info-request? :open :draft)
-       :municipality  (:municipality data)
-       :location      {:x (->double (:x data)) :y (->double (:y data))}
-       :address       (:address data)
-       :propertyId    (:propertyId data)
-       :title         (:address data)
-       :roles         {:applicant owner}
-       :auth          [owner]
-       :operations    [{:operation op :created created}]
-       :documents     (if info-request? [] (make-documents user created nil op))
-       :attachments   (if info-request? [] (make-attachments created op))
-       :allowedAttachmentTypes (if info-request?
-                                 [[:muut [:muu]]]
-                                 (partition 2 attachment/attachment-types))
-       :comments      (map make-comment (:messages data))
-       :permitType    (keyword (:permitType data))})
-    (ok :id id)))
+        user-role     (keyword (:role user))]
+    (if (or (= :applicant user-role)
+            (and (:municipality user) (= (:municipality data) (:municipality user))))
+      (let [
+            user-summary  (security/summary user)
+            id            (mongo/create-id)
+            owner         (role user :owner :type :owner)
+            op            (keyword (:operation data))
+            info-request? (if (:infoRequest data) true false)
+            make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
+        (mongo/insert :applications
+                      {:id            id
+                       :created       created
+                       :opened        (when (= :authority user-role) created)
+                       :creator       user-summary
+                       :modified      created
+                       :infoRequest   info-request?
+                       :state         (if (or info-request? (= :authority user-role)) :open :draft)
+                       :municipality  (:municipality data)
+                       :location      {:x (->double (:x data)) :y (->double (:y data))}
+                       :address       (:address data)
+                       :propertyId    (:propertyId data)
+                       :title         (:address data)
+                       :roles         {:applicant owner}
+                       :auth          [owner]
+                       :operations    [{:operation op :created created}]
+                       :documents     (if info-request? [] (make-documents user created nil op))
+                       :attachments   (if info-request? [] (make-attachments created op))
+                       :allowedAttachmentTypes (if info-request?
+                                                 [[:muut [:muu]]]
+                                                 (partition 2 attachment/attachment-types))
+                       :comments      (map make-comment (:messages data))
+                       :permitType    (keyword (:permitType data))})
+        (ok :id id))
+      (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
   (with-application command
@@ -242,7 +243,6 @@
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :roles-in   [:applicant]
    :states     [:draft :open]}
   [command]
   (with-application command
@@ -258,13 +258,21 @@
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))
 
+(defquery "get-users-in-application"
+  {:parameters [:id]
+   :roles      [:applicant :authority]}
+  [query]
+  (with-application query
+    (fn [{:keys [auth]}]
+      (ok :users auth))))
+
 ;;
 ;; krysp enrichment
 ;;
 
 (defcommand "merge-details-from-krysp"
   {:parameters [:id :buildingId]
-   :roles-in   [:applicant :authority]}
+   :roles      [:applicant :authority]}
   [{{:keys [id buildingId]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality propertyId] :as application}]
@@ -285,7 +293,7 @@
 
 (defcommand "get-building-info-from-legacy"
   {:parameters [:id]
-   :roles-in   [:applicant :authority]}
+   :roles      [:applicant :authority]}
   [{{:keys [id]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality propertyId] :as application}]

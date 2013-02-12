@@ -54,7 +54,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     label.className = "form-label form-label-" + type;
 
     var path = groupLabel ? pathStr + "._group_label" : pathStr;
-    var locKey = specId + "." + path.replace(/\.\d+\./g, ".");
+    var locKey = (specId + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     label.innerHTML = loc(locKey);
     return label;
   }
@@ -203,13 +203,13 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return div;
   }
 
-  function buildGroup(spec, model, path, save, specId, partOfChoice, title) {
+  function buildGroup(spec, model, path, save, specId, partOfChoice) {
     var myPath = path.join(".");
     var name = spec.name;
     var myModel = model[name] || {};
 
     var partsDiv = document.createElement("div");
-    appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice, title);
+    appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice);
 
     var div = document.createElement("div");
     div.id = pathStrToGroupID(myPath);
@@ -255,7 +255,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
         .success(function() {
           save(event);
-          hub.send("load-application", {id: appId});
+          repository.load(appId);
         })
         .call();
       return false;
@@ -299,24 +299,72 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       .call();
 
     var span = makeEntrySpan();
-    span.appendChild(makeLabel("select", myPath, specId, true));
+    span.appendChild(makeLabel("select", "", "buildingSelector", true));
     span.appendChild(select);
     return span;
   }
 
-  function buildPersonSelector(spec, model, path, save, specId, partOfChoice, title) {
-    $(title)
-        .append($("<button>", {
-            class: "icon-remove",
+  function buildPersonSelector(spec, model, path, save, specId) {
+    var span = makeEntrySpan();
+
+    // existing users
+    var myPath = path.join(".");
+
+    var select = document.createElement("select");
+    select.name = myPath;
+    select.className = "form-input combobox long";
+    var selectedOption = model[spec.name] || "";
+    select.onchange = function(event) {
+      var target = getEvent(event).target;
+      var userId = target.value;
+      ajax
+        .command("set-user-to-document", {id: appId, documentId: docId, userId: userId})
+        .success(function() {
+          save(event,function() { repository.load(appId); });
+        })
+        .call();
+      return false;
+    };
+    var option = document.createElement("option");
+    option.value = "";
+    option.appendChild(document.createTextNode(loc("selectone")));
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
+    select.appendChild(option);
+
+    ajax
+      .command("get-users-in-application", {id: appId})
+      .success(function(data) {
+        $.each(data.users, function (i, user) {
+          var option = document.createElement("option");
+          var value = user.id;
+          option.value = value;
+          option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
+          if (selectedOption === value) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
+        });
+      })
+      .call();
+
+    span.appendChild(makeLabel("select", "", "personSelector", true));
+    span.appendChild(select);
+
+    // new invite
+    $("<button>", {
+            "class": "icon-remove",
             "data-test-id": "application-invite-"+specId,
-            html: "["+loc("personSelector.invite")+"]",
+            text: loc("personSelector.invite"),
             click: function() {
               $("#invite-document-name").val(specId).change();
               $("#invite-document-id").val(self.docId).change();
               LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
               return false;
-            }}));
-    return makeEntrySpan();
+            }}).appendTo(span);
+
+    return span;
   }
 
   function buildUnknown(spec, model, path) {
@@ -341,7 +389,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     unknown: buildUnknown
   };
 
-  function build(spec, model, path, save, specId, partOfChoice, title) {
+  function build(spec, model, path, save, specId, partOfChoice) {
 
     var myName = spec.name;
     var myPath = path.concat([myName]);
@@ -349,7 +397,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var repeatingId = myPath.join("-");
 
     function makeElem(myModel, id) {
-      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice, title);
+      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
       elem.setAttribute("data-repeating-id", repeatingId);
       elem.setAttribute("data-repeating-id-" + repeatingId, id);
       return elem;
@@ -383,7 +431,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       return elements;
     }
 
-    return builder(spec, model, myPath, save, specId, partOfChoice, title);
+    return builder(spec, model, myPath, save, specId, partOfChoice);
   }
 
   function getSelectOneOfDefinition(schema) {
@@ -398,7 +446,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return [];
   }
 
-  function appendElements(body, schema, model, path, save, specId, partOfChoice, title) {
+  function appendElements(body, schema, model, path, save, specId, partOfChoice) {
 
     function toggleSelectedGroup(value) {
       $(body)
@@ -411,7 +459,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var selectOneOf = getSelectOneOfDefinition(schema);
 
     _.each(schema.body, function(spec) {
-        var children = build(spec, model, path, save, specId, partOfChoice, title);
+        var children = build(spec, model, path, save, specId, partOfChoice);
         if (!_.isArray(children)) {
           children = [children];
         }
@@ -446,7 +494,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
   }
 
   function makeSaverDelegate(save, eventData) {
-    return function (event) {
+    return function (event, callback) {
       var target = getEvent(event).target;
       var path = target.name;
       var value = target.value;
@@ -472,6 +520,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         } else if (status !== "ok") {
           error("Unknown status:", status, "path:", path);
         }
+        if(callback) { callback(); }
       }, eventData);
       // No return value or stoping the event propagation:
       // That would prevent moving to the next field with tab key in IE8.
@@ -516,7 +565,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     sectionContainer.className = "application_section_content content_expanded";
 
     var elements = document.createElement("article");
-    appendElements(elements, self.spec, self.model, [], save, specId, undefined, title);
+    appendElements(elements, self.spec, self.model, [], save, specId);
 
     sectionContainer.appendChild(elements);
     section.appendChild(title);

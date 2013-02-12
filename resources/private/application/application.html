@@ -95,20 +95,20 @@
 
         <!-- Actions: -->
         <div class="application_actions">
-          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary" ></button>
-          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
-          <button data-bind="ltext: 'application.addOperation',       click: addOperation,       enable: $root.authorization.ok('add-operation')"                                              class="todo btn action-bar-button"></button>
-          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn action-bar-button"></button>
+          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary"></button>
+          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
+          <button data-bind="ltext: 'application.addOperation',       click: addOperation,       visible: $root.authorization.ok('add-operation'),       enable: $root.authorization.ok('add-operation')"       data-test-id="add-operation"           class="btn btn-primary"></button>
+          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn btn-primary"></button>
         </div>
 
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="ltext: 'application.tabDocuments',    click: $root.tab.tabClick, clickBubble: false"  href="#application-application-tab"   data-test-id="application-open-application-tab" class="active-as-default"></a></li>
-            <li><a data-bind="ltext: 'application.tabParties',      click: $root.tab.tabClick, clickBubble: false"  href="#application-parties-tab"       data-test-id="application-open-parties-tab"      ></a></li>
-            <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.tab.tabClick, clickBubble: false"  href="#application-attachments-tab"   data-test-id="application-open-attachments-tab"  ></a></li>
-            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.tab.tabClick, clickBubble: false"  href="#application-verdict-tab"       data-test-id="application-open-verdict-tab"      ></a></li>
-            <li><a data-bind="ltext: 'application.tabConversation', click: $root.tab.tabClick, clickBubble: false"  href="#application-conversation-tab"  data-test-id="application-open-conversation-tab" ></a></li>
+            <li><a data-bind="ltext: 'application.tabInfo',         click: $root.application.changeTab" href="#" name="info"         data-test-id="application-open-info-tab"         ></a></li>
+            <li><a data-bind="ltext: 'application.tabParties',      click: $root.application.changeTab" href="#" name="parties"      data-test-id="application-open-parties-tab"      ></a></li>
+            <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.application.changeTab" href="#" name="attachments"  data-test-id="application-open-attachments-tab"  ></a></li>
+            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.application.changeTab" href="#" name="verdict"      data-test-id="application-open-verdict-tab"      ></a></li>
+            <li><a data-bind="ltext: 'application.tabConversation', click: $root.application.changeTab" href="#" name="conversation" data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
         </div>
 
@@ -124,7 +124,7 @@
 
     <div class="tab-content-container container">
 
-      <div id="application-application-tab" class="tab-content" style="display: block;">
+      <div id="application-info-tab" class="tab-content">
 
         <!-- docgen generated content: -->
         <div class="application_section">
@@ -134,7 +134,7 @@
         </div>
       </div>
 
-      <div id="application-parties-tab" class="tab-content" style="display: block;">
+      <div id="application-parties-tab" class="tab-content">
 
         <div class="application_section" data-bind="with: application">
           <h2 class="application_section_header " onclick="accordion.click();">
@@ -301,8 +301,8 @@
         </div>
         <div class="dialog-content">
           <form data-bind="with: $root.invite">
-            <label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label>
-            <input class="form-input text long" id="invite-document-name" disabled="true" type="text" data-bind="value: documentName" />
+            <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
+            <input class="form-input text long" id="invite-document-name" disabled="true" type="hidden" data-bind="value: documentName" />
             <input class="form-input text long" id="invite-document-id" disabled="true" type="hidden" data-bind="value: documentId" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
@@ -334,21 +334,6 @@
         </div>
       </div>
 
-    <div id="dialog-confirm" class="window autosized">
-      <div data-bind="with: $root.removeApplicationModel">
-        <div class="dialog-header">
-          <p data-bind="ltext: 'areyousure'"></p>
-          <p class="dialog-close close">X</p>
-        </div>
-        <div>
-          <span data-bind="ltext: 'areyousure.message'"></span>
-        </div>
-        <div class="dialog-content">
-          <button data-bind="click: ok, ltext: 'yes'" class="btn btn-primary btn-dialog close" data-test-id="confirm-delete-yes"></button>
-          <button data-bind="click: cancel, ltext: 'no'" class="btn btn-dialog close" data-test-id="confirm-delete-no"></button>
-        </div>
-      </div>
-    </div>
     </div>
   </section>
 </body>

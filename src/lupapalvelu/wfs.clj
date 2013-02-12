@@ -115,7 +115,8 @@
     {:x x :y y}))
 
 (defn feature-to-property-id [feature]
-  {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))})
+  (when feature
+    {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
 
 (defn response->features [response]
   (let [input-xml (:body response)

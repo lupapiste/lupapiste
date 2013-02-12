@@ -34,6 +34,9 @@
     (let [user (non-private (first (mongo/select :users {:private.apikey apikey})))]
       (when (:enabled user) user))))
 
+(defn get-non-private-userinfo [user-id]
+  (non-private (mongo/select-one :users {:_id user-id})))
+
 (defn get-user-by-email [email]
   (and email (non-private (first (mongo/select :users {:email email})))))
 

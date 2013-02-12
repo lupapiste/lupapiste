@@ -44,6 +44,7 @@
     "invites",
     "applicationsConfig",
     "selectionTree",
-    "inforequestsConfig"
+    "inforequestsConfig",
+    "attachmentTypeSelect"
   ]
 }

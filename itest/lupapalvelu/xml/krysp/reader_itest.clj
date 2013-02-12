@@ -1,8 +1,11 @@
 (ns lupapalvelu.xml.krysp.reader-itest
   (:use [lupapalvelu.xml.krysp.reader]
+        [lupapalvelu.itest-util]
         [midje.sweet]))
 
 (def id "75300301050006")
+
+(def local-test-legacy  (str (server-address) "/krysp/building.xml"))
 
 (fact "two buildings can be extracted"
   (let [xml (building-xml local-test-legacy id)]

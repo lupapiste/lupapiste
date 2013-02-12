@@ -18,6 +18,7 @@
 
     self.init = function(application) {
       self.application = application;
+
       self.operation(null).treeReady(false).title(application.title).url("#!/application/" + application.id);
       var id = application.id;
       ajax
@@ -40,7 +41,9 @@
         .click(function(e) {
           ajax
             .command("add-operation", {id: self.application.id, operation: val.op})
-            .success(function() { window.location.hash = self.url(); })
+            .success(function() {
+                window.location.hash = self.url();
+            })
             .call();
           var target = $(e.target);
           setTimeout(function() {
@@ -70,11 +73,11 @@
     if (newId !== currentId) {
       currentId = newId;
       model.clear();
-      hub.send("load-application", {id: currentId});
+      repository.load(currentId);
     }
   });
 
-  hub.subscribe("application-loaded", function(e) {
+  repository.loaded(function(e) {
     var application = e.applicationDetails.application;
     if (currentId === application.id) { model.init(application); }
   });
