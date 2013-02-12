@@ -128,25 +128,22 @@
         (error "Failed to get 'property-id' by point: %s" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
-		
+
+; this proxy service needs some refactoring
 (def auth ["***REMOVED***" "***REMOVED***"])
-
-
-(defn osoitebypoint [request]
+(defn address-by-point-proxy [request]
   (let [x (get (:query-params request) "x")
         y (get (:query-params request) "y")
-        input-xml (:body (client/get (clojure.string/join "" ["https://ws.nls.fi/maasto/nearestfeature?NAMESPACE=xmlns%28oso%3Dhttp%3A%2F%2Fxml.nls.fi%2FOsoitteet%2FOsoitepiste%2F2011%2F02%29&TYPENAME=oso%3AOsoitepiste&COORDS=" x "%2C" y "%2CEPSG%3A3067&SRSNAME=EPSG%3A3067&MAXFEATURES=1&BUFFER=500"])
-		{:basic-auth auth}))
+        input-xml (:body (client/get (clojure.string/join "" ["https://ws.nls.fi/maasto/nearestfeature?NAMESPACE=xmlns%28oso%3Dhttp%3A%2F%2Fxml.nls.fi%2FOsoitteet%2FOsoitepiste%2F2011%2F02%29&TYPENAME=oso%3AOsoitepiste&COORDS=" x "%2C" y "%2CEPSG%3A3067&SRSNAME=EPSG%3A3067&MAXFEATURES=1&BUFFER=500"]) {:basic-auth auth}))
         features (zip/xml-zip (xml/parse (java.io.ByteArrayInputStream. (.getBytes (clojure.string/replace input-xml "UTF-8" "ISO-8859-1")))))]
-      (resp/json (->> (xml-> features :gml:featureMember)
-                (map (fn [feature] { (clojure.string/join "" ["katunimi_" (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:kieli text))]) (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
-				                      (clojure.string/join "" ["katunimi_" (second (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:kieli text))]) (second (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
-                                        :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
-                                        :kuntanimi_fin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
-                                        :kuntanimi_swe (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))
-										:x (first  (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" "))
-                                        :y (second (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" ")) }))))))
-									
+    (resp/json (first (->> (xml-> features :gml:featureMember)
+                 (map (fn [feature] { (clojure.string/join "" ["katunimi" (first (xml-> feature :oso:Osoite :oso:kieli text))]) 
+                                     (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+                                     :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
+                                     :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
+                                     :kuntanimiSv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))
+                                     :x (first  (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" "))
+                                     :y (second (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" ")) })))))))
 
 ;
 ; Utils:
@@ -167,6 +164,7 @@
 (def services {"nls" (secure wfs/raster-images)
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
+               "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy
 			   "osoitebypoint" osoitebypoint
                "get-address" get-addresses-proxy})
