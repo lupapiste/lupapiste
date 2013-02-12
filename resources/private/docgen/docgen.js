@@ -189,20 +189,6 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     return span;
   }
 
-  function buildChoice(spec, model, path, save, specId) {
-    var name = spec.name;
-    var myModel = model[name] || {};
-
-    var choicesDiv = document.createElement("div");
-    appendElements(choicesDiv, spec, myModel, path, save, specId, true);
-
-    var div = document.createElement("div");
-    div.className = "form-choice";
-    div.appendChild(makeLabel("choice", path.join("."), specId, true));
-    div.appendChild(choicesDiv);
-    return div;
-  }
-
   function buildGroup(spec, model, path, save, specId, partOfChoice) {
     var myPath = path.join(".");
     var name = spec.name;
@@ -378,7 +364,6 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     group: buildGroup,
     string: buildString,
     text: buildText,
-    choice: buildChoice,
     checkbox: buildCheckbox,
     select: buildSelect,
     radioGroup: buildRadioGroup,
