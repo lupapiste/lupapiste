@@ -31,6 +31,10 @@
   "traverses m and applies f to all maps within"
   [f m] (postwalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
 
+(defn prewalk-map
+  "traverses m and applies f to all maps within"
+  [f m] (prewalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
+
 (defn strip-key
   "removes namespacey part of a keyword key"
   [k] (if (keyword? k) (-> k name (s/split #":") last keyword) k))
