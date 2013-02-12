@@ -199,7 +199,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
 
     var div = document.createElement("div");
     div.id = pathStrToGroupID(myPath);
-    div.className = "form-group";
+    div.className = spec.layout === "vertical" ? "form-choice" : "form-group";
     div.appendChild(makeLabel("group", myPath, specId, true));
     div.appendChild(partsDiv);
     return div;
