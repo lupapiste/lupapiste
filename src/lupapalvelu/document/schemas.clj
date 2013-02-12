@@ -124,7 +124,7 @@
 (def rakennuksen-tiedot [
              {:name "kaytto"
               :type :group
-              :body [{:name "rakentajaTyyppi" :type "select"
+              :body [{:name "rakentajaTyyppi" :type :select
                       :body [{:name "liiketaloudellinen"}
                              {:name "muu"}
                              {:name "ei tiedossa"}]}
@@ -348,7 +348,7 @@
               :body [{:name "oma"}
                      {:name "vuokra"}
                      {:name "ei tiedossa"}]}
-             {:name "kaavanaste" :type "select"
+             {:name "kaavanaste" :type :select
               :body [{:name "asema"}
                      {:name "ranta"}
                      {:name "rakennus"}
