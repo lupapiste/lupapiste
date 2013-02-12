@@ -114,7 +114,9 @@
                              {:name "keittotila"}
                              {:name "tupakeittio"}
                              {:name "ei tiedossa"}]}
-                     {:name "varusteet" :type :choice
+                     {:name "varusteet"
+                      :type :group
+                      :layout :vertical
                       :body [{:name "WCKytkin" :type :checkbox}
                              {:name "ammeTaiSuihkuKytkin" :type :checkbox}
                              {:name "saunaKytkin" :type :checkbox}
@@ -124,7 +126,7 @@
 (def rakennuksen-tiedot [
              {:name "kaytto"
               :type :group
-              :body [{:name "rakentajaTyyppi" :type "select"
+              :body [{:name "rakentajaTyyppi" :type :select
                       :body [{:name "liiketaloudellinen"}
                              {:name "muu"}
                              {:name "ei tiedossa"}]}
@@ -257,13 +259,17 @@
                              {:name "puu"}
                              {:name "muu" :type :string :size "s"} ;TODO tukii tekstille
                              {:name "ei tiedossa"}]}]}
-             {:name "verkostoliittymat" :type :choice
+             {:name   "verkostoliittymat"
+              :type   :group
+              :layout :vertical
               :body [{:name "viemariKytkin" :type :checkbox}
                      {:name "vesijohtoKytkin" :type :checkbox}
                      {:name "sahkoKytkin" :type :checkbox}
                      {:name "maakaasuKytkin" :type :checkbox}
                      {:name "kaapeliKytkin" :type :checkbox}]}
-             {:name "varusteet" :type :choice
+             {:name   "varusteet"
+              :type   :group
+              :layout :vertical
               :body [{:name "sahkoKytkin" :type :checkbox}
                      {:name "kaasuKytkin" :type :checkbox}
                      {:name "viemariKytkin" :type :checkbox}
@@ -348,7 +354,7 @@
               :body [{:name "oma"}
                      {:name "vuokra"}
                      {:name "ei tiedossa"}]}
-             {:name "kaavanaste" :type "select"
+             {:name "kaavanaste" :type :select
               :body [{:name "asema"}
                      {:name "ranta"}
                      {:name "rakennus"}
