@@ -36,8 +36,6 @@
       (fn [x]
         (if (map? x)
           (let [k (-> x :name keyword)
-                v (if (= :group (:type x))
-                    (group x)
-                    (f x))]
+                v (if (= :group (:type x)) (group x)(f x))]
             {k v})
           x)))))
