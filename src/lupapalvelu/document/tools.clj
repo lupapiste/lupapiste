@@ -20,7 +20,7 @@
     :kiinteistotunnus "09100200990013"
     name))
 
-(defn pimped [col]
+(defn flattened [col]
   (walk/postwalk
     (fn [x]
       (if (and (vector? x) (-> x first map?))
@@ -37,7 +37,7 @@
                 v (if (= :group (:type x)) (:body x) (f x))]
             {k v})
           x)))
-    pimped))
+    flattened))
 
 (comment
   {:info {:name "osoite"},
