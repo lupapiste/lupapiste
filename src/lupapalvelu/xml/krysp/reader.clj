@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.reader
   (:use sade.xml)
   (:require [clojure.string :as s]
-            [clojure.walk :refer [postwalk postwalk-demo]]
+            [clojure.walk :refer [postwalk prewalk]]
             [lupapalvelu.document.schemas :as schema]
             [net.cgrand.enlive-html :as enlive]
             [clj-time.format :as timeformat]
@@ -30,6 +30,10 @@
 (defn postwalk-map
   "traverses m and applies f to all maps within"
   [f m] (postwalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
+
+(defn prewalk-map
+  "traverses m and applies f to all maps within"
+  [f m] (prewalk (fn [x] (if (map? x) (into {} (f x)) x)) m))
 
 (defn strip-key
   "removes namespacey part of a keyword key"
