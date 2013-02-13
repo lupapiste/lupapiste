@@ -123,6 +123,10 @@
 
 (def yhden-asunnon-talot "011 yhden asunnon talot")
 
+(def vapaa-ajan-asuinrakennus "041 vapaa-ajan asuinrakennukset")
+
+(def talousrakennus "941 talousrakennukset")
+
 (def rakennuksen-tiedot [
              {:name "kaytto"
               :type :group
@@ -132,7 +136,7 @@
                              {:name "ei tiedossa"}]}
                      {:name "kayttotarkoitus" :type :select
                       :body [{:name "999 muualla luokittelemattomat rakennukset"}
-                             {:name "941 talousrakennukset"}
+                             {:name talousrakennus}
                              {:name "931 saunarakennukset"}
                              {:name "899 muut maa-, mets\u00e4- ja kalatalouden rakennukset"}
                              {:name "893 turkistarhat"}
@@ -200,7 +204,7 @@
                              {:name "119 muut myym\u00e4l\u00e4rakennukset"}
                              {:name "112 liike- ja tavaratalot, kauppakeskukset"}
                              {:name "111 myym\u00e4l\u00e4hallit"}
-                             {:name "041 vapaa-ajan asuinrakennukset"}
+                             {:name vapaa-ajan-asuinrakennus}
                              {:name "039 muut asuinkerrostalot"}
                              {:name "032 luhtitalot"}
                              {:name "022 ketjutalot"}

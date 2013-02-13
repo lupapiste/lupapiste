@@ -42,8 +42,7 @@
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                               [["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments [:hakija [:valtakirja]
                                                :rakennuspaikka [:ote_alueen_peruskartasta]
@@ -52,15 +51,19 @@
                                                               :julkisivupiirros]
                                                :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]}
    :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
                                  :required common-schemas
                                  :attachments []}
    :varasto-tms                 {:schema "uusiRakennus"
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments []}
    :julkinen-rakennus           {:schema "uusiRakennus"
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments []}
    :muu-uusi-rakentaminen       {:schema "uusiRakennus"
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments []}
    :laajentaminen               {:schema "rakennuksen-muuttaminen"
