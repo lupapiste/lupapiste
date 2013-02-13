@@ -309,21 +309,25 @@
                     {:name "poistumanAjankohta" :type :string}]
                    olemassaoleva-rakennus))
 
+(def toimenpiteen-kuvaus [{:name "kuvaus" :type :text}])
+
 (def schemas
   (to-map-by-name
-    [{:info {:name "uusiRakennus"}
-      :body (concat rakennuksen-omistajat rakennuksen-tiedot)}
-
-     {:info {:name "hankkeen-kuvaus"}
+    [{:info {:name "hankkeen-kuvaus"}
       :body [{:name "kuvaus" :type :text}
              {:name "poikkeamat" :type :text}]}
 
+     {:info {:name "uusiRakennus"}
+      :body (concat toimenpiteen-kuvaus rakennuksen-omistajat rakennuksen-tiedot)}
 
      {:info {:name "rakennuksen-muuttaminen"}
-      :body rakennuksen-muuttaminen}
+      :body (concat toimenpiteen-kuvaus rakennuksen-muuttaminen)}
 
      {:info {:name "purku"}
-      :body purku}
+      :body (concat toimenpiteen-kuvaus purku)}
+
+     {:info {:name "kaupunkikuvatoimenpide"}
+      :body (concat toimenpiteen-kuvaus [])}
 
      {:info {:name "hakija" :repeating true}
       :body party-body}

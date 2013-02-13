@@ -42,6 +42,7 @@
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
+                                 :schmea-data {"plaa" "pldfsad" }
                                  :required common-schemas
                                  :attachments [:hakija [:valtakirja]
                                                :rakennuspaikka [:ote_alueen_peruskartasta]
@@ -49,40 +50,40 @@
                                                               :pohjapiirros
                                                               :julkisivupiirros]
                                                :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]}
-   :vapaa-ajan-asuinrakennus    {:schema "vapaa-ajan-asuinrakennus"
+   :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
                                  :required common-schemas
                                  :attachments []}
-   :varasto-tms                 {:schema "varasto-tms"
+   :varasto-tms                 {:schema "uusiRakennus"
                                  :required common-schemas
                                  :attachments []}
-   :julkinen-rakennus           {:schema "julkinen-rakennus"
+   :julkinen-rakennus           {:schema "uusiRakennus"
                                  :required common-schemas
                                  :attachments []}
-   :muu-uusi-rakentaminen       {:schema "muu-uusi-rakentaminen"
+   :muu-uusi-rakentaminen       {:schema "uusiRakennus"
                                  :required common-schemas
                                  :attachments []}
    :laajentaminen               {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
-   :kayttotark-muutos           {:schema "kayttotark-muutos"
+   :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
-   :julkisivu-muutos            {:schema "julkisivu-muutos"
+   :julkisivu-muutos            {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
-   :jakaminen-tai-yhdistaminen  {:schema "jakaminen-tai-yhdistaminen"
+   :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
-   :markatilan-laajentaminen    {:schema "markatilan-laajentaminen"
+   :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
-   :takka-tai-hormi             {:schema "takka-tai-hormi"
+   :takka-tai-hormi             {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
-   :parveke-tai-terassi         {:schema "parveke-tai-terassi"
+   :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
-   :muu-laajentaminen           {:schema "muu-laajentaminen"
+   :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
                                  :required common-schemas
                                  :attachments []}
    :auto-katos                  {:schema "auto-katos"

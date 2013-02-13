@@ -539,6 +539,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
 
   function buildElement() {
     var specId = self.spec.info.name;
+    var op = self.spec.info.op;
     var save = makeSaverDelegate(self.saveCallback, self.eventData);
 
     var section = document.createElement("section");
@@ -549,7 +550,11 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
     var title = document.createElement("h2");
     title.className = "application_section_header";
     title.appendChild(icon);
-    title.appendChild(document.createTextNode(loc(specId + "._group_label")));
+    if (op) {
+      title.appendChild(document.createTextNode(loc(op + "._group_label")));
+    } else {
+      title.appendChild(document.createTextNode(loc(specId + "._group_label")));
+    }
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
