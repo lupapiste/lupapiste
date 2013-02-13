@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.tools
   (:require [clojure.walk :as walk]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.model :as model]))
 
 (defn nil-values [_] nil)
