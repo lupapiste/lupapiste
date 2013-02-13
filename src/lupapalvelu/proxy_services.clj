@@ -164,5 +164,4 @@
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy
-               "osoitebypoint" osoitebypoint
                "get-address" get-addresses-proxy})
