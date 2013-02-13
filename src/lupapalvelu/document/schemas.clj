@@ -11,11 +11,11 @@
 
 (def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
 
-(def simple-osoite {:name "osoite"
-                    :type :group
-                    :body [{:name "katu" :type :string}
-                           {:name "postinumero" :type :string :size "s"}
-                           {:name "postitoimipaikannimi" :type :string :size "m"}]})
+(def simple-osoite [{:name "osoite"
+                     :type :group
+                     :body [{:name "katu" :type :string}
+                            {:name "postinumero" :type :string :size "s"}
+                            {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def full-osoite [{:name "osoite"
                    :type :group
@@ -31,29 +31,29 @@
                           {:name "postitoimipaikannimi" :type :string :size "m"}
                           {:name "pistesijanti" :type :string}]}])
 
-(def yhteystiedot {:name "yhteystiedot"
-                   :type :group
-                   :body [{:name "puhelin" :type :string :subtype :tel}
-                          {:name "email" :type :string :subtype :email}
-                          {:name "fax" :type :string :subtype :tel}]})
+(def yhteystiedot [{:name "yhteystiedot"
+                    :type :group
+                    :body [{:name "puhelin" :type :string :subtype :tel}
+                           {:name "email" :type :string :subtype :email}
+                           {:name "fax" :type :string :subtype :tel}]}])
 
 (def henkilotiedot-minimal-body [{:name "etunimi" :type :string}
                                  {:name "sukunimi" :type :string}])
 
-(def henkilotiedot {:name "henkilotiedot"
-                    :type :group
-                    :body (conj henkilotiedot-minimal-body {:name "hetu" :type :string})})
+(def henkilotiedot [{:name "henkilotiedot"
+                     :type :group
+                     :body (conj henkilotiedot-minimal-body {:name "hetu" :type :string})}])
 
-(def henkilo-body (concat henkilo-valitsin [henkilotiedot simple-osoite yhteystiedot]))
+(def henkilo-body (concat henkilo-valitsin henkilotiedot simple-osoite yhteystiedot))
 
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
                    {:name "liikeJaYhteisoTunnus" :type :string}])
 
-(def yritys-body (conj yritys-minimal-body
-                       simple-osoite
-                       {:name "yhteyshenkilo" :type :group
-                        :body [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
-                               yhteystiedot]}))
+(def yritys-body (concat yritys-minimal-body
+                         simple-osoite
+                         [{:name "yhteyshenkilo" :type :group
+                           :body (concat [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
+                                          yhteystiedot])}]))
 
 (def party-body [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
                  {:name "henkilo" :type :group :body henkilo-body}
@@ -67,10 +67,10 @@
                        {:name "C"}
                        {:name "ei tiedossa"}]}])
 
-(def designer-basic [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
-                     {:name "yritys" :type :group :body yritys-minimal-body}
-                     simple-osoite
-                     yhteystiedot])
+(def designer-basic (concat [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}]
+                            [{:name "yritys" :type :group :body yritys-minimal-body}]
+                            simple-osoite
+                            yhteystiedot)
 
 (def paasuunnittelija-body (concat
                              henkilo-valitsin
@@ -364,7 +364,7 @@
 
      ;; not used...
      {:info {:name "osoite"}
-      :body full-osoite}
+      :body [full-osoite]}
 
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
