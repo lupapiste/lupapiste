@@ -55,9 +55,13 @@
 (def henkilotiedot-minimal [{:name "etunimi" :type :string}
                             {:name "sukunimi" :type :string}])
 
+(def henkilotiedot-with-sotu [{:name "etunimi" :type :string}
+                              {:name "sukunimi" :type :string}
+                              {:name "hetu" :type :string}])
+
 (def henkilotiedot [{:name "henkilotiedot"
                      :type :group
-                     :body (conj henkilotiedot-minimal {:name "hetu" :type :string})}])
+                     :body (body henkilotiedot-with-sotu)}])
 
 (def henkilo (body henkilo-valitsin henkilotiedot simple-osoite yhteystiedot))
 
@@ -346,7 +350,6 @@
       :body [{:name "kuvaus" :type :text}
              {:name "poikkeamat" :type :text}]}
 
-
      {:info {:name "rakennuksen-muuttaminen"}
       :body rakennuksen-muuttaminen}
 
@@ -386,7 +389,7 @@
 
      ;; not used...
      {:info {:name "osoite"}
-      :body [full-osoite]}
+      :body full-osoite}
 
      {:info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
