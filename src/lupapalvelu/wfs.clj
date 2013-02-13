@@ -118,6 +118,12 @@
   (when feature
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
 
+(defn feature-to-address-details [feature]
+  (when feature
+    {:katunimi (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+     :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
+     :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))}))
+
 (defn response->features [response]
   (let [input-xml (:body response)
        features (-> input-xml
@@ -155,15 +161,20 @@
    :MAXFEATURES "1"
    :BUFFER "500"})
 
-(defn get-url
+(defn http-get
   [url q]
   (deref
     (future
-      (let [query-params q
-            response (client/get url 
+      (let [response (client/get url 
                                  {:query-params q
-                                  :basic-auth auth})]
-        [:ok response]))))
+                                  :basic-auth auth
+                                  :throw-exceptions false})]
+        (if (= (:status response) 200)
+          [:ok (response->features response)]
+          [:error response])))
+    timeout
+    [:timeout]))
+
 ;;
 ;; Raster images:
 ;;
