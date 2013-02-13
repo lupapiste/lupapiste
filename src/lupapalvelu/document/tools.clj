@@ -23,18 +23,19 @@
           (into {} x)
           x)))))
 
+(defn group [x]
+  (if (:repeating x)
+    {:name :0
+     :type :group
+     :body (dissoc x :repeating)}
+    (:body x)))
+
 (defn create [{body :body} f]
   (->> body
     (walk/prewalk
       (fn [x]
         (if (map? x)
           (let [k (-> x :name keyword)
-                v (if (= :group (:type x))
-                    (if (:repeating x)
-                      {:name :0
-                       :type :group
-                       :body (dissoc x :repeating)}
-                      (:body x))
-                    (f x))]
+                v (if (= :group (:type x)) (group x)(f x))]
             {k v})
           x)))))

@@ -17,7 +17,6 @@
        :body [{:name "name", :type :string}
               {:name "instrument", :type :string}]}]}]})
 
-
 (fact "simple schema"
   (-> schema
     (create nil-values)
