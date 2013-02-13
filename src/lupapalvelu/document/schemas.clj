@@ -52,18 +52,20 @@
                            {:name "email" :type :string :subtype :email}
                            {:name "fax" :type :string :subtype :tel}]}])
 
-(def henkilotiedot-minimal [{:name "etunimi" :type :string}
-                            {:name "sukunimi" :type :string}])
+(def henkilotiedot-minimal [{:name "henkilotiedot"
+                             :type :group
+                             :body [{:name "etunimi" :type :string}
+                                    {:name "sukunimi" :type :string}]}])
 
 (def henkilotiedot-with-sotu [{:name "etunimi" :type :string}
                               {:name "sukunimi" :type :string}
                               {:name "hetu" :type :string}])
 
-(def henkilotiedot [{:name "henkilotiedot"
-                     :type :group
-                     :body (body henkilotiedot-with-sotu)}])
-
-(def henkilo (body henkilo-valitsin henkilotiedot simple-osoite yhteystiedot))
+(def henkilo (body
+               henkilo-valitsin
+               {:name "henkilotiedot" :type :group :body (body henkilotiedot-with-sotu)}
+               simple-osoite
+               yhteystiedot))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string}
                      {:name "liikeJaYhteisoTunnus" :type :string}])
@@ -71,7 +73,7 @@
 (def yritys (body yritys-minimal
                   simple-osoite
                   {:name "yhteyshenkilo" :type :group
-                   :body (body {:name "henkilotiedot" :type :group :body henkilotiedot-minimal}
+                   :body (body henkilotiedot-minimal
                                yhteystiedot)}))
 
 (def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
@@ -86,10 +88,11 @@
                        {:name "C"}
                        {:name "ei tiedossa"}]}])
 
-(def designer-basic (body {:name "henkilotiedot" :type :group :body henkilotiedot-minimal}
-                          {:name "yritys" :type :group :body yritys-minimal}
-                          simple-osoite
-                          yhteystiedot))
+(def designer-basic (body
+                      henkilotiedot-minimal
+                      {:name "yritys" :type :group :body yritys-minimal}
+                      simple-osoite
+                      yhteystiedot))
 
 (def paasuunnittelija (body
                         henkilo-valitsin
