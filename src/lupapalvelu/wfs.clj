@@ -147,11 +147,20 @@
     timeout
     [:timeout]))
 
+(defn nearest-query-params [x y]
+  {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
+   :TYPENAME "oso:Osoitepiste"
+   :COORDS (str x "," y ",EPSG:3067")
+   :SRSNAME "EPSG:3067"
+   :MAXFEATURES "1"
+   :BUFFER "500"})
+
 (defn get-url
   [url q]
   (deref
     (future
-      (let [response (client/get url 
+      (let [query-params q
+            response (client/get url 
                                  {:query-params q
                                   :basic-auth auth})]
         [:ok response]))))

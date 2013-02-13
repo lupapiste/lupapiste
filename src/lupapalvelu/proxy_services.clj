@@ -128,7 +128,9 @@
         (error "Failed to get 'property-id' by point: %s" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
-
+; --------------------------------------------------------------
+; comment
+(comment
 ; this proxy service needs some refactoring
 (def auth ["***REMOVED***" "***REMOVED***"])
 (defn address-by-point-proxy [request]
@@ -145,8 +147,7 @@
                                      :x (first  (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" "))
                                      :y (second (clojure.string/split (first (xml-> feature :oso:Osoitepiste :oso:sijainti text)) #" ")) })))))))
 
-(comment
-(defn get-addresses [street number city]
+  (defn get-addresses [street number city]
   (wfs/execute wfs/maasto
     (wfs/query {"typeName" "oso:Osoitenimi"}
       (wfs/sort-by "oso:katunumero")
@@ -168,24 +169,21 @@
                     :suggestions (map wfs/feature-to-simple-address-string features)
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable")))))
+; comment
+; --------------------------------------------------------------
+
 
 (defn get-address-by-point [x y]
-  (wfs/get-url wfs/nearestfeature
-               {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
-                :TYPENAME "oso:Osoitepiste"
-                :COORDS (str x "," y ",EPSG:3067")
-                :SRSNAME "EPSG:3067"
-                :MAXFEATURES "1"
-                :BUFFER "500"}))
+  (wfs/get-url wfs/nearestfeature (wfs/nearest-query-params x y)))
 
-(get-addresses "Luhtaankatu" "10" "Tampere")
-(get-address-by-point 333168 6822000)
-
-(defn address-by-point-proxy2 [request]
+(defn address-by-point-proxy [request]
   (let [x (get (:query-params request) "x")
         y (get (:query-params request) "y")
         response (get-address-by-point x y)]
     (println response)))
+
+(get-address-by-point 333168 6822000)
+
 
 ;    (if (= status :ok)
 ;      (resp/json {:foo "bar"})
