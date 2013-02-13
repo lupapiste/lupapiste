@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.tools
   (:require [clojure.walk :as walk]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.model :as model]))
 
 (defn nil-values [_] nil)
@@ -23,15 +24,15 @@
           (into {} x)
           x)))))
 
-(defn group [x]
+(defn- group [x]
   (if (:repeating x)
     {:name :0
      :type :group
      :body (dissoc x :repeating)}
     (:body x)))
 
-(defn create [{body :body} f]
-  (->> body
+(defn create [col f]
+  (->> col
     (walk/prewalk
       (fn [x]
         (if (map? x)
