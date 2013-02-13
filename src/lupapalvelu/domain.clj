@@ -33,8 +33,8 @@
 
 (defn get-documents-by-name
   "returns document from application by schema name"
-  [{documents :documents} schema-name]
-  (filter (comp (partial = schema-name) :name :info :schema) documents))
+  [application schema-name]
+  (filter (comp (partial = schema-name) :name :info :schema) (:documents application)))
 
 (defn get-document-by-name
   "returns first document from application by schema name"
