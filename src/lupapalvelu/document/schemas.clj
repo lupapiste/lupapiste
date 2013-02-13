@@ -57,13 +57,15 @@
                              :body [{:name "etunimi" :type :string}
                                     {:name "sukunimi" :type :string}]}])
 
-(def henkilotiedot-with-sotu [{:name "etunimi" :type :string}
-                              {:name "sukunimi" :type :string}
-                              {:name "hetu" :type :string}])
+(def henkilotiedot-with-sotu [{:name "henkilotiedot"
+                               :type :group
+                               :body [{:name "etunimi" :type :string}
+                                      {:name "sukunimi" :type :string}
+                                      {:name "hetu" :type :string}]}])
 
 (def henkilo (body
                henkilo-valitsin
-               {:name "henkilotiedot" :type :group :body (body henkilotiedot-with-sotu)}
+               henkilotiedot-with-sotu
                simple-osoite
                yhteystiedot))
 
