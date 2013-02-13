@@ -55,7 +55,7 @@
                                  :required common-schemas
                                  :attachments []}
    :varasto-tms                 {:schema "uusiRakennus"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/talousrakennus]]
                                  :required common-schemas
                                  :attachments []}
    :julkinen-rakennus           {:schema "uusiRakennus"
