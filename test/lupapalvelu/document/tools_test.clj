@@ -1,7 +1,6 @@
-(ns lupapalvelu.document.model-test
-  (:use
-    [lupapalvelu.document.tools]
-    [midje.sweet]))
+(ns lupapalvelu.document.tools-test
+  (:use [lupapalvelu.document.tools]
+        [midje.sweet]))
 
 (def schema
   {:info {:name "band"},

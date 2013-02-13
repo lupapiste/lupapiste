@@ -23,7 +23,7 @@
           (into {} x)
           x)))))
 
-(defn group [x]
+(defn- group [x]
   (if (:repeating x)
     {:name :0
      :type :group
