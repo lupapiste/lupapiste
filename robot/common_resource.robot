@@ -7,6 +7,7 @@ Library        Selenium2Library   timeout=15  run_on_failure=Log Source
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
+${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${SLOW_SPEED}                   0.2
@@ -66,7 +67,7 @@ Wait and click
 
 Wait until
   [Arguments]  ${keyword}  @{varargs}
-  Wait Until Keyword Succeeds  30  0.1  ${keyword}  @{varargs}
+  Wait Until Keyword Succeeds  ${WAIT_DELAY}  0.1  ${keyword}  @{varargs}
 
 #
 # Navigation
@@ -92,6 +93,8 @@ Logout
 #
 
 User should not be logged in
+  # Wait for login query to complete
+  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
   Wait Until  User is not logged in
 
 User is not logged in
@@ -104,6 +107,11 @@ Login
   Input text  login-username  ${username}
   Input text  login-password  ${password}
   Click button  login-button
+
+Login fails
+  [Arguments]  ${username}  ${password}
+  Login  ${username}  ${password}
+  User should not be logged in
 
 User should be logged in
   [Arguments]  ${name}
@@ -210,11 +218,24 @@ Click enabled by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
+  Wait Until  Element should be visible  xpath=//*[@data-test-id="${id}"]
   Click element  xpath=//*[@data-test-id="${id}"]
 
 #
-# Helpser for creating new inforequest and application:
+# Helpser for inforequest and application crud operations:
 #
+
+Create application the fast way
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Reload Page
+  Open application  ${address}
+
+Create inforequest the fast way
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"permitType":"infoRequest","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Reload Page
+  Open inforequest  ${address}
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}
@@ -224,27 +245,18 @@ Create application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
 
-Create application the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
-  Reload Page
-  Open application  ${address}
-
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-proceed-to-inforequest
+  # Needed for animation to finish.
+  Sleep  1
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
+  Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
   Wait Until  Element should be visible  inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
-
-Create inforequest the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"permitType":"infoRequest","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
-  Reload Page
-  Open inforequest  ${address}
 
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}
@@ -257,7 +269,22 @@ Prepare new request
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+  # Needed for animation to finish.
+  Sleep  1
 
+# Closes the application that is currently open by clicking cancel button
+Close current application
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
+  Click by test id  application-cancel-btn
+  Confirm closing
+
+Confirm closing
+  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-yes"]
+  Click by test id  confirm-yes
+  Wait Until  Element Should Not Be Visible  dialog-confirm-cancel
+
+It is possible to add operation
+  Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
 #
 # Jump to application or inforequest:
 #

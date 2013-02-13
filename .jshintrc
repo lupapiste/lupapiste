@@ -21,6 +21,8 @@
   "predef": [
     "$",
     "ko",
+    "moment",
+    "OpenLayers",
     "_",
     "loc",
     "getEvent",
@@ -33,6 +35,7 @@
     "comments",
     "trace",
     "error",
+    "warn",
     "repository",
     "notify",
     "ajax",
@@ -40,6 +43,8 @@
     "LUPAPISTE",
     "invites",
     "applicationsConfig",
-    "inforequestsConfig"
+    "selectionTree",
+    "inforequestsConfig",
+    "attachmentTypeSelect"
   ]
 }

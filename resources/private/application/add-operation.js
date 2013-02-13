@@ -18,21 +18,22 @@
 
     self.init = function(application) {
       self.application = application;
+
       self.operation(null).treeReady(false).title(application.title).url("#!/application/" + application.id);
       var id = application.id;
       ajax
         .query("municipality", {municipality: application.municipality})
-        .success(function (data) { if (self.application.id === id) self.setOperations(data.operations).treeReady(true); })
+        .success(function (data) { if (self.application.id === id) { self.setOperations(data.operations).treeReady(true); }})
         .call();
       return self;
     };
 
     self.setOperations = function(operations) {
-      if (self.tree) self.tree.reset(operations);
+      if (self.tree) { self.tree.reset(operations); }
       return self;
     };
 
-    self.generateLast = function(val, key) {
+    self.generateLast = function(val) {
       var e = $("<div>").addClass("tree-magic");
       e.append($("<a>")
         .addClass("tree-action")
@@ -40,14 +41,17 @@
         .click(function(e) {
           ajax
             .command("add-operation", {id: self.application.id, operation: val.op})
-            .success(function() { window.location.hash = self.url(); })
+            .success(function() {
+                window.location.hash = self.url();
+            })
             .call();
           var target = $(e.target);
           setTimeout(function() {
               target
                 .parent()
                 .empty()
-                .append($("<img>").attr("src", "/img/ajax-loader.gif"))
+                .append($("<img>")
+                  .attr("src", "/img/ajax-loader.gif"));
             }, 200);
           return false;
         }));
@@ -69,13 +73,13 @@
     if (newId !== currentId) {
       currentId = newId;
       model.clear();
-      hub.send("load-application", {id: currentId});
+      repository.load(currentId);
     }
   });
 
-  hub.subscribe("application-loaded", function(e) {
+  repository.loaded(function(e) {
     var application = e.applicationDetails.application;
-    if (currentId === application.id) model.init(application);
+    if (currentId === application.id) { model.init(application); }
   });
 
   $(function() {

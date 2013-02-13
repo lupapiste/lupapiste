@@ -11,3 +11,7 @@
         =>
           {"a" {:info {:name "a"}}
            "b" {:info {:name "b"}}}))
+
+(facts "body"
+  (fact "flattens stuff into lists"    (body 1 2 [3 4] 5) => [1 2 3 4 5])
+  (fact "does not flatten recursively" (body 1 2 [3 4 [5]]) => [1 2 3 4 [5]]))

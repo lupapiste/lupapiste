@@ -31,6 +31,7 @@ Mikko adds a comment
 
 Application is now in stage valmisteilla
   Applicantion state is  Valmisteilla
+  It is possible to add operation
   Logout
 
 Sonja should see one (Sipoo) application

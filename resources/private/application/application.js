@@ -57,6 +57,34 @@
     }, self);
   }();
 
+  var removeApplicationModel = new function() {
+    var self = this;
+
+    self.applicationId = ko.observable();
+
+    self.init = function(applicationId) {
+      self.applicationId(applicationId);
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax
+        .command("cancel-application", {id: self.applicationId()})
+        .success(function() {
+          window.location.hash = "!/applications";
+        })
+        .call();
+      return false;
+    };
+
+    self.cancel = function() { return true; };
+
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel",
+        loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+  }();
+
+
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -72,7 +100,7 @@
     address: ko.observable(),
     verdict: ko.observable(),
     operations: ko.observable(),
-
+    applicant: ko.observable(),
     assignee: ko.observable(),
 
     // new stuff
@@ -81,12 +109,26 @@
     // all data in here
     data: ko.observable(),
 
-    openOskariMap: function(model) {
+    openOskariMap: function() {
       var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
       window.open(url);
-      
+      var applicationId = application.id();
+
+      hub.subscribe("map-initialized", function() {
+        if(application.shapes && application.shapes().length > 0) {
+          oskariDrawShape(application.shapes()[0]);
+        }
+
+        oskariSetMarker(application.location().x(), application.location().y());
+      });
+
       hub.subscribe("map-draw-done", function(e) {
-        debug(""+e.data.drawing);
+        var drawing = "" + e.data.drawing;
+        ajax.command("save-application-shape", {id: applicationId, shape: drawing})
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .call();
       });
     },
 
@@ -95,7 +137,7 @@
       ajax.command("submit-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus j\u00E4tetty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -106,7 +148,7 @@
       ajax.command("mark-inforequest-answered", {id: applicationId})
         .success(function() {
           notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -116,21 +158,10 @@
       var id = application.id();
       ajax.command("convert-to-application", {id: id})
         .success(function() {
-          repository.reloadApplication(id);
+          repository.load(id);
           window.location.hash = "!/application/" + id;
         })
         .call();
-      return false;
-    },
-
-    setMeAsPaasuunnittelija: function(model) {
-      var applicationId = application.id();
-      ajax.command("user-to-document", { id: applicationId, name: "paasuunnittelija"})
-      .success(function() {
-        notify.success("tiedot tallennettu",model);
-        repository.reloadApplication(applicationId);
-      })
-      .call();
       return false;
     },
 
@@ -139,7 +170,7 @@
       ajax.command("approve-application", { id: applicationId})
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -150,7 +181,7 @@
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function() {
           notify.success("kutsu poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
@@ -161,10 +192,14 @@
       ajax.command("remove-auth", { id : applicationId, email : model.username()})
         .success(function() {
           notify.success("oikeus poistettu", model);
-          repository.reloadApplication(applicationId);
+          repository.load(applicationId);
         })
         .call();
       return false;
+    },
+
+    isNotOwner: function(model) {
+      return model.role() !== "owner";
     },
 
     addOperation: function() {
@@ -174,15 +209,14 @@
 
     cancelApplication: function() {
       var id = application.id();
-      ajax
-        .command("cancel-application", {id: id})
-        .success(function() {
-          window.location.hash = "!/applications";
-        })
-        .call();
+      removeApplicationModel.init(id);
       return false;
-    }
+    },
 
+    changeTab: function(model,event){
+      var element = event.target;
+      window.location.hash = "#!/application/"+application.id()+"/"+element.name;
+    }
   };
 
   var authorities = ko.observableArray([]);
@@ -203,18 +237,35 @@
 
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
-    if (isInitializing) return;
+    if (isInitializing) {
+      return;
+    }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok('assign-application')) return;
+    if (!authorizationModel.ok('assign-application')) {
+      return;
+    }
 
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {})
-      .error(function(e) { error(e); })
-      .fail(function(e) { error(e); })
+      .success(function() {authorizationModel.refresh(currentId);})
       .call();
+  }
+
+  function oskariDrawShape(shape) {
+    hub.send("map-viewvectors", {
+      drawing: shape,
+      style: {fillColor: "#3CB8EA", fillOpacity: 0.35, strokeColor: "#0000FF"},
+      clear: false
+    });
+  }
+
+  function oskariSetMarker(x, y) {
+    hub.send("documents-map",{
+      data:  [ {location: {x: x, y: y}} ],
+      clear: true
+      });
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
@@ -240,10 +291,6 @@
       applicationModel.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
-      // Operations:
-      
-      application.operations(app.operations);
-
       // Comments:
 
       commentModel.setApplicationId(app.id);
@@ -258,7 +305,7 @@
       };
 
       application.hasAttachment(false);
-      
+
       attachments(_.map(app.attachments || [], function(a) {
         a.statusName = statuses[a.state] || "unknown";
         a.latestVersion = _.last(a.versions);
@@ -277,8 +324,12 @@
       applicationMap.clear().add(x, y).center(x, y, 11);
       inforequestMap.clear().add(x, y).center(x, y, 11);
 
-      // docgen:
+      if(application.shapes && application.shapes().length > 0) {
+        applicationMap.drawShape(application.shapes()[0]);
+        inforequestMap.drawShape(application.shapes()[0]);
+      }
 
+      // docgen:
       var save = function(path, value, callback, data) {
         ajax
           .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
@@ -292,21 +343,30 @@
           .fail(function(e) { error(e); callback("err"); })
           .call();
       };
+      
+      var displayOrder = {
+          "hankkeen-kuvaus": 1, 
+          "rakennuspaikka": 2, 
+          "hakija": 3,
+          "paasuunnittelija": 4,
+          "suunnittelija": 5,
+          "maksaja": 6,
+          "lisatiedot": 100};
+
+      function getDocumentOrder(doc) {
+        var num = displayOrder[doc.schema.info.name] || 7;
+        return num * 10000000000 + doc.created/1000;
+      }
 
       function displayDocuments(containerSelector, documents) {
 
-        var groupedDocs = _.groupBy(documents, function (doc) { return doc.schema.info.name; });
-
-        var displayOrder = ["hankkeen-kuvaus", "rakennuspaikka", "purku", "uusiRakennus", "lisatiedot", "hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-        var sortedDocs = _.sortBy(groupedDocs, function (docGroup) { return _.indexOf(displayOrder, docGroup[0].schema.info.name); });
-
+        var sortedDocs = _.sortBy(documents, getDocumentOrder);
+        
         var docgenDiv = $(containerSelector).empty();
-        _.each(sortedDocs, function(docGroup) {
-          _.each(docGroup, function(doc) {
-            docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
-          });
+        _.each(sortedDocs, function(doc) {
+          docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
 
-          var schema = docGroup[0].schema;
+          var schema = doc.schema;
 
           if (schema.info.repeating) {
             var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -331,10 +391,6 @@
       displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
       displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
-      if(! isTabSelected('#applicationTabs')) {
-        selectDefaultTab('#applicationTabs');
-      }
-
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.roles);
       var assigneeId = assignee ? assignee.id : null;
@@ -344,7 +400,7 @@
     });
   }
 
-  hub.subscribe("application-loaded", function(e) {
+  repository.loaded(function(e) {
     if (!currentId || (currentId === e.applicationDetails.application.id)) {
       showApplication(e.applicationDetails);
     }
@@ -355,62 +411,70 @@
 
     self.email = ko.observable();
     self.text = ko.observable();
+    self.documentName = ko.observable();
+    self.documentId = ko.observable();
+    self.error = ko.observable();
 
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
+      var documentName = model.documentName();
+      var documentId = model.documentId();
       var id = application.id();
       ajax.command("invite", { id: id,
+                               documentName: documentName,
+                               documentId: documentId,
                                email: email,
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
         .success(function() {
           self.email(undefined);
+          self.documentName(undefined);
+          self.documentId(undefined);
           self.text(undefined);
-          repository.reloadApplication(id);
+          self.error(undefined);
+          repository.load(id);
+          LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
-          notify.info("kutsun l\u00E4hett\u00E4minen ep\u00E4onnistui",d);
+          self.error(d.text);
         })
         .call();
       return false;
     };
   }();
 
-  var tab = {
-    tabClick: function(data, event) {
-      var target = event.target;
-     setSelectedTab('#applicationTabs', target);
-    }
-  };
+   // tabs
 
-  function isTabSelected(id) {
-    return $(id + ' > li').hasClass("active");
-  }
-
-  function selectDefaultTab(id) {
-    setSelectedTab(id, $('.active-as-default'));
-  }
-
-  function setSelectedTab(id, element) {
-    $(id + " li").removeClass("active");
-    $(element).parent().addClass("active");
+  function openTab(id) {
     $(".tab-content").hide();
-    var selected_tab = $(element).attr("href");
-    $(selected_tab).fadeIn();
+    $("#application-"+id+"-tab").fadeIn();
   }
 
-  var accordian = {
-    accordianClick: function(data, event) {
-      accordion.toggle(event);
-    }
+  function markTabActive(id) {
+    $("#applicationTabs li").removeClass("active");
+    $("a[name='"+id+"']").parent().addClass("active");
+  }
+
+  function selectTab(tab) {
+    markTabActive(tab);
+    openTab(tab);
+  }
+
+  var accordian = function(data, event) {
+    accordion.toggle(event);
   };
 
   var initApplication = function(e) {
-    currentId = e.pagePath[0];
-    applicationMap.updateSize();
-    inforequestMap.updateSize();
-    hub.send("load-application", {id: currentId});
+    var newId = e.pagePath[0];
+    var tab = e.pagePath[1];
+    selectTab(tab || "info");
+    if(newId !== currentId || !tab) {
+      currentId = newId;
+      applicationMap.updateSize();
+      inforequestMap.updateSize();
+      repository.load(currentId);
+    }
   };
 
   hub.onPageChange("application", initApplication);
@@ -429,13 +493,13 @@
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
-      tab: tab,
       accordian: accordian,
-      removeDocModel: removeDocModel
+      removeDocModel: removeDocModel,
+      removeApplicationModel: removeApplicationModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
   });
-  
+
 })();

@@ -5,9 +5,10 @@
             [clojure.xml :as xml]
             [clojure.zip :as zip])
   (:use [clojure.data.zip.xml :only [xml-> text]]
+        [lupapalvelu.env :only [config]]
         [lupapalvelu.strings :only [starts-with-i]]))
 
-(def ^:private auth ["***REMOVED***" "***REMOVED***"])
+(def ^:private auth [(:username (:nls config)) (:password (:nls config))])
 
 (def ^:private timeout 30000)
 
@@ -114,7 +115,8 @@
     {:x x :y y}))
 
 (defn feature-to-property-id [feature]
-  {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))})
+  (when feature
+    {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
 
 (defn response->features [response]
   (let [input-xml (:body response)
@@ -152,5 +154,5 @@
   (client/get "https://ws.nls.fi/rasteriaineistot/image"
     {:query-params (:query-params request)
      :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-     :basic-auth ["***REMOVED***" "***REMOVED***"]
+     :basic-auth auth
      :as :stream}))
