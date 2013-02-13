@@ -1,5 +1,9 @@
 (ns lupapalvelu.document.schemas)
 
+;;
+;; helpers
+;;
+
 (defn body
   "shallow merges stuff into vector"
   [& rest]
@@ -13,6 +17,10 @@
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
   [docs]
   (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
+
+;;
+;; schema sniplets
+;;
 
 (def henkilo-valitsin [{:name :userId :type :personSelector}])
 
@@ -324,6 +332,10 @@
                          {:name "poistaminen"}]}
                  {:name "poistumanAjankohta" :type :string}
                  olemassaoleva-rakennus))
+
+;;
+;; schemas
+;;
 
 (def schemas
   (to-map-by-name
