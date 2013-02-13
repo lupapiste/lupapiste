@@ -1,6 +1,13 @@
 (ns lupapalvelu.document.schemas)
 
-(defn group [name & body] {:name name :type :group :body (-> body vector flatten vec)})
+(defn body
+  "shallow merges stuff into vector"
+  [& rest]
+  (reduce
+    (fn [a x]
+      (let [v (if (sequential? x) x (vector x))]
+        (concat a v)))
+    [] rest))
 
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
@@ -44,10 +51,10 @@
                      :type :group
                      :body (conj henkilotiedot-minimal-body {:name "hetu" :type :string})}])
 
-(def henkilo-body (concat henkilo-valitsin henkilotiedot simple-osoite yhteystiedot))
+(def henkilo-body (body henkilo-valitsin henkilotiedot simple-osoite yhteystiedot))
 
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
-                   {:name "liikeJaYhteisoTunnus" :type :string}])
+                          {:name "liikeJaYhteisoTunnus" :type :string}])
 
 (def yritys-body (concat yritys-minimal-body
                          simple-osoite
@@ -70,7 +77,7 @@
 (def designer-basic (concat [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}]
                             [{:name "yritys" :type :group :body yritys-minimal-body}]
                             simple-osoite
-                            yhteystiedot)
+                            yhteystiedot))
 
 (def paasuunnittelija-body (concat
                              henkilo-valitsin
