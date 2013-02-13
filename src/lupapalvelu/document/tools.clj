@@ -31,8 +31,8 @@
      :body (dissoc x :repeating)}
     (:body x)))
 
-(defn create [col f]
-  (->> col
+(defn create [{body :body} f]
+  (->> body
     (walk/prewalk
       (fn [x]
         (if (map? x)
