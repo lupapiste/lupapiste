@@ -128,6 +128,21 @@
         (error "Failed to get 'property-id' by point: %s" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
+(defn get-address-by-point [x y]
+  (wfs/http-get wfs/nearestfeature (wfs/nearest-query-params x y)))
+
+(defn address-by-point-proxy [request]
+  (let [x (get (:query-params request) "x")
+        y (get (:query-params request) "y")
+        resp (get-address-by-point x y)
+        [status features] resp]
+    (if (= status :ok)
+      (do
+        (resp/json (wfs/feature-to-address-details (first features))))
+      (do
+        (error "Failed to get 'property-id' by point: %s" features)
+        (resp/status 503 "Service temporarily unavailable")))))
+
 ;
 ; Utils:
 ;
@@ -154,5 +169,6 @@
 (def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images))
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
+               "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy
                "get-address" get-addresses-proxy})
