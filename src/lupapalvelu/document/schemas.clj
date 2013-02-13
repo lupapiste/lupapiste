@@ -56,11 +56,11 @@
 (def yritys-minimal-body [{:name "yritysnimi" :type :string}
                           {:name "liikeJaYhteisoTunnus" :type :string}])
 
-(def yritys-body (concat yritys-minimal-body
-                         simple-osoite
-                         [{:name "yhteyshenkilo" :type :group
-                           :body (concat [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
-                                          yhteystiedot])}]))
+(def yritys-body (body yritys-minimal-body
+                       simple-osoite
+                       {:name "yhteyshenkilo" :type :group
+                        :body (body {:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
+                                    yhteystiedot)}))
 
 (def party-body [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
                  {:name "henkilo" :type :group :body henkilo-body}
@@ -74,34 +74,32 @@
                        {:name "C"}
                        {:name "ei tiedossa"}]}])
 
-(def designer-basic (concat [{:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}]
-                            [{:name "yritys" :type :group :body yritys-minimal-body}]
-                            simple-osoite
-                            yhteystiedot))
+(def designer-basic (body {:name "henkilotiedot" :type :group :body henkilotiedot-minimal-body}
+                          {:name "yritys" :type :group :body yritys-minimal-body}
+                          simple-osoite
+                          yhteystiedot))
 
-(def paasuunnittelija-body (concat
+(def paasuunnittelija-body (body
                              henkilo-valitsin
-                             (conj
-                               designer-basic
-                               {:name "patevyys" :type :group :body patevyys})))
+                             designer-basic
+                             {:name "patevyys" :type :group :body patevyys}))
 
-(def suunnittelija-body (concat
+(def suunnittelija-body (body
                           henkilo-valitsin
-                          (conj
-                            designer-basic
-                            {:name "patevyys" :type :group
-                             :body
-                             (cons {:name "kuntaRoolikoodi" :type :select
-                                    :body [{:name "GEO-suunnittelija"}
-                                           {:name "LVI-suunnittelija"}
-                                           {:name "IV-suunnittelija"}
-                                           {:name "KVV-suunnittelija"}
-                                           {:name "RAK-rakennesuunnittelija"}
-                                           {:name "ARK-rakennussuunnittelija"}
-                                           {:name "ei tiedossa"}
-                                           {:name "Vaikeiden t\u00F6iden suunnittelija"}]
-                                    } patevyys)
-                             }))) ; TODO miten liitteet hanskataan
+                          designer-basic
+                          {:name "patevyys" :type :group
+                           :body
+                           (cons {:name "kuntaRoolikoodi" :type :select
+                                  :body [{:name "GEO-suunnittelija"}
+                                         {:name "LVI-suunnittelija"}
+                                         {:name "IV-suunnittelija"}
+                                         {:name "KVV-suunnittelija"}
+                                         {:name "RAK-rakennesuunnittelija"}
+                                         {:name "ARK-rakennussuunnittelija"}
+                                         {:name "ei tiedossa"}
+                                         {:name "Vaikeiden t\u00F6iden suunnittelija"}]
+                                  } patevyys)
+                           }))
 
 (def huoneisto-body [{:name "huoneistoTunnus" :type :group
                       :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
@@ -309,18 +307,24 @@
                        {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
   )
 
-(def olemassaoleva-rakennus (concat rakennuksen-valitsin rakennuksen-omistajat full-osoite rakennuksen-tiedot))
+(def olemassaoleva-rakennus (body
+                              rakennuksen-valitsin
+                              rakennuksen-omistajat
+                              full-osoite
+                              rakennuksen-tiedot))
 
-(def rakennuksen-muuttaminen (concat muutostyonlaji olemassaoleva-rakennus))
+(def rakennuksen-muuttaminen (body
+                               muutostyonlaji
+                               olemassaoleva-rakennus))
 
-(def purku (concat [{:name "poistumanSyy" :type :select
-                     :body [{:name "purettu uudisrakentamisen vuoksi"}
-                            {:name "purettu muusta syyst\u00e4"}
-                            {:name "tuhoutunut"}
-                            {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
-                            {:name "poistaminen"}]}
-                    {:name "poistumanAjankohta" :type :string}]
-                   olemassaoleva-rakennus))
+(def purku (body {:name "poistumanSyy" :type :select
+                  :body [{:name "purettu uudisrakentamisen vuoksi"}
+                         {:name "purettu muusta syyst\u00e4"}
+                         {:name "tuhoutunut"}
+                         {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                         {:name "poistaminen"}]}
+                 {:name "poistumanAjankohta" :type :string}
+                 olemassaoleva-rakennus))
 
 (def schemas
   (to-map-by-name
