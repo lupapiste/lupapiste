@@ -121,6 +121,8 @@
                              {:name "parvekeTaiTerassiKytkin" :type :checkbox}
                              {:name "lamminvesiKytkin" :type :checkbox}]}])
 
+(def yhden-asunnon-talot "011 yhden asunnon talot")
+
 (def rakennuksen-tiedot [
              {:name "kaytto"
               :type :group
@@ -205,7 +207,7 @@
                              {:name "021 rivitalot"}
                              {:name "013 muut erilliset talot"}
                              {:name "012 kahden asunnon talot"}
-                             {:name "011 yhden asunnon talot"}
+                             {:name yhden-asunnon-talot}
                              {:name "ei tiedossa"}]}]}
              {:name "mitat"
               :type :group

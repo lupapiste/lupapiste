@@ -42,7 +42,8 @@
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
-                                 :schmea-data {"plaa" "pldfsad" }
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                               [["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments [:hakija [:valtakirja]
                                                :rakennuspaikka [:ote_alueen_peruskartasta]

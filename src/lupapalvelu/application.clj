@@ -166,7 +166,8 @@
      :versions []}))
 
 (defn- make-documents [user created existing-documents op]
-  (let [make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
+  (let [make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
+                                                 :body {}})
         op-info               (operations/operations op)
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
