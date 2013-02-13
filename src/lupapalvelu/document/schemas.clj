@@ -72,11 +72,14 @@
 (def yritys-minimal [{:name "yritysnimi" :type :string}
                      {:name "liikeJaYhteisoTunnus" :type :string}])
 
-(def yritys (body yritys-minimal
-                  simple-osoite
-                  {:name "yhteyshenkilo" :type :group
-                   :body (body henkilotiedot-minimal
-                               yhteystiedot)}))
+(def yritys (body
+              yritys-minimal
+              simple-osoite
+              {:name "yhteyshenkilo"
+               :type :group
+               :body (body
+                       henkilotiedot-minimal
+                       yhteystiedot)}))
 
 (def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
             {:name "henkilo" :type :group :body henkilo}
@@ -101,21 +104,23 @@
                         designer-basic
                         {:name "patevyys" :type :group :body patevyys}))
 
+(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select
+                       :body [{:name "GEO-suunnittelija"}
+                              {:name "LVI-suunnittelija"}
+                              {:name "IV-suunnittelija"}
+                              {:name "KVV-suunnittelija"}
+                              {:name "RAK-rakennesuunnittelija"}
+                              {:name "ARK-rakennussuunnittelija"}
+                              {:name "ei tiedossa"}
+                              {:name "Vaikeiden t\u00F6iden suunnittelija"}]}])
+
 (def suunnittelija (body
                      henkilo-valitsin
                      designer-basic
                      {:name "patevyys" :type :group
-                      :body
-                      (cons {:name "kuntaRoolikoodi" :type :select
-                             :body [{:name "GEO-suunnittelija"}
-                                    {:name "LVI-suunnittelija"}
-                                    {:name "IV-suunnittelija"}
-                                    {:name "KVV-suunnittelija"}
-                                    {:name "RAK-rakennesuunnittelija"}
-                                    {:name "ARK-rakennussuunnittelija"}
-                                    {:name "ei tiedossa"}
-                                    {:name "Vaikeiden t\u00F6iden suunnittelija"}]
-                             } patevyys)
+                      :body (body
+                              kuntaroolikoodi
+                              patevyys)
                       }))
 
 (def huoneisto [{:name "huoneistoTunnus" :type :group
@@ -333,14 +338,15 @@
                                muutostyonlaji
                                olemassaoleva-rakennus))
 
-(def purku (body {:name "poistumanSyy" :type :select
-                  :body [{:name "purettu uudisrakentamisen vuoksi"}
-                         {:name "purettu muusta syyst\u00e4"}
-                         {:name "tuhoutunut"}
-                         {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
-                         {:name "poistaminen"}]}
-                 {:name "poistumanAjankohta" :type :string}
-                 olemassaoleva-rakennus))
+(def purku (body
+             {:name "poistumanSyy" :type :select
+              :body [{:name "purettu uudisrakentamisen vuoksi"}
+                     {:name "purettu muusta syyst\u00e4"}
+                     {:name "tuhoutunut"}
+                     {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
+                     {:name "poistaminen"}]}
+             {:name "poistumanAjankohta" :type :string}
+             olemassaoleva-rakennus))
 
 ;;
 ;; schemas
