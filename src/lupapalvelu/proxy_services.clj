@@ -153,13 +153,20 @@
   stuff. At the moment strips the 'Set-Cookie' headers."
   [f]
   (fn [request]
-    (dissoc-in (f request) [:headers "set-cookie"])))
+    (let [response (f request)]
+      (assoc response :headers (dissoc (:headers response) "set-cookie" "server")))))
+
+(defn- cache [max-age-in-s f]
+  (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
+    (fn [request]
+      (let [response (f request)]
+        (assoc response :headers (merge (:headers response) cache-control))))))
 
 ;;
 ;; Proxy services by name:
 ;;
 
-(def services {"nls" (secure wfs/raster-images)
+(def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images))
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
