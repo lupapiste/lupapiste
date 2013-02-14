@@ -31,10 +31,15 @@
   [{documents :documents} document-id]
   (first (filter #(= document-id (:id %)) documents)))
 
+(defn get-documents-by-name
+  "returns document from application by schema name"
+  [application schema-name]
+  (filter (comp (partial = schema-name) :name :info :schema) (:documents application)))
+
 (defn get-document-by-name
-  "returns first document from application by name"
-  [{documents :documents} name]
-  (first (filter #(= name (get-in % [:schema :info :name])) documents)))
+  "returns first document from application by schema name"
+  [application schema-name]
+  (first (get-documents-by-name application schema-name)))
 
 (defn invited? [{invites :invites} email]
   (or (some #(= email (-> % :user :username)) invites) false))

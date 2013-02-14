@@ -40,11 +40,12 @@
 
 (defn -main [& _]
   (info "Server starting")
-  (info "Running on Java %s %s %s (%s)"
+  (info "Running on Java %s %s %s (%s) [%s]"
     (System/getProperty "java.vm.vendor")
     (System/getProperty "java.vm.name")
     (System/getProperty "java.runtime.version")
-    (System/getProperty "java.vm.info"))
+    (System/getProperty "java.vm.info")
+    (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful"))
   (info "Running on Clojure %d.%d.%d"
     (:major *clojure-version*)
     (:minor *clojure-version*)
@@ -72,8 +73,6 @@
                           :session-cookie-attrs (:cookie env/config)})
   (info "Server running")
   (env/in-dev
-    (warn "*** Applying test fixture")
-    (fixture/apply-fixture "minimal")
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
   ; Sensible return value for -main for repl use.
