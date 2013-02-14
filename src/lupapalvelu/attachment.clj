@@ -1,7 +1,7 @@
 (ns lupapalvelu.attachment
   (:use [monger.operators]
         [lupapalvelu.core]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
         [clojure.string :only [split join trim]])
   (:require [lupapalvelu.mongo :as mongo]

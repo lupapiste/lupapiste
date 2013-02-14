@@ -6,7 +6,7 @@
         [monger.operators]
         [clj-time.local :only [local-now]]
         [hiccup.form]
-        [lupapalvelu.log])
+        [clojure.tools.logging])
   (:require [digest]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]

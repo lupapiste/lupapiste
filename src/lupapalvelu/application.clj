@@ -1,6 +1,6 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
         [lupapalvelu.domain :only [application-query-for get-application-as]]
         [clojure.string :only [blank?]])

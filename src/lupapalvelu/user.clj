@@ -1,7 +1,7 @@
 (ns lupapalvelu.user
   (:use [monger.operators]
         [lupapalvelu.core]
-        [lupapalvelu.log])
+        [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]

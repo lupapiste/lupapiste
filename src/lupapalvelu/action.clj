@@ -1,6 +1,6 @@
 (ns lupapalvelu.action
   (:use [monger.operators]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [sade.security :as sadesecurity]

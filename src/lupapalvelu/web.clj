@@ -1,7 +1,7 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail]]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]])
   (:require [noir.request :as request]

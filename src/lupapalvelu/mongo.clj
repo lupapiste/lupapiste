@@ -1,7 +1,7 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count])
   (:use monger.operators
-        lupapalvelu.log)
+        clojure.tools.logging)
   (:require [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]

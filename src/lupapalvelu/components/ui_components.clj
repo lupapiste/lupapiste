@@ -1,5 +1,5 @@
 (ns lupapalvelu.components.ui-components
-  (:use [lupapalvelu.log])
+  (:use [clojure.tools.logging])
   (:require [lupapalvelu.components.core :as c]
             [lupapalvelu.env :as env]
             [lupapalvelu.i18n :as i18n]

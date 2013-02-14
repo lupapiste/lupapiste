@@ -6,7 +6,7 @@
             [clojure.string :as s]
             [lupapalvelu.wfs :as wfs])
   (:use [clojure.data.zip.xml]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.util :only [dissoc-in select]]))
 
 ;;

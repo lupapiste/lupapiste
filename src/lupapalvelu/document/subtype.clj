@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.subtype
   (:use [clojure.string :only [blank?]]
-        [lupapalvelu.log]))
+        [clojure.tools.logging]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
 
