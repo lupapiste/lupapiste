@@ -59,35 +59,41 @@
                                  :required common-schemas
                                  :attachments []}
    :julkinen-rakennus           {:schema "uusiRakennus"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments []}
    :muu-uusi-rakentaminen       {:schema "uusiRakennus"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments []}
    :laajentaminen               {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
    :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
                                  :required common-schemas
                                  :attachments []}
    :julkisivu-muutos            {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
    :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
    :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
    :takka-tai-hormi             {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
    :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
    :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
    :auto-katos                  {:schema "auto-katos"

@@ -312,7 +312,7 @@
                          {:name "huoneistot"
                           :type :group
                           :repeating true
-                          :body huoneisto-body}])
+                          :body huoneisto}])
 (def rakennuksen-tiedot [{:name "kaytto"
                           :type :group
                           :body [{:name "rakentajaTyyppi" :type :select
@@ -482,12 +482,15 @@
                              :type :group :repeating true
                              :body party}])
 
-(def muutostyonlaji [{:name :muutostyolaji :type :select
+(def muumuutostyo "muut muutosty\u00f6t")
+(def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
+
+(def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
+                     {:name "muutostyolaji" :type :select
                       :body
                       [{:name "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t"}
-                       {:name "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos"}
-                       {:name "muut muutosty\u00f6t"}]}];Kirjotus virhe kryspin 2.02 versiossa. korjaus arvattu tarkista m
-  )
+                       {:name kayttotarkotuksen-muutos}
+                       {:name muumuutostyo}]}])
 
 (def olemassaoleva-rakennus (body
                               rakennuksen-valitsin
