@@ -2,6 +2,7 @@
   (:use lupapalvelu.log)
   (:require [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
+            [lupapalvelu.logging]
             [lupapalvelu.web]
             [lupapalvelu.vetuma]
             [lupapalvelu.env :as env]

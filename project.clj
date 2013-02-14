@@ -3,6 +3,7 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [noir "1.3.0" :exclusions [org.clojure/clojure]]
                  [com.novemberain/monger "1.4.2"]
+                 [org.slf4j/slf4j-log4j12 "1.6.4"]
                  [org.clojure/tools.logging "0.2.6"]
                  [clj-logging-config "1.9.10"]
                  [enlive "1.0.1" :exclusions [org.clojure/clojure]]
