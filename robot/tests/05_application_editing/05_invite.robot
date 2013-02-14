@@ -17,7 +17,6 @@ Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko invites Teppo
-  [Tags]  fail
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
@@ -29,7 +28,6 @@ Mikko invites Teppo
   Invite count is  1
 
 Mikko can't reinvite Teppo
-  [Tags]  fail
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
   Input Text  invite-email  teppo@example.com
@@ -40,8 +38,15 @@ Mikko can't reinvite Teppo
 # TODO: cant remove auth for owner
 # TODO: can remove auth for someone else
 
+Mikko leaves and Teppo logs in
+  Logout
+  Teppo logs in
+
+Teppo can edit Mikko's application
+  Open application  invite-app
+  Sleep  3
+
 Mikko removes Teppo's invite
-  [Tags]  fail
   Click by test id  application-remove-invite
   Wait until  Element should not be visible  xpath=//*[@data-test-id='application-remove-invite']
   Wait until  Invite count is  0
