@@ -10,7 +10,7 @@
             [lupapalvelu.mime :as mime]
             [clojure.java.io :as io])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream]
+           [java.io File OutputStream FilterInputStream]
            [org.apache.commons.io IOUtils]))
 
 ;;
@@ -320,11 +320,19 @@
         (doseq [attachment attachments]
           (append-attachment zip (-> attachment :versions last)))
         (.finish zip)))
-    (io/input-stream temp-file)))
+    temp-file))
+
+(defn- temp-file-input-stream [^File file]
+  (let [i (io/input-stream file)]
+    (proxy [FilterInputStream] [i]
+      (close []
+        (proxy-super close)
+        (when-not (.delete file)
+          (warn "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
 (defn output-all-attachments [application-id user]
   (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]} {:attachments 1})]
-    {:body (get-all-attachments (:attachments application))
+    {:body (temp-file-input-stream (get-all-attachments (:attachments application)))
      :status 200
      :headers {"Content-Type" "application/octet-stream"
                "Content-Disposition" "attachment;filename=\"liitteet.zip\""}}
