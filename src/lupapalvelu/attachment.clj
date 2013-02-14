@@ -10,8 +10,7 @@
             [lupapalvelu.mime :as mime]
             [clojure.java.io :as io])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]
-           [org.apache.commons.io IOUtils]))
+           [java.io File OutputStream FilterInputStream]))
 
 ;;
 ;; Constants
@@ -310,7 +309,7 @@
   (when latest
     (.putNextEntry zip (ZipEntry. (encode-filename (:filename latest))))
     (with-open [in ((-> latest :fileId mongo/download :content))]
-      (IOUtils/copy in zip))))
+      (io/copy in zip))))
 
 (defn- get-all-attachments [attachments]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
@@ -327,7 +326,7 @@
     (proxy [FilterInputStream] [i]
       (close []
         (proxy-super close)
-        (when-not (.delete file)
+        (when (= (io/delete-file file :could-not) :could-not)
           (warn "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
 (defn output-all-attachments [application-id user]
