@@ -7,8 +7,8 @@
   (fact "takes (recursively) last sub-keyword from keywords"
         (strip-keys {:a:b:c {:x:y:z 2 :y 3}}) => {:c {:z 2 :y 3}})
   (fact "does not touch other key types"
-        (strip-keys {[:a :b :c] 1
-                     ":a:b:c" 2}) => {[:a :b :c] 1
+        (strip-keys {:a:b:c 1
+                     ":a:b:c" 2}) => {:c 1
                                       ":a:b:c" 2}))
 
 (fact "strip-nils"
