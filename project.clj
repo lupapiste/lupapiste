@@ -6,10 +6,7 @@
 
                  [org.clojure/tools.logging "0.2.6"]
                  [clj-logging-config "1.9.10"]
-                 [log4j/log4j "1.2.16"]
                  [org.slf4j/slf4j-log4j12 "1.7.2"]
-                 [org.slf4j/slf4j-api "1.6.4"]
-                 [org.slf4j/jul-to-slf4j "1.6.4"]
 
                  [enlive "1.0.1" :exclusions [org.clojure/clojure]]
                  [org.clojure/tools.nrepl "0.2.1"]
