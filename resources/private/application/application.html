@@ -99,6 +99,7 @@
           <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
           <button data-bind="ltext: 'application.addOperation',       click: addOperation,       visible: $root.authorization.ok('add-operation'),       enable: $root.authorization.ok('add-operation')"       data-test-id="add-operation"           class="btn btn-primary"></button>
           <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn btn-primary"></button>
+          <button data-bind="ltext: 'application.pdf',                click: exportPdf"                                                                                                                         data-test-id="application-pdf-btn"     class="btn action-bar-button"></button>
         </div>
 
         <!-- Tabs: -->

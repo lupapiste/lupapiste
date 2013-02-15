@@ -1,11 +1,10 @@
 (ns lupapalvelu.operations
+  (:use [lupapalvelu.log])
   (:require [lupapalvelu.document.schemas :as schemas]))
 
-;; Key in applications_[fi|sv].js
 (def default-description "operations.default-description")
 
 (def ^:private operations-tree
-  ;; These keys as localized in applications_[fi|sv].js
   [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" {:op :asuinrakennus :text default-description}]
                                                                      ["Vapaa-ajan asuinrakennus" {:op :vapaa-ajan-asuinrakennus :text default-description}]
                                                                      ["Varasto, sauna, autotalli tai muu talousrakennus" {:op :varasto-tms :text default-description}]
@@ -124,3 +123,4 @@
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
   (if-not (schemas/schemas schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+
