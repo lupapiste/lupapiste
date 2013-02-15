@@ -478,6 +478,9 @@
                           :repeating true
                           :body huoneisto}])
 
+(def rakennelma (body {:name "kuvaus" :type :text}))
+(def maisematyo (body {:name "kuvaus" :type :text}))
+
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group :repeating true
                              :body party}])
@@ -516,8 +519,6 @@
 ;; schemas
 ;;
 
-(def toimenpiteen-kuvaus [{:name "kuvaus" :type :text}])
-
 (def schemas
   (to-map-by-name
     [{:info {:name "hankkeen-kuvaus"}
@@ -525,16 +526,19 @@
              {:name "poikkeamat" :type :text}]}
 
      {:info {:name "uusiRakennus"}
-      :body (concat toimenpiteen-kuvaus rakennuksen-omistajat rakennuksen-tiedot)}
+      :body (concat rakennuksen-omistajat rakennuksen-tiedot)}
 
      {:info {:name "rakennuksen-muuttaminen"}
-      :body (concat toimenpiteen-kuvaus rakennuksen-muuttaminen)}
+      :body rakennuksen-muuttaminen}
 
      {:info {:name "purku"}
-      :body (concat toimenpiteen-kuvaus purku)}
+      :body purku}
 
      {:info {:name "kaupunkikuvatoimenpide"}
-      :body (concat toimenpiteen-kuvaus [])}
+      :body rakennelma}
+
+     {:info {:name "maisematyo"}
+      :body maisematyo}
 
      {:info {:name "hakija" :repeating true}
       :body party}
@@ -567,60 +571,5 @@
                      {:name "eiKaavaa"}
                      {:name "ei tiedossa"}]}]}
 
-     ;; not used...
-     {:info {:name "osoite"}
-      :body full-osoite}
-
-     {:info {:name "lisatiedot"}
-      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}
-
-     ; Rest are templates for future. Just guessing...
-
-     {:info {:name "asuinrakennus"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "vapaa-ajan-asuinrakennus"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "varasto-tms"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "julkinen-rakennus"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "muu-uusi-rakentaminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "laajentaminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "kayttotark-muutos"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "julkisivu-muutos"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "jakaminen-tai-yhdistaminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "markatilan-laajentaminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "takka-tai-hormi"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "parveke-tai-terassi"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "muu-laajentaminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "auto-katos"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "masto-tms"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "mainoslaite"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "aita"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "maalampo"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "jatevesi"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "muu-rakentaminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "purkaminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "kaivuu"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "puun-kaataminen"}
-      :body [{:name "foo" :type :string}]}
-     {:info {:name "muu-maisema-toimenpide"}
-      :body [{:name "foo" :type :string}]}]))
+       {:info {:name "lisatiedot"}
+      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))

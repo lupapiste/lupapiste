@@ -96,37 +96,37 @@
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :auto-katos                  {:schema "auto-katos"
+   :auto-katos                  {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :masto-tms                   {:schema "masto-tms"
+   :masto-tms                   {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :mainoslaite                 {:schema "mainoslaite"
+   :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :aita                        {:schema "aita"
+   :aita                        {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :maalampo                    {:schema "maalampo"
+   :maalampo                    {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :jatevesi                    {:schema "jatevesi"
+   :jatevesi                    {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :muu-rakentaminen            {:schema "muu-rakentaminen"
+   :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
    :purkaminen                  {:schema "purku"
                                  :required common-schemas
                                  :attachments []}
-   :kaivuu                      {:schema "kaivuu"
+   :kaivuu                      {:schema "maisematyo"
                                  :required common-schemas
                                  :attachments []}
-   :puun-kaataminen             {:schema "puun-kaataminen"
+   :puun-kaataminen             {:schema "maisematyo"
                                  :required common-schemas
                                  :attachments []}
-   :muu-maisema-toimenpide      {:schema "muu-maisema-toimenpide"
+   :muu-maisema-toimenpide      {:schema "maisematyo"
                                  :required  common-schemas
                                  :attachments []}})
 
