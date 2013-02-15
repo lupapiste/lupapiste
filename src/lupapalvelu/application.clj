@@ -240,8 +240,9 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
-                                              $set {:modified command}})
+        (mongo/update-by-id :applications id {$push {:operations {:operation op :created created}}
+                                              $pushAll {:documents new-docs}
+                                              $set {:modified created}})
         (ok)))))
 
 (defcommand "convert-to-application"
