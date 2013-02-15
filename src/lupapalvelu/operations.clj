@@ -1,11 +1,10 @@
 (ns lupapalvelu.operations
+  (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]))
 
-;; Key in applications_[fi|sv].js
 (def default-description "operations.default-description")
 
 (def ^:private operations-tree
-  ;; These keys as localized in applications_[fi|sv].js
   [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" {:op :asuinrakennus :text default-description}]
                                                                      ["Vapaa-ajan asuinrakennus" {:op :vapaa-ajan-asuinrakennus :text default-description}]
                                                                      ["Varasto, sauna, autotalli tai muu talousrakennus" {:op :varasto-tms :text default-description}]
@@ -42,6 +41,7 @@
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
                                  :attachments [:hakija [:valtakirja]
                                                :rakennuspaikka [:ote_alueen_peruskartasta]
@@ -49,73 +49,83 @@
                                                               :pohjapiirros
                                                               :julkisivupiirros]
                                                :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]]}
-   :vapaa-ajan-asuinrakennus    {:schema "vapaa-ajan-asuinrakennus"
+   :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
                                  :required common-schemas
                                  :attachments []}
-   :varasto-tms                 {:schema "varasto-tms"
+   :varasto-tms                 {:schema "uusiRakennus"
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/talousrakennus]]
                                  :required common-schemas
                                  :attachments []}
-   :julkinen-rakennus           {:schema "julkinen-rakennus"
+   :julkinen-rakennus           {:schema "uusiRakennus"
                                  :required common-schemas
                                  :attachments []}
-   :muu-uusi-rakentaminen       {:schema "muu-uusi-rakentaminen"
+   :muu-uusi-rakentaminen       {:schema "uusiRakennus"
                                  :required common-schemas
                                  :attachments []}
    :laajentaminen               {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :kayttotark-muutos           {:schema "kayttotark-muutos"
+   :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
                                  :required common-schemas
                                  :attachments []}
-   :julkisivu-muutos            {:schema "julkisivu-muutos"
+   :julkisivu-muutos            {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :jakaminen-tai-yhdistaminen  {:schema "jakaminen-tai-yhdistaminen"
+   :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :markatilan-laajentaminen    {:schema "markatilan-laajentaminen"
+   :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :takka-tai-hormi             {:schema "takka-tai-hormi"
+   :takka-tai-hormi             {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :parveke-tai-terassi         {:schema "parveke-tai-terassi"
+   :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :muu-laajentaminen           {:schema "muu-laajentaminen"
+   :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
+                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments []}
-   :auto-katos                  {:schema "auto-katos"
+   :auto-katos                  {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :masto-tms                   {:schema "masto-tms"
+   :masto-tms                   {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :mainoslaite                 {:schema "mainoslaite"
+   :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :aita                        {:schema "aita"
+   :aita                        {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :maalampo                    {:schema "maalampo"
+   :maalampo                    {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :jatevesi                    {:schema "jatevesi"
+   :jatevesi                    {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
-   :muu-rakentaminen            {:schema "muu-rakentaminen"
+   :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
                                  :attachments []}
    :purkaminen                  {:schema "purku"
                                  :required common-schemas
                                  :attachments []}
-   :kaivuu                      {:schema "kaivuu"
+   :kaivuu                      {:schema "maisematyo"
                                  :required common-schemas
                                  :attachments []}
-   :puun-kaataminen             {:schema "puun-kaataminen"
+   :puun-kaataminen             {:schema "maisematyo"
                                  :required common-schemas
                                  :attachments []}
-   :muu-maisema-toimenpide      {:schema "muu-maisema-toimenpide"
+   :muu-maisema-toimenpide      {:schema "maisematyo"
                                  :required  common-schemas
                                  :attachments []}})
 
@@ -124,3 +134,4 @@
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
   (if-not (schemas/schemas schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+

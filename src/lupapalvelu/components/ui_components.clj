@@ -15,6 +15,9 @@
         data (json/generate-string js-conf)]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
+(defn loc->js []
+  (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
+
 (def ui-components
   {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.9.0.custom.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
    :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js"]}
@@ -30,7 +33,7 @@
    :debug        (if (env/dev-mode?) debugjs {})
 
    :i18n         {:depends [:jquery :underscore]
-                  :js ["loc.js" i18n/loc->js]}
+                  :js ["loc.js" loc->js]}
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"

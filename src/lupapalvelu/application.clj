@@ -165,9 +165,13 @@
      :modified created
      :versions []}))
 
+(defn- schema-data-to-body [schema-data]
+  (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
+
 (defn- make-documents [user created existing-documents op]
-  (let [make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
-        op-info               (operations/operations op)
+  (let [op-info               (operations/operations op)
+        make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
+                                                 :body (schema-data-to-body (:schema-data op-info))})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
@@ -236,8 +240,9 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
-                                              $set {:modified command}})
+        (mongo/update-by-id :applications id {$push {:operations {:operation op :created created}}
+                                              $pushAll {:documents new-docs}
+                                              $set {:modified created}})
         (ok)))))
 
 (defcommand "convert-to-application"

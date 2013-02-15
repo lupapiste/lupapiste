@@ -212,10 +212,15 @@
       removeApplicationModel.init(id);
       return false;
     },
+    
+    exportPdf: function() {
+      window.open("/api/pdf-export/" + loc.currentLanguage + "/" + application.id(), "_blank");
+      return false;
+    },
 
-    changeTab: function(model,event){
+    changeTab: function(model,event) {
       var element = event.target;
-      window.location.hash = "#!/application/"+application.id()+"/"+element.name;
+      window.location.hash = "#!/application/" + application.id() + "/" + element.name;
     }
   };
 
@@ -237,14 +242,10 @@
 
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
-    if (isInitializing) {
-      return;
-    }
+    if (isInitializing) return;
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok('assign-application')) {
-      return;
-    }
+    if (!authorizationModel.ok('assign-application')) return;
 
     var assigneeId = value ? value : null;
 
@@ -262,10 +263,10 @@
   }
 
   function oskariSetMarker(x, y) {
-    hub.send("documents-map",{
-      data:  [ {location: {x: x, y: y}} ],
+    hub.send("documents-map", {
+      data:  [{location: {x: x, y: y}}],
       clear: true
-      });
+    });
   }
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
@@ -461,9 +462,7 @@
     openTab(tab);
   }
 
-  var accordian = function(data, event) {
-    accordion.toggle(event);
-  };
+  var accordian = function(data, event) { accordion.toggle(event); };
 
   var initApplication = function(e) {
     var newId = e.pagePath[0];
