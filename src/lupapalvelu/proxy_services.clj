@@ -6,7 +6,7 @@
             [clojure.string :as s]
             [lupapalvelu.wfs :as wfs])
   (:use [clojure.data.zip.xml]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.util :only [dissoc-in select]]))
 
 ;;
@@ -90,7 +90,7 @@
                     :suggestions (map feature->string features)
                     :data (map wfs/feature-to-address features)}))
       (do
-        (error "find-addresses failed: status=%s, response=%s" status response)
+        (errorf "find-addresses failed: status=%s, response=%s" status response)
         (resp/status 503 "Service temporarily unavailable")))))
 
 (defn- point-by-property-id [property-id]
@@ -107,7 +107,7 @@
     (if (= status :ok)
       (resp/json {:data (map wfs/feature-to-position features)})
       (do
-        (error "Failed to get point by 'property-id': %s" features)
+        (error "Failed to get point by 'property-id':" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
 (defn- property-id-by-point [[x y]]
@@ -125,7 +125,7 @@
     (if (= status :ok)
       (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
       (do
-        (error "Failed to get 'property-id' by point: %s" features)
+        (error "Failed to get 'property-id' by point:" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
 (defn get-address-by-point [x y]
@@ -140,7 +140,7 @@
       (do
         (resp/json (wfs/feature-to-address-details (first features))))
       (do
-        (error "Failed to get 'property-id' by point: %s" features)
+        (error "Failed to get 'property-id' by point:" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
 ;

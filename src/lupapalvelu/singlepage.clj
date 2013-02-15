@@ -1,5 +1,5 @@
 (ns lupapalvelu.singlepage
-  (:use [lupapalvelu.log]
+  (:use [clojure.tools.logging]
         [lupapalvelu.components.ui-components :only [ui-components]])
   (:require [clojure.java.io :as io]
             [net.cgrand.enlive-html :as enlive]
@@ -88,7 +88,7 @@
     (.toByteArray out)))
 
 (defn compose [kind component]
-  (debug "Compose %s%s" component kind)
+  (debugf "Compose %s%s" component kind)
   (ByteArrayInputStream.
     (if (= :html kind)
       (compose-html component)

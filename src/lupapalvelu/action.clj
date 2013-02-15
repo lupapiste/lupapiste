@@ -1,6 +1,6 @@
 (ns lupapalvelu.action
   (:use [monger.operators]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [sade.security :as sadesecurity]
@@ -45,7 +45,7 @@
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
         (fail :already-invited)
-      (let [invited (security/get-or-create-user-by-email email)]
+        (let [invited (security/get-or-create-user-by-email email)]
           (if (domain/has-auth? application (:id invited))
             (fail :already-has-auth)
             (do
@@ -64,12 +64,12 @@
                                   :inviter      (security/summary user)}
                         :auth (role invited :writer)}})
               (future
-                (info "sending email to %s" email)
+                (info "sending email to" email)
                 (if (not (= (suffix email "@") "example.com"))
                   (if (email/send-email email (:title application) (invite-body user application-id host))
                     (info "email was sent successfully")
                     (error "email could not be delivered."))
-                  (debug "...not really")))
+                  (info "we are not sending emails to @example.com doamin.")))
               nil)))))))
 
 (defcommand "approve-invite"
@@ -128,8 +128,7 @@
   [{data :data}]
   (let [vetuma   (client/json-get (str "/vetuma/stamp/" (:stamp data)))
         userdata (merge data vetuma)]
-    (println userdata)
-    (info "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
+    (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
     (if-let [user (security/create-user userdata)]
       (do
         (future
@@ -183,7 +182,7 @@
           (fail :error.document-not-found)
           ;; FIXME: all users should be modelled the same way.
           (let [path (if (or (= "maksaja" schema-name) (= "hakija" schema-name)) :documents.$.body.henkilo :documents.$.body)]
-            (info "merging user %s with best effort into document %s" subject name)
+            (infof "merging user %s with best effort into document %s" subject name)
             (mongo/update
               :applications
               {:_id (:id application)

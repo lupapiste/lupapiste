@@ -1,5 +1,5 @@
 (ns lupapalvelu.operations
-  (:use [lupapalvelu.log])
+  (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]))
 
 (def default-description "operations.default-description")
