@@ -3,15 +3,17 @@
         [clj-logging-config.log4j])
   (:import [org.apache.log4j DailyRollingFileAppender EnhancedPatternLayout]))
 
-(def pattern "%-5p %d (%r) [%c %-3L]-25 - %X{sessionId} - %X{applicationId} - %m%n")
+(def pattern "%-5p %d (%r) %-25c %-4L - %X{sessionId} - %X{applicationId} - %m%n")
 
 (defn daily-rolling-midnight-appender [pattern file]
   (DailyRollingFileAppender. (EnhancedPatternLayout. pattern) file "'.'yyyy-MM-dd"))
 
 (def default {:level :debug :pattern pattern})
 
-(set-loggers! ["sade" "lupapalvelu"] default
-              "ontolog.excel"        default
+(set-loggers! "sade"                 default
+              "lupapalvelu"          default
+              "ontodev.excel"        default
+              "org"                  (assoc default :level :info)
               "events"               {:out (daily-rolling-midnight-appender pattern "target/logs/events.log")})
 
 (defn unsecure-log-event [level event]
