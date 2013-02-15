@@ -20,8 +20,10 @@ Mikko invites Teppo
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
+  Sleep  1
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Sleep  1
   Click by test id  application-invite-submit
   Wait until  Element should not be visible  invite-email
   Wait until  Element should be visible  xpath=//*[@data-test-id='application-remove-invite']
@@ -44,19 +46,24 @@ Mikko leaves and Teppo logs in
 
 Teppo can edit Mikko's application
   Open application  invite-app
-  Sleep  3
+  Input text  //label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+  Logout
 
-Mikko removes Teppo's invite
-  Click by test id  application-remove-invite
-  Wait until  Element should not be visible  xpath=//*[@data-test-id='application-remove-invite']
-  Wait until  Invite count is  0
+Mikko comes back and can see Teppos modification
+  Mikko logs in
+  Open application  invite-app
+  Wait Until  Textfield Value Should Be  xpath=//label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+
+Mikko can see invite paasuunnittelija button again
+  Open tab  parties
+  Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko can't invite himself
   Click by test id  application-invite-paasuunnittelija
   Input Text  invite-email  mikko@example.com
   Input Text  invite-text  Voinko kutsua itseni?
   Click by test id  application-invite-submit
-  Invite count is  0
+  Invite count is  1
 
 Mikko adds comment so thate application will be visible to admin
   Add comment  Woe to you, Oh Earth and Sea, for the Devil sends the beast with wrath, because he knows the time is short...
