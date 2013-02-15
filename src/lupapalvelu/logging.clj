@@ -14,11 +14,12 @@
               "ontolog.excel"        default
               "events"               {:out (daily-rolling-midnight-appender pattern "target/logs/events.log")})
 
-(defn unsecure-log-event [event]
-  (with-logs "events" (println event)))
+(defn unsecure-log-event [level event]
+  (with-logs "events" level level
+    (println event)))
 
-(defn log-event [event]
+(defn log-event [level event]
   (try
-    (unsecure-log-event event)
+    (unsecure-log-event level event)
     (catch Exception e
       (error "can't write to event log:" event))))
