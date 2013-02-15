@@ -196,7 +196,7 @@
               {$set {:attachments.$.type attachment-type}})
             (ok))
           (do
-            (error "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
+            (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
             (fail :error.attachmentTypeNotAllowed)))))))
 
 (defcommand "approve-attachment"
@@ -244,7 +244,7 @@
   [{created :created
     user    :user
     {:keys [id attachmentId attachmentType filename tempfile size text]} :data}]
-  (debug "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
+  (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
@@ -291,7 +291,7 @@
         #"[^a-zA-Z0-9\.\-_ ]" "-")))
 
 (defn output-attachment [attachment-id user download?]
-  (debug "file download: attachment-id=%s" attachment-id)
+  (debugf "file download: attachment-id=%s" attachment-id)
   (if-let [attachment (get-attachment attachment-id user)]
     (let [response {:status 200
                     :body ((:content attachment))
@@ -314,7 +314,7 @@
 
 (defn- get-all-attachments [attachments]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
-    (debug "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
+    (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
       (let [zip (ZipOutputStream. out)]
         (doseq [attachment attachments]

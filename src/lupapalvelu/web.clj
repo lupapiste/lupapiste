@@ -167,7 +167,7 @@
 (defpage "/security/activate/:activation-key" {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do
-      (info "User account '%s' activated, auto-logging in the user" (:username user))
+      (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)
       (resp/redirect "/"))
     (do
@@ -200,7 +200,7 @@
 
 (defpage [:post "/api/upload"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector] :as data}
-  (debug "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
+  (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
   (let [upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId

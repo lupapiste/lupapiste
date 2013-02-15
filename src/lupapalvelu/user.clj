@@ -17,15 +17,15 @@
   [{{:keys [username password]} :data}]
   (if-let [user (security/login username password)]
     (do
-      (info "login: successful: username=%s" username)
+      (info "login successful, username:" username)
       (session/put! :user user)
       (if-let [application-page (applicationpage-for (:role user))]
         (ok :user user :applicationpage application-page)
         (do
-          (error "Unknown user role: role=[%s]" (:role user))
+          (error "Unknown user role:" (:role user))
           (fail :error.login))))
     (do
-      (info "login: failed: username=%s" username)
+      (info "login failed, username:" username)
       (fail :error.login))))
 
 (defcommand "change-passwd"
@@ -36,11 +36,11 @@
         user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
       (do
-        (debug "Password change: user-id=%s" user-id)
+        (debug "Password change: user-id:" user-id)
         (security/change-password (:email user) newPassword)
         (ok))
       (do
-        (warn "Password change: failed: old password does not match: user-id=%s" user-id)
+        (warn "Password change: failed: old password does not match, user-id:" user-id)
         (fail :old-password-does-not-match)))))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))

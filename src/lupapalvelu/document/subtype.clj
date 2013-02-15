@@ -44,5 +44,5 @@
   nil)
 
 (defmethod subtype-validation :default [elem _]
-  (error "Unknown subtype: elem=[%s]" elem)
+  (error "Unknown subtype:" elem)
   [:err "illegal-subtype"])

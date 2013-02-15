@@ -127,7 +127,7 @@
     (if @connected
       (debug "Already connected!")
       (do
-        (debug "Connecting to DB: %s" uri)
+        (debug "Connecting to DB:" uri)
         (m/connect-via-uri! uri)
         (debug "DB is" (m/get-db))
         (reset! connected true)))))

@@ -65,7 +65,7 @@
                            :enabled      enabled
                            :private      {:salt salt
                                           :password hashed-password}}]
-    (info "register user: %s" (dissoc user :password))
+    (info "register user:" (dissoc user :password))
     (if (= "dummy" (:role old-user))
       (do
         (info "rewriting over dummy user:" (:id old-user))

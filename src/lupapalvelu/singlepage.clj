@@ -88,7 +88,7 @@
     (.toByteArray out)))
 
 (defn compose [kind component]
-  (debug "Compose %s%s" component kind)
+  (debugf "Compose %s%s" component kind)
   (ByteArrayInputStream.
     (if (= :html kind)
       (compose-html component)
