@@ -20,10 +20,8 @@ Mikko invites Teppo
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
-  Sleep  1
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
-  Sleep  1
   Click by test id  application-invite-submit
   Wait until  Element should not be visible  invite-email
   Wait until  Element should be visible  xpath=//*[@data-test-id='application-remove-invite']
