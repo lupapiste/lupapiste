@@ -65,13 +65,14 @@
       'lupapalvelu.tepa))
   (mongo/connect!)
   (server/add-middleware apply-custom-content-types)
-  (server/start env/port {:mode env/mode
-                          :jetty-options {:ssl? true
-                                          :ssl-port 8443
-                                          :keystore "./keystore"
-                                          :key-password "lupapiste"}
-                          :ns 'lupapalvelu.web
-                          :session-cookie-attrs (:cookie env/config)})
+  (with-logs "lupapalvelu"
+    (server/start env/port {:mode env/mode
+                            :jetty-options {:ssl? true
+                                            :ssl-port 8443
+                                            :keystore "./keystore"
+                                            :key-password "lupapiste"}
+                            :ns 'lupapalvelu.web
+                            :session-cookie-attrs (:cookie env/config)}))
   (info "Server running")
   (env/in-dev
     (warn "*** Applying test fixture")
