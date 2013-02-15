@@ -1,14 +1,15 @@
 (ns lupapalvelu.logging
   (:use [clojure.tools.logging]
         [clj-logging-config.log4j])
+  (:require [lupapalvelu.env :as env])
   (:import [org.apache.log4j DailyRollingFileAppender EnhancedPatternLayout]))
 
-(def pattern "%-5p %d (%r) %-25c %-4L - %X{sessionId} - %X{applicationId} - %m%n")
 
+(def pattern "%-5p %d (%r) %-25c %-4L - %X{sessionId} - %X{applicationId} - %m%n")
 (defn daily-rolling-midnight-appender [pattern file]
   (DailyRollingFileAppender. (EnhancedPatternLayout. pattern) file "'.'yyyy-MM-dd"))
 
-(def default {:level :debug :pattern pattern})
+(def default {:level env/log-level :pattern pattern})
 
 (set-loggers! "sade"                 default
               "lupapalvelu"          default
