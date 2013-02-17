@@ -2,6 +2,8 @@
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail]]
         [clojure.tools.logging]
+        [clojure.tools.logging]
+        [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]])
   (:require [noir.request :as request]
@@ -39,14 +41,16 @@
 
 (defn current-user
   "fetches the current user from 1) http-session 2) apikey from headers"
-  []
-  (or (session/get :user) ((request/ring-request) :user)))
+  [] (or (session/get :user) ((request/ring-request) :user)))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
 
 (defn user-agent [request]
   (str (get-in request [:headers "user-agent"])))
+
+(defn sessionId [request]
+  (get-in request [:cookies "ring-session" :value]))
 
 (defn client-ip [request]
   (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
@@ -55,11 +59,8 @@
   (let [request (request/ring-request)]
     {:user-agent (user-agent request)
      :client-ip  (client-ip request)
+     :sessionId  (sessionId request)
      :host       (host request)}))
-
-(defn enriched [m]
-  (merge m {:user (current-user)
-            :web  (web-stuff)}))
 
 (defn logged-in? []
   (not (nil? (current-user))))
@@ -86,11 +87,22 @@
 ;; Commands
 ;;
 
+(defn enriched [m]
+  (merge m {:user (current-user)
+            :web  (web-stuff)}))
+
+(defn execute [action]
+  (with-logging-context
+    {:sessionId (or (sessionId (request/ring-request)) "???")
+     :applicationId (get-in action [:data :id] "???")
+     :email (get-in action [:user :email] "???")}
+    (core/execute action)))
+
 (defjson [:post "/api/command/:name"] {name :name}
-  (core/execute (enriched (core/command name (from-json)))))
+  (execute (enriched (core/command name (from-json)))))
 
 (defjson "/api/query/:name" {name :name}
-  (core/execute (enriched (core/query name (from-query)))))
+  (execute (enriched (core/query name (from-query)))))
 
 ;;
 ;; Web UI:
