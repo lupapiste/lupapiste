@@ -11,18 +11,20 @@ jakaminen-tai-yhdistaminen._group_label: Jakaminen tai yhdistäminen
 markatilan-laajentaminen._group_label: Märkätilan laajentaminen
 takka-tai-hormi._group_label: Takan tai hormin rakentaminen
 parveke-tai-terassi._group_label: Parvekken tai terassin rakentaminen
-auto-katos._group_label: Autokatoksen rakentaminen
-masto-tms._group_label: Maston tai muun sellaisen rakentaminen
+auto-katos._group_label: Uuden autokatoksen rakentaminen
+masto-tms._group_label: Uuden maston tai muun sellaisen rakentaminen
 aita._group_label: Aidan rakentaminen
 maalampo._group_label: Maalampökaivon poraaminen tai lämmönkeruuputkiston asentaminen
 muu-laajentaminen._group_label: Muu laajentaminen tai muuttaminen
 jatevesi._group_label: Rakennuksen jätevesijärjestelmän uusiminen
-muu-rakentaminen._group_label: Muu rakennelma
+muu-rakentaminen._group_label: Uusi muu rakennelma
 puun-kaataminen._group_label: Puun kaataminen
 muu-maisema-toimenpide._group_label: Muu maisemätyötoimenpide
 kaivuu._group_label: Kaivuu
 maisematyo.kuvaus: Kuvaus
 kaupunkikuvatoimenpide.kuvaus: Kuvaus
+julkinen-rakennus._group_label: Uusi julkinen rakennus
+purkaminen._group_label: Rakennuksen purkaminen
 
 
 

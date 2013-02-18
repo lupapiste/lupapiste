@@ -97,7 +97,7 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open]}
+   :states     [:draft :open :submitted]}
   [command]
   (mongo/update-by-id :applications (-> command :data :id)
                       {$set {:modified (:created command)
