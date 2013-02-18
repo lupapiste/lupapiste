@@ -22,13 +22,6 @@
   (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
 
 ;;
-;; roles
-;;
-
-(defn role-in-application [{roles :roles} user-id]
-  (some (fn [[role {id :id}]] (when (= id user-id) role)) roles))
-
-;;
 ;; authorization
 ;;
 

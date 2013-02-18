@@ -4,13 +4,6 @@
         midje.sweet))
 
 (facts
-  (let [application {:roles {:role-x {:id :user-x} :role-y {:id :user-y}}}]
-    (fact (role-in-application application :user-x) => :role-x)
-    (fact (role-in-application application :user-y) => :role-y)
-    (fact (role-in-application application :user-z) => nil)
-    (fact (role-in-application application nil) => nil)))
-
-(facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
     (fact (has-auth? application :user-x) => true)
     (fact (has-auth? application :user-z) => false)))
