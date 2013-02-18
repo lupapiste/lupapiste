@@ -34,6 +34,17 @@
   (fact (invited? {:invites []} "mikko@example.com") => false))
 
 (facts
+  (let [owner   {:id "123"
+                 :role "owner"}
+        writer1 {:id "456"
+                 :role "writer"}
+        writer2 {:id "789"
+                 :role "writer"}
+        auth  [owner writer1 writer2]]
+  (fact "get owner" (get-auths-by-role {:auth auth} :owner) => (just owner))
+  (fact "get writers" (get-auths-by-role {:auth auth} :writer) => (just writer1 writer2))))
+
+(facts
   (let [user {:id        "123"
               :firstName "kari"
               :lastName  "tapio"
