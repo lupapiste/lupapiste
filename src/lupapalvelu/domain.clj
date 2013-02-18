@@ -37,9 +37,6 @@
   [{auth :auth} role]
   (filter #(-> % :role (= (name role))) auth))
 
-(defn has-role? [application user-id]
-  (not (nil? (role-in-application application user-id))))
-
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
 

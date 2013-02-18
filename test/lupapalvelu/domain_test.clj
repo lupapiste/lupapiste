@@ -8,10 +8,7 @@
     (fact (role-in-application application :user-x) => :role-x)
     (fact (role-in-application application :user-y) => :role-y)
     (fact (role-in-application application :user-z) => nil)
-    (fact (role-in-application application nil) => nil)
-
-    (fact (has-role? application :user-x) => true)
-    (fact (has-role? application :user-z) => false)))
+    (fact (role-in-application application nil) => nil)))
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
