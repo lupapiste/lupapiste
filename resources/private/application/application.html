@@ -149,7 +149,7 @@
                     <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                     (<span data-bind="text: username"></span>)
                     <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
-                    <i><span data-bind="if: $data.invite"><span data-bind="text: loc('invited')"></span></span></i>
+                    <i><span data-bind="if: $data.invite"><span class="user-invite" data-bind="text: loc('invited')"></span></span></i>
                     <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
                   </li>
                 </ul>
