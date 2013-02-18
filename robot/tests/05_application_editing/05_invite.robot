@@ -16,6 +16,8 @@ Mikko can see invite paasuunnittelija button
   Open tab  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
+# comment
+
 Mikko invites Teppo
   Set selenium speed  ${SLOWEST_SPEED}
   Invite count is  0
