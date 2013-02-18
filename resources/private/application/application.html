@@ -306,9 +306,9 @@
             <input class="form-input text long" id="invite-document-name" disabled="true" type="hidden" data-bind="value: documentName, valueUpdate: 'afterkeydown'" />
             <input class="form-input text long" id="invite-document-id" disabled="true" type="hidden" data-bind="value: documentId, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
-            <input class="form-input text long" id="invite-email" type="text" data-bind="value: email" />
+            <input class="form-input text long" id="invite-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-            <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text"></textarea>
+            <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
             <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
             <h1 class="form-error" data-bind="visible: error, text: error"></h1>
           </form>

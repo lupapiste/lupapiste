@@ -49,7 +49,7 @@ Mikko can't reinvite Teppo
 Mikko leaves and Teppo logs in
   Logout
   Teppo logs in
-  
+
 Teppo can see the invite
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
   Click by test id  accept-invite-button
