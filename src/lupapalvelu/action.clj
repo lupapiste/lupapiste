@@ -45,7 +45,18 @@
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
         (fail :already-invited)
-        (let [invited (security/get-or-create-user-by-email email)]
+        (let [invited (security/get-or-create-user-by-email email)
+              invite  {:title        title
+                       :application  application-id
+                       :text         text
+                       :documentName documentName
+                       :documentId   documentId
+                       :created      created
+                       :email        email
+                       :user         (security/summary invited)
+                       :inviter      (security/summary user)}
+              writer  (role invited :writer)
+              auth    (assoc writer :invite invite)]
           (if (domain/has-auth? application (:id invited))
             (fail :already-has-auth)
             (do
@@ -53,16 +64,8 @@
                 :applications
                 {:_id application-id
                  :invites {$not {$elemMatch {:user.username email}}}}
-                {$push {:invites {:title        title
-                                  :application  application-id
-                                  :text         text
-                                  :documentName documentName
-                                  :documentId   documentId
-                                  :created      created
-                                  :email        email
-                                  :user         (security/summary invited)
-                                  :inviter      (security/summary user)}
-                        :auth (role invited :writer)}})
+                {$push {:invites invite
+                        :auth    auth}})
               (future
                 (info "sending email to" email)
                 (if (not (= (suffix email "@") "example.com"))
