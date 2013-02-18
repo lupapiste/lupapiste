@@ -20,6 +20,9 @@
 (defn role-in-application [{roles :roles} user-id]
   (some (fn [[role {id :id}]] (when (= id user-id) role)) roles))
 
+(defn get-auths-by-role [{auth :auth} role]
+  nil)
+
 (defn has-role? [application user-id]
   (not (nil? (role-in-application application user-id))))
 

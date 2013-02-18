@@ -34,6 +34,19 @@
   (fact (invited? {:invites []} "mikko@example.com") => false))
 
 (facts
+  (let [mikko-auth {:id "777777777777777777000010"
+                    :username "mikko@example.com"
+                    :firstName "Mikko"
+                    :lastName "Intonen"
+                    :role "owner"}
+        teppo-auth {:id "5073c0a1c2e6c470aef589a5"
+                    :username "teppo@example.com"
+                    :firstName "Teppo"
+                    :lastName "Nieminen"
+                    :role "writer"}]
+  (fact (get-auths-by-role {:auth [mikko-auth teppo-auth]} :owner) => mikko-auth)))
+
+(facts
   (let [user {:id        "123"
               :firstName "kari"
               :lastName  "tapio"
