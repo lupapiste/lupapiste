@@ -13,32 +13,32 @@
 (defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
 
 (comment
-(facts
-  (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
-                      (operations/operations :bar) => {:schema "bar" :required ["b" "c"] :attachments []}
-                      (schemas/schemas "hakija")   => {:info {:name "hakija"}, :body []}
-                      (schemas/schemas "foo")      => {:info {:name "foo"}, :body []}
-                      (schemas/schemas "a")        => {:info {:name "a"}, :body []}
-                      (schemas/schemas "b")        => {:info {:name "b"}, :body []}
-                      (schemas/schemas "bar")      => {:info {:name "bar"}, :body []}
-                      (schemas/schemas "c")        => {:info {:name "c"}, :body []})
-  (let [user {:name "foo"}
-        created 12345]
-    (let [docs (make-documents user created nil :foo)]
-      (count docs) => 4
-      (find-by-schema? docs "hakija") => (contains {:body {:henkilo {:henkilotiedot user}}})
-      docs => (has-schema? "foo")
-      docs => (has-schema? "a")
-      docs => (has-schema? "b"))
-    ; use-case: "create-application"
-    (let [docs (make-documents user created [{:schema {:name "hakija"}}] :foo)]
-      (count docs) => 4)
-    ; use-case "add-operation"
-    (let [docs (make-documents user created nil :foo)
-          docs (make-documents nil created docs :bar)]
-      (count docs) => 2
-      docs => (has-schema? "bar")
-      docs => (has-schema? "c")))))
+  (facts
+    (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
+      (operations/operations :bar) => {:schema "bar" :required ["b" "c"] :attachments []}
+      (schemas/schemas "hakija")   => {:info {:name "hakija"}, :body []}
+      (schemas/schemas "foo")      => {:info {:name "foo"}, :body []}
+      (schemas/schemas "a")        => {:info {:name "a"}, :body []}
+      (schemas/schemas "b")        => {:info {:name "b"}, :body []}
+      (schemas/schemas "bar")      => {:info {:name "bar"}, :body []}
+      (schemas/schemas "c")        => {:info {:name "c"}, :body []})
+    (let [user {:name "foo"}
+          created 12345]
+      (let [docs (make-documents user created nil :foo)]
+        (count docs) => 4
+        (find-by-schema? docs "hakija") => (contains {:body {:henkilo {:henkilotiedot user}}})
+        docs => (has-schema? "foo")
+        docs => (has-schema? "a")
+        docs => (has-schema? "b"))
+      ; use-case: "create-application"
+      (let [docs (make-documents user created [{:schema {:name "hakija"}}] :foo)]
+        (count docs) => 4)
+      ; use-case "add-operation"
+      (let [docs (make-documents user created nil :foo)
+            docs (make-documents nil created docs :bar)]
+        (count docs) => 2
+        docs => (has-schema? "bar")
+        docs => (has-schema? "c")))))
 
 (comment
   ; Should rewrite this as a couple of unit tests
