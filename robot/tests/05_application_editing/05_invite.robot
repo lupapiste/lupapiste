@@ -54,13 +54,16 @@ Teppo can see the invite
 
 Teppo can edit Mikko's application
   Open application  invite-app
-  Input text  //label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+  # OnChange event does not seem to get triggered. Do it manually.
+  Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
+  Wait for jQuery
+  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
   Logout
 
 Mikko comes back and can see Teppos modification
   Mikko logs in
   Open application  invite-app
-  Wait Until  Textfield Value Should Be  xpath=//label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+  Wait Until  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
 
 Mikko can see invite paasuunnittelija button again
   Open tab  parties
