@@ -34,24 +34,15 @@
   (fact (invited? {:invites []} "mikko@example.com") => false))
 
 (facts
-  (let [mikko-auth {:id "777777777777777777000010"
-                    :username "mikko@example.com"
-                    :firstName "Mikko"
-                    :lastName "Intonen"
-                    :role "owner"}
-        teppo-auth {:id "5073c0a1c2e6c470aef589a5"
-                    :username "teppo@example.com"
-                    :firstName "Teppo"
-                    :lastName "Nieminen"
-                    :role "writer"}
-        pena-auth  {:id "123"
-                    :username "pena@example.com"
-                    :firstName "Pena"
-                    :lastName "Pena"
-                    :role "writer"}
-        auth       [mikko-auth teppo-auth pena-auth]]
-  (fact "get owner" (get-auths-by-role {:auth auth} :owner) => (just mikko-auth))
-  (fact "get writers" (get-auths-by-role {:auth auth} :writer) => (just teppo-auth pena-auth))))
+  (let [owner   {:id "123"
+                 :role "owner"}
+        writer1 {:id "456"
+                 :role "writer"}
+        writer2 {:id "789"
+                 :role "writer"}
+        auth  [owner writer1 writer2]]
+  (fact "get owner" (get-auths-by-role {:auth auth} :owner) => (just owner))
+  (fact "get writers" (get-auths-by-role {:auth auth} :writer) => (just writer1 writer2))))
 
 (facts
   (let [user {:id        "123"
