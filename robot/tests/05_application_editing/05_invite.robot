@@ -58,7 +58,9 @@ Teppo can see the invite
 Teppo can edit Mikko's application
   Open application  invite-app
   Input text  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
+  Input text  kuvaus  Edited by Teppo
   Wait for jQuery
+  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]
   Logout
 
 Mikko comes back and can see Teppos modification
