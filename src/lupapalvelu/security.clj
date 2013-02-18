@@ -1,6 +1,6 @@
 (ns lupapalvelu.security
   (:use [monger.operators]
-        [lupapalvelu.log])
+        [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.util :as util])
   (:import [org.mindrot.jbcrypt BCrypt]))
@@ -65,7 +65,7 @@
                            :enabled      enabled
                            :private      {:salt salt
                                           :password hashed-password}}]
-    (info "register user: %s" (dissoc user :password))
+    (info "register user:" (dissoc user :password))
     (if (= "dummy" (:role old-user))
       (do
         (info "rewriting over dummy user:" (:id old-user))

@@ -1,5 +1,5 @@
 (ns lupapalvelu.document.model
-  (:use [lupapalvelu.log]
+  (:use [clojure.tools.logging]
         [lupapalvelu.strings]
         [lupapalvelu.document.schemas :only [schemas]]
         [clojure.walk :only [keywordize-keys]])

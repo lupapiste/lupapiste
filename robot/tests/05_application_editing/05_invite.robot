@@ -17,10 +17,10 @@ Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko invites Teppo
-  [Tags]  fail
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
+  Sleep  1
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Click by test id  application-invite-submit
@@ -29,9 +29,9 @@ Mikko invites Teppo
   Invite count is  1
 
 Mikko can't reinvite Teppo
-  [Tags]  fail
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
+  Sleep  1
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
   Click by test id  application-invite-submit
@@ -40,11 +40,28 @@ Mikko can't reinvite Teppo
 # TODO: cant remove auth for owner
 # TODO: can remove auth for someone else
 
-Mikko removes Teppo's invite
-  [Tags]  fail
-  Click by test id  application-remove-invite
-  Wait until  Element should not be visible  xpath=//*[@data-test-id='application-remove-invite']
-  Wait until  Invite count is  0
+Mikko leaves and Teppo logs in
+  Logout
+  Teppo logs in
+  
+Teppo can see the invite
+  Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
+  Click by test id  accept-invite-button
+  Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
+
+Teppo can edit Mikko's application
+  Open application  invite-app
+  Input text  //label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+  Logout
+
+Mikko comes back and can see Teppos modification
+  Mikko logs in
+  Open application  invite-app
+  Wait Until  Textfield Value Should Be  xpath=//label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+
+Mikko can see invite paasuunnittelija button again
+  Open tab  parties
+  Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko can't invite himself
   Click by test id  application-invite-paasuunnittelija

@@ -1,7 +1,8 @@
 (ns lupapalvelu.server
-  (:use lupapalvelu.log)
+  (:use clojure.tools.logging)
   (:require [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
+            [lupapalvelu.logging]
             [lupapalvelu.web]
             [lupapalvelu.vetuma]
             [lupapalvelu.env :as env]
@@ -40,13 +41,13 @@
 
 (defn -main [& _]
   (info "Server starting")
-  (info "Running on Java %s %s %s (%s) [%s]"
+  (infof "Running on Java %s %s %s (%s) [%s]"
     (System/getProperty "java.vm.vendor")
     (System/getProperty "java.vm.name")
     (System/getProperty "java.runtime.version")
     (System/getProperty "java.vm.info")
     (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful"))
-  (info "Running on Clojure %d.%d.%d"
+  (infof "Running on Clojure %d.%d.%d"
     (:major *clojure-version*)
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
@@ -64,13 +65,14 @@
       'lupapalvelu.tepa))
   (mongo/connect!)
   (server/add-middleware apply-custom-content-types)
-  (server/start env/port {:mode env/mode
-                          :jetty-options {:ssl? true
-                                          :ssl-port 8443
-                                          :keystore "./keystore"
-                                          :key-password "lupapiste"}
-                          :ns 'lupapalvelu.web
-                          :session-cookie-attrs (:cookie env/config)})
+  (with-logs "lupapalvelu"
+    (server/start env/port {:mode env/mode
+                            :jetty-options {:ssl? true
+                                            :ssl-port 8443
+                                            :keystore "./keystore"
+                                            :key-password "lupapiste"}
+                            :ns 'lupapalvelu.web
+                            :session-cookie-attrs (:cookie env/config)}))
   (info "Server running")
   (env/in-dev
     (warn "*** Starting nrepl")

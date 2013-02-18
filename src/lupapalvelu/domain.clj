@@ -1,6 +1,6 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
-        [lupapalvelu.log])
+        [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]))
 
 (defn application-query-for [user]

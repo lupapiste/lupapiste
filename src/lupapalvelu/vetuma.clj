@@ -6,7 +6,7 @@
         [monger.operators]
         [clj-time.local :only [local-now]]
         [hiccup.form]
-        [lupapalvelu.log])
+        [clojure.tools.logging])
   (:require [digest]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
@@ -54,7 +54,7 @@
 (defn- keys-as-strings [m] (keys-as #(.toUpperCase (name %)) m))
 (defn- keys-as-keywords [m] (keys-as #(keyword (.toLowerCase %)) m))
 
-(defn- logged [m] (info "%s" (str m)) m)
+(defn- logged [m] (info (str m)) m)
 
 (defn apply-template
   "changes all variables in braces {} with keywords with same name.
