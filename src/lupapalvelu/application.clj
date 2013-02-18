@@ -26,7 +26,7 @@
 
 (defn get-applicant-name [app]
   (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (domain/get-auths-by-role app :owner)]
+    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
     (when-let [body (:body (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
