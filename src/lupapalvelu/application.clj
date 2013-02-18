@@ -2,7 +2,6 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.domain :only [application-query-for get-application-as]]
         [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -27,7 +26,7 @@
 
 (defn get-applicant-name [app]
   (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (:creator app)]
+    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
     (when-let [body (:body (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
@@ -50,13 +49,13 @@
 ;;
 
 (defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (map with-meta-fields (mongo/select :applications (application-query-for user)))))
+  (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-municipality [app]
   (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (if-let [app (get-application-as id user)]
+  (if-let [app (domain/get-application-as id user)]
     (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
 
@@ -98,7 +97,7 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open]}
+   :states     [:draft :open :submitted]}
   [command]
   (mongo/update-by-id :applications (-> command :data :id)
                       {$set {:modified (:created command)
@@ -206,7 +205,6 @@
                       {:id            id
                        :created       created
                        :opened        (when (= :authority user-role) created)
-                       :creator       user-summary
                        :modified      created
                        :infoRequest   info-request?
                        :state         (if (or info-request? (= :authority user-role)) :open :draft)
@@ -344,7 +342,7 @@
         {:title {$regex search $options "i"}}))))
 
 (defn applications-for-user [user params]
-  (let [user-query  (application-query-for user)
+  (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
         query-total (mongo/count :applications query)

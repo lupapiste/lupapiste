@@ -174,10 +174,11 @@
   [{{:keys [documentId userId]} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (let [document       (domain/get-document-by-id application documentId)
-            schema-name    (get-in document [:schema :info :name])
-            schema         (get schemas/schemas schema-name)
-            subject        (security/get-non-private-userinfo userId)]
+      (let [document     (domain/get-document-by-id application documentId)
+            schema-name  (get-in document [:schema :info :name])
+            schema       (get schemas/schemas schema-name)
+            subject      (security/get-non-private-userinfo userId)
+            henkilo      (domain/user2henkilo subject)]
         (if (nil? document)
           (fail :error.document-not-found)
           ;; FIXME: all users should be modelled the same way.
@@ -187,5 +188,5 @@
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:id documentId}}}
-              {$set {path (domain/user2henkilo subject)
+              {$set {path henkilo
                      :modified (:created command)}})))))))
