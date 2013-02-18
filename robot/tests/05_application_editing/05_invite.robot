@@ -24,6 +24,7 @@ Mikko invites Teppo
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Click by test id  application-invite-submit
+  Sleep  1
   Wait until  Element should not be visible  invite-email
   Wait until  Element should be visible  xpath=//*[@data-test-id='application-remove-invite']
   Invite count is  1
@@ -35,6 +36,7 @@ Mikko can't reinvite Teppo
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
   Click by test id  application-invite-submit
+  Sleep  1
   Invite count is  1
 
 # TODO: cant remove auth for owner
@@ -68,6 +70,7 @@ Mikko can't invite himself
   Input Text  invite-email  mikko@example.com
   Input Text  invite-text  Voinko kutsua itseni?
   Click by test id  application-invite-submit
+  Sleep  1
   Invite count is  0
 
 Mikko adds comment so thate application will be visible to admin
