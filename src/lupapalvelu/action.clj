@@ -72,7 +72,7 @@
                   (if (email/send-email email (:title application) (invite-body user application-id host))
                     (info "email was sent successfully")
                     (error "email could not be delivered."))
-                  (info "we are not sending emails to @example.com doamin.")))
+                  (info "we are not sending emails to @example.com domain.")))
               nil)))))))
 
 (defcommand "approve-invite"
