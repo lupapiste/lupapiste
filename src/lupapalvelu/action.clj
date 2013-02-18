@@ -63,9 +63,8 @@
               (mongo/update
                 :applications
                 {:_id application-id
-                 :invites {$not {$elemMatch {:user.username email}}}}
-                {$push {:invites invite
-                        :auth    auth}})
+                 :auth {$not {$elemMatch {:invite.user.username email}}}}
+                {$push {:auth auth}})
               (future
                 (info "sending email to" email)
                 (if (not (= (suffix email "@") "example.com"))
@@ -80,15 +79,15 @@
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{application-id :id invites :invites}]
-      (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
-        (executed "set-user-to-document" (-> command
-                                           (assoc-in [:data :documentId] (:documentId my-invite))
-                                           (assoc-in [:data :userId]     (:id user))))
+    (fn [{application-id :id :as application}]
+      (when-let [my-invite (domain/invite application (:email user))]
+        (executed "set-user-to-document"
+          (-> command
+            (assoc-in [:data :documentId] (:documentId my-invite))
+            (assoc-in [:data :userId]     (:id user))))
         (mongo/update :applications
-                      {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
-                      {$set  {:auth.$ (role user :writer)}
-                       $pull {:invites      {:user.id (:id user)}}})))))
+          {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
+          {$set  {:auth.$ (role user :writer)}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -99,9 +98,8 @@
       (with-user email
         (fn [_]
           (mongo/update-by-id :applications application-id
-            {$pull {:invites      {:user.username email}
-                    :auth         {$and [{:username email}
-                                         {:type {$ne :owner}}]}}}))))))
+            {$pull {:auth {$and [{:username email}
+                                 {:type {$ne :owner}}]}}}))))))
 
 ;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
