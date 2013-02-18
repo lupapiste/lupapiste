@@ -3,6 +3,10 @@
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]))
 
+;;
+;; application mongo querys
+;;
+
 (defn application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)
@@ -17,8 +21,16 @@
 (defn get-application-as [application-id user]
   (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
 
+;;
+;; roles
+;;
+
 (defn role-in-application [{roles :roles} user-id]
   (some (fn [[role {id :id}]] (when (= id user-id) role)) roles))
+
+;;
+;; authorization
+;;
 
 (defn get-auths-by-role
   "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
@@ -30,6 +42,10 @@
 
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
+
+;;
+;; documents
+;;
 
 (defn get-document-by-id
   "returns first document from application with the document-id"
