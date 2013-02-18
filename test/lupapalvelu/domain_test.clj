@@ -20,12 +20,14 @@
     (fact (get-document-by-name application "") => nil)))
 
 (facts "invites"
-  (let [invite1 {:id 1}
-        invite2 {:id 2}
-        app     {:auth [{:id 1 :role "owner"}
-                        {:id 2 :role "writer" :invite invite1}
-                        {:id 3 :role "writer" :invite invite2}]}]
-    (fact "has two invites" (invites app) => (just invite1 invite2))))
+  (let [invite1 {:email "abba@example.com"}
+        invite2 {:email "kiss@example.com"}
+        app     {:auth [{:role "writer" :invite invite1}
+                        {:role "writer" :invite invite2}
+                        {:role "owner"}]}]
+    (fact "has two invites" (invites app) => (just invite1 invite2))
+    (fact "abba@example.com has one invite" (invite app "abba@example.com") => invite1)
+    (fact "jabba@example.com has no invite" (invite app "jabba@example.com") => nil)))
 
 (facts
   (fact (invited? {:invites [{:user {:username "mikko@example.com"}}]} "mikko@example.com") => true)

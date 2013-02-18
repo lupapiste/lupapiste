@@ -56,6 +56,9 @@
 (defn invites [{auth :auth}]
   (map :invite (filter :invite auth)))
 
+(defn invite [application email]
+  (first (filter #(-> % :email (= email)) (invites application))))
+
 (defn invited? [{invites :invites} email]
   (or (some #(= email (-> % :user :username)) invites) false))
 
