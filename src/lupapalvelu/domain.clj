@@ -53,6 +53,9 @@
   [application schema-name]
   (first (get-documents-by-name application schema-name)))
 
+(defn invites [{auth :auth}]
+  (map :invite (filter :invite auth)))
+
 (defn invited? [{invites :invites} email]
   (or (some #(= email (-> % :user :username)) invites) false))
 

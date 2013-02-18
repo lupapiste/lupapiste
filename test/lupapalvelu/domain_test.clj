@@ -19,14 +19,22 @@
     (fact (get-document-by-name application "kukka") => {:id 1 :data "jee" :schema {:info {:name "kukka"}}})
     (fact (get-document-by-name application "") => nil)))
 
+(facts "invites"
+  (let [invite1 {:id 1}
+        invite2 {:id 2}
+        app     {:auth [{:id 1 :role "owner"}
+                        {:id 2 :role "writer" :invite invite1}
+                        {:id 3 :role "writer" :invite invite2}]}]
+    (fact "has two invites" (invites app) => (just invite1 invite2))))
+
 (facts
   (fact (invited? {:invites [{:user {:username "mikko@example.com"}}]} "mikko@example.com") => true)
   (fact (invited? {:invites []} "mikko@example.com") => false))
 
 (facts
-  (let [owner   {:id "123" :role "owner"}
-        writer1 {:id "456" :role "writer"}
-        writer2 {:id "789" :role "writer"}
+  (let [owner   {:id 1 :role "owner"}
+        writer1 {:id 2 :role "writer"}
+        writer2 {:id 3 :role "writer"}
         app     {:auth [owner writer1 writer2]}]
   (fact "get owner"   (get-auths-by-role app :owner)  => (just owner))
   (fact "get writers" (get-auths-by-role app :writer) => (just writer1 writer2))))
