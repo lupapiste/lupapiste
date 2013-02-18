@@ -205,7 +205,6 @@
                       {:id            id
                        :created       created
                        :opened        (when (= :authority user-role) created)
-                       :creator       user-summary
                        :modified      created
                        :infoRequest   info-request?
                        :state         (if (or info-request? (= :authority user-role)) :open :draft)
