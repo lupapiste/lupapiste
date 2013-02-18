@@ -7,6 +7,7 @@
 ;; application mongo querys
 ;;
 
+;; TODO: test me!
 (defn application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)
