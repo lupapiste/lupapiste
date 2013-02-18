@@ -43,8 +43,15 @@
                     :username "teppo@example.com"
                     :firstName "Teppo"
                     :lastName "Nieminen"
-                    :role "writer"}]
-  (fact (get-auths-by-role {:auth [mikko-auth teppo-auth]} :owner) => mikko-auth)))
+                    :role "writer"}
+        pena-auth  {:id "123"
+                    :username "pena@example.com"
+                    :firstName "Pena"
+                    :lastName "Pena"
+                    :role "writer"}
+        auth       [mikko-auth teppo-auth pena-auth]]
+  (fact "get owner" (get-auths-by-role {:auth auth} :owner) => (just mikko-auth))
+  (fact "get writers" (get-auths-by-role {:auth auth} :writer) => (just teppo-auth pena-auth))))
 
 (facts
   (let [user {:id        "123"

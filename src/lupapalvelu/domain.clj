@@ -21,7 +21,7 @@
   (some (fn [[role {id :id}]] (when (= id user-id) role)) roles))
 
 (defn get-auths-by-role [{auth :auth} role]
-  nil)
+  (filter #(-> % :role (= (name role))) auth))
 
 (defn has-role? [application user-id]
   (not (nil? (role-in-application application user-id))))
