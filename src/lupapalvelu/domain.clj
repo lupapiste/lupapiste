@@ -20,7 +20,9 @@
 (defn role-in-application [{roles :roles} user-id]
   (some (fn [[role {id :id}]] (when (= id user-id) role)) roles))
 
-(defn get-auths-by-role [{auth :auth} role]
+(defn get-auths-by-role
+  "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
+  [{auth :auth} role]
   (filter #(-> % :role (= (name role))) auth))
 
 (defn has-role? [application user-id]
