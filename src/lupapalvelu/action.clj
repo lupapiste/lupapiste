@@ -17,10 +17,10 @@
 (defquery "invites"
   {:authenticated true}
   [{{:keys [id]} :user}]
-  (let [filter     {:invites {$elemMatch {:user.id id}}}
+  (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select :applications filter projection)
-        invites    (flatten (map :invites data))]
+        invites    (map :invite (flatten (map :auth data)))]
     (ok :invites invites)))
 
 (defn invite-body [user id host]
