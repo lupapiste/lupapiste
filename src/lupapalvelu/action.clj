@@ -20,7 +20,7 @@
   (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select :applications filter projection)
-        invites    (map :invite (flatten (map :auth data)))]
+        invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
 
 (defn invite-body [user id host]
@@ -86,9 +86,9 @@
                                            (assoc-in [:data :documentId] (:documentId my-invite))
                                            (assoc-in [:data :userId]     (:id user))))
         (mongo/update :applications
-                      {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
-                      ;; TODO: should refresh the data - for new invites to get full names
-                      {$pull {:invites      {:user.id (:id user)}}})))))
+                      {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
+                      {$set  {:auth.$ (role user :writer)}
+                       $pull {:invites      {:user.id (:id user)}}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
