@@ -65,12 +65,12 @@
 (defn logged-in? []
   (not (nil? (current-user))))
 
-(defn has-role? [role]
+(defn in-role? [role]
   (= role (keyword (:role (current-user)))))
 
-(defn authority? [] (has-role? :authority))
-(defn authority-admin? [] (has-role? :authorityAdmin))
-(defn admin? [] (has-role? :admin))
+(defn authority? [] (in-role? :authority))
+(defn authority-admin? [] (in-role? :authorityAdmin))
+(defn admin? [] (in-role? :admin))
 (defn anyone [] true)
 (defn nobody [] false)
 

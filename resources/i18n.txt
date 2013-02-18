@@ -1,3 +1,4 @@
+invited: kutsuttu
 foo: bar
 rakennuksen-muuttaminen.perusparannuskytkin: Perusparannusta
 asuinrakennus._group_label: Uusi asuinrakennus

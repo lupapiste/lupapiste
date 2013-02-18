@@ -16,8 +16,6 @@ Mikko can see invite paasuunnittelija button
   Open tab  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
-# comment
-
 Mikko invites Teppo
   Set selenium speed  ${SLOWEST_SPEED}
   Invite count is  0
@@ -29,8 +27,7 @@ Mikko invites Teppo
   Click by test id  application-invite-submit
   Sleep  1
   Wait until  Element should not be visible  invite-email
-  Wait until  Element should be visible  xpath=//*[@data-test-id='application-remove-invite']
-  Invite count is  1
+  Wait until  Invite count is  1
   Set selenium speed  ${DEFAULT_SPEED}
 
 Mikko can't reinvite Teppo
@@ -98,4 +95,4 @@ Sonja (the Authority) is not allowed to invite people
 
 Invite count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //li[@class='user-invite']  ${amount}
+  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
