@@ -61,6 +61,12 @@
                             :perfmon @*perf-context*}
                            WriteConcern/NONE)))))))))
 
+(defn throttle-middleware [handler]
+  (fn [request]
+    (if-not (or (get-in request [:query-params "npm"]) (get-in request [:headers "npm"]))
+      (Thread/sleep @web-throttle))
+    (handler request)))
+
 (defn get-data [start end]
   (map (fn [row] (dissoc row :_id))
        (mc/find-maps "perf-mon" {$and [{:ts {$gte start}}
@@ -105,6 +111,7 @@
 
 (defn init []
   (server/add-middleware perf-mon-middleware)
+  (server/add-middleware throttle-middleware)
   (instrument-ns wrap-throttle 'lupapalvelu.mongo)
   (instrument-ns wrap-perf-mon 'lupapalvelu.mongo))
 
