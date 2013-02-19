@@ -94,22 +94,14 @@
     (resp/status 200)))
 
 (defpage [:get "/perfmon/throttle"] _
-  (resp/status 200 (str "db: " @db-throttle ", web: " @web-throttle)))
-
-(defpage [:get "/perfmon/throttle/:id"] {id :id}
-  (let [throttle ({"db" db-throttle "web" web-throttle} id)]
-    (if throttle
-      (resp/status 200 (str @throttle))
-      (resp/status 404 (str "unknown throttle: '" id "'")))))
+  (->> {:db @db-throttle :web @web-throttle} (resp/json) (resp/status 200)))
 
 (defpage [:post "/perfmon/throttle/:id"] {id :id}
-  (let [throttle ({"db" db-throttle "web" web-throttle} id)
-        value (-> (request/ring-request) :body io/reader json/parse-stream (get "value") str Long/parseLong)]
-    (if throttle
-      (do
-        (reset! throttle value)
-        (resp/status 200 (str "ok: " id " -> " value)))
-      (resp/status 404 (str "unknown throttle: '" id "'")))))
+  (if-let [throttle ({"db" db-throttle "web" web-throttle} id)]
+    (let [value (-> (request/ring-request) :body io/reader json/parse-stream (get "value") str Long/parseLong)]
+      (reset! throttle value)
+      (->> {id value} (resp/json) (resp/status 200)))
+    (resp/status 404 (str "unknown throttle: '" id "'"))))
 
 (defn init []
   (server/add-middleware perf-mon-middleware)
