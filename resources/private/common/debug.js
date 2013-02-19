@@ -20,10 +20,40 @@ $(function() {
       .call();
   }
   
+  function loadTimingData() {
+    if (!window.performance) return;
+    
+    if (!window.performance.timing.loadEventEnd) {
+      setTimeout(loadTimingData, 10);
+      return;
+    }
+
+    var table = $("footer table.dev-debug-timing");
+    var data = [["fetch", "fetchStart", "requestStart"],
+                ["req", "requestStart", "responseStart"],
+                ["resp", "responseStart", "responseEnd"],
+                ["network", "fetchStart", "responseEnd"],
+                ["display", "responseEnd", "loadEventEnd"],
+                ["total", "navigationStart", "loadEventEnd"]];
+    
+    _.each(data, function(row) {
+      var name = row[0],
+          start = window.performance.timing[row[1]],
+          end = window.performance.timing[row[2]],
+          duration = end - start;
+      if (!start) throw "Unknown timineg event: " + row[1];
+      if (!end) throw "Unknown timineg event: " + row[2];
+      table
+        .append($("<tr>").css("padding", "0px")
+          .append($("<td>").text(name).css("padding", "0px"))
+          .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
+    });
+  }
+  
   $("footer")
     .append($("<div>").addClass("dev-debug")
       .append($("<h3>")
-        .append($("<a>").attr("href", "#").text("Development").click(function() { $("footer .dev-debug div").slideToggle(); return false; })))
+        .append($("<a>").attr("href", "#").text("Development").click(function() { $("footer .dev-debug div:eq(0)").slideToggle(); return false; })))
       .append($("<div>")
         .append($("<input type='checkbox' checked='checked'>").click(function() { $(".todo").toggleClass("todo-off"); }))
         .append($("<label>").text("Unfinished"))
@@ -40,7 +70,14 @@ $(function() {
         .append($("<br>"))
         .append($("<span>").text("Throttle DB: "))
         .append($("<b>").addClass("dev-throttle-db").text("0"))
-        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "db"), 500)))));
+        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "db"), 500))))
+      .append($("<h3>")
+        .append($("<a>").attr("href", "#").text("Timing").click(function() { $("footer .dev-debug div:eq(1)").slideToggle(); return false; })))
+      .append($("<div>")
+        .append($("<table>").addClass("dev-debug-timing"))
+        .hide()));
+  
+  setTimeout(loadTimingData, 10);
   
   ajax.get(window.location.protocol + "//" + window.location.host + "/perfmon/throttle")
     .success(function(data) {
