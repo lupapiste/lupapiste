@@ -44,10 +44,9 @@
 
 (defn perf-mon-middleware [handler]
   (fn [request]
-    (if (get-in request [:params :nopm])
+    (if (get-in request [:params :npm])
       (handler request)
       (binding [*perf-context* (atom [])]
-        (Thread/sleep @db-throttle)
         (let [start (System/nanoTime)] 
           (try
             (handler request)
