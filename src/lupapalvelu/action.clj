@@ -166,7 +166,7 @@
     (fn [application]
       (mongo/update-by-id
         :applications (:id application)
-        {$set {:roles.authority (security/summary user)}}))))
+        {$set {:authority (security/summary user)}}))))
 
 ;; FIXME: only for the current document
 (defcommand "set-user-to-document"

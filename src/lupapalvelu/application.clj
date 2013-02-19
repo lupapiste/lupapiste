@@ -79,8 +79,8 @@
       (mongo/update-by-id
         :applications (:id application)
         (if assigneeId
-          {$set {:roles.authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-          {$unset {:roles.authority ""}})))))
+          {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
+          {$unset {:authority ""}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -316,7 +316,7 @@
                   :submitted
                   :modified
                   :state
-                  (comp :authority :roles)])
+                  :authority])
 
 (def col-map (zipmap col-sources (map str (range))))
 
