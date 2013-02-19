@@ -35,7 +35,7 @@
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
 
-   :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
+   :common       {:depends [:init :jquery :knockout :underscore :moment :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
                   :css ["css/main.css"]
@@ -80,16 +80,16 @@
                   :html ["create.html"]}
 
    :applicant    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage]
+                            :buildinfo :docgen :create :mypage :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage]
+                            :buildinfo :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :buildinfo :mypage]
+   :authority-admin {:depends [:common :buildinfo :mypage :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
@@ -97,7 +97,7 @@
              :js ["tree.js"]
              :css ["tree.css"]}
 
-   :admin   {:depends [:common :map :buildinfo :mypage]
+   :admin   {:depends [:common :map :buildinfo :mypage :debug]
              :js ["admin.js"]
              :html ["index.html" "admin.html"]}
 
@@ -108,7 +108,7 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :register :buildinfo]
+   :welcome {:depends [:common :register :buildinfo :debug]
              :js ["welcome.js" "login.js"]
              :html ["login.html" "index.html"]}
 
