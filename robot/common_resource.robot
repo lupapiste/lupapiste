@@ -69,6 +69,8 @@ Wait until
   [Arguments]  ${keyword}  @{varargs}
   Wait Until Keyword Succeeds  ${WAIT_DELAY}  0.1  ${keyword}  @{varargs}
 
+Wait for jQuery
+  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
 #
 # Navigation
 #
@@ -94,7 +96,7 @@ Logout
 
 User should not be logged in
   # Wait for login query to complete
-  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
+  Wait for jQuery
   Wait Until  User is not logged in
 
 User is not logged in

@@ -17,6 +17,7 @@ Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko invites Teppo
+  Set selenium speed  ${SLOWEST_SPEED}
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
@@ -24,9 +25,10 @@ Mikko invites Teppo
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Click by test id  application-invite-submit
+  Sleep  1
   Wait until  Element should not be visible  invite-email
-  Wait until  Element should be visible  xpath=//*[@data-test-id='application-remove-invite']
-  Invite count is  1
+  Wait until  Invite count is  1
+  Set selenium speed  ${DEFAULT_SPEED}
 
 Mikko can't reinvite Teppo
   Click by test id  application-invite-paasuunnittelija
@@ -35,6 +37,7 @@ Mikko can't reinvite Teppo
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
   Click by test id  application-invite-submit
+  Sleep  1
   Invite count is  1
 
 # TODO: cant remove auth for owner
@@ -43,7 +46,7 @@ Mikko can't reinvite Teppo
 Mikko leaves and Teppo logs in
   Logout
   Teppo logs in
-  
+
 Teppo can see the invite
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
   Click by test id  accept-invite-button
@@ -51,13 +54,16 @@ Teppo can see the invite
 
 Teppo can edit Mikko's application
   Open application  invite-app
-  Input text  //label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+  # OnChange event does not seem to get triggered. Do it manually.
+  Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
+  Wait for jQuery
+  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
   Logout
 
 Mikko comes back and can see Teppos modification
   Mikko logs in
   Open application  invite-app
-  Wait Until  Textfield Value Should Be  xpath=//label[text()='Rakennuksen kokonaisala']/following-sibling::*/input  1024
+  Wait Until  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
 
 Mikko can see invite paasuunnittelija button again
   Open tab  parties
@@ -68,6 +74,7 @@ Mikko can't invite himself
   Input Text  invite-email  mikko@example.com
   Input Text  invite-text  Voinko kutsua itseni?
   Click by test id  application-invite-submit
+  Sleep  1
   Invite count is  0
 
 Mikko adds comment so thate application will be visible to admin
@@ -88,4 +95,4 @@ Sonja (the Authority) is not allowed to invite people
 
 Invite count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //li[@class='user-invite']  ${amount}
+  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}

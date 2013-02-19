@@ -3,6 +3,11 @@
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]))
 
+;;
+;; application mongo querys
+;;
+
+;; TODO: test me!
 (defn application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)
@@ -17,14 +22,21 @@
 (defn get-application-as [application-id user]
   (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
 
-(defn role-in-application [{roles :roles} user-id]
-  (some (fn [[role {id :id}]] (when (= id user-id) role)) roles))
+;;
+;; authorization
+;;
 
-(defn has-role? [application user-id]
-  (not (nil? (role-in-application application user-id))))
+(defn get-auths-by-role
+  "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
+  [{auth :auth} role]
+  (filter #(-> % :role (= (name role))) auth))
 
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
+
+;;
+;; documents
+;;
 
 (defn get-document-by-id
   "returns first document from application with the document-id"
@@ -40,6 +52,12 @@
   "returns first document from application by schema name"
   [application schema-name]
   (first (get-documents-by-name application schema-name)))
+
+(defn invites [{auth :auth}]
+  (map :invite (filter :invite auth)))
+
+(defn invite [application email]
+  (first (filter #(-> % :email (= email)) (invites application))))
 
 (defn invited? [{invites :invites} email]
   (or (some #(= email (-> % :user :username)) invites) false))

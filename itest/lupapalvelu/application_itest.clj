@@ -67,8 +67,8 @@
     application-id => truthy
     application => truthy
     (success resp) => true
-    (count roles-before-assignation) => 1
-    (count roles-after-assignation) => 2))
+    (count roles-before-assignation) => 0
+    (count roles-after-assignation) => 1))
 
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (:id (create-app pena :municipality sonja-muni))
@@ -82,8 +82,8 @@
         resp (command sonja :assign-application :id application-id :assigneeId nil)
         assigned-app (:application (query sonja :application :id application-id))
         roles-in-the-end (:roles assigned-app)]
-    (count roles-before-assignation) => 1
-    (count roles-in-the-end) => 1))
+    (count roles-before-assignation) => 0
+    (count roles-in-the-end) => 0))
 
 (fact "Applicaton shape is saved"
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"

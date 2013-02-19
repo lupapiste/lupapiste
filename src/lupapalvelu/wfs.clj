@@ -165,7 +165,7 @@
   [url q]
   (deref
     (future
-      (let [response (client/get url 
+      (let [response (client/get url
                                  {:query-params q
                                   :basic-auth auth
                                   :throw-exceptions false})]
