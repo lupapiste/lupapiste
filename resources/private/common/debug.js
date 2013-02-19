@@ -48,6 +48,11 @@ $(function() {
           .append($("<td>").text(name).css("padding", "0px"))
           .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
     });
+    
+    ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/browser-timing")
+      .json({timing: window.performance.timing})
+      .header("npm", "true")
+      .call();
   }
   
   $("footer")

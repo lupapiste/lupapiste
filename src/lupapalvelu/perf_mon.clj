@@ -108,6 +108,16 @@
       (->> {id value} (resp/json) (resp/status 200)))
     (resp/status 404 (str "unknown throttle: '" id "'"))))
 
+(defpage [:post "/perfmon/browser-timing"] _
+  (let [timing (-> (request/ring-request) :body io/reader json/parse-stream (get "timing"))
+        user-agent (-> (request/ring-request) :headers (get "user-agent"))]
+    (mc/insert "perf-mon-timing" 
+               {:ts (System/currentTimeMillis)
+                :ua user-agent
+                :timing timing}
+               WriteConcern/NONE))
+  (resp/status 200 "ok"))
+
 (defn init []
   (server/add-middleware perf-mon-middleware)
   (server/add-middleware throttle-middleware)
