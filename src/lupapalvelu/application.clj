@@ -112,7 +112,7 @@
   [command]
   (with-application command
     (fn [application]
-      (if (nil? (-> application :roles :authority))
+      (if (nil? (:authority application))
         (executed "assign-to-me" command))
       (rl-mapping/get-application-as-krysp application)
       (mongo/update
