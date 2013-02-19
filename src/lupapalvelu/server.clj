@@ -17,7 +17,8 @@
             [lupapalvelu.document.commands]
             [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.user]
-            [lupapalvelu.operations])
+            [lupapalvelu.operations]
+            [sade.security-headers :as headers])
   (:gen-class))
 
 (def custom-content-type {".eot"   "application/vnd.ms-fontobject"
@@ -65,6 +66,7 @@
       'lupapalvelu.tepa))
   (mongo/connect!)
   (server/add-middleware apply-custom-content-types)
+  (server/add-middleware headers/add-security-headers)
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :jetty-options {:ssl? true
