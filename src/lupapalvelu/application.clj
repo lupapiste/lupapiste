@@ -213,7 +213,6 @@
                        :address       (:address data)
                        :propertyId    (:propertyId data)
                        :title         (:address data)
-                       :roles         {:applicant owner}
                        :auth          [owner]
                        :operations    [{:operation op :created created}]
                        :documents     (if info-request? [] (make-documents user created nil op))
