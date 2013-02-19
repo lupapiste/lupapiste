@@ -5,7 +5,7 @@ $(function() {
     ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
       .param("name", "minimal")
       .param("npm", "true")
-      .success(function() { $(e.target).parent().find("span").text(" DONE!").show().delay(1000).fadeOut(); })
+      .success(function() { $("#debug-apply-done").text(" DONE!").show().delay(1000).fadeOut(); })
       .call();
     return false;
   }
@@ -31,8 +31,8 @@ $(function() {
         .append($("<input type='checkbox'>").click(function() { $(".page").toggleClass("visible"); }))
         .append($("<label>").text("Toggle hidden"))
         .append($("<br>"))
-        .append($("<a>").attr("href", "#").text("Apply minimal!").click(applyMinimal))
-        .append($("<span>").css("font-weight", "bold").hide())
+        .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal!").click(applyMinimal))
+        .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
         .append($("<br>"))
         .append($("<span>").text("Throttle web: "))
         .append($("<b>").addClass("dev-throttle-web").text("0"))
