@@ -22,7 +22,7 @@
   {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.9.0.custom.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
    :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js"]}
-   :underscore   {:js ["underscore.js" "underscore.string.min.js" "underscore.string.init.js"]}
+   :underscore   {:js ["underscore-1.4.4-min.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
 
    :init         {:js [conf "hub.js" "log.js"]}
