@@ -36,11 +36,11 @@ $(function() {
         .append($("<br>"))
         .append($("<span>").text("Throttle web: "))
         .append($("<b>").addClass("dev-throttle-web").text("0"))
-        .append($("<input type='range' value='0' min='0' max='2000' step='20'>").change(_.throttle(_.partial(throttle, "web"), 500)))
+        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "web"), 500)))
         .append($("<br>"))
         .append($("<span>").text("Throttle DB: "))
         .append($("<b>").addClass("dev-throttle-db").text("0"))
-        .append($("<input type='range' value='0' min='0' max='2000' step='20'>").change(_.throttle(_.partial(throttle, "db"), 500)))));
+        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "db"), 500)))));
   
   ajax.get(window.location.protocol + "//" + window.location.host + "/perfmon/throttle")
     .success(function(data) {
