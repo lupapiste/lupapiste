@@ -22,7 +22,7 @@
   {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.9.0.custom.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
    :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js"]}
-   :underscore   {:js ["underscore.js" "underscore.string.min.js" "underscore.string.init.js"]}
+   :underscore   {:js ["underscore-1.4.4-min.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
 
    :init         {:js [conf "hub.js" "log.js"]}
@@ -35,7 +35,7 @@
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
 
-   :common       {:depends [:init :jquery :knockout :underscore :moment :debug :i18n]
+   :common       {:depends [:init :jquery :knockout :underscore :moment :i18n]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js"]
                   :css ["css/main.css"]
@@ -80,16 +80,16 @@
                   :html ["create.html"]}
 
    :applicant    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage]
+                            :buildinfo :docgen :create :mypage :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage]
+                            :buildinfo :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :buildinfo :mypage]
+   :authority-admin {:depends [:common :buildinfo :mypage :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
@@ -97,7 +97,7 @@
              :js ["tree.js"]
              :css ["tree.css"]}
 
-   :admin   {:depends [:common :map :buildinfo :mypage]
+   :admin   {:depends [:common :map :buildinfo :mypage :debug]
              :js ["admin.js"]
              :html ["index.html" "admin.html"]}
 
@@ -108,7 +108,7 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :register :buildinfo]
+   :welcome {:depends [:common :register :buildinfo :debug]
              :js ["welcome.js" "login.js"]
              :html ["login.html" "index.html"]}
 

@@ -256,7 +256,9 @@
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
-    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
+    (if env/proxy-off
+      {:status 503}
+      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
 
 ;;
@@ -266,3 +268,4 @@
 (env/in-dev
   (defjson "/api/spy" []
     (dissoc (request/ring-request) :body)))
+
