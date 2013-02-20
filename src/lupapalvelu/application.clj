@@ -79,8 +79,8 @@
       (mongo/update-by-id
         :applications (:id application)
         (if assigneeId
-          {$set {:roles.authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-          {$unset {:roles.authority ""}})))))
+          {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
+          {$unset {:authority ""}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -112,7 +112,7 @@
   [command]
   (with-application command
     (fn [application]
-      (if (nil? (-> application :roles :authority))
+      (if (nil? (:authority application))
         (executed "assign-to-me" command))
       (rl-mapping/get-application-as-krysp application)
       (mongo/update
@@ -316,7 +316,7 @@
                   :submitted
                   :modified
                   :state
-                  (comp :authority :roles)])
+                  :authority])
 
 (def col-map (zipmap col-sources (map str (range))))
 
