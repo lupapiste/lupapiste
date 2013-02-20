@@ -15,7 +15,6 @@
             [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
-            [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.user]
             [lupapalvelu.operations]
             [lupapalvelu.proxy-services]
@@ -58,7 +57,8 @@
   (server/add-middleware headers/add-security-headers)
   (when env/perf-mon-on
     (warn "*** Instrumenting performance monitoring")
-    (perf-mon/init))
+    (require 'lupapalvelu.perf-mon)
+    ((resolve 'lupapalvelu.perf-mon/init)))
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :jetty-options {:ssl? true
