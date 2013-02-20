@@ -11,10 +11,36 @@
             [cheshire.core :as json])
   (:import [com.mongodb WriteConcern]))
 
+;;
+;; Instrumenting:
+;;
+
+(defn instrument [f v]
+  (alter-var-root v f (str (. v ns) \/ (. v sym))))
+
+(defn instrument-ns [f & namespaces]
+  (doseq [n namespaces
+          v (filter (comp fn? deref) (vals (ns-publics n)))]
+    (instrument f v)))
+
+;;
+;; State:
+;;
+
 (defonce db-throttle (atom 0))
 (defonce web-throttle (atom 0))
-
 (def ^:dynamic *perf-context* nil)
+
+;;
+;; Utils:
+;;
+
+(defn- bypass? [request]
+  (or (get-in request [:query-params "npm"]) (get-in request [:headers "npm"])))
+
+;;
+;; Performance minitoring:
+;;
 
 (defn wrap-perf-mon [f f-name]
   (fn [& args]
@@ -29,22 +55,9 @@
                   (swap! context conj [f-name (- end start) @sub-context])))))))
       (apply f args))))
 
-(defn wrap-throttle [f f-name]
-  (fn [& args]
-    (Thread/sleep @db-throttle)
-    (apply f args)))
-
-(defn instrument [f v]
-  (alter-var-root v f (str (. v ns) \/ (. v sym))))
-
-(defn instrument-ns [f & namespaces]
-  (doseq [n namespaces
-          v (filter (comp fn? deref) (vals (ns-publics n)))]
-    (instrument f v)))
-
 (defn perf-mon-middleware [handler]
   (fn [request]
-    (if (get-in request [:params :npm])
+    (if (bypass? request)
       (handler request)
       (binding [*perf-context* (atom [])]
         (let [start (System/nanoTime)] 
@@ -60,11 +73,23 @@
                             :perfmon @*perf-context*}
                            WriteConcern/NONE)))))))))
 
+;;
+;; Throttling:
+;;
+
+(defn wrap-db-throttle [f f-name]
+  (fn [& args]
+    (Thread/sleep @db-throttle)
+    (apply f args)))
+
 (defn throttle-middleware [handler]
   (fn [request]
-    (if-not (or (get-in request [:query-params "npm"]) (get-in request [:headers "npm"]))
-      (Thread/sleep @web-throttle))
+    (if-not (bypass? request) (Thread/sleep @web-throttle))
     (handler request)))
+
+;;
+;; REST API for performance data and throtting control:
+;;
 
 (defn get-data [start end]
   (map (fn [row] (dissoc row :_id))
@@ -74,11 +99,6 @@
 (defn- to-long [v]
   (when v
     (if (string? v) (Long/parseLong v) (long v))))
-
-(defn- group-by-uri [data]
-  (with-logs "lupapiste"
-    (clojure.pprint/pprint data))
-  data)
 
 (defn- find-min-max-avg [{:keys [min-val max-val avg cnt] :as m} {duration :duration perfmon :perfmon}]
   (assoc m :min-val (min min-val duration)
@@ -118,41 +138,13 @@
                WriteConcern/NONE))
   (resp/status 200 "ok"))
 
+;;
+;; Initialize: register middlewares and wrap vars:
+;;
+
 (defn init []
   (server/add-middleware perf-mon-middleware)
   (server/add-middleware throttle-middleware)
-  (instrument-ns wrap-throttle 'lupapalvelu.mongo)
+  (instrument-ns wrap-db-throttle 'lupapalvelu.mongo)
   (instrument-ns wrap-perf-mon 'lupapalvelu.mongo))
 
-;;
-;; Here be dragons...
-;;
-
-(comment
-  (mc/remove "perf-mon")
-
-  ; Prints call hierarchy:
-  (defn perf-logger
-    ([context]
-      (println (with-out-str (perf-logger context ""))))
-    ([[[f-name args duration sub-contexts] & r] indent]
-      (println indent f-name (format "%.3f ms" (/ duration 1000000.0)))
-      (doseq [sub-context sub-contexts]
-        (perf-logger [sub-context] (str indent "   ")))
-      (when r (perf-logger r indent))))
-  
-  (defn- append-summary [summary [f-name args duration sub-contexts]]
-    (let [[c v] (get summary f-name [0 0.0])
-          summary (assoc summary f-name [(inc c) (+ v duration)])
-          summary (reduce append-summary summary sub-contexts)]
-      summary))
-  
-  (defn perf-logger [context]
-    (let [summary (reduce append-summary {} context)]
-      (println
-        (with-out-str
-          (let [k (ffirst context)
-                [c v] (get summary k)]
-            (println (format "%s: %5d:  %9.3f ms (%.3f ms)" k c (/ v 1000000.0) (/ (/ v 1000000.0) c)))
-            (doseq [[k [c v]] (dissoc summary k)]
-              (println (format "   %-60s %5d:  %9.3f ms (%.3f ms)" (str k \:) c (/ v 1000000.0) (/ (/ v 1000000.0) c))))))))))
