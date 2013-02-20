@@ -472,7 +472,20 @@
                          {:name "luokitus"
                           :type :group
                           :body [{:name "energialuokka" :type :string :size "s"}
-                                 {:name "paloluokka" :type :string :size "s"}]}
+                                 {:name "paloluokka" :type :select
+                                  :body [{:name "palonkest\u00e4v\u00e4"}
+                                         {:name "paloapid\u00e4tt\u00e4v\u00e4"}
+                                         {:name "paloahidastava"}
+                                         {:name "l\u00e4hinn\u00e4 paloakest\u00e4v\u00e4"}
+                                         {:name "l\u00e4hinn\u00e4 paloapid\u00e4tt\u00e4v\u00e4"}
+                                         {:name "l\u00e4hinn\u00e4 paloahidastava"}
+                                         {:name "P1"}
+                                         {:name "P2"}
+                                         {:name "P3"}
+                                         {:name "P1/P2"}
+                                         {:name "P1/P3"}
+                                         {:name "P2/P3"}
+                                         {:name "P1/P2/P3"}]}]}
                          {:name "huoneistot"
                           :type :group
                           :repeating true
