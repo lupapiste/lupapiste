@@ -29,8 +29,8 @@
                       sijantitieto
                       {:tag :tunnus :child tunnus-children}))
 
-(def yht-rakennus [{:tag :ns "yht" :yksilointitieto }
-                   {:tag :ns "yht" :alkuHetki}
+(def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
+                   {:tag :alkuHetki :ns "yht"}
                    sijantitieto
                    {:tag :rakennuksenTiedot
                     :child [{:tag :rakennustunnus :child tunnus-children}
