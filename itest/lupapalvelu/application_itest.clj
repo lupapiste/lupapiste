@@ -58,32 +58,35 @@
         ;; add a comment to change state to open
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
-        roles-before-assignation (:roles application)
+        authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         assigned-app (:application (query sonja :application :id application-id))
-        roles-after-assignation (:roles assigned-app)]
+        authority-after-assignation (:authority assigned-app)]
     application-id => truthy
     application => truthy
     (success resp) => true
-    (count roles-before-assignation) => 1
-    (count roles-after-assignation) => 2))
+    authority-before-assignation => nil
+    ;; TODO: why is this returned in different format?
+    ;;   Expected: {:id "777777777777777777000023", :lastName "Sibbo", :firstName "Sonja"}
+    ;;     Actual: {:role "authority", :lastName "Sibbo", :firstName "Sonja", :username "sonja", :id "777777777777777777000023"}
+    authority-after-assignation => (contains {:id (:id authority)})))
 
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (:id (create-app pena :municipality sonja-muni))
         ;; add a comment change set state to open
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
-        roles-before-assignation (:roles application)
+        authority-before-assignation (:authority application)
         authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         resp (command sonja :assign-application :id application-id :assigneeId nil)
         assigned-app (:application (query sonja :application :id application-id))
-        roles-in-the-end (:roles assigned-app)]
-    (count roles-before-assignation) => 1
-    (count roles-in-the-end) => 1))
+        authority-in-the-end (:authority assigned-app)]
+    authority-before-assignation => nil
+    authority-in-the-end => nil))
 
 (fact "Applicaton shape is saved"
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
