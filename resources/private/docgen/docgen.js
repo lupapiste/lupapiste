@@ -323,14 +323,17 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
       .command("get-users-in-application", {id: appId})
       .success(function(data) {
         $.each(data.users, function (i, user) {
-          var option = document.createElement("option");
-          var value = user.id;
-          option.value = value;
-          option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
-          if (selectedOption === value) {
-            option.selected = "selected";
+          // LUPA-89: don't print fully empty names
+          if(user.firstName && user.lastName) {
+            var option = document.createElement("option");
+            var value = user.id;
+            option.value = value;
+            option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
+            if (selectedOption === value) {
+              option.selected = "selected";
+            }
+            select.appendChild(option);
           }
-          select.appendChild(option);
         });
       })
       .call();
