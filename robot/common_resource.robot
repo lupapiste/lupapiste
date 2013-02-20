@@ -219,6 +219,7 @@ Click by test id
   Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
   # IE8
   Focus  xpath=//*[@data-test-id='${id}']
+  Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
   Click element  xpath=//*[@data-test-id='${id}']
 
 Click enabled by test id
