@@ -308,6 +308,10 @@
                          {:name "luokitus"
                           :type :group
                           :body [{:name "energialuokka" :type :string :size "s"}
+                                 {:name "energiatehokkuusluku" :type :number}
+                                 {:name "energiatehokkuusluvunYksikko" :type :select
+                                  :body [{:name "kWh/m2"}
+                                         {:name "kWh/brm2/vuosi"}]}
                                  {:name "paloluokka" :type :string :size "s"}]}
                          {:name "huoneistot"
                           :type :group
