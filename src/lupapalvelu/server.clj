@@ -65,6 +65,7 @@
       'lupapalvelu.security
       'lupapalvelu.tepa))
   (mongo/connect!)
+  (server/add-middleware headers/sessionId2mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
   (with-logs "lupapalvelu"

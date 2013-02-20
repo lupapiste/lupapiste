@@ -94,8 +94,7 @@
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:sessionId     (or (sessionId (request/ring-request)) "???")
-     :applicationId (get-in action [:data :id] "???")
+    {:applicationId (get-in action [:data :id] "???")
      :email         (get-in action [:user :email] "???")}
     (core/execute action)))
 

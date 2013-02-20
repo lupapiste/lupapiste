@@ -1,4 +1,5 @@
-(ns sade.security-headers)
+(ns sade.security-headers
+  (:use [clj-logging-config.log4j :only [with-logging-context]]))
 
 (defn add-security-headers
   "Ring middleware.
@@ -25,3 +26,11 @@
           ; else than declared by the content type in the HTTP headers.
           (assoc-in [:headers "X-Content-Type-Options"] "nosniff"))))))
 
+(defn sessionId2mdc
+  "Ring middleware. Sets 'sessionId' mdc-key with ring-sessionId."
+  [handler]
+  (fn [request]
+    (let [sessionId (get-in request [:cookies "ring-session" :value])]
+      (with-logging-context
+        {:sessionId (or sessionId "???")}
+        (handler request)))))
