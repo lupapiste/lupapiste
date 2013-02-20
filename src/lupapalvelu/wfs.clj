@@ -35,7 +35,7 @@
             <ogc:SortProperty>
               <ogc:PropertyName>" property-name "</ogc:PropertyName>
             </ogc:SortProperty>
-            <ogc:SortOrder>" (.toUpperCase order) "</ogc:SortOrder>
+            <ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>
           </ogc:SortBy>")))
 
 (defn filter [& e]

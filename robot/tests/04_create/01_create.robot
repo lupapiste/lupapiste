@@ -6,11 +6,13 @@ Resource        ../../common_resource.robot
 *** Test Cases ***
 
 Mikko creates a new application
+  [Tags]  ie8
   Mikko logs in
   Create application  create-app  753  75341600250021
   It is possible to add operation
 
 Mikko sees application in list
+  [Tags]  ie8
   Go to page  applications
   Request should be visible  create-app
 

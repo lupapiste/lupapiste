@@ -15,9 +15,9 @@
             [lupapalvelu.authority-admin]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
-            [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.user]
             [lupapalvelu.operations]
+            [lupapalvelu.proxy-services]
             [sade.security-headers :as headers])
   (:gen-class))
 
@@ -52,22 +52,14 @@
     (:major *clojure-version*)
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
-  (when env/perf-mon-on
-    (warn "*** Instrumenting performance monitoring")
-    (perf-mon/instrument-ns
-      'lupapalvelu.action
-      'lupapalvelu.application
-      'lupapalvelu.attachment
-      'lupapalvelu.authority-admin
-      'lupapalvelu.core
-      'lupapalvelu.domain
-      'lupapalvelu.mongo
-      'lupapalvelu.security
-      'lupapalvelu.tepa))
   (mongo/connect!)
   (server/add-middleware headers/sessionId2mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
+  (when env/perf-mon-on
+    (warn "*** Instrumenting performance monitoring")
+    (require 'lupapalvelu.perf-mon)
+    ((resolve 'lupapalvelu.perf-mon/init)))
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :jetty-options {:ssl? true

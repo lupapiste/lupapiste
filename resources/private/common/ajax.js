@@ -25,6 +25,9 @@ var ajax = (function() {
       },
       complete: function(jqXHR, textStatus) {
         self.completeHandler(jqXHR, textStatus);
+      },
+      beforeSend: function(request) {
+        _.each(self.headers, function(value, key) { request.setRequestHeader(key, value); });
       }
     };
 
@@ -32,7 +35,8 @@ var ajax = (function() {
     self.errorHandler = function(e) { notify.error("error",e); };
     self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
     self.completeHandler = function() { };
-
+    self.headers = {};
+    
     self.raw = function(v) {
       self.rawData = (v === undefined) ? true : v;
       return self;
@@ -102,6 +106,11 @@ var ajax = (function() {
 
     self.call = function() {
       $.ajax(self.request);
+      return self;
+    };
+    
+    self.header = function(key, value) {
+      self.headers[key] = value;
       return self;
     };
   }

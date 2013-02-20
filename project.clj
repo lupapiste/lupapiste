@@ -32,7 +32,7 @@
              :lupadev {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"\/jquery" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers" #"underscore"]}
+              :excludes [#"\/jquery" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers" #"underscore" #"highcharts\.js"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
