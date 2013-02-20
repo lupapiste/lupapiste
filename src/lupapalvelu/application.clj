@@ -170,7 +170,9 @@
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
         make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
-                                                 :body (schema-data-to-body (:schema-data op-info))})
+                                                 :body (if (= schema-name (:schema op-info))
+                                                         (schema-data-to-body (:schema-data op-info))
+                                                         {})})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
