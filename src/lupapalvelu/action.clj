@@ -168,26 +168,25 @@
         :applications (:id application)
         {$set {:authority (security/summary user)}}))))
 
-;; FIXME: only for the current document
 (defcommand "set-user-to-document"
-  {:parameters [:id :documentId :userId]
+  {:parameters [:id :documentId :userId :path]
    :authenticated true}
-  [{{:keys [documentId userId]} :data user :user :as command}]
+  [{{:keys [documentId userId path]} :data user :user :as command}]
   (with-application command
     (fn [application]
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (domain/user2henkilo subject)]
+            henkilo      (domain/user2henkilo subject)
+            full-path    (str "documents.$.body." path)]
         (if (nil? document)
           (fail :error.document-not-found)
-          ;; FIXME: all users should be modelled the same way.
-          (let [path (if (or (= "maksaja" schema-name) (= "hakija" schema-name)) :documents.$.body.henkilo :documents.$.body)]
-            (infof "merging user %s with best effort into document %s" subject name)
+          (do
+            (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
             (mongo/update
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:id documentId}}}
-              {$set {path henkilo
+              {$set {full-path henkilo
                      :modified (:created command)}})))))))
