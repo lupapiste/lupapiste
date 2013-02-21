@@ -53,6 +53,7 @@
                                                                       {:tag :maakaasuKytkin}
                                                                       {:tag :kaapeliKytkin}]}
                                  {:tag :energialuokka}
+                                 {:tag :energiatehokkuusluku}
                                  {:tag :paloluokka}
                                  {:tag :lammitystapa}
                                  {:tag :lammonlahde :child [{:tag :polttoaine}

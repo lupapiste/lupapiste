@@ -316,7 +316,7 @@
                                          {:name "E"}
                                          {:name "F"}
                                          {:name "G"}]}
-                                 {:name "energiatehokkuusluku" :type :number}
+                                 {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
                                  {:name "energiatehokkuusluvunYksikko" :type :select
                                   :body [{:name "kWh/m2"}
                                          {:name "kWh/brm2/vuosi"}]}
