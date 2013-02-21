@@ -12,19 +12,20 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
+;TODO where to find out this?
 (defn resolve-host-name []
   "http://localhost:8000")
 
-(defn message-for-new-application [application host]
+(defn message-for-new-comment-in-application [application host]
   (let [permit-type (:permitType application)
-        permit-type-name (if (= permit-type "infoRequest") {:fi (str "neuvontapyynt\u00F6") :sv (str "r\u00E5dbeg\u00E4ra")} {:fi (str "hakemus") :sv (str "ans\u00F6kan")})
+        permit-type-name (if (= permit-type "infoRequest") {:fi (str "Neuvontapyynt\u00F6\u00F6n") :sv (str "R\u00E5dbeg\u00E4ra")} {:fi (str "Hakemukseen") :sv (str "Ans\u00F6kan")})
         permit-type-path (if (= permit-type "infoRequest") (str "inforequest") (str "application"))]
     (format
       (str
-        "Hei,\n\nUusi %s luotu. Katso hakemus osoitteesta %s/fi/applicant#!/%s/%s\n\n"
+        "Hei,\n\n%s on lis\u00E4tty kommentti. Katso lis\u00E4tietoja osoitteesta %s/fi/applicant#!/%s/%s\n\n"
         "Yst\u00E4v\u00E4llisin terveisin,\n\nLupapiste.fi\n\n\n\n"
         "Hej,\n\n"
-        "En ny %s har anl\u00E4ndat. Se ans\u00F6kan i addresset %s/sv/applicant#!/%s/%s\n\n"
+        "%s har nya commenter. Se mera information i addresset %s/sv/applicant#!/%s/%s\n\n"
         "\n\n"
         "Grattis,\n\nLupapiste.fi\n\n\n\n")
       (:fi permit-type-name)
@@ -36,17 +37,18 @@
       permit-type-path
       (:id application))))
 
-(defn send-notifications-on-new-application [application-id]
-  (println "notifying on " application-id)
-  
-  (if-let [application (mongo/by-id :applications application-id)]
-    (let [email "timo.lehtonen@solita.fi"
-          msg (message-for-new-application application (resolve-host-name))]
-      (println msg)
-      (future
-        (info "sending email to" email)
-        (if (email/send-email email (:title application) msg)
-          (info "email was sent successfully")) ((error "email could not be delivered."))))
+(defn user-is-in-authority-role [user]
+  (println user))
+
+(defn send-notifications-on-new-comment [user-commenting application]
+  (println "sending comment")
+  (if (user-is-in-authority-role user-commenting)
     (do
-      (debugf "application '%s' not found" application-id)
-      (fail :error.application-not-found))))
+      (println "notification on new comment for " application)
+      (let [email "timo.lehtonen@solita.fi"
+            msg (message-for-new-comment-in-application application (resolve-host-name))]
+        (println msg)
+        (future
+          (info "sending email to" email)
+          (if (email/send-email email (:title application) msg)
+            (info "email was sent successfully")) ((error "email could not be delivered.")))))))

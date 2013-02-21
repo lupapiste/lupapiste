@@ -15,7 +15,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
-            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
@@ -223,7 +222,6 @@
                                                  (partition 2 attachment/attachment-types))
                        :comments      (map make-comment (:messages data))
                        :permitType    (keyword (:permitType data))})
-        (notifications/send-notifications-on-new-application id)
         (ok :id id))
       (fail :error.unauthorized))))
 

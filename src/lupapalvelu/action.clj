@@ -8,6 +8,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
@@ -145,6 +146,7 @@
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
   [{{:keys [text target]} :data user :user :as command}]
+  (println "adding comment")
   (with-application command
     (fn [application]
       (if (= "draft" (:state application))
@@ -156,7 +158,8 @@
          $push {:comments {:text    text
                            :target  target
                            :created (:created command)
-                           :user    (security/summary user)}}}))))
+                           :user    (security/summary user)}}})
+      (notifications/send-notifications-on-new-comment user application))))
 
 (defcommand "assign-to-me"
   {:parameters [:id]
