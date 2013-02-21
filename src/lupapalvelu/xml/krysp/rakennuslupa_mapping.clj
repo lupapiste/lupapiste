@@ -54,6 +54,7 @@
                                                                       {:tag :kaapeliKytkin}]}
                                  {:tag :energialuokka}
                                  {:tag :energiatehokkuusluku}
+                                 {:tag :energiatehokkuusluvunYksikko}
                                  {:tag :paloluokka}
                                  {:tag :lammitystapa}
                                  {:tag :lammonlahde :child [{:tag :polttoaine}
