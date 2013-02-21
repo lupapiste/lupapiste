@@ -434,4 +434,8 @@
                      {:name "ei tiedossa"}]}]}
 
        {:info {:name "lisatiedot"}
-      :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
+      :body [{:name "suoramarkkinointikielto" :type :checkbox}
+             {:name "toimitustapa" :type :select
+              :body [{:name "s\u00e4hk\u00f6isesti"}
+                     {:name "noudetaan"}
+                     {:name "postitse"}]}]}]))
