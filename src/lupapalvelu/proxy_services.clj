@@ -6,7 +6,7 @@
             [clojure.string :as s]
             [lupapalvelu.wfs :as wfs])
   (:use [clojure.data.zip.xml]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.util :only [dissoc-in select]]))
 
 ;;
@@ -90,7 +90,7 @@
                     :suggestions (map feature->string features)
                     :data (map wfs/feature-to-address features)}))
       (do
-        (error "find-addresses failed: status=%s, response=%s" status response)
+        (errorf "find-addresses failed: status=%s, response=%s" status response)
         (resp/status 503 "Service temporarily unavailable")))))
 
 (defn- point-by-property-id [property-id]
@@ -107,7 +107,7 @@
     (if (= status :ok)
       (resp/json {:data (map wfs/feature-to-position features)})
       (do
-        (error "Failed to get point by 'property-id': %s" features)
+        (error "Failed to get point by 'property-id':" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
 (defn- property-id-by-point [[x y]]
@@ -125,7 +125,22 @@
     (if (= status :ok)
       (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
       (do
-        (error "Failed to get 'property-id' by point: %s" features)
+        (error "Failed to get 'property-id' by point:" features)
+        (resp/status 503 "Service temporarily unavailable")))))
+
+(defn get-address-by-point [x y]
+  (wfs/http-get wfs/nearestfeature (wfs/nearest-query-params x y)))
+
+(defn address-by-point-proxy [request]
+  (let [x (get (:query-params request) "x")
+        y (get (:query-params request) "y")
+        resp (get-address-by-point x y)
+        [status features] resp]
+    (if (= status :ok)
+      (do
+        (resp/json (wfs/feature-to-address-details (first features))))
+      (do
+        (error "Failed to get 'property-id' by point:" features)
         (resp/status 503 "Service temporarily unavailable")))))
 
 ;
@@ -138,14 +153,22 @@
   stuff. At the moment strips the 'Set-Cookie' headers."
   [f]
   (fn [request]
-    (dissoc-in (f request) [:headers "set-cookie"])))
+    (let [response (f request)]
+      (assoc response :headers (dissoc (:headers response) "set-cookie" "server")))))
+
+(defn- cache [max-age-in-s f]
+  (let [cache-control {"Cache-Control" (str "public, max-age=" max-age-in-s)}]
+    (fn [request]
+      (let [response (f request)]
+        (assoc response :headers (merge (:headers response) cache-control))))))
 
 ;;
 ;; Proxy services by name:
 ;;
 
-(def services {"nls" (secure wfs/raster-images)
+(def services {"nls" (cache (* 3 60 60 24) (secure wfs/raster-images))
                "point-by-property-id" point-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
+               "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy
                "get-address" get-addresses-proxy})

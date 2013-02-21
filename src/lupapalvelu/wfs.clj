@@ -35,7 +35,7 @@
             <ogc:SortProperty>
               <ogc:PropertyName>" property-name "</ogc:PropertyName>
             </ogc:SortProperty>
-            <ogc:SortOrder>" (.toUpperCase order) "</ogc:SortOrder>
+            <ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>
           </ogc:SortBy>")))
 
 (defn filter [& e]
@@ -118,6 +118,12 @@
   (when feature
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
 
+(defn feature-to-address-details [feature]
+  (when feature
+    {:katunimi (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+     :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
+     :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))}))
+
 (defn response->features [response]
   (let [input-xml (:body response)
        features (-> input-xml
@@ -130,6 +136,7 @@
 
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
 (def maasto "https://ws.nls.fi/maasto/wfs")
+(def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
 (defn execute
   "Takes a query (in XML) and returns a vector. If the first element of that
@@ -140,6 +147,28 @@
   (deref
     (future
       (let [response (client/post url {:body q :basic-auth auth :throw-exceptions false})]
+        (if (= (:status response) 200)
+          [:ok (response->features response)]
+          [:error response])))
+    timeout
+    [:timeout]))
+
+(defn nearest-query-params [x y]
+  {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
+   :TYPENAME "oso:Osoitepiste"
+   :COORDS (str x "," y ",EPSG:3067")
+   :SRSNAME "EPSG:3067"
+   :MAXFEATURES "1"
+   :BUFFER "500"})
+
+(defn http-get
+  [url q]
+  (deref
+    (future
+      (let [response (client/get url
+                                 {:query-params q
+                                  :basic-auth auth
+                                  :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
           [:error response])))

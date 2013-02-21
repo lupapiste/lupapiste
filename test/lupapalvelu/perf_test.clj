@@ -5,6 +5,7 @@
   "a")
 
 (defn b [x]
+  ; (throw (Exception. "Ups!"))
   (Thread/sleep 200)
   "b")
 

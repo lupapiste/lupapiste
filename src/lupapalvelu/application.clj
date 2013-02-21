@@ -1,8 +1,7 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [lupapalvelu.domain :only [application-query-for get-application-as]]
         [clojure.string :only [blank?]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -27,7 +26,7 @@
 
 (defn get-applicant-name [app]
   (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (:creator app)]
+    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
     (when-let [body (:body (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
@@ -50,13 +49,13 @@
 ;;
 
 (defquery "applications" {:authenticated true} [{user :user}]
-  (ok :applications (map with-meta-fields (mongo/select :applications (application-query-for user)))))
+  (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-municipality [app]
   (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
-  (if-let [app (get-application-as id user)]
+  (if-let [app (domain/get-application-as id user)]
     (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
 
@@ -80,8 +79,8 @@
       (mongo/update-by-id
         :applications (:id application)
         (if assigneeId
-          {$set {:roles.authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-          {$unset {:roles.authority ""}})))))
+          {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
+          {$unset {:authority ""}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -98,7 +97,7 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open]}
+   :states     [:draft :open :submitted]}
   [command]
   (mongo/update-by-id :applications (-> command :data :id)
                       {$set {:modified (:created command)
@@ -113,7 +112,7 @@
   [command]
   (with-application command
     (fn [application]
-      (if (nil? (-> application :roles :authority))
+      (if (nil? (:authority application))
         (executed "assign-to-me" command))
       (rl-mapping/get-application-as-krysp application)
       (mongo/update
@@ -165,9 +164,13 @@
      :modified created
      :versions []}))
 
+(defn- schema-data-to-body [schema-data]
+  (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
+
 (defn- make-documents [user created existing-documents op]
-  (let [make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created :body {}})
-        op-info               (operations/operations op)
+  (let [op-info               (operations/operations op)
+        make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
+                                                 :body (schema-data-to-body (:schema-data op-info))})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
@@ -202,7 +205,6 @@
                       {:id            id
                        :created       created
                        :opened        (when (= :authority user-role) created)
-                       :creator       user-summary
                        :modified      created
                        :infoRequest   info-request?
                        :state         (if (or info-request? (= :authority user-role)) :open :draft)
@@ -211,7 +213,6 @@
                        :address       (:address data)
                        :propertyId    (:propertyId data)
                        :title         (:address data)
-                       :roles         {:applicant owner}
                        :auth          [owner]
                        :operations    [{:operation op :created created}]
                        :documents     (if info-request? [] (make-documents user created nil op))
@@ -236,8 +237,9 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
-                                              $set {:modified command}})
+        (mongo/update-by-id :applications id {$push {:operations {:operation op :created created}}
+                                              $pushAll {:documents new-docs}
+                                              $set {:modified created}})
         (ok)))))
 
 (defcommand "convert-to-application"
@@ -314,7 +316,7 @@
                   :submitted
                   :modified
                   :state
-                  (comp :authority :roles)])
+                  :authority])
 
 (def col-map (zipmap col-sources (map str (range))))
 
@@ -339,7 +341,7 @@
         {:title {$regex search $options "i"}}))))
 
 (defn applications-for-user [user params]
-  (let [user-query  (application-query-for user)
+  (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
         query-total (mongo/count :applications query)
@@ -361,5 +363,3 @@
   {:parameters [:params]}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
-
-

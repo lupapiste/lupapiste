@@ -1,7 +1,9 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail]]
-        [lupapalvelu.log]
+        [clojure.tools.logging]
+        [clojure.tools.logging]
+        [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]])
   (:require [noir.request :as request]
@@ -18,6 +20,7 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.municipality]
             [lupapalvelu.application :as application]
+            [lupapalvelu.ke6666 :as ke6666]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]))
@@ -38,14 +41,16 @@
 
 (defn current-user
   "fetches the current user from 1) http-session 2) apikey from headers"
-  []
-  (or (session/get :user) ((request/ring-request) :user)))
+  [] (or (session/get :user) ((request/ring-request) :user)))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
 
 (defn user-agent [request]
   (str (get-in request [:headers "user-agent"])))
+
+(defn sessionId [request]
+  (get-in request [:cookies "ring-session" :value]))
 
 (defn client-ip [request]
   (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
@@ -54,21 +59,18 @@
   (let [request (request/ring-request)]
     {:user-agent (user-agent request)
      :client-ip  (client-ip request)
+     :sessionId  (sessionId request)
      :host       (host request)}))
-
-(defn enriched [m]
-  (merge m {:user (current-user)
-            :web  (web-stuff)}))
 
 (defn logged-in? []
   (not (nil? (current-user))))
 
-(defn has-role? [role]
+(defn in-role? [role]
   (= role (keyword (:role (current-user)))))
 
-(defn authority? [] (has-role? :authority))
-(defn authority-admin? [] (has-role? :authorityAdmin))
-(defn admin? [] (has-role? :admin))
+(defn authority? [] (in-role? :authority))
+(defn authority-admin? [] (in-role? :authorityAdmin))
+(defn admin? [] (in-role? :admin))
 (defn anyone [] true)
 (defn nobody [] false)
 
@@ -85,11 +87,22 @@
 ;; Commands
 ;;
 
+(defn enriched [m]
+  (merge m {:user (current-user)
+            :web  (web-stuff)}))
+
+;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
+(defn execute [action]
+  (with-logging-context
+    {:applicationId (get-in action [:data :id] "???")
+     :email         (get-in action [:user :email] "???")}
+    (core/execute action)))
+
 (defjson [:post "/api/command/:name"] {name :name}
-  (core/execute (enriched (core/command name (from-json)))))
+  (execute (enriched (core/command name (from-json)))))
 
 (defjson "/api/query/:name" {name :name}
-  (core/execute (enriched (core/query name (from-query)))))
+  (execute (enriched (core/query name (from-query)))))
 
 ;;
 ;; Web UI:
@@ -167,7 +180,7 @@
 (defpage "/security/activate/:activation-key" {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do
-      (info "User account '%s' activated, auto-logging in the user" (:username user))
+      (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)
       (resp/redirect "/"))
     (do
@@ -200,7 +213,7 @@
 
 (defpage [:post "/api/upload"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector] :as data}
-  (debug "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
+  (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
   (let [upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
@@ -233,13 +246,18 @@
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
   (attachment/output-all-attachments application-id (current-user)))
 
+(defpage [:get ["/api/pdf-export/:lang/:application-id" :lang #"[a-z]{2}"]] {lang :lang application-id :application-id}
+  (ke6666/export application-id (current-user) lang))
+
 ;;
 ;; Proxy
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
-    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
+    (if env/proxy-off
+      {:status 503}
+      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
 
 ;;
@@ -249,3 +267,4 @@
 (env/in-dev
   (defjson "/api/spy" []
     (dissoc (request/ring-request) :body)))
+
