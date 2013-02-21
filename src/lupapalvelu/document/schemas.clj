@@ -540,16 +540,16 @@
      {:info {:name "maisematyo"}
       :body maisematyo}
 
-     {:info {:name "hakija" :repeating true :removable true :min 1}
+     {:info {:name "hakija" :repeating true :removable true :min 1 :type :party}
       :body party}
 
-     {:info {:name "paasuunnittelija"}
+     {:info {:name "paasuunnittelija" :type :party}
       :body paasuunnittelija}
 
-     {:info {:name "suunnittelija" :repeating true}
+     {:info {:name "suunnittelija" :repeating true :type :party}
       :body suunnittelija}
 
-     {:info {:name "maksaja" :repeating true}
+     {:info {:name "maksaja" :repeating true :type :party}
       :body party}
 
      {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osoitettu)
