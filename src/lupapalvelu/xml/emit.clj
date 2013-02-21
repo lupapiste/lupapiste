@@ -4,7 +4,9 @@
 (declare element-to-xml)
 
 (defn- create-element-hierarcy [data model ns]
-  (element (str ns (:tag model)) (:attr model)
+  (element (if ns
+             (str ns (:tag model))
+             (:tag model)) (:attr model)
            (if (:child model)
              (map #(element-to-xml data % ns) (:child model))
              (str data))))

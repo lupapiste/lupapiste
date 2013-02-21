@@ -4,8 +4,8 @@
         clojure.data.xml))
 
 (def simple-data {:test "Test"})
-(def simple-model  {:tag :test})
-(def simple-result #clojure.data.xml.Element{:tag :test, :attrs {}, :content ("Test")})
+(def simple-model  {:tag :test :ns "ns"})
+(def simple-result #clojure.data.xml.Element{:tag  "ns:test", :attrs {}, :content ("Test")})
 
 (def model-with-childs {:tag :main
                        :child [{:tag :a :attr{:a "a"}
