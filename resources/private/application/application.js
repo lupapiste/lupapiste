@@ -310,7 +310,7 @@
       attachments(_.map(app.attachments || [], function(a) {
         a.statusName = statuses[a.state] || "unknown";
         a.latestVersion = _.last(a.versions);
-        if (a.versions && a.versions.length) application.hasAttachment(true);
+        if (a.versions && a.versions.length) { application.hasAttachment(true); }
         return a;
       }));
 
