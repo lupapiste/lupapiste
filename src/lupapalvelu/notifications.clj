@@ -16,6 +16,20 @@
 (defn resolve-host-name []
   "http://localhost:8000")
 
+(defn get-file-content []
+  (let [stream (ByteArrayOutputStream.)]
+    (with-open [out (io/writer stream)]
+      (.write (write-header out (str "fn: " (fn-name src))) (src))
+      (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
+        (if (.contains src ".min.")
+          (IOUtils/copy in (write-header out src))
+          (minified kind in (write-header out src)))))))
+(.toByteArray stream)))
+
+      )
+
+
+
 (defn message-for-new-comment-in-application [application host]
   (let [permit-type (:permitType application)
         permit-type-name (if (= permit-type "infoRequest") {:fi (str "Neuvontapyynt\u00F6\u00F6n") :sv (str "R\u00E5dbeg\u00E4ra")} {:fi (str "Hakemukseen") :sv (str "Ans\u00F6kan")})
