@@ -38,10 +38,9 @@
       (:id application))))
 
 (defn user-is-in-authority-role [user]
-  (println user))
+  (= "authority" (:role user)))
 
 (defn send-notifications-on-new-comment [user-commenting application]
-  (println "sending comment")
   (if (user-is-in-authority-role user-commenting)
     (do
       (println "notification on new comment for " application)
@@ -51,4 +50,5 @@
         (future
           (info "sending email to" email)
           (if (email/send-email email (:title application) msg)
-            (info "email was sent successfully")) ((error "email could not be delivered.")))))))
+            (info "email was sent successfully")) ((error "email could not be delivered."))) 
+        nil))))

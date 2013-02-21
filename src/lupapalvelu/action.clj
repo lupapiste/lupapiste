@@ -146,7 +146,6 @@
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
   [{{:keys [text target]} :data user :user :as command}]
-  (println "adding comment")
   (with-application command
     (fn [application]
       (if (= "draft" (:state application))
