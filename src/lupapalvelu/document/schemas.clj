@@ -244,7 +244,7 @@
                           :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
                                  {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
                                  {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number}
-                                 {:name "kerrosluku" :type :string :size "s"}
+                                 {:name "kerrosluku" :type :string :size "s" :subtype :number}
                                  {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}]}
                          {:name "rakenne"
                           :type :group
@@ -320,7 +320,7 @@
                                  {:name "energiatehokkuusluvunYksikko" :type :select
                                   :body [{:name "kWh/m2"}
                                          {:name "kWh/brm2/vuosi"}]}
-                                 {:name "paloluokka"
+                                 {:name "paloluokka" :type :select
                                   :body [{:name "palonkest\u00e4v\u00e4"}
                                           {:name "paloapid\u00e4tt\u00e4v\u00e4"}
                                           {:name "paloahidastava"}

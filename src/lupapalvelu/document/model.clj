@@ -82,6 +82,7 @@
       (every? true? (map (fn [[k2 v2]] (validate-document-fields schema-body k2 v2 current-path)) v))
       (let [elem (find-by-name schema-body current-path)
             result (validate (keywordize-keys elem) v)]
+        (when-not (nil? result) (println k v path elem result))
         (nil? result)))))
 
 (defn validate-against-current-schema [document]
