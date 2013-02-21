@@ -540,7 +540,7 @@
      {:info {:name "maisematyo"}
       :body maisematyo}
 
-     {:info {:name "hakija" :repeating true :removable true}
+     {:info {:name "hakija" :repeating true :removable true :min 1}
       :body party}
 
      {:info {:name "paasuunnittelija"}

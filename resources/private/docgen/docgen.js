@@ -408,6 +408,7 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='"+ count + "']").length) {
           count++;
         }
+
         var myModel = {};
         myModel[myName] = {};
         $(this).before(makeElem(myModel, count));
@@ -569,4 +570,3 @@ LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, 
 
   self.element = buildElement();
 };
-
