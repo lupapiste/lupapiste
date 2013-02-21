@@ -445,11 +445,21 @@
     };
   }();
 
-   // tabs
+  // tabs
+  var selectedTab;
+  var tabFlow = false;
+  hub.subscribe("set-debug-tab-flow", function(e) {
+    tabFlow = e.value;
+    $(".tab-content").show(0,function() { selectTab(selectedTab); });
+  });
 
   function openTab(id) {
-    $(".tab-content").hide();
-    $("#application-"+id+"-tab").fadeIn();
+    if(tabFlow) {
+      $('html, body').animate({ scrollTop: $("#application-"+id+"-tab").offset().top}, 100);
+    } else {
+      $(".tab-content").hide();
+      $("#application-"+id+"-tab").fadeIn();
+    }
   }
 
   function markTabActive(id) {
@@ -460,6 +470,7 @@
   function selectTab(tab) {
     markTabActive(tab);
     openTab(tab);
+    selectedTab = tab; // remove after tab-spike
   }
 
   var accordian = function(data, event) { accordion.toggle(event); };
