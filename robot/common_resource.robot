@@ -62,13 +62,17 @@ Number of visible inforequests
 Wait and click
   [Arguments]  ${element}
   Wait until  Element should be visible  ${element}
-  Focus      ${element}
+  # for IE8
+  Focus  ${element}
+  Wait until  Element should be visible  ${element}
   Click element  ${element}
 
 Wait until
   [Arguments]  ${keyword}  @{varargs}
   Wait Until Keyword Succeeds  ${WAIT_DELAY}  0.1  ${keyword}  @{varargs}
 
+Wait for jQuery
+  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
 #
 # Navigation
 #
@@ -94,7 +98,7 @@ Logout
 
 User should not be logged in
   # Wait for login query to complete
-  Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
+  Wait for jQuery
   Wait Until  User is not logged in
 
 User is not logged in
@@ -106,7 +110,8 @@ Login
   [Arguments]  ${username}  ${password}
   Input text  login-username  ${username}
   Input text  login-password  ${password}
-  Click button  login-button
+  # for IE8
+  Wait and click  login-button
 
 Login fails
   [Arguments]  ${username}  ${password}
@@ -212,6 +217,9 @@ Click by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id='${id}']
   Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
+  # IE8
+  Focus  xpath=//*[@data-test-id='${id}']
+  Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
   Click element  xpath=//*[@data-test-id='${id}']
 
 Click enabled by test id
@@ -262,6 +270,9 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Execute Javascript  window.location.hash = "!/applications";
   Click by test id  applications-create-new
+  Wait Until  Element should be visible  xpath=//input[@data-test-id="create-address"]
+  # for IE8
+  Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
   Select From List by test id  create-municipality-select  ${municipality}
   Input text by test id  create-property-id  ${propertyId}

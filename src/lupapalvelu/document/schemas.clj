@@ -402,7 +402,7 @@
      {:info {:name "maisematyo"}
       :body maisematyo}
 
-     {:info {:name "hakija" :repeating true}
+     {:info {:name "hakija" :repeating true :removable true}
       :body party}
 
      {:info {:name "paasuunnittelija"}

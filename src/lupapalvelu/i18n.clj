@@ -50,11 +50,11 @@
      ~@body))
 
 (env/in-dev
-  
+
   ;;
   ;; Re-define get-localizations so that i18n.txt is always loaded and merged to excel data.
   ;;
-  
+
   (defn- load-add-ons []
     (when-let [in (io/resource "i18n.txt")]
       (with-open [in (io/reader in)]
@@ -64,6 +64,6 @@
                     m))
                 {}
                 (line-seq in)))))
-  
+
   (defn get-localizations []
     (assoc excel-data "fi" (merge (get excel-data "fi") (load-add-ons)))))

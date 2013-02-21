@@ -65,12 +65,12 @@
 (defn logged-in? []
   (not (nil? (current-user))))
 
-(defn has-role? [role]
+(defn in-role? [role]
   (= role (keyword (:role (current-user)))))
 
-(defn authority? [] (has-role? :authority))
-(defn authority-admin? [] (has-role? :authorityAdmin))
-(defn admin? [] (has-role? :admin))
+(defn authority? [] (in-role? :authority))
+(defn authority-admin? [] (in-role? :authorityAdmin))
+(defn admin? [] (in-role? :admin))
 (defn anyone [] true)
 (defn nobody [] false)
 
@@ -94,8 +94,7 @@
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:sessionId     (or (sessionId (request/ring-request)) "???")
-     :applicationId (get-in action [:data :id] "???")
+    {:applicationId (get-in action [:data :id] "???")
      :email         (get-in action [:user :email] "???")}
     (core/execute action)))
 
@@ -256,7 +255,9 @@
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
-    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))
+    (if env/proxy-off
+      {:status 503}
+      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
 
 ;;
@@ -266,3 +267,4 @@
 (env/in-dev
   (defjson "/api/spy" []
     (dissoc (request/ring-request) :body)))
+

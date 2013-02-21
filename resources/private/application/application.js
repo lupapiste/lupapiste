@@ -212,7 +212,7 @@
       removeApplicationModel.init(id);
       return false;
     },
-    
+
     exportPdf: function() {
       window.open("/api/pdf-export/" + loc.currentLanguage + "/" + application.id(), "_blank");
       return false;
@@ -271,8 +271,8 @@
 
   application.assignee.subscribe(function(v) { updateAssignee(v); });
 
-  function resolveApplicationAssignee(roles) {
-    return (roles && roles.authority) ? new AuthorityInfo(roles.authority.id, roles.authority.firstName, roles.authority.lastName) : null;
+  function resolveApplicationAssignee(authority) {
+    return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
   }
 
   function initAuthoritiesSelectList(data) {
@@ -344,10 +344,10 @@
           .fail(function(e) { error(e); callback("err"); })
           .call();
       };
-      
+
       var displayOrder = {
-          "hankkeen-kuvaus": 1, 
-          "rakennuspaikka": 2, 
+          "hankkeen-kuvaus": 1,
+          "rakennuspaikka": 2,
           "hakija": 3,
           "paasuunnittelija": 4,
           "suunnittelija": 5,
@@ -362,7 +362,7 @@
       function displayDocuments(containerSelector, documents) {
 
         var sortedDocs = _.sortBy(documents, getDocumentOrder);
-        
+
         var docgenDiv = $(containerSelector).empty();
         _.each(sortedDocs, function(doc) {
           docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
@@ -393,7 +393,7 @@
       displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
 
       // set the value behind assignee selection list
-      var assignee = resolveApplicationAssignee(app.roles);
+      var assignee = resolveApplicationAssignee(app.authority);
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
 

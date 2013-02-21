@@ -79,8 +79,8 @@
       (mongo/update-by-id
         :applications (:id application)
         (if assigneeId
-          {$set {:roles.authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-          {$unset {:roles.authority ""}})))))
+          {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
+          {$unset {:authority ""}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -112,7 +112,7 @@
   [command]
   (with-application command
     (fn [application]
-      (if (nil? (-> application :roles :authority))
+      (if (nil? (:authority application))
         (executed "assign-to-me" command))
       (rl-mapping/get-application-as-krysp application)
       (mongo/update
@@ -170,7 +170,9 @@
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
         make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
-                                                 :body (schema-data-to-body (:schema-data op-info))})
+                                                 :body (if (= schema-name (:schema op-info))
+                                                         (schema-data-to-body (:schema-data op-info))
+                                                         {})})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
@@ -213,7 +215,6 @@
                        :address       (:address data)
                        :propertyId    (:propertyId data)
                        :title         (:address data)
-                       :roles         {:applicant owner}
                        :auth          [owner]
                        :operations    [{:operation op :created created}]
                        :documents     (if info-request? [] (make-documents user created nil op))
@@ -317,7 +318,7 @@
                   :submitted
                   :modified
                   :state
-                  (comp :authority :roles)])
+                  :authority])
 
 (def col-map (zipmap col-sources (map str (range))))
 
@@ -364,5 +365,3 @@
   {:parameters [:params]}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
-
-

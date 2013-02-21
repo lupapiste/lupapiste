@@ -17,10 +17,10 @@
 (defquery "invites"
   {:authenticated true}
   [{{:keys [id]} :user}]
-  (let [filter     {:invites {$elemMatch {:user.id id}}}
+  (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
         projection (assoc filter :_id 0)
         data       (mongo/select :applications filter projection)
-        invites    (flatten (map :invites data))]
+        invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
 
 (defn invite-body [user id host]
@@ -45,31 +45,33 @@
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
         (fail :already-invited)
-        (let [invited (security/get-or-create-user-by-email email)]
+        (let [invited (security/get-or-create-user-by-email email)
+              invite  {:title        title
+                       :application  application-id
+                       :text         text
+                       :documentName documentName
+                       :documentId   documentId
+                       :created      created
+                       :email        email
+                       :user         (security/summary invited)
+                       :inviter      (security/summary user)}
+              writer  (role invited :writer)
+              auth    (assoc writer :invite invite)]
           (if (domain/has-auth? application (:id invited))
             (fail :already-has-auth)
             (do
               (mongo/update
                 :applications
                 {:_id application-id
-                 :invites {$not {$elemMatch {:user.username email}}}}
-                {$push {:invites {:title        title
-                                  :application  application-id
-                                  :text         text
-                                  :documentName documentName
-                                  :documentId   documentId
-                                  :created      created
-                                  :email        email
-                                  :user         (security/summary invited)
-                                  :inviter      (security/summary user)}
-                        :auth (role invited :writer)}})
+                 :auth {$not {$elemMatch {:invite.user.username email}}}}
+                {$push {:auth auth}})
               (future
                 (info "sending email to" email)
                 (if (not (= (suffix email "@") "example.com"))
                   (if (email/send-email email (:title application) (invite-body user application-id host))
                     (info "email was sent successfully")
                     (error "email could not be delivered."))
-                  (info "we are not sending emails to @example.com doamin.")))
+                  (info "we are not sending emails to @example.com domain.")))
               nil)))))))
 
 (defcommand "approve-invite"
@@ -77,15 +79,15 @@
    :roles      [:applicant]}
   [{user :user :as command}]
   (with-application command
-    (fn [{application-id :id invites :invites}]
-      (when-let [my-invite (first (filter #(= (-> % :user :id) (:id user)) invites))]
-        (executed "set-user-to-document" (-> command
-                                           (assoc-in [:data :documentId] (:documentId my-invite))
-                                           (assoc-in [:data :userId]     (:id user))))
+    (fn [{application-id :id :as application}]
+      (when-let [my-invite (domain/invite application (:email user))]
+        (executed "set-user-to-document"
+          (-> command
+            (assoc-in [:data :documentId] (:documentId my-invite))
+            (assoc-in [:data :userId]     (:id user))))
         (mongo/update :applications
-                      {:_id application-id :invites {$elemMatch {:user.id (:id user)}}}
-                      ;; TODO: should refresh the data - for new invites to get full names
-                      {$pull {:invites      {:user.id (:id user)}}})))))
+          {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
+          {$set  {:auth.$ (role user :writer)}})))))
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
@@ -96,9 +98,8 @@
       (with-user email
         (fn [_]
           (mongo/update-by-id :applications application-id
-            {$pull {:invites      {:user.username email}
-                    :auth         {$and [{:username email}
-                                         {:type {$ne :owner}}]}}}))))))
+            {$pull {:auth {$and [{:username email}
+                                 {:type {$ne :owner}}]}}}))))))
 
 ;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
@@ -165,28 +166,27 @@
     (fn [application]
       (mongo/update-by-id
         :applications (:id application)
-        {$set {:roles.authority (security/summary user)}}))))
+        {$set {:authority (security/summary user)}}))))
 
-;; FIXME: only for the current document
 (defcommand "set-user-to-document"
-  {:parameters [:id :documentId :userId]
+  {:parameters [:id :documentId :userId :path]
    :authenticated true}
-  [{{:keys [documentId userId]} :data user :user :as command}]
+  [{{:keys [documentId userId path]} :data user :user :as command}]
   (with-application command
     (fn [application]
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (domain/user2henkilo subject)]
+            henkilo      (domain/user2henkilo subject)
+            full-path    (str "documents.$.body." path)]
         (if (nil? document)
           (fail :error.document-not-found)
-          ;; FIXME: all users should be modelled the same way.
-          (let [path (if (or (= "maksaja" schema-name) (= "hakija" schema-name)) :documents.$.body.henkilo :documents.$.body)]
-            (infof "merging user %s with best effort into document %s" subject name)
+          (do
+            (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
             (mongo/update
               :applications
               {:_id (:id application)
                :documents {$elemMatch {:id documentId}}}
-              {$set {path henkilo
+              {$set {full-path henkilo
                      :modified (:created command)}})))))))

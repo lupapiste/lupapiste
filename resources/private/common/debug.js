@@ -1,33 +1,98 @@
 $(function() {
   "use strict";
 
-  $("footer")
-    .append("<div class=\"dev-debug\">"+
-            "<h3><u>Development</u></h3>"+
-            "<input type='checkbox' id='debug-todo' checked='checked'>Toteuttamattomat<br/>"+
-            "<input type='checkbox' id='debug-hidden'>K&auml;&auml;nn&auml; piilotetut<br/>"+
-            "<input type='checkbox' id='debug-events'>N&auml;yt&auml; eventit<br/>"+
-            "<a id='debug-apply-minimal' href='#' style='margin-left: 10px'>Apply minimal</a>"+
-            "<span id='debug-apply-done' style='display: none'> DONE!</span><br/>"+
-            "</div>");
-
-  $(".todo").addClass("todo-off");
-  $("#debug-todo").click(function() { $(".todo").toggleClass("todo-off"); });
-  $("#debug-hidden").click(function() { $(".page").toggleClass("visible"); });
-  $("#debug-events").click(function() { hub.send("toggle-show-events"); });
-  $("#debug-apply-minimal").click(function() {
+  function applyMinimal(e) {
     ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
       .param("name", "minimal")
-      .success(function() {
-        $("#debug-apply-done").show();
-      })
+      .param("npm", "true")
+      .success(function() { $("#debug-apply-done").text(" DONE!").show().delay(1000).fadeOut(); })
       .call();
     return false;
-  });
+  }
+  
+  function throttle(type, e) {
+    var t = $(e.target);
+    var value = t.val();
+    ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/throttle/" + type)
+      .json({value: value})
+      .header("npm", "true")
+      .success(function() { t.parent().find("b.dev-throttle-" + type).text(value); })
+      .call();
+  }
+  
+  function loadTimingData() {
+    if (!window.performance) return;
+    
+    if (!window.performance.timing.loadEventEnd) {
+      setTimeout(loadTimingData, 10);
+      return;
+    }
 
-  hub.subscribe("page-change", function() { $("#debug-apply-done").hide(); });
-
+    var table = $("footer table.dev-debug-timing");
+    var data = [["fetch", "fetchStart", "requestStart"],
+                ["req", "requestStart", "responseStart"],
+                ["resp", "responseStart", "responseEnd"],
+                ["network", "fetchStart", "responseEnd"],
+                ["display", "responseEnd", "loadEventEnd"],
+                ["total", "navigationStart", "loadEventEnd"]];
+    
+    _.each(data, function(row) {
+      var name = row[0],
+          start = window.performance.timing[row[1]],
+          end = window.performance.timing[row[2]],
+          duration = end - start;
+      if (!start) throw "Unknown timineg event: " + row[1];
+      if (!end) throw "Unknown timineg event: " + row[2];
+      table
+        .append($("<tr>").css("padding", "0px")
+          .append($("<td>").text(name).css("padding", "0px"))
+          .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
+    });
+    
+    ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/browser-timing")
+      .json({timing: window.performance.timing})
+      .header("npm", "true")
+      .call();
+  }
+  
+  $("footer")
+    .append($("<div>").addClass("dev-debug")
+      .append($("<h3>")
+        .append($("<a>").attr("href", "#").text("Development").click(function() { $("footer .dev-debug div:eq(0)").slideToggle(); return false; })))
+      .append($("<div>")
+        .append($("<input type='checkbox' checked='checked'>").click(function() { $(".todo").toggleClass("todo-off"); }))
+        .append($("<label>").text("Unfinished"))
+        .append($("<br>"))
+        .append($("<input type='checkbox'>").click(function() { $(".page").toggleClass("visible"); }))
+        .append($("<label>").text("Toggle hidden"))
+        .append($("<br>"))
+        .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal!").click(applyMinimal))
+        .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
+        .append($("<br>"))
+        .append($("<span>").text("Throttle web: "))
+        .append($("<b>").addClass("dev-throttle-web").text("0"))
+        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "web"), 500)))
+        .append($("<br>"))
+        .append($("<span>").text("Throttle DB: "))
+        .append($("<b>").addClass("dev-throttle-db").text("0"))
+        .append($("<input type='range' value='0' min='0' max='2000' step='10'>").change(_.throttle(_.partial(throttle, "db"), 500))))
+      .append($("<h3>")
+        .append($("<a>").attr("href", "#").text("Timing").click(function() { $("footer .dev-debug div:eq(1)").slideToggle(); return false; })))
+      .append($("<div>")
+        .append($("<table>").addClass("dev-debug-timing"))
+        .hide()));
+  
+  setTimeout(loadTimingData, 10);
+  
+  ajax.get(window.location.protocol + "//" + window.location.host + "/perfmon/throttle")
+    .success(function(data) {
+      var ranges = $("footer .dev-debug input[type='range']");
+      $(ranges[0]).val(data.web).change();
+      $(ranges[1]).val(data.db).change();
+    })
+    .call();
+  
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
-
+  
 });
