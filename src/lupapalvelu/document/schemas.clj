@@ -22,7 +22,8 @@
 ;; schema sniplets
 ;;
 
-(def henkilo-valitsin [{:name :userId :type :personSelector}])
+(def henkilo-valitsin [{:name :userId :type :personSelector }
+                        {:name "turvakieltoKytkin" :type :checkbox}])
 
 (def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
 
@@ -111,8 +112,8 @@
                               {:name "KVV-suunnittelija"}
                               {:name "RAK-rakennesuunnittelija"}
                               {:name "ARK-rakennussuunnittelija"}
-                              {:name "ei tiedossa"}
-                              {:name "Vaikeiden t\u00F6iden suunnittelija"}]}])
+                              {:name "Vaikeiden t\u00F6iden suunnittelija"}
+                              {:name "ei tiedossa"}]}])
 
 (def suunnittelija (body
                      henkilo-valitsin
@@ -320,19 +321,19 @@
                                   :body [{:name "kWh/m2"}
                                          {:name "kWh/brm2/vuosi"}]}
                                  {:name "paloluokka"
-                                  :body [{:name "palonkest\u00e4v\u00e4"
-                                          :name "paloapid\u00e4tt\u00e4v\u00e4"
-                                          :name "paloahidastava"
-                                          :name "l\u00e4hinn\u00e4 paloakest\u00e4v\u00e4"
-                                          :name "l\u00e4hinn\u00e4 paloapid\u00e4tt\u00e4v\u00e4"
-                                          :name "l\u00e4hinn\u00e4 paloahidastava"
-                                          :name "P1"
-                                          :name "P2"
-                                          :name "P3"
-                                          :name "P1/P2"
-                                          :name "P1/P3"
-                                          :name "P2/P3"
-                                          :name "P1/P2/P3"}]}]}
+                                  :body [{:name "palonkest\u00e4v\u00e4"}
+                                          {:name "paloapid\u00e4tt\u00e4v\u00e4"}
+                                          {:name "paloahidastava"}
+                                          {:name "l\u00e4hinn\u00e4 paloakest\u00e4v\u00e4"}
+                                          {:name "l\u00e4hinn\u00e4 paloapid\u00e4tt\u00e4v\u00e4"}
+                                          {:name "l\u00e4hinn\u00e4 paloahidastava"}
+                                          {:name "P1"}
+                                          {:name "P2"}
+                                          {:name "P3"}
+                                          {:name "P1/P2"}
+                                          {:name "P1/P3"}
+                                          {:name "P2/P3"}
+                                          {:name "P1/P2/P3"}]}]}
                          {:name "huoneistot"
                           :type :group
                           :repeating true
