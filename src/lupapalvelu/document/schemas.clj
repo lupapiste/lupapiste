@@ -5,13 +5,21 @@
 ;;
 
 (defn body
-  "shallow merges stuff into vector"
+  "Shallow merges stuff into vector"
   [& rest]
   (reduce
     (fn [a x]
       (let [v (if (sequential? x) x (vector x))]
         (concat a v)))
     [] rest))
+
+(defn repeatable
+  "Created repeatable element."
+  [name childs]
+  [{:name      name
+    :type      :group
+    :repeating true
+    :body      (body childs)}])
 
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
@@ -540,8 +548,8 @@
      {:info {:name "maisematyo"}
       :body maisematyo}
 
-     {:info {:name "hakija" :repeating true :removable true :min 1 :type :party}
-      :body party}
+     {:info {:name "hakijat" :type :party}
+      :body (repeatable "hakija" party)}
 
      {:info {:name "paasuunnittelija" :type :party}
       :body paasuunnittelija}
