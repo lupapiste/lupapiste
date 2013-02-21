@@ -167,49 +167,6 @@
         </div>
       </div>
 
-      <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
-        <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
-        <div>
-          <table class="table table-striped conversation" data-test-id="application-comments-table">
-            <tbody data-bind="foreach: comments">
-              <tr class="comment">
-                <td class="comment-party commenttd">
-                  <span class="date" data-bind="dateTimeString: created"></span>
-                  <br />
-                  <span class="author" data-bind="fullName: user">
-                  </span>
-                  <br />
-                  <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-                </td>
-                <td class="commenttd" data-bind="text: text"></td>
-              </tr>
-            </tbody>
-          </table>
-          <form>
-            <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
-            <textarea
-              data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-              data-test-id="application-new-comment-text"
-              class="form-input textarea"
-              rows="3">
-            </textarea>
-            <button
-              data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
-              data-test-id="application-new-comment-btn"
-              type="submit"
-              class="btn btn-primary"></button>
-          </form>
-        </div>
-      </div>
-
-      <div id="application-verdict-tab" class="tab-content" data-bind="with: application">
-        <div class="tab-wrapper">
-          <div class="row" data-bind="with: verdict">
-            <span data-bind="text: text" data-test-id="application-verdict"></span>
-          </div>
-        </div>
-      </div>
-
       <div id="application-attachments-tab" class="tab-content">
         <p data-bind="ltext: 'application.attachmentsDesc'" class="tab-info"></p>
         <div class="tab-wrapper">
@@ -280,6 +237,49 @@
               data-window-id="upload-dialog"
               data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
           </button>
+        </div>
+      </div>
+
+      <div id="application-verdict-tab" class="tab-content" data-bind="with: application">
+        <div class="tab-wrapper">
+          <div class="row" data-bind="with: verdict">
+            <span data-bind="text: text" data-test-id="application-verdict"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
+        <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
+        <div>
+          <table class="table table-striped conversation" data-test-id="application-comments-table">
+            <tbody data-bind="foreach: comments">
+              <tr class="comment">
+                <td class="comment-party commenttd">
+                  <span class="date" data-bind="dateTimeString: created"></span>
+                  <br />
+                  <span class="author" data-bind="fullName: user">
+                  </span>
+                  <br />
+                  <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
+                </td>
+                <td class="commenttd" data-bind="text: text"></td>
+              </tr>
+            </tbody>
+          </table>
+          <form>
+            <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
+            <textarea
+              data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+              data-test-id="application-new-comment-text"
+              class="form-input textarea"
+              rows="3">
+            </textarea>
+            <button
+              data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
+              data-test-id="application-new-comment-btn"
+              type="submit"
+              class="btn btn-primary"></button>
+          </form>
         </div>
       </div>
 
