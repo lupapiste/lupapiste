@@ -25,7 +25,8 @@
         "Yst\u00E4v\u00E4llisin terveisin,\n\nLupapiste.fi\n\n\n\n"
         "Hej,\n\n"
         "En ny %s har anl\u00E4ndat. Se ans\u00F6kan i addresset %s/sv/applicant#!/%s/%s\n\n"
-        "\n\n")
+        "\n\n"
+        "Grattis,\n\nLupapiste.fi\n\n\n\n")
       (:fi permit-type-name)
       host
       permit-type-path
