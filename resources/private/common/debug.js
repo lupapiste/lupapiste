@@ -1,7 +1,7 @@
 $(function() {
   "use strict";
 
-  function applyMinimal(e) {
+  function applyMinimal() {
     ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
       .param("name", "minimal")
       .param("npm", "true")
@@ -9,7 +9,7 @@ $(function() {
       .call();
     return false;
   }
-  
+
   function throttle(type, e) {
     var t = $(e.target);
     var value = t.val();
@@ -19,10 +19,10 @@ $(function() {
       .success(function() { t.parent().find("b.dev-throttle-" + type).text(value); })
       .call();
   }
-  
+
   function loadTimingData() {
-    if (!window.performance) return;
-    
+    if (!window.performance) { return; }
+
     if (!window.performance.timing.loadEventEnd) {
       setTimeout(loadTimingData, 10);
       return;
@@ -35,26 +35,26 @@ $(function() {
                 ["network", "fetchStart", "responseEnd"],
                 ["display", "responseEnd", "loadEventEnd"],
                 ["total", "navigationStart", "loadEventEnd"]];
-    
+
     _.each(data, function(row) {
       var name = row[0],
           start = window.performance.timing[row[1]],
           end = window.performance.timing[row[2]],
           duration = end - start;
-      if (!start) throw "Unknown timineg event: " + row[1];
-      if (!end) throw "Unknown timineg event: " + row[2];
+      if (!start) { throw "Unknown timineg event: " + row[1]; }
+      if (!end) { throw "Unknown timineg event: " + row[2]; }
       table
         .append($("<tr>").css("padding", "0px")
           .append($("<td>").text(name).css("padding", "0px"))
           .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
     });
-    
+
     ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/browser-timing")
       .json({timing: window.performance.timing})
       .header("npm", "true")
       .call();
   }
-  
+
   $("footer")
     .append($("<div>").addClass("dev-debug")
       .append($("<h3>")
@@ -81,9 +81,9 @@ $(function() {
       .append($("<div>")
         .append($("<table>").addClass("dev-debug-timing"))
         .hide()));
-  
+
   setTimeout(loadTimingData, 10);
-  
+
   ajax.get(window.location.protocol + "//" + window.location.host + "/perfmon/throttle")
     .success(function(data) {
       var ranges = $("footer .dev-debug input[type='range']");
@@ -91,8 +91,8 @@ $(function() {
       $(ranges[1]).val(data.db).change();
     })
     .call();
-  
+
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
-  
+
 });
