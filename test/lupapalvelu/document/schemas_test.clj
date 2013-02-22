@@ -18,8 +18,8 @@
 
 (facts "repeatable"
   (fact (repeatable "beers" {:name :beer
-                             :type :string}) => {:name "beers"
-                                                 :type :group
-                                                 :repeating true
-                                                 :body [{:name :beer
-                                                         :type :string}]}))
+                             :type :string}) => [{:name "beers"
+                                                  :type :group
+                                                  :repeating true
+                                                  :body [{:name :beer
+                                                          :type :string}]}]))
