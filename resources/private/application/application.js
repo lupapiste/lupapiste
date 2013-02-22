@@ -330,57 +330,8 @@
         inforequestMap.drawShape(application.shapes()[0]);
       }
 
-      // docgen:
-      var save = function(path, value, callback, data) {
-        ajax
-          .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-          // Server returns empty array (all ok), or array containing an array with three
-          // elements: [key status message]. Here we use just the status.
-          .success(function(e) {
-            var status = (e.results.length === 0) ? "ok" : e.results[0][1];
-            callback(status);
-          })
-          .error(function(e) { error(e); callback("err"); })
-          .fail(function(e) { error(e); callback("err"); })
-          .call();
-      };
-
-      function getDocumentOrder(doc) {
-        var num = doc.schema.info.order || 7;
-        return num * 10000000000 + doc.created/1000;
-      }
-
-      function displayDocuments(containerSelector, documents) {
-
-        var sortedDocs = _.sortBy(documents, getDocumentOrder);
-
-        var docgenDiv = $(containerSelector).empty();
-        _.each(sortedDocs, function(doc) {
-          docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
-
-          var schema = doc.schema;
-
-          if (schema.info.repeating) {
-            var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
-
-            $(btn).click(function() {
-              var self = this;
-              ajax
-                .command("create-doc", {schema: schema.info.name, id: application.id()})
-                .success(function(data) {
-                  var newDocId = data.doc;
-                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application.id()).element;
-                  $(self).before(newElem);
-                })
-                .call();
-            });
-            docgenDiv.append(btn);
-          }
-        });
-      }
-
-      displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
-      displayDocuments("#partiesDocgen",     _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
+      docgen.displayDocuments("#applicationDocgen", removeDocModel, application.id(), _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
+      docgen.displayDocuments("#partiesDocgen",     removeDocModel, application.id(), _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
