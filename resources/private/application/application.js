@@ -345,17 +345,8 @@
           .call();
       };
 
-      var displayOrder = {
-          "hankkeen-kuvaus": 1,
-          "rakennuspaikka": 2,
-          "hakija": 3,
-          "paasuunnittelija": 4,
-          "suunnittelija": 5,
-          "maksaja": 6,
-          "lisatiedot": 100};
-
       function getDocumentOrder(doc) {
-        var num = displayOrder[doc.schema.info.name] || 7;
+        var num = doc.schema.info.order || 7;
         return num * 10000000000 + doc.created/1000;
       }
 
