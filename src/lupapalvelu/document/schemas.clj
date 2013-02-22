@@ -289,13 +289,13 @@
                                          {:name "puu"}
                                          {:name "muu" :type :string :size "s"} ;TODO tukii tekstille
                                          {:name "ei tiedossa"}]}]}
-                         {:name "verkostoliittymat" :type :choice
+                         {:name "verkostoliittymat" :type :group
                           :body [{:name "viemariKytkin" :type :checkbox}
                                  {:name "vesijohtoKytkin" :type :checkbox}
                                  {:name "sahkoKytkin" :type :checkbox}
                                  {:name "maakaasuKytkin" :type :checkbox}
                                  {:name "kaapeliKytkin" :type :checkbox}]}
-                         {:name "varusteet" :type :choice
+                         {:name "varusteet" :type :group
                           :body [{:name "sahkoKytkin" :type :checkbox}
                                  {:name "kaasuKytkin" :type :checkbox}
                                  {:name "viemariKytkin" :type :checkbox}
@@ -345,7 +345,21 @@
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group :repeating true
-                             :body party}])
+                             :body (body party [{:name "omistajalaji" :type :select
+                                           :body [{:name "yksityinen maatalousyrittäjä"}
+                                                  {:name "muu yksityinen henkilö tai perikunta"}
+                                                  {:name "asunto-oy tai asunto-osuuskunta"}
+                                                  {:name "kiinteistö oy"}
+                                                  {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)"}
+                                                  {:name "valtio- tai kuntaenemmistöinen yritys"}
+                                                  {:name "kunnan liikelaitos"}
+                                                  {:name "valtion liikelaitos"}
+                                                  {:name "pankki tai vakuutuslaitos"}
+                                                  {:name "kunta tai kuntainliitto"}
+                                                  {:name "valtio"}
+                                                  {:name "sosiaaliturvarahasto"}
+                                                  {:name "uskonnollinen yhteisö, säätiö, puolue tai yhdistys"}
+                                                  {:name "ei tiedossa"}]}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")

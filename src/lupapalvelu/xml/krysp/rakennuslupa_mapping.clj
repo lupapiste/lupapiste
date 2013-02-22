@@ -34,31 +34,31 @@
                    sijantitieto
                    {:tag :rakennuksenTiedot
                     :child [{:tag :rakennustunnus :child tunnus-children}
-                                 {:tag :kayttotarkoitus}
-                                 {:tag :tilavuus}
-                                 {:tag :kokonaisala}
-                                 {:tag :kellarinpinta-ala}
-                                 {:tag :BIM :child []}
-                                 {:tag :kerrosluku}
-                                 {:tag :kerrosala}
-                                 {:tag :rakentamistapa}
-                                 {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
-                                                                        {:tag :rakennusaine}]}
-                                 {:tag :julkisivu
-                                  :child [{:tag :muuMateriaali}
-                                          {:tag :julkisivumateriaali}]}
-                                 {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
-                                                                      {:tag :vesijohtoKytkin}
-                                                                      {:tag :sahkoKytkin}
-                                                                      {:tag :maakaasuKytkin}
-                                                                      {:tag :kaapeliKytkin}]}
-                                 {:tag :energialuokka}
-                                 {:tag :energiatehokkuusluku}
-                                 {:tag :energiatehokkuusluvunYksikko}
-                                 {:tag :paloluokka}
+                            {:tag :kayttotarkoitus}
+                            {:tag :tilavuus}
+                            {:tag :kokonaisala}
+                            {:tag :kellarinpinta-ala}
+                            {:tag :BIM :child []}
+                            {:tag :kerrosluku}
+                            {:tag :kerrosala}
+                            {:tag :rakentamistapa}
+                            {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
+                                                               {:tag :rakennusaine}]}
+                            {:tag :julkisivu
+                             :child [{:tag :muuMateriaali}
+                                     {:tag :julkisivumateriaali}]}
+                            {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
+                                                             {:tag :vesijohtoKytkin}
+                                                             {:tag :sahkoKytkin}
+                                                             {:tag :maakaasuKytkin}
+                                                             {:tag :kaapeliKytkin}]}
+                            {:tag :energialuokka}
+                            {:tag :energiatehokkuusluku}
+                            {:tag :energiatehokkuusluvunYksikko}
+                            {:tag :paloluokka}
                                  {:tag :lammitystapa}
                                  {:tag :lammonlahde :child [{:tag :polttoaine}
-                                                             {:tag :muu}]}
+                                                            {:tag :muu}]}
                                  {:tag :varusteet
                                   :child [{:tag :sahkoKytkin}
                                           {:tag :kaasuKytkin}
@@ -73,7 +73,14 @@
                                           {:tag :vaestonsuoja}]}
                                  {:tag :jaahdytysmuoto}
                                  {:tag :asuinhuoneistot :child [huoneisto]}
-                                 ]}])
+                                 ]}
+                   {:tag :omistajatieto
+                    :child [{:tag :Omistaja
+                             :child [osapuoli-body
+                                     {:tag :omistajalaji
+                                      :child [{:tag :muu}
+                                              {:tag :omistajalaji}]}]}]}
+                   ])
 
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
