@@ -5,13 +5,21 @@
 ;;
 
 (defn body
-  "shallow merges stuff into vector"
+  "Shallow merges stuff into vector"
   [& rest]
   (reduce
     (fn [a x]
       (let [v (if (sequential? x) x (vector x))]
         (concat a v)))
     [] rest))
+
+(defn repeatable
+  "Created repeatable element."
+  [name childs]
+  [{:name      name
+    :type      :group
+    :repeating true
+    :body      (body childs)}])
 
 (defn to-map-by-name
   "Take list of schema maps, return a map of schemas keyed by :name under :info"
@@ -521,7 +529,8 @@
 
 (def schemas
   (to-map-by-name
-    [{:info {:name "hankkeen-kuvaus"}
+    [{:info {:name "hankkeen-kuvaus"
+             :order 1}
       :body [{:name "kuvaus" :type :text}
              {:name "poikkeamat" :type :text}]}
 
@@ -540,19 +549,31 @@
      {:info {:name "maisematyo"}
       :body maisematyo}
 
-     {:info {:name "hakija" :repeating true :removable true}
+     {:info {:name "hakija"
+             :order 3
+             :repeating true
+             :type :party}
       :body party}
 
-     {:info {:name "paasuunnittelija"}
+     {:info {:name "paasuunnittelija"
+             :order 4
+             :type :party}
       :body paasuunnittelija}
 
-     {:info {:name "suunnittelija" :repeating true}
+     {:info {:name "suunnittelija"
+             :repeating true
+             :order 5
+             :type :party}
       :body suunnittelija}
 
-     {:info {:name "maksaja" :repeating true}
+     {:info {:name "maksaja"
+             :repeating true
+             :order 6
+             :type :party}
       :body party}
 
-     {:info {:name "rakennuspaikka"} ; TODO sijainti(kios?/ jo kartalta osoitettu)
+     {:info {:name "rakennuspaikka"
+             :order 2} ; TODO sijainti(kios?/ jo kartalta osoitettu)
       :body [{:name "kiinteisto"
               :type :group
               :body [{:name "maaraalaTunnus" :type :string}
@@ -571,5 +592,6 @@
                      {:name "eiKaavaa"}
                      {:name "ei tiedossa"}]}]}
 
-       {:info {:name "lisatiedot"}
+       {:info {:name "lisatiedot"
+               :order 100}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
