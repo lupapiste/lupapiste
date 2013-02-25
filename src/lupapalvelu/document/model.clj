@@ -4,6 +4,7 @@
         [lupapalvelu.document.schemas :only [schemas]]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
+            [clj-time.format :as timeformat]
             [lupapalvelu.document.subtype :as subtype]))
 
 ;;
@@ -33,10 +34,14 @@
 (defmethod validate :boolean [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-;; FIXME
+
+(def dd-mm-yyyy (timeformat/formatter "dd-MM-YYYY"))
+
 (defmethod validate :date [elem v]
-  (info "validated :date " elem v)
-  nil)
+  (try
+    (timeformat/parse dd-mm-yyyy v)
+    nil
+    (catch Exception e [:warn "invalid-date-format"])))
 
 ;; FIXME
 (defmethod validate :checkbox [elem v]
