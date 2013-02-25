@@ -140,11 +140,20 @@ var docgen = (function() {
     function buildDate(spec, model, path, save, specId) {
       var myPath = path.join(".");
       var value = model[spec.name] || "";
-      var input = makeInput("date", myPath, value, save, "form-date");
 
       var span = makeEntrySpan();
       span.appendChild(makeLabel("date", myPath, specId));
-      span.appendChild(input);
+
+      // date
+      $("<input>", {
+              id:    pathStrToID(myPath),
+              name:  docId + "." + path,
+              type:  "text",
+              class: "form-input text form-date",
+              value: value,
+              change: save,
+              }).datepicker().appendTo(span);
+
       return span;
     }
 
