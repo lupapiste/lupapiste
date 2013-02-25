@@ -520,7 +520,7 @@
                      {:name "tuhoutunut"}
                      {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
                      {:name "poistaminen"}]}
-             {:name "poistumanAjankohta" :type :string}
+             {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus))
 
 ;;
@@ -551,7 +551,12 @@
 
      {:info {:name "hakija"
              :order 3
-             :repeating true
+             :type :party}
+      :body party}
+
+     {:info {:name "hakijat"
+             :order 3
+             :optonal true
              :type :party}
       :body party}
 
