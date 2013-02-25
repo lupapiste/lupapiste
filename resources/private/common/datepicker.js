@@ -23,15 +23,15 @@ jQuery(function($){
       yearSuffix: ''};
 
   $.datepicker.regional.sv = {
-      closeText: 'Stäng',
-      prevText: '&laquo;Förra',
-      nextText: 'Nästa&raquo;',
+      closeText: 'St&auml;ng',
+      prevText: '&laquo;F&ouml;rra',
+      nextText: 'N&auml;sta&raquo;',
       currentText: 'Idag',
       monthNames: ['Januari','Februari','Mars','April','Maj','Juni', 'Juli','Augusti','September','Oktober','November','December'],
       monthNamesShort: ['Jan','Feb','Mar','Apr','Maj','Jun', 'Jul','Aug','Sep','Okt','Nov','Dec'],
-      dayNamesShort: ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'],
-      dayNames: ['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'],
-      dayNamesMin: ['Sö','Må','Ti','On','To','Fr','Lö'],
+      dayNamesShort: ['S&ouml;n','M&aring;n','Tis','Ons','Tor','Fre','L&ouml;r'],
+      dayNames: ['S&ouml;ndag','M&aring;ndag','Tisdag','Onsdag','Torsdag','Fredag','L&ouml;rdag'],
+      dayNamesMin: ['S&ouml;','M&aring;','Ti','On','To','Fr','L&ouml;'],
       weekHeader: 'Ve',
       dateFormat: 'dd.mm.yy',
       firstDay: 1,
