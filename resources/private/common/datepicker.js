@@ -1,5 +1,9 @@
+/*global jQuery:false */
+
 jQuery(function($){
-  $.datepicker.regional['fi'] = {
+  "use strict";
+
+  $.datepicker.regional.fi = {
       closeText: 'Sulje',
       prevText: '&laquo;Edellinen',
       nextText: 'Seuraava&raquo;',
@@ -17,5 +21,24 @@ jQuery(function($){
       buttonImage: '/img/calendar.gif',
       showMonthAfterYear: false,
       yearSuffix: ''};
-  $.datepicker.setDefaults($.datepicker.regional['fi']);
+
+  $.datepicker.regional.sv = {
+      closeText: 'Stäng',
+      prevText: '&laquo;Förra',
+      nextText: 'Nästa&raquo;',
+      currentText: 'Idag',
+      monthNames: ['Januari','Februari','Mars','April','Maj','Juni', 'Juli','Augusti','September','Oktober','November','December'],
+      monthNamesShort: ['Jan','Feb','Mar','Apr','Maj','Jun', 'Jul','Aug','Sep','Okt','Nov','Dec'],
+      dayNamesShort: ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'],
+      dayNames: ['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'],
+      dayNamesMin: ['Sö','Må','Ti','On','To','Fr','Lö'],
+      weekHeader: 'Ve',
+      dateFormat: 'dd.mm.yy',
+      firstDay: 1,
+      isRTL: false,
+      buttonImage: '/img/calendar.gif',
+      showMonthAfterYear: false,
+      yearSuffix: ''};
+
+  $.datepicker.setDefaults($.datepicker.regional.fi);
 });
