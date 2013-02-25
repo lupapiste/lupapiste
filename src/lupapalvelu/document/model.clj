@@ -38,7 +38,6 @@
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
 (defmethod validate :date [elem v]
-  (println v)
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
