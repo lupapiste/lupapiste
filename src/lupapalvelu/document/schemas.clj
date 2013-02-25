@@ -520,7 +520,7 @@
                      {:name "tuhoutunut"}
                      {:name "r\u00e4nsitymisen vuoksi hyl\u00e4tty"}
                      {:name "poistaminen"}]}
-             {:name "poistumanAjankohta" :type :string}
+             {:name "poistumanAjankohta" :type :date}
              olemassaoleva-rakennus))
 
 ;;
