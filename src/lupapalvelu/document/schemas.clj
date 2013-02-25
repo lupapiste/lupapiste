@@ -402,7 +402,7 @@
              {:name "poikkeamat" :type :text}]}
 
      {:info {:name "uusiRakennus"}
-      :body (concat rakennuksen-omistajat rakennuksen-tiedot)}
+      :body (body rakennuksen-omistajat rakennuksen-tiedot)}
 
      {:info {:name "rakennuksen-muuttaminen"}
       :body rakennuksen-muuttaminen}
@@ -447,9 +447,9 @@
                      {:name "eiKaavaa"}
                      {:name "ei tiedossa"}]}]}
 
-       {:info {:name "lisatiedot"}
+       :info {:name "lisatiedot"}
       :body [{:name "suoramarkkinointikielto" :type :checkbox}
              {:name "toimitustapa" :type :select
               :body [{:name "s\u00e4hk\u00f6isesti"}
                      {:name "noudetaan"}
-                     {:name "postitse"}]}]}]))
+                     {:name "postitse"}]}]]))
