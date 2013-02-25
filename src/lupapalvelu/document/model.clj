@@ -34,6 +34,11 @@
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
 ;; FIXME
+(defmethod validate :date [elem v]
+  (info "validated :date " elem v)
+  nil)
+
+;; FIXME
 (defmethod validate :checkbox [elem v]
   nil)
 
