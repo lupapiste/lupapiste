@@ -14,6 +14,7 @@ jQuery(function($){
       dateFormat: 'dd.mm.yy',
       firstDay: 1,
       isRTL: false,
+      buttonImage: '/img/calendar.gif',
       showMonthAfterYear: false,
       yearSuffix: ''};
   $.datepicker.setDefaults($.datepicker.regional['fi']);
