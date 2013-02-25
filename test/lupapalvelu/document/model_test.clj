@@ -70,4 +70,4 @@
 (facts "dates"
   (validate {:type :date} "abba") => [:warn "invalid-date-format"]
   (validate {:type :date} "") => nil
-  (validate {:type :date} "11-12-2013") => nil)
+  (validate {:type :date} "11.12.2013") => nil)

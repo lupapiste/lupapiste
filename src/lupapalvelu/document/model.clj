@@ -35,9 +35,10 @@
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
 
-(def dd-mm-yyyy (timeformat/formatter "dd-MM-YYYY"))
+(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
 (defmethod validate :date [elem v]
+  (println v)
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
