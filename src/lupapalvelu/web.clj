@@ -144,7 +144,15 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
+(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
+
+(defjson "/api/gotobang" []
+  (ok :data (session/get! "gotobang")))
+
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app gotobang :gotobang}
+  (when (and gotobang (local? gotobang))
+    (info "gotobang:" gotobang)
+    (session/put! "gotobang" gotobang))
   (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
 
 ;;
