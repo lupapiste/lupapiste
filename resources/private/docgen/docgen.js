@@ -1,10 +1,7 @@
-if (typeof LUPAPISTE === "undefined") {
-  var LUPAPISTE = {};
-}
+var docgen = (function() {
+  "use strict";
 
-LUPAPISTE.DOMUtils = {
-  makeButton: function (id, label) {
-    "use strict";
+  function makeButton(id, label) {
 
     var appendButton = document.createElement("button");
     appendButton.id = id;
@@ -12,561 +9,621 @@ LUPAPISTE.DOMUtils = {
     appendButton.innerHTML = label;
     return appendButton;
   }
-};
 
-LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, appId) {
-  "use strict";
+  LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, appId) {
 
-  // Magic key: if schema contains "_selected" radioGroup,
-  // user can select only one of the schemas named in "_selected" group
-  var SELECT_ONE_OF_GROUP_KEY = "_selected";
+    // Magic key: if schema contains "_selected" radioGroup,
+    // user can select only one of the schemas named in "_selected" group
+    var SELECT_ONE_OF_GROUP_KEY = "_selected";
 
-  var self = this;
+    var self = this;
 
-  self.spec = spec;
-  self.model = model;
-  self.saveCallback = saveCallback;
-  self.removeCallback = removeCallback;
-  self.docId = docId;
-  self.appId = appId;
-  self.eventData = {doc: docId, app: appId};
+    self.spec = spec;
+    self.model = model;
+    self.saveCallback = saveCallback;
+    self.removeCallback = removeCallback;
+    self.docId = docId;
+    self.appId = appId;
+    self.eventData = {doc: docId, app: appId};
 
-  self.sizeClasses = {"s" : "form-input short", "m" : "form-input medium"};
+    self.sizeClasses = {"s" : "form-input short", "m" : "form-input medium"};
 
-  // ID utilities
+    // ID utilities
 
-  function pathStrToID(pathStr) {
-      return self.docId + pathStr.replace(/\./g, "-");
-  }
-
-  function pathStrToLabelID(pathStr) {
-    return "label-" + pathStrToID(pathStr);
-  }
-
-  function pathStrToGroupID(pathStr) {
-    return "group-" + pathStrToID(pathStr);
-  }
-
-  function makeLabel(type, pathStr, specId, groupLabel) {
-    var label = document.createElement("label");
-    label.id = pathStrToLabelID(pathStr);
-    label.htmlFor = pathStrToID(pathStr);
-    label.className = "form-label form-label-" + type;
-
-    var path = groupLabel ? pathStr + "._group_label" : pathStr;
-    var locKey = (specId + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
-    label.innerHTML = loc(locKey);
-    return label;
-  }
-
-  function makeInput(type, path, value, save, extraClass) {
-    var input = document.createElement("input");
-    input.id = pathStrToID(path);
-    input.name = docId + "." + path;
-
-    try {
-      input.type = type;
-    } catch (e) {
-      // IE does not support HTML5 input types such as email
-      input.type = "text";
+    function pathStrToID(pathStr) {
+        return self.docId + pathStr.replace(/\./g, "-");
     }
 
-    input.className = "form-input " + type + " " + (extraClass || "");
-    input.onchange = save;
-    if (type === "checkbox") {
-      input.checked = value;
-    } else {
-      input.value = value || "";
+    function pathStrToLabelID(pathStr) {
+      return "label-" + pathStrToID(pathStr);
     }
-    return input;
-  }
 
-  function makeEntrySpan() {
-    var span = document.createElement("span");
-    span.className = "form-entry";
-    return span;
-  }
+    function pathStrToGroupID(pathStr) {
+      return "group-" + pathStrToID(pathStr);
+    }
 
-  // Form field builders
+    function makeLabel(type, pathStr, specId, groupLabel) {
+      var label = document.createElement("label");
+      label.id = pathStrToLabelID(pathStr);
+      label.htmlFor = pathStrToID(pathStr);
+      label.className = "form-label form-label-" + type;
 
-  function buildCheckbox(spec, model, path, save, specId) {
-    var myPath = path.join(".");
-    var span = makeEntrySpan();
-    span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
-    span.appendChild(makeLabel("checkbox", myPath, specId));
-    return span;
-  }
+      var path = groupLabel ? pathStr + "._group_label" : pathStr;
+      var locKey = (specId + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+      label.innerHTML = loc(locKey);
+      return label;
+    }
 
-  function buildString(spec, model, path, save, specId, partOfChoice) {
-    var myPath = path.join(".");
-    var span =  makeEntrySpan();
-    span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
+    function makeInput(type, path, value, save, extraClass) {
+      var input = document.createElement("input");
+      input.id = pathStrToID(path);
+      input.name = docId + "." + path;
+
+      try {
+        input.type = type;
+      } catch (e) {
+        // IE does not support HTML5 input types such as email
+        input.type = "text";
+      }
+
+      input.className = "form-input " + type + " " + (extraClass || "");
+      input.onchange = save;
+      if (type === "checkbox") {
+        input.checked = value;
+      } else {
+        input.value = value || "";
+      }
+      return input;
+    }
+
+    function makeEntrySpan() {
+      var span = document.createElement("span");
+      span.className = "form-entry";
+      return span;
+    }
+
+    // Form field builders
+
+    function buildCheckbox(spec, model, path, save, specId) {
+      var myPath = path.join(".");
+      var span = makeEntrySpan();
+      span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
+      span.appendChild(makeLabel("checkbox", myPath, specId));
+      return span;
+    }
+
+    function buildString(spec, model, path, save, specId, partOfChoice) {
+      var myPath = path.join(".");
+      var span =  makeEntrySpan();
+      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
 
 
 
-    var type = (spec.subtype === "email") ? "email" : "text";
-    var sizeClass = self.sizeClasses[spec.size] || "";
-    var input = makeInput(type, myPath, model[spec.name], save, sizeClass);
+      var type = (spec.subtype === "email") ? "email" : "text";
+      var sizeClass = self.sizeClasses[spec.size] || "";
+      var input = makeInput(type, myPath, model[spec.name], save, sizeClass);
 
-    if (spec.unit) {
-      var inputAndUnit = document.createElement("span");
-      inputAndUnit.className = "form-input-and-unit";
-      inputAndUnit.appendChild(input);
+      if (spec.unit) {
+        var inputAndUnit = document.createElement("span");
+        inputAndUnit.className = "form-input-and-unit";
+        inputAndUnit.appendChild(input);
 
-      var unit = document.createElement("span");
-      unit.className = "form-string-unit";
-      unit.appendChild(document.createTextNode(loc("unit." + spec.unit)));
-      inputAndUnit.appendChild(unit);
-      span.appendChild(inputAndUnit);
-    } else {
+        var unit = document.createElement("span");
+        unit.className = "form-string-unit";
+        unit.appendChild(document.createTextNode(loc("unit." + spec.unit)));
+        inputAndUnit.appendChild(unit);
+        span.appendChild(inputAndUnit);
+      } else {
+        span.appendChild(input);
+      }
+
+      return span;
+    }
+
+    function buildText(spec, model, path, save, specId) {
+      var myPath = path.join(".");
+
+      var input = document.createElement("textarea");
+      input.name = myPath;
+      input.setAttribute("rows", spec.rows || "10");
+      input.setAttribute("cols", spec.cols || "40");
+      input.className = "form-input textarea";
+      input.onchange = save;
+      input.value = model[spec.name] || "";
+
+      var span = makeEntrySpan();
+      span.appendChild(makeLabel("text", myPath, specId));
       span.appendChild(input);
+      return span;
     }
 
-    return span;
-  }
+    function buildDate(spec, model, path, save, specId) {
+      var myPath = path.join(".");
+      var value = model[spec.name] || "";
 
-  function buildText(spec, model, path, save, specId) {
-    var myPath = path.join(".");
+      var span = makeEntrySpan();
+      span.appendChild(makeLabel("date", myPath, specId));
 
-    var input = document.createElement("textarea");
-    input.name = myPath;
-    input.setAttribute("rows", spec.rows || "10");
-    input.setAttribute("cols", spec.cols || "40");
-    input.className = "form-input textarea";
-    input.onchange = save;
-    input.value = model[spec.name] || "";
+      // date
+      $("<input>", {
+              id:    pathStrToID(myPath),
+              name:  docId + "." + path,
+              type:  "text",
+              class: "form-input text form-date",
+              value: value,
+              change: save,
+              }).datepicker().appendTo(span);
 
-    var span = makeEntrySpan();
-    span.appendChild(makeLabel("text", myPath, specId));
-    span.appendChild(input);
-    return span;
-  }
-
-  function buildDate(spec, model, path, save, specId) {
-    var myPath = path.join(".");
-    var value = model[spec.name] || "";
-    var input = makeInput("date", myPath, value, save, "form-date");
-
-    var span = makeEntrySpan();
-    span.appendChild(makeLabel("date", myPath, specId));
-    span.appendChild(input);
-    return span;
-  }
-
-  function buildSelect(spec, model, path, save, specId) {
-    var myPath = path.join(".");
-
-    var select = document.createElement("select");
-    select.name = myPath;
-    select.className = "form-input combobox";
-    select.onchange = save;
-
-    var selectedOption = model[spec.name] || "";
-
-    var option = document.createElement("option");
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") {
-      option.selected = "selected";
+      return span;
     }
-    select.appendChild(option);
 
-    $.each(spec.body, function (i, o) {
-      var name = o.name;
+    function buildSelect(spec, model, path, save, specId) {
+      var myPath = path.join(".");
+
+      var select = document.createElement("select");
+      select.name = myPath;
+      select.className = "form-input combobox";
+      select.onchange = save;
+
+      var selectedOption = model[spec.name] || "";
+
       var option = document.createElement("option");
-      option.value = name;
-      var locKey = specId + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
-      option.appendChild(document.createTextNode(loc(locKey)));
-      if (selectedOption === name) {
+      option.value = "";
+      option.appendChild(document.createTextNode(loc("selectone")));
+      if (selectedOption === "") {
         option.selected = "selected";
       }
       select.appendChild(option);
-    });
 
-    var span = makeEntrySpan();
-    span.appendChild(makeLabel("select", myPath, specId, true));
-    span.appendChild(select);
-    return span;
-  }
-
-  function buildGroup(spec, model, path, save, specId, partOfChoice) {
-    var myPath = path.join(".");
-    var name = spec.name;
-    var myModel = model[name] || {};
-
-    var partsDiv = document.createElement("div");
-    appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice);
-
-    var div = document.createElement("div");
-    div.id = pathStrToGroupID(myPath);
-    div.className = spec.layout === "vertical" ? "form-choice" : "form-group";
-    div.appendChild(makeLabel("group", myPath, specId, true));
-    div.appendChild(partsDiv);
-    return div;
-  }
-
-  function buildRadioGroup(spec, model, path, save, specId) {
-    var myPath = path.join(".");
-    var myModel = model[spec.name] || _.first(spec.body).name;
-
-    var partsDiv = document.createElement("div");
-    partsDiv.id = pathStrToID(myPath);
-
-    var span = makeEntrySpan();
-
-    $.each(spec.body, function (i, o) {
-      var pathForId = myPath + "." + o.name;
-      var input = makeInput("radio", myPath, o.name, save);
-      input.id = pathStrToID(pathForId);
-      input.checked = o.name === myModel;
-
-      span.appendChild(input);
-      span.appendChild(makeLabel("radio", pathForId, specId));
-    });
-
-    partsDiv.appendChild(span);
-    return partsDiv;
-  }
-
-  function buildBuildingSelector(spec, model, path, save, specId) {
-    var myPath = path.join(".");
-
-    var select = document.createElement("select");
-    select.name = myPath;
-    select.className = "form-input combobox really-long";
-    select.onchange = function(event) {
-      var target = getEvent(event).target;
-      var buildingId = target.value;
-      ajax
-        .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
-        .success(function() {
-          save(event);
-          repository.load(appId);
-        })
-        .call();
-      return false;
-    };
-
-    var selectedOption = model[spec.name] || "";
-
-    var option = document.createElement("option");
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") {
-      option.selected = "selected";
-    }
-    select.appendChild(option);
-
-    ajax
-      .command("get-building-info-from-legacy", {id: appId})
-      .success(function(data) {
-        $.each(data.data, function (i, building) {
-          var name = building.buildingId;
-          var usage = building.usage;
-          var created = building.created;
-          var option = document.createElement("option");
-          option.value = name;
-          option.appendChild(document.createTextNode(name+" ("+usage+") - "+created));
-          if (selectedOption === name) {
-            option.selected = "selected";
-          }
-          select.appendChild(option);
-        });
-      })
-      .error(function(error) {
-        var text = error.text;
+      $.each(spec.body, function (i, o) {
+        var name = o.name;
         var option = document.createElement("option");
         option.value = name;
-        option.appendChild(document.createTextNode(loc("error."+text)));
-        option.selected = "selected";
+        var locKey = specId + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
+        option.appendChild(document.createTextNode(loc(locKey)));
+        if (selectedOption === name) {
+          option.selected = "selected";
+        }
         select.appendChild(option);
-        select.setAttribute("disabled", true);
-      })
-      .call();
+      });
 
-    var span = makeEntrySpan();
-    span.appendChild(makeLabel("select", "", "buildingSelector", true));
-    span.appendChild(select);
-    return span;
-  }
-
-  function buildPersonSelector(spec, model, path, save, specId) {
-    var span = makeEntrySpan();
-
-    var myPath = path.join(".");
-    var myNs = path.slice(0,path.length-1).join(".");
-
-    var select = document.createElement("select");
-    select.name = myPath;
-    select.className = "form-input combobox long";
-    var selectedOption = model[spec.name] || "";
-    select.onchange = function(event) {
-      var target = getEvent(event).target;
-      var userId = target.value;
-      ajax
-        .command("set-user-to-document", {id: appId, documentId: docId, userId: userId, path: myNs})
-        .success(function() {
-          save(event,function() { repository.load(appId); });
-        })
-        .call();
-      return false;
-    };
-    var option = document.createElement("option");
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") {
-      option.selected = "selected";
+      var span = makeEntrySpan();
+      span.appendChild(makeLabel("select", myPath, specId, true));
+      span.appendChild(select);
+      return span;
     }
-    select.appendChild(option);
 
-    ajax
-      .command("get-users-in-application", {id: appId})
-      .success(function(data) {
-        $.each(data.users, function (i, user) {
-          // LUPA-89: don't print fully empty names
-          if(user.firstName && user.lastName) {
+    function buildGroup(spec, model, path, save, specId, partOfChoice) {
+      var myPath = path.join(".");
+      var name = spec.name;
+      var myModel = model[name] || {};
+
+      var partsDiv = document.createElement("div");
+      appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice);
+
+      var div = document.createElement("div");
+      div.id = pathStrToGroupID(myPath);
+      div.className = spec.layout === "vertical" ? "form-choice" : "form-group";
+      div.appendChild(makeLabel("group", myPath, specId, true));
+      div.appendChild(partsDiv);
+      return div;
+    }
+
+    function buildRadioGroup(spec, model, path, save, specId) {
+      var myPath = path.join(".");
+      var myModel = model[spec.name] || _.first(spec.body).name;
+
+      var partsDiv = document.createElement("div");
+      partsDiv.id = pathStrToID(myPath);
+
+      var span = makeEntrySpan();
+
+      $.each(spec.body, function (i, o) {
+        var pathForId = myPath + "." + o.name;
+        var input = makeInput("radio", myPath, o.name, save);
+        input.id = pathStrToID(pathForId);
+        input.checked = o.name === myModel;
+
+        span.appendChild(input);
+        span.appendChild(makeLabel("radio", pathForId, specId));
+      });
+
+      partsDiv.appendChild(span);
+      return partsDiv;
+    }
+
+    function buildBuildingSelector(spec, model, path, save, specId) {
+      var myPath = path.join(".");
+
+      var select = document.createElement("select");
+      select.name = myPath;
+      select.className = "form-input combobox really-long";
+      select.onchange = function(event) {
+        var target = getEvent(event).target;
+        var buildingId = target.value;
+        ajax
+          .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
+          .success(function() {
+            save(event);
+            repository.load(appId);
+          })
+          .call();
+        return false;
+      };
+
+      var selectedOption = model[spec.name] || "";
+
+      var option = document.createElement("option");
+      option.value = "";
+      option.appendChild(document.createTextNode(loc("selectone")));
+      if (selectedOption === "") {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
+
+      ajax
+        .command("get-building-info-from-legacy", {id: appId})
+        .success(function(data) {
+          $.each(data.data, function (i, building) {
+            var name = building.buildingId;
+            var usage = building.usage;
+            var created = building.created;
             var option = document.createElement("option");
-            var value = user.id;
-            option.value = value;
-            option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
-            if (selectedOption === value) {
+            option.value = name;
+            option.appendChild(document.createTextNode(name+" ("+usage+") - "+created));
+            if (selectedOption === name) {
               option.selected = "selected";
             }
             select.appendChild(option);
-          }
+          });
+        })
+        .error(function(error) {
+          var text = error.text;
+          var option = document.createElement("option");
+          option.value = name;
+          option.appendChild(document.createTextNode(loc("error."+text)));
+          option.selected = "selected";
+          select.appendChild(option);
+          select.setAttribute("disabled", true);
+        })
+        .call();
+
+      var span = makeEntrySpan();
+      span.appendChild(makeLabel("select", "", "buildingSelector", true));
+      span.appendChild(select);
+      return span;
+    }
+
+    function buildPersonSelector(spec, model, path, save, specId) {
+      var span = makeEntrySpan();
+
+      var myPath = path.join(".");
+      var myNs = path.slice(0,path.length-1).join(".");
+
+      var select = document.createElement("select");
+      select.name = myPath;
+      select.className = "form-input combobox long";
+      var selectedOption = model[spec.name] || "";
+      select.onchange = function(event) {
+        var target = getEvent(event).target;
+        var userId = target.value;
+        ajax
+          .command("set-user-to-document", {id: appId, documentId: docId, userId: userId, path: myNs})
+          .success(function() {
+            save(event,function() { repository.load(appId); });
+          })
+          .call();
+        return false;
+      };
+      var option = document.createElement("option");
+      option.value = "";
+      option.appendChild(document.createTextNode(loc("selectone")));
+      if (selectedOption === "") {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
+
+      ajax
+        .command("get-users-in-application", {id: appId})
+        .success(function(data) {
+          $.each(data.users, function (i, user) {
+            // LUPA-89: don't print fully empty names
+            if(user.firstName && user.lastName) {
+              var option = document.createElement("option");
+              var value = user.id;
+              option.value = value;
+              option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
+              if (selectedOption === value) {
+                option.selected = "selected";
+              }
+              select.appendChild(option);
+            }
+          });
+        })
+        .call();
+
+      span.appendChild(makeLabel("select", "", "personSelector", true));
+      span.appendChild(select);
+
+      // new invite
+      $("<button>", {
+              "class": "icon-remove",
+              "data-test-id": "application-invite-"+specId,
+              text: loc("personSelector.invite"),
+              click: function() {
+                $("#invite-document-name").val(specId).change();
+                $("#invite-document-id").val(self.docId).change();
+                LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+                return false;
+              }}).appendTo(span);
+
+      return span;
+    }
+
+    function buildUnknown(spec, model, path) {
+      error("Unknown element type:", spec.type, path);
+      var div = document.createElement("div");
+      div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
+      return div;
+    }
+
+    var builders = {
+      group: buildGroup,
+      string: buildString,
+      text: buildText,
+      checkbox: buildCheckbox,
+      select: buildSelect,
+      radioGroup: buildRadioGroup,
+      date: buildDate,
+      element: buildElement,
+      buildingSelector: buildBuildingSelector,
+      personSelector: buildPersonSelector,
+      unknown: buildUnknown
+    };
+
+    function build(spec, model, path, save, specId, partOfChoice) {
+
+      var myName = spec.name;
+      var myPath = path.concat([myName]);
+      var builder = builders[spec.type] || buildUnknown;
+      var repeatingId = myPath.join("-");
+
+      function makeElem(myModel, id) {
+        var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
+        elem.setAttribute("data-repeating-id", repeatingId);
+        elem.setAttribute("data-repeating-id-" + repeatingId, id);
+        return elem;
+      }
+
+      if (spec.repeating) {
+        var models = model[myName] || [{}];
+
+        var elements = _.map(models, function(val, key) {
+          var myModel = {};
+          myModel[myName] = val;
+          return makeElem(myModel, key);
         });
-      })
-      .call();
 
-    span.appendChild(makeLabel("select", "", "personSelector", true));
-    span.appendChild(select);
+        var appendButton = makeButton(myPath.join("_") + "_append", loc(specId + "."+  myPath.join(".") + "._append_label"));
 
-    // new invite
-    $("<button>", {
-            "class": "icon-remove",
-            "data-test-id": "application-invite-"+specId,
-            text: loc("personSelector.invite"),
-            click: function() {
-              $("#invite-document-name").val(specId).change();
-              $("#invite-document-id").val(self.docId).change();
-              LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-              return false;
-            }}).appendTo(span);
+        var appender = function() {
+          var parent$ = $(this.parentNode);
+          var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
+          while (parent$.children("*[data-repeating-id-" + repeatingId + "='"+ count + "']").length) {
+            count++;
+          }
+          var myModel = {};
+          myModel[myName] = {};
+          $(this).before(makeElem(myModel, count));
+        };
 
-    return span;
-  }
+        $(appendButton).click(appender);
+        elements.push(appendButton);
 
-  function buildUnknown(spec, model, path) {
-    error("Unknown element type:", spec.type, path);
-    var div = document.createElement("div");
-    div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
-    return div;
-  }
+        return elements;
+      }
 
-  var builders = {
-    group: buildGroup,
-    string: buildString,
-    text: buildText,
-    checkbox: buildCheckbox,
-    select: buildSelect,
-    radioGroup: buildRadioGroup,
-    date: buildDate,
-    element: buildElement,
-    buildingSelector: buildBuildingSelector,
-    personSelector: buildPersonSelector,
-    unknown: buildUnknown
+      return builder(spec, model, myPath, save, specId, partOfChoice);
+    }
+
+    function getSelectOneOfDefinition(schema) {
+      var selectOneOfSchema = _.find(schema.body, function(spec){
+        return spec.name === SELECT_ONE_OF_GROUP_KEY && spec.type === "radioGroup";
+      });
+
+      if (selectOneOfSchema) {
+        return _.map(selectOneOfSchema.body, function(spec) {return spec.name;}) || [];
+      }
+
+      return [];
+    }
+
+    function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+
+      function toggleSelectedGroup(value) {
+        $(body)
+          .children("[data-select-one-of]")
+          .hide()
+          .filter("[data-select-one-of='" + value + "']")
+          .show();
+      }
+
+      var selectOneOf = getSelectOneOfDefinition(schema);
+
+      _.each(schema.body, function(spec) {
+          var children = build(spec, model, path, save, specId, partOfChoice);
+          if (!_.isArray(children)) {
+            children = [children];
+          }
+          _.each(children, function(elem) {
+            if (_.indexOf(selectOneOf, spec.name) >= 0) {
+              elem.setAttribute("data-select-one-of", spec.name);
+              $(elem).hide();
+            }
+
+            body.appendChild(elem);
+          });
+      });
+
+      if (selectOneOf.length) {
+        // Show current selection or the first of the group
+        var myModel = model[SELECT_ONE_OF_GROUP_KEY] || _.first(selectOneOf);
+        toggleSelectedGroup(myModel);
+
+        var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
+        $(body).find(s).change(function() {
+          toggleSelectedGroup(this.value);
+        });
+      }
+
+      return body;
+    }
+
+    function loaderImg() {
+      var img = document.createElement("img");
+      img.src = "/img/ajax-loader-12.gif";
+      return img;
+    }
+
+    function makeSaverDelegate(save, eventData) {
+      return function (event, callback) {
+        var target = getEvent(event).target;
+        var path = target.name;
+        var value = target.value;
+        if (target.type === "checkbox") {
+          value = target.checked;
+        }
+
+        var loader = loaderImg();
+        var label = document.getElementById(pathStrToLabelID(path));
+        if (label) {
+          label.appendChild(loader);
+        }
+
+        save(path, value, function (status) {
+          if (label) {
+            label.removeChild(loader);
+          }
+          $(target).removeClass("form-input-warn").removeClass("form-input-err");
+          if (status === "warn") {
+            $(target).addClass("form-input-warn");
+          } else if (status === "err") {
+            $(target).addClass("form-input-err");
+          } else if (status !== "ok") {
+            error("Unknown status:", status, "path:", path);
+          }
+          if(callback) { callback(); }
+        }, eventData);
+        // No return value or stoping the event propagation:
+        // That would prevent moving to the next field with tab key in IE8.
+      };
+    }
+
+    function removeThis() {
+      this.parent().slideUp(function() { $(this).remove(); });
+    }
+
+    function removeDoc(e) {
+      var n = $(e.target).parent();
+      self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.spec.info.name + "._group_label"), removeThis.bind(n));
+      return false;
+    }
+
+    function buildElement() {
+      var specId = self.spec.info.name;
+      var op = self.spec.info.op;
+      var save = makeSaverDelegate(self.saveCallback, self.eventData);
+
+      var section = document.createElement("section");
+      section.className = "application_section";
+
+      var icon = document.createElement("span");
+      icon.className = "font-icon icon-expanded";
+      var title = document.createElement("h2");
+      title.className = "application_section_header";
+      title.appendChild(icon);
+      if (op) {
+        title.appendChild(document.createTextNode(loc(op + "._group_label")));
+      } else {
+        title.appendChild(document.createTextNode(loc(specId + "._group_label")));
+      }
+      title.setAttribute("data-doc-id", self.docId);
+      title.setAttribute("data-app-id", self.appId);
+      title.onclick = accordion.click;
+      if (self.spec.info.removable) {
+        $(title)
+          .append($("<button>")
+            .addClass("icon-remove")
+            .text("[X]")
+            .click(removeDoc));
+      }
+
+      var sectionContainer = document.createElement("div");
+      sectionContainer.className = "application_section_content content_expanded";
+
+      var elements = document.createElement("article");
+      appendElements(elements, self.spec, self.model, [], save, specId);
+
+      sectionContainer.appendChild(elements);
+      section.appendChild(title);
+      section.appendChild(sectionContainer);
+
+      return section;
+    }
+
+    self.element = buildElement();
   };
 
-  function build(spec, model, path, save, specId, partOfChoice) {
+  var save = function(path, value, callback, data) {
+    ajax
+      .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
+      // Server returns empty array (all ok), or array containing an array with three
+      // elements: [key status message]. Here we use just the status.
+      .success(function(e) {
+        var status = (e.results.length === 0) ? "ok" : e.results[0][1];
+        callback(status);
+      })
+      .error(function(e) { error(e); callback("err"); })
+      .fail(function(e) { error(e); callback("err"); })
+      .call();
+  };
 
-    var myName = spec.name;
-    var myPath = path.concat([myName]);
-    var builder = builders[spec.type] || buildUnknown;
-    var repeatingId = myPath.join("-");
-
-    function makeElem(myModel, id) {
-      var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
-      elem.setAttribute("data-repeating-id", repeatingId);
-      elem.setAttribute("data-repeating-id-" + repeatingId, id);
-      return elem;
-    }
-
-    if (spec.repeating) {
-      var models = model[myName] || [{}];
-
-      var elements = _.map(models, function(val, key) {
-        var myModel = {};
-        myModel[myName] = val;
-        return makeElem(myModel, key);
-      });
-
-      var appendButton = LUPAPISTE.DOMUtils.makeButton(myPath.join("_") + "_append", loc(specId + "."+  myPath.join(".") + "._append_label"));
-
-      var appender = function() {
-        var parent$ = $(this.parentNode);
-        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-        while (parent$.children("*[data-repeating-id-" + repeatingId + "='"+ count + "']").length) {
-          count++;
-        }
-        var myModel = {};
-        myModel[myName] = {};
-        $(this).before(makeElem(myModel, count));
-      };
-
-      $(appendButton).click(appender);
-      elements.push(appendButton);
-
-      return elements;
-    }
-
-    return builder(spec, model, myPath, save, specId, partOfChoice);
+  function getDocumentOrder(doc) {
+    var num = doc.schema.info.order || 7;
+    return num * 10000000000 + doc.created/1000;
   }
 
-  function getSelectOneOfDefinition(schema) {
-    var selectOneOfSchema = _.find(schema.body, function(spec){
-      return spec.name === SELECT_ONE_OF_GROUP_KEY && spec.type === "radioGroup";
-    });
+  function displayDocuments(containerSelector, removeDocModel, applicationId, documents) {
 
-    if (selectOneOfSchema) {
-      return _.map(selectOneOfSchema.body, function(spec) {return spec.name;}) || [];
-    }
+    var sortedDocs = _.sortBy(documents, getDocumentOrder);
 
-    return [];
-  }
+    var docgenDiv = $(containerSelector).empty();
+    _.each(sortedDocs, function(doc) {
+      docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, applicationId).element);
 
-  function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+      var schema = doc.schema;
 
-    function toggleSelectedGroup(value) {
-      $(body)
-        .children("[data-select-one-of]")
-        .hide()
-        .filter("[data-select-one-of='" + value + "']")
-        .show();
-    }
+      if (schema.info.repeating) {
+        var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
-    var selectOneOf = getSelectOneOfDefinition(schema);
-
-    _.each(schema.body, function(spec) {
-        var children = build(spec, model, path, save, specId, partOfChoice);
-        if (!_.isArray(children)) {
-          children = [children];
-        }
-        _.each(children, function(elem) {
-          if (_.indexOf(selectOneOf, spec.name) >= 0) {
-            elem.setAttribute("data-select-one-of", spec.name);
-            $(elem).hide();
-          }
-
-          body.appendChild(elem);
+        $(btn).click(function() {
+          var self = this;
+          ajax
+            .command("create-doc", {schema: schema.info.name, id: applicationId})
+            .success(function(data) {
+              var newDocId = data.doc;
+              var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, applicationId).element;
+              $(self).before(newElem);
+            })
+            .call();
         });
+        docgenDiv.append(btn);
+      }
     });
-
-    if (selectOneOf.length) {
-      // Show current selection or the first of the group
-      var myModel = model[SELECT_ONE_OF_GROUP_KEY] || _.first(selectOneOf);
-      toggleSelectedGroup(myModel);
-
-      var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
-      $(body).find(s).change(function() {
-        toggleSelectedGroup(this.value);
-      });
-    }
-
-    return body;
   }
 
-  function loaderImg() {
-    var img = document.createElement("img");
-    img.src = "/img/ajax-loader-12.gif";
-    return img;
-  }
+  return {
+    displayDocuments: displayDocuments
+  };
 
-  function makeSaverDelegate(save, eventData) {
-    return function (event, callback) {
-      var target = getEvent(event).target;
-      var path = target.name;
-      var value = target.value;
-      if (target.type === "checkbox") {
-        value = target.checked;
-      }
-
-      var loader = loaderImg();
-      var label = document.getElementById(pathStrToLabelID(path));
-      if (label) {
-        label.appendChild(loader);
-      }
-
-      save(path, value, function (status) {
-        if (label) {
-          label.removeChild(loader);
-        }
-        $(target).removeClass("form-input-warn").removeClass("form-input-err");
-        if (status === "warn") {
-          $(target).addClass("form-input-warn");
-        } else if (status === "err") {
-          $(target).addClass("form-input-err");
-        } else if (status !== "ok") {
-          error("Unknown status:", status, "path:", path);
-        }
-        if(callback) { callback(); }
-      }, eventData);
-      // No return value or stoping the event propagation:
-      // That would prevent moving to the next field with tab key in IE8.
-    };
-  }
-
-  function removeThis() {
-    this.parent().slideUp(function() { $(this).remove(); });
-  }
-
-  function removeDoc(e) {
-    var n = $(e.target).parent();
-    self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.spec.info.name + "._group_label"), removeThis.bind(n));
-    return false;
-  }
-
-  function buildElement() {
-    var specId = self.spec.info.name;
-    var op = self.spec.info.op;
-    var save = makeSaverDelegate(self.saveCallback, self.eventData);
-
-    var section = document.createElement("section");
-    section.className = "application_section";
-
-    var icon = document.createElement("span");
-    icon.className = "font-icon icon-expanded";
-    var title = document.createElement("h2");
-    title.className = "application_section_header";
-    title.appendChild(icon);
-    if (op) {
-      title.appendChild(document.createTextNode(loc(op + "._group_label")));
-    } else {
-      title.appendChild(document.createTextNode(loc(specId + "._group_label")));
-    }
-    title.setAttribute("data-doc-id", self.docId);
-    title.setAttribute("data-app-id", self.appId);
-    title.onclick = accordion.click;
-    if (self.spec.info.removable) {
-      $(title)
-        .append($("<button>")
-          .addClass("icon-remove")
-          .text("[X]")
-          .click(removeDoc));
-    }
-
-    var sectionContainer = document.createElement("div");
-    sectionContainer.className = "application_section_content content_expanded";
-
-    var elements = document.createElement("article");
-    appendElements(elements, self.spec, self.model, [], save, specId);
-
-    sectionContainer.appendChild(elements);
-    section.appendChild(title);
-    section.appendChild(sectionContainer);
-
-    return section;
-  }
-
-  self.element = buildElement();
-};
-
+})();

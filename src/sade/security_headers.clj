@@ -26,11 +26,11 @@
           ; else than declared by the content type in the HTTP headers.
           (assoc-in [:headers "X-Content-Type-Options"] "nosniff"))))))
 
-(defn sessionId2mdc
+(defn session-id-to-mdc
   "Ring middleware. Sets 'sessionId' mdc-key with ring-sessionId."
   [handler]
   (fn [request]
     (let [sessionId (get-in request [:cookies "ring-session" :value])]
       (with-logging-context
-        {:sessionId (or sessionId "???")}
+        {:sessionId (or sessionId "?")}
         (handler request)))))

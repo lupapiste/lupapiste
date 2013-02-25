@@ -95,7 +95,7 @@
 (defn execute [action]
   (with-logging-context
     {:applicationId (get-in action [:data :id] "???")
-     :email         (get-in action [:user :email] "???")}
+     :userId        (get-in action [:user :id] "???")}
     (core/execute action)))
 
 (defjson [:post "/api/command/:name"] {name :name}

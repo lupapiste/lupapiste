@@ -12,6 +12,7 @@
     :email            "example@example.com"
     :tel              "012 123 4567"
     :letter           "\u00c5"
+    :date             "2.5.1974"
     :kiinteistotunnus "09100200990013"
     name))
 
