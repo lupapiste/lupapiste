@@ -39,7 +39,7 @@
 
 (defmethod validate :date [elem v]
   (try
-    (timeformat/parse dd-mm-yyyy v)
+    (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "invalid-date-format"])))
 
