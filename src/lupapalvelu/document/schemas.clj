@@ -354,19 +354,19 @@
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group :repeating true
                              :body (body party [{:name "omistajalaji" :type :select
-                                           :body [{:name "yksityinen maatalousyrittäjä"}
-                                                  {:name "muu yksityinen henkilö tai perikunta"}
+                                           :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
+                                                  {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                                   {:name "asunto-oy tai asunto-osuuskunta"}
-                                                  {:name "kiinteistö oy"}
-                                                  {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)"}
-                                                  {:name "valtio- tai kuntaenemmistöinen yritys"}
+                                                  {:name "kiinteist\u00f6 oy"}
+                                                  {:name "yksityinen yritys (osake-, avoin- tai kommandiittiyhti\u00f6, osuuskunta)"}
+                                                  {:name "valtio- tai kuntaenemmist\u00f6inen yritys"}
                                                   {:name "kunnan liikelaitos"}
                                                   {:name "valtion liikelaitos"}
                                                   {:name "pankki tai vakuutuslaitos"}
                                                   {:name "kunta tai kuntainliitto"}
                                                   {:name "valtio"}
                                                   {:name "sosiaaliturvarahasto"}
-                                                  {:name "uskonnollinen yhteisö, säätiö, puolue tai yhdistys"}
+                                                  {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
                                                   {:name "ei tiedossa"}]}
                                                 {:name "muu-omistajalaji" :type :text :size "s"}])}])
 
