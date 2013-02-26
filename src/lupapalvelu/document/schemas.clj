@@ -428,12 +428,7 @@
 
      {:info {:name "hakija"
              :order 3
-             :type :party}
-      :body party}
-
-     {:info {:name "hakijat"
-             :order 3
-             :optonal true
+             :repeating true
              :type :party}
       :body party}
 

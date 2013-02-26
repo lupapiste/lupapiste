@@ -138,6 +138,7 @@ var docgen = (function() {
     }
 
     function buildDate(spec, model, path, save, specId) {
+      var lang = loc.getCurrentLanguage();
       var myPath = path.join(".");
       var value = model[spec.name] || "";
 
@@ -152,7 +153,7 @@ var docgen = (function() {
               class: "form-input text form-date",
               value: value,
               change: save,
-              }).datepicker().appendTo(span);
+              }).datepicker($.datepicker.regional[lang]).appendTo(span);
 
       return span;
     }

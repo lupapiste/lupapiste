@@ -95,7 +95,7 @@
                       error:   urlPrefix + '#!/register/error'}, function(d) {
       $('#vetuma-register')
         .html(d).find(':submit').addClass('btn btn-primary')
-                                .attr('value','Tunnistaudu')
+                                .attr('value',loc("register.action"))
                                 .attr('id', 'vetuma-init');
     });
     statusModel.subPage(subPage());
