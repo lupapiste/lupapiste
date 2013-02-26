@@ -367,7 +367,8 @@
                                                   {:name "valtio"}
                                                   {:name "sosiaaliturvarahasto"}
                                                   {:name "uskonnollinen yhteisö, säätiö, puolue tai yhdistys"}
-                                                  {:name "ei tiedossa"}]}])}])
+                                                  {:name "ei tiedossa"}]}
+                                                {:name "muu-omistajalaji" :type :text :size "s"}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
