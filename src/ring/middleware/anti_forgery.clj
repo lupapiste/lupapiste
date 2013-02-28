@@ -86,12 +86,10 @@
 ;; Modified middleware for Lupapiste
 
 (defn wrap-all-anti-forgery
-  "Middleware that prevents CSRF attacks. Checks POST and GET requests alike."
-  [handler attack-callback log-fn]
-  (fn [request]
-    (binding [*anti-forgery-token* (session-token request default-token-generation-fn log-fn)]
-      (if (not (valid-request? request default-token-generation-fn log-fn))
-        (attack-callback request)
-        (if-let [response (handler request)]
-          (assoc-session-token response request *anti-forgery-token* log-fn)))))
-  )
+  "Middleware helper that prevents CSRF attacks. Checks POST and GET requests alike."
+  [handler request attack-callback log-fn]
+  (binding [*anti-forgery-token* (session-token request default-token-generation-fn log-fn)]
+    (if (not (valid-request? request default-token-generation-fn log-fn))
+      (attack-callback request)
+      (if-let [response (handler request)]
+        (assoc-session-token response request *anti-forgery-token* log-fn)))))

@@ -3,7 +3,7 @@
   (:require [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
             [lupapalvelu.logging]
-            [lupapalvelu.web]
+            [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
             [lupapalvelu.env :as env]
             [lupapalvelu.fixture :as fixture]
@@ -56,6 +56,8 @@
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
+  (server/add-middleware web/anti-csrf)
+  (server/add-middleware web/apikey-authentication)
   (when env/perf-mon-on
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)

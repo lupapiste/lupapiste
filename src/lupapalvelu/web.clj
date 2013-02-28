@@ -23,7 +23,8 @@
             [lupapalvelu.ke6666 :as ke6666]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [ring.middleware.anti-forgery :as anti-forgery]))
 
 ;;
 ;; Helpers
@@ -41,7 +42,8 @@
 
 (defn current-user
   "fetches the current user from 1) http-session 2) apikey from headers"
-  [] (or (session/get :user) ((request/ring-request) :user)))
+  ([] (current-user (request/ring-request)))
+  ([request] (or (session/get :user) (request :user))))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -62,8 +64,9 @@
      :sessionId  (sessionId request)
      :host       (host request)}))
 
-(defn logged-in? []
-  (not (nil? (current-user))))
+(defn logged-in?
+  ([] (logged-in? (request/ring-request)))
+  ([request] (not (nil? (current-user request)))))
 
 (defn in-role? [role]
   (= role (keyword (:role (current-user)))))
@@ -196,16 +199,21 @@
     (if-let [[_ k v] (re-find #"(\w+)\s*[ :=]\s*(\w+)" header-value)]
       (if (= k required-key) v))))
 
+(defn- get-apikey [request]
+  (let [authorization (get-in request [:headers "authorization"])]
+    (parse "apikey" authorization)))
+
 (defn apikey-authentication
-  "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
+  "Reads apikey from 'Auhtorization' headers, pushed it to :user request attribute
    'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
   [handler]
   (fn [request]
-    (let [authorization (get-in request [:headers "authorization"])
-          apikey        (parse "apikey" authorization)]
+    (let [apikey (get-apikey request)]
       (handler (assoc request :user (security/login-with-apikey apikey))))))
 
-(server/add-middleware apikey-authentication)
+
+(defn- logged-in-with-apikey? [request]
+  (and (get-apikey request) (logged-in? request)))
 
 ;;
 ;; File upload/download:
@@ -259,6 +267,33 @@
       {:status 503}
       ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
+
+;;
+;; Cross-site request forgery protection
+;;
+
+(defn- csrf-attack-hander [request]
+  (warn "CSRF attempt detected!")
+(println (:user request))
+  (resp/json (fail :error.invalid-csrf-token)))
+
+(defn- csrf-logger [s]
+  (warn s))
+
+(defn- doit [handler request]
+  (if (and (.startsWith (:uri request) "/api/") (not (logged-in-with-apikey? request)))
+    (do
+      (println "API CALL" (:uri request))
+      (anti-forgery/wrap-all-anti-forgery handler request csrf-attack-hander csrf-logger))
+    (handler request)
+    )
+  )
+
+(defn anti-csrf
+  [handler]
+  (fn [request]
+    ; TODO inline 'doit' here
+    (doit handler request)))
 
 ;;
 ;; dev utils:
