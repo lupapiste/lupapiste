@@ -10,6 +10,7 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
+            [noir.cookies :as cookies]
             [lupapalvelu.env :as env]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
@@ -157,16 +158,20 @@
 (defn- redirect-to-frontpage [lang]
   (resp/redirect (str "/" lang "/welcome")))
 
-(defjson [:post "/api/logout"] []
+(defn- logout! []
   (session/clear!)
+  (cookies/put! :lupapiste-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+
+(defjson [:post "/api/logout"] []
+  (logout!)
   (ok))
 
 (defpage "/logout" []
-  (session/clear!)
+  (logout!)
   (resp/redirect "/"))
 
 (defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (session/clear!)
+  (logout!)
   (redirect-to-frontpage lang))
 
 (defpage "/" []
@@ -281,13 +286,9 @@
   (warn s))
 
 (defn- doit [handler request]
-  (if (and (.startsWith (:uri request) "/api/") (not (logged-in-with-apikey? request)))
-    (do
-      (println "API CALL" (:uri request))
-      (anti-forgery/wrap-all-anti-forgery handler request csrf-attack-hander csrf-logger))
-    (handler request)
-    )
-  )
+  (let [cookie-name "lupapiste-token"] (if (and (.startsWith (:uri request) "/api/") (not (logged-in-with-apikey? request)))
+    (anti-forgery/wrap-all-anti-forgery handler request cookie-name csrf-attack-hander csrf-logger)
+    (anti-forgery/set-token-in-cookie request (handler request) cookie-name))))
 
 (defn anti-csrf
   [handler]

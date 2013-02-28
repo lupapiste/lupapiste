@@ -85,11 +85,20 @@
 
 ;; Modified middleware for Lupapiste
 
+(defn- csrf-token [request cookie-name]
+  (or (get-in request [:cookies cookie-name :value]) (default-token-generation-fn)))
+
 (defn wrap-all-anti-forgery
   "Middleware helper that prevents CSRF attacks. Checks POST and GET requests alike."
-  [handler request attack-callback log-fn]
-  (binding [*anti-forgery-token* (session-token request default-token-generation-fn log-fn)]
+  [handler request cookie-name attack-callback log-fn]
+  (binding [*anti-forgery-token* (csrf-token request cookie-name)]
     (if (not (valid-request? request default-token-generation-fn log-fn))
       (attack-callback request)
-      (if-let [response (handler request)]
-        (assoc-session-token response request *anti-forgery-token* log-fn)))))
+      (handler request))))
+
+(defn set-token-in-cookie [request response cookie-name]
+  (when response
+    (let [token (csrf-token request cookie-name)]
+      (if (get-in request [:cookies cookie-name :value])
+       response
+       (assoc-in response [:cookies cookie-name] {:value token :path "/"})))))
