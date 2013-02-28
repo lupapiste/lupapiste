@@ -279,15 +279,11 @@
 
 (defn- csrf-attack-hander [request]
   (warn "CSRF attempt detected!")
-(println (:user request))
   (resp/json (fail :error.invalid-csrf-token)))
-
-(defn- csrf-logger [s]
-  (warn s))
 
 (defn- doit [handler request]
   (let [cookie-name "lupapiste-token"] (if (and (.startsWith (:uri request) "/api/") (not (logged-in-with-apikey? request)))
-    (anti-forgery/wrap-all-anti-forgery handler request cookie-name csrf-attack-hander csrf-logger)
+    (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
     (anti-forgery/set-token-in-cookie request (handler request) cookie-name))))
 
 (defn anti-csrf

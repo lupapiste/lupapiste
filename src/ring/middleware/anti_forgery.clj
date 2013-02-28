@@ -88,13 +88,14 @@
 (defn- csrf-token [request cookie-name]
   (or (get-in request [:cookies cookie-name :value]) (default-token-generation-fn)))
 
-(defn wrap-all-anti-forgery
-  "Middleware helper that prevents CSRF attacks. Checks POST and GET requests alike."
-  [handler request cookie-name attack-callback log-fn]
-  (binding [*anti-forgery-token* (csrf-token request cookie-name)]
-    (if (not (valid-request? request default-token-generation-fn log-fn))
-      (attack-callback request)
-      (handler request))))
+(defn crosscheck-token
+  "Middleware helper that prevents CSRF attacks."
+  [handler request cookie-name attack-callback]
+  (let [request-token (request-token request)
+        stored-token (csrf-token request cookie-name)]
+    (if (and request-token stored-token (secure-eql? request-token stored-token))
+      (handler request)
+      (attack-callback request))))
 
 (defn set-token-in-cookie [request response cookie-name]
   (when response
