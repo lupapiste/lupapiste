@@ -28,6 +28,7 @@ var ajax = (function() {
       },
       beforeSend: function(request) {
         _.each(self.headers, function(value, key) { request.setRequestHeader(key, value); });
+        request.setRequestHeader("x-anti-forgery-token", $.cookie("lupapiste-token"));
       }
     };
 
@@ -36,7 +37,7 @@ var ajax = (function() {
     self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
     self.completeHandler = function() { };
     self.headers = {};
-    
+
     self.raw = function(v) {
       self.rawData = (v === undefined) ? true : v;
       return self;
@@ -108,7 +109,7 @@ var ajax = (function() {
       $.ajax(self.request);
       return self;
     };
-    
+
     self.header = function(key, value) {
       self.headers[key] = value;
       return self;
