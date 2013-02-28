@@ -80,7 +80,7 @@
                                      {:tag :VRKrooliKoodi :ns "yht"}
                                      henkilo
                                      yritys
-                                     {:tag :omistajalaji :ns "yht"
+                                     {:tag :omistajalaji :ns "rakval"
                                       :child [{:tag :muu}
                                               {:tag :omistajalaji}]}]}]}])
 
