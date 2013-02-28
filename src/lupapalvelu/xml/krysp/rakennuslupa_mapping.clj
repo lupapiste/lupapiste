@@ -76,11 +76,13 @@
                                  ]}
                    {:tag :omistajatieto
                     :child [{:tag :Omistaja
-                             :child [osapuoli-body
-                                     {:tag :omistajalaji
+                             :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                                     {:tag :VRKrooliKoodi :ns "yht"}
+                                     henkilo
+                                     yritys
+                                     {:tag :omistajalaji :ns "yht"
                                       :child [{:tag :muu}
-                                              {:tag :omistajalaji}]}]}]}
-                   ])
+                                              {:tag :omistajalaji}]}]}]}])
 
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
