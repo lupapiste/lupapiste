@@ -10,7 +10,7 @@ if (typeof LUPAPISTE === "undefined") {
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
-LUPAPISTE.App = function(startPage, allowAnonymous) {
+LUPAPISTE.App = function (startPage, allowAnonymous) {
 
   "use strict";
 
@@ -21,48 +21,52 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
 
-  this.createLogo = function() {
+  this.createLogo = function () {
     var href = "#!/" + self.startPage;
-    var link$ = $("<a class='brand' href='" +href+ "'></a>");
-    return link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
+    var link$ = $("<a class='brand' href='" + href + "'></a>");
+    link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
+    var naviLinks$ = $("<span>").attr("id", "navi-right");
+    _.each(loc.getSupportedLanguages(), function (lang) {
+      if (lang !== loc.getCurrentLanguage()) {
+        naviLinks$.append(
+            $("<a>").attr("href", "#").text(loc("in_" + lang))
+            .click(function (e) {
+              hub.send("change-lang", { lang: lang });
+              e.preventDefault();
+            }));
+      }
+    });
+    link$.append(naviLinks$);
+    return link$;
   };
 
-  this.createConnectionErrorContainer = function() {
+  this.createConnectionErrorContainer = function () {
     var span$ = $("<span class='connection-error' style='display: none;'></span>");
     return span$.text(loc("connection-error"));
   };
 
-  this.createUserMenu = function() {
-    return $("<ul class='user-menu'><li><a href='#!/mypage'><span id='user-name'></span></a></li></ul><br/>");
-  };
-
-  this.createNaviLinks = function() {
-    var naviLinks$ = $("<span>").attr("id", "navi-right");
-
-    _.each(loc.getSupportedLanguages(), function(lang) {
-      if (lang !== loc.getCurrentLanguage()) {
-        naviLinks$.append(
-            $("<a>").attr("href", "#").text(loc("in_"  + lang))
-            .click(function(e) {
-              hub.send("change-lang", {lang: lang});
-              e.preventDefault();
-              }));
-      }
-    });
-
+  this.createUserMenu = function () {
+    var userMenu$ = $("<div class='user-menu'><a href='#!/mypage'><span id='user-name'></span></a>");
     if (!self.allowAnonymous) {
-      naviLinks$.append(" ");
-      naviLinks$.append($("<a>")
+      userMenu$.append(" ");
+      userMenu$.append($("<a>")
         .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
         .text(loc("logout")));
     }
+    return userMenu$;
+  };
+
+  this.createNaviLinks = function () {
+    var naviLinks$ = $("div").attr("class", "nav-main");
+    naviLinks$.append($("div").attr({ "class": "nav-applications", "href": "#" }));
+    naviLinks$.append($("div").attr({ "class": "nav-requests", "href": "#" }));
     return naviLinks$;
   };
 
   /**
-   * Complete the App initialization after DOM is loaded.
-   */
-  this.domReady = function() {
+  * Complete the App initialization after DOM is loaded.
+  */
+  this.domReady = function () {
     $(window).hashchange(self.hashChanged);
     $(window).hashchange();
     $(window).unload(self.unload);
@@ -82,13 +86,13 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
   $(this.domReady);
 
   /**
-   * Window unload event handler
-   */
-  this.unload = function() {
+  * Window unload event handler
+  */
+  this.unload = function () {
     trace("window.unload");
   };
 
-  this.openPage = function(path) {
+  this.openPage = function (path) {
     var pageId = path[0];
     var pagePath = path.splice(1, path.length - 1);
 
@@ -107,14 +111,14 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
       }
 
       page.addClass("visible");
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
       self.currentPage = pageId;
     }
 
-    hub.send("page-change", {pageId: pageId, pagePath: pagePath});
+    hub.send("page-change", { pageId: pageId, pagePath: pagePath });
   };
 
-  this.hashChanged = function() {
+  this.hashChanged = function () {
     trace("hash changed");
 
     var hash = (location.hash || "").substr(3);
@@ -145,30 +149,30 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
   };
 
-  this.connectionCheck = function() {
+  this.connectionCheck = function () {
     /*
     ajax.get("/api/ping")
-      .success(function() {
-        hub.send("connection-online");
-        setTimeout(self.connectionCheck, 15000);
-      })
-      .fail(function() {
-        hub.send("connection-offline");
-        setTimeout(self.connectionCheck, 5000);
-      })
-      .call();
+    .success(function() {
+    hub.send("connection-online");
+    setTimeout(self.connectionCheck, 15000);
+    })
+    .fail(function() {
+    hub.send("connection-offline");
+    setTimeout(self.connectionCheck, 5000);
+    })
+    .call();
     */
   };
 
-  hub.subscribe("connection-online", function() {
+  hub.subscribe("connection-online", function () {
     $(".connection-error").hide();
   });
 
-  hub.subscribe("connection-offline", function() {
+  hub.subscribe("connection-offline", function () {
     $(".connection-error").show();
   });
 
-  hub.subscribe("logout", function() {
+  hub.subscribe("logout", function () {
     window.location = "/" + loc.getCurrentLanguage() + "/logout";
   });
 
