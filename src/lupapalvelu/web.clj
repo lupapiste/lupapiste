@@ -147,7 +147,7 @@
 (defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
 
 (defjson "/api/gotobang" []
-  (ok :data (session/get! "gotobang")))
+  (ok :bang (session/get! :gotobang "")))
 
 (defn- redirect-to-frontpage [lang]
   (resp/redirect (str "/" (name lang) "/welcome#")))
