@@ -172,6 +172,7 @@
           notify.success("hakemus hyv\u00E4ksytty",model);
           repository.load(applicationId);
         })
+        .error(function(resp) {alert(resp.text);})
         .call();
       return false;
     },
