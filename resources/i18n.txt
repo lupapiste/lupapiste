@@ -15,6 +15,7 @@ register.activation-email-info2: Aktivoi käyttäjätunnuksesi klikkaamalla säh
 applications.title: Omat hankkeeni
 application.muncipality: Asiointikunta
 application.muncipality-contact: Yhteystiedot
+newRequest.topic: Uusi hanke
 
 uusiRakennus.rakennuksenOmistajat.henkilo.turvakieltoKytkin: Turvakieleto
 uusiRakennus.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: yksityinen maatalousyrittäjä
