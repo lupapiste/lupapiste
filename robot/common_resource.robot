@@ -277,9 +277,12 @@ Prepare new request
   Select From List by test id  create-municipality-select  ${municipality}
   Input text by test id  create-property-id  ${propertyId}
   Click by test id  create-continue
+  # Going too fast causes negative margins
+  Set Selenium Speed  ${SLOW_SPEED}
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+  Set Selenium Speed  ${DEFAULT_SPEED}
   # Needed for animation to finish.
   Sleep  1
 
