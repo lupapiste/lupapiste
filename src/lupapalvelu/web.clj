@@ -149,20 +149,24 @@
 (defjson "/api/gotobang" []
   (ok :data (session/get! "gotobang")))
 
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" (name lang) "/welcome#")))
+
 (defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app gotobang :gotobang}
-  (let [welcome-url "/fi/welcome#"
-        banged-url  (if (and gotobang (local? gotobang))
-                      (str welcome-url gotobang)
-                      welcome-url)]
-    (infof "gotobang: %s, banged-url: %s" gotobang banged-url)
-    (single-resource :html (keyword app) (resp/redirect banged-url))))
+  ;; hashbangs are not sent to server, query-parameter gotobang used to store where the user wanted to go, stored on server, reapplied on login
+  (when (and gotobang (local? gotobang))
+    (info "gotobang:" gotobang)
+    (session/put! :gotobang gotobang))
+  (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
 ;;
 ;; Login/logout:
 ;;
 
-(defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" lang "/welcome")))
+(def applicationpage-for {"applicant"      "/applicant"
+                          "authority"      "/authority"
+                          "authorityAdmin" "/authority-admin"
+                          "admin"          "/admin"})
 
 (defjson [:post "/api/logout"] []
   (session/clear!)
