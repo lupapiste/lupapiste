@@ -85,7 +85,7 @@ Go to page
 
 Open tab
   [Arguments]  ${name}
-  Execute Javascript  window.scrollTo($("[data-test-id='application-open-${name}-tab']").position().top, 0);
+  Execute Javascript  window.scrollTo(0, $("[data-test-id='application-open-${name}-tab']").position().top);
   Click by test id  application-open-${name}-tab
   Wait until  Element should be visible  application-${name}-tab
 
@@ -283,9 +283,8 @@ Prepare new request
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+  Wait until  Element should be visible  xpath=//div[@class='tree-result']
   Set Selenium Speed  ${DEFAULT_SPEED}
-  # Needed for animation to finish.
-  Sleep  1
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
