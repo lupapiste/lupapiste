@@ -281,16 +281,13 @@
   (warn "CSRF attempt detected!")
   (resp/json (fail :error.invalid-csrf-token)))
 
-(defn- doit [handler request]
-  (let [cookie-name "lupapiste-token"] (if (and (.startsWith (:uri request) "/api/") (not (logged-in-with-apikey? request)))
-    (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-    (anti-forgery/set-token-in-cookie request (handler request) cookie-name))))
-
 (defn anti-csrf
   [handler]
   (fn [request]
-    ; TODO inline 'doit' here
-    (doit handler request)))
+    (let [cookie-name "lupapiste-token"]
+      (if (and (.startsWith (:uri request) "/api/") (not (logged-in-with-apikey? request)))
+        (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+        (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
 
 ;;
 ;; dev utils:
