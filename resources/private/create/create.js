@@ -201,7 +201,7 @@
     };
 
     self.setAddressData = function(data) {
-      self
+      return self
         .setXY(data.x, data.y)
         .setAddress(data)
         .setMunicipality(data.kuntatunnus)
@@ -265,7 +265,7 @@
       serviceUrl:      "/proxy/find-address",
       deferRequestBy:  500,
       noCache:         true,
-      onSelect:        function(value, data) { model.setAddressData(data); }
+      onSelect:        function(value, data) { model.setAddressData(data).center(data.x, data.y, 10); }
     });
 
     var tree = selectionTree.create(
