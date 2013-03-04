@@ -163,11 +163,6 @@
 ;; Login/logout:
 ;;
 
-(def applicationpage-for {"applicant"      "/applicant"
-                          "authority"      "/authority"
-                          "authorityAdmin" "/authority-admin"
-                          "admin"          "/admin"})
-
 (defjson [:post "/api/logout"] []
   (session/clear!)
   (ok))
