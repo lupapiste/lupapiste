@@ -19,6 +19,7 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
+  self.gotobang = undefined;
 
   self.createLogo = function() {
     var href = "#!/" + self.startPage;
@@ -65,6 +66,8 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
     $(window).hashchange(self.hashChanged);
     $(window).hashchange();
     $(window).unload(self.unload);
+
+    self.gotobang = window.location.hash;
 
     self.connectionCheck();
 
