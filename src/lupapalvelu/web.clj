@@ -150,10 +150,12 @@
   (ok :data (session/get! "gotobang")))
 
 (defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app gotobang :gotobang}
-  (when (and gotobang (local? gotobang))
-    (info "gotobang:" gotobang)
-    (session/put! "gotobang" gotobang))
-  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
+  (let [welcome-url "/fi/welcome#"
+        banged-url  (if (and gotobang (local? gotobang))
+                      (str welcome-url gotobang)
+                      welcome-url)]
+    (infof "gotobang: %s, banged-url: %s" gotobang banged-url)
+    (single-resource :html (keyword app) (resp/redirect banged-url))))
 
 ;;
 ;; Login/logout:
