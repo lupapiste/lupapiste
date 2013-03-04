@@ -536,12 +536,11 @@ var docgen = (function() {
       var save = makeSaverDelegate(self.saveCallback, self.eventData);
 
       var section = document.createElement("section");
-      section.className = "application_section";
+      section.className = "accordion";
 
       var icon = document.createElement("span");
       icon.className = "font-icon icon-expanded";
       var title = document.createElement("h2");
-      title.className = "application_section_header";
       title.appendChild(icon);
       if (op) {
         title.appendChild(document.createTextNode(loc(op + "._group_label")));
@@ -560,7 +559,7 @@ var docgen = (function() {
       }
 
       var sectionContainer = document.createElement("div");
-      sectionContainer.className = "application_section_content content_expanded";
+      sectionContainer.className = "accordion_content expanded";
 
       var elements = document.createElement("article");
       appendElements(elements, self.spec, self.model, [], save, specId);

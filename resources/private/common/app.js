@@ -29,7 +29,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     _.each(loc.getSupportedLanguages(), function (lang) {
       if (lang !== loc.getCurrentLanguage()) {
         naviLinks$.append(
-            $("<a>").attr("href", "#").text(loc("in_" + lang))
+            $("<a>").attr("href", "#").text(loc("in_" + lang ) +" >>")
             .click(function (e) {
               hub.send("change-lang", { lang: lang });
               e.preventDefault();
@@ -57,9 +57,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
   };
 
   this.createNaviLinks = function () {
-    var naviLinks$ = $("div").attr("class", "nav-main");
-    naviLinks$.append($("div").attr({ "class": "nav-applications", "href": "#" }));
-    naviLinks$.append($("div").attr({ "class": "nav-requests", "href": "#" }));
+    var naviLinks$ = $("<span>").attr("id", "main-nav");
     return naviLinks$;
   };
 
@@ -76,12 +74,13 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
       LUPAPISTE.ModalDialog.init();
     }
-
-    $("nav").append(self.createLogo()).append(self.createConnectionErrorContainer());
+    var navWrapper = $("<div class='nav-wrapper'></div>");
+    navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
     if (!self.allowAnonymous) {
-      $("nav").append(self.createUserMenu());
+      navWrapper.append(self.createUserMenu());
     }
-    $("nav").append(self.createNaviLinks());
+    navWrapper.append(self.createNaviLinks());
+    $("nav").append(navWrapper)
   };
   $(this.domReady);
 

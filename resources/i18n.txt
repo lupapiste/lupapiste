@@ -12,3 +12,6 @@ register.personal-info: Tarkista tietosi ja täytä puuttuvat kentät. Voit myö
 register.register-action: Rekisteröidy
 register.activation-email-info1: Aktivointisähköposti lähetetty osoitteeseen
 register.activation-email-info2: Aktivoi käyttäjätunnuksesi klikkaamalla sähköpostissa olevaa aktivointilinkkiä. Näin voimme varmistaa että sähköpostiosoitteesi toimii.
+applications.title: Omat hankkeeni
+application.muncipality: Asiointikunta
+application.muncipality-contact: Yhteystiedot
