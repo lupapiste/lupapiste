@@ -3,7 +3,8 @@
          [clojure.data.xml]
          [clojure.java.io]
          [lupapalvelu.document.krysp :only [application-to-canonical]]
-         [lupapalvelu.xml.emit :only [element-to-xml]]))
+         [lupapalvelu.xml.emit :only [element-to-xml]]
+         [lupapalvelu.xml.krysp.validator :only [validate]]))
 
 ;RakVal
 (def tunnus-children [{:tag :valtakunnallinenNumero}
@@ -119,7 +120,11 @@
 (defn get-application-as-krysp [application]
   (let [
         canonical (application-to-canonical application)
-        xml (element-to-xml canonical rakennuslupa_to_krysp )]
+        xml (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s (indent-str xml)]
+    (validate xml-s)
+
+
     ;(with-open [out-file (writer "/Users/terotu/example-krysp.xml" )]
-     ; (emit xml out-file))
+    ; (emit xml out-file))
     ))
