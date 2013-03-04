@@ -85,6 +85,7 @@ Go to page
 
 Open tab
   [Arguments]  ${name}
+  Execute Javascript  window.scrollTo($("[data-test-id='application-open-${name}-tab']").position().top, 0);
   Click by test id  application-open-${name}-tab
   Wait until  Element should be visible  application-${name}-tab
 
