@@ -85,7 +85,6 @@ Go to page
 
 Open tab
   [Arguments]  ${name}
-  Execute Javascript  window.scrollTo(0, $("[data-test-id='application-open-${name}-tab']").position().top);
   Click by test id  application-open-${name}-tab
   Wait until  Element should be visible  application-${name}-tab
 
@@ -218,6 +217,8 @@ Click by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id='${id}']
   Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
+  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
+  Execute Javascript  window.scrollTo(0, $("[data-test-id='${id}']").position().top - 130);
   # IE8
   Focus  xpath=//*[@data-test-id='${id}']
   Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
