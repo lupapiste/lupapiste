@@ -258,7 +258,7 @@
 
   $(function() {
 
-    model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
+    model.setMap(gis.makeMap("create-map").center(404168, 7205000, 0));
     ko.applyBindings(model, $("#create")[0]);
 
     $("#create-search").autocomplete({
