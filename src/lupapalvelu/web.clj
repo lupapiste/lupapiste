@@ -35,8 +35,8 @@
   `(defpage ~path ~params
      (resp/json (do ~@content))))
 
-(defn from-json []
-  (json/decode (slurp (:body (request/ring-request))) true))
+(defn from-json [request]
+  (json/decode (slurp (:body request)) true))
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
@@ -103,7 +103,7 @@
     (core/execute action)))
 
 (defjson [:post "/api/command/:name"] {name :name}
-  (execute (enriched (core/command name (from-json)))))
+  (execute (enriched (core/command name (from-json (request/ring-request))))))
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
@@ -278,8 +278,14 @@
 ;;
 
 (defn- csrf-attack-hander [request]
-  (warn "CSRF attempt detected!")
-  (resp/json (fail :error.invalid-csrf-token)))
+
+  (with-logging-context
+    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
+     :userId        (or (:id (current-user request)) "???")}
+    (warn "CSRF attempt blocked."
+          "Client IP:" (client-ip request)
+          "Referer:" (get-in request [:headers "referer"]))
+    (resp/json (fail :error.invalid-csrf-token))))
 
 (defn anti-csrf
   [handler]

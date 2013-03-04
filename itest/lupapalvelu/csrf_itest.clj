@@ -25,5 +25,7 @@
 
 (fact "Failing to send the header fails CSRF check"
       (let [resp (c/get (str (server-address) "/api/query/allowed-actions")
-                        {:cookies {"lupapiste-token" {:value "my-token"}}})]
+                        {:cookies {"lupapiste-token" {:value "my-token"}}
+                         :query-params {:id 123}
+                         :headers {"Referer" "http://attacker.example.com/"}})]
         (invalid-csrf-token (decode-response resp)) => true))
