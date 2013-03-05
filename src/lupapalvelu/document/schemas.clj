@@ -288,7 +288,7 @@
                                  {:name "lammonlahde" :type :select
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                                          {:name "kevyt poltto\u00f6ljy"}
-                                         {:name "raskas poltto\u00f6ljy"}§
+                                         {:name "raskas poltto\u00f6ljy"}
                                          {:name "s\u00e4hk\u00f6"}
                                          {:name "kaasu"}
                                          {:name "kiviihiili koksi tms"}
