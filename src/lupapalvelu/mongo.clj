@@ -134,7 +134,7 @@
 
 (defn ensure-indexes []
   (debug "ensure-indexes")
-  (mc/ensure-index :users {:username 1})
+  (mc/ensure-index :users {:username 1} {:unique true})
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:municipality 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
