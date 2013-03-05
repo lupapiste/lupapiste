@@ -6,18 +6,8 @@
          [lupapalvelu.xml.emit :only [element-to-xml]]))
 
 ;RakVal
-(def tunnus-children [{:tag :valtakunnallinenNumero}
-                      {:tag :jarjestysnumero}
-                      {:tag :kiinttun}
-                      {:tag :rakennusnro}
-                      {:tag :aanestysalue}])
 
-(def rakennelma (conj [{:tag :kuvaus
-                        :child [{:tag :kuvaus}]}]
-                      sijantitieto
-                      {:tag :tunnus :child tunnus-children}))
-
-(def huoneisto {:tag :huoneisto
+(def ^:private huoneisto {:tag :huoneisto
                 :child [{:tag :huoneluku}
                         {:tag :keittionTyyppi}
                         {:tag :huoneistoala}
@@ -31,39 +21,44 @@
                         {:tag :huoneistotunnus
                          :child [{:tag :porras}
                                  {:tag :huoneistonumero}
-                                 {:tag :jakokirjain}
-                                 ]}
-                        ]})
+                                 {:tag :jakokirjain}]}]})
 
-(def rakennus {:tag :Rakennus
-                :child [{:tag :yksilointitieto :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
-                        {:tag :alkuHetki :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}}
-                        sijantitieto
-                        {:tag :rakennuksenTiedot
-                         :child [{:tag :rakennustunnus :child tunnus-children}
-                                 {:tag :kayttotarkoitus}
-                                 {:tag :tilavuus}
-                                 {:tag :kokonaisala}
-                                 {:tag :kellarinpinta-ala}
-                                 {:tag :BIM :child []}
-                                 {:tag :kerrosluku}
-                                 {:tag :kerrosala}
-                                 {:tag :rakentamistapa}
-                                 {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
-                                                                    {:tag :rakennusaine}]}
-                                 {:tag :julkisivu
-                                  :child [{:tag :muuMateriaali}
-                                          {:tag :julkisivumateriaali}]}
-                                 {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
-                                                                  {:tag :vesijohtoKytkin}
-                                                                  {:tag :sahkoKytkin}
-                                                                  {:tag :maakaasuKytkin}
-                                                                  {:tag :kaapeliKytkin}]}
-                                 {:tag :energialuokka}
-                                 {:tag :paloluokka}
+
+(def rakennelma (conj [{:tag :kuvaus
+                        :child [{:tag :kuvaus}]}]
+                      sijantitieto
+                      {:tag :tunnus :child tunnus-children}))
+
+(def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
+                   {:tag :alkuHetki :ns "yht"}
+                   sijantitieto
+                   {:tag :rakennuksenTiedot
+                    :child [{:tag :rakennustunnus :child tunnus-children}
+                            {:tag :kayttotarkoitus}
+                            {:tag :tilavuus}
+                            {:tag :kokonaisala}
+                            {:tag :kellarinpinta-ala}
+                            {:tag :BIM :child []}
+                            {:tag :kerrosluku}
+                            {:tag :kerrosala}
+                            {:tag :rakentamistapa}
+                            {:tag :kantavaRakennusaine :child [{:tag :muuRakennusaine}
+                                                               {:tag :rakennusaine}]}
+                            {:tag :julkisivu
+                             :child [{:tag :muuMateriaali}
+                                     {:tag :julkisivumateriaali}]}
+                            {:tag :verkostoliittymat :child [{:tag :viemariKytkin}
+                                                             {:tag :vesijohtoKytkin}
+                                                             {:tag :sahkoKytkin}
+                                                             {:tag :maakaasuKytkin}
+                                                             {:tag :kaapeliKytkin}]}
+                            {:tag :energialuokka}
+                            {:tag :energiatehokkuusluku}
+                            {:tag :energiatehokkuusluvunYksikko}
+                            {:tag :paloluokka}
                                  {:tag :lammitystapa}
                                  {:tag :lammonlahde :child [{:tag :polttoaine}
-                                                             {:tag :muu}]}
+                                                            {:tag :muu}]}
                                  {:tag :varusteet
                                   :child [{:tag :sahkoKytkin}
                                           {:tag :kaasuKytkin}
@@ -78,22 +73,33 @@
                                           {:tag :vaestonsuoja}]}
                                  {:tag :jaahdytysmuoto}
                                  {:tag :asuinhuoneistot :child [huoneisto]}
-                                 ]}]})
+                                 ]}
+                   {:tag :omistajatieto
+                    :child [{:tag :Omistaja
+                             :child [{:tag :kuntaRooliKoodi :ns "yht"}
+                                     {:tag :VRKrooliKoodi :ns "yht"}
+                                     henkilo
+                                     yritys
+                                     {:tag :omistajalaji :ns "rakval"
+                                      :child [{:tag :muu}
+                                              {:tag :omistajalaji}]}]}]}])
+
+(def rakennus {:tag :Rakennus
+               :child yht-rakennus})
 
 
 (def rakennuslupa_to_krysp
-  {:tag :Rakennusvalvonta :attr {:xmlns:xlink "http://www.w3.org/1999/xlink" :xmlns:xml "http://www.w3.org/XML/1998/namespace"
-  :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance" :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-  :xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.0/rakennusvalvonta.xsd"
-  :xmlns "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
+  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.4/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.4/rakennusvalvonta.xsd"
+                                        :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+                                        :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+                                        :xmlns:xlink "http://www.w3.org/1999/xlink"
+                                        :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
                      :child [{:tag :kasittelynTilatieto :child [tilamuutos]}
                              {:tag :luvanTunnisteTiedot
-                              :child [{:tag :LupaTunnus
-                                       :attr {:xmlns "http://www.paikkatietopalvelu.fi/gml/yhteiset"}
-                                       :child [{:tag :muuTunnus} {:tag :saapumisPvm}]}]}
+                              :child [lupatunnus]}
                              {:tag :osapuolettieto
                               :child [osapuolet]}
                              {:tag :rakennuspaikkatieto
@@ -104,14 +110,11 @@
                                                 :child [{:tag :huoneistoala}
                                                         {:tag :kuvaus}]}
                                                {:tag :laajennus}
-                                               {:tag :kayttotarkoitusmuutos}
-                                               {:tag :perustus}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
                                                {:tag :purkaminen}
                                                {:tag :muuMuutosTyo}
                                                {:tag :kaupunkikuvaToimenpide}
-                                               {:tag :katselmustieto}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
                                                {:tag :rakennelmatieto}]}]}]}]}]})
@@ -121,5 +124,5 @@
         canonical (application-to-canonical application)
         xml (element-to-xml canonical rakennuslupa_to_krysp )]
     ;(with-open [out-file (writer "/Users/terotu/example-krysp.xml" )]
-     ; (emit xml out-file))
+    ; (emit xml out-file))
     ))
