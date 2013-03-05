@@ -77,7 +77,7 @@
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
-    self.center = function(x, y) { if (self.map) { self.map.center(x, y); } return self; };
+    self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
     self.setPropertyId = function(value) { return  self.propertyId(value); };
     self.setMunicipality = function(value) { return isBlank(value) ? self.municipalityCode(null).municipality("") : self.municipalityCode(value).municipality(loc("municipality." + value)); };
     self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
@@ -155,7 +155,7 @@
           var data = result.data[0], x = data.x, y = data.y;
           self
             .setXY(x, y)
-            .center(x, y)
+            .center(x, y, 11)
             .setAddress(data)
             .beginUpdateRequest()
             .searchMunicipality(x, y)
@@ -201,7 +201,7 @@
     };
 
     self.setAddressData = function(data) {
-      self
+      return self
         .setXY(data.x, data.y)
         .setAddress(data)
         .setMunicipality(data.kuntatunnus)
@@ -258,14 +258,14 @@
 
   $(function() {
 
-    model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
+    model.setMap(gis.makeMap("create-map").center(404168, 7205000, 0));
     ko.applyBindings(model, $("#create")[0]);
 
     $("#create-search").autocomplete({
       serviceUrl:      "/proxy/find-address",
       deferRequestBy:  500,
       noCache:         true,
-      onSelect:        function(value, data) { model.setAddressData(data); }
+      onSelect:        function(value, data) { model.setAddressData(data).center(data.x, data.y, 10); }
     });
 
     var tree = selectionTree.create(
