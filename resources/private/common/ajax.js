@@ -32,9 +32,9 @@ var ajax = (function() {
       }
     };
 
-    self.successHandler = function(e) { notify.success("ok",e); };
+    self.successHandler = function(e) { };
     self.errorHandler = function(e) { notify.error("error",e); };
-    self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", jqXHR, textStatus, errorThrown); };
+    self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown); };
     self.completeHandler = function() { };
     self.headers = {};
 

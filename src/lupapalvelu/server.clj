@@ -58,7 +58,7 @@
   (server/add-middleware headers/add-security-headers)
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/apikey-authentication)
-  (when env/perf-mon-on
+  (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init)))
