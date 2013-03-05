@@ -5,7 +5,7 @@
   (:import [org.apache.log4j DailyRollingFileAppender EnhancedPatternLayout]))
 
 
-(def pattern "%-7p %d (%r) %X{sessionId} [%X{applicationId}] [%X{userId}] %c:%L - %m%n")
+(def pattern "%-7p %d (%r) [%X{sessionId}] [%X{applicationId}] [%X{userId}] %c:%L - %m%n")
 
 (defn daily-rolling-midnight-appender [pattern file]
   (DailyRollingFileAppender. (EnhancedPatternLayout. pattern) file "'.'yyyy-MM-dd"))
