@@ -278,7 +278,6 @@
 ;;
 
 (defn- csrf-attack-hander [request]
-
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
      :userId        (or (:id (current-user request)) "???")}

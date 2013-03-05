@@ -2,6 +2,14 @@
   "Ring middleware to prevent CSRF attacks with an anti-forgery token."
   (:require [crypto.random :as random]))
 
+;; ring-anti-forgery, Copyright 2012 James Reeves, distributed under the MIT License.
+;;
+;; This file is copied from
+;; https://github.com/weavejester/ring-anti-forgery/pull/12
+;;
+;; Also inspired by:
+;; https://github.com/weavejester/ring-anti-forgery/pull/13
+
 (def ^:dynamic
   ^{:doc "Binding that stores a anti-forgery token that must be included
           in POST forms if the handler is wrapped in wrap-anti-forgery."}
