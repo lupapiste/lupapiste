@@ -93,21 +93,17 @@
 
 ;; Modified middleware for Lupapiste
 
-(defn- csrf-token [request cookie-name]
-  (or (get-in request [:cookies cookie-name :value]) (default-token-generation-fn)))
-
 (defn crosscheck-token
   "Middleware helper that prevents CSRF attacks."
   [handler request cookie-name attack-callback]
   (let [request-token (request-token request)
-        stored-token (csrf-token request cookie-name)]
+        stored-token  (get-in request [:cookies cookie-name :value])]
     (if (and request-token stored-token (secure-eql? request-token stored-token))
       (handler request)
       (attack-callback request))))
 
 (defn set-token-in-cookie [request response cookie-name]
   (when response
-    (let [token (csrf-token request cookie-name)]
-      (if (get-in request [:cookies cookie-name :value])
+    (if (get-in request [:cookies cookie-name :value])
        response
-       (assoc-in response [:cookies cookie-name] {:value token :path "/"})))))
+       (assoc-in response [:cookies cookie-name] {:value (default-token-generation-fn) :path "/"}))))
