@@ -132,12 +132,18 @@
         (debug "DB is" (.getName (m/get-db)))
         (reset! connected true)))))
 
-(defn clear! []
-  (warn "Clearing MongoDB:" mongouri)
-  (gfs/remove-all)
-  (db/drop-db (m/get-db))
+(defn ensure-indexes []
+  (debug "ensure-indexes")
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
   (mc/ensure-index :activations {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
   #_(mc/ensure-index "users" {:personId 1} {:unique true}))
+
+(defn clear! []
+  (warn "Clearing MongoDB:" mongouri)
+  (gfs/remove-all)
+  ; Collections must be dropped individially, otherwise index cache will be stale
+  (doseq [coll (db/get-collection-names)]
+    (when-not (.startsWith coll "system") (mc/drop coll)))
+  (ensure-indexes))
