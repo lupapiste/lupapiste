@@ -283,7 +283,7 @@ Prepare new request
   Set Selenium Speed  ${SLOW_SPEED}
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennuksen rakentaminen"]
   Wait until  Element should be visible  xpath=//div[@class='tree-result']
   Set Selenium Speed  ${DEFAULT_SPEED}
 

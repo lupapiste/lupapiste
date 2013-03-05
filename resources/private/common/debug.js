@@ -42,8 +42,8 @@ $(function() {
           start = window.performance.timing[row[1]],
           end = window.performance.timing[row[2]],
           duration = end - start;
-      if (!start) { throw "Unknown timineg event: " + row[1]; }
-      if (!end) { throw "Unknown timineg event: " + row[2]; }
+      if (typeof start !== "number") {throw "Unknown timineg event: " + row[1]; }
+      if (typeof end !== "number") {throw "Unknown timineg event: " + row[2]; }
       table
         .append($("<tr>").css("padding", "0px")
           .append($("<td>").text(name).css("padding", "0px"))
