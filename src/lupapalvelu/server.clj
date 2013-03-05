@@ -53,6 +53,7 @@
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
   (mongo/connect!)
+  (mongo/ensure-indexes)
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
