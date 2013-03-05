@@ -64,4 +64,4 @@ hakija.henkilo.turvakieltoKytkin: Turvakielto
 paasuunnittelija.turvakieltoKytkin: Turvakielto
 suunnittelija.turvakieltoKytkin: Turvakielto
 maksaja.henkilo.turvakieltoKytkin: Turvakielto
-uusiRakennus.rakenne.muuRakennusaine Muu rakennusaine
+uusiRakennus.rakenne.muuRakennusaine: Muu rakennusaine
