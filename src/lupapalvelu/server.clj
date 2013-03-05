@@ -56,7 +56,7 @@
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
-  (when env/perf-mon-on
+  (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init)))
