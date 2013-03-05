@@ -290,7 +290,8 @@
   [handler]
   (fn [request]
     (let [cookie-name "lupapiste-token"]
-      (if (and (.startsWith (:uri request) "/api/") (not (logged-in-with-apikey? request)))
+      (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+               (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
         (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
 
