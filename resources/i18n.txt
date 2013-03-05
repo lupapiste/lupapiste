@@ -16,6 +16,7 @@ applications.title: Omat hankkeeni
 application.muncipality: Asiointikunta
 application.muncipality-contact: Yhteystiedot
 newRequest.topic: Uusi hanke
+attachment.return: Palaa hakemukseen
 
 uusiRakennus.rakennuksenOmistajat.henkilo.turvakieltoKytkin: Turvakieleto
 uusiRakennus.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: yksityinen maatalousyrittäjä
