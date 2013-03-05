@@ -121,13 +121,9 @@
                                                {:tag :rakennelmatieto}]}]}]}]}]})
 
 (defn get-application-as-krysp [application]
-  (let [
-        canonical (application-to-canonical application)
+  (let [canonical (application-to-canonical application)
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     (validate xml-s)
-
-
-    ;(with-open [out-file (writer "/Users/terotu/example-krysp.xml" )]
-    ; (emit xml out-file))
-    ))
+  (with-open [out-file (writer "/Users/terotu/example-krysp.xml")]
+    (emit xml out-file))))
