@@ -3,66 +3,65 @@
         [clojure.tools.logging]
         [lupapalvelu.strings :only [suffix]]
         [lupapalvelu.core])
-  (:require [sade.security :as sadesecurity]
+  (:require [clojure.java.io :as io]
+            [net.cgrand.enlive-html :as enlive]
+            [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
             [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.components.core :as c])
+  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
+           [java.util.zip GZIPOutputStream]
+           [org.apache.commons.io IOUtils]
+           [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
+           [org.mozilla.javascript ErrorReporter EvaluatorException]))
 
-;TODO where to find out this?
-(defn resolve-host-name []
-  "http://localhost:8000")
+(defn write-header [out n]
+    (.write out (format "\n\n/*\n * %s\n */\n" n))
+  out)
 
 (defn get-file-content []
   (let [stream (ByteArrayOutputStream.)]
     (with-open [out (io/writer stream)]
-      (.write (write-header out (str "fn: " (fn-name src))) (src))
-      (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-        (if (.contains src ".min.")
-          (IOUtils/copy in (write-header out src))
-          (minified kind in (write-header out src)))))))
-(.toByteArray stream)))
+      (let [src "foo.html"]
+          (.write src)
+          (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
+              (IOUtils/copy in (write-header out src)))))
+    (.toByteArray stream)))
 
-      )
+(defn get-application-link [host application lang]
+  (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
+    (str host "/" lang "/applicant#!" permit-type-path (:id application))))
 
+(defn replace-with-selector [e host application lang]
+  (enlive/transform e [(keyword (str "#application-link-" lang))] (fn [e] (assoc e :content (get-application-link host application lang)))))
 
+(defn get-message-for-new-comment [application host]
+  (let [application-id (:id application)
+        e (enlive/html-resource "email-templates/application-new-comment.html")]
+    
+    (apply str (enlive/emit* (-> e
+                               (replace-with-selector host application "fi")
+                               (replace-with-selector host application "sv"))))))
 
-(defn message-for-new-comment-in-application [application host]
-  (let [permit-type (:permitType application)
-        permit-type-name (if (= permit-type "infoRequest") {:fi (str "Neuvontapyynt\u00F6\u00F6n") :sv (str "R\u00E5dbeg\u00E4ra")} {:fi (str "Hakemukseen") :sv (str "Ans\u00F6kan")})
-        permit-type-path (if (= permit-type "infoRequest") (str "inforequest") (str "application"))]
-    (format
-      (str
-        "Hei,\n\n%s on lis\u00E4tty kommentti. Katso lis\u00E4tietoja osoitteesta %s/fi/applicant#!/%s/%s\n\n"
-        "Yst\u00E4v\u00E4llisin terveisin,\n\nLupapiste.fi\n\n\n\n"
-        "Hej,\n\n"
-        "%s har nya commenter. Se mera information i addresset %s/sv/applicant#!/%s/%s\n\n"
-        "\n\n"
-        "Grattis,\n\nLupapiste.fi\n\n\n\n")
-      (:fi permit-type-name)
-      host
-      permit-type-path
-      (:id application)
-      (:sv permit-type-name)
-      host
-      permit-type-path
-      (:id application))))
+(defn get-emails-for-new-comment [application]
+  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
 
-(defn user-is-in-authority-role [user]
-  (= "authority" (:role user)))
+(def mail-agent (agent nil)) 
 
-(defn send-notifications-on-new-comment [user-commenting application]
-  (if (user-is-in-authority-role user-commenting)
-    (do
-      (println "notification on new comment for " application)
-      (let [email "timo.lehtonen@solita.fi"
-            msg (message-for-new-comment-in-application application (resolve-host-name))]
-        (println msg)
-        (future
-          (info "sending email to" email)
-          (if (email/send-email email (:title application) msg)
-            (info "email was sent successfully")) ((error "email could not be delivered."))) 
-        nil))))
+(defn send-mail-to-recipients [recipients title msg]
+  (doseq [recipient recipients]
+    (send-off mail-agent (fn [_]
+                           (if (email/send-email recipient title msg)
+                             (info "email was sent successfully")
+                             (error "email could not be delivered."))))))
+
+(defn send-notifications-on-new-comment [host application user-commenting comment-text]
+  (if (= :authority (keyword (:role user-commenting)))
+    (let [recipients (get-emails-for-new-comment application)
+          msg (get-message-for-new-comment application host)]
+      (send-mail-to-recipients recipients (:title application) msg))))

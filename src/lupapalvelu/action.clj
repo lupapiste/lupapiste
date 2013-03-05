@@ -145,7 +145,7 @@
 (defcommand "add-comment"
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
-  [{{:keys [text target]} :data user :user :as command}]
+  [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
   (with-application command
     (fn [application]
       (if (= "draft" (:state application))
@@ -158,7 +158,7 @@
                            :target  target
                            :created (:created command)
                            :user    (security/summary user)}}})
-      (notifications/send-notifications-on-new-comment user application))))
+      (notifications/send-notifications-on-new-comment host application user text))))
 
 (defcommand "assign-to-me"
   {:parameters [:id]
