@@ -54,7 +54,11 @@
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
 
     self.clear = function() {
-      if (self.map) { self.map.clear().updateSize(); }
+      if (!self.map) {
+        self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
+        self.map.addClickHandler(self.click);
+      }
+      self.map.clear().updateSize();
       return self
         .search("")
         .x(0)
@@ -67,12 +71,6 @@
         .message("")
         .requestType(null)
         .goPhase1();
-    };
-
-    self.setMap = function(map) {
-      self.map = map;
-      self.map.addClickHandler(self.click);
-      return self;
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
@@ -201,7 +199,7 @@
     };
 
     self.setAddressData = function(data) {
-      self
+      return self
         .setXY(data.x, data.y)
         .setAddress(data)
         .setMunicipality(data.kuntatunnus)
@@ -258,14 +256,13 @@
 
   $(function() {
 
-    model.setMap(gis.makeMap("create-map").center(404168, 7005000, 0));
     ko.applyBindings(model, $("#create")[0]);
 
     $("#create-search").autocomplete({
       serviceUrl:      "/proxy/find-address",
       deferRequestBy:  500,
       noCache:         true,
-      onSelect:        function(value, data) { model.setAddressData(data); }
+      onSelect:        function(value, data) { model.setAddressData(data).center(data.x, data.y, 10); }
     });
 
     var tree = selectionTree.create(
