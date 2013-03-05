@@ -14,6 +14,7 @@ $(function() {
     var t = $(e.target);
     var value = t.val();
     ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/throttle/" + type)
+      .raw()
       .json({value: value})
       .header("npm", "true")
       .success(function() { t.parent().find("b.dev-throttle-" + type).text(value); })
@@ -50,6 +51,7 @@ $(function() {
     });
 
     ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/browser-timing")
+      .raw()
       .json({timing: window.performance.timing})
       .header("npm", "true")
       .call();
