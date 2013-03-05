@@ -137,6 +137,7 @@
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:municipality 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
+  (mc/ensure-index :applications {:municipality 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (mc/ensure-index :activations {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
