@@ -1,30 +1,66 @@
-invited: kutsuttu
-foo: bar
-rakennuksen-muuttaminen.perusparannuskytkin: Perusparannusta
-asuinrakennus._group_label: Uusi asuinrakennus
-vapaa-ajan-asuinrakennus._group_label: Uusi vapaa-ajan asuinrakennus
-varasto-tms._group_label: Uusi varasto tai muu sellainen
-laajentaminen._group_label: Rakennuksen laajentaminen
-kayttotark-muutos._group_label: Käyttötarkoituksen muutos
-julkisivu-muutos._group_label: Julkisivumuutos
-jakaminen-tai-yhdistaminen._group_label: Jakaminen tai yhdistäminen
-markatilan-laajentaminen._group_label: Märkätilan laajentaminen
-takka-tai-hormi._group_label: Takan tai hormin rakentaminen
-parveke-tai-terassi._group_label: Parvekken tai terassin rakentaminen
-auto-katos._group_label: Uuden autokatoksen rakentaminen
-masto-tms._group_label: Uuden maston tai muun sellaisen rakentaminen
-aita._group_label: Aidan rakentaminen
-maalampo._group_label: Maalampökaivon poraaminen tai lämmönkeruuputkiston asentaminen
-muu-laajentaminen._group_label: Muu laajentaminen tai muuttaminen
-jatevesi._group_label: Rakennuksen jätevesijärjestelmän uusiminen
-muu-rakentaminen._group_label: Uusi muu rakennelma
-puun-kaataminen._group_label: Puun kaataminen
-muu-maisema-toimenpide._group_label: Muu maisemätyötoimenpide
-kaivuu._group_label: Kaivuu
-maisematyo.kuvaus: Kuvaus
-kaupunkikuvatoimenpide.kuvaus: Kuvaus
-julkinen-rakennus._group_label: Uusi julkinen rakennus
-purkaminen._group_label: Rakennuksen purkaminen
+register.header: Rekisteröidy Lupapisteen käyttäjäksi
+register.info: Tervetuloa Lupapisteen käyttäjäksi. Lupapiste on uudenlainen sähköinen palvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa- ja ilmoitusasiansa vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa. Koska Lupapisteessä käsitellään luottamuksellisia ja luvanvaraisia tietoja, Lupapisteen käyttäjien henkilöllisyys täytyy varmistaa verkkopankkitunnusten avulla.
+register.cancel: Tunnistautuminen peruutettiin. Palveluun rekisteröityminen vaatii tunnistautumisen. Ole hyvä ja yritä uudelleen.
+register.error: Tunnistautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen. Jos virhe toistuu, yritä myöhemmin uudelleen.
+register.action: Tunnistaudu
+front-page: Etusivu
+register.breadcrum1: Rekisteröinti 1/3
+register.breadcrum2: Rekisteröinti 2/3
+register.breadcrum3: Rekisteröinti 3/3
+register.personal-info: Tarkista tietosi ja täytä puuttuvat kentät. Voit myöhemmin muuttaa tietojasi "omat tiedot" valikosta.
+register.register-action: Rekisteröidy
+register.activation-email-info1: Aktivointisähköposti lähetetty osoitteeseen
+register.activation-email-info2: Aktivoi käyttäjätunnuksesi klikkaamalla sähköpostissa olevaa aktivointilinkkiä. Näin voimme varmistaa että sähköpostiosoitteesi toimii.
+mypage.null:
 
-
-
+uusiRakennus.rakennuksenOmistajat.henkilo.turvakieltoKytkin: Turvakieleto
+uusiRakennus.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: yksityinen maatalousyrittäjä
+uusiRakennus.rakennuksenOmistajat.omistajalaji.muu yksityinen henkilö tai perikunta: muu yksityinen henkilö tai perikunta
+uusiRakennus.rakennuksenOmistajat.omistajalaji.asunto-oy tai asunto-osuuskunta: asunto-oy tai asunto-osuuskunta
+uusiRakennus.rakennuksenOmistajat.omistajalaji.kiinteistö oy: kiinteistö oy
+uusiRakennus.rakennuksenOmistajat.omistajalaji.yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta): yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)
+uusiRakennus.rakennuksenOmistajat.omistajalaji.valtio- tai kuntaenemmistöinen yritys: valtio- tai kuntaenemmistöinen yritys
+uusiRakennus.rakennuksenOmistajat.omistajalaji.kunnan liikelaitos: kunnan liikelaitos
+uusiRakennus.rakennuksenOmistajat.omistajalaji.valtion liikelaitos: valtion liikelaitos
+uusiRakennus.rakennuksenOmistajat.omistajalaji.pankki tai vakuutuslaitos: pankki tai vakuutuslaitos
+uusiRakennus.rakennuksenOmistajat.omistajalaji.kunta tai kuntainliitto: kunta tai kuntainliitto
+uusiRakennus.rakennuksenOmistajat.omistajalaji.valtio: valtio
+uusiRakennus.rakennuksenOmistajat.omistajalaji.sosiaaliturvarahasto: sosiaaliturvarahasto
+uusiRakennus.rakennuksenOmistajat.omistajalaji.uskonnollinen yhteisö, säätiö, puolue tai yhdistys: uskonnollinen yhteisö, säätiö, puolue tai yhdistys
+uusiRakennus.rakennuksenOmistajat.omistajalaji.ei tiedossa: ei tiedossa
+uusiRakennus.rakennuksenOmistajat.omistajalaji._group_label: Omistajalaji
+uusiRakennus.rakennuksenOmistajat.muu-omistajalaji: Muu omistajalaji
+uusiRakennus.luokitus.energialuokka.A: A
+uusiRakennus.luokitus.energialuokka.B: B
+uusiRakennus.luokitus.energialuokka.C: C
+uusiRakennus.luokitus.energialuokka.D: D
+uusiRakennus.luokitus.energialuokka.E: E
+uusiRakennus.luokitus.energialuokka.F: F
+uusiRakennus.luokitus.energialuokka.G: G
+uusiRakennus.luokitus.energialuokka._group_label: Energialuokka
+uusiRakennus.luokitus.energiatehokkuusluku: Energiatehokkuusluku
+uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/m2: kWh/m2
+uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/brm2/vuosi: kWh/brm2/vuosi
+uusiRakennus.luokitus.energiatehokkuusluvunYksikko._group_label: Energiatehokkuusluvun yksikkö
+uusiRakennus.luokitus.paloluokka.palonkestävä: palon kestävä
+uusiRakennus.luokitus.paloluokka.paloapidättävä: paloa pidättävä
+uusiRakennus.luokitus.paloluokka.paloahidastava: paloa hidastava
+uusiRakennus.luokitus.paloluokka.lähinnä paloakestävä: paloa kestävä
+uusiRakennus.luokitus.paloluokka.lähinnä paloapidättävä: paloa pidättävä
+uusiRakennus.luokitus.paloluokka.lähinnä paloahidastava: paloa hidastava
+uusiRakennus.luokitus.paloluokka.P1: P1
+uusiRakennus.luokitus.paloluokka.P2: P2
+uusiRakennus.luokitus.paloluokka.P3: P3
+uusiRakennus.luokitus.paloluokka.P1/P2: P1/P2
+uusiRakennus.luokitus.paloluokka.P1/P3: P1/P3
+uusiRakennus.luokitus.paloluokka.P2/P3: P2/P3
+uusiRakennus.luokitus.paloluokka.P1/P2/P3: P1/P2/P3
+uusiRakennus.luokitus.paloluokka._group_label: Paloluokka
+lisatiedot.toimitustapa.sähköisesti: Sähköisesti
+lisatiedot.toimitustapa.noudetaan: Noudetaan
+lisatiedot.toimitustapa.postitse: Postitse
+lisatiedot.toimitustapa._group_label: Toimitustapa
+hakija.henkilo.turvakieltoKytkin: Turvakielto
+paasuunnittelija.turvakieltoKytkin: Turvakielto
+suunnittelija.turvakieltoKytkin: Turvakielto
+maksaja.henkilo.turvakieltoKytkin: Turvakielto
