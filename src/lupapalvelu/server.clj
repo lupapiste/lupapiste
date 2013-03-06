@@ -62,20 +62,17 @@
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init)))
+  (env/in-dev
+    (warn "*** Starting nrepl")
+    (nrepl/start-server :port 9000))
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
+                            :ns 'lupapalvelu.web
                             :jetty-options {:ssl? true
                                             :ssl-port 8443
                                             :keystore "./keystore"
                                             :key-password "lupapiste"}
-                            :ns 'lupapalvelu.web
-                            :session-cookie-attrs (:cookie env/config)}))
-  (info "Server running")
-  (env/in-dev
-    (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9000))
-  ; Sensible return value for -main for repl use.
-  "ready")
+                            :session-cookie-attrs (:cookie env/config)})))
 
 (comment
   (-main))
