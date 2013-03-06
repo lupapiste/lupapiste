@@ -10,7 +10,8 @@ if (typeof LUPAPISTE === "undefined") {
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
-LUPAPISTE.App = function(startPage, allowAnonymous) {
+LUPAPISTE.App = function (startPage, allowAnonymous) {
+
   "use strict";
 
   var self = this;
@@ -20,48 +21,50 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
 
-  self.createLogo = function() {
+  self.createLogo = function () {
     var href = "#!/" + self.startPage;
-    var link$ = $("<a class='brand' href='" +href+ "'></a>");
-    return link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
-  };
-
-  self.createConnectionErrorContainer = function() {
-    var span$ = $("<span class='connection-error' style='display: none;'></span>");
-    return span$.text(loc("connection-error"));
-  };
-
-  self.createUserMenu = function() {
-    return $("<ul class='user-menu'><li><a href='#!/mypage'><span id='user-name'></span></a></li></ul><br/>");
-  };
-
-  self.createNaviLinks = function() {
+    var link$ = $("<a class='brand' href='" + href + "'></a>");
+    link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
     var naviLinks$ = $("<span>").attr("id", "navi-right");
-
-    _.each(loc.getSupportedLanguages(), function(lang) {
+    _.each(loc.getSupportedLanguages(), function (lang) {
       if (lang !== loc.getCurrentLanguage()) {
         naviLinks$.append(
-            $("<a>").attr("href", "#").text(loc("in_"  + lang))
-            .click(function(e) {
-              hub.send("change-lang", {lang: lang});
+            $('<a data-test-id="lang-' +lang +'">').attr("href", "#").text(loc("in_" + lang ) +" >>")
+            .click(function (e) {
+              hub.send("change-lang", { lang: lang });
               e.preventDefault();
             }));
       }
     });
+    link$.append(naviLinks$);
+    return link$;
+  };
 
+  self.createConnectionErrorContainer = function () {
+    var span$ = $("<span class='connection-error' style='display: none;'></span>");
+    return span$.text(loc("connection-error"));
+  };
+
+  self.createUserMenu = function () {
+    var userMenu$ = $("<div class='user-menu'><a href='#!/mypage'><span id='user-name'></span></a>");
     if (!self.allowAnonymous) {
-      naviLinks$.append(" ");
-      naviLinks$.append($("<a>")
+      userMenu$.append(" ");
+      userMenu$.append($("<a>")
         .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
         .text(loc("logout")));
     }
+    return userMenu$;
+  };
+
+  self.createNaviLinks = function () {
+    var naviLinks$ = $("<span>").attr("id", "main-nav");
     return naviLinks$;
   };
 
   /**
-   * Complete the App initialization after DOM is loaded.
-   */
-  self.domReady = function() {
+  * Complete the App initialization after DOM is loaded.
+  */
+  self.domReady = function () {
     $(window).hashchange(self.hashChanged);
     $(window).hashchange();
     $(window).unload(self.unload);
@@ -71,23 +74,24 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
       LUPAPISTE.ModalDialog.init();
     }
-
-    $("nav").append(self.createLogo()).append(self.createConnectionErrorContainer());
+    var navWrapper = $("<div class='nav-wrapper'></div>");
+    navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
     if (!self.allowAnonymous) {
-      $("nav").append(self.createUserMenu());
+      navWrapper.append(self.createUserMenu());
     }
-    $("nav").append(self.createNaviLinks());
+    navWrapper.append(self.createNaviLinks());
+    $("nav").append(navWrapper)
   };
   $(self.domReady);
 
   /**
-   * Window unload event handler
-   */
-  self.unload = function() {
+  * Window unload event handler
+  */
+  self.unload = function () {
     trace("window.unload");
   };
 
-  self.openPage = function(path) {
+  self.openPage = function (path) {
     var pageId = path[0];
     var pagePath = path.splice(1, path.length - 1);
 
@@ -100,21 +104,20 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
       var page = $("#" + pageId);
       if (page.length === 0) {
         error("Unknown page", pageId);
-        // firefox bug: does not compute with hashbangs (LUPA-80)
-        pageId = allowAnonymous ? "login" : pageId = "404";
+        pageId = "404";
         pagePath = [];
         page = $("#" + pageId);
       }
 
       page.addClass("visible");
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
       self.currentPage = pageId;
     }
 
-    hub.send("page-change", {pageId: pageId, pagePath: pagePath});
+    hub.send("page-change", { pageId: pageId, pagePath: pagePath });
   };
 
-  self.hashChanged = function() {
+  self.hashChanged = function () {
     trace("hash changed");
 
     var hash = (location.hash || "").substr(3);
@@ -145,30 +148,30 @@ LUPAPISTE.App = function(startPage, allowAnonymous) {
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
   };
 
-  self.connectionCheck = function() {
+  self.connectionCheck = function () {
     /*
     ajax.get("/api/ping")
-      .success(function() {
-        hub.send("connection-online");
-        setTimeout(self.connectionCheck, 15000);
-      })
-      .fail(function() {
-        hub.send("connection-offline");
-        setTimeout(self.connectionCheck, 5000);
-      })
-      .call();
+    .success(function() {
+    hub.send("connection-online");
+    setTimeout(self.connectionCheck, 15000);
+    })
+    .fail(function() {
+    hub.send("connection-offline");
+    setTimeout(self.connectionCheck, 5000);
+    })
+    .call();
     */
   };
 
-  hub.subscribe("connection-online", function() {
+  hub.subscribe("connection-online", function () {
     $(".connection-error").hide();
   });
 
-  hub.subscribe("connection-offline", function() {
+  hub.subscribe("connection-offline", function () {
     $(".connection-error").show();
   });
 
-  hub.subscribe("logout", function() {
+  hub.subscribe("logout", function () {
     window.location = "/" + loc.getCurrentLanguage() + "/logout";
   });
 
