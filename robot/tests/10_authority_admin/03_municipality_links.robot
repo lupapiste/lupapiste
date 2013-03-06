@@ -36,6 +36,7 @@ Add link
   [Arguments]  ${name}  ${url}
   Element should not be visible  //a[@href='${url}']
   Wait and click  xpath=//a[@data-test-id='add-link']
+  Wait until  Element should be visible  dialog-edit-link
   Input Text  //div[@id='dialog-edit-link']//input[1]  ${name} fi
   Input Text  //div[@id='dialog-edit-link']//input[2]  ${name} sv
   Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
@@ -47,6 +48,7 @@ Add link
 Update link
   [Arguments]  ${name}  ${url}
   Wait and click  xpath=//table[@data-test-id='municipality-links-table']//td[text()='${name} fi']/..//a[@data-test-id='edit']
+  Wait Until  Element Should Be Visible  dialog-edit-link
   Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
 
