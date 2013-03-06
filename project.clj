@@ -24,7 +24,7 @@
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.6"]]
-  :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
+  :profiles {:dev {:dependencies [[midje "1.5-alpha9" :exclusions [org.clojure/clojure]]
                                   [ring-mock "0.1.1"]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
