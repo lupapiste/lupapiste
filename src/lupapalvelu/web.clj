@@ -167,7 +167,7 @@
 ;;
 
 (defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" lang "/welcome")))
+  (resp/redirect (str "/" (name lang) "/welcome")))
 
 (defn- logout! []
   (session/clear!)
