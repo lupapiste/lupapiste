@@ -8,15 +8,15 @@
 (defn by-id [id] {:email (str id "@foo.com")})
 
 (fact "Each owner and writer gets email from authority comment. Readers do not."
-   (get-emails-for-new-comment { :auth [{:id "a"} {:id "b"}] :title "title" }) => truthy
-   (provided (mongo/by-id :users "a") => {:email "AA@foo.com"}
-             (mongo/by-id :users "b") => {:email "BB@foo.com"}))
+   (get-emails-for-new-comment { :auth [{:id "a"} {:id "b"}] :title "title" }) => [ "a@foo.com" "b@foo.com" ]
+   (provided (mongo/by-id :users "a") => {:email "a@foo.com"}
+             (mongo/by-id :users "b") => {:email "b@foo.com"}))
 
 (comment
 (fact "email is sent when authority adds a comment"
   (send-notifications-on-new-comment { :auth [{:id "a"} {:id "b"}] :title "title" } { :role "authority" } "foo" ) => anything
-  (provided (mongo/by-id :users "a") => {:email "AA@foo.com"}
-            (mongo/by-id :users "b") => {:email "BB@foo.com"}
+  (provided (mongo/by-id :users "a") => {:email "a@foo.com"}
+            (mongo/by-id :users "b") => {:email "a@foo.com"}
             (send-mail-to-recipients anything anything anything) => anything)))
 
 
