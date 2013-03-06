@@ -21,7 +21,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
 
-  this.createLogo = function () {
+  self.createLogo = function () {
     var href = "#!/" + self.startPage;
     var link$ = $("<a class='brand' href='" + href + "'></a>");
     link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
@@ -40,12 +40,12 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     return link$;
   };
 
-  this.createConnectionErrorContainer = function () {
+  self.createConnectionErrorContainer = function () {
     var span$ = $("<span class='connection-error' style='display: none;'></span>");
     return span$.text(loc("connection-error"));
   };
 
-  this.createUserMenu = function () {
+  self.createUserMenu = function () {
     var userMenu$ = $("<div class='user-menu'><a href='#!/mypage'><span id='user-name'></span></a>");
     if (!self.allowAnonymous) {
       userMenu$.append(" ");
@@ -56,7 +56,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     return userMenu$;
   };
 
-  this.createNaviLinks = function () {
+  self.createNaviLinks = function () {
     var naviLinks$ = $("<span>").attr("id", "main-nav");
     return naviLinks$;
   };
@@ -64,7 +64,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
   /**
   * Complete the App initialization after DOM is loaded.
   */
-  this.domReady = function () {
+  self.domReady = function () {
     $(window).hashchange(self.hashChanged);
     $(window).hashchange();
     $(window).unload(self.unload);
@@ -82,16 +82,16 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     navWrapper.append(self.createNaviLinks());
     $("nav").append(navWrapper)
   };
-  $(this.domReady);
+  $(self.domReady);
 
   /**
   * Window unload event handler
   */
-  this.unload = function () {
+  self.unload = function () {
     trace("window.unload");
   };
 
-  this.openPage = function (path) {
+  self.openPage = function (path) {
     var pageId = path[0];
     var pagePath = path.splice(1, path.length - 1);
 
@@ -117,7 +117,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     hub.send("page-change", { pageId: pageId, pagePath: pagePath });
   };
 
-  this.hashChanged = function () {
+  self.hashChanged = function () {
     trace("hash changed");
 
     var hash = (location.hash || "").substr(3);
@@ -148,7 +148,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
   };
 
-  this.connectionCheck = function () {
+  self.connectionCheck = function () {
     /*
     ajax.get("/api/ping")
     .success(function() {

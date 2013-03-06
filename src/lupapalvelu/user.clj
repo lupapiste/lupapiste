@@ -7,10 +7,10 @@
             [lupapalvelu.util :as util]
             [noir.session :as session]))
 
-(def applicationpage-for {"applicant" "/applicant"
-                          "authority" "/authority"
+(def applicationpage-for {"applicant"      "/applicant"
+                          "authority"      "/authority"
                           "authorityAdmin" "/authority-admin"
-                          "admin" "/admin"})
+                          "admin"          "/admin"})
 
 (defcommand "login"
   {:parameters [:username :password]}
