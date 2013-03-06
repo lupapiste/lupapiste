@@ -148,8 +148,19 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
-  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
+(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
+
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" (name lang) "/welcome#")))
+
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when (and hashbang (local? hashbang))
+    (session/put! :hashbang hashbang))
+  (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
 ;;
 ;; Login/logout:
