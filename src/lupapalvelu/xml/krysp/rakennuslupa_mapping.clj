@@ -4,7 +4,9 @@
          [clojure.java.io]
          [lupapalvelu.document.krysp :only [application-to-canonical]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]]))
+         [lupapalvelu.xml.krysp.validator :only [validate]]
+         [lupapalvelu.env :as env]
+         ))
 
 ;RakVal
 
@@ -123,7 +125,14 @@
 (defn get-application-as-krysp [application]
   (let [canonical (application-to-canonical application)
         xml (element-to-xml canonical rakennuslupa_to_krysp)
-        xml-s (indent-str xml)]
+        xml-s (indent-str xml)
+        file-name (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus/Lupapiste" (:id application))
+        tempfile (file (str file-name ".tmp"))
+        outfile (file (str file-name ".xml"))]
     (validate xml-s)
-  (with-open [out-file (writer "/Users/terotu/example-krysp.xml")]
-    (emit xml out-file))))
+
+    (with-open [out-file (writer tempfile)]
+      (emit xml out-file)
+      )
+    ;todoo liitetiedostot
+   (.renameTo tempfile outfile)))
