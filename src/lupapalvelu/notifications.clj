@@ -48,7 +48,7 @@
                                (replace-with-selector host application "fi")
                                (replace-with-selector host application "sv"))))))
 
-(defn get-emails-for-new-comment [application]
+(defn get-email-recipients-for-new-comment [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
 
 (def mail-agent (agent nil)) 
@@ -62,6 +62,6 @@
 
 (defn send-notifications-on-new-comment [host application user-commenting comment-text]
   (if (= :authority (keyword (:role user-commenting)))
-    (let [recipients (get-emails-for-new-comment application)
+    (let [recipients (get-email-recipients-for-new-comment application)
           msg (get-message-for-new-comment application host)]
       (send-mail-to-recipients recipients (:title application) msg))))
