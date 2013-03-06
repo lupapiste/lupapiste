@@ -155,7 +155,6 @@
 (defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app gotobang :gotobang}
   ;; hashbangs are not sent to server, query-parameter gotobang used to store where the user wanted to go, stored on server, reapplied on login
   (when (and gotobang (local? gotobang))
-    (info "gotobang:" gotobang)
     (session/put! :gotobang gotobang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
