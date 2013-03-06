@@ -27,7 +27,7 @@
   (format
     (str
       "Tervehdys,\n\n%s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/fi/applicant?gotobang=/application/%s#!/application/%s\n\n"
+      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/fi/applicant?gotobang=!/application/%s#!/application/%s\n\n"
       "Yst\u00E4v\u00E4llisin terveisin,\n\n"
       "Lupapiste.fi")
     (:firstName user)
