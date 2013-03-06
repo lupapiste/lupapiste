@@ -323,10 +323,9 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
-      applicationMap.clear().add(x, y).center(x, y, 11);
-      inforequestMap.clear().add(x, y).center(x, y, 11);
+      (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
 
-      if(application.shapes && application.shapes().length > 0) {
+      if (application.shapes && application.shapes().length > 0) {
         applicationMap.drawShape(application.shapes()[0]);
         inforequestMap.drawShape(application.shapes()[0]);
       }

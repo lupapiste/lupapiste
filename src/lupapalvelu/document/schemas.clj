@@ -371,12 +371,13 @@
                                                 {:name "muu-omistajalaji" :type :string :size "s"}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
+(def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
                      {:name "muutostyolaji" :type :select
                       :body
-                      [{:name "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t"}
+                      [{:name perustusten-korjaus}
                        {:name kayttotarkotuksen-muutos}
                        {:name muumuutostyo}]}])
 

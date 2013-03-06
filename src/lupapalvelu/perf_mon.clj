@@ -136,7 +136,7 @@
                 :ua user-agent
                 :timing timing}
                WriteConcern/NONE))
-  (resp/status 200 "ok"))
+  (->> {:ok true} (resp/json) (resp/status 200)))
 
 ;;
 ;; Initialize: register middlewares and wrap vars:
@@ -147,4 +147,3 @@
   (server/add-middleware throttle-middleware)
   (instrument-ns wrap-db-throttle 'lupapalvelu.mongo)
   (instrument-ns wrap-perf-mon 'lupapalvelu.mongo))
-

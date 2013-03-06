@@ -14,6 +14,7 @@ $(function() {
     var t = $(e.target);
     var value = t.val();
     ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/throttle/" + type)
+      .raw()
       .json({value: value})
       .header("npm", "true")
       .success(function() { t.parent().find("b.dev-throttle-" + type).text(value); })
@@ -41,8 +42,8 @@ $(function() {
           start = window.performance.timing[row[1]],
           end = window.performance.timing[row[2]],
           duration = end - start;
-      if (!start) { throw "Unknown timineg event: " + row[1]; }
-      if (!end) { throw "Unknown timineg event: " + row[2]; }
+      if (typeof start !== "number") {throw "Unknown timineg event: " + row[1]; }
+      if (typeof end !== "number") {throw "Unknown timineg event: " + row[2]; }
       table
         .append($("<tr>").css("padding", "0px")
           .append($("<td>").text(name).css("padding", "0px"))
@@ -50,6 +51,7 @@ $(function() {
     });
 
     ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/browser-timing")
+      .raw()
       .json({timing: window.performance.timing})
       .header("npm", "true")
       .call();

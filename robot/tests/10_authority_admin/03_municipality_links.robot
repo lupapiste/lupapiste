@@ -56,21 +56,10 @@ Remove link
 
 User sees link
   [Arguments]  ${name}  ${url}
-  Begin inforequest
+  Prepare new request  Latokuja 103  753  75300000000001
   Element Text Should Be  xpath=//a[@href='${url}']  ${name} fi
 
 User does not see link
   [Arguments]  ${name}
-  Begin inforequest
+  Prepare new request  Latokuja 103  753  75300000000001
   Element should not be visible  //a[text()='${name} fi']
-
-Begin inforequest
-  Click link  xpath=//a[@class='brand']
-  Click by test id  applications-create-new
-  Input text by test id  create-address  Latokuja 103, Sipoo
-  Select From List by test id  create-municipality-select  753
-  Click by test id  create-continue
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
-  Wait until  Element should be visible  xpath=//div[@class='tree-result']

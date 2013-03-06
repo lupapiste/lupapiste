@@ -10,6 +10,7 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
+            [noir.cookies :as cookies]
             [lupapalvelu.env :as env]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
@@ -23,7 +24,8 @@
             [lupapalvelu.ke6666 :as ke6666]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [ring.middleware.anti-forgery :as anti-forgery]))
 
 ;;
 ;; Helpers
@@ -33,15 +35,16 @@
   `(defpage ~path ~params
      (resp/json (do ~@content))))
 
-(defn from-json []
-  (json/decode (slurp (:body (request/ring-request))) true))
+(defn from-json [request]
+  (json/decode (slurp (:body request)) true))
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
 
 (defn current-user
   "fetches the current user from 1) http-session 2) apikey from headers"
-  [] (or (session/get :user) ((request/ring-request) :user)))
+  ([] (current-user (request/ring-request)))
+  ([request] (or (session/get :user) (request :user))))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -62,8 +65,9 @@
      :sessionId  (sessionId request)
      :host       (host request)}))
 
-(defn logged-in? []
-  (not (nil? (current-user))))
+(defn logged-in?
+  ([] (logged-in? (request/ring-request)))
+  ([request] (not (nil? (current-user request)))))
 
 (defn in-role? [role]
   (= role (keyword (:role (current-user)))))
@@ -99,7 +103,7 @@
     (core/execute action)))
 
 (defjson [:post "/api/command/:name"] {name :name}
-  (execute (enriched (core/command name (from-json)))))
+  (execute (enriched (core/command name (from-json (request/ring-request))))))
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
@@ -154,16 +158,20 @@
 (defn- redirect-to-frontpage [lang]
   (resp/redirect (str "/" lang "/welcome")))
 
-(defjson [:post "/api/logout"] []
+(defn- logout! []
   (session/clear!)
+  (cookies/put! :lupapiste-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+
+(defjson [:post "/api/logout"] []
+  (logout!)
   (ok))
 
 (defpage "/logout" []
-  (session/clear!)
+  (logout!)
   (resp/redirect "/"))
 
 (defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (session/clear!)
+  (logout!)
   (redirect-to-frontpage lang))
 
 (defpage "/" []
@@ -196,16 +204,21 @@
     (if-let [[_ k v] (re-find #"(\w+)\s*[ :=]\s*(\w+)" header-value)]
       (if (= k required-key) v))))
 
+(defn- get-apikey [request]
+  (let [authorization (get-in request [:headers "authorization"])]
+    (parse "apikey" authorization)))
+
 (defn apikey-authentication
-  "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
+  "Reads apikey from 'Auhtorization' headers, pushed it to :user request attribute
    'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
   [handler]
   (fn [request]
-    (let [authorization (get-in request [:headers "authorization"])
-          apikey        (parse "apikey" authorization)]
+    (let [apikey (get-apikey request)]
       (handler (assoc request :user (security/login-with-apikey apikey))))))
 
-(server/add-middleware apikey-authentication)
+
+(defn- logged-in-with-apikey? [request]
+  (and (get-apikey request) (logged-in? request)))
 
 ;;
 ;; File upload/download:
@@ -259,6 +272,28 @@
       {:status 503}
       ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
+
+;;
+;; Cross-site request forgery protection
+;;
+
+(defn- csrf-attack-hander [request]
+  (with-logging-context
+    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
+     :userId        (or (:id (current-user request)) "???")}
+    (warn "CSRF attempt blocked."
+          "Client IP:" (client-ip request)
+          "Referer:" (get-in request [:headers "referer"]))
+    (resp/json (fail :error.invalid-csrf-token))))
+
+(defn anti-csrf
+  [handler]
+  (fn [request]
+    (let [cookie-name "lupapiste-token"]
+      (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+               (not (logged-in-with-apikey? request)))
+        (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+        (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
 
 ;;
 ;; dev utils:

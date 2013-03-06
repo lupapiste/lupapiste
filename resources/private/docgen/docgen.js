@@ -150,7 +150,7 @@ var docgen = (function() {
               id:    pathStrToID(myPath),
               name:  docId + "." + path,
               type:  "text",
-              class: "form-input text form-date",
+              "class": "form-input text form-date",
               value: value,
               change: save,
               }).datepicker($.datepicker.regional[lang]).appendTo(span);
