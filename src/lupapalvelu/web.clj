@@ -317,5 +317,5 @@
   
   (defpage "/api/by-id/:collection/:id" {collection :collection id :id}
     (if-let [r (mongo/by-id collection id)]
-      (resp/status 200 (resp/json r))
-      (resp/status 404 (resp/json {:ok false :error "not found"})))))
+      (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"})))))
