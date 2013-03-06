@@ -29,7 +29,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     _.each(loc.getSupportedLanguages(), function (lang) {
       if (lang !== loc.getCurrentLanguage()) {
         naviLinks$.append(
-            $("<a>").attr("href", "#").text(loc("in_" + lang ) +" >>")
+            $('<a data-test-id="lang-' +lang +'">').attr("href", "#").text(loc("in_" + lang ) +" >>")
             .click(function (e) {
               hub.send("change-lang", { lang: lang });
               e.preventDefault();

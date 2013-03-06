@@ -44,5 +44,5 @@ Application is assigned to
   Should be equal  ${assignee}  ${to}
 
 Application is not assigned
-  Application is assigned to  Valitse..
+  Wait Until  Application is assigned to  Valitse..
 
