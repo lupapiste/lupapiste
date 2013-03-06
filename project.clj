@@ -10,6 +10,7 @@
                  [org.clojure/tools.nrepl "0.2.1"]
                  [org.jasypt/jasypt "1.9.0"]
                  [org.mindrot/jbcrypt "0.3m"]
+                 [crypto-random "1.1.0" :exclusions [commons-codec]]
                  [clj-http "0.6.4" :exclusions [commons-codec]]
                  [digest "1.4.2"]
                  [clj-time "0.4.4"]
@@ -23,7 +24,8 @@
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.6"]]
-  :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]]
+  :profiles {:dev {:dependencies [[midje "1.4.0" :exclusions [org.clojure/clojure]]
+                                  [ring-mock "0.1.1"]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]]}

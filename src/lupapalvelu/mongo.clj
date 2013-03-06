@@ -129,7 +129,7 @@
       (do
         (debug "Connecting to DB:" uri)
         (m/connect-via-uri! uri)
-        (debug "DB is" (m/get-db))
+        (debug "DB is" (.getName (m/get-db)))
         (reset! connected true)))))
 
 (defn clear! []

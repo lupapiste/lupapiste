@@ -5,15 +5,7 @@
  * Copyright 2013 Klaus Hartl
  * Released under the MIT license
  */
-(function (factory) {
-	if (typeof define === 'function' && define.amd) {
-		// AMD. Register as anonymous module.
-		define(['jquery'], factory);
-	} else {
-		// Browser globals.
-		factory(jQuery);
-	}
-}(function ($) {
+(function ($, document, undefined) {
 
 	var pluses = /\+/g;
 
@@ -22,17 +14,19 @@
 	}
 
 	function decoded(s) {
-		return decodeURIComponent(s.replace(pluses, ' '));
+		return unRfc2068(decodeURIComponent(s.replace(pluses, ' ')));
 	}
 
-	function converted(s) {
-		if (s.indexOf('"') === 0) {
+	function unRfc2068(value) {
+		if (value.indexOf('"') === 0) {
 			// This is a quoted cookie as according to RFC2068, unescape
-			s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+			value = value.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
 		}
-		try {
-			return config.json ? JSON.parse(s) : s;
-		} catch(er) {}
+		return value;
+	}
+
+	function fromJSON(value) {
+		return config.json ? JSON.parse(value) : value;
 	}
 
 	var config = $.cookie = function (key, value, options) {
@@ -40,6 +34,10 @@
 		// write
 		if (value !== undefined) {
 			options = $.extend({}, config.defaults, options);
+
+			if (value === null) {
+				options.expires = -1;
+			}
 
 			if (typeof options.expires === 'number') {
 				var days = options.expires, t = options.expires = new Date();
@@ -60,19 +58,19 @@
 		// read
 		var decode = config.raw ? raw : decoded;
 		var cookies = document.cookie.split('; ');
-		var result = key ? undefined : {};
+		var result = key ? null : {};
 		for (var i = 0, l = cookies.length; i < l; i++) {
 			var parts = cookies[i].split('=');
 			var name = decode(parts.shift());
 			var cookie = decode(parts.join('='));
 
 			if (key && key === name) {
-				result = converted(cookie);
+				result = fromJSON(cookie);
 				break;
 			}
 
 			if (!key) {
-				result[name] = converted(cookie);
+				result[name] = fromJSON(cookie);
 			}
 		}
 
@@ -82,11 +80,11 @@
 	config.defaults = {};
 
 	$.removeCookie = function (key, options) {
-		if ($.cookie(key) !== undefined) {
-			$.cookie(key, '', $.extend(options, { expires: -1 }));
+		if ($.cookie(key) !== null) {
+			$.cookie(key, null, options);
 			return true;
 		}
 		return false;
 	};
 
-}));
+})(jQuery, document);
