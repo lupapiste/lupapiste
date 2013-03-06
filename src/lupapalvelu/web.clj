@@ -146,16 +146,16 @@
 
 (defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
 
-(defjson "/api/gotobang" []
-  (ok :bang (session/get! :gotobang "")))
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
 
 (defn- redirect-to-frontpage [lang]
   (resp/redirect (str "/" (name lang) "/welcome#")))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app gotobang :gotobang}
-  ;; hashbangs are not sent to server, query-parameter gotobang used to store where the user wanted to go, stored on server, reapplied on login
-  (when (and gotobang (local? gotobang))
-    (session/put! :gotobang gotobang))
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when (and hashbang (local? hashbang))
+    (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
 ;;
