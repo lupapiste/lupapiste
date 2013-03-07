@@ -223,7 +223,7 @@
       window.location.hash = "#!/application/" + application.id() + "/" + element.name;
     }
   };
-
+  
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -297,6 +297,24 @@
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
 
+      // Operations:
+      
+      var ops = {};
+      _.each(app.documents, function(doc) {
+        var op = doc.schema.info.op;
+        if (op) {
+          if (ops[op]) {
+            ops[op] += 1;
+          } else {
+            ops[op] = 1;
+          }
+        }
+      });
+      ops = _.map(ops, function(v, k) { return {op: k, count: v}; });
+      application.operations(ops);
+
+      window.app = app;
+      
       // Attachments:
 
       var statuses = {
