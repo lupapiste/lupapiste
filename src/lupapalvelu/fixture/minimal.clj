@@ -20,7 +20,6 @@
     :enabled true
     :role :authority
     :municipality "837"
-    :personId "kunta 122"
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
@@ -35,7 +34,6 @@
     :enabled true
     :role :authority
     :municipality "753"
-    :personId "kunta123"
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -50,7 +48,6 @@
     :enabled true
     :role :authority
     :municipality "753"
-    :personId "kunta123"
     :firstName "Ronja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -63,7 +60,6 @@
     :enabled true
     :role :authority
     :municipality "638"
-    :personId "kunta333"
     :firstName "Pekka"
     :lastName "Borga"
     :phone "121212"
