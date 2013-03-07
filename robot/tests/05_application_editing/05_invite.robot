@@ -17,15 +17,12 @@ Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko invites Teppo
-  Set selenium speed  ${SLOWEST_SPEED}
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
-  Sleep  1
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Click by test id  application-invite-submit
-  Set selenium speed  ${DEFAULT_SPEED}
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
@@ -95,12 +92,12 @@ Sonja (the Authority) is not allowed to invite people
 
 Error message is present on invite form
   Wait until  Element should be visible  xpath=//div[@id='dialog-valtuutus']//h1[@class='form-error']
-  Click Element  xpath=//div[@id='ModalDialogMask']
+  Click Element  xpath=//div[@id='dialog-valtuutus']//p[contains(@class,'close')]
   Wait until  Mask is invisible
-  
+
 Mask is invisible
   Element should not be visible  xpath=//div[@id='ModalDialogMask']
-    
+
 Invite count is
   [Arguments]  ${amount}
   Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}

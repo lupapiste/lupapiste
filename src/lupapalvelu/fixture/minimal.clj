@@ -92,6 +92,72 @@
     :private {:salt "$2a$10$VFcksPILCd9ykyl.1FIhwO",
               :password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
               :apikey "50ac788ec2e6c2ea6e73f83f"}}
+   {:id "50ac77ecd2e6c2ea6e73f83f" ;; naantali
+    :email "admin@naantali.fi"
+    :enabled true
+    :role :authorityAdmin
+    :municipality "529"
+    :firstName "Admin"
+    :lastName "Naantali"
+    :username "admin@naantali.fi"
+    :private {:salt "$2a$10$4pvNDXk2g5XgxT.whx1Ua.",
+              :password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
+              :apikey "a0ac77ecd2e6c2ea6e73f83f"}}
+   {:id "50ac77ecd2e6c2ea6e73f840"
+    :email "rakennustarkastaja@naantali.fi"
+    :enabled true
+    :role :authority
+    :municipality "529"
+    :firstName "Rakennustarkastaja"
+    :lastName "Naantali"
+    :username "rakennustarkastaja@naantali.fi"
+    :private {:salt "$2a$10$4pvNDXk2g5XgxT.whx1Ua.",
+              :password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
+              :apikey "a0ac77ecd2e6c2ea6e73f840"}}
+   {:id "50ac77ecd2e6c2ea6e73f841"
+    :email "lupasihteeri@naantali.fi"
+    :enabled true
+    :role :authority
+    :municipality "529"
+    :firstName "Lupasihteeri"
+    :lastName "Naantali"
+    :username "lupasihteeri@naantali.fi"
+    :private {:salt "$2a$10$4pvNDXk2g5XgxT.whx1Ua.",
+              :password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
+              :apikey "a0ac77ecd2e6c2ea6e73f841"}}
+   {:id "50ac77ecd2e6c2ea6e73f850" ;; jarvenpaa
+    :email "admin@jarvenpaa.fi"
+    :enabled true
+    :role :authorityAdmin
+    :municipality "186"
+    :firstName "Admin"
+    :lastName "J\u00E4rvenp\u00E4\u00E4"
+    :username "admin@jarvenpaa.fi"
+    :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
+              :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+              :apikey "a0ac77ecd2e6c2ea6e73f850"}}
+   {:id "50ac77ecd2e6c2ea6e73f851"
+    :email "rakennustarkastaja@jarvenpaa.fi"
+    :enabled true
+    :role :authority
+    :municipality "186"
+    :firstName "Rakennustarkastaja"
+    :lastName "J\u00E4rvenp\u00E4\u00E4"
+    :username "rakennustarkastaja@jarvenpaa.fi"
+    :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
+              :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+              :apikey "a0ac77ecd2e6c2ea6e73f851"}}
+   {:id "50ac77ecd2e6c2ea6e73f852"
+    :email "lupasihteeri@jarvenpaa.fi"
+    :enabled true
+    :role :authority
+    :municipality "186"
+    :firstName "Lupasihteeri"
+    :lastName "J\u00E4rvenp\u00E4\u00E4"
+    :username "lupasihteeri@jarvenpaa.fi"
+    :private {:salt "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.",
+              :password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
+              :apikey "a0ac77ecd2e6c2ea6e73f852"}}
    {:id "505718b0aa24a1c901e6ba24" ;; Admin
     :enabled true
     :firstName "Judge"
@@ -168,7 +234,31 @@
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
     :role  "applicant"}])
 
-(def municipalities [{:id "753"
+(def municipalities [{:id "186"
+                      :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
+                      :municipalityCode "186"
+                      :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
+                               :url "http://www.jarvenpaa.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
+                     {:id "529"
+                      :name {:fi "Naantali", :sv "N\u00E5dendahl"}
+                      :municipalityCode "529"}
+                     {:id "564"
+                      :name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                      :municipalityCode "564"
+                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                               :url "http://www.ouka.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
+                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
+                     {:id "638"
+                      :name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
+                      :municipalityCode "638"
+                      :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
+                               :url "http://www.porvoo.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                     {:id "753"
                       :municipalityCode "753"
                       :name {:fi "Sipoo" :sv "Sibbo"}
                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
@@ -186,27 +276,8 @@
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
                               {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
-                     {:id "186"
-                      :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
-                      :municipalityCode "186"
-                      :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
-                               :url "http://www.jarvenpaa.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
-                     {:id "638"
-                      :name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
-                      :municipalityCode "638"
-                      :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
-                               :url "http://www.porvoo.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
-                     {:id "564"
-                      :name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                      :municipalityCode "564"
-                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                               :url "http://www.ouka.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
-                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}])
+                     
+                     ])
 
 (deffixture "minimal" {}
   (mongo/clear!)

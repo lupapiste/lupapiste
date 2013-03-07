@@ -1,20 +1,11 @@
 <!DOCTYPE html>
 <html >
 <body>
-  <section class="page" id="attachment" data-bind="with: attachment">
-    <div class="breadcrumb">
-      <a href="#!/applications" id="test-applications" data-bind="ltext: 'permitApplications'">Lupahakemukset</a>
-      /
-      <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications">
-        <span data-bind="text: application.title"></span>
-      </a>
-      /
-      <span data-bind="ltext: name"></span>
-    </div>
+  <section class="page container" id="attachment" data-bind="with: attachment">
     <div>
       <div class="attachment-info">
         <h1>
-          <span data-bind="ltext: name"></span>
+          <span data-bind="text: application.title"></span> : <span data-bind="ltext: name"></span>
           <span data-bind="if: latestVersion">
             <span data-bind="ltext: 'attachment.version'">versio</span>
             <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
@@ -22,6 +13,7 @@
             <span data-bind="dateTimeString: latestVersion().created"></span>
           </span>
         </h1>
+        <a class="btn attachment-back" data-bind ="attr: {href: '#!/application/' + application.id() }, ltext: 'attachment.return'"></a>
         <div class="form-entry">
           <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <div id="attachment-type-select-list-container"></div>
