@@ -16,7 +16,7 @@ Mikko asks information and sees the new link
 
 Admin changes link target
   Sipoo logs in
-  Update link  fancy-link  http://slashdot.org
+  Wait until  Update link  fancy-link  http://slashdot.org
 
 Mikko asks information and sees updated link
   Mikko logs in
