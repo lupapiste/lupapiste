@@ -210,6 +210,7 @@
                                      :opened        (when (= :authority user-role) created)
                                      :modified      created
                                      :infoRequest   info-request?
+                                     :initialOp     op
                                      :state         (if (or info-request? (= :authority user-role)) :open :draft)
                                      :municipality  (:municipality data)
                                      :location      {:x (->double (:x data)) :y (->double (:y data))}
@@ -252,7 +253,7 @@
     (fn [inforequest]
       (let [id       (get-in command [:data :id])
             created  (:created command)
-            op       (-> inforequest :operations first :operation keyword)]
+            op       (keyword (:initialOp inforequest))]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
