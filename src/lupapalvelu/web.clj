@@ -24,6 +24,7 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
+            [sade.status :as status]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery]))
@@ -80,13 +81,15 @@
 (defn nobody [] false)
 
 ;;
-;; API:
+;; Status
 ;;
+
+(status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
+(status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
+(status/defstatus :mode  env/mode)
 
 (defjson "/api/buildinfo" []
   (ok :data (assoc env/buildinfo :server-mode env/mode)))
-
-(defjson "/api/ping" [] (ok))
 
 ;;
 ;; Commands
@@ -196,6 +199,9 @@
 ;;
 ;; FROM SADE
 ;;
+
+(defjson "/system/ping" [] {:ok true})
+(defjson "/system/status" [] (status/status))
 
 (defpage "/security/activate/:activation-key" {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
@@ -314,7 +320,7 @@
 (env/in-dev
   (defjson "/api/spy" []
     (dissoc (request/ring-request) :body))
-  
+
   (defpage "/api/by-id/:collection/:id" {collection :collection id :id}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
