@@ -57,7 +57,7 @@
   (get-in request [:cookies "ring-session" :value]))
 
 (defn client-ip [request]
-  (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
+  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
 (defn web-stuff []
   (let [request (request/ring-request)]
@@ -314,7 +314,7 @@
 (env/in-dev
   (defjson "/api/spy" []
     (dissoc (request/ring-request) :body))
-  
+
   (defpage "/api/by-id/:collection/:id" {collection :collection id :id}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
