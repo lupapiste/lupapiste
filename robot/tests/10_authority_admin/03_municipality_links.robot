@@ -7,7 +7,8 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Admin adds new municipality link
-  Sipoo logs in
+#  Sipoo logs in
+  As Sipoo
   Add link  fancy-link  http://reddit.com
 
 Mikko asks information and sees the new link
@@ -47,6 +48,7 @@ Add link
 
 Update link
   [Arguments]  ${name}  ${url}
+  Execute Javascript  window.scrollTo(0, 400);
   Wait and click  xpath=//table[@data-test-id='municipality-links-table']//td[text()='${name} fi']/..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
   Wait Until  Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
@@ -54,6 +56,7 @@ Update link
 
 Remove link
   [Arguments]  ${name}
+  Execute Javascript  window.scrollTo(0, 500);
   Wait and click  xpath=//table[@data-test-id='municipality-links-table']//td[text()='${name} fi']/..//a[@data-test-id='remove']
 
 User sees link
