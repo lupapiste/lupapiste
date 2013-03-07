@@ -169,7 +169,9 @@
 
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
-        make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
+        make                  (fn [schema-name] {:id (mongo/create-id)
+                                                 :schema (schemas/schemas schema-name)
+                                                 :created created
                                                  :body (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info))
                                                          {})})
@@ -203,27 +205,26 @@
             op            (keyword (:operation data))
             info-request? (if (:infoRequest data) true false)
             make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
-        (mongo/insert :applications
-                      {:id            id
-                       :created       created
-                       :opened        (when (= :authority user-role) created)
-                       :modified      created
-                       :infoRequest   info-request?
-                       :state         (if (or info-request? (= :authority user-role)) :open :draft)
-                       :municipality  (:municipality data)
-                       :location      {:x (->double (:x data)) :y (->double (:y data))}
-                       :address       (:address data)
-                       :propertyId    (:propertyId data)
-                       :title         (:address data)
-                       :auth          [owner]
-                       :operations    [{:operation op :created created}]
-                       :documents     (if info-request? [] (make-documents user created nil op))
-                       :attachments   (if info-request? [] (make-attachments created op))
-                       :allowedAttachmentTypes (if info-request?
-                                                 [[:muut [:muu]]]
-                                                 (partition 2 attachment/attachment-types))
-                       :comments      (map make-comment (:messages data))
-                       :permitType    (keyword (:permitType data))})
+        (mongo/insert :applications {:id            id
+                                     :created       created
+                                     :opened        (when (= :authority user-role) created)
+                                     :modified      created
+                                     :infoRequest   info-request?
+                                     :initialOp     op
+                                     :state         (if (or info-request? (= :authority user-role)) :open :draft)
+                                     :municipality  (:municipality data)
+                                     :location      {:x (->double (:x data)) :y (->double (:y data))}
+                                     :address       (:address data)
+                                     :propertyId    (:propertyId data)
+                                     :title         (:address data)
+                                     :auth          [owner]
+                                     :documents     (if info-request? [] (make-documents user created nil op))
+                                     :attachments   (if info-request? [] (make-attachments created op))
+                                     :allowedAttachmentTypes (if info-request?
+                                                               [[:muut [:muu]]]
+                                                               (partition 2 attachment/attachment-types))
+                                     :comments      (map make-comment (:messages data))
+                                     :permitType    (keyword (:permitType data))})
         (ok :id id))
       (fail :error.unauthorized))))
 
@@ -239,8 +240,7 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$push {:operations {:operation op :created created}}
-                                              $pushAll {:documents new-docs}
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
                                               $set {:modified created}})
         (ok)))))
 
@@ -253,7 +253,7 @@
     (fn [inforequest]
       (let [id       (get-in command [:data :id])
             created  (:created command)
-            op       (-> inforequest :operations first :operation keyword)]
+            op       (keyword (:initialOp inforequest))]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)

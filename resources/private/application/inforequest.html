@@ -42,13 +42,13 @@
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
-            <ul data-bind="foreach: operations">
-              <li>
-                <span data-bind="ltext: 'operations.' + operation()" data-test-id="inforequest-application-operation" class="application_summary_text"></span>
+            <ul>
+              <li data-bind="if: initialOp">
+                <span data-bind="ltext: 'operations.' + initialOp()" data-test-id="inforequest-application-operation" class="application_summary_text"></span>
               </li>
             </ul>
           </div>
-
+  
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
               <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>

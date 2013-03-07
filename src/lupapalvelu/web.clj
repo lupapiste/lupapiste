@@ -22,6 +22,7 @@
             [lupapalvelu.municipality]
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
             [cheshire.core :as json]
             [clj-http.client :as client]
@@ -312,5 +313,9 @@
 
 (env/in-dev
   (defjson "/api/spy" []
-    (dissoc (request/ring-request) :body)))
-
+    (dissoc (request/ring-request) :body))
+  
+  (defpage "/api/by-id/:collection/:id" {collection :collection id :id}
+    (if-let [r (mongo/by-id collection id)]
+      (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"})))))

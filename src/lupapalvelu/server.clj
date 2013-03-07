@@ -72,7 +72,8 @@
                                             :ssl-port 8443
                                             :keystore "./keystore"
                                             :key-password "lupapiste"}
-                            :session-cookie-attrs (:cookie env/config)})))
+                            :session-cookie-attrs (:cookie env/config)}))
+  "ok")
 
 (comment
   (-main))
