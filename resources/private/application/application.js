@@ -26,7 +26,13 @@
     self.ok = function() {
       ajax
         .command("remove-doc", {id: self.appId(), docId: self.docId()})
-        .success(self.callback)
+        .success(function() {
+          self.callback();
+          // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
+          // The docgen already has code to remove actual document (that's the self.callback() above), just the
+          // "operations" list should be changed. 
+          repository.load(self.appId);
+        })
         .call();
       return false;
     };
@@ -84,7 +90,23 @@
         loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
   }();
 
-
+  function getOperations(docs) {
+    var ops = {};
+    if (docs) {
+      _.each(docs, function(doc) {
+        var op = doc.schema.info.op;
+        if (op) {
+          if (ops[op]) {
+            ops[op] += 1;
+          } else {
+            ops[op] = 1;
+          }
+        }
+      });
+    }
+    return _.map(ops, function(v, k) { return {op: k, count: v}; });
+  }
+  
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -115,6 +137,7 @@
       window.open(url);
       var applicationId = application.id();
 
+      // FIXME: Can't just subscribe repeatedly.
       hub.subscribe("map-initialized", function() {
         if(application.shapes && application.shapes().length > 0) {
           oskariDrawShape(application.shapes()[0]);
@@ -123,6 +146,7 @@
         oskariSetMarker(application.location().x(), application.location().y());
       });
 
+      // FIXME: Can't just subscribe repeatedly.
       hub.subscribe("map-draw-done", function(e) {
         var drawing = "" + e.data.drawing;
         ajax.command("save-application-shape", {id: applicationId, shape: drawing})
@@ -300,20 +324,8 @@
 
       // Operations:
       
-      var ops = {};
-      _.each(app.documents, function(doc) {
-        var op = doc.schema.info.op;
-        if (op) {
-          if (ops[op]) {
-            ops[op] += 1;
-          } else {
-            ops[op] = 1;
-          }
-        }
-      });
-      ops = _.map(ops, function(v, k) { return {op: k, count: v}; });
-      application.operations(ops);
-
+      application.operations(getOperations(app.documents));
+      
       // Attachments:
 
       var statuses = {
