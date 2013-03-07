@@ -10,20 +10,17 @@
     </div>
 
     <div class="application_summary">
-      <div class="application-map-container">
-        <div id="application-map" class="map map-large" style="width: 320px; height: 320px;"></div>
-        <div class="application-map-actions" data-bind="with: application">
-          <!-- ko if: location() -->
-            <button data-bind="click: openOskariMap, ltext: 'application.mapActionOpen'" class="btn btn-primary map-search-button"></button>
-          <!-- /ko -->
+      <div class=" container">
+        <div class="application-map-container">
+          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+          <div class="application-map-actions" data-bind="with: application">
+            <!-- ko if: location() -->
+              <button data-bind="click: openOskariMap, ltext: 'application.mapActionOpen'" class="btn btn-primary map-search-button"></button>
+            <!-- /ko -->
+          </div>
         </div>
-      </div>
-      <div data-bind="with: application">
-
-        <h1 data-bind="text: address"></h1>
-
-        <div class="application_summary_info">
-
+        <div data-bind="with: application" class="application_summary_info">
+          <h1 data-bind="text: address"></h1>
           <!-- ID: -->
           <div>
             <p data-bind="ltext: 'application.id'"></p>
@@ -33,7 +30,6 @@
               class="application_summary_text">
             </span>
           </div>
-
           <!-- State: -->
           <div>
             <p data-bind="ltext: 'application.state'">Tila:</p>
@@ -43,19 +39,16 @@
               class="application_summary_text">
             </span>
           </div>
-
           <!-- Permit type: -->
           <div>
             <p data-bind="ltext: 'application.type'"></p>
             <span class="application_summary_text" data-bind="ltext: permitType"></span>
           </div>
-
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
             <span class="application_summary_text" data-bind="text: propertyId" data-test-id="application-property-id"></span>
           </div>
-
           <!-- Authorities: -->
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
@@ -98,14 +91,19 @@
         </div>
 
         <!-- Actions: -->
-        <div class="application_actions">
-          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn btn-primary"></button>
-          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class="btn btn-primary"></button>
-          <button data-bind="ltext: 'application.addOperation',       click: addOperation,       visible: $root.authorization.ok('add-operation'),       enable: $root.authorization.ok('add-operation')"       data-test-id="add-operation"           class="btn btn-primary"></button>
-          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn btn-primary"></button>
+        <div data-bind="with: application" class="application_actions">
+          <div class="muncipality-info">
+            <h2 data-bind="ltext: 'application.muncipality'"></h2>
+            <p>Sipoo</p>
+            <a href="http://sipoo.fi/" data-bind="ltext: 'application.muncipality-contact'"></a>
+          </div>
+          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class=""></button>
+          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class=""></button>
+          <button data-bind="ltext: 'application.addOperation',       click: addOperation,       visible: $root.authorization.ok('add-operation'),       enable: $root.authorization.ok('add-operation')"       data-test-id="add-operation"           class=""></button>
+          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class=""></button>
           <button data-bind="ltext: 'application.pdf',                click: exportPdf"                                                                                                                         data-test-id="application-pdf-btn"     class="btn action-bar-button"></button>
         </div>
-
+      
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
@@ -116,10 +114,10 @@
             <li><a data-bind="ltext: 'application.tabConversation', click: $root.application.changeTab" href="#" name="conversation" data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
         </div>
-
       </div>
     </div>
 
+    <div class="container">
     <div class="sidebar">
       <aside class="instructions">
           <h3 data-bind="ltext: 'help'">Ohje</h3>
@@ -127,7 +125,7 @@
       </aside>
     </div>
 
-    <div class="tab-content-container container">
+    <div class="tab-content-container content">
 
       <div id="application-info-tab" class="tab-content">
 
@@ -288,7 +286,7 @@
       </div>
 
     </div>
-
+    </div>
     <div id="boxes">
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
