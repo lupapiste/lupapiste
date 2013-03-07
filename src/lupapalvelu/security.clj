@@ -50,11 +50,10 @@
         hashed-password   (get-hash password salt)
         id                (mongo/create-id)
         old-user          (get-user-by-email email)
-        new-user          {:id           id
+        new-user-base     {:id           id
                            :username     email
                            :email        email
                            :role         role
-                           :personId     userid
                            :firstName    firstname
                            :lastName     lastname
                            :phone        phone
@@ -64,7 +63,8 @@
                            :municipality municipality
                            :enabled      enabled
                            :private      {:salt salt
-                                          :password hashed-password}}]
+                                          :password hashed-password}}
+        new-user          (if userid (assoc new-user-base :personId userid) new-user-base)]
     (info "register user:" (dissoc user :password))
     (if (= "dummy" (:role old-user))
       (do
