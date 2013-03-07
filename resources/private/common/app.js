@@ -104,7 +104,8 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
       var page = $("#" + pageId);
       if (page.length === 0) {
         error("Unknown page", pageId);
-        pageId = "404";
+        // firefox bug: does not compute with hashbangs (LUPA-80)
+        pageId = allowAnonymous ? "login" : pageId = "404";
         pagePath = [];
         page = $("#" + pageId);
       }
