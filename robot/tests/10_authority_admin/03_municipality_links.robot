@@ -16,7 +16,7 @@ Mikko asks information and sees the new link
 
 Admin changes link target
   Sipoo logs in
-  Wait until  Update link  fancy-link  http://slashdot.org
+  Update link  fancy-link  http://slashdot.org
 
 Mikko asks information and sees updated link
   Mikko logs in
@@ -49,7 +49,7 @@ Update link
   [Arguments]  ${name}  ${url}
   Wait and click  xpath=//table[@data-test-id='municipality-links-table']//td[text()='${name} fi']/..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
-  Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
+  Wait Until  Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
 
 Remove link
