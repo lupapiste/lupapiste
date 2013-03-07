@@ -314,8 +314,6 @@
       ops = _.map(ops, function(v, k) { return {op: k, count: v}; });
       application.operations(ops);
 
-      window.app = app;
-      
       // Attachments:
 
       var statuses = {
