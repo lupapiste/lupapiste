@@ -99,6 +99,7 @@
     hasAttachment: ko.observable(false),
     address: ko.observable(),
     verdict: ko.observable(),
+    initialOp: ko.observable(),
     operations: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
@@ -223,7 +224,7 @@
       window.location.hash = "#!/application/" + application.id() + "/" + element.name;
     }
   };
-  
+    
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
