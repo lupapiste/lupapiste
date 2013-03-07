@@ -49,11 +49,11 @@
                 <span data-bind="text: count"></span>
                 <span>&#x00D7;</span>
                 <!-- /ko -->
-                <span data-bind="ltext: 'operations.' + op"></span>
+                <span data-bind="ltext: 'operations.' + op" data-test-id="inforequest-application-operation" class="application_summary_text"></span>
               </li>
             </ul>
           </div>
-
+  
           <!-- ko if: $root.authorization.ok('assign-application') -->
             <div>
               <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
