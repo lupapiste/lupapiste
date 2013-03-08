@@ -457,8 +457,20 @@
 
   var attachmentTemplatesModel = new function() {
     var self = this;
+
+    self.init = function() {
+      self.select = $("#dialog-add-attachment-templates input[type='hidden']");
+      return self;
+    }
     
     self.show = function() {
+      self.select.select2({
+          width: 400,
+          data: [{text: "eka", children: [{id: "1", text: "Valtakirja"}, {id: "2", text: "Kirjavalta"}]},
+                 {text: "toka", children: [{id: "3", text: "Suunnitelma"}, {id: "4", text: "Plan B"}]}],
+          allowClear: true})
+        .on("change", self.add);
+      $("#dialog-add-attachment-templates ul").empty();
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
       return self;
     }
@@ -466,11 +478,19 @@
     self.ok = function() {
       console.log("newAttachmentTemplates:", application.id());
       ajax.command("add-attachment-templates", {id: application.id()}).call();
+      try { self.select.select2("data", null); } catch (e) { }
       LUPAPISTE.ModalDialog.close();
     };
     
+    self.add = function(e) {
+      if (e && e.val) $("#dialog-add-attachment-templates ul").append($("<li>").text(e.val));
+      try { self.select.select2("data", null); } catch (e) { }
+      return false;
+    };
+    
     self.query = function(query) {
-      query.callback({results: [{id: "1", text: "eka"}, {id: "2", text: "toka"}]});
+      query.callback({results: [{text: "eka", children: [{id: "1", text: "Valtakirja"}, {id: "2", text: "Kirjavalta"}]},
+                                {text: "toka", children: [{id: "3", text: "Suunnitelma"}, {id: "4", text: "Plan B"}]}]});
     };
     
   };
@@ -494,15 +514,13 @@
       accordian: accordian,
       removeDocModel: removeDocModel,
       removeApplicationModel: removeApplicationModel,
-      attachmentTemplatesModel: attachmentTemplatesModel
+      attachmentTemplatesModel: attachmentTemplatesModel.init()
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
     
-    $("#dialog-add-attachment-templates input[type='hidden']").select2({
-      placeholder: "Valitse liitepohja...",
-      query: attachmentTemplatesModel.query});
+    
   });
 
 })();
