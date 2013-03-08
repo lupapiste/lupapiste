@@ -11,8 +11,6 @@
            [com.mongodb WriteConcern]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
-(def ^:const write-concern WriteConcern/SAFE)
-
 ;;
 ;; Utils
 ;;
@@ -120,13 +118,15 @@
 ;; Bootstrappin'
 ;;
 
+(defn server-list []
+  (let [servers (vals (get-in env/config [:mongodb :servers]))]
+    (map #(apply m/server-address [(:host %) (:port %)]) servers)))
+
 (def connected (atom false))
 
 (defn connect!
   ([]
-    (let [addrs [["localhost" 27017]]
-          servers (map #(apply m/server-address %) addrs)]
-      (connect! servers "lupapiste")))
+    (connect! (server-list) "lupapiste"))
   ([servers db]
     (if @connected
       (debug "Already connected!")
@@ -134,7 +134,7 @@
         (debug "Connecting to DB:" servers)
         (m/connect! servers (m/mongo-options))
         (reset! connected true)
-        (m/set-default-write-concern! write-concern)
+        (m/set-default-write-concern! WriteConcern/SAFE)
         (m/use-db! db)
         (debug "DB is" (.getName (m/get-db)))))))
 
