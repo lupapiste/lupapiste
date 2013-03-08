@@ -203,23 +203,6 @@ var attachment = (function() {
     initFileUpload(m.application.id(), null, type, selector);
   }
 
-  function AttachmentTemplatesModel(id) {
-    var self = this;
-    
-    self.id = id;
-
-    self.add = function() {
-      console.log("newAttachmentTemplates:", self.id);
-      ajax.command("add-attachment-templates", {id: self.id}).call();
-      LUPAPISTE.ModalDialog.close();
-    };
-  }
-  
-  function newAttachmentTemplates(m) {
-    console.log("newAttachmentTemplates:", m.application.id());
-    LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
-  }
-
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
@@ -233,7 +216,6 @@ var attachment = (function() {
 
   return {
     newAttachment: newAttachment,
-    newAttachmentTemplates: newAttachmentTemplates,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 

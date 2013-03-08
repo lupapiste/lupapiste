@@ -239,7 +239,7 @@
               class="btn btn-primary modal">
           </button>
           <button
-              data-bind="click: attachment.newAttachmentTemplates, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('add-attachment-templates')"
+              data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('add-attachment-templates')"
               class="btn">                
           </button>
         </div>
@@ -291,6 +291,7 @@
     </div>
     </div>
     <div id="boxes">
+    
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.addInvite'">Lis&auml;&auml; valtuutus</p>
@@ -330,6 +331,7 @@
           </div>
         </div>
       </div>
+      
       <div id="dialog-add-attachment-templates" class="window autosized">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
@@ -337,8 +339,12 @@
         </div>
         <div class="dialog-content">
           <p>Fozzaa!</p>
+          <span data-bind="text: attachmentTemplatesModel.id"></span>
+          <button data-bind="click: attachmentTemplatesModel.add">Add</button>
+          <button data-bind="click: attachmentTemplatesModel.cancel">Cancel</button>
         </div>
       </div>
+      
     </div>
   </section>
 </body>

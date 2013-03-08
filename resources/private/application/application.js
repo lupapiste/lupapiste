@@ -455,6 +455,31 @@
     }
   };
 
+  var attachmentTemplatesModel = new function() {
+    var self = this;
+    
+    self.id = ko.observable();
+
+    self.show = function() {
+      self.id(application.id());
+      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
+      return self;
+    }
+    
+    self.add = function() {
+      console.log("newAttachmentTemplates:", self.id());
+      // ajax.command("add-attachment-templates", {id: self.id}).call();
+      LUPAPISTE.ModalDialog.close();
+    };
+    
+    self.cancel = LUPAPISTE.ModalDialog.close;
+    
+  };
+  
+  function newAttachmentTemplates(m) {
+    attachmentTemplatesModel.init().show();
+  }
+
   hub.onPageChange("application", initApplication);
   hub.onPageChange("inforequest", initApplication);
 
@@ -473,7 +498,8 @@
       authorization: authorizationModel,
       accordian: accordian,
       removeDocModel: removeDocModel,
-      removeApplicationModel: removeApplicationModel
+      removeApplicationModel: removeApplicationModel,
+      attachmentTemplatesModel: attachmentTemplatesModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
