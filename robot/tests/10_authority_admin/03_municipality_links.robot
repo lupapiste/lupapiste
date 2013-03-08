@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Admin adds new municipality link
- Sipoo logs in
+  Sipoo logs in
   Add link  fancy-link  http://reddit.com
 
 Mikko asks information and sees the new link
