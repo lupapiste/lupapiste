@@ -161,7 +161,7 @@
   (mc/ensure-index :municipalities {:municipalityCode 1}))
 
 (defn clear! []
-  (warn "Clearing MongoDB:" mongouri)
+  (warn "Clearing MongoDB")
   (gfs/remove-all)
   ; Collections must be dropped individially, otherwise index cache will be stale
   (doseq [coll (db/get-collection-names)]
