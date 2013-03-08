@@ -13,25 +13,7 @@
             [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.components.core :as c])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
-           [java.util.zip GZIPOutputStream]
-           [org.apache.commons.io IOUtils]
-           [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
-           [org.mozilla.javascript ErrorReporter EvaluatorException]))
-
-(defn write-header [out n]
-    (.write out (format "\n\n/*\n * %s\n */\n" n))
-  out)
-
-(defn get-file-content []
-  (let [stream (ByteArrayOutputStream.)]
-    (with-open [out (io/writer stream)]
-      (let [src "foo.html"]
-          (.write src)
-          (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-              (IOUtils/copy in (write-header out src)))))
-    (.toByteArray stream)))
+            [lupapalvelu.components.core :as c]))
 
 (defn get-application-link [host application lang]
   (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
@@ -40,6 +22,14 @@
 (defn replace-with-selector [e host application lang]
   (enlive/transform e [(keyword (str "#application-link-" lang))] (fn [e] (assoc e :content (get-application-link host application lang)))))
 
+(defn send-mail-to-recipients [recipients title msg]
+  (doseq [recipient recipients]
+    (send-off mail-agent (fn [_]
+                           (if (email/send-email recipient title msg)
+                             (info "email was sent successfully")
+                             (error "email could not be delivered."))))))
+
+; new comment
 (defn get-message-for-new-comment [application host]
   (let [application-id (:id application)
         e (enlive/html-resource "email-templates/application-new-comment.html")]
@@ -48,20 +38,27 @@
                                (replace-with-selector host application "fi")
                                (replace-with-selector host application "sv"))))))
 
+(defn get-users-in-role [users roles]
+  ; todo return only users in the roles
+  users)
+
+(defn get-email-recipients-for-application-roles [application roles]
+  (map (fn [user] (:email (mongo/by-id :users (:id user)))) ((get-users-in-role (:auth application) roles))))
+
 (defn get-email-recipients-for-new-comment [application]
-  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
-
-(def mail-agent (agent nil)) 
-
-(defn send-mail-to-recipients [recipients title msg]
-  (doseq [recipient recipients]
-    (send-off mail-agent (fn [_]
-                           (if (email/send-email recipient title msg)
-                             (info "email was sent successfully")
-                             (error "email could not be delivered."))))))
-
+  (get-email-recipients-for-application-roles application [:owner :writer]))
+    
 (defn send-notifications-on-new-comment [host application user-commenting comment-text]
   (if (= :authority (keyword (:role user-commenting)))
     (let [recipients (get-email-recipients-for-new-comment application)
           msg (get-message-for-new-comment application host)]
       (send-mail-to-recipients recipients (:title application) msg))))
+
+; application opened
+(defn get-emails-for-application-state-change [application]
+  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
+
+(defn send-notifications-on-application-opened [application-id state]
+  (let [application (mongo/by-id :applications (application-id))]
+  (get-email-recipients-for-application-roles application [:owner :writer])
+  (println "notification sent on app" application-id " now with state" state)))

@@ -92,7 +92,8 @@
       (mongo/update-by-id :applications id
         {$set {:modified (:created command)
                :state :open
-               :opened (:created command)}}))))
+               :opened (:created command)}})
+      (notifications/send-notifications-on-application-opened application-id :open))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
