@@ -94,11 +94,19 @@
               </tbody>
             </table>
             <form>
-              <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-                        class="conversation-input" id="attachment.commentText" rows="3"></textarea>
-              <button id="attachment.addComment"
+              <textarea
+                data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+                id="attachment.commentText"
+                class="conversation-input"
+                rows="3">
+              </textarea>
+              <button
                   data-bind="disable: disabled, click: submit, ltext: 'attachment.send'"
-                  type="submit" class="btn btn-primary">Lähetä viesti</button>
+                  id="attachment.addComment"
+                  type="submit"
+                  class="btn btn-primary">
+                Lähetä viesti
+              </button>
             </form>
           </div>
       </div>
