@@ -375,6 +375,6 @@
   [{user :user {kind :kind} :data}]
   (let [base-query (domain/application-query-for user)
         query (if kind
-                (assoc base-query :infoRequest (= "inforequest" kind))
+                (assoc base-query :infoRequest (= "inforequests" kind))
                 base-query)]
     (ok :data (mongo/count :applications query))))
