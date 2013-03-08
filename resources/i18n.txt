@@ -17,7 +17,7 @@ application.muncipality-contact: Yhteystiedot
 newRequest.topic: Uusi hanke
 attachment.return: Palaa hakemukseen
 mypage.null:
-application.attachmentsAddTemplates: Lisää liite pohjia
+application.newAttachmentTemplates: Lisää liitepohjia
 
 uusiRakennus.rakennuksenOmistajat.henkilo.turvakieltoKytkin: Turvakielto
 uusiRakennus.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: yksityinen maatalousyrittäjä
