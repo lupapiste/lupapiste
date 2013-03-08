@@ -118,7 +118,7 @@
 ;; Bootstrappin'
 ;;
 
-(defn server-list []
+(def server-list
   (let [servers (vals (get-in env/config [:mongodb :servers]))]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
 
@@ -126,7 +126,7 @@
 
 (defn connect!
   ([]
-    (connect! (server-list) "lupapiste"))
+    (connect! server-list (get-in env/config [:mongodb :dbname])))
   ([servers db]
     (if @connected
       (debug "Already connected!")
