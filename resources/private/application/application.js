@@ -463,7 +463,7 @@
       return self;
     }
     
-    self.add = function() {
+    self.ok = function() {
       console.log("newAttachmentTemplates:", application.id());
       ajax.command("add-attachment-templates", {id: application.id()}).call();
       LUPAPISTE.ModalDialog.close();
@@ -500,7 +500,9 @@
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
     
-    $("#dialog-add-attachment-templates input[type='hidden']").select2({query: attachmentTemplatesModel.query});
+    $("#dialog-add-attachment-templates input[type='hidden']").select2({
+      placeholder: "Valitse liitepohja...",
+      query: attachmentTemplatesModel.query});
   });
 
 })();
