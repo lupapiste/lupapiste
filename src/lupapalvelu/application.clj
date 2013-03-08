@@ -365,3 +365,16 @@
   {:parameters [:params]}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
+
+;
+; Query that returns number of applications or info-requests user has:
+;
+
+(defquery "applications-count"
+  {:params [:kind]}
+  [{user :user {kind :kind} :data}]
+  (let [base-query (domain/application-query-for user)
+        query (if kind
+                (assoc base-query :infoRequest (= "inforequest" kind))
+                base-query)]
+    (ok :data (mongo/count :applications query))))
