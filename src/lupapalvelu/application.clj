@@ -11,6 +11,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
@@ -93,7 +94,7 @@
         {$set {:modified (:created command)
                :state :open
                :opened (:created command)}})
-      (notifications/send-notifications-on-application-opened application-id :open))))
+      (notifications/send-notifications-on-application-state-change id :open))))
 
 (defcommand "cancel-application"
   {:parameters [:id]

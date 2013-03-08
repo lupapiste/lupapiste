@@ -15,6 +15,8 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.components.core :as c]))
 
+(def mail-agent (agent nil)) 
+
 (defn get-application-link [host application lang]
   (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
     (str host "/" lang "/applicant#!" permit-type-path (:id application))))
@@ -38,15 +40,11 @@
                                (replace-with-selector host application "fi")
                                (replace-with-selector host application "sv"))))))
 
-(defn get-users-in-role [users roles]
-  ; todo return only users in the roles
-  users)
-
-(defn get-email-recipients-for-application-roles [application roles]
-  (map (fn [user] (:email (mongo/by-id :users (:id user)))) ((get-users-in-role (:auth application) roles))))
+(defn get-email-recipients-for-application-roles [application]
+  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
 
 (defn get-email-recipients-for-new-comment [application]
-  (get-email-recipients-for-application-roles application [:owner :writer]))
+  (get-email-recipients-for-application-roles application))
     
 (defn send-notifications-on-new-comment [host application user-commenting comment-text]
   (if (= :authority (keyword (:role user-commenting)))
@@ -55,11 +53,19 @@
       (send-mail-to-recipients recipients (:title application) msg))))
 
 ; application opened
-(defn get-emails-for-application-state-change [application]
+(defn get-message-for-application-state-change [application host]
+  (let [application-id (:id application)
+        e (enlive/html-resource "email-templates/application-state-change.html")]
+    
+    (apply str (enlive/emit* (-> e
+                               (replace-with-selector host application "fi")
+                               (replace-with-selector host application "sv"))))))
+
+(defn get-email-recipients-for-application-state-change [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
 
-(defn send-notifications-on-application-opened [application-id state]
+(defn send-notifications-on-application-state-change [application-id state host]
   (let [application (mongo/by-id :applications (application-id))]
-  (let [recipients (get-email-recipients-for-application-roles application [:owner :writer])]
-    )
-  (println "notification sent on app" application-id " now with state" state)))
+  (let [recipients (get-email-recipients-for-application-roles application)
+        msg (get-message-for-application-state-change application host)]
+  (send-mail-to-recipients recipients (:title application) msg))))
