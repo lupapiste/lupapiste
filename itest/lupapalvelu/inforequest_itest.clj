@@ -38,4 +38,8 @@
             (success resp) => true)
           (let [inforequest  (:application (query pena :application :id id))]
             (:state inforequest) => "answered"))
+
+    (fact "Pena can convert-to-application"
+          (let [resp (command pena :convert-to-application :id id)]
+            (success resp) => true))
 ))

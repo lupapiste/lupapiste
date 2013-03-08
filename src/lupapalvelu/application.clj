@@ -248,7 +248,7 @@
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open]}
+   :states     [:draft :open :answered]}
   [command]
   (with-application command
     (fn [inforequest]
