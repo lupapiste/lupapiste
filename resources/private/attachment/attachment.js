@@ -203,6 +203,10 @@ var attachment = (function() {
     initFileUpload(m.application.id(), null, type, selector);
   }
 
+  function newAttachmentTemplates(m) {
+    console.log("newAttachmentTemplates:", m, this);
+  }
+
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';

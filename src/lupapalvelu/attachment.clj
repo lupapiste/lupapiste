@@ -267,6 +267,14 @@
         (fail :error.no-such-application))
       (fail :error.illegal-file-type))))
 
+(defcommand "add-attachment-templates"
+  {:parameters [:id]
+   :roles      [:authority]
+   :states     [:draft :open]}
+  [{created :created user :user {id :id} :data}]
+  (println "add-attachment-templates: id=" id "user=" user)
+  (ok))
+
 ;;
 ;; Download
 ;;
