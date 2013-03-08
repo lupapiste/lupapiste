@@ -234,10 +234,13 @@
             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
           </div>
           <button
-              id="add-attachment"
               class="btn btn-primary modal"
               data-window-id="upload-dialog"
-              data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment">
+              data-bind="click: attachment.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')">
+          </button>
+          <button
+              class="btn modal"
+              data-bind="click: attachment.newAttachmentTemplates, ltext: 'application.attachmentsAddTemplates', visible: $root.authorization.ok('add-attachment-templates')">
           </button>
         </div>
       </div>
