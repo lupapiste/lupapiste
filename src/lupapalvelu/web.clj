@@ -58,7 +58,7 @@
   (get-in request [:cookies "ring-session" :value]))
 
 (defn client-ip [request]
-  (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
+  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
 (defn web-stuff []
   (let [request (request/ring-request)]
