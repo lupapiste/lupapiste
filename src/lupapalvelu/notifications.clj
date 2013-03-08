@@ -60,5 +60,6 @@
 
 (defn send-notifications-on-application-opened [application-id state]
   (let [application (mongo/by-id :applications (application-id))]
-  (get-email-recipients-for-application-roles application [:owner :writer])
+  (let [recipients (get-email-recipients-for-application-roles application [:owner :writer])]
+    )
   (println "notification sent on app" application-id " now with state" state)))
