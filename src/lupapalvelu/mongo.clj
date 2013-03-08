@@ -8,9 +8,10 @@
             [monger.db :as db]
             [monger.gridfs :as gfs])
   (:import [org.bson.types ObjectId]
+           [com.mongodb WriteConcern]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
-(def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
+(def ^:const write-concern WriteConcern/SAFE)
 
 ;;
 ;; Utils
@@ -123,15 +124,26 @@
 
 (defn connect!
   ([]
-    (connect! mongouri))
-  ([uri]
+    (let [addrs [["localhost" 27017]]
+          servers (map #(apply m/server-address %) addrs)]
+      (connect! servers "lupapiste")))
+  ([servers db]
     (if @connected
       (debug "Already connected!")
       (do
-        (debug "Connecting to DB:" uri)
-        (m/connect-via-uri! uri)
-        (debug "DB is" (.getName (m/get-db)))
-        (reset! connected true)))))
+        (debug "Connecting to DB:" servers)
+        (m/connect! servers (m/mongo-options))
+        (reset! connected true)
+        (m/set-default-write-concern! write-concern)
+        (m/use-db! db)
+        (debug "DB is" (.getName (m/get-db)))))))
+
+(defn disconnect! []
+  (if @connected
+    (do
+      (m/disconnect!)
+      (reset! connected false))
+    (debug "Not connected")))
 
 (defn ensure-indexes []
   (debug "ensure-indexes")
