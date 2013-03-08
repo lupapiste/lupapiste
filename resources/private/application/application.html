@@ -339,9 +339,12 @@
         </div>
         <div class="dialog-content">
           <p>Fozzaa!</p>
-          <span data-bind="text: attachmentTemplatesModel.id"></span>
+          <span data-bind="text: application.id"></span>
           <button data-bind="click: attachmentTemplatesModel.add">Add</button>
-          <button data-bind="click: attachmentTemplatesModel.cancel">Cancel</button>
+          <button data-bind="click: LUPAPISTE.ModalDialog.close">Cancel</button>
+          <div>
+            <input type="hidden"></input>
+          </div>
         </div>
       </div>
       

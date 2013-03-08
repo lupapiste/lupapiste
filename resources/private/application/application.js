@@ -458,28 +458,23 @@
   var attachmentTemplatesModel = new function() {
     var self = this;
     
-    self.id = ko.observable();
-
     self.show = function() {
-      self.id(application.id());
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
       return self;
     }
     
     self.add = function() {
-      console.log("newAttachmentTemplates:", self.id());
-      // ajax.command("add-attachment-templates", {id: self.id}).call();
+      console.log("newAttachmentTemplates:", application.id());
+      ajax.command("add-attachment-templates", {id: application.id()}).call();
       LUPAPISTE.ModalDialog.close();
     };
     
-    self.cancel = LUPAPISTE.ModalDialog.close;
+    self.query = function(query) {
+      query.callback({results: [{id: "1", text: "eka"}, {id: "2", text: "toka"}]});
+    };
     
   };
   
-  function newAttachmentTemplates(m) {
-    attachmentTemplatesModel.init().show();
-  }
-
   hub.onPageChange("application", initApplication);
   hub.onPageChange("inforequest", initApplication);
 
@@ -504,6 +499,8 @@
 
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
+    
+    $("#dialog-add-attachment-templates input[type='hidden']").select2({query: attachmentTemplatesModel.query});
   });
 
 })();
