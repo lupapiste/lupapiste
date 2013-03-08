@@ -126,8 +126,12 @@
 
 (defn connect!
   ([]
-    (connect! server-list (get-in env/config [:mongodb :dbname])))
-  ([servers db]
+    (let [conf (:mongodb env/config)
+          db   (:dbname conf)
+          user (-> conf :credentials :username)
+          pw   (-> conf :credentials :password)]
+      (connect! server-list db user pw)))
+  ([servers db username password]
     (if @connected
       (debug "Already connected!")
       (do
@@ -136,7 +140,10 @@
         (reset! connected true)
         (m/set-default-write-concern! WriteConcern/SAFE)
         (m/use-db! db)
-        (debug "DB is" (.getName (m/get-db)))))))
+        (debug "DB is" (.getName (m/get-db)))
+        (when (and username password)
+          (m/authenticate (m/get-db db) username (.toCharArray password))
+          (debug "Authenticated to DB as" username))))))
 
 (defn disconnect! []
   (if @connected
