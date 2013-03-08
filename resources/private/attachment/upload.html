@@ -2,30 +2,38 @@
 <html lang="en">
 <body>
   <section class="page" id="upload-page" style="visibility: visible;display:block;">
-          <div id="upload-dialog" class="window autosized">
-            <div class="dialog-header">
-              <p>Tallenna tiedosto</p>
-              <p class="dialog-close close">X</p>
-            </div>
-            <div class="dialog-content">
-              <!--[if !IE]> -->
-              <iframe id="uploadFrame" class="attachment-iframe"
-                  src="/html/pages/upload.html" data-src="/html/pages/upload.html"></iframe>
-              <!-- <![endif]-->
-              <!--
-                   IE(8) hacks:
-                   * Empty scr attribute: content must be loaded AFTER this parent
-                     document and all the JS libs are loaded.
-                   * A non-standard frameborder attribute is needed. For some
-                     reason the JS workaround in not affecting this iframe.
-              -->
-              <!--[if IE]>
-              <iframe id="uploadFrame" class="attachment-iframe"
-                  src="" data-src="/html/pages/upload.html"
-                  frameborder="0"></iframe>
-              <![endif]-->
-            </div>
-          </div>
-</section>
-
-</body></html>
+    <div id="upload-dialog" class="window autosized">
+      <div class="dialog-header">
+        <p>Tallenna tiedosto</p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+        <!--[if !IE]> -->
+          <iframe
+            id="uploadFrame"
+            class="attachment-iframe"
+            src="/html/pages/upload.html"
+            data-src="/html/pages/upload.html">
+          </iframe>
+        <!-- <![endif]-->
+        <!--
+         IE(8) hacks:
+           * Empty scr attribute: content must be loaded AFTER this parent
+             document and all the JS libs are loaded.
+           * A non-standard frameborder attribute is needed. For some
+             reason the JS workaround in not affecting this iframe.
+        -->
+        <!--[if IE]>
+          <iframe
+            id="uploadFrame"
+            class="attachment-iframe"
+            src=""
+            data-src="/html/pages/upload.html"
+            frameborder="0">
+          </iframe>
+        <![endif]-->
+      </div>
+    </div>
+  </section>
+</body>
+</html>
