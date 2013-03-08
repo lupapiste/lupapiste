@@ -240,7 +240,7 @@
           </button>
           <button
               data-bind="click: attachment.newAttachmentTemplates, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('add-attachment-templates')"
-              class="btn">
+              class="btn">                
           </button>
         </div>
       </div>
@@ -330,7 +330,15 @@
           </div>
         </div>
       </div>
-
+      <div id="dialog-add-attachment-templates" class="window autosized">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+        <div class="dialog-content">
+          <p>Fozzaa!</p>
+        </div>
+      </div>
     </div>
   </section>
 </body>
