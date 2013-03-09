@@ -16,6 +16,27 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.components.core :as c]))
 
+(def mail-default-styles
+"
+html {
+  background-color: #f0f0f0;
+}
+body {
+  font-family: Dosis,sans-serif;
+  font-size: 14px;
+  padding: 18px;
+  margin: 12px;
+  background-color: #ffffff;
+}
+
+h1 {
+  font-size: 16px;
+}
+
+p {
+  font-size: 14px;
+}")
+
 (def mail-agent (agent nil)) 
 
 (defn get-application-link [application lang suffix host]
@@ -41,8 +62,7 @@
 ; new comment
 (defn get-message-for-new-comment [application host]
   (let [application-id (:id application)
-        e (enlive/html-resource "email-templates/application-new-comment.html")]
-    
+        e (enlive/html-resource "email-templates/application-new-comment.html")]    
     (apply str (enlive/emit* (-> e
                                (replace-application-link "#conversation-link-" application "fi" "/conversation" host)
                                (replace-application-link "#conversation-link-" application "sv" "/conversation" host))))))
