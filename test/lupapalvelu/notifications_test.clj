@@ -15,8 +15,13 @@
    (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000") => 
 "<html>
 <body>
-  <p>Uusi kommentti lisätty: <a id=\"application-link-fi\">http://localhost:8000/fi/applicant#!/application/123</a></p>
-  <p>Ett nytt komment lagt: <a id=\"application-link-sv\">http://localhost:8000/sv/applicant#!/application/123</a></p>
+  <p>Hei,</p>
+  <p>Uusi kommentti lisätty <a id=\"conversation-link-fi\" href=\"http://localhost:8000/fi/applicant#!/application/123/conversation\">keskusteluun</a>.</p>
+  <p>Terveisin, Lupapiste</p>
+  <hr />
+  <p>Hej,</p>
+  <p>Ett nytt komment lagt <a id=\"conversation-link-sv\" href=\"http://localhost:8000/sv/applicant#!/application/123/conversation\">till diskussionet</a>.</p>
+  <p>Grattis, Lupapiste</p>
 </body>\n
 </html>")
 
@@ -31,8 +36,12 @@
    (get-message-for-application-state-change { :id 123 :state "open"} "http://localhost:8000") => 
 "<html>
 <body>
-  <p>Hakemuksen tila on nyt <span class=\"state-fi\"></span>: <a id=\"application-link-fi\">http://localhost:8000/fi/applicant#!/application/123</a></p>
-  <p>Tillstånd förändrat till <span class=\"state-sv\"></span>: <a id=\"application-link-sv\">http://localhost:8000/sv/applicant#!/application/123</a></p>
-</body>
-
+  <p>Hei,</p>
+  <p>Hakemuksen tila on nyt <span id=\"state-fi\">Valmisteilla</span>: <a href=\"http://localhost:8000/fi/applicant#!/application/123\" id=\"application-link-fi\">linkki</a></p>
+  <p>Terveisin, Lupapiste</p>
+  <hr />
+  <p>Hej,</p>
+  <p>Tillståndet förändrat till <span id=\"state-sv\">Inför</span>: <a href=\"http://localhost:8000/sv/applicant#!/application/123\" id=\"application-link-sv\">link</a></p>
+  <p>Grattis, Lupapiste</p>
+</body>\n
 </html>")

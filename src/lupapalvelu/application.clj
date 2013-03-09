@@ -87,6 +87,7 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft]}
+  [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
   [command]
   (with-application command
     (fn [{id :id}]
@@ -94,7 +95,7 @@
         {$set {:modified (:created command)
                :state :open
                :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change id :open))))
+      (notifications/send-notifications-on-application-state-change id :open host))))
 
 (defcommand "cancel-application"
   {:parameters [:id]

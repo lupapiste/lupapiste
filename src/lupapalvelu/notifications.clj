@@ -8,6 +8,7 @@
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
             [lupapalvelu.email :as email]
@@ -17,12 +18,12 @@
 
 (def mail-agent (agent nil)) 
 
-(defn get-application-link [host application lang]
+(defn get-conversation-link [host application lang]
   (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
-    (str host "/" lang "/applicant#!" permit-type-path (:id application))))
+    (str host "/" lang "/applicant#!" permit-type-path (:id application) "/conversation")))
 
-(defn replace-with-selector [e host application lang]
-  (enlive/transform e [(keyword (str "#application-link-" lang))] (fn [e] (assoc e :content (get-application-link host application lang)))))
+(defn replace-conversation-link [e host application lang]
+  (enlive/transform e [(keyword (str "#conversation-link-" lang))] (fn [e] (assoc-in e [:attrs :href] (get-conversation-link host application lang)))))
 
 (defn send-mail-to-recipients [recipients title msg]
   (doseq [recipient recipients]
@@ -37,8 +38,8 @@
         e (enlive/html-resource "email-templates/application-new-comment.html")]
     
     (apply str (enlive/emit* (-> e
-                               (replace-with-selector host application "fi")
-                               (replace-with-selector host application "sv"))))))
+                               (replace-conversation-link host application "fi")
+                               (replace-conversation-link host application "sv"))))))
 
 (defn get-email-recipients-for-application-roles [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
@@ -59,13 +60,15 @@
     
     (apply str (enlive/emit* (-> e
                                (replace-with-selector host application "fi")
-                               (replace-with-selector host application "sv"))))))
+                               (replace-with-selector host application "sv")
+                               (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str "open")))))
+                               (enlive/transform [(keyword "#state-sv")] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "open"))))))))))
 
 (defn get-email-recipients-for-application-state-change [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
 
 (defn send-notifications-on-application-state-change [application-id state host]
-  (let [application (mongo/by-id :applications (application-id))]
+  (let [application (mongo/by-id :applications application-id)]
   (let [recipients (get-email-recipients-for-application-roles application)
         msg (get-message-for-application-state-change application host)]
   (send-mail-to-recipients recipients (:title application) msg))))
