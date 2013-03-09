@@ -4,6 +4,7 @@
         [lupapalvelu.document.schemas :only [schemas]]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
+            [clj-time.format :as timeformat]
             [lupapalvelu.document.subtype :as subtype]))
 
 ;;
@@ -32,6 +33,15 @@
 
 (defmethod validate :boolean [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
+
+
+(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
+
+(defmethod validate :date [elem v]
+  (try
+    (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
+    nil
+    (catch Exception e [:warn "invalid-date-format"])))
 
 ;; FIXME
 (defmethod validate :checkbox [elem v]
@@ -82,6 +92,7 @@
       (every? true? (map (fn [[k2 v2]] (validate-document-fields schema-body k2 v2 current-path)) v))
       (let [elem (find-by-name schema-body current-path)
             result (validate (keywordize-keys elem) v)]
+        (when-not (nil? result) (println k v path elem result))
         (nil? result)))))
 
 (defn validate-against-current-schema [document]

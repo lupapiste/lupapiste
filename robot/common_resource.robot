@@ -73,6 +73,13 @@ Wait until
 
 Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
+
+Kill dev-debug
+  Execute Javascript  $(".dev-debug").hide();
+
+Show dev-debug
+  Execute Javascript  $(".dev-debug").show();
+
 #
 # Navigation
 #
@@ -126,6 +133,7 @@ User logs in
   [Arguments]  ${login}  ${password}  ${username}
   Login  ${login}  ${password}
   User should be logged in  ${username}
+  Kill dev-debug
 
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
@@ -217,6 +225,8 @@ Click by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id='${id}']
   Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
+  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
+  Execute Javascript  window.scrollTo(0, $("[data-test-id='${id}']").position().top - 130);
   # IE8
   Focus  xpath=//*[@data-test-id='${id}']
   Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
@@ -277,11 +287,13 @@ Prepare new request
   Select From List by test id  create-municipality-select  ${municipality}
   Input text by test id  create-property-id  ${propertyId}
   Click by test id  create-continue
+  # Going too fast causes negative margins
+  Set Selenium Speed  ${SLOW_SPEED}
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
   Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
-  # Needed for animation to finish.
-  Sleep  1
+  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennuksen rakentaminen"]
+  Wait until  Element should be visible  xpath=//div[@class='tree-result']
+  Set Selenium Speed  ${DEFAULT_SPEED}
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
@@ -339,8 +351,10 @@ Add comment
 #
 
 Apply minimal fixture now
+  Show dev-debug
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
+  Kill dev-debug
 
 #
 # Application state check:

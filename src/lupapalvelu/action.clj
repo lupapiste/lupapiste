@@ -28,12 +28,13 @@
   (format
     (str
       "Tervehdys,\n\n%s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/fi/applicant#!/application/%s\n\n"
+      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/fi/applicant?hashbang=!/application/%s#!/application/%s\n\n"
       "Yst\u00E4v\u00E4llisin terveisin,\n\n"
       "Lupapiste.fi")
     (:firstName user)
     (:lastName user)
     host
+    id
     id))
 
 (defcommand "invite"
@@ -67,11 +68,13 @@
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
               (future
-                (info "sending email to" email)
-                (if (not (= (suffix email "@") "example.com"))
-                  (if (email/send-email email (:title application) (invite-body user application-id host))
-                    (info "email was sent successfully")
-                    (error "email could not be delivered."))
+                (if (not= (suffix email "@") "example.com")
+                  (try
+                    (info "sending email to" email)
+                    (if (email/send-email email (:title application) (invite-body user application-id host))
+                      (info "email was sent successfully")
+                      (error "email could not be delivered."))
+                    (catch Exception e (info e (.getMessage e))))
                   (info "we are not sending emails to @example.com domain.")))
               nil)))))))
 

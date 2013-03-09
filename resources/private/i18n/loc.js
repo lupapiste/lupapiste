@@ -12,6 +12,14 @@ var loc;
     return term;
   };
 
+  hub.subscribe("change-lang", function(e) {
+    var lang = e.lang;
+    if (_.contains(loc.supported, lang)) {
+      var url = location.href.replace("/" + loc.currentLanguage + "/", "/" + lang + "/");
+      window.location = url;
+    }
+  });
+
   loc.supported = [];
   loc.currentLanguage = null;
   loc.terms = {};
@@ -28,14 +36,6 @@ var loc;
     loc.currentLanguage = resolveLang();
     loc.terms = newTerms[loc.currentLanguage];
   };
-
-  hub.subscribe("change-lang", function(e) {
-    var lang = e.lang;
-    if (_.contains(loc.supported, lang)) {
-      var url = location.href.replace("/" + loc.currentLanguage + "/", "/" + lang + "/");
-      window.location = url;
-    }
-  });
 
   // FIXME: This does not work with new localizations.
   loc.toMap = function() { return loc.terms.error; };

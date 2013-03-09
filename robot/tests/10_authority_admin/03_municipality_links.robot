@@ -36,6 +36,7 @@ Add link
   [Arguments]  ${name}  ${url}
   Element should not be visible  //a[@href='${url}']
   Wait and click  xpath=//a[@data-test-id='add-link']
+  Wait until  Element should be visible  dialog-edit-link
   Input Text  //div[@id='dialog-edit-link']//input[1]  ${name} fi
   Input Text  //div[@id='dialog-edit-link']//input[2]  ${name} sv
   Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
@@ -46,31 +47,23 @@ Add link
 
 Update link
   [Arguments]  ${name}  ${url}
+  Execute Javascript  window.scrollTo(0, 500);
   Wait and click  xpath=//table[@data-test-id='municipality-links-table']//td[text()='${name} fi']/..//a[@data-test-id='edit']
-  Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
+  Wait Until  Element Should Be Visible  dialog-edit-link
+  Wait Until  Input Text  //div[@id='dialog-edit-link']//input[3]  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
 
 Remove link
   [Arguments]  ${name}
+  Execute Javascript  window.scrollTo(0, 500);
   Wait and click  xpath=//table[@data-test-id='municipality-links-table']//td[text()='${name} fi']/..//a[@data-test-id='remove']
 
 User sees link
   [Arguments]  ${name}  ${url}
-  Begin inforequest
+  Prepare new request  Latokuja 103  753  75300000000001
   Element Text Should Be  xpath=//a[@href='${url}']  ${name} fi
 
 User does not see link
   [Arguments]  ${name}
-  Begin inforequest
+  Prepare new request  Latokuja 103  753  75300000000001
   Element should not be visible  //a[text()='${name} fi']
-
-Begin inforequest
-  Click link  xpath=//a[@class='brand']
-  Click by test id  applications-create-new
-  Input text by test id  create-address  Latokuja 103, Sipoo
-  Select From List by test id  create-municipality-select  753
-  Click by test id  create-continue
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennus"]
-  Wait until  Element should be visible  xpath=//div[@class='tree-result']

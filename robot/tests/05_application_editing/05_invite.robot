@@ -17,18 +17,15 @@ Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko invites Teppo
-  Set selenium speed  ${SLOWEST_SPEED}
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
-  Sleep  1
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
   Click by test id  application-invite-submit
-  Sleep  1
+  Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
-  Set selenium speed  ${DEFAULT_SPEED}
 
 Mikko can't reinvite Teppo
   Click by test id  application-invite-paasuunnittelija
@@ -37,7 +34,7 @@ Mikko can't reinvite Teppo
   Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan taas hakemusta
   Click by test id  application-invite-submit
-  Sleep  1
+  Error message is present on invite form
   Invite count is  1
 
 # TODO: cant remove auth for owner
@@ -74,7 +71,7 @@ Mikko can't invite himself
   Input Text  invite-email  mikko@example.com
   Input Text  invite-text  Voinko kutsua itseni?
   Click by test id  application-invite-submit
-  Sleep  1
+  Error message is present on invite form
   Invite count is  0
 
 Mikko adds comment so thate application will be visible to admin
@@ -93,6 +90,14 @@ Sonja (the Authority) is not allowed to invite people
 
 *** Keywords ***
 
+Error message is present on invite form
+  Wait until  Element should be visible  xpath=//div[@id='dialog-valtuutus']//h1[@class='form-error']
+  Click Element  xpath=//div[@id='dialog-valtuutus']//p[contains(@class,'close')]
+  Wait until  Mask is invisible
+
+Mask is invisible
+  Element should not be visible  xpath=//div[@id='ModalDialogMask']
+
 Invite count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
+  Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}

@@ -10,6 +10,7 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
+            [noir.cookies :as cookies]
             [lupapalvelu.env :as env]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
@@ -21,9 +22,12 @@
             [lupapalvelu.municipality]
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
+            [sade.status :as status]
             [cheshire.core :as json]
-            [clj-http.client :as client]))
+            [clj-http.client :as client]
+            [ring.middleware.anti-forgery :as anti-forgery]))
 
 ;;
 ;; Helpers
@@ -33,15 +37,16 @@
   `(defpage ~path ~params
      (resp/json (do ~@content))))
 
-(defn from-json []
-  (json/decode (slurp (:body (request/ring-request))) true))
+(defn from-json [request]
+  (json/decode (slurp (:body request)) true))
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
 
 (defn current-user
   "fetches the current user from 1) http-session 2) apikey from headers"
-  [] (or (session/get :user) ((request/ring-request) :user)))
+  ([] (current-user (request/ring-request)))
+  ([request] (or (session/get :user) (request :user))))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -53,7 +58,7 @@
   (get-in request [:cookies "ring-session" :value]))
 
 (defn client-ip [request]
-  (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
+  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
 (defn web-stuff []
   (let [request (request/ring-request)]
@@ -62,8 +67,9 @@
      :sessionId  (sessionId request)
      :host       (host request)}))
 
-(defn logged-in? []
-  (not (nil? (current-user))))
+(defn logged-in?
+  ([] (logged-in? (request/ring-request)))
+  ([request] (not (nil? (current-user request)))))
 
 (defn in-role? [role]
   (= role (keyword (:role (current-user)))))
@@ -75,13 +81,15 @@
 (defn nobody [] false)
 
 ;;
-;; API:
+;; Status
 ;;
+
+(status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
+(status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
+(status/defstatus :mode  env/mode)
 
 (defjson "/api/buildinfo" []
   (ok :data (assoc env/buildinfo :server-mode env/mode)))
-
-(defjson "/api/ping" [] (ok))
 
 ;;
 ;; Commands
@@ -95,11 +103,11 @@
 (defn execute [action]
   (with-logging-context
     {:applicationId (get-in action [:data :id] "???")
-     :email         (get-in action [:user :email] "???")}
+     :userId        (get-in action [:user :id] "???")}
     (core/execute action)))
 
 (defjson [:post "/api/command/:name"] {name :name}
-  (execute (enriched (core/command name (from-json)))))
+  (execute (enriched (core/command name (from-json (request/ring-request))))))
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
@@ -144,26 +152,41 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
-  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
+(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
+
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" (name lang) "/welcome#")))
+
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when (and hashbang (local? hashbang))
+    (session/put! :hashbang hashbang))
+  (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
 ;;
 ;; Login/logout:
 ;;
 
 (defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" lang "/welcome")))
+  (resp/redirect (str "/" (name lang) "/welcome")))
+
+(defn- logout! []
+  (session/clear!)
+  (cookies/put! :lupapiste-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
 
 (defjson [:post "/api/logout"] []
-  (session/clear!)
+  (logout!)
   (ok))
 
 (defpage "/logout" []
-  (session/clear!)
+  (logout!)
   (resp/redirect "/"))
 
 (defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (session/clear!)
+  (logout!)
   (redirect-to-frontpage lang))
 
 (defpage "/" []
@@ -176,6 +199,9 @@
 ;;
 ;; FROM SADE
 ;;
+
+(defjson "/system/ping" [] {:ok true})
+(defjson "/system/status" [] (status/status))
 
 (defpage "/security/activate/:activation-key" {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
@@ -196,16 +222,21 @@
     (if-let [[_ k v] (re-find #"(\w+)\s*[ :=]\s*(\w+)" header-value)]
       (if (= k required-key) v))))
 
+(defn- get-apikey [request]
+  (let [authorization (get-in request [:headers "authorization"])]
+    (parse "apikey" authorization)))
+
 (defn apikey-authentication
-  "Reads apikey from 'Auhtorization' headers, pushed it to :user request header
+  "Reads apikey from 'Auhtorization' headers, pushed it to :user request attribute
    'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
   [handler]
   (fn [request]
-    (let [authorization (get-in request [:headers "authorization"])
-          apikey        (parse "apikey" authorization)]
+    (let [apikey (get-apikey request)]
       (handler (assoc request :user (security/login-with-apikey apikey))))))
 
-(server/add-middleware apikey-authentication)
+
+(defn- logged-in-with-apikey? [request]
+  (and (get-apikey request) (logged-in? request)))
 
 ;;
 ;; File upload/download:
@@ -261,10 +292,36 @@
     {:status 401}))
 
 ;;
+;; Cross-site request forgery protection
+;;
+
+(defn- csrf-attack-hander [request]
+  (with-logging-context
+    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
+     :userId        (or (:id (current-user request)) "???")}
+    (warn "CSRF attempt blocked."
+          "Client IP:" (client-ip request)
+          "Referer:" (get-in request [:headers "referer"]))
+    (resp/json (fail :error.invalid-csrf-token))))
+
+(defn anti-csrf
+  [handler]
+  (fn [request]
+    (let [cookie-name "lupapiste-token"]
+      (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+               (not (logged-in-with-apikey? request)))
+        (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+        (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
+
+;;
 ;; dev utils:
 ;;
 
 (env/in-dev
   (defjson "/api/spy" []
-    (dissoc (request/ring-request) :body)))
+    (dissoc (request/ring-request) :body))
 
+  (defpage "/api/by-id/:collection/:id" {collection :collection id :id}
+    (if-let [r (mongo/by-id collection id)]
+      (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"})))))

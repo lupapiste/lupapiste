@@ -26,7 +26,13 @@
     self.ok = function() {
       ajax
         .command("remove-doc", {id: self.appId(), docId: self.docId()})
-        .success(self.callback)
+        .success(function() {
+          self.callback();
+          // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
+          // The docgen already has code to remove actual document (that's the self.callback() above), just the
+          // "operations" list should be changed. 
+          repository.load(self.appId);
+        })
         .call();
       return false;
     };
@@ -84,7 +90,23 @@
         loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
   }();
 
-
+  function getOperations(docs) {
+    var ops = {};
+    if (docs) {
+      _.each(docs, function(doc) {
+        var op = doc.schema.info.op;
+        if (op) {
+          if (ops[op]) {
+            ops[op] += 1;
+          } else {
+            ops[op] = 1;
+          }
+        }
+      });
+    }
+    return _.map(ops, function(v, k) { return {op: k, count: v}; });
+  }
+  
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -99,6 +121,7 @@
     hasAttachment: ko.observable(false),
     address: ko.observable(),
     verdict: ko.observable(),
+    initialOp: ko.observable(),
     operations: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
@@ -114,6 +137,7 @@
       window.open(url);
       var applicationId = application.id();
 
+      // FIXME: Can't just subscribe repeatedly.
       hub.subscribe("map-initialized", function() {
         if(application.shapes && application.shapes().length > 0) {
           oskariDrawShape(application.shapes()[0]);
@@ -122,6 +146,7 @@
         oskariSetMarker(application.location().x(), application.location().y());
       });
 
+      // FIXME: Can't just subscribe repeatedly.
       hub.subscribe("map-draw-done", function(e) {
         var drawing = "" + e.data.drawing;
         ajax.command("save-application-shape", {id: applicationId, shape: drawing})
@@ -223,7 +248,7 @@
       window.location.hash = "#!/application/" + application.id() + "/" + element.name;
     }
   };
-
+    
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -297,6 +322,10 @@
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
 
+      // Operations:
+      
+      application.operations(getOperations(app.documents));
+      
       // Attachments:
 
       var statuses = {
@@ -310,7 +339,7 @@
       attachments(_.map(app.attachments || [], function(a) {
         a.statusName = statuses[a.state] || "unknown";
         a.latestVersion = _.last(a.versions);
-        if (a.versions && a.versions.length) application.hasAttachment(true);
+        if (a.versions && a.versions.length) { application.hasAttachment(true); }
         return a;
       }));
 
@@ -322,75 +351,15 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
-      applicationMap.clear().add(x, y).center(x, y, 11);
-      inforequestMap.clear().add(x, y).center(x, y, 11);
+      (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
 
-      if(application.shapes && application.shapes().length > 0) {
+      if (application.shapes && application.shapes().length > 0) {
         applicationMap.drawShape(application.shapes()[0]);
         inforequestMap.drawShape(application.shapes()[0]);
       }
 
-      // docgen:
-      var save = function(path, value, callback, data) {
-        ajax
-          .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-          // Server returns empty array (all ok), or array containing an array with three
-          // elements: [key status message]. Here we use just the status.
-          .success(function(e) {
-            var status = (e.results.length === 0) ? "ok" : e.results[0][1];
-            callback(status);
-          })
-          .error(function(e) { error(e); callback("err"); })
-          .fail(function(e) { error(e); callback("err"); })
-          .call();
-      };
-
-      var displayOrder = {
-          "hankkeen-kuvaus": 1,
-          "rakennuspaikka": 2,
-          "hakija": 3,
-          "paasuunnittelija": 4,
-          "suunnittelija": 5,
-          "maksaja": 6,
-          "lisatiedot": 100};
-
-      function getDocumentOrder(doc) {
-        var num = displayOrder[doc.schema.info.name] || 7;
-        return num * 10000000000 + doc.created/1000;
-      }
-
-      function displayDocuments(containerSelector, documents) {
-
-        var sortedDocs = _.sortBy(documents, getDocumentOrder);
-
-        var docgenDiv = $(containerSelector).empty();
-        _.each(sortedDocs, function(doc) {
-          docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, application.id()).element);
-
-          var schema = doc.schema;
-
-          if (schema.info.repeating) {
-            var btn = LUPAPISTE.DOMUtils.makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
-
-            $(btn).click(function() {
-              var self = this;
-              ajax
-                .command("create-doc", {schema: schema.info.name, id: application.id()})
-                .success(function(data) {
-                  var newDocId = data.doc;
-                  var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application.id()).element;
-                  $(self).before(newElem);
-                })
-                .call();
-            });
-            docgenDiv.append(btn);
-          }
-        });
-      }
-
-      var partyDocumentNames = ["hakija", "paasuunnittelija", "suunnittelija", "maksaja"];
-      displayDocuments("#applicationDocgen", _.filter(app.documents, function(doc) {return !_.contains(partyDocumentNames, doc.schema.info.name);}));
-      displayDocuments("#partiesDocgen", _.filter(app.documents, function(doc) {return _.contains(partyDocumentNames, doc.schema.info.name);}));
+      docgen.displayDocuments("#applicationDocgen", removeDocModel, application.id(), _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
+      docgen.displayDocuments("#partiesDocgen",     removeDocModel, application.id(), _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
@@ -445,11 +414,21 @@
     };
   }();
 
-   // tabs
+  // tabs
+  var selectedTab;
+  var tabFlow = false;
+  hub.subscribe("set-debug-tab-flow", function(e) {
+    tabFlow = e.value;
+    $(".tab-content").show(0,function() { selectTab(selectedTab); });
+  });
 
   function openTab(id) {
-    $(".tab-content").hide();
-    $("#application-"+id+"-tab").fadeIn();
+    if(tabFlow) {
+      $('html, body').animate({ scrollTop: $("#application-"+id+"-tab").offset().top}, 100);
+    } else {
+      $(".tab-content").hide();
+      $("#application-"+id+"-tab").fadeIn();
+    }
   }
 
   function markTabActive(id) {
@@ -460,6 +439,7 @@
   function selectTab(tab) {
     markTabActive(tab);
     openTab(tab);
+    selectedTab = tab; // remove after tab-spike
   }
 
   var accordian = function(data, event) { accordion.toggle(event); };

@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-  <section class="page" id="register3">
+  <section class="page container" id="register3">
     <div class="breadcrumb">
-      <a href="#" >Etusivu</a> » Rekisteröinti 3/3
+      <a href="#" data-bind="ltext: 'front-page'"></a> » <span data-bind="ltext: 'register.breadcrum3'"></span>
     </div>
     <div class="container">
-      <h1>Rekisteröidy Lupapisteen käyttäjäksi Vaihe 3/3</h1>
-      <p>Aktivointisähköposti lähetetty osoitteeseen <strong id="activation-email" data-bind="text: email"></strong>, aktivoi käyttäjätunnuksesi klikkaamalla sähköpostissa olevaa aktivointilinkkiä.</p>
+      <h1 data-bind="ltext: 'register.header'">Rekisteröidy Lupapisteen käyttäjäksi Vaihe 3/3</h1>
+      <p data-bind="ltext: 'register.activation-email-info1'">Aktivointisähköposti lähetetty osoitteeseen <strong id="activation-email" data-bind="text: email"></strong></p>
+      <p data-bind="ltext: 'register.activation-email-info2'">Aktivoi käyttäjätunnuksesi klikkaamalla sähköpostissa olevaa aktivointilinkkiä. Näin voimme varmistaa että sähköpostiosoitteesi toimii.</p>
     </div>
   </section>
 </body>

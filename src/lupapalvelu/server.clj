@@ -3,7 +3,7 @@
   (:require [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
             [lupapalvelu.logging]
-            [lupapalvelu.web]
+            [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
             [lupapalvelu.env :as env]
             [lupapalvelu.fixture :as fixture]
@@ -53,27 +53,28 @@
     (:minor *clojure-version*)
     (:incremental *clojure-version*))
   (mongo/connect!)
-  (server/add-middleware headers/sessionId2mdc)
+  (mongo/ensure-indexes)
+  (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
-  (when env/perf-mon-on
+  (server/add-middleware web/anti-csrf)
+  (server/add-middleware web/apikey-authentication)
+  (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init)))
+  (env/in-dev
+    (warn "*** Starting nrepl")
+    (nrepl/start-server :port 9000))
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
+                            :ns 'lupapalvelu.web
                             :jetty-options {:ssl? true
                                             :ssl-port 8443
                                             :keystore "./keystore"
                                             :key-password "lupapiste"}
-                            :ns 'lupapalvelu.web
                             :session-cookie-attrs (:cookie env/config)}))
-  (info "Server running")
-  (env/in-dev
-    (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9000))
-  ; Sensible return value for -main for repl use.
-  "ready")
+  "ok")
 
 (comment
   (-main))

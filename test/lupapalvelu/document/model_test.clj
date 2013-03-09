@@ -64,3 +64,10 @@
  (fact (validation-status [["foo" :warn "bar"]]) => :warn)
  (fact (validation-status [["foo" :warn "bar"] ["foo2" :warn "bar2"]]) => :warn)
  (fact (validation-status [["foo" :warn "bar"] ["foo2" :err "bar2"]]) => :err))
+
+; field validation
+
+(facts "dates"
+  (validate {:type :date} "abba") => [:warn "invalid-date-format"]
+  (validate {:type :date} "") => nil
+  (validate {:type :date} "11.12.2013") => nil)
