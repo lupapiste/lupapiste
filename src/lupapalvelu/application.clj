@@ -87,7 +87,7 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft]}
-  [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
+  [{{:keys [host]} :web :as command}]
   [command]
   (with-application command
     (fn [{id :id}]
@@ -130,7 +130,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
+  [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
       (let [new-state :submitted
