@@ -77,7 +77,7 @@
 
 (defn send-notifications-on-application-state-change [application-id state host]
   (let [application (mongo/by-id :applications application-id)]
-  (let [recipients (get-email-recipients-for-application-roles application)
+  (let [recipients (get-email-recipients-for-application application)
         msg (get-message-for-application-state-change application host)]
   (send-mail-to-recipients recipients
                            (get-email-title application "state-change-email-title")
