@@ -139,11 +139,11 @@
         (m/connect! servers (m/mongo-options))
         (reset! connected true)
         (m/set-default-write-concern! WriteConcern/SAFE)
-        (m/use-db! db)
-        (debug "DB is" (.getName (m/get-db)))
         (when (and username password)
           (m/authenticate (m/get-db db) username (.toCharArray password))
-          (debug "Authenticated to DB as" username))))))
+          (debugf "Authenticated to DB '%s' as '%s'" db username))
+        (m/use-db! db)
+        (debug "DB is" (.getName (m/get-db)))))))
 
 (defn disconnect! []
   (if @connected
