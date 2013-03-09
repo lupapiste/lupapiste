@@ -158,7 +158,7 @@
                            :target  target
                            :created (:created command)
                            :user    (security/summary user)}}})
-      (notifications/send-notifications-on-new-comment host application user text))))
+      (notifications/send-notifications-on-new-comment application user text host))))
 
 (defcommand "assign-to-me"
   {:parameters [:id]

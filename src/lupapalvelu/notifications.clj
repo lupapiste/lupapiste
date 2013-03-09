@@ -18,12 +18,12 @@
 
 (def mail-agent (agent nil)) 
 
-(defn get-conversation-link [host application lang]
+(defn get-application-link [application lang suffix host]
   (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
-    (str host "/" lang "/applicant#!" permit-type-path (:id application) "/conversation")))
+    (str host "/" lang "/applicant#!" permit-type-path (:id application) suffix)))
 
-(defn replace-conversation-link [e host application lang]
-  (enlive/transform e [(keyword (str "#conversation-link-" lang))] (fn [e] (assoc-in e [:attrs :href] (get-conversation-link host application lang)))))
+(defn replace-application-link [e application lang selector suffix host]
+  (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients [recipients title msg]
   (doseq [recipient recipients]
@@ -38,8 +38,8 @@
         e (enlive/html-resource "email-templates/application-new-comment.html")]
     
     (apply str (enlive/emit* (-> e
-                               (replace-conversation-link host application "fi")
-                               (replace-conversation-link host application "sv"))))))
+                               (replace-application-link application "fi" "#conversation-link-" "/conversation" host)
+                               (replace-application-link application "sv" "#conversation-link-" "/conversation" host))))))
 
 (defn get-email-recipients-for-application-roles [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
@@ -47,11 +47,15 @@
 (defn get-email-recipients-for-new-comment [application]
   (get-email-recipients-for-application-roles application))
     
-(defn send-notifications-on-new-comment [host application user-commenting comment-text]
+(defn send-notifications-on-new-comment [application user-commenting comment-text host]
   (if (= :authority (keyword (:role user-commenting)))
     (let [recipients (get-email-recipients-for-new-comment application)
           msg (get-message-for-new-comment application host)]
-      (send-mail-to-recipients recipients (:title application) msg))))
+      (send-mail-to-recipients recipients 
+                               (str (i18n/with-lang "fi" (i18n/loc (str "email-title-prefix"))) 
+                                    (i18n/with-lang "fi" (i18n/loc (str "new-comment-email-title")))
+                                    " - " (:title application)) 
+                               msg))))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
@@ -59,8 +63,8 @@
         e (enlive/html-resource "email-templates/application-state-change.html")]
     
     (apply str (enlive/emit* (-> e
-                               (replace-with-selector host application "fi")
-                               (replace-with-selector host application "sv")
+                               (replace-application-link application "fi" "#application-link-" "" host)
+                               (replace-application-link application "sv" "#application-link-" "" host)
                                (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str "open")))))
                                (enlive/transform [(keyword "#state-sv")] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "open"))))))))))
 
