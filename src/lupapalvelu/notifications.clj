@@ -22,7 +22,7 @@
   (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
     (str host "/" lang "/applicant#!" permit-type-path (:id application) suffix)))
 
-(defn replace-application-link [e application lang selector suffix host]
+(defn replace-application-link [e selector application lang suffix host]
   (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients [recipients title msg]
@@ -44,14 +44,14 @@
         e (enlive/html-resource "email-templates/application-new-comment.html")]
     
     (apply str (enlive/emit* (-> e
-                               (replace-application-link application "fi" "#conversation-link-" "/conversation" host)
-                               (replace-application-link application "sv" "#conversation-link-" "/conversation" host))))))
+                               (replace-application-link "#conversation-link-" application "fi" "/conversation" host)
+                               (replace-application-link "#conversation-link-" application "sv" "/conversation" host))))))
 
-(defn get-email-recipients-for-application-roles [application]
+(defn get-email-recipients-for-application [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
 
 (defn get-email-recipients-for-new-comment [application]
-  (get-email-recipients-for-application-roles application))
+  (get-email-recipients-for-application application))
 
 (defn send-notifications-on-new-comment [application user-commenting comment-text host]
   (if (= :authority (keyword (:role user-commenting)))
@@ -67,13 +67,13 @@
         e (enlive/html-resource "email-templates/application-state-change.html")]
     
     (apply str (enlive/emit* (-> e
-                               (replace-application-link application "fi" "#application-link-" "" host)
-                               (replace-application-link application "sv" "#application-link-" "" host)
+                               (replace-application-link "#application-link-" application "fi" "" host)
+                               (replace-application-link "#application-link-" application "sv" "" host)
                                (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
                                (enlive/transform [(keyword "#state-sv")] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application)))))))))))
 
 (defn get-email-recipients-for-application-state-change [application]
-  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
+  (get-email-recipients-for-application application))
 
 (defn send-notifications-on-application-state-change [application-id state host]
   (let [application (mongo/by-id :applications application-id)]
