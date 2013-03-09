@@ -91,11 +91,12 @@
   [command]
   (with-application command
     (fn [{id :id}]
+      (let [new-state :open]
       (mongo/update-by-id :applications id
         {$set {:modified (:created command)
-               :state :open
+               :state new-state
                :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change id :open host))))
+      (notifications/send-notifications-on-application-state-change id new-state host)))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
@@ -112,27 +113,33 @@
    :roles      [:authority]
    :authority  true
    :states     [:submitted]}
-  [command]
+  [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (if (nil? (:authority application))
-        (executed "assign-to-me" command))
-      (rl-mapping/get-application-as-krysp application)
-      (mongo/update
-        :applications {:_id (:id application) :state :submitted}
-        {$set {:state :sent}}))))
+      (let [new-state :submitted
+            application-id (:id application)]
+        (if (nil? (:authority application))
+          (executed "assign-to-me" command))
+        (rl-mapping/get-application-as-krysp application)
+        (mongo/update
+          :applications {:_id (:id application) :state new-state}
+          {$set {:state :sent}})
+        (notifications/send-notifications-on-application-state-change application-id new-state host)))))
 
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [command]
+  [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
   (with-application command
     (fn [application]
-      (mongo/update
-        :applications {:_id (:id application)}
-          {$set {:state :submitted
-                 :submitted (:created command) }}))))
+      (let [new-state :submitted
+            application-id (:id application)]
+        (mongo/update
+          :applications {:_id application-id}
+          {$set {:state new-state
+                 :submitted (:created command) }})
+        (notifications/send-notifications-on-application-state-change application-id new-state host)))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]

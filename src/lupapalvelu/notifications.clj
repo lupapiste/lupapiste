@@ -32,10 +32,11 @@
                              (info "email was sent successfully")
                              (error "email could not be delivered."))))))
 
-(defn get-email-title [title-key title-suffix]
-  (str (i18n/with-lang "fi" (i18n/loc (str "email-title-prefix"))) 
-       (i18n/with-lang "fi" (i18n/loc (str title-key)))
-       " - " title-suffix))
+(defn get-email-title [application title-key]
+  (str (i18n/with-lang "fi" (i18n/loc (str "email-title-prefix")))
+       (:title application)
+       (i18n/with-lang "fi" (i18n/loc (str "email-title-delimiter")))
+       (i18n/with-lang "fi" (i18n/loc (str title-key)))))
 
 ; new comment
 (defn get-message-for-new-comment [application host]
@@ -57,7 +58,7 @@
     (let [recipients (get-email-recipients-for-new-comment application)
           msg (get-message-for-new-comment application host)]
       (send-mail-to-recipients recipients 
-                               (get-email-title "new-comment-email-title" (:title application))
+                               (get-email-title application "new-comment-email-title")
                                msg))))
 
 ; application opened
@@ -78,6 +79,6 @@
   (let [application (mongo/by-id :applications application-id)]
   (let [recipients (get-email-recipients-for-application-roles application)
         msg (get-message-for-application-state-change application host)]
-  (send-mail-to-recipients recipients 
-                           (get-email-title "state-change-email-title" (:title application))
+  (send-mail-to-recipients recipients
+                           (get-email-title application "state-change-email-title")
                            msg))))
