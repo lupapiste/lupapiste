@@ -32,7 +32,7 @@
              (mongo/by-id :users "b") => {:email "b@foo.com"}
              (mongo/by-id :users "c") => {:email "c@foo.com"}))
 
-(fact "Email for application state change is like"
+(fact "Email for application open is like"
    (get-message-for-application-state-change { :id 123 :state "open"} "http://localhost:8000") => 
 "<html>
 <body>
@@ -45,3 +45,6 @@
   <p>V\u00E4nliga h\u00E4lsningar, Lupapiste</p>
 </body>\n
 </html>")
+
+(fact "Email for application submitted contains the state string."
+   (re-find #"Vireill\u00E4" (get-message-for-application-state-change { :state "submitted"} "")) => truthy)

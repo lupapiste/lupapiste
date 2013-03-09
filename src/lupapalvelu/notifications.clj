@@ -69,8 +69,8 @@
     (apply str (enlive/emit* (-> e
                                (replace-application-link application "fi" "#application-link-" "" host)
                                (replace-application-link application "sv" "#application-link-" "" host)
-                               (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str "open")))))
-                               (enlive/transform [(keyword "#state-sv")] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "open"))))))))))
+                               (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
+                               (enlive/transform [(keyword "#state-sv")] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application)))))))))))
 
 (defn get-email-recipients-for-application-state-change [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
