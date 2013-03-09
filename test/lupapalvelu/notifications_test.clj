@@ -17,11 +17,11 @@
 <body>
   <p>Hei,</p>
   <p>Uusi kommentti lisätty <a id=\"conversation-link-fi\" href=\"http://localhost:8000/fi/applicant#!/application/123/conversation\">keskusteluun</a>.</p>
-  <p>Terveisin, Lupapiste</p>
+  <p>Yst\u00E4v\u00E4llisin terveisin, Lupapiste</p>
   <hr />
   <p>Hej,</p>
   <p>Ett nytt komment lagt <a id=\"conversation-link-sv\" href=\"http://localhost:8000/sv/applicant#!/application/123/conversation\">till diskussionet</a>.</p>
-  <p>Grattis, Lupapiste</p>
+  <p>V\u00E4nliga h\u00E4lsningar, Lupapiste</p>
 </body>\n
 </html>")
 
@@ -37,11 +37,11 @@
 "<html>
 <body>
   <p>Hei,</p>
-  <p>Hakemuksen tila on nyt <span id=\"state-fi\">Valmisteilla</span>: <a href=\"http://localhost:8000/fi/applicant#!/application/123\" id=\"application-link-fi\">linkki</a></p>
-  <p>Terveisin, Lupapiste</p>
+  <p><a href=\"http://localhost:8000/fi/applicant#!/application/123\" id=\"application-link-fi\">Hakemuksen</a> tila on nyt: <span id=\"state-fi\">Valmisteilla</span></p>
+  <p>Yst\u00E4v\u00E4llisin terveisin, Lupapiste</p>
   <hr />
   <p>Hej,</p>
-  <p>Tillståndet förändrat till <span id=\"state-sv\">Inför</span>: <a href=\"http://localhost:8000/sv/applicant#!/application/123\" id=\"application-link-sv\">link</a></p>
-  <p>Grattis, Lupapiste</p>
+  <p>Tillståndet av <a href=\"http://localhost:8000/sv/applicant#!/application/123\" id=\"application-link-sv\">ansökan</a> förändrats till: <span id=\"state-sv\">Inför</span></p>
+  <p>V\u00E4nliga h\u00E4lsningar, Lupapiste</p>
 </body>\n
 </html>")
