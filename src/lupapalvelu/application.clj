@@ -102,11 +102,16 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft :open :submitted]}
+  [{{:keys [host]} :web :as command}]
   [command]
-  (mongo/update-by-id :applications (-> command :data :id)
-                      {$set {:modified (:created command)
-                             :state :canceled}})
-  (ok))
+  (with-application command
+    (fn [{id :id}]
+      (let [new-state :canceled]
+        (mongo/update-by-id :applications (-> command :data :id)
+                            {$set {:modified (:created command)
+                                   :state new-state}})
+        (notifications/send-notifications-on-application-state-change id new-state host)
+        (ok)))))
 
 (defcommand "approve-application"
   {:parameters [:id]
