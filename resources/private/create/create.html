@@ -3,26 +3,16 @@
 <body>
   <section class="page container" id="create">
 
-    <div class="breadcrumb">
-      <a href="#!/applications" data-bind="ltext: 'request.requests'"></a>
-      /
-      <span data-bind="ltext: 'request.new'"></span>
-    </div>
-
     <h1 data-bind="ltext: 'newRequest.topic'"></h1>
-    <section id="create-part-1" class="accordion">
-      <h2 data-bind="ltext: 'newRequest.title'" onclick="accordion.click(this);">
-        <span class="font-icon icon-expanded"></span>
-      </h2>
-      <div class="accordion_content expanded">
-        <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-        <div id="create-map" class="map map-large create-application-map" style="width: 100%; height: 600px;">
+    <h2 data-bind="ltext: 'newRequest.title'"></h2>
+    <p data-bind="ltext: 'newRequest.locationInfo'"></p>
+    <div class="create-application-search-box">
+      <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search"/>
+      <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary map-search-button"></button>
+    </div>
+    <div id="create-map" class="map map-large create-application-map" style="width: 100%; height: 600px;">
           <div class="create-application-search-box-container">
-            <div class="create-application-search-box">
-              <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search"/>
-              <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary map-search-button"></button>
-            </div>
-          </div>
+
           <div class="map-select-info">
             <h3 data-bind="ltext: 'newRequest.chosenLocation'">Valittu sijainti:</h3>
             <div class="form-entry">
@@ -61,9 +51,7 @@
             </button>
           </div>
         </div>
-      </div>
-
-    </div>
+  </section>
 
     <!-- Phase 2: -->
 
