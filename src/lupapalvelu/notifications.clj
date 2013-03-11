@@ -16,27 +16,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.components.core :as c]))
 
-(def mail-default-styles
-"
-html {
-  background-color: #f0f0f0;
-}
-body {
-  font-family: Dosis,sans-serif;
-  font-size: 14px;
-  padding: 18px;
-  margin: 12px;
-  background-color: #ffffff;
-}
-
-h1 {
-  font-size: 16px;
-}
-
-p {
-  font-size: 14px;
-}")
-
 (def mail-agent (agent nil)) 
 
 (defn get-application-link [application lang suffix host]
@@ -66,11 +45,9 @@ p {
 (defn get-message-for-new-comment [application host]
   (let [e (enlive/html-resource "email-templates/application-new-comment.html")]
     (apply str (enlive/emit* (-> e
-                               (replace-style mail-default-styles)
+                               (replace-style (slurp (io/resource "email-templates/styles.css")))
                                (replace-application-link "#conversation-link-" application "fi" "/conversation" host)
                                (replace-application-link "#conversation-link-" application "sv" "/conversation" host))))))
-
-(println (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000"))
 
 (defn get-email-recipients-for-application [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
