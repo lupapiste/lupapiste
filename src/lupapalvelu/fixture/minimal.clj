@@ -250,7 +250,7 @@
 		 :role :authority
 		 :municipality "047"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "enontekio"
+		 :lastName "Enontekiö"
 		 :username "rakennustarkastaja@enontekio.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -261,7 +261,7 @@
 		 :role :authority
 		 :municipality "078"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "hanko"
+		 :lastName "Hanko"
 		 :username "rakennustarkastaja@hanko.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -272,7 +272,7 @@
 		 :role :authority
 		 :municipality "079"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "harjavalta"
+		 :lastName "Harjavalta"
 		 :username "rakennustarkastaja@harjavalta.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -283,7 +283,7 @@
 		 :role :authority
 		 :municipality "090"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "heinavesi"
+		 :lastName "Heinävesi"
 		 :username "rakennustarkastaja@heinavesi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -294,7 +294,7 @@
 		 :role :authority
 		 :municipality "106"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "hyvinkaa"
+		 :lastName "Hyvinkää"
 		 :username "rakennustarkastaja@hyvinkaa.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -305,7 +305,7 @@
 		 :role :authority
 		 :municipality "109"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "hameenlinna"
+		 :lastName "Hämeenlinna"
 		 :username "rakennustarkastaja@hameenlinna.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -316,7 +316,7 @@
 		 :role :authority
 		 :municipality "165"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "janakkala"
+		 :lastName "Janakkala"
 		 :username "rakennustarkastaja@janakkala.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -327,7 +327,7 @@
 		 :role :authority
 		 :municipality "205"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "kajaani"
+		 :lastName "Kajaani"
 		 :username "rakennustarkastaja@kajaani.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -338,7 +338,7 @@
 		 :role :authority
 		 :municipality "244"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "kempele"
+		 :lastName "Kempele"
 		 :username "rakennustarkastaja@kempele.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -349,7 +349,7 @@
 		 :role :authority
 		 :municipality "257"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "kirkkonummi"
+		 :lastName "Kirkkonummi"
 		 :username "rakennustarkastaja@kirkkonummi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -360,7 +360,7 @@
 		 :role :authority
 		 :municipality "297"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "kuopio"
+		 :lastName "Kuopio"
 		 :username "rakennustarkastaja@kuopio.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -371,7 +371,7 @@
 		 :role :authority
 		 :municipality "491"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "mikkeli"
+		 :lastName "Mikkeli"
 		 :username "rakennustarkastaja@mikkeli.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -382,7 +382,7 @@
 		 :role :authority
 		 :municipality "499"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "mustasaari"
+		 :lastName "Mustasaari"
 		 :username "rakennustarkastaja@mustasaari.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -393,7 +393,7 @@
 		 :role :authority
 		 :municipality "535"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "nivala"
+		 :lastName "Nivala"
 		 :username "rakennustarkastaja@nivala.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -404,7 +404,7 @@
 		 :role :authority
 		 :municipality "050"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "eura"
+		 :lastName "Eura"
 		 :username "rakennustarkastaja@eura.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -415,7 +415,7 @@
 		 :role :authority
 		 :municipality "319"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "koylio"
+		 :lastName "Köyliö"
 		 :username "rakennustarkastaja@koylio.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -426,7 +426,7 @@
 		 :role :authority
 		 :municipality "783"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "sakyla"
+		 :lastName "Säkylä"
 		 :username "rakennustarkastaja@sakyla.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -448,7 +448,7 @@
 		 :role :authority
 		 :municipality "734"
 		 :firstName "Rakennustarkastaja"
-		 :lastName "salo"
+		 :lastName "Salo"
 		 :username "rakennustarkastaja@salo.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
