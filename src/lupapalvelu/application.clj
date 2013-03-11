@@ -371,10 +371,11 @@
 ;
 
 (defquery "applications-count"
-  {:params [:kind]}
+  {:parameters [:kind]}
   [{user :user {kind :kind} :data}]
   (let [base-query (domain/application-query-for user)
-        query (if kind
-                (assoc base-query :infoRequest (= "inforequests" kind))
-                base-query)]
+        query (condp = kind
+                "inforequests" (assoc base-query :infoRequest true)
+                "applications" (assoc base-query :infoRequest false)
+                "both"         base-query)]
     (ok :data (mongo/count :applications query))))
