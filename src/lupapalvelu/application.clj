@@ -11,6 +11,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
@@ -86,50 +87,64 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft]}
+  [{{:keys [host]} :web :as command}]
   [command]
   (with-application command
     (fn [{id :id}]
+      (let [new-state :open]
       (mongo/update-by-id :applications id
         {$set {:modified (:created command)
-               :state :open
-               :opened (:created command)}}))))
+               :state new-state
+               :opened (:created command)}})
+      (notifications/send-notifications-on-application-state-change id host)))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft :open :submitted]}
+  [{{:keys [host]} :web :as command}]
   [command]
-  (mongo/update-by-id :applications (-> command :data :id)
-                      {$set {:modified (:created command)
-                             :state :canceled}})
-  (ok))
+  (with-application command
+    (fn [{id :id}]
+      (let [new-state :canceled]
+        (mongo/update-by-id :applications (-> command :data :id)
+                            {$set {:modified (:created command)
+                                   :state new-state}})
+        (notifications/send-notifications-on-application-state-change id host)
+        (ok)))))
 
 (defcommand "approve-application"
   {:parameters [:id]
    :roles      [:authority]
    :authority  true
    :states     [:submitted]}
-  [command]
+  [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (if (nil? (:authority application))
-        (executed "assign-to-me" command))
-      (rl-mapping/get-application-as-krysp application)
-      (mongo/update
-        :applications {:_id (:id application) :state :submitted}
-        {$set {:state :sent}}))))
+      (let [new-state :submitted
+            application-id (:id application)]
+        (if (nil? (:authority application))
+          (executed "assign-to-me" command))
+        (rl-mapping/get-application-as-krysp application)
+        (mongo/update
+          :applications {:_id (:id application) :state new-state}
+          {$set {:state :sent}})
+        (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [command]
+  [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (mongo/update
-        :applications {:_id (:id application)}
-          {$set {:state :submitted
-                 :submitted (:created command) }}))))
+      (let [new-state :submitted
+            application-id (:id application)]
+        (mongo/update
+          :applications {:_id application-id}
+          {$set {:state new-state
+                 :submitted (:created command) }})
+        (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
@@ -169,7 +184,9 @@
 
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
-        make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
+        make                  (fn [schema-name] {:id (mongo/create-id)
+                                                 :schema (schemas/schemas schema-name)
+                                                 :created created
                                                  :body (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info))
                                                          {})})
@@ -202,28 +219,28 @@
             owner         (role user :owner :type :owner)
             op            (keyword (:operation data))
             info-request? (if (:infoRequest data) true false)
+            state         (if (or info-request? (= :authority user-role)) :open :draft)
             make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
-        (mongo/insert :applications
-                      {:id            id
-                       :created       created
-                       :opened        (when (= :authority user-role) created)
-                       :modified      created
-                       :infoRequest   info-request?
-                       :state         (if (or info-request? (= :authority user-role)) :open :draft)
-                       :municipality  (:municipality data)
-                       :location      {:x (->double (:x data)) :y (->double (:y data))}
-                       :address       (:address data)
-                       :propertyId    (:propertyId data)
-                       :title         (:address data)
-                       :auth          [owner]
-                       :operations    [{:operation op :created created}]
-                       :documents     (if info-request? [] (make-documents user created nil op))
-                       :attachments   (if info-request? [] (make-attachments created op))
-                       :allowedAttachmentTypes (if info-request?
-                                                 [[:muut [:muu]]]
-                                                 (partition 2 attachment/attachment-types))
-                       :comments      (map make-comment (:messages data))
-                       :permitType    (keyword (:permitType data))})
+        (mongo/insert :applications {:id            id
+                                     :created       created
+                                     :opened        (when (= state :open) created)
+                                     :modified      created
+                                     :infoRequest   info-request?
+                                     :initialOp     op
+                                     :state         state
+                                     :municipality  (:municipality data)
+                                     :location      {:x (->double (:x data)) :y (->double (:y data))}
+                                     :address       (:address data)
+                                     :propertyId    (:propertyId data)
+                                     :title         (:address data)
+                                     :auth          [owner]
+                                     :documents     (if info-request? [] (make-documents user created nil op))
+                                     :attachments   (if info-request? [] (make-attachments created op))
+                                     :allowedAttachmentTypes (if info-request?
+                                                               [[:muut [:muu]]]
+                                                               (partition 2 attachment/attachment-types))
+                                     :comments      (map make-comment (:messages data))
+                                     :permitType    (keyword (:permitType data))})
         (ok :id id))
       (fail :error.unauthorized))))
 
@@ -239,21 +256,20 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$push {:operations {:operation op :created created}}
-                                              $pushAll {:documents new-docs}
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
                                               $set {:modified created}})
         (ok)))))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open]}
+   :states     [:draft :open :answered]}
   [command]
   (with-application command
     (fn [inforequest]
       (let [id       (get-in command [:data :id])
             created  (:created command)
-            op       (-> inforequest :operations first :operation keyword)]
+            op       (keyword (:initialOp inforequest))]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
@@ -365,3 +381,17 @@
   {:parameters [:params]}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
+
+;
+; Query that returns number of applications or info-requests user has:
+;
+
+(defquery "applications-count"
+  {:parameters [:kind]}
+  [{user :user {kind :kind} :data}]
+  (let [base-query (domain/application-query-for user)
+        query (condp = kind
+                "inforequests" (assoc base-query :infoRequest true)
+                "applications" (assoc base-query :infoRequest false)
+                "both"         base-query)]
+    (ok :data (mongo/count :applications query))))

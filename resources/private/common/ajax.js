@@ -54,7 +54,7 @@ var ajax = (function() {
     };
 
     self.params = function(data) {
-     if (data) { _.each(data, function(v, k) { self.param(k, v); }); }
+      if (data) { _.each(data, function(v, k) { self.param(k, v); }); }
       return self;
     };
 

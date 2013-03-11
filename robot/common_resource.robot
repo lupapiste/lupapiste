@@ -73,6 +73,13 @@ Wait until
 
 Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
+
+Kill dev-debug
+  Execute Javascript  $(".dev-debug").hide();
+
+Show dev-debug
+  Execute Javascript  $(".dev-debug").show();
+
 #
 # Navigation
 #
@@ -126,6 +133,7 @@ User logs in
   [Arguments]  ${login}  ${password}  ${username}
   Login  ${login}  ${password}
   User should be logged in  ${username}
+  Kill dev-debug
 
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
@@ -343,8 +351,10 @@ Add comment
 #
 
 Apply minimal fixture now
+  Show dev-debug
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
+  Kill dev-debug
 
 #
 # Application state check:

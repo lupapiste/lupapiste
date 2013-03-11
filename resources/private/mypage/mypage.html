@@ -1,7 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-  <section class="page" id="mypage">
+  <section class="page container" id="mypage">
+
+    
+
+    <form id="pw-form">
+
+      <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
+
+      <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
+      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
+
+      <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
+      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
+      <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
+
+      <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
+      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
+      <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
+
+      <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
+      <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
+      <span data-bind="visible: error() == null && saved, ltext: 'mypage.passwordChanged'" style="font-weight: bold; color: green;" data-test-id="change-my-passwor-ok"></span>
+      <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
+
+      <br/>
+      <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;"></a>
+    </form>
 
     <form id="own-info-form">
 
@@ -32,30 +58,6 @@
       <span data-bind="visible: error() == null && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
 
-    </form>
-
-    <form id="pw-form">
-
-      <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
-
-      <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
-      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
-
-      <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
-      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
-      <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
-
-      <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
-      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
-      <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
-
-      <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
-      <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
-      <span data-bind="visible: error() == null && saved, ltext: 'mypage.passwordChanged'" style="font-weight: bold; color: green;" data-test-id="change-my-passwor-ok"></span>
-      <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
-
-      <br/>
-      <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;"></a>
     </form>
   </section>
 </body>

@@ -8,6 +8,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
@@ -27,12 +28,13 @@
   (format
     (str
       "Tervehdys,\n\n%s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/fi/applicant#!/application/%s\n\n"
+      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/fi/applicant?hashbang=!/application/%s#!/application/%s\n\n"
       "Yst\u00E4v\u00E4llisin terveisin,\n\n"
       "Lupapiste.fi")
     (:firstName user)
     (:lastName user)
     host
+    id
     id))
 
 (defcommand "invite"
@@ -66,11 +68,13 @@
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
               (future
-                (info "sending email to" email)
-                (if (not (= (suffix email "@") "example.com"))
-                  (if (email/send-email email (:title application) (invite-body user application-id host))
-                    (info "email was sent successfully")
-                    (error "email could not be delivered."))
+                (if (not= (suffix email "@") "example.com")
+                  (try
+                    (info "sending email to" email)
+                    (if (email/send-email email (:title application) (invite-body user application-id host))
+                      (info "email was sent successfully")
+                      (error "email could not be delivered."))
+                    (catch Exception e (info e (.getMessage e))))
                   (info "we are not sending emails to @example.com domain.")))
               nil)))))))
 
@@ -144,7 +148,7 @@
 (defcommand "add-comment"
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
-  [{{:keys [text target]} :data user :user :as command}]
+  [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
   (with-application command
     (fn [application]
       (if (= "draft" (:state application))
@@ -156,7 +160,8 @@
          $push {:comments {:text    text
                            :target  target
                            :created (:created command)
-                           :user    (security/summary user)}}}))))
+                           :user    (security/summary user)}}})
+      (notifications/send-notifications-on-new-comment application user text host))))
 
 (defcommand "assign-to-me"
   {:parameters [:id]

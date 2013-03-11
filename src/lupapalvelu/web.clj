@@ -22,7 +22,9 @@
             [lupapalvelu.municipality]
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
+            [sade.status :as status]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery]))
@@ -56,7 +58,7 @@
   (get-in request [:cookies "ring-session" :value]))
 
 (defn client-ip [request]
-  (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
+  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
 (defn web-stuff []
   (let [request (request/ring-request)]
@@ -79,13 +81,15 @@
 (defn nobody [] false)
 
 ;;
-;; API:
+;; Status
 ;;
+
+(status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
+(status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
+(status/defstatus :mode  env/mode)
 
 (defjson "/api/buildinfo" []
   (ok :data (assoc env/buildinfo :server-mode env/mode)))
-
-(defjson "/api/ping" [] (ok))
 
 ;;
 ;; Commands
@@ -148,15 +152,26 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
-  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
+(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
+
+(defn- redirect-to-frontpage [lang]
+  (resp/redirect (str "/" (name lang) "/welcome#")))
+
+(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when (and hashbang (local? hashbang))
+    (session/put! :hashbang hashbang))
+  (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
 ;;
 ;; Login/logout:
 ;;
 
 (defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" lang "/welcome")))
+  (resp/redirect (str "/" (name lang) "/welcome")))
 
 (defn- logout! []
   (session/clear!)
@@ -184,6 +199,9 @@
 ;;
 ;; FROM SADE
 ;;
+
+(defjson "/system/ping" [] {:ok true})
+(defjson "/system/status" [] (status/status))
 
 (defpage "/security/activate/:activation-key" {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
@@ -301,5 +319,9 @@
 
 (env/in-dev
   (defjson "/api/spy" []
-    (dissoc (request/ring-request) :body)))
+    (dissoc (request/ring-request) :body))
 
+  (defpage "/api/by-id/:collection/:id" {collection :collection id :id}
+    (if-let [r (mongo/by-id collection id)]
+      (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"})))))
