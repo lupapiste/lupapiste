@@ -23,15 +23,13 @@
     var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
 
     self.goPhase2 = function() {
-      $("#create-part-1")
-        .find("h2")
-        .accordionClose(open("#create-part-2"));
+      $("#create-part-1").hide();
+      $("#create-part-2").show();
     };
 
     self.goPhase3 = function() {
-      $("#create-part-2")
-        .find("h2")
-        .accordionClose(open("#create-part-3"));
+      $("#create-part-2").hide();
+      $("#create-part-3").show();
     };
 
     self.municipalities = ko.observableArray([]);
@@ -117,6 +115,7 @@
     // Search activation:
 
     self.searchNow = function() {
+      $('.selected-location').show();
       self
         .resetXY()
         .setAddress(null)

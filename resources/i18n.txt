@@ -18,6 +18,7 @@ newRequest.topic: Uusi hanke
 attachment.return: Palaa hakemukseen
 mypage.null:
 
+
 uusiRakennus.rakennuksenOmistajat.henkilo.turvakieltoKytkin: Turvakielto
 uusiRakennus.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: yksityinen maatalousyrittäjä
 uusiRakennus.rakennuksenOmistajat.omistajalaji.muu yksityinen henkilö tai perikunta: muu yksityinen henkilö tai perikunta
@@ -244,3 +245,6 @@ applications.empty.new-application: Luo uusi lupahakemus
 applications.empty.inforequests-title: Neuvontapyynnöt
 applications.empty.inforequests-desc: Sinulla ei tällä hetkellä ole järjestelmässä aktiivisia neuvontapyyntöjä. Neuvontapyynnöt ovat helppo tapa selvittää kuntasi viranomaisilta rakentamiseen liittyviä lupa-asioita. Saat viranomaisen vastauksesta tiedon suoraan sähköpostiisi. Neuvontapyynnön perusteella voit aloittaa myös varsinaisen luvan hakemisen. Voit luoda neuvontapyynnön klikkaamalla alla olevaa nappia.
 applications.empty.new-request: Luo uusi neuvontapyyntö
+
+create.search-map: Hae kartalta
+create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko kartalta varmasti valittu oikea kiinteistö? Ovatko alle haetut tiedot oikeat? Kun olet tarkistanut tiedot, paina "Jatka".
