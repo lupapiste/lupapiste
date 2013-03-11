@@ -233,7 +233,17 @@
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
     :role  "applicant"}
-   
+   {:id "50ac77ecd2e6c2ea6e799909"
+    :email "rakennustarkastaja@tampere.fi"
+    :enabled true
+    :role :authority
+    :municipality "837"
+    :firstName "Rakennustarkastaja"
+    :lastName "Tampere"
+    :username "rakennustarkastaja@tampere.fi"
+    :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+              :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+              :apikey "50ac77ecd2e6c2ea6e799909"}}
 		{:id "50ac77ecd2e6c2ea6e799910"
 		 :email "rakennustarkastaja@enontekio.fi"
 		 :enabled true
@@ -498,9 +508,9 @@
    :username "hakija4@testi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
-		           :apikey "50ac77ecd2e6c2ea6e799931"}
+		           :apikey "50ac77ecd2e6c2ea6e799932"}
    :phone "050123456"
-   :email "hakija2@testi.fi"
+   :email "hakija4@testi.fi"
    :personId "150604-0004"
    :role "applicant"
    :id "5073c0a1c2e6c470aef88814"
