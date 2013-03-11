@@ -450,7 +450,7 @@
    :username "hakija@testi.fi"
    :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
              :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
-		         :apikey "50ac77ecd2e6c2ea6e799928"}
+		         :apikey "50ac77ecd2e6c2ea6e799929"}
    :phone "050123456"
    :email "hakija@testi.fi"
    :personId "150601-0001"
@@ -466,7 +466,7 @@
    :username "hakija2@testi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
-		           :apikey "50ac77ecd2e6c2ea6e799928"}
+		           :apikey "50ac77ecd2e6c2ea6e799930"}
    :phone "050123456"
    :email "hakija2@testi.fi"
    :personId "150602-0002"
@@ -482,7 +482,7 @@
    :username "hakija3@testi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
-		           :apikey "50ac77ecd2e6c2ea6e799928"}
+		           :apikey "50ac77ecd2e6c2ea6e799931"}
    :phone "050123456"
    :email "hakija3@testi.fi"
    :personId "150603-0003"
@@ -498,7 +498,7 @@
    :username "hakija4@testi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
-		           :apikey "50ac77ecd2e6c2ea6e799928"}
+		           :apikey "50ac77ecd2e6c2ea6e799931"}
    :phone "050123456"
    :email "hakija2@testi.fi"
    :personId "150604-0004"
@@ -514,7 +514,7 @@
    :username "hakija5@testi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
-		           :apikey "50ac77ecd2e6c2ea6e799928"}
+		           :apikey "50ac77ecd2e6c2ea6e799933"}
    :phone "050123456"
    :email "hakija5@testi.fi"
    :personId "150605-0005"
@@ -530,7 +530,7 @@
    :username "hakija6@testi.fi"
 		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
 		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
-		           :apikey "50ac77ecd2e6c2ea6e799928"}
+		           :apikey "50ac77ecd2e6c2ea6e799934"}
    :phone "050123456"
    :email "hakija6@testi.fi"
    :personId "150606-0006"
