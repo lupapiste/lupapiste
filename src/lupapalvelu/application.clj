@@ -204,14 +204,15 @@
             owner         (role user :owner :type :owner)
             op            (keyword (:operation data))
             info-request? (if (:infoRequest data) true false)
+            state         (if (or info-request? (= :authority user-role)) :open :draft)
             make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
         (mongo/insert :applications {:id            id
                                      :created       created
-                                     :opened        (when (= :authority user-role) created)
+                                     :opened        (when (= state :open) created)
                                      :modified      created
                                      :infoRequest   info-request?
                                      :initialOp     op
-                                     :state         (if (or info-request? (= :authority user-role)) :open :draft)
+                                     :state         state
                                      :municipality  (:municipality data)
                                      :location      {:x (->double (:x data)) :y (->double (:y data))}
                                      :address       (:address data)
@@ -247,7 +248,7 @@
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open]}
+   :states     [:draft :open :answered]}
   [command]
   (with-application command
     (fn [inforequest]
