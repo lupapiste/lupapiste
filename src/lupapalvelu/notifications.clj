@@ -43,6 +43,9 @@ p {
   (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
     (str host "/" lang "/applicant#!" permit-type-path (:id application) suffix)))
 
+(defn replace-style [e style]
+  (enlive/transform e [:style] (enlive/content style)))
+
 (defn replace-application-link [e selector application lang suffix host]
   (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
@@ -61,10 +64,13 @@ p {
 
 ; new comment
 (defn get-message-for-new-comment [application host]
-  (let [e (enlive/html-resource "email-templates/application-new-comment.html")]    
+  (let [e (enlive/html-resource "email-templates/application-new-comment.html")]
     (apply str (enlive/emit* (-> e
+                               (replace-style mail-default-styles)
                                (replace-application-link "#conversation-link-" application "fi" "/conversation" host)
                                (replace-application-link "#conversation-link-" application "sv" "/conversation" host))))))
+
+(println (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000"))
 
 (defn get-email-recipients-for-application [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
