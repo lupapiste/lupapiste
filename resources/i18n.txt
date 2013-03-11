@@ -235,3 +235,12 @@ purku.luokitus.paloluokka._group_label: Paloluokka
 
 rakennuksen-muuttaminen.lammitys.lammonlahde.kiviihiili koksi tms: Kivihiili, koksi tms.
 purku.lammitys.lammonlahde.kiviihiili koksi tms: Kivihiili, koksi tms.
+
+applications.empty.title: Tervetuloa Lupapisteeseen!
+applications.empty.desc: Lupapiste on uudenlainen sähköinen palvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa- ja ilmoitusasiansa vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa. Lupapiste toimii yhteisenä työtilana koko hankkeesi ajan. Alkaen luvantarpeen selvityksistä ja ensimmäisistä luonnoksista aina hankkeesi valmistumiseen asti.
+applications.empty.applications-title: Lupahakemukset
+applications.empty.applications-desc: Sinulla ei tällä hetkellä ole järjestelmässä aktiivisia lupahakemuksia. Lupapisteessä hoidat helposti sekä luvan hakemisen että ilmoitukset. Lupapiste auttaa sinut alkuun tarvittavien suunnitelmien ja lomakkeiden kanssa. Voit luoda lupahakemuksen klikkaamalla alla olevaa nappia.
+applications.empty.new-application: Luo uusi lupahakemus
+applications.empty.inforequests-title: Neuvontapyynnöt
+applications.empty.inforequests-desc: Sinulla ei tällä hetkellä ole järjestelmässä aktiivisia neuvontapyyntöjä. Neuvontapyynnöt ovat helppo tapa selvittää kuntasi viranomaisilta rakentamiseen liittyviä lupa-asioita. Saat viranomaisen vastauksesta tiedon suoraan sähköpostiisi. Neuvontapyynnön perusteella voit aloittaa myös varsinaisen luvan hakemisen. Voit luoda neuvontapyynnön klikkaamalla alla olevaa nappia.
+applications.empty.new-request: Luo uusi neuvontapyyntö

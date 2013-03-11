@@ -8,9 +8,8 @@
             [monger.db :as db]
             [monger.gridfs :as gfs])
   (:import [org.bson.types ObjectId]
+           [com.mongodb WriteConcern]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
-
-(def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
 
 ;;
 ;; Utils
@@ -119,19 +118,39 @@
 ;; Bootstrappin'
 ;;
 
+(def server-list
+  (let [servers (vals (get-in env/config [:mongodb :servers]))]
+    (map #(apply m/server-address [(:host %) (:port %)]) servers)))
+
 (def connected (atom false))
 
 (defn connect!
   ([]
-    (connect! mongouri))
-  ([uri]
+    (let [conf (:mongodb env/config)
+          db   (:dbname conf)
+          user (-> conf :credentials :username)
+          pw   (-> conf :credentials :password)]
+      (connect! server-list db user pw)))
+  ([servers db username password]
     (if @connected
       (debug "Already connected!")
       (do
-        (debug "Connecting to DB:" uri)
-        (m/connect-via-uri! uri)
-        (debug "DB is" (.getName (m/get-db)))
-        (reset! connected true)))))
+        (debug "Connecting to DB:" servers)
+        (m/connect! servers (m/mongo-options))
+        (reset! connected true)
+        (m/set-default-write-concern! WriteConcern/SAFE)
+        (when (and username password)
+          (m/authenticate (m/get-db db) username (.toCharArray password))
+          (debugf "Authenticated to DB '%s' as '%s'" db username))
+        (m/use-db! db)
+        (debug "DB is" (.getName (m/get-db)))))))
+
+(defn disconnect! []
+  (if @connected
+    (do
+      (m/disconnect!)
+      (reset! connected false))
+    (debug "Not connected")))
 
 (defn ensure-indexes []
   (debug "ensure-indexes")
@@ -149,7 +168,7 @@
   (mc/ensure-index :municipalities {:municipalityCode 1}))
 
 (defn clear! []
-  (warn "Clearing MongoDB:" mongouri)
+  (warn "Clearing MongoDB")
   (gfs/remove-all)
   ; Collections must be dropped individially, otherwise index cache will be stale
   (doseq [coll (db/get-collection-names)]
