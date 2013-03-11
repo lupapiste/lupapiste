@@ -61,8 +61,7 @@ p {
 
 ; new comment
 (defn get-message-for-new-comment [application host]
-  (let [application-id (:id application)
-        e (enlive/html-resource "email-templates/application-new-comment.html")]    
+  (let [e (enlive/html-resource "email-templates/application-new-comment.html")]    
     (apply str (enlive/emit* (-> e
                                (replace-application-link "#conversation-link-" application "fi" "/conversation" host)
                                (replace-application-link "#conversation-link-" application "sv" "/conversation" host))))))
@@ -96,9 +95,24 @@ p {
   (get-email-recipients-for-application application))
 
 (defn send-notifications-on-application-state-change [application-id state host]
-  (let [application (mongo/by-id :applications application-id)]
-  (let [recipients (get-email-recipients-for-application application)
+  (let [application (mongo/by-id :applications application-id)
+        recipients (get-email-recipients-for-application application)
         msg (get-message-for-application-state-change application host)]
-  (send-mail-to-recipients recipients
-                           (get-email-title application "state-change-email-title")
-                           msg))))
+    (send-mail-to-recipients recipients
+                             (get-email-title application "state-change-email-title")
+                             msg)))
+
+; verdict given
+(defn get-message-for-verdict [application host]
+  (let [e (enlive/html-resource "email-templates/application-verdict.html")]
+    (apply str (enlive/emit* (-> e
+                               (replace-application-link "#verdict-link-" application "fi" "/verdict" host)
+                               (replace-application-link "#verdict-link-" application "sv" "/verdict" host))))))
+  
+(defn send-notifications-on-verdict [application-id host]
+  (let [application (mongo/by-id :applications application-id)
+        recipients (get-email-recipients-for-application application)
+        msg (get-message-for-verdict application host)]
+    (send-mail-to-recipients recipients
+                             (get-email-title application "verdict-email-title")
+                             msg)))
