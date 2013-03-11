@@ -202,7 +202,7 @@
   {:description "Authority can approve attachement, moves to ok"
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open]}
+   :states      [:draft :open :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
@@ -216,7 +216,7 @@
   {:description "Authority can reject attachement, requires user action."
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open]}
+   :states      [:draft :open :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
