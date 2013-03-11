@@ -250,7 +250,7 @@
     :role :authority
     :municipality "047"
     :firstName "Rakennustarkastaja"
-    :lastName "Enontekiö"
+    :lastName "Enonteki\u00F6"
     :username "rakennustarkastaja@enontekio.fi"
     :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
               :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -283,7 +283,7 @@
     :role :authority
     :municipality "090"
     :firstName "Rakennustarkastaja"
-    :lastName "Heinävesi"
+    :lastName "Hein\u00E4vesi"
     :username "rakennustarkastaja@heinavesi.fi"
     :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
               :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -294,7 +294,7 @@
     :role :authority
     :municipality "106"
     :firstName "Rakennustarkastaja"
-    :lastName "Hyvinkää"
+    :lastName "Hyvink\u00E4\u00E4"
     :username "rakennustarkastaja@hyvinkaa.fi"
     :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
               :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -305,7 +305,7 @@
     :role :authority
     :municipality "109"
     :firstName "Rakennustarkastaja"
-    :lastName "Hämeenlinna"
+    :lastName "H\u00E4meenlinna"
     :username "rakennustarkastaja@hameenlinna.fi"
     :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
               :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -415,7 +415,7 @@
     :role :authority
     :municipality "319"
     :firstName "Rakennustarkastaja"
-    :lastName "Köyliö"
+    :lastName "K\u00F6yli\u00F6"
     :username "rakennustarkastaja@koylio.fi"
     :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
               :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -426,7 +426,7 @@
     :role :authority
     :municipality "783"
     :firstName "Rakennustarkastaja"
-    :lastName "Säkylä"
+    :lastName "S\u00E4kyl\u00E4"
     :username "rakennustarkastaja@sakyla.fi"
     :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
               :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
@@ -594,22 +594,22 @@
                               {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
                      {:id "047"
-                      :name {:fi "Enontekiö", :sv "Enontekis"}
+                      :name {:fi "Enonteki\u00F6", :sv "Enontekis"}
                       :municipalityCode "047"}
                      {:id "078"
-                      :name {:fi "Hanko", :sv "Hangö"}
+                      :name {:fi "Hanko", :sv "Hang\u00F6"}
                       :municipalityCode "078"}
                      {:id "079"
                       :name {:fi "Harjavalta", :sv "Harjavalta"}
                       :municipalityCode "079"}
                      {:id "090"
-                      :name {:fi "Heinävesi", :sv "Heinävesi"}
+                      :name {:fi "Hein\u00E4vesi", :sv "Hein\u00E4vesi"}
                       :municipalityCode "090"}
                      {:id "106"
-                      :name {:fi "Hyvinkää", :sv "Hyvinge"}
+                      :name {:fi "Hyvink\u00E4\u00E4", :sv "Hyvinge"}
                       :municipalityCode "106"}
                      {:id "109"
-                      :name {:fi "Hämeenlinna", :sv "Tavastehus"}
+                      :name {:fi "H\u00E4meenlinna", :sv "Tavastehus"}
                       :municipalityCode "109"}
                      {:id "165"
                       :name {:fi "Janakkala", :sv "Janakkala"}
@@ -621,7 +621,7 @@
                       :name {:fi "Kempele", :sv "Kempele"}
                       :municipalityCode "244"}
                      {:id "257"
-                      :name {:fi "Kirkkonummi", :sv "Kyrkslätt"}
+                      :name {:fi "Kirkkonummi", :sv "Kyrksl\u00E4tt"}
                       :municipalityCode "257"}
                      {:id "297"
                       :name {:fi "Kuopio", :sv "Kuopio"}
@@ -639,10 +639,10 @@
                       :name {:fi "Eura", :sv "Eura"}
                       :municipalityCode "050"}
                      {:id "319"
-                      :name {:fi "Köyliö", :sv "Kjulo"}
+                      :name {:fi "K\u00F6yli\u00F6", :sv "Kjulo"}
                       :municipalityCode "319"}
                      {:id "783"
-                      :name {:fi "Säkylä", :sv "Säkylä"}
+                      :name {:fi "S\u00E4kyl\u00E4", :sv "S\u00E4kyl\u00E4"}
                       :municipalityCode "783"}
                      {:id "732"
                       :name {:fi "Salla", :sv "Salla"}
