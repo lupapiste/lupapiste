@@ -96,7 +96,7 @@
         {$set {:modified (:created command)
                :state new-state
                :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change id new-state host)))))
+      (notifications/send-notifications-on-application-state-change id host)))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
@@ -110,7 +110,7 @@
         (mongo/update-by-id :applications (-> command :data :id)
                             {$set {:modified (:created command)
                                    :state new-state}})
-        (notifications/send-notifications-on-application-state-change id new-state host)
+        (notifications/send-notifications-on-application-state-change id host)
         (ok)))))
 
 (defcommand "approve-application"
@@ -129,7 +129,7 @@
         (mongo/update
           :applications {:_id (:id application) :state new-state}
           {$set {:state :sent}})
-        (notifications/send-notifications-on-application-state-change application-id new-state host)))))
+        (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "submit-application"
   {:parameters [:id]
@@ -144,7 +144,7 @@
           :applications {:_id application-id}
           {$set {:state new-state
                  :submitted (:created command) }})
-        (notifications/send-notifications-on-application-state-change application-id new-state host)))))
+        (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]

@@ -18,6 +18,9 @@
 
 (def mail-agent (agent nil)) 
 
+(defn get-styles []
+  (slurp (io/resource "email-templates/styles.css")))
+
 (defn get-application-link [application lang suffix host]
   (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
     (str host "/" lang "/applicant#!" permit-type-path (:id application) suffix)))
@@ -45,7 +48,7 @@
 (defn get-message-for-new-comment [application host]
   (let [e (enlive/html-resource "email-templates/application-new-comment.html")]
     (apply str (enlive/emit* (-> e
-                               (replace-style (slurp (io/resource "email-templates/styles.css")))
+                               (replace-style (get-styles))
                                (replace-application-link "#conversation-link-" application "fi" "/conversation" host)
                                (replace-application-link "#conversation-link-" application "sv" "/conversation" host))))))
 
@@ -69,6 +72,7 @@
         e (enlive/html-resource "email-templates/application-state-change.html")]
     
     (apply str (enlive/emit* (-> e
+                               (replace-style (get-styles))
                                (replace-application-link "#application-link-" application "fi" "" host)
                                (replace-application-link "#application-link-" application "sv" "" host)
                                (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
@@ -77,7 +81,7 @@
 (defn get-email-recipients-for-application-state-change [application]
   (get-email-recipients-for-application application))
 
-(defn send-notifications-on-application-state-change [application-id state host]
+(defn send-notifications-on-application-state-change [application-id host]
   (let [application (mongo/by-id :applications application-id)
         recipients (get-email-recipients-for-application application)
         msg (get-message-for-application-state-change application host)]
@@ -89,6 +93,7 @@
 (defn get-message-for-verdict [application host]
   (let [e (enlive/html-resource "email-templates/application-verdict.html")]
     (apply str (enlive/emit* (-> e
+                               (replace-style (get-styles))
                                (replace-application-link "#verdict-link-" application "fi" "/verdict" host)
                                (replace-application-link "#verdict-link-" application "sv" "/verdict" host))))))
   
