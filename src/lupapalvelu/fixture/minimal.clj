@@ -232,7 +232,314 @@
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
-    :role  "applicant"}])
+    :role  "applicant"}
+   
+		{:id "50ac77ecd2e6c2ea6e799910"
+		 :email "rakennustarkastaja@enontekio.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "047"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "enontekio"
+		 :username "rakennustarkastaja@enontekio.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799910"}}
+		{:id "50ac77ecd2e6c2ea6e799911"
+		 :email "rakennustarkastaja@hanko.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "078"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "hanko"
+		 :username "rakennustarkastaja@hanko.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799911"}}
+		{:id "50ac77ecd2e6c2ea6e799912"
+		 :email "rakennustarkastaja@harjavalta.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "079"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "harjavalta"
+		 :username "rakennustarkastaja@harjavalta.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799912"}}
+		{:id "50ac77ecd2e6c2ea6e799913"
+		 :email "rakennustarkastaja@heinavesi.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "090"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "heinavesi"
+		 :username "rakennustarkastaja@heinavesi.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799913"}}
+		{:id "50ac77ecd2e6c2ea6e799914"
+		 :email "rakennustarkastaja@hyvinkaa.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "106"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "hyvinkaa"
+		 :username "rakennustarkastaja@hyvinkaa.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799914"}}
+		{:id "50ac77ecd2e6c2ea6e799915"
+		 :email "rakennustarkastaja@hameenlinna.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "109"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "hameenlinna"
+		 :username "rakennustarkastaja@hameenlinna.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799915"}}
+		{:id "50ac77ecd2e6c2ea6e799916"
+		 :email "rakennustarkastaja@janakkala.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "165"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "janakkala"
+		 :username "rakennustarkastaja@janakkala.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799916"}}
+		{:id "50ac77ecd2e6c2ea6e799917"
+		 :email "rakennustarkastaja@kajaani.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "205"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "kajaani"
+		 :username "rakennustarkastaja@kajaani.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799917"}}
+		{:id "50ac77ecd2e6c2ea6e799918"
+		 :email "rakennustarkastaja@kempele.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "244"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "kempele"
+		 :username "rakennustarkastaja@kempele.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799918"}}
+		{:id "50ac77ecd2e6c2ea6e799919"
+		 :email "rakennustarkastaja@kirkkonummi.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "257"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "kirkkonummi"
+		 :username "rakennustarkastaja@kirkkonummi.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799919"}}
+		{:id "50ac77ecd2e6c2ea6e799920"
+		 :email "rakennustarkastaja@kuopio.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "297"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "kuopio"
+		 :username "rakennustarkastaja@kuopio.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799920"}}
+		{:id "50ac77ecd2e6c2ea6e799921"
+		 :email "rakennustarkastaja@mikkeli.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "491"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "mikkeli"
+		 :username "rakennustarkastaja@mikkeli.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799921"}}
+		{:id "50ac77ecd2e6c2ea6e799922"
+		 :email "rakennustarkastaja@mustasaari.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "499"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "mustasaari"
+		 :username "rakennustarkastaja@mustasaari.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799922"}}
+		{:id "50ac77ecd2e6c2ea6e799923"
+		 :email "rakennustarkastaja@nivala.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "535"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "nivala"
+		 :username "rakennustarkastaja@nivala.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799923"}}
+		{:id "50ac77ecd2e6c2ea6e799924"
+		 :email "rakennustarkastaja@eura.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "050"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "eura"
+		 :username "rakennustarkastaja@eura.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799924"}}
+		{:id "50ac77ecd2e6c2ea6e799925"
+		 :email "rakennustarkastaja@koylio.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "319"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "koylio"
+		 :username "rakennustarkastaja@koylio.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799925"}}
+		{:id "50ac77ecd2e6c2ea6e799926"
+		 :email "rakennustarkastaja@sakyla.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "783"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "sakyla"
+		 :username "rakennustarkastaja@sakyla.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799926"}}
+		{:id "50ac77ecd2e6c2ea6e799927"
+		 :email "rakennustarkastaja@salla.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "732"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "salla"
+		 :username "rakennustarkastaja@salla.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799927"}}
+		{:id "50ac77ecd2e6c2ea6e799928"
+		 :email "rakennustarkastaja@salo.fi"
+		 :enabled true
+		 :role :authority
+		 :municipality "734"
+		 :firstName "Rakennustarkastaja"
+		 :lastName "salo"
+		 :username "rakennustarkastaja@salo.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799928"}}
+  {:lastName "Hakija"
+   :firstName "Testi"
+   :enabled true
+   :postalCode "33200"
+   :username "hakija@testi.fi"
+   :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+             :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		         :apikey "50ac77ecd2e6c2ea6e799928"}
+   :phone "050123456"
+   :email "hakija@testi.fi"
+   :personId "150601-0001"
+   :role "applicant"
+   :id "5073c0a1c2e6c470aef88811"
+   :street "Testikatu 2"
+   :zip "33200"
+   :city "Tampere"}  
+  {:lastName "Hakijakaksi"
+   :firstName "Testi"
+   :enabled true
+   :postalCode "33200"
+   :username "hakija2@testi.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799928"}
+   :phone "050123456"
+   :email "hakija2@testi.fi"
+   :personId "150602-0002"
+   :role "applicant"
+   :id "5073c0a1c2e6c470aef88812"
+   :street "Testikatu 2"
+   :zip "33200"
+   :city "Tampere"}
+  {:lastName "Hakijakolme"
+   :firstName "Testi"
+   :enabled true
+   :postalCode "33200"
+   :username "hakija3@testi.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799928"}
+   :phone "050123456"
+   :email "hakija3@testi.fi"
+   :personId "150603-0003"
+   :role "applicant"
+   :id "5073c0a1c2e6c470aef88813"
+   :street "Testikatu 2"
+   :zip "33200"
+   :city "Tampere"}
+  {:lastName "Hakijanelja"
+   :firstName "Testi"
+   :enabled true
+   :postalCode "33200"
+   :username "hakija4@testi.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799928"}
+   :phone "050123456"
+   :email "hakija2@testi.fi"
+   :personId "150604-0004"
+   :role "applicant"
+   :id "5073c0a1c2e6c470aef88814"
+   :street "Testikatu 4"
+   :zip "33200"
+   :city "Tampere"}
+  {:lastName "Hakijaviisi"
+   :firstName "Testi"
+   :enabled true
+   :postalCode "33200"
+   :username "hakija5@testi.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799928"}
+   :phone "050123456"
+   :email "hakija5@testi.fi"
+   :personId "150605-0005"
+   :role "applicant"
+   :id "5073c0a1c2e6c470aef88815"
+   :street "Testikatu 5"
+   :zip "33200"
+   :city "Tampere"}
+  {:lastName "Hakijakuusi"
+   :firstName "Testi"
+   :enabled true
+   :postalCode "33200"
+   :username "hakija6@testi.fi"
+		 :private {:salt "$2a$10$DC0FxcCzQO7ppdJsoYdTEO",
+		           :password "$2a$10$DC0FxcCzQO7ppdJsoYdTEON8XlMzyS4t/FmjepX.qNjDwnZqrjHnO"
+		           :apikey "50ac77ecd2e6c2ea6e799928"}
+   :phone "050123456"
+   :email "hakija6@testi.fi"
+   :personId "150606-0006"
+   :role "applicant"
+   :id "5073c0a1c2e6c470aef88816"
+   :street "Testikatu 6"
+   :zip "33200"
+   :city "Tampere"}
+  ])
 
 (def municipalities [{:id "186"
                       :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
@@ -276,8 +583,63 @@
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
                               {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
-                     
-                     ])
+                     {:id "047"
+                      :name {:fi "Enontekiö", :sv "Enontekis"}
+                      :municipalityCode "047"}
+                     {:id "078"
+                      :name {:fi "Hanko", :sv "Hangö"}
+                      :municipalityCode "078"}
+                     {:id "079"
+                      :name {:fi "Harjavalta", :sv "Harjavalta"}
+                      :municipalityCode "079"}
+                     {:id "090"
+                      :name {:fi "Heinävesi", :sv "Heinävesi"}
+                      :municipalityCode "090"}
+                     {:id "106"
+                      :name {:fi "Hyvinkää", :sv "Hyvinge"}
+                      :municipalityCode "106"}
+                     {:id "109"
+                      :name {:fi "Hämeenlinna", :sv "Tavastehus"}
+                      :municipalityCode "109"}
+                     {:id "165"
+                      :name {:fi "Janakkala", :sv "Janakkala"}
+                      :municipalityCode "165"}
+                     {:id "205"
+                      :name {:fi "Kajaani", :sv "Kajana"}
+                      :municipalityCode "205"}
+                     {:id "244"
+                      :name {:fi "Kempele", :sv "Kempele"}
+                      :municipalityCode "244"}
+                     {:id "257"
+                      :name {:fi "Kirkkonummi", :sv "Kyrkslätt"}
+                      :municipalityCode "257"}
+                     {:id "297"
+                      :name {:fi "Kuopio", :sv "Kuopio"}
+                      :municipalityCode "297"}
+                     {:id "491"
+                      :name {:fi "Mikkeli", :sv "St.Michel"}
+                      :municipalityCode "491"}
+                     {:id "499"
+                      :name {:fi "Mustasaari", :sv "Korsholm"}
+                      :municipalityCode "499"}
+                     {:id "535"
+                      :name {:fi "Nivala", :sv "Nivala"}
+                      :municipalityCode "535"}
+                     {:id "050"
+                      :name {:fi "Eura", :sv "Eura"}
+                      :municipalityCode "050"}
+                     {:id "319"
+                      :name {:fi "Köyliö", :sv "Kjulo"}
+                      :municipalityCode "319"}
+                     {:id "783"
+                      :name {:fi "Säkylä", :sv "Säkylä"}
+                      :municipalityCode "783"}
+                     {:id "732"
+                      :name {:fi "Salla", :sv "Salla"}
+                      :municipalityCode "732"}
+                     {:id "734"
+                      :name {:fi "Salo", :sv "Salo"}
+                      :municipalityCode "734"}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
