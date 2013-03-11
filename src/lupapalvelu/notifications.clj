@@ -67,7 +67,7 @@ p {
                                (replace-application-link "#conversation-link-" application "sv" "/conversation" host))))))
 
 (defn get-email-recipients-for-application [application]
-  (map (fn [user] (:username (mongo/by-id :users (:id user)))) (:auth application)))
+  (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
 
 (defn get-email-recipients-for-new-comment [application]
   (get-email-recipients-for-application application))
