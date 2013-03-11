@@ -8,6 +8,7 @@
     var self = this;
 
     self.goPhase1 = function() {
+      $('.selected-location').hide();
       $("#create")
         .find("#create-part-1")
           .find("h2").accordionOpen().end()
