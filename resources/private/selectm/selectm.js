@@ -1,21 +1,19 @@
-function loc(v) {
-  return v;
-}
-
-function Selectm(element, onOk, onCancel) {
-  var self = this;
+jQuery.fn.selectm = function() {
+  var self = {};
   
   self.data = [];
   self.visible = [];
 
-  self.$filter = $("input", element);
-  self.$source = $(".source select", element);
-  self.$target = $(".target select", element);
-  self.$add = $(".add", element);
-  self.$remove = $(".remove", element);
-  self.$ok = $(".ok", element);
-  self.$cancel = $(".cancel", element);
-
+  self.$filter = $("input", this);
+  self.$source = $(".source select", this);
+  self.$target = $(".target select", this);
+  self.$add = $(".add", this);
+  self.$remove = $(".remove", this);
+  self.$ok = $(".ok", this);
+  self.$cancel = $(".cancel", this);
+  self.onOk = function(f) { self.okCallback = f; return self; };
+  self.onCancel = function(f) { self.cancelCallback = f; return self; };
+  
   self.filterData = function(filterValue) {
     var f = _.trim(filterValue).toLowerCase();
     if (_.isBlank(f)) return self.data;
@@ -76,8 +74,8 @@ function Selectm(element, onOk, onCancel) {
 
   self.$add.click(self.add);
   self.$remove.click(self.remove);
-  self.$cancel.click(onCancel);
-  self.$ok.click(function() { onOk(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
+  self.$cancel.click(function() { self.cancelCallback(); });
+  self.$ok.click(function() { self.okCallback(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
   
   //
   // Reset:
@@ -102,12 +100,6 @@ function Selectm(element, onOk, onCancel) {
   self.$remove.text(loc("remove"));
   self.$ok.text(loc("ok"));
   self.$cancel.text(loc("cancel"));
-}
-
-$(function() {
-  var s = new Selectm($(".selectm"), function(ids) { console.log("OK:", ids);  }, function() { console.log("CANCEL"); });
-  s.reset([["Fozzaa", ["foo1", "foo2"]],
-           ["Bazzaa", ["bar1", "bar2", "bar3"]],
-           ["Dozooz", ["doz1", "doz2", "doz3", "doz4"]],
-           ["Ozzooo", ["ozz1", "ozz2", "ozz3", "ozz4", "ozz5"]]]);
-});
+  
+  return self;
+};
