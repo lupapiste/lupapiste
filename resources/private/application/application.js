@@ -458,39 +458,31 @@
   var attachmentTemplatesModel = new function() {
     var self = this;
 
-    self.init = function() {
-      self.select = $("#dialog-add-attachment-templates input[type='hidden']");
-      return self;
-    }
-    
-    self.show = function() {
-      self.select.select2({
-          width: 400,
-          data: [{text: "eka", children: [{id: "1", text: "Valtakirja"}, {id: "2", text: "Kirjavalta"}]},
-                 {text: "toka", children: [{id: "3", text: "Suunnitelma"}, {id: "4", text: "Plan B"}]}],
-          allowClear: true})
-        .on("change", self.add);
-      $("#dialog-add-attachment-templates ul").empty();
-      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
-      return self;
-    }
-    
-    self.ok = function() {
-      console.log("newAttachmentTemplates:", application.id());
+    self.ok = function(ids) {
+      console.log("OK:", application.id(), ids);
       ajax.command("add-attachment-templates", {id: application.id()}).call();
-      try { self.select.select2("data", null); } catch (e) { }
       LUPAPISTE.ModalDialog.close();
     };
     
-    self.add = function(e) {
-      if (e && e.val) $("#dialog-add-attachment-templates ul").append($("<li>").text(e.val));
-      try { self.select.select2("data", null); } catch (e) { }
-      return false;
+    self.cancel = function() {
+      LUPAPISTE.ModalDialog.close();
     };
     
-    self.query = function(query) {
-      query.callback({results: [{text: "eka", children: [{id: "1", text: "Valtakirja"}, {id: "2", text: "Kirjavalta"}]},
-                                {text: "toka", children: [{id: "3", text: "Suunnitelma"}, {id: "4", text: "Plan B"}]}]});
+    self.init = function() {
+      self.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
+      self.selectm.ok(self.ok).cancel(self.cancel);
+      return self;
+    };
+    
+    self.show = function() {
+      var data = _.map(application.allowedAttachmentTypes(), function(g) {
+        return ["attachmentType." + g[0] + "._group_label", _.map(g[1], function(a) {
+          return "attachmentType." + g[0] + "." + a;
+        })]
+      });
+      self.selectm.reset(data);
+      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
+      return self;
     };
     
   };
@@ -514,13 +506,13 @@
       accordian: accordian,
       removeDocModel: removeDocModel,
       removeApplicationModel: removeApplicationModel,
-      attachmentTemplatesModel: attachmentTemplatesModel.init()
+      attachmentTemplatesModel: attachmentTemplatesModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
     
-    
+    attachmentTemplatesModel.init();
   });
 
 })();
