@@ -245,13 +245,13 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
   Open application  ${address}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
   Open inforequest  ${address}
 
