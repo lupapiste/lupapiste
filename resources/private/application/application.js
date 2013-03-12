@@ -351,6 +351,13 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
+      
+      if(x == 0 && y == 0) {
+        $('#application-map').css("display", "none");
+      } else {
+        $('#application-map').css("display", "inline-block");
+      }
+      
       (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
 
       if (application.shapes && application.shapes().length > 0) {

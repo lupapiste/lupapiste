@@ -8,6 +8,8 @@
     var self = this;
 
     self.goPhase1 = function() {
+      $("#create-map").show();
+
       $("#create")
         .find("#create-part-1")
           .find("h2").accordionOpen().end()
@@ -23,6 +25,8 @@
     var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
 
     self.goPhase2 = function() {
+      $("#create-map").hide();
+      
       $("#create-part-1")
         .find("h2")
         .accordionClose(open("#create-part-2"));
@@ -51,7 +55,7 @@
     self.operations = ko.observable(null);
     self.requestType = ko.observable();
 
-    self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
+    self.valuesOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address) && !isBlank(self.propertyId); });
 
     self.clear = function() {
       if (!self.map) {
