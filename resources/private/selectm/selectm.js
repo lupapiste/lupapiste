@@ -2,7 +2,7 @@ function loc(v) {
   return v;
 }
 
-function Foo(element, onOk, onCancel) {
+function Selectm(element, onOk, onCancel) {
   var self = this;
   
   self.c = element;
@@ -89,9 +89,9 @@ function Foo(element, onOk, onCancel) {
 }
 
 $(function() {
-  var foo = new Foo($(".foo"), function(ids) { console.log("OK:", ids);  }, function() { console.log("CANCEL"); });
-  foo.reset([["Fozzaa", ["foo1", "foo2"]],
-             ["Bazzaa", ["bar1", "bar2", "bar3"]],
-             ["Dozooz", ["doz1", "doz2", "doz3", "doz4"]],
-             ["Ozzooo", ["ozz1", "ozz2", "ozz3", "ozz4", "ozz5"]]]);
+  var s = new Selectm($(".selectm"), function(ids) { console.log("OK:", ids);  }, function() { console.log("CANCEL"); });
+  s.reset([["Fozzaa", ["foo1", "foo2"]],
+           ["Bazzaa", ["bar1", "bar2", "bar3"]],
+           ["Dozooz", ["doz1", "doz2", "doz3", "doz4"]],
+           ["Ozzooo", ["ozz1", "ozz2", "ozz3", "ozz4", "ozz5"]]]);
 });
