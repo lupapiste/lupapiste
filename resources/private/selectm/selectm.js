@@ -8,6 +8,7 @@ function Selectm(element, onOk, onCancel) {
   self.c = element;
   self.data = [];
   self.visible = [];
+
   self.$filter = $("input", self.c);
   self.$source = $(".source select", self.c);
   self.$target = $(".target select", self.c);
@@ -39,10 +40,9 @@ function Selectm(element, onOk, onCancel) {
         self.$source.append($("<option>").data("id", option).html("&nbsp;&nbsp;" + name));
       });
     });
+    self.checkAdd();
   };
-  
-  self.$filter.keyup(self.updateFilter);
-  
+    
   self.add = function() {
     var id = $("option:selected", self.$source).data("id");
     if (id) self.$target.append($("<option>").data("id", id).text(loc(id)));
@@ -51,7 +51,7 @@ function Selectm(element, onOk, onCancel) {
 
   self.remove = function() {
     $("option:selected", self.$target).remove();
-    self.checkOk();
+    self.checkRemove();
   };
 
   self.checkOk = function() {
@@ -59,15 +59,23 @@ function Selectm(element, onOk, onCancel) {
   };
   
   self.checkAdd = function() {
-    self.$add.attr("disabled", $("option", self.$target).length === 0);
+    self.$add.attr("disabled", $("option:selected", self.$source).length === 0);
   };
 
   self.checkRemove = function() {
-    self.$ok.attr("disabled", $("option", self.$target).length === 0);
+    self.$remove.attr("disabled", $("option:selected", self.$target).length === 0);
   };
+
+  //
+  // Register event handlers:
+  //
+  
+  self.$filter
+    .keyup(self.updateFilter);
 
   $(".source button", self.c)
     .click(self.add);
+  
   $(".source select", self.c)
     .keydown(function(e) { if (e.keyCode === 13) self.add(); })
     .dblclick(self.add)
@@ -75,16 +83,21 @@ function Selectm(element, onOk, onCancel) {
   
   $(".target button", self.c)
     .click(self.remove);
+  
   $(".target select", self.c)
     .keydown(function(e) { if (e.keyCode === 13) self.remove(); })
     .dblclick(self.remove)
     .on("change focus blur", self.checkRemove);
   
-  self.$ok.click(function() {
-    onOk(_.map($("option", self.$target), function(e) { return $(e).data("id"); }));
-  });
+  self.$ok
+    .click(function() { onOk(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
 
-  self.$cancel.click(onCancel);
+  self.$cancel
+    .click(onCancel);
+  
+  //
+  // Reset:
+  //
   
   self.reset = function(data) {
     self.$source.empty();
@@ -92,9 +105,9 @@ function Selectm(element, onOk, onCancel) {
     self.data = data;
     self.$filter.val("");
     self.updateFilter();
-    self.checkAdd(); 
-    self.checkRemove(); 
-    self.checkOk(); 
+    self.checkAdd();
+    self.checkRemove();
+    self.checkOk();
     return self;
   }
 
