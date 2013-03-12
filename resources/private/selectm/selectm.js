@@ -5,17 +5,16 @@ function loc(v) {
 function Selectm(element, onOk, onCancel) {
   var self = this;
   
-  self.c = element;
   self.data = [];
   self.visible = [];
 
-  self.$filter = $("input", self.c);
-  self.$source = $(".source select", self.c);
-  self.$target = $(".target select", self.c);
-  self.$add = $(".add", self.c);
-  self.$remove = $(".remove", self.c);
-  self.$ok = $(".ok", self.c);
-  self.$cancel = $(".cancel", self.c);
+  self.$filter = $("input", element);
+  self.$source = $(".source select", element);
+  self.$target = $(".target select", element);
+  self.$add = $(".add", element);
+  self.$remove = $(".remove", element);
+  self.$ok = $(".ok", element);
+  self.$cancel = $(".cancel", element);
 
   self.filterData = function(filterValue) {
     var f = _.trim(filterValue).toLowerCase();
@@ -54,46 +53,31 @@ function Selectm(element, onOk, onCancel) {
     self.checkRemove();
   };
 
-  self.checkOk = function() {
-    self.$ok.attr("disabled", $("option", self.$target).length === 0);
-  };
-  
-  self.checkAdd = function() {
-    self.$add.attr("disabled", $("option:selected", self.$source).length === 0);
-  };
-
-  self.checkRemove = function() {
-    self.$remove.attr("disabled", $("option:selected", self.$target).length === 0);
-  };
+  self.checkOk = function() { self.$ok.attr("disabled", $("option", self.$target).length === 0); };
+  self.checkAdd = function() { self.$add.attr("disabled", $("option:selected", self.$source).length === 0); };
+  self.checkRemove = function() { self.$remove.attr("disabled", $("option:selected", self.$target).length === 0); };
 
   //
   // Register event handlers:
   //
   
-  self.$filter
-    .keyup(self.updateFilter);
+  self.$filter.keyup(self.updateFilter);
 
-  $(".source button", self.c)
-    .click(self.add);
-  
-  $(".source select", self.c)
+  self.$source
     .keydown(function(e) { if (e.keyCode === 13) self.add(); })
     .dblclick(self.add)
     .on("change focus blur", self.checkAdd);
   
-  $(".target button", self.c)
-    .click(self.remove);
-  
-  $(".target select", self.c)
+  self.$target
     .keydown(function(e) { if (e.keyCode === 13) self.remove(); })
     .dblclick(self.remove)
     .on("change focus blur", self.checkRemove);
   
-  self.$ok
-    .click(function() { onOk(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
 
-  self.$cancel
-    .click(onCancel);
+  self.$add.click(self.add);
+  self.$remove.click(self.remove);
+  self.$cancel.click(onCancel);
+  self.$ok.click(function() { onOk(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
   
   //
   // Reset:
@@ -112,6 +96,12 @@ function Selectm(element, onOk, onCancel) {
   }
 
   self.reset([]);
+ 
+  self.$filter.attr("placeholder", loc("filter"));
+  self.$add.text(loc("add"));
+  self.$remove.text(loc("remove"));
+  self.$ok.text(loc("ok"));
+  self.$cancel.text(loc("cancel"));
 }
 
 $(function() {
