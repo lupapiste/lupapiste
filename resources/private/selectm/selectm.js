@@ -2,14 +2,14 @@
   
   "use strict";
   
-  $.fn.selectm = function() {
+  $.fn.selectm = function(template) {
     var self = {};
     
     self.data = [];
     self.visible = [];
   
     this.append(
-      $("#selectm-template")
+      (template ? template : $("#selectm-template"))
         .children()
         .first()
         .clone()
