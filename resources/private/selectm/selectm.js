@@ -4,6 +4,28 @@ jQuery.fn.selectm = function() {
   self.data = [];
   self.visible = [];
 
+  this
+    .addClass("selectm")
+    .append($("<div>")
+      .addClass("row")
+      .append($("<input type='text'>").attr("placeholder", loc("selectm.filter"))))
+    .append($("<div>")
+      .addClass("row")
+      .append($("<div>")
+        .addClass("col")
+        .addClass("source")
+        .append($("<select>").attr("size", "2"))
+        .append($("<button>").addClass("add").text(loc("selectm.add"))))
+      .append($("<div>")
+        .addClass("col")
+        .addClass("target")
+        .append($("<select>").attr("size", "2"))
+        .append($("<button>").addClass("remove").text(loc("selectm.remove")))))
+    .append($("<div>")
+      .addClass("row")
+      .append($("<button>").addClass("ok").text(loc("selectm.ok")))
+      .append($("<button>").addClass("cancel").text(loc("selectm.cancel"))));
+   
   self.$filter = $("input", this);
   self.$source = $(".source select", this);
   self.$target = $(".target select", this);
@@ -11,8 +33,8 @@ jQuery.fn.selectm = function() {
   self.$remove = $(".remove", this);
   self.$ok = $(".ok", this);
   self.$cancel = $(".cancel", this);
-  self.onOk = function(f) { self.okCallback = f; return self; };
-  self.onCancel = function(f) { self.cancelCallback = f; return self; };
+  self.ok = function(f) { self.okCallback = f; return self; };
+  self.cancel = function(f) { self.cancelCallback = f; return self; };
   
   self.filterData = function(filterValue) {
     var f = _.trim(filterValue).toLowerCase();
@@ -49,6 +71,7 @@ jQuery.fn.selectm = function() {
   self.remove = function() {
     $("option:selected", self.$target).remove();
     self.checkRemove();
+    self.checkOk();
   };
 
   self.checkOk = function() { self.$ok.attr("disabled", $("option", self.$target).length === 0); };
@@ -74,8 +97,8 @@ jQuery.fn.selectm = function() {
 
   self.$add.click(self.add);
   self.$remove.click(self.remove);
-  self.$cancel.click(function() { self.cancelCallback(); });
-  self.$ok.click(function() { self.okCallback(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
+  self.$cancel.click(function() { if (self.cancelCallback) self.cancelCallback(); });
+  self.$ok.click(function() { if (self.okCallback) self.okCallback(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
   
   //
   // Reset:
@@ -94,12 +117,6 @@ jQuery.fn.selectm = function() {
   }
 
   self.reset([]);
- 
-  self.$filter.attr("placeholder", loc("filter"));
-  self.$add.text(loc("add"));
-  self.$remove.text(loc("remove"));
-  self.$ok.text(loc("ok"));
-  self.$cancel.text(loc("cancel"));
-  
+   
   return self;
 };
