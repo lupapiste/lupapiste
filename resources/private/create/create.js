@@ -222,7 +222,6 @@
     self.create = function(infoRequest) {
       ajax.command("create-application", {
         infoRequest: infoRequest,
-        permitType: "buildingPermit", // FIXME: WTF this should be?
         operation: self.operation().op,
         y: self.y(),
         x: self.x(),
