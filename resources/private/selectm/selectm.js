@@ -1,21 +1,22 @@
 ;(function($) {
-
+  
+  "use strict";
+  
   $.fn.selectm = function() {
     var self = {};
     
     self.data = [];
     self.visible = [];
   
-    var template = $("#selectm-template")
-      .clone()
-      .find("input").attr("placeholder", loc("selectm.filter")).end()
-      .find(".add").text(loc("selectm.add")).end()
-      .find(".remove").text(loc("selectm.remove")).end()
-      .find(".ok").text(loc("selectm.ok")).end()
-      .find(".cancel").text(loc("selectm.cancel")).end()
-      .show();
-    
-    this.append(template);
+    this.append(
+      $("#selectm-template")
+        .clone()
+        .find("input").attr("placeholder", loc("selectm.filter")).end()
+        .find(".add").text(loc("selectm.add")).end()
+        .find(".remove").text(loc("selectm.remove")).end()
+        .find(".ok").text(loc("selectm.ok")).end()
+        .find(".cancel").text(loc("selectm.cancel")).end()
+        .show());
      
     self.$filter = $("input", this);
     self.$source = $(".source select", this);
@@ -105,10 +106,11 @@
       self.checkRemove();
       self.checkOk();
       return self;
-    }
+    };
   
     self.reset([]);
      
     return self;
-  }
+  };
+  
 })(jQuery);
