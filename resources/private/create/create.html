@@ -56,23 +56,25 @@
 
     <!-- Phase 2: -->
 
-    <section id="create-part-2"class="accordion">
+    <section id="create-part-2">
 
       <h1 data-bind="ltext: 'newRequest.descTitle'"></h1>
       <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text" ></p>
 
-      <div class="tree" data-bind="visible: operations">
-        <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
-        <div class="tree-content">
+      <div class="create-content"> 
+        <div class="tree" data-bind="visible: operations">
+          <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
+          <div class="tree-content">
+          </div>
         </div>
-      </div>
-      <div class="tree" data-bind="visible: !operations()">
-        <img src="/img/ajax-loader.gif" alt="loading"/>
-      </div>
+        <div class="tree" data-bind="visible: !operations()">
+          <img src="/img/ajax-loader.gif" alt="loading"/>
+        </div>
 
-      <div style="margin-top: 10px;">
-        <button data-bind="click: goPhase3, enable: operation, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary"></button>
-        <button data-bind="click: createApplication, enable: operation, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary"></button>
+        <div class="create-buttons">
+          <button data-bind="click: goPhase3, visible: operation, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary"></button>
+          <button data-bind="click: createApplication, visible: operation, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary"></button>
+        </div>
       </div>
 
     </section>
