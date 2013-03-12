@@ -8,10 +8,13 @@ function Selectm(element, onOk, onCancel) {
   self.c = element;
   self.data = [];
   self.visible = [];
-  self.filter = $("input", self.c);
-  self.source = $(".source select", self.c);
-  self.target = $(".target select", self.c);
-  self.ok = $(".ok", self.c);
+  self.$filter = $("input", self.c);
+  self.$source = $(".source select", self.c);
+  self.$target = $(".target select", self.c);
+  self.$add = $(".add", self.c);
+  self.$remove = $(".remove", self.c);
+  self.$ok = $(".ok", self.c);
+  self.$cancel = $(".cancel", self.c);
 
   self.filterData = function(filterValue) {
     var f = _.trim(filterValue).toLowerCase();
@@ -25,63 +28,73 @@ function Selectm(element, onOk, onCancel) {
   };
   
   self.updateFilter = function() {
-    var newVisible = self.filterData(self.filter.val());
+    var newVisible = self.filterData(self.$filter.val());
     if (_.isEqual(self.visible, newVisible)) return;
-    self.source.empty();
+    self.$source.empty();
     self.visible = newVisible;
     _.each(self.visible, function(group) {
-      self.source.append($("<optgroup>").attr("label", loc(group[0])));
+      self.$source.append($("<optgroup>").attr("label", loc(group[0])));
       _.each(group[1], function(option) {
         var name = loc(option);
-        self.source.append($("<option>").data("id", option).html("&nbsp;&nbsp;" + name));
+        self.$source.append($("<option>").data("id", option).html("&nbsp;&nbsp;" + name));
       });
     });
   };
   
-  self.filter.keyup(self.updateFilter);
+  self.$filter.keyup(self.updateFilter);
   
   self.add = function() {
-    var id = $("option:selected", self.source).data("id");
-    self.target.append($("<option>").data("id", id).text(loc(id)));
-    self.updateOk();
+    var id = $("option:selected", self.$source).data("id");
+    if (id) self.$target.append($("<option>").data("id", id).text(loc(id)));
+    self.checkOk();
   };
 
   self.remove = function() {
-    var e = $("option:selected", self.target);
-    e.remove();
-    self.updateOk();
+    $("option:selected", self.$target).remove();
+    self.checkOk();
+  };
+
+  self.checkOk = function() {
+    self.$ok.attr("disabled", $("option", self.$target).length === 0);
+  };
+  
+  self.checkAdd = function() {
+    self.$add.attr("disabled", $("option", self.$target).length === 0);
+  };
+
+  self.checkRemove = function() {
+    self.$ok.attr("disabled", $("option", self.$target).length === 0);
   };
 
   $(".source button", self.c)
     .click(self.add);
   $(".source select", self.c)
     .keydown(function(e) { if (e.keyCode === 13) self.add(); })
-    .dblclick(self.add);
-
+    .dblclick(self.add)
+    .on("change focus blur", self.checkAdd);
+  
   $(".target button", self.c)
     .click(self.remove);
   $(".target select", self.c)
     .keydown(function(e) { if (e.keyCode === 13) self.remove(); })
-    .dblclick(self.remove);
+    .dblclick(self.remove)
+    .on("change focus blur", self.checkRemove);
   
-  self.updateOk = function() {
-    self.ok.attr("disabled", $("option", self.target).length === 0);
-    return self;
-  };
-  
-  self.ok.click(function() {
-    onOk(_.map($("option", self.target), function(e) { return $(e).data("id"); }));
+  self.$ok.click(function() {
+    onOk(_.map($("option", self.$target), function(e) { return $(e).data("id"); }));
   });
 
-  $(".cancel", self.c).click(onCancel);
+  self.$cancel.click(onCancel);
   
   self.reset = function(data) {
-    self.source.empty();
-    self.target.empty();
+    self.$source.empty();
+    self.$target.empty();
     self.data = data;
-    self.filter.val("");
+    self.$filter.val("");
     self.updateFilter();
-    self.updateOk(); 
+    self.checkAdd(); 
+    self.checkRemove(); 
+    self.checkOk(); 
     return self;
   }
 
