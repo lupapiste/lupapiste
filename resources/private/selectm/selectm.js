@@ -10,21 +10,23 @@
   
     this.append(
       $("#selectm-template")
+        .children()
+        .first()
         .clone()
         .find("input").attr("placeholder", loc("selectm.filter")).end()
-        .find(".add").text(loc("selectm.add")).end()
-        .find(".remove").text(loc("selectm.remove")).end()
-        .find(".ok").text(loc("selectm.ok")).end()
-        .find(".cancel").text(loc("selectm.cancel")).end()
-        .show());
+        .find(".selectm-target-label").text(loc("selectm.target")).end()
+        .find(".selectm-add").text(loc("selectm.add")).end()
+        .find(".selectm-remove").text(loc("selectm.remove")).end()
+        .find(".selectm-ok").text(loc("selectm.ok")).end()
+        .find(".selectm-cancel").text(loc("selectm.cancel")).end());
      
     self.$filter = $("input", this);
-    self.$source = $(".source select", this);
-    self.$target = $(".target select", this);
-    self.$add = $(".add", this);
-    self.$remove = $(".remove", this);
-    self.$ok = $(".ok", this);
-    self.$cancel = $(".cancel", this);
+    self.$source = $(".selectm-source", this);
+    self.$target = $(".selectm-target", this);
+    self.$add = $(".selectm-add", this);
+    self.$remove = $(".selectm-remove", this);
+    self.$ok = $(".selectm-ok", this);
+    self.$cancel = $(".selectm-cancel", this);
     self.ok = function(f) { self.okCallback = f; return self; };
     self.cancel = function(f) { self.cancelCallback = f; return self; };
     
