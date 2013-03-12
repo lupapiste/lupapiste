@@ -364,3 +364,7 @@ Application state should be
   [Arguments]  ${state}
   ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
   Should be equal  ${s}  ${state}
+
+Permit type should be
+  [Arguments]  ${type}
+  Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}
