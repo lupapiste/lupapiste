@@ -205,8 +205,12 @@
   (let [v (str v)]
     (if (s/blank? v) 0.0 (Double/parseDouble v))))
 
+(defn- permit-type-from-operation [operation]
+  ;; TODO operation to permit type mapping???
+  "buildingPermit")
+
 (defcommand "create-application"
-  {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
+  {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]}
   [command]
   (let [{:keys [user created data]} command
@@ -240,7 +244,7 @@
                                                                [[:muut [:muu]]]
                                                                (partition 2 attachment/attachment-types))
                                      :comments      (map make-comment (:messages data))
-                                     :permitType    (keyword (:permitType data))})
+                                     :permitType    (permit-type-from-operation op)})
         (ok :id id))
       (fail :error.unauthorized))))
 
