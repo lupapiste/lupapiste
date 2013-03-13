@@ -22,7 +22,6 @@
     app => (contains {:id id
                       :state "draft"
                       :location {:x 444444.0 :y 6666666.0}
-                      :permitType "buildingPermit"
                       :municipality "753"})
     (count (:comments app)) => 0
     (first (:auth app)) => (contains
