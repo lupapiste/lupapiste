@@ -54,7 +54,7 @@
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
-  (when-not (env/dev-mode?) (server/add-middleware web/anti-csrf))
+  (env/dev-mode?) (server/add-middleware web/anti-csrf)
   (server/add-middleware web/apikey-authentication)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
