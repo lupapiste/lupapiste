@@ -261,7 +261,7 @@ Create application
   Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-application
   Wait Until  Element should be visible  application
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
@@ -274,7 +274,7 @@ Create inforequest
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
   Wait Until  Element should be visible  inforequest
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}
