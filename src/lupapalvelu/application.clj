@@ -125,8 +125,8 @@
       (let [new-state :complement-needed
             application-id (:id application)]
         (mongo/update
-          :applications {:_id (:id application) :state new-state}
-          {$set {:state :sent}})))))
+          :applications {:_id (:id application) :state :submitted}
+          {$set {:state new-state}})))))
 
 (defcommand "approve-application"
   {:parameters [:id]
