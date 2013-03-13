@@ -31,6 +31,7 @@
                              [lein-nitpicker "0.3.0"]]}
              :itest {:test-paths ^:replace ["itest"]}
              :stest {:test-paths ^:replace ["stest"]}
+             :alltests {:source-paths ["itest" "stest"]}
              :lupadev {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
   :nitpicker {:exts ["clj" "js" "html"]
