@@ -35,7 +35,7 @@
       if (_.isBlank(f)) return self.data;
       var newData = [];
       _.each(self.data, function(group) {
-        var options = _.filter(group[1], function(o) { return loc(o).toLowerCase().indexOf(f) >= 0; });
+        var options = _.filter(group[1], function(o) { return o.text.toLowerCase().indexOf(f) >= 0; });
         if (options.length > 0) newData.push([group[0], options]);
       });
       return newData;
@@ -47,18 +47,17 @@
       self.$source.empty();
       self.visible = newVisible;
       _.each(self.visible, function(group) {
-        self.$source.append($("<optgroup>").attr("label", loc(group[0])));
+        self.$source.append($("<optgroup>").attr("label", group[0]));
         _.each(group[1], function(option) {
-          var name = loc(option);
-          self.$source.append($("<option>").data("id", option).html("&nbsp;&nbsp;" + name));
+          self.$source.append($("<option>").data("id", option.id).data("text", option.text).html("&nbsp;&nbsp;" + option.text));
         });
       });
       self.checkAdd();
     };
       
     self.add = function() {
-      var id = $("option:selected", self.$source).data("id");
-      if (id) self.$target.append($("<option>").data("id", id).text(loc(id)));
+      var d = $("option:selected", self.$source).data();
+      if (d) self.$target.append($("<option>").data("id", d.id).text(d.text));
       self.checkOk();
     };
   

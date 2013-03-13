@@ -458,16 +458,10 @@
   var attachmentTemplatesModel = new function() {
     var self = this;
 
-    self.toAttachmentTypes = function(ids) {
-      return [{"type-group": "hakija", "type-id": "valtakirja"},
-              {"type-group": "hakija", "type-id": "valtakirja"},
-              {"type-group": "muut", "type-id": "kerrosalaselvitys"}];
-    };
-    
     self.ok = function(ids) {
-      console.log("OK:", application.id(), ids);
-      ajax.command("create-attachments", {id: application.id(), attachmentTypes: self.toAttachmentTypes(ids)})
-        .success(LUPAPISTE.ModalDialog.close)
+      ajax.command("create-attachments", {id: application.id(), attachmentTypes: ids})
+        .success(function() { repository.load(application.id()); })
+        .complete(LUPAPISTE.ModalDialog.close)
         .call();
     };
     
@@ -483,9 +477,15 @@
     
     self.show = function() {
       var data = _.map(application.allowedAttachmentTypes(), function(g) {
-        return ["attachmentType." + g[0] + "._group_label", _.map(g[1], function(a) {
-          return "attachmentType." + g[0] + "." + a;
-        })]
+        var groupId = g[0];
+        var groupText = loc("attachmentType." + groupId + "._group_label");
+        var attachemntIds = g[1];
+        var attachments = _.map(attachemntIds, function(a) {
+          var id = {"type-group": groupId, "type-id": a};
+          var text = loc("attachmentType." + groupId + "." + a);
+          return {id: id, text: text};
+        });
+        return [groupText, attachments];
       });
       self.selectm.reset(data);
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
