@@ -11,6 +11,14 @@
 
     <div class="application_summary">
       <div class=" container">
+        <div class="application-map-container">
+          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+          <div class="application-map-actions" data-bind="with: application">
+            <!-- ko if: location() -->
+              <button data-bind="click: openOskariMap, ltext: 'application.mapActionOpen'" class="btn btn-primary map-search-button"></button>
+            <!-- /ko -->
+          </div>
+        </div>
         <div data-bind="with: application" class="application_summary_info">
           <h1 data-bind="text: address"></h1>
           <!-- ID: -->
@@ -81,15 +89,6 @@
           </div>
         </div>
         
-        <div class="application-map-container">
-          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
-          <div class="application-map-actions" data-bind="with: application">
-            <!-- ko if: location() -->
-              <button data-bind="click: openOskariMap, ltext: 'application.mapActionOpen'" class="btn btn-primary map-search-button"></button>
-            <!-- /ko -->
-          </div>
-        </div>
-
         <!-- Actions: -->
         <div data-bind="with: application" class="application_actions">
           <div class="muncipality-info">
