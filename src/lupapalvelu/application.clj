@@ -113,7 +113,6 @@
         (notifications/send-notifications-on-application-state-change id host)
         (ok)))))
 
-
 (defcommand "request-for-complement"
   {:parameters [:id]
    :roles      [:authority]
@@ -122,11 +121,11 @@
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (let [new-state :complement-needed
-            application-id (:id application)]
+      (let [application-id (:id application)]
         (mongo/update
           :applications {:_id (:id application) :state :submitted}
-          {$set {:state new-state}})))))
+          {$set {:state :complement-needed}})
+        (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "approve-application"
   {:parameters [:id]
