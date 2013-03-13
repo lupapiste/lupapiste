@@ -148,7 +148,7 @@
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
