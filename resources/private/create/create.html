@@ -9,7 +9,7 @@
         <label data-bind="ltext: 'create.search-map'" for="create-search" class="form-label"></label>
         <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search"/>
         
-        <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary"></button>
+        <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary" data-test-id="create-search-button"></button>
       </div>
       <div class="selected-location">
         <div class="map-select-info">
