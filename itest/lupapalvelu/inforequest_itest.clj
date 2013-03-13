@@ -8,7 +8,7 @@
   )
 
 (facts "inforequest workflow"
-  (let [resp (create-app pena :messages ["hello"] :infoRequest true :permitType "infoRequest" :municipality sonja-muni)
+  (let [resp (create-app pena :messages ["hello"] :infoRequest true :municipality sonja-muni)
         id   (:id resp)]
 
     (success resp) => true

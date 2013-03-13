@@ -26,7 +26,7 @@
 
     self.goPhase2 = function() {
       $("#create-map").hide();
-      
+
       $("#create-part-1")
         .find("h2")
         .accordionClose(open("#create-part-2"));
@@ -83,7 +83,7 @@
     self.setPropertyId = function(value) { return  self.propertyId(value); };
     self.setMunicipality = function(value) { return isBlank(value) ? self.municipalityCode(null).municipality("") : self.municipalityCode(value).municipality(loc("municipality." + value)); };
     self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
-    
+
     self.municipalityCode.subscribe(function(v) {
       self.operations(null).links.removeAll();
       if (!v || v.length === 0) { return; }
@@ -130,7 +130,7 @@
         .searchPointByAddressOrPropertyId(self.search());
       return false;
     };
-    
+
     self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
@@ -203,7 +203,7 @@
         .call();
       return self;
     };
-    
+
     self.searchAddress = function(x, y) {
       var requestId = self.updateRequestId;
       ajax
@@ -222,7 +222,6 @@
     self.create = function(infoRequest) {
       ajax.command("create-application", {
         infoRequest: infoRequest,
-        permitType: infoRequest ? "infoRequest" : "buildingPermit", // FIXME: WTF this should be?
         operation: self.operation().op,
         y: self.y(),
         x: self.x(),
