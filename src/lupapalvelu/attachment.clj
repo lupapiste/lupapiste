@@ -236,6 +236,14 @@
     (ok :applicationId application-id :attachmentId attachment-id)
     (fail :error.attachment-placeholder)))
 
+(defcommand "delete-attachment"
+  {:description "delete attachement with all it's versions. do not delete comments."
+   :parameters  [:id :attachmentId]
+   :states      [:draft :open]}
+  [{{:keys [id attachmentId]} :data}]
+  (println "***" id attachmentId)
+  (ok))
+
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
