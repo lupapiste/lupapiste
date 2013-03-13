@@ -237,12 +237,16 @@
     (fail :error.attachment-placeholder)))
 
 (defcommand "delete-attachment"
-  {:description "delete attachement with all it's versions. do not delete comments."
+  {:description "Delete attachement with all it's versions. do not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
    :states      [:draft :open]}
-  [{{:keys [id attachmentId]} :data}]
-  (mongo/delete-file attachmentId)
-  (ok))
+  [{{:keys [id attachmentId]} :data :as command}]
+  (with-application command
+    (fn [_]
+      ;; works (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
+      ;; loop all versions and delete them all in one sweep
+      (ok))
+      ))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]

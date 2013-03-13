@@ -108,7 +108,7 @@
      :application (.getString (.getMetaData attachment) "application")}))
 
 (defn delete-file [file-id]
-  (println "deleted"))
+  (gfs/remove {:_id file-id}))
 
 (defn count
   "returns count of objects in collection"
