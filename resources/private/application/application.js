@@ -111,6 +111,7 @@
     infoRequest: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
+    municipality: ko.observable(),
     permitType: ko.observable(),
     propertyId: ko.observable(),
     title: ko.observable(),
