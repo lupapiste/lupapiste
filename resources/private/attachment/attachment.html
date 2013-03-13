@@ -13,7 +13,7 @@
             <span data-bind="dateTimeString: latestVersion().created"></span>
           </span>
         </h1>
-        <a class="btn attachment-back" data-bind ="attr: {href: '#!/application/' + application.id() }, ltext: 'attachment.return'"></a>
+        <a class="btn attachment-back" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }, ltext: 'attachment.return'"></a>
         <div class="form-entry">
           <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <div id="attachment-type-select-list-container"></div>
@@ -95,11 +95,19 @@
               </tbody>
             </table>
             <form>
-              <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-                        class="conversation-input" id="attachment.commentText" rows="3"></textarea>
-              <button id="attachment.addComment"
+              <textarea
+                data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+                id="attachment.commentText"
+                class="conversation-input"
+                rows="3">
+              </textarea>
+              <button
                   data-bind="disable: disabled, click: submit, ltext: 'attachment.send'"
-                  type="submit" class="btn btn-primary">Lähetä viesti</button>
+                  id="attachment.addComment"
+                  type="submit"
+                  class="btn btn-primary">
+                Lähetä viesti
+              </button>
             </form>
           </div>
       </div>

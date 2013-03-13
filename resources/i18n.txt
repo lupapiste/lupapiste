@@ -18,6 +18,10 @@ newRequest.topic: Uusi hanke
 attachment.return: Palaa hakemukseen
 mypage.null:
 
+application.newAttachmentTemplates: Lisää liitepohjia
+application.newAttachmentTemplates.add: Lisää
+application.newAttachmentTemplates.cancel: Peruuta
+
 uusiRakennus.rakennuksenOmistajat.henkilo.turvakieltoKytkin: Turvakielto
 uusiRakennus.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: yksityinen maatalousyrittäjä
 uusiRakennus.rakennuksenOmistajat.omistajalaji.muu yksityinen henkilö tai perikunta: muu yksityinen henkilö tai perikunta
@@ -69,6 +73,8 @@ hakija.henkilo.turvakieltoKytkin: Turvakielto
 paasuunnittelija.turvakieltoKytkin: Turvakielto
 suunnittelija.turvakieltoKytkin: Turvakielto
 maksaja.henkilo.turvakieltoKytkin: Turvakielto
+
+applications.operation: Toimenpide
 
 operations.Rakentaminen ja purkaminen: Rakentaminen ja purkaminen
 operations.Elinympariston muuttaminen: Elinympäristön muuttaminen
@@ -243,6 +249,14 @@ applications.empty.applications-desc: Sinulla ei tällä hetkellä ole järjeste
 applications.empty.new-application: Luo uusi lupahakemus
 applications.empty.inforequests-title: Neuvontapyynnöt
 applications.empty.inforequests-desc: Sinulla ei tällä hetkellä ole järjestelmässä aktiivisia neuvontapyyntöjä. Neuvontapyynnöt ovat helppo tapa selvittää kuntasi viranomaisilta rakentamiseen liittyviä lupa-asioita. Saat viranomaisen vastauksesta tiedon suoraan sähköpostiisi. Neuvontapyynnön perusteella voit aloittaa myös varsinaisen luvan hakemisen. Voit luoda neuvontapyynnön klikkaamalla alla olevaa nappia.
-applications.empty.new-request: Luo uusi neuvontapyyntö
 
 attachment.delete: poista
+
+applications.empty.new-request: Luo uusi neuvontapyyntö
+
+selectm.filter: Etsi
+selectm.target: Lisättävät liitepohjat
+selectm.add: Lisää
+selectm.remove: Poista
+selectm.ok: Ok
+selectm.cancel: Peruuta

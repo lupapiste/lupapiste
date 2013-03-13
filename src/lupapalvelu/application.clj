@@ -35,6 +35,11 @@
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str first-name \space last-name))))))
 
+(defn get-application-operation [app]
+  (if (:infoRequest app)
+    (:initialOp app)
+    (some (comp :op :info :schema) (:documents app))))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -333,7 +338,7 @@
 
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   :address
-                  :title
+                  get-application-operation
                   get-applicant-name
                   :submitted
                   :modified
@@ -360,7 +365,7 @@
         "inforequests" {:infoRequest true}
         nil)
       (when-not (blank? search)
-        {:title {$regex search $options "i"}}))))
+        {:address {$regex search $options "i"}}))))
 
 (defn applications-for-user [user params]
   (let [user-query  (domain/application-query-for user)
