@@ -8,7 +8,13 @@ var attachment = (function() {
   var approveModel = new ApproveModel(authorizationModel);
 
   function deleteAttachmentFromServer() {
-    console.log("removed "+attachmentId);
+    ajax
+      .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
+      .success(function() {
+        window.location.hash = "!/applications";
+      })
+      .call();
+    return false;
   }
 
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
