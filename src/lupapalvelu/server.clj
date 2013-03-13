@@ -48,10 +48,7 @@
     (System/getProperty "java.runtime.version")
     (System/getProperty "java.vm.info")
     (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful"))
-  (infof "Running on Clojure %d.%d.%d"
-    (:major *clojure-version*)
-    (:minor *clojure-version*)
-    (:incremental *clojure-version*))
+  (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)
   (server/add-middleware headers/session-id-to-mdc)

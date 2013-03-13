@@ -23,31 +23,44 @@
 
     (comment-application application-id pena)
 
-    (let [resp            (command veikko :create-attachment :id application-id :attachmentType {:type-group "tg" :type-id "tid"})
-          attachment-id   (:attachmentId resp)]
+    (let [resp (command veikko
+                        :create-attachments
+                        :id application-id
+                        :attachmentTypes [{:type-group "tg" :type-id "tid-1"}
+                                          {:type-group "tg" :type-id "tid-2"}])
+          attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
-            (success resp) => true)
+        (success resp) => true)
 
+      (fact "Two attachments were created in one call"
+        (fact (count attachment-ids) => 2))
+      
+      (clojure.pprint/pprint attachment-ids)
+      
       (fact "attachment has been saved to application"
-            (get-attachment application-id attachment-id) => (contains
-                                                               {:type {:type-group "tg" :type-id "tid"}
-                                                                :state "requires_user_action"
-                                                                :versions []}))
+        (get-attachment application-id (first attachment-ids)) => (contains
+                                                                    {:type {:type-group "tg" :type-id "tid-1"}
+                                                                     :state "requires_user_action"
+                                                                     :versions []})
+        (get-attachment application-id (second attachment-ids)) => (contains
+                                                                     {:type {:type-group "tg" :type-id "tid-2"}
+                                                                      :state "requires_user_action"
+                                                                      :versions []}))
 
       (fact "Veikko can approve attachment"
-            (approve-attachment application-id attachment-id))
+        (approve-attachment application-id (first attachment-ids)))
 
       (fact "Veikko can reject attachment"
-            (reject-attachment application-id attachment-id))
+        (reject-attachment application-id (first attachment-ids)))
 
       (fact "Veikko submits the application"
-            (success (command veikko :submit-application :id application-id)) => true
-            (-> (query veikko :application :id application-id) :application :state) => "submitted")
+        (success (command veikko :submit-application :id application-id)) => true
+        (-> (query veikko :application :id application-id) :application :state) => "submitted")
 
       (fact "Veikko can still approve attachment"
-            (approve-attachment application-id attachment-id))
+        (approve-attachment application-id (first attachment-ids)))
 
       (fact "Veikko can still reject attachment"
-            (reject-attachment application-id attachment-id)))))
+        (reject-attachment application-id (first attachment-ids))))))
 
