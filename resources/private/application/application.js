@@ -490,7 +490,6 @@
         });
         return [groupText, attachments];
       });
-      console.log("SHOW:", data);
       self.selectm.reset(data);
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
       return self;
