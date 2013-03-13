@@ -245,15 +245,15 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
-  Open application  ${address}
+  Open application  ${address}  ${propertyId}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"permitType":"infoRequest","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
-  Open inforequest  ${address}
+  Open inforequest  ${address}  ${propertyId}
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}
@@ -261,7 +261,7 @@ Create application
   Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-application
   Wait Until  Element should be visible  application
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
@@ -274,17 +274,18 @@ Create inforequest
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
   Wait Until  Element should be visible  inforequest
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Execute Javascript  window.location.hash = "!/applications";
   Click by test id  applications-create-new
-  Wait Until  Element should be visible  xpath=//input[@data-test-id="create-address"]
+  Wait and click  xpath=//button[@data-test-id="create-search-button"]
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
   Select From List by test id  create-municipality-select  ${municipality}
+  Sleep  1
   Input text by test id  create-property-id  ${propertyId}
   Click by test id  create-continue
   # Going too fast causes negative margins
@@ -318,14 +319,14 @@ Open the request
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
 
 Open application
-  [Arguments]  ${address}
+  [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
-  [Arguments]  ${address}
+  [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
   [Arguments]  ${address}
@@ -364,3 +365,7 @@ Application state should be
   [Arguments]  ${state}
   ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
   Should be equal  ${s}  ${state}
+
+Permit type should be
+  [Arguments]  ${type}
+  Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}

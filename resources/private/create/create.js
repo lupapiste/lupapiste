@@ -8,6 +8,7 @@
     var self = this;
 
     self.goPhase1 = function() {
+      $('.selected-location').hide();
       $("#create")
         .find("#create-part-1")
           .find("h2").accordionOpen().end()
@@ -23,15 +24,13 @@
     var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
 
     self.goPhase2 = function() {
-      $("#create-part-1")
-        .find("h2")
-        .accordionClose(open("#create-part-2"));
+      $("#create-part-1").hide();
+      $("#create-part-2").show();
     };
 
     self.goPhase3 = function() {
-      $("#create-part-2")
-        .find("h2")
-        .accordionClose(open("#create-part-3"));
+      $("#create-part-2").hide();
+      $("#create-part-3").show();
     };
 
     self.municipalities = ko.observableArray([]);
@@ -79,7 +78,7 @@
     self.setPropertyId = function(value) { return  self.propertyId(value); };
     self.setMunicipality = function(value) { return isBlank(value) ? self.municipalityCode(null).municipality("") : self.municipalityCode(value).municipality(loc("municipality." + value)); };
     self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
-    
+
     self.municipalityCode.subscribe(function(v) {
       self.operations(null).links.removeAll();
       if (!v || v.length === 0) { return; }
@@ -117,6 +116,7 @@
     // Search activation:
 
     self.searchNow = function() {
+      $('.selected-location').show();
       self
         .resetXY()
         .setAddress(null)
@@ -126,7 +126,7 @@
         .searchPointByAddressOrPropertyId(self.search());
       return false;
     };
-    
+
     self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
@@ -199,7 +199,7 @@
         .call();
       return self;
     };
-    
+
     self.searchAddress = function(x, y) {
       var requestId = self.updateRequestId;
       ajax
@@ -218,7 +218,6 @@
     self.create = function(infoRequest) {
       ajax.command("create-application", {
         infoRequest: infoRequest,
-        permitType: infoRequest ? "infoRequest" : "buildingPermit", // FIXME: WTF this should be?
         operation: self.operation().op,
         y: self.y(),
         x: self.x(),

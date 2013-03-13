@@ -31,7 +31,7 @@ var docgen = (function() {
     // ID utilities
 
     function pathStrToID(pathStr) {
-        return self.docId + pathStr.replace(/\./g, "-");
+      return self.docId + pathStr.replace(/\./g, "-");
     }
 
     function pathStrToLabelID(pathStr) {
@@ -147,13 +147,13 @@ var docgen = (function() {
 
       // date
       $("<input>", {
-              id:    pathStrToID(myPath),
-              name:  docId + "." + path,
-              type:  "text",
-              "class": "form-input text form-date",
-              value: value,
-              change: save,
-              }).datepicker($.datepicker.regional[lang]).appendTo(span);
+        id:    pathStrToID(myPath),
+        name:  docId + "." + path,
+        type:  "text",
+        "class": "form-input text form-date",
+        value: value,
+        change: save,
+      }).datepicker($.datepicker.regional[lang]).appendTo(span);
 
       return span;
     }
@@ -233,7 +233,7 @@ var docgen = (function() {
       return partsDiv;
     }
 
-    function buildBuildingSelector(spec, model, path, save, specId) {
+    function buildBuildingSelector(spec, model, path, save) {
       var myPath = path.join(".");
 
       var select = document.createElement("select");
@@ -348,15 +348,16 @@ var docgen = (function() {
 
       // new invite
       $("<button>", {
-              "class": "icon-remove",
-              "data-test-id": "application-invite-"+specId,
-              text: loc("personSelector.invite"),
-              click: function() {
-                $("#invite-document-name").val(specId).change();
-                $("#invite-document-id").val(self.docId).change();
-                LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-                return false;
-              }}).appendTo(span);
+        "class": "icon-remove",
+        "data-test-id": "application-invite-"+specId,
+        text: loc("personSelector.invite"),
+        click: function() {
+          $("#invite-document-name").val(specId).change();
+          $("#invite-document-id").val(self.docId).change();
+          LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+          return false;
+        }
+      }).appendTo(span);
 
       return span;
     }

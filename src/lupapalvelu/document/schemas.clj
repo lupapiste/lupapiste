@@ -429,6 +429,7 @@
 
      {:info {:name "hakija"
              :order 3
+             :removable true
              :repeating true
              :type :party}
       :body party}

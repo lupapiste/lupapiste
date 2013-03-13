@@ -232,7 +232,8 @@
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
-    :role  "applicant"}])
+    :role  "applicant"}
+   ])
 
 (def municipalities [{:id "186"
                       :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
@@ -276,8 +277,63 @@
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
                               {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
-                     
-                     ])
+                     {:id "047"
+                      :name {:fi "Enonteki\u00F6", :sv "Enontekis"}
+                      :municipalityCode "047"}
+                     {:id "078"
+                      :name {:fi "Hanko", :sv "Hang\u00F6"}
+                      :municipalityCode "078"}
+                     {:id "079"
+                      :name {:fi "Harjavalta", :sv "Harjavalta"}
+                      :municipalityCode "079"}
+                     {:id "090"
+                      :name {:fi "Hein\u00E4vesi", :sv "Hein\u00E4vesi"}
+                      :municipalityCode "090"}
+                     {:id "106"
+                      :name {:fi "Hyvink\u00E4\u00E4", :sv "Hyvinge"}
+                      :municipalityCode "106"}
+                     {:id "109"
+                      :name {:fi "H\u00E4meenlinna", :sv "Tavastehus"}
+                      :municipalityCode "109"}
+                     {:id "165"
+                      :name {:fi "Janakkala", :sv "Janakkala"}
+                      :municipalityCode "165"}
+                     {:id "205"
+                      :name {:fi "Kajaani", :sv "Kajana"}
+                      :municipalityCode "205"}
+                     {:id "244"
+                      :name {:fi "Kempele", :sv "Kempele"}
+                      :municipalityCode "244"}
+                     {:id "257"
+                      :name {:fi "Kirkkonummi", :sv "Kyrksl\u00E4tt"}
+                      :municipalityCode "257"}
+                     {:id "297"
+                      :name {:fi "Kuopio", :sv "Kuopio"}
+                      :municipalityCode "297"}
+                     {:id "491"
+                      :name {:fi "Mikkeli", :sv "St.Michel"}
+                      :municipalityCode "491"}
+                     {:id "499"
+                      :name {:fi "Mustasaari", :sv "Korsholm"}
+                      :municipalityCode "499"}
+                     {:id "535"
+                      :name {:fi "Nivala", :sv "Nivala"}
+                      :municipalityCode "535"}
+                     {:id "050"
+                      :name {:fi "Eura", :sv "Eura"}
+                      :municipalityCode "050"}
+                     {:id "319"
+                      :name {:fi "K\u00F6yli\u00F6", :sv "Kjulo"}
+                      :municipalityCode "319"}
+                     {:id "783"
+                      :name {:fi "S\u00E4kyl\u00E4", :sv "S\u00E4kyl\u00E4"}
+                      :municipalityCode "783"}
+                     {:id "732"
+                      :name {:fi "Salla", :sv "Salla"}
+                      :municipalityCode "732"}
+                     {:id "734"
+                      :name {:fi "Salo", :sv "Salo"}
+                      :municipalityCode "734"}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
