@@ -241,7 +241,7 @@
    :parameters  [:id :attachmentId]
    :states      [:draft :open]}
   [{{:keys [id attachmentId]} :data}]
-  (println "***" id attachmentId)
+  (mongo/delete-file attachmentId)
   (ok))
 
 (defcommand "upload-attachment"
