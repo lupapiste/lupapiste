@@ -247,13 +247,13 @@ Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
-  Open application  ${address}
+  Open application  ${address}  ${propertyId}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
-  Open inforequest  ${address}
+  Open inforequest  ${address}  ${propertyId}
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}
@@ -285,6 +285,7 @@ Prepare new request
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
   Select From List by test id  create-municipality-select  ${municipality}
+  Sleep  1
   Input text by test id  create-property-id  ${propertyId}
   Click by test id  create-continue
   # Going too fast causes negative margins
@@ -318,14 +319,14 @@ Open the request
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
 
 Open application
-  [Arguments]  ${address}
+  [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
-  [Arguments]  ${address}
+  [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
   [Arguments]  ${address}
