@@ -11,7 +11,7 @@ var attachment = (function() {
     ajax
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
       .success(function() {
-        window.location.hash = "!/applications";
+        window.location.hash = "!/application/"+applicationId+"/attachments";
       })
       .call();
     return false;
