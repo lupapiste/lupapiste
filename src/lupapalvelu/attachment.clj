@@ -83,21 +83,31 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-;;
-;; Upload
-;;
+(defn make-attachment [now attachement-type]
+  {:id (mongo/create-id)
+   :type attachement-type
+   :modified now
+   :state :requires_user_action
+   :versions []})
+
+(defn make-attachments [now attachement-types]
+  (map (partial make-attachment now) attachement-types))
 
 (defn create-attachment [application-id attachement-type now]
-  (let [attachment-id (mongo/create-id)
-        attachment-model {:id attachment-id
-                          :type (or attachement-type default-type)
-                          :state :requires_user_action
-                          :modified now
-                          :versions []}]
-    (mongo/update-by-id :applications application-id
+  (let [attachment (make-attachment now attachement-type)]
+    (mongo/update-by-id
+      :applications application-id
       {$set {:modified now}
-       $push {:attachments attachment-model}})
-    attachment-id))
+       $push {:attachments attachment}})
+    (:id attachment)))
+
+(defn create-attachments [application-id attachement-types now]
+  (let [attachments (make-attachments now attachement-types)]
+    (mongo/update-by-id
+      :applications application-id
+      {$set {:modified now}
+       $pushAll {:attachments attachments}})
+    (map :id attachments)))
 
 (defn- next-attachment-version [{major :major minor :minor} user]
   (let [major (or major 0)
@@ -226,14 +236,14 @@
         {$set {:modified (:created command)
                :attachments.$.state :requires_user_action}}))))
 
-(defcommand "create-attachment"
+(defcommand "create-attachments"
   {:description "Authority can set a placeholder for an attachment"
-   :parameters  [:id :attachmentType]
+   :parameters  [:id :attachmentTypes]
    :roles       [:authority]
    :states      [:draft :open]}
-  [{{application-id :id attachmentType :attachmentType} :data created :created}]
-  (if-let [attachment-id (create-attachment application-id attachmentType created)]
-    (ok :applicationId application-id :attachmentId attachment-id)
+  [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
+  (if-let [attachment-ids (create-attachments application-id attachment-types created)]
+    (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
 (defcommand "upload-attachment"
@@ -266,14 +276,6 @@
           (fail :error.illegal-attachment-type))
         (fail :error.no-such-application))
       (fail :error.illegal-file-type))))
-
-(defcommand "add-attachment-templates"
-  {:parameters [:id]
-   :roles      [:authority]
-   :states     [:draft :open]}
-  [{created :created user :user {id :id} :data}]
-  (println "add-attachment-templates: id=" id "user=" user)
-  (ok))
 
 ;;
 ;; Download
