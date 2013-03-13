@@ -98,6 +98,7 @@
     //
     
     self.reset = function(data) {
+      self.visible = null;
       self.data = data;
       self.$source.empty();
       self.$target.empty();
