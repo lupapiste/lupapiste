@@ -256,3 +256,7 @@ selectm.remove: Poista
 selectm.ok: Ok
 selectm.cancel: Peruuta
 
+create.search-map: Määritä sijainti
+
+navigation: Omat hankkeet
+
