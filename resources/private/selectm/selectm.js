@@ -98,9 +98,9 @@
     //
     
     self.reset = function(data) {
+      self.data = data;
       self.$source.empty();
       self.$target.empty();
-      self.data = data;
       self.$filter.val("");
       self.updateFilter();
       self.checkAdd();

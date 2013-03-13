@@ -465,13 +465,9 @@
         .call();
     };
     
-    self.cancel = function() {
-      LUPAPISTE.ModalDialog.close();
-    };
-    
     self.init = function() {
       self.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
-      self.selectm.ok(self.ok).cancel(self.cancel);
+      self.selectm.ok(self.ok).cancel(LUPAPISTE.ModalDialog.close);
       return self;
     };
     
@@ -487,6 +483,7 @@
         });
         return [groupText, attachments];
       });
+      console.log("SHOW:", data);
       self.selectm.reset(data);
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
       return self;
