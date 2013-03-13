@@ -16,7 +16,7 @@
         </div>
 
         <div data-bind="with: application" class="application_summary_info">
-          <h1 data-bind="text: address"></h1>
+          <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span></h1>
           <div>
             <p data-bind="ltext: 'application.id'"></p>
             <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>

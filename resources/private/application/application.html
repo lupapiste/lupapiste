@@ -14,7 +14,7 @@
           </div>
         </div>
         <div data-bind="with: application" class="application_summary_info">
-          <h1 data-bind="text: address"></h1>
+          <h1><span data-bind="ltext: permitType"></span><span data-bind="text: address"></span></h1>
           <!-- ID: -->
           <div>
             <p data-bind="ltext: 'application.id'"></p>
@@ -32,11 +32,6 @@
               data-test-id="application-state"
               class="application_summary_text">
             </span>
-          </div>
-          <!-- Permit type: -->
-          <div>
-            <p data-bind="ltext: 'application.type'"></p>
-            <span class="application_summary_text" data-bind="ltext: permitType"></span>
           </div>
           <!-- Property ID: -->
           <div>
