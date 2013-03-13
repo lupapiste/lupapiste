@@ -18,7 +18,7 @@ Mikko could add an operation
 
 Application is not assigned
   Sonja logs in
-  Open application  assign-to-me
+  Open application  assign-to-me  75341600250030
   Application is not assigned
 
 Sonja assign application to herself

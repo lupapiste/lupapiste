@@ -8,8 +8,7 @@
     var self = this;
 
     self.goPhase1 = function() {
-      $("#create-map").show();
-
+      $('.selected-location').hide();
       $("#create")
         .find("#create-part-1")
           .find("h2").accordionOpen().end()
@@ -25,17 +24,13 @@
     var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
 
     self.goPhase2 = function() {
-      $("#create-map").hide();
-
-      $("#create-part-1")
-        .find("h2")
-        .accordionClose(open("#create-part-2"));
+      $("#create-part-1").hide();
+      $("#create-part-2").show();
     };
 
     self.goPhase3 = function() {
-      $("#create-part-2")
-        .find("h2")
-        .accordionClose(open("#create-part-3"));
+      $("#create-part-2").hide();
+      $("#create-part-3").show();
     };
 
     self.municipalities = ko.observableArray([]);
@@ -55,7 +50,7 @@
     self.operations = ko.observable(null);
     self.requestType = ko.observable();
 
-    self.valuesOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address) && !isBlank(self.propertyId); });
+    self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
 
     self.clear = function() {
       if (!self.map) {
@@ -121,6 +116,7 @@
     // Search activation:
 
     self.searchNow = function() {
+      $('.selected-location').show();
       self
         .resetXY()
         .setAddress(null)
