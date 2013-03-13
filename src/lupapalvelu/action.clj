@@ -3,7 +3,8 @@
         [clojure.tools.logging]
         [lupapalvelu.strings :only [suffix]]
         [lupapalvelu.core])
-  (:require [sade.security :as sadesecurity]
+  (:require [clojure.string :as s]
+            [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
@@ -184,7 +185,7 @@
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
             henkilo      (domain/user2henkilo subject)
-            full-path    (str "documents.$.body." path)]
+            full-path    (str "documents.$.body" (when-not (s/blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
           (do
