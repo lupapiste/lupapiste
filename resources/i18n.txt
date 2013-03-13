@@ -244,3 +244,5 @@ applications.empty.new-application: Luo uusi lupahakemus
 applications.empty.inforequests-title: Neuvontapyynnöt
 applications.empty.inforequests-desc: Sinulla ei tällä hetkellä ole järjestelmässä aktiivisia neuvontapyyntöjä. Neuvontapyynnöt ovat helppo tapa selvittää kuntasi viranomaisilta rakentamiseen liittyviä lupa-asioita. Saat viranomaisen vastauksesta tiedon suoraan sähköpostiisi. Neuvontapyynnön perusteella voit aloittaa myös varsinaisen luvan hakemisen. Voit luoda neuvontapyynnön klikkaamalla alla olevaa nappia.
 applications.empty.new-request: Luo uusi neuvontapyyntö
+
+attachment.delete: poista
