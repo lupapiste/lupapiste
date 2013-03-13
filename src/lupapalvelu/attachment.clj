@@ -4,11 +4,12 @@
         [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
         [clojure.string :only [split join trim]])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [clojure.java.io :as io]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.strings :as strings]
             [lupapalvelu.mime :as mime]
-            [clojure.java.io :as io])
+            [lupapalvelu.ke6666 :as ke6666])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -315,19 +316,33 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-(defn- append-attachment [zip latest]
-  (when latest
-    (.putNextEntry zip (ZipEntry. (encode-filename (:filename latest))))
-    (with-open [in ((-> latest :fileId mongo/download :content))]
+(defn- append-gridfs-file [zip file-name file-id]
+  (when file-id
+    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
-(defn- get-all-attachments [attachments]
+(defn- append-stream [zip file-name in]
+  (when in
+    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (io/copy in zip)))
+
+(defn- append-attachment [zip {:keys [filename fileId]}]
+  (append-gridfs-file zip filename fileId))
+
+(defn- get-all-attachments [application]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
       (let [zip (ZipOutputStream. out)]
-        (doseq [attachment attachments]
+        ; Add all attachments:
+        (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
+        ; Add submitted PDF, if exists:
+        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+          (append-stream zip "hakemus-jatettaessa.pdf" (ke6666/generate submitted-application "fi")))
+        ; Add current PDF:
+        (append-stream zip "hakemus.pdf" (ke6666/generate application "fi"))
         (.finish zip)))
     temp-file))
 
@@ -340,8 +355,8 @@
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
 (defn output-all-attachments [application-id user]
-  (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]} {:attachments 1})]
-    {:body (temp-file-input-stream (get-all-attachments (:attachments application)))
+  (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
+    {:body (temp-file-input-stream (get-all-attachments application))
      :status 200
      :headers {"Content-Type" "application/octet-stream"
                "Content-Disposition" "attachment;filename=\"liitteet.zip\""}}
