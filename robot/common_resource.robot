@@ -280,9 +280,9 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Execute Javascript  window.location.hash = "!/applications";
   Click by test id  applications-create-new
-  Wait and click  xpath=//input[@data-test-id="create-search-button"]
+  Wait and click  xpath=//button[@data-test-id="create-search-button"]
   # for IE8
-  Focus  xpath=//input[@data-test-id="create-search"]
+  Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
   Select From List by test id  create-municipality-select  ${municipality}
   Input text by test id  create-property-id  ${propertyId}
