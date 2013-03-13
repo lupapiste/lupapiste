@@ -1,9 +1,9 @@
 $(function() {
   "use strict";
 
-  function applyMinimal() {
+  function applyFixture(fixture) {
     ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
-      .param("name", "minimal")
+      .param("name", fixture)
       .param("npm", "true")
       .success(function() { $("#debug-apply-done").text(" DONE!").show().delay(1000).fadeOut(); })
       .call();
@@ -70,8 +70,12 @@ $(function() {
         .append($("<br>"))
         .append($("<input type='checkbox'>").click(function() { $(".page").toggleClass("visible"); }))
         .append($("<label>").text("Toggle hidden"))
-        .append($("<br>"))
-        .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal!").click(applyMinimal))
+        .append($("<p>").text("Apply:")
+          .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
+          .append($("<br>"))
+          .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("minimal").click(function() { applyFixture("minimal"); }))
+          .append($("<br>"))
+          .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("municipality-test-users").click(function() { applyFixture("municipality-test-users"); })))
         .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
         .append($("<br>"))
         .append($("<span>").text("Throttle web: "))
