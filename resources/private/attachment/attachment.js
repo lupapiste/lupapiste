@@ -18,7 +18,7 @@ var attachment = (function() {
   }
 
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
-    loc("areyousure"), loc("areyousure.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
+    loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
 
   function ApproveModel(authorizationModel) {
     var self = this;
