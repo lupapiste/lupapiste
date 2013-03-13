@@ -458,10 +458,17 @@
   var attachmentTemplatesModel = new function() {
     var self = this;
 
+    self.toAttachmentTypes = function(ids) {
+      return [{"type-group": "hakija", "type-id": "valtakirja"},
+              {"type-group": "hakija", "type-id": "valtakirja"},
+              {"type-group": "muut", "type-id": "kerrosalaselvitys"}];
+    };
+    
     self.ok = function(ids) {
       console.log("OK:", application.id(), ids);
-      ajax.command("add-attachment-templates", {id: application.id()}).call();
-      LUPAPISTE.ModalDialog.close();
+      ajax.command("create-attachments", {id: application.id(), attachmentTypes: self.toAttachmentTypes(ids)})
+        .success(LUPAPISTE.ModalDialog.close)
+        .call();
     };
     
     self.cancel = function() {
