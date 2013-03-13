@@ -30,7 +30,7 @@
           self.callback();
           // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
           // The docgen already has code to remove actual document (that's the self.callback() above), just the
-          // "operations" list should be changed. 
+          // "operations" list should be changed.
           repository.load(self.appId);
         })
         .call();
@@ -106,7 +106,7 @@
     }
     return _.map(ops, function(v, k) { return {op: k, count: v}; });
   }
-  
+
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -248,7 +248,7 @@
       window.location.hash = "#!/application/" + application.id() + "/" + element.name;
     }
   };
-    
+
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -267,10 +267,10 @@
 
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
-    if (isInitializing) return;
+    if (isInitializing) { return; }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok('assign-application')) return;
+    if (!authorizationModel.ok('assign-application')) { return; }
 
     var assigneeId = value ? value : null;
 
@@ -323,9 +323,9 @@
       commentModel.setComments(app.comments);
 
       // Operations:
-      
+
       application.operations(getOperations(app.documents));
-      
+
       // Attachments:
 
       var statuses = {
@@ -351,13 +351,13 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
-      
-      if(x == 0 && y == 0) {
+
+      if(x === 0 && y === 0) {
         $('#application-map').css("display", "none");
       } else {
         $('#application-map').css("display", "inline-block");
       }
-      
+
       (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
 
       if (application.shapes && application.shapes().length > 0) {
