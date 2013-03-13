@@ -175,6 +175,13 @@
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
+(defn delete-attachment [{:keys [id attachments]} attachmentId]
+  (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
+        versions   (:versions attachment)
+        file-ids   (map :fileId versions)]
+    (dorun (map mongo/delete-file file-ids))
+    (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})))
+
 ;;
 ;; Actions
 ;;
@@ -252,11 +259,9 @@
    :states      [:draft :open]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
-    (fn [_]
-      ;; works (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
-      ;; loop all versions and delete them all in one sweep
-      (ok))
-      ))
+    (fn [application]
+      (delete-attachment application attachmentId)
+      (ok))))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
