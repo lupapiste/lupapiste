@@ -7,6 +7,13 @@ var attachment = (function() {
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
 
+  function deleteAttachmentFromServer() {
+    console.log("removed "+attachmentId);
+  }
+
+  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
+    loc("areyousure"), loc("areyousure.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
+
   function ApproveModel(authorizationModel) {
     var self = this;
 
@@ -21,7 +28,7 @@ var attachment = (function() {
         _.find(self.application.attachments,
             function(attachment) {
               return attachment.id === self.attachmentId;
-          });
+            });
       return att.state === state;
     };
 
@@ -96,6 +103,10 @@ var attachment = (function() {
       // Upload dialog is opened manually here, because click event binding to
       // dynamic content rendered by Knockout is not possible
       LUPAPISTE.ModalDialog.open("#upload-dialog");
+    },
+
+    deleteAttachment: function() {
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     }
   };
 
