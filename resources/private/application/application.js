@@ -66,17 +66,17 @@
   var removeApplicationModel = new function() {
     var self = this;
 
-    self.applicationId = ko.observable();
+    self.applicationId = null;
 
     self.init = function(applicationId) {
-      self.applicationId(applicationId);
+      self.applicationId = applicationId;
       LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
       return self;
     };
 
     self.ok = function() {
       ajax
-        .command("cancel-application", {id: self.applicationId()})
+        .command("cancel-application", {id: self.applicationId})
         .success(function() {
           window.location.hash = "!/applications";
         })
