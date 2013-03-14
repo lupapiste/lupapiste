@@ -9,7 +9,8 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.strings :as strings]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.ke6666 :as ke6666])
+            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.i18n :as i18n])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -330,7 +331,7 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application]
+(defn- get-all-attachments [application loc]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
@@ -340,9 +341,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip "hakemus-jatettaessa.pdf" (ke6666/generate submitted-application "fi")))
+          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application "fi")))
         ; Add current PDF:
-        (append-stream zip "hakemus.pdf" (ke6666/generate application "fi"))
+        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application "fi"))
         (.finish zip)))
     temp-file))
 
@@ -354,12 +355,13 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn output-all-attachments [application-id user]
-  (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
-    {:body (temp-file-input-stream (get-all-attachments application))
-     :status 200
-     :headers {"Content-Type" "application/octet-stream"
-               "Content-Disposition" "attachment;filename=\"liitteet.zip\""}}
-    {:body "404"
-     :status 404
-     :headers {"Content-Type" "text/plain"}}))
+(defn output-all-attachments [application-id user lang]
+  (let [loc (i18n/localizer lang)]
+    (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
+      {:body (temp-file-input-stream (get-all-attachments application loc))
+       :status 200
+       :headers {"Content-Type" "application/octet-stream"
+                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
+      {:body "404"
+       :status 404
+       :headers {"Content-Type" "text/plain"}})))
