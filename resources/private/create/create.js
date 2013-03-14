@@ -118,6 +118,7 @@
         .setPropertyId(null)
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
+      self.map.updateSize();
       return false;
     };
 
@@ -221,6 +222,7 @@
         municipality: self.municipalityCode()
       })
       .success(function(data) {
+        self.clear();
         window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
