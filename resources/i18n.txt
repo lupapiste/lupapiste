@@ -272,4 +272,4 @@ attachment.zip.pdf.filename.current: hakemus.pdf
 attachment.zip.pdf.filename.submitted: jatetty-hakemus.pdf
 
 application.requestForComplement: Palauta täydennettäväksi
-complement-needed: Vaatii täydennystä
+complement-needed: Täydennettävänä
