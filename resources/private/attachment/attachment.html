@@ -17,6 +17,8 @@
         <div class="form-entry">
           <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <div id="attachment-type-select-list-container"></div>
+          <br>
+          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment" style="margin-left: 0">Poista liite</button>
         </div>
       </div>
 
@@ -50,6 +52,7 @@
               <th data-bind="ltext: 'attachment.version'">Versio</th>
               <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
               <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
+              <th data-bind="ltext: 'attachment.actions'">Toiminto</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: versions()">
@@ -61,6 +64,7 @@
                 <span data-bind="fullName: user"></span>
                 (<span data-bind="ltext: user.role"></span>)
               </td>
+              <td><a data-bind="click: $root.attachment.deleteVersion, ltext: 'remove'" ></a></td>
             </tr>
           </tbody>
         </table>
