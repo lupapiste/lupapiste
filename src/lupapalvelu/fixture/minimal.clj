@@ -203,7 +203,7 @@
     :personId "010203-0405"
     :firstName "Pena"
     :lastName "Panaani"
-    :email "pena"
+    :email "pena@example.com"
     :street "Paapankuja 12"
     :zip "010203"
     :city "Piippola"

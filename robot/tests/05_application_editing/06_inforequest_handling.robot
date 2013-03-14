@@ -16,7 +16,7 @@ Mikko creates two new inforequests
 Authority assigns an inforequest to herself
   Sonja logs in
   Inforequest is not assigned  inforequest-handling
-  Open inforequest  inforequest-handling
+  Open inforequest  inforequest-handling  75341600250030
   Wait until  Element should be visible  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
   Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
@@ -31,12 +31,12 @@ Mikko sees Sonja as authority
   Inforequest is assigned to  inforequest-handling  Sonja Sibbo
 
 Mikko should be able to cancel the inforequest but not mark it as answered
-  Open inforequest  inforequest-handling
+  Open inforequest  inforequest-handling  75341600250030
   Element should not be visible  //*[@data-test-id='inforequest-mark-answered']
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
 
 Mikko cancels an inforequest
-  Open inforequest  inforequest-cancelling
+  Open inforequest  inforequest-cancelling  75341600250030
   Click enabled by test id  inforequest-cancel-btn
   Confirm closing
   Wait until  Element should be visible  applications-list
@@ -47,7 +47,7 @@ Mikko waits until the first inforequest is answered
 
 Authority can not cancel the inforequest
   Sonja logs in
-  Open inforequest  inforequest-handling
+  Open inforequest  inforequest-handling  75341600250030
   Wait until  Inforequest state is  Avoin
   Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
 

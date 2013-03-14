@@ -15,7 +15,7 @@
                                :city "Piippola"
                                :zip "010203"
                                :phone "0102030405"
-                               :email "pena"
+                               :email "pena@example.com"
                                :personId "010203-0405"
                                :role "applicant"}))
 

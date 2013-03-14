@@ -15,13 +15,13 @@ Mikko creates a new application
 
 Sonja can submit application
   Sonja logs in
-  Open application  submit-app
+  Open application  submit-app  75341600250030
   Wait until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Logout
 
 Mikko could submit application
   Mikko logs in
-  Open application  submit-app
+  Open application  submit-app  75341600250030
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
 
 Submit date is not be visible

@@ -35,7 +35,11 @@
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
 
-   :common       {:depends [:init :jquery :knockout :underscore :moment :i18n]
+   :selectm      {:js   ["selectm.js"]
+                  :html ["selectm.html"]
+                  :css  ["selectm.css"]}
+   
+   :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js" "datepicker.js"]
                   :css ["css/main.css"]

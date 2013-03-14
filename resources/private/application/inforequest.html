@@ -16,7 +16,7 @@
         </div>
 
         <div data-bind="with: application" class="application_summary_info">
-          <h1 data-bind="text: address"></h1>
+          <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span></h1>
           <div>
             <p data-bind="ltext: 'application.id'"></p>
             <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>
@@ -25,6 +25,11 @@
           <div data-bind="if: state">
             <p data-bind="ltext: 'application.state'"></p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
+          </div>
+          <!-- Property ID: -->
+          <div>
+            <p data-bind="ltext: 'application.property'"></p>
+            <span class="application_summary_text" data-bind="text: propertyId" data-test-id="inforequest-property-id"></span>
           </div>
 
           <div data-bind="with: $root.applicationModel.data">

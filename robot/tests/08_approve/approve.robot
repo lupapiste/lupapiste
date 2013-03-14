@@ -38,7 +38,7 @@ Mikko comes back, fills in missing parts and makes a resubmit
   
 Sonja logs in for approval
   Sonja logs in
-  Open application  approve-app
+  Open application  approve-app  75341600250030
 
 Sonja approves application
   Click by test id  approve-application

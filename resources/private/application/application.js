@@ -86,8 +86,7 @@
 
     self.cancel = function() { return true; };
 
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel",
-        loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
   }();
 
   function getOperations(docs) {
@@ -112,6 +111,7 @@
     infoRequest: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
+    municipality: ko.observable(),
     permitType: ko.observable(),
     propertyId: ko.observable(),
     title: ko.observable(),
@@ -474,6 +474,41 @@
     }
   };
 
+  var attachmentTemplatesModel = new function() {
+    var self = this;
+
+    self.ok = function(ids) {
+      ajax.command("create-attachments", {id: application.id(), attachmentTypes: ids})
+        .success(function() { repository.load(application.id()); })
+        .complete(LUPAPISTE.ModalDialog.close)
+        .call();
+    };
+    
+    self.init = function() {
+      self.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
+      self.selectm.ok(self.ok).cancel(LUPAPISTE.ModalDialog.close);
+      return self;
+    };
+    
+    self.show = function() {
+      var data = _.map(application.allowedAttachmentTypes(), function(g) {
+        var groupId = g[0];
+        var groupText = loc("attachmentType." + groupId + "._group_label");
+        var attachemntIds = g[1];
+        var attachments = _.map(attachemntIds, function(a) {
+          var id = {"type-group": groupId, "type-id": a};
+          var text = loc("attachmentType." + groupId + "." + a);
+          return {id: id, text: text};
+        });
+        return [groupText, attachments];
+      });
+      self.selectm.reset(data);
+      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
+      return self;
+    };
+    
+  };
+  
   hub.onPageChange("application", initApplication);
   hub.onPageChange("inforequest", initApplication);
 
@@ -492,11 +527,14 @@
       authorization: authorizationModel,
       accordian: accordian,
       removeDocModel: removeDocModel,
-      removeApplicationModel: removeApplicationModel
+      removeApplicationModel: removeApplicationModel,
+      attachmentTemplatesModel: attachmentTemplatesModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
+    
+    attachmentTemplatesModel.init();
   });
 
 })();
