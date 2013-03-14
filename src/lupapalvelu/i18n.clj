@@ -41,12 +41,15 @@
   [terms term]
   (or (terms term) (str "???" term "???")))
 
+(defn localizer [lang]
+  (partial localize (get-terms lang)))
+
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
        :dynamic true}
   loc)
 
 (defmacro with-lang [lang & body]
-  `(binding [loc (partial localize (get-terms ~lang))]
+  `(binding [loc (localizer ~lang)]
      ~@body))
 
 (env/in-dev

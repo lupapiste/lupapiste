@@ -263,5 +263,10 @@ create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko
 
 navigation: Omat hankkeet
 
+
 application.submit.areyousure.title: Jätä hakemus käsiteltäväksi
 application.submit.areyousure.message: Oletko varma että haluat jättää hakemuksen käsiteltäväksi? Hakemuksen käsittely saattaa maksaa.
+
+attachment.zip.filename: liitteet.zip
+attachment.zip.pdf.filename.current: hakemus.pdf
+attachment.zip.pdf.filename.submitted: jatetty-hakemus.pdf
