@@ -10,17 +10,17 @@ if (typeof LUPAPISTE === "undefined") {
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
-LUPAPISTE.App = function (startPage, allowAnonymous) {
-
-  "use strict";
-
-  var self = this;
-
+ LUPAPISTE.App = function (startPage, allowAnonymous) {
+ 
+ "use strict";
+ 
+ var self = this;
+ 
   self.startPage = startPage;
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
-
+  
   self.createLogo = function () {
     var href = "#!/" + self.startPage;
     var link$ = $("<a class='brand' href='" + href + "'></a>");
