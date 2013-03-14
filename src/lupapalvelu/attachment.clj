@@ -175,12 +175,22 @@
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
-(defn delete-attachment [{:keys [id attachments]} attachmentId]
+(defn get-file-ids
+  "Gets all file-ids from attachment."
+  [attachments attachmentId]
   (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
         versions   (:versions attachment)
         file-ids   (map :fileId versions)]
-    (dorun (map mongo/delete-file file-ids))
-    (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})))
+    file-ids))
+
+(defn delete-attachment
+  "Deletes attachment and all it's versions. Is not atomic: first deletes files, then removes application pointers."
+  [{:keys [id attachments]} attachmentId]
+  (info "1/3 deleting attachment" attachmentId)
+  (dorun (map mongo/delete-file (get-file-ids attachments attachmentId)))
+  (info "2/3 deleted attachment" attachmentId)
+  (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
+  (info "3/3 deleted attachment meta-data" attachmentId))
 
 ;;
 ;; Actions
@@ -262,6 +272,19 @@
     (fn [application]
       (delete-attachment application attachmentId)
       (ok))))
+
+(defcommand "delete-attachment-version"
+  {:description "Delete attachement version. does not delete comments."
+   :parameters  [:id :attachmentId :fileId]
+   :states      [:draft :open]}
+  [{{:keys [id attachmentId fileId]} :data :as command}]
+  (with-application command
+    (fn [{:keys [attachments]}]
+      (let [file-ids (get-file-ids attachments attachmentId)]
+        ;; test that the file-id is linked to the application
+        (if (some #{fileId} file-ids)
+          (mongo/delete-file fileId)
+          (fail :file_not_linked_to_the_document))))))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
