@@ -51,6 +51,7 @@
               <th data-bind="ltext: 'attachment.version'">Versio</th>
               <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
               <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
+              <th data-bind="ltext: 'attachment.delete.version'">Toiminto</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: versions()">
@@ -62,6 +63,7 @@
                 <span data-bind="fullName: user"></span>
                 (<span data-bind="ltext: user.role"></span>)
               </td>
+              <td><button data-bind="ltext: 'attachment.delete.version', click: $root.attachment.deleteVersion" class="btn-decline">X</button></td>
             </tr>
           </tbody>
         </table>
