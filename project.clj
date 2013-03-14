@@ -29,9 +29,10 @@
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]]}
-             :itest {:test-paths ^:replace ["itest"]}
-             :stest {:test-paths ^:replace ["stest"]}
-             :lupadev {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
+             :itest    {:test-paths ^:replace ["itest"]}
+             :stest    {:test-paths ^:replace ["stest"]}
+             :alltests {:source-paths ["itest" "stest"]}
+             :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"\/jquery" #"\/theme\/default\/" #"\/public\/lib\/" #"openlayers" #"underscore" #"highcharts\.js"]}

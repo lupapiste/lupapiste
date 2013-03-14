@@ -473,8 +473,8 @@
 
        {:info {:name "lisatiedot"
                :order 100}
-        :body [{:name "suoramarkkinointikielto" :type :checkbox}
-               {:name "toimitustapa" :type :select
+        :body [{:name "toimitustapa" :type :select
                 :body [{:name "s\u00e4hk\u00f6isesti"}
                        {:name "noudetaan"}
-                       {:name "postitse"}]}]}]))
+                       {:name "postitse"}]}
+               {:name "suoramarkkinointikielto" :type :checkbox}]}]))

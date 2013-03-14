@@ -153,20 +153,20 @@ kortteli-yht-alue-muutos._group_label: Korttelin yhteisiin alueisiin liittyvä m
 muu-tontti-tai-kort-muutos._group_label: Muu tontti- tai korttelialueen järjestelymuutos
 
 rakennuksen-muuttaminen.rakennuksenOmistajat.henkilo.turvakieltoKytkin: Turvakielto
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: yksityinen maatalousyrittäjä
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.muu yksityinen henkilö tai perikunta: muu yksityinen henkilö tai perikunta
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.asunto-oy tai asunto-osuuskunta: asunto-oy tai asunto-osuuskunta
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.kiinteistö oy: kiinteistö oy
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta): yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.valtio- tai kuntaenemmistöinen yritys: valtio- tai kuntaenemmistöinen yritys
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.kunnan liikelaitos: kunnan liikelaitos
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.valtion liikelaitos: valtion liikelaitos
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.pankki tai vakuutuslaitos: pankki tai vakuutuslaitos
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.kunta tai kuntainliitto: kunta tai kuntainliitto
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.valtio: valtio
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.sosiaaliturvarahasto: sosiaaliturvarahasto
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.uskonnollinen yhteisö, säätiö, puolue tai yhdistys: uskonnollinen yhteisö, säätiö, puolue tai yhdistys
-rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.ei tiedossa: ei tiedossa
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.yksityinen maatalousyrittäjä: Yksityinen maatalousyrittäjä
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.muu yksityinen henkilö tai perikunta: Muu yksityinen henkilö tai perikunta
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.asunto-oy tai asunto-osuuskunta: Asunto-osakeyhtiö tai asunto-osuuskunta
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.kiinteistö oy: Kiinteistöosakeyhtiö
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta): Yksityinen yritys (osake-, avoin- tai kommandiittiyhtiö, osuuskunta)
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.valtio- tai kuntaenemmistöinen yritys: Valtio- tai kuntaenemmistöinen yritys
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.kunnan liikelaitos: Kunnan liikelaitos
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.valtion liikelaitos: Valtion liikelaitos
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.pankki tai vakuutuslaitos: Pankki tai vakuutuslaitos
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.kunta tai kuntainliitto: Kunta tai kuntainliitto
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.valtio: Valtio
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.sosiaaliturvarahasto: Sosiaaliturvarahasto
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.uskonnollinen yhteisö, säätiö, puolue tai yhdistys: Uskonnollinen yhteisö, säätiö, puolue tai yhdistys
+rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji.ei tiedossa: Ei tiedossa
 rakennuksen-muuttaminen.rakennuksenOmistajat.omistajalaji._group_label: Omistajalaji
 rakennuksen-muuttaminen.rakennuksenOmistajat.muu-omistajalaji: Muu omistajalaji
 rakennuksen-muuttaminen.luokitus.energialuokka.A: A
@@ -249,6 +249,13 @@ applications.empty.applications-desc: Sinulla ei tällä hetkellä ole järjeste
 applications.empty.new-application: Luo uusi lupahakemus
 applications.empty.inforequests-title: Neuvontapyynnöt
 applications.empty.inforequests-desc: Sinulla ei tällä hetkellä ole järjestelmässä aktiivisia neuvontapyyntöjä. Neuvontapyynnöt ovat helppo tapa selvittää kuntasi viranomaisilta rakentamiseen liittyviä lupa-asioita. Saat viranomaisen vastauksesta tiedon suoraan sähköpostiisi. Neuvontapyynnön perusteella voit aloittaa myös varsinaisen luvan hakemisen. Voit luoda neuvontapyynnön klikkaamalla alla olevaa nappia.
+
+attachment.delete: poista liitepohja
+attachment.delete.header: Poista liitepohja
+attachment.delete.message: poistamalla liitepohjan poistuvat myös kaikki sen liitteet. Oletko aivan varma?
+attachment.actions: Toiminnot
+attachment.delete.version.message: tiedoston versio poistuu pysyvästi. Oletko varma?
+
 applications.empty.new-request: Luo uusi neuvontapyyntö
 
 selectm.filter: Etsi
@@ -258,8 +265,15 @@ selectm.remove: Poista
 selectm.ok: Ok
 selectm.cancel: Peruuta
 
-create.search-map: Määritä sijainti
-create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko kartalta varmasti valittu oikea kiinteistö? Ovatko alle haetut tiedot oikeat? Kun olet tarkistanut tiedot, paina "Jatka".
+create.search-map: Anna hankkeen osoite tai kiinteistötunnus
+create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko kartalta varmasti valittu oikea kiinteistö? Voit valita kartalta klikkaamalla oikean kiinteistön. Ovatko alle haetut tiedot oikeat? Kun olet tarkistanut tiedot, paina "Jatka".
 
 navigation: Omat hankkeet
 
+
+application.submit.areyousure.title: Jätä hakemus käsiteltäväksi
+application.submit.areyousure.message: Oletko varma että haluat jättää hakemuksen käsiteltäväksi? Hakemuksen käsittely saattaa maksaa.
+
+attachment.zip.filename: liitteet.zip
+attachment.zip.pdf.filename.current: hakemus.pdf
+attachment.zip.pdf.filename.submitted: jatetty-hakemus.pdf

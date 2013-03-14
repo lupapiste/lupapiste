@@ -4,11 +4,13 @@
         [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
         [clojure.string :only [split join trim]])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [clojure.java.io :as io]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.strings :as strings]
             [lupapalvelu.mime :as mime]
-            [clojure.java.io :as io])
+            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.i18n :as i18n])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -119,6 +121,18 @@
 (defn attachment-latest-version [attachments attachment-id]
   (:version (:latestVersion (some #(when (= attachment-id (:id %)) %) attachments))))
 
+(defn version-number
+  [{{:keys [major minor]} :version}]
+  (+ (* 1000 major) minor))
+
+(defn latest-version-after-removing-file [attachments attachment-id fileId]
+  (let [attachment (some #(when (= attachment-id (:id %)) %) attachments)
+        versions   (:versions attachment)
+        stripped   (filter #(not= (:fileId %) fileId) versions)
+        sorted     (sort-by version-number stripped)
+        latest     (last sorted)]
+    latest))
+
 (defn- set-attachment-version
   ([application-id attachment-id file-id filename content-type size now user]
     (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
@@ -174,6 +188,43 @@
 (defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
+
+(defn attachment-file-ids
+  "Gets all file-ids from attachment."
+  [{:keys [attachments]} attachmentId]
+  (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
+        versions   (:versions attachment)
+        file-ids   (map :fileId versions)]
+    file-ids))
+
+(defn file-id-in-application?
+  "tests that file-id is referenced from application"
+  [application attachmentId file-id]
+  (let [file-ids (attachment-file-ids application attachmentId)]
+    (if (some #{file-id} file-ids) true false)))
+
+(defn delete-attachment
+  "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
+  [{:keys [id attachments] :as application} attachmentId]
+  (info "1/3 deleting files of attachment" attachmentId)
+  (dorun (map mongo/delete-file (attachment-file-ids application attachmentId)))
+  (info "2/3 deleted files of attachment" attachmentId)
+  (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
+  (info "3/3 deleted meta-data of attachment" attachmentId))
+
+(defn delete-attachment-version
+  "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
+  [{:keys [id attachments] :as application} attachmentId fileId]
+  (let [latest-version (latest-version-after-removing-file attachments attachmentId fileId)]
+    (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
+    (mongo/delete-file fileId)
+    (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
+    (mongo/update
+      :applications
+      {:_id id :attachments {$elemMatch {:id attachmentId}}}
+      {$pull {:attachments.$.versions {:fileId fileId}}
+       $set  {:attachments.$.latestVersion latest-version}})
+    (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))
 
 ;;
 ;; Actions
@@ -246,6 +297,27 @@
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
+(defcommand "delete-attachment"
+  {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
+   :parameters  [:id :attachmentId]
+   :states      [:draft :open]}
+  [{{:keys [id attachmentId]} :data :as command}]
+  (with-application command
+    (fn [application]
+      (delete-attachment application attachmentId)
+      (ok))))
+
+(defcommand "delete-attachment-version"
+  {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
+   :parameters  [:id :attachmentId :fileId]
+   :states      [:draft :open]}
+  [{{:keys [id attachmentId fileId]} :data :as command}]
+  (with-application command
+    (fn [application]
+      (if (file-id-in-application? application attachmentId fileId)
+        (delete-attachment-version application attachmentId fileId)
+        (fail :file_not_linked_to_the_document)))))
+
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
@@ -315,19 +387,33 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-(defn- append-attachment [zip latest]
-  (when latest
-    (.putNextEntry zip (ZipEntry. (encode-filename (:filename latest))))
-    (with-open [in ((-> latest :fileId mongo/download :content))]
+(defn- append-gridfs-file [zip file-name file-id]
+  (when file-id
+    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
-(defn- get-all-attachments [attachments]
+(defn- append-stream [zip file-name in]
+  (when in
+    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (io/copy in zip)))
+
+(defn- append-attachment [zip {:keys [filename fileId]}]
+  (append-gridfs-file zip filename fileId))
+
+(defn- get-all-attachments [application loc lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
       (let [zip (ZipOutputStream. out)]
-        (doseq [attachment attachments]
+        ; Add all attachments:
+        (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
+        ; Add submitted PDF, if exists:
+        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
+        ; Add current PDF:
+        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -339,12 +425,13 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn output-all-attachments [application-id user]
-  (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]} {:attachments 1})]
-    {:body (temp-file-input-stream (get-all-attachments (:attachments application)))
-     :status 200
-     :headers {"Content-Type" "application/octet-stream"
-               "Content-Disposition" "attachment;filename=\"liitteet.zip\""}}
-    {:body "404"
-     :status 404
-     :headers {"Content-Type" "text/plain"}}))
+(defn output-all-attachments [application-id user lang]
+  (let [loc (i18n/localizer lang)]
+    (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
+      {:body (temp-file-input-stream (get-all-attachments application loc lang))
+       :status 200
+       :headers {"Content-Type" "application/octet-stream"
+                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
+      {:body "404"
+       :status 404
+       :headers {"Content-Type" "text/plain"}})))

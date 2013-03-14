@@ -256,16 +256,16 @@ Create inforequest the fast way
   Open inforequest  ${address}  ${propertyId}
 
 Create application
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Go to page  applications
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
+  Go to page  applications 
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${button}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   Sleep  1
@@ -277,16 +277,16 @@ Create inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Prepare new request
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
   Execute Javascript  window.location.hash = "!/applications";
-  Click by test id  applications-create-new
+  Click by test id  ${button}
   Wait and click  xpath=//button[@data-test-id="create-search-button"]
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
   Select From List by test id  create-municipality-select  ${municipality}
-  Sleep  1
   Input text by test id  create-property-id  ${propertyId}
+  Sleep  1
   Click by test id  create-continue
   # Going too fast causes negative margins
   Set Selenium Speed  ${SLOW_SPEED}
@@ -330,11 +330,11 @@ Open inforequest
 
 Request should be visible
   [Arguments]  ${address}
-  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
 Request should not be visible
   [Arguments]  ${address}
-  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+  Wait Until  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
 #
 # Comments:
