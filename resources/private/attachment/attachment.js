@@ -25,6 +25,9 @@ var attachment = (function() {
   function deleteAttachmentVersionFromServer(fileId) {
     ajax
       .command("delete-attachment-version", {id: applicationId, attachmentId: attachmentId, fileId: fileId})
+      .success(function() {
+        repository.load(applicationId);
+      })
       .call();
     return false;
   }

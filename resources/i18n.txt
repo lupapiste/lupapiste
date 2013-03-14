@@ -253,7 +253,7 @@ applications.empty.inforequests-desc: Sinulla ei tällä hetkellä ole järjeste
 attachment.delete: poista liitepohja
 attachment.delete.header: Poista liitepohja
 attachment.delete.message: poistamalla liitepohjan poistuvat myös kaikki sen liitteet. Oletko aivan varma?
-attachment.delete.version: Poista
+attachment.actions: Toiminnot
 attachment.delete.version.message: tiedoston versio poistuu pysyvästi. Oletko varma?
 
 applications.empty.new-request: Luo uusi neuvontapyyntö
