@@ -274,10 +274,10 @@
 (defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
 
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
-  (attachment/output-all-attachments application-id (current-user)))
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
+  (attachment/output-all-attachments application-id (current-user) lang))
 
-(defpage [:get ["/api/pdf-export/:lang/:application-id" :lang #"[a-z]{2}"]] {lang :lang application-id :application-id}
+(defpage "/api/pdf-export/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
   (ke6666/export application-id (current-user) lang))
 
 ;;
