@@ -25,7 +25,7 @@ Attachment count is
 
 Add attachment
   [Arguments]  ${path}  ${description}
-  Wait and click   add-attachment
+  Wait and click   xpath=//button[@data-test-id="add-attachment"] 
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
