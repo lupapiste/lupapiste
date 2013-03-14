@@ -10,9 +10,7 @@ var attachment = (function() {
   function deleteAttachmentFromServer() {
     ajax
       .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
-      .success(function() {
-        window.location.hash = "!/application/"+applicationId+"/attachments";
-      })
+      .success(function() { window.location.hash = "!/application/"+applicationId+"/attachments"; })
       .call();
     return false;
   }
@@ -74,7 +72,7 @@ var attachment = (function() {
     },
     filename:       ko.observable(),
     latestVersion:  ko.observable(),
-    versions:       ko.observable(),
+    versions:       ko.observableArray(),
     name:           ko.observable(),
     type:           ko.observable(),
     attachmentType: ko.observable(),
