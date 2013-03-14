@@ -7,7 +7,7 @@ Resource        ../../common_resource.robot
 *** Test Cases ***
 
 Mikko creates an application
-  Mikko logs in
+  As Mikko
   Create application the fast way  approve-app  753  75341600250030
 
 Mikko can't approve application
@@ -27,7 +27,14 @@ Sonja logs in and sees that some completion is needed
   Open application  approve-app
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='request-for-complement']
   Click by test id  request-for-complement
+  Logout
   
+Mikko comes back, fills in missing parts and makes a resubmit
+  Mikko logs in
+  Open application  approve-app
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
+  Click by test id  application-submit-btn
+  Logout
   
 Sonja logs in for approval
   Sonja logs in
