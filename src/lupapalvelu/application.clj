@@ -150,11 +150,13 @@
           {:_id application-id}
           {$set {:state new-state
                  :submitted (:created command) }})
-        (mongo/update
-          :submitted-applications
-          {}
-          (assoc (dissoc application :id) :_id application-id)
-          :upsert true)
+        (try
+          (mongo/insert
+            :submitted-applications
+            (assoc (dissoc application :id) :_id application-id))
+          (catch com.mongodb.MongoException$DuplicateKey e
+            ; This is ok. Only the first submit is saved.
+            ))
         (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "save-application-shape"
