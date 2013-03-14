@@ -9,19 +9,11 @@
 
     self.goPhase1 = function() {
       $('.selected-location').hide();
-      $("#create")
-        .find("#create-part-1")
-          .find("h2").accordionOpen().end()
-          .show().end()
-        .find("#create-part-2")
-          .find("h2").accordionClose().end()
-          .hide().end()
-        .find("#create-part-3")
-          .find("h2").accordionClose().end()
-          .hide();
+      $("#create-part-1").show()
+      $("#create-part-2").hide()
+      $("#create-part-3").hide();
     };
 
-    var open = function(id) { return function() { $(id).show().find("h2").accordionOpen(); }; };
 
     self.goPhase2 = function() {
       $("#create-part-1").hide();
@@ -53,6 +45,8 @@
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
 
     self.clear = function() {
+
+      self.goPhase1();
       if (!self.map) {
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
         self.map.addClickHandler(self.click);
