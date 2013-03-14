@@ -126,7 +126,8 @@
 (defn latest-version-after-removing-file [attachments attachment-id fileId]
   (let [attachment (some #(when (= attachment-id (:id %)) %) attachments)
         versions   (:versions attachment)
-        sorted     (sort-by version-number versions)
+        stripped   (filter #(not= (:fileId %) fileId) versions)
+        sorted     (sort-by version-number stripped)
         latest     (last sorted)]
     latest))
 
@@ -212,7 +213,7 @@
 (defn delete-attachment-version
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
   [{:keys [id attachments] :as application} attachmentId fileId]
-  (let [latest-version (attachment-latest-version attachments attachmentId)]
+  (let [latest-version (latest-version-after-removing-file attachments attachmentId fileId)]
     (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
     (mongo/delete-file fileId)
     (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
