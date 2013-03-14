@@ -270,3 +270,6 @@ application.submit.areyousure.message: Oletko varma että haluat jättää hakem
 attachment.zip.filename: liitteet.zip
 attachment.zip.pdf.filename.current: hakemus.pdf
 attachment.zip.pdf.filename.submitted: jatetty-hakemus.pdf
+
+application.requestForComplement: Palauta täydennettäväksi
+complement-needed: Vaatii täydennystä
