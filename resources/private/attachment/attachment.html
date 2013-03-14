@@ -17,7 +17,8 @@
         <div class="form-entry">
           <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <div id="attachment-type-select-list-container"></div>
-          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment" class="btn-decline">Poista liite</button>
+          <br>
+          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment" style="margin-left: 0">Poista liite</button>
         </div>
       </div>
 
@@ -63,7 +64,7 @@
                 <span data-bind="fullName: user"></span>
                 (<span data-bind="ltext: user.role"></span>)
               </td>
-              <td><button data-bind="click: $root.attachment.deleteVersion" class="btn-decline btn-small">X</button></td>
+              <td><a data-bind="click: $root.attachment.deleteVersion, ltext: 'remove'" ></a></td>
             </tr>
           </tbody>
         </table>
