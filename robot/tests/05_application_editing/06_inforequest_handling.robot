@@ -35,12 +35,17 @@ Mikko should be able to cancel the inforequest but not mark it as answered
   Element should not be visible  //*[@data-test-id='inforequest-mark-answered']
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
 
-Mikko cancels an inforequest
+Mikko opens inforequest for cancellation
   Open inforequest  inforequest-cancelling  75341600250030
+
+Mikko cancels an inforequest
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
   Click enabled by test id  inforequest-cancel-btn
   Confirm closing
+
+Mikko does not see the cancelled inforequest
   Wait until  Element should be visible  applications-list
-  Inforequest is not visible  inforequest-cancelling
+  Wait Until  Inforequest is not visible  inforequest-cancelling
 
 Mikko waits until the first inforequest is answered
   Logout

@@ -22,7 +22,7 @@ Mikko creates new application from inforequest
 
 Proper attachment templates are present
   Open tab  attachments
-  Element should be visible  xpath=//tr[@class='attachment-group-header']
+  Wait until  Element should be visible  xpath=//tr[@class='attachment-group-header']
   # Element should not be visible  xpath=//*[@data-test-id='application-attachments-no-attachments']
 
 Mikko closes application
