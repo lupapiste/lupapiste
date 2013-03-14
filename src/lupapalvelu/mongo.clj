@@ -38,8 +38,8 @@
 
 (defn update
   "Updates data into collection by query. Always returns nil."
-   [collection query data]
-  (mc/update collection query data)
+  [collection query data & opts]
+  (apply mc/update collection query data opts)
   nil)
 
 (defn update-by-id

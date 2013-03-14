@@ -118,6 +118,20 @@
         (notifications/send-notifications-on-application-state-change id host)
         (ok)))))
 
+(defcommand "request-for-complement"
+  {:parameters [:id]
+   :roles      [:authority]
+   :authority  true
+   :states     [:submitted]}
+  [command]
+  (with-application command
+    (fn [application]
+      (let [application-id (:id application)]
+        (mongo/update
+          :applications {:_id (:id application) :state :submitted}
+          {$set {:state :complement-needed}})
+        (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
+
 (defcommand "approve-application"
   {:parameters [:id]
    :roles      [:authority]
@@ -139,16 +153,24 @@
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
       (let [new-state :submitted
             application-id (:id application)]
         (mongo/update
-          :applications {:_id application-id}
+          :applications
+          {:_id application-id}
           {$set {:state new-state
                  :submitted (:created command) }})
+        (try
+          (mongo/insert
+            :submitted-applications
+            (assoc (dissoc application :id) :_id application-id))
+          (catch com.mongodb.MongoException$DuplicateKey e
+            ; This is ok. Only the first submit is saved.
+            ))
         (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "save-application-shape"

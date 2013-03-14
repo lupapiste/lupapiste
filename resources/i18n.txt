@@ -264,3 +264,16 @@ selectm.add: Lisää
 selectm.remove: Poista
 selectm.ok: Ok
 selectm.cancel: Peruuta
+
+create.search-map: Määritä sijainti
+create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko kartalta varmasti valittu oikea kiinteistö? Ovatko alle haetut tiedot oikeat? Kun olet tarkistanut tiedot, paina "Jatka".
+
+navigation: Omat hankkeet
+
+
+application.submit.areyousure.title: Jätä hakemus käsiteltäväksi
+application.submit.areyousure.message: Oletko varma että haluat jättää hakemuksen käsiteltäväksi? Hakemuksen käsittely saattaa maksaa.
+
+attachment.zip.filename: liitteet.zip
+attachment.zip.pdf.filename.current: hakemus.pdf
+attachment.zip.pdf.filename.submitted: jatetty-hakemus.pdf
