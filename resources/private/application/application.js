@@ -84,9 +84,32 @@
       return false;
     };
 
-    self.cancel = function() { return true; };
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+    });
+  }();
 
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+  var submitApplicationModel = new function() {
+    var self = this;
+
+    self.applicationId = null;
+
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-submit");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax.command("submit-application", {id: self.applicationId})
+        .success(function() { repository.load(self.applicationId); })
+        .call();
+      return false;
+    };
+
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
+    });
   }();
 
   function getOperations(docs) {
@@ -157,14 +180,8 @@
       });
     },
 
-    submitApplication: function(model) {
-      var applicationId = application.id();
-      ajax.command("submit-application", { id: applicationId})
-        .success(function() {
-          notify.success("hakemus j\u00E4tetty",model);
-          repository.load(applicationId);
-        })
-        .call();
+    submitApplication: function() {
+      submitApplicationModel.init(application.id());
       return false;
     },
     

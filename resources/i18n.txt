@@ -263,3 +263,5 @@ create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko
 
 navigation: Omat hankkeet
 
+application.submit.areyousure.title: Jätä hakemus käsiteltäväksi
+application.submit.areyousure.message: Oletko varma että haluat jättää hakemuksen käsiteltäväksi? Hakemuksen käsittely saattaa maksaa.
