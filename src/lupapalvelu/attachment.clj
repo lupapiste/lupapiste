@@ -201,7 +201,14 @@
 (defn delete-attachment-version
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
   [{:keys [id attachments] :as application} attachmentId fileId]
-  (println "DELETED:" fileId))
+  (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
+  (mongo/delete-file fileId)
+  (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
+  (mongo/update
+    :applications
+    {:_id id :attachments {$elemMatch {:id attachmentId}}}
+    {$pull {:attachments.$.versions {:fileId fileId}}})
+  (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId))
 
 ;;
 ;; Actions
