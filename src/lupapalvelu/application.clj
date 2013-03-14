@@ -118,14 +118,14 @@
    :roles      [:authority]
    :authority  true
    :states     [:submitted]}
-  [{{:keys [host]} :web :as command}]
+  [command]
   (with-application command
     (fn [application]
       (let [application-id (:id application)]
         (mongo/update
           :applications {:_id (:id application) :state :submitted}
           {$set {:state :complement-needed}})
-        (notifications/send-notifications-on-application-state-change application-id host)))))
+        (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
   {:parameters [:id]
