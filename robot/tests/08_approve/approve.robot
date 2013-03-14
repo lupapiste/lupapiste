@@ -22,6 +22,13 @@ Mikko still can't approve application
 Mikko remembers that it is his turn to pick the kids from day care
   Logout
 
+Sonja logs in and sees that some completion is needed
+  Sonja logs in
+  Open application  approve-app
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='request-for-complement']
+  Click by test id  request-for-complement
+  
+  
 Sonja logs in for approval
   Sonja logs in
   Open application  approve-app
