@@ -254,7 +254,7 @@
     (fail :error.attachment-placeholder)))
 
 (defcommand "delete-attachment"
-  {:description "Delete attachement with all it's versions. do not delete comments. Non-atomic operation: first deletes files, then updates document."
+  {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
    :states      [:draft :open]}
   [{{:keys [id attachmentId]} :data :as command}]
