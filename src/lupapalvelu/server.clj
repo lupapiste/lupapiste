@@ -9,6 +9,7 @@
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
+            [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.action]
             [lupapalvelu.admin]
             [lupapalvelu.application]
