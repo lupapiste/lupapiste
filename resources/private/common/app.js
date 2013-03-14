@@ -10,17 +10,17 @@ if (typeof LUPAPISTE === "undefined") {
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
-LUPAPISTE.App = function (startPage, allowAnonymous) {
-
-  "use strict";
-
-  var self = this;
-
+ LUPAPISTE.App = function (startPage, allowAnonymous) {
+ 
+ "use strict";
+ 
+ var self = this;
+ 
   self.startPage = startPage;
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
-
+  
   self.createLogo = function () {
     var href = "#!/" + self.startPage;
     var link$ = $("<a class='brand' href='" + href + "'></a>");
@@ -31,7 +31,7 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
         naviLinks$.append(
             $('<a>')
             .attr("data-test-id", "lang-" + lang).attr("href", "#")
-            .text(loc("in_" + lang ) +" >>")
+            .text(loc("in_" + lang) + " >>")
             .click(function (e) {
               hub.send("change-lang", { lang: lang });
               e.preventDefault();
@@ -59,8 +59,10 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
   };
 
   self.createNaviLinks = function () {
-    var naviLinks$ = $("<span>").attr("id", "main-nav");
-    return naviLinks$;
+    var navi$ = $('<span>').attr("href", "#").text(loc('navigation'));
+    var naviBox$ = $('<a>').attr("class", "main-nav").attr("href", "#");
+    naviBox$.append(navi$);
+    return naviBox$;
   };
 
   /**
@@ -80,8 +82,8 @@ LUPAPISTE.App = function (startPage, allowAnonymous) {
     navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
     if (!self.allowAnonymous) {
       navWrapper.append(self.createUserMenu());
+      navWrapper.append(self.createNaviLinks());
     }
-    navWrapper.append(self.createNaviLinks());
     $("nav").append(navWrapper)
   };
   $(self.domReady);
