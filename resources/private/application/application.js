@@ -167,6 +167,17 @@
         .call();
       return false;
     },
+    
+    requestForComplement: function(model) {
+      var applicationId = application.id();
+      ajax.command("request-for-complement", { id: applicationId})
+        .success(function() {
+          notify.success("pyynt\u00F6 l\u00E4hetetty",model);
+          repository.load(applicationId);
+        })
+        .call();
+      return false;
+    },
 
     markInforequestAnswered: function(model) {
       var applicationId = application.id();
