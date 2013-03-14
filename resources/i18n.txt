@@ -249,6 +249,13 @@ applications.empty.applications-desc: Sinulla ei tällä hetkellä ole järjeste
 applications.empty.new-application: Luo uusi lupahakemus
 applications.empty.inforequests-title: Neuvontapyynnöt
 applications.empty.inforequests-desc: Sinulla ei tällä hetkellä ole järjestelmässä aktiivisia neuvontapyyntöjä. Neuvontapyynnöt ovat helppo tapa selvittää kuntasi viranomaisilta rakentamiseen liittyviä lupa-asioita. Saat viranomaisen vastauksesta tiedon suoraan sähköpostiisi. Neuvontapyynnön perusteella voit aloittaa myös varsinaisen luvan hakemisen. Voit luoda neuvontapyynnön klikkaamalla alla olevaa nappia.
+
+attachment.delete: poista liitepohja
+attachment.delete.header: Poista liitepohja
+attachment.delete.message: poistamalla liitepohjan poistuvat myös kaikki sen liitteet. Oletko aivan varma?
+attachment.actions: Toiminnot
+attachment.delete.version.message: tiedoston versio poistuu pysyvästi. Oletko varma?
+
 applications.empty.new-request: Luo uusi neuvontapyyntö
 
 selectm.filter: Etsi

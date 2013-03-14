@@ -121,6 +121,18 @@
 (defn attachment-latest-version [attachments attachment-id]
   (:version (:latestVersion (some #(when (= attachment-id (:id %)) %) attachments))))
 
+(defn version-number
+  [{{:keys [major minor]} :version}]
+  (+ (* 1000 major) minor))
+
+(defn latest-version-after-removing-file [attachments attachment-id fileId]
+  (let [attachment (some #(when (= attachment-id (:id %)) %) attachments)
+        versions   (:versions attachment)
+        stripped   (filter #(not= (:fileId %) fileId) versions)
+        sorted     (sort-by version-number stripped)
+        latest     (last sorted)]
+    latest))
+
 (defn- set-attachment-version
   ([application-id attachment-id file-id filename content-type size now user]
     (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
@@ -176,6 +188,43 @@
 (defn- allowed-attachment-type-for? [allowed-types {:keys [type-group type-id]}]
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
+
+(defn attachment-file-ids
+  "Gets all file-ids from attachment."
+  [{:keys [attachments]} attachmentId]
+  (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
+        versions   (:versions attachment)
+        file-ids   (map :fileId versions)]
+    file-ids))
+
+(defn file-id-in-application?
+  "tests that file-id is referenced from application"
+  [application attachmentId file-id]
+  (let [file-ids (attachment-file-ids application attachmentId)]
+    (if (some #{file-id} file-ids) true false)))
+
+(defn delete-attachment
+  "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
+  [{:keys [id attachments] :as application} attachmentId]
+  (info "1/3 deleting files of attachment" attachmentId)
+  (dorun (map mongo/delete-file (attachment-file-ids application attachmentId)))
+  (info "2/3 deleted files of attachment" attachmentId)
+  (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
+  (info "3/3 deleted meta-data of attachment" attachmentId))
+
+(defn delete-attachment-version
+  "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
+  [{:keys [id attachments] :as application} attachmentId fileId]
+  (let [latest-version (latest-version-after-removing-file attachments attachmentId fileId)]
+    (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
+    (mongo/delete-file fileId)
+    (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
+    (mongo/update
+      :applications
+      {:_id id :attachments {$elemMatch {:id attachmentId}}}
+      {$pull {:attachments.$.versions {:fileId fileId}}
+       $set  {:attachments.$.latestVersion latest-version}})
+    (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))
 
 ;;
 ;; Actions
@@ -247,6 +296,27 @@
   (if-let [attachment-ids (create-attachments application-id attachment-types created)]
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
+
+(defcommand "delete-attachment"
+  {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
+   :parameters  [:id :attachmentId]
+   :states      [:draft :open]}
+  [{{:keys [id attachmentId]} :data :as command}]
+  (with-application command
+    (fn [application]
+      (delete-attachment application attachmentId)
+      (ok))))
+
+(defcommand "delete-attachment-version"
+  {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
+   :parameters  [:id :attachmentId :fileId]
+   :states      [:draft :open]}
+  [{{:keys [id attachmentId fileId]} :data :as command}]
+  (with-application command
+    (fn [application]
+      (if (file-id-in-application? application attachmentId fileId)
+        (delete-attachment-version application attachmentId fileId)
+        (fail :file_not_linked_to_the_document)))))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]

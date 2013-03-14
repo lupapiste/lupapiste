@@ -7,6 +7,37 @@ var attachment = (function() {
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
 
+  function deleteAttachmentFromServer() {
+    ajax
+      .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
+      .success(function() {
+        repository.load(applicationId);
+        window.location.hash = "!/application/"+applicationId+"/attachments";
+        return false;
+      })
+      .call();
+    return false;
+  }
+
+  // this function is mutated over in the attachement.deleteVersion
+  var deleteAttachmentVersionFromServerProxy;
+
+  function deleteAttachmentVersionFromServer(fileId) {
+    ajax
+      .command("delete-attachment-version", {id: applicationId, attachmentId: attachmentId, fileId: fileId})
+      .success(function() {
+        repository.load(applicationId);
+      })
+      .call();
+    return false;
+  }
+
+  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
+    loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
+
+  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
+    loc("attachment.delete.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
+
   function ApproveModel(authorizationModel) {
     var self = this;
 
@@ -21,7 +52,7 @@ var attachment = (function() {
         _.find(self.application.attachments,
             function(attachment) {
               return attachment.id === self.attachmentId;
-          });
+            });
       return att.state === state;
     };
 
@@ -96,6 +127,16 @@ var attachment = (function() {
       // Upload dialog is opened manually here, because click event binding to
       // dynamic content rendered by Knockout is not possible
       LUPAPISTE.ModalDialog.open("#upload-dialog");
+    },
+
+    deleteAttachment: function() {
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
+    },
+
+    deleteVersion: function(model) {
+      var fileId = model.fileId;
+      deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment-version");
     }
   };
 
