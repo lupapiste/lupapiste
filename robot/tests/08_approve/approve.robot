@@ -24,14 +24,14 @@ Mikko remembers that it is his turn to pick the kids from day care
 
 Sonja logs in and sees that some completion is needed
   Sonja logs in
-  Open application  approve-app
+  Open application  approve-app  75341600250030
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='request-for-complement']
   Click by test id  request-for-complement
   Logout
   
 Mikko comes back, fills in missing parts and makes a resubmit
   Mikko logs in
-  Open application  approve-app
+  Open application  approve-app  75341600250030
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Click by test id  application-submit-btn
   Logout
