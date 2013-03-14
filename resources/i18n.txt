@@ -74,6 +74,8 @@ paasuunnittelija.turvakieltoKytkin: Turvakielto
 suunnittelija.turvakieltoKytkin: Turvakielto
 maksaja.henkilo.turvakieltoKytkin: Turvakielto
 
+applications.operation: Toimenpide
+
 operations.Rakentaminen ja purkaminen: Rakentaminen ja purkaminen
 operations.Elinympariston muuttaminen: Elinympäristön muuttaminen
 operations.Rakennuksen korjaaminen tai muuttaminen: Rakennuksen korjaaminen tai muuttaminen

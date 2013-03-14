@@ -36,8 +36,6 @@
       (fact "Two attachments were created in one call"
         (fact (count attachment-ids) => 2))
       
-      (clojure.pprint/pprint attachment-ids)
-      
       (fact "attachment has been saved to application"
         (get-attachment application-id (first attachment-ids)) => (contains
                                                                     {:type {:type-group "tg" :type-id "tid-1"}

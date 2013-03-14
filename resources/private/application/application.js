@@ -111,6 +111,7 @@
     infoRequest: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
+    municipality: ko.observable(),
     permitType: ko.observable(),
     propertyId: ko.observable(),
     title: ko.observable(),
@@ -490,7 +491,6 @@
         });
         return [groupText, attachments];
       });
-      console.log("SHOW:", data);
       self.selectm.reset(data);
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
       return self;
