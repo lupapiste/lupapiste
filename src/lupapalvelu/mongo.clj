@@ -7,8 +7,9 @@
             [monger.collection :as mc]
             [monger.db :as db]
             [monger.gridfs :as gfs])
-  (:import [org.bson.types ObjectId]
-           [com.mongodb WriteConcern]
+  (:import [javax.net.ssl SSLSocketFactory]
+           [org.bson.types ObjectId]
+           [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
 
 ;;
@@ -118,6 +119,42 @@
 ;; Bootstrappin'
 ;;
 
+;; From monger.core, pimped with SSL option
+(defn mongo-options
+  [& { :keys [connections-per-host threads-allowed-to-block-for-connection-multiplier
+              max-wait-time connect-timeout socket-timeout socket-keep-alive auto-connect-retry max-auto-connect-retry-time ssl
+              safe w w-timeout fsync j] :or [auto-connect-retry true] }]
+  (let [mob (MongoClientOptions$Builder.)]
+    (when connections-per-host
+      (.connectionsPerHost mob connections-per-host))
+    (when threads-allowed-to-block-for-connection-multiplier
+      (.threadsAllowedToBlockForConnectionMultiplier mob threads-allowed-to-block-for-connection-multiplier))
+    (when max-wait-time
+      (.maxWaitTime mob max-wait-time))
+    (when connect-timeout
+      (.connectTimeout mob connect-timeout))
+    (when socket-timeout
+      (.socketTimeout mob socket-timeout))
+    (when socket-keep-alive
+      (.socketKeepAlive mob socket-keep-alive))
+    (when auto-connect-retry
+      (.autoConnectRetry mob auto-connect-retry))
+    (when max-auto-connect-retry-time
+      (.maxAutoConnectRetryTime mob max-auto-connect-retry-time))
+    (when ssl
+      (.socketFactory mob (SSLSocketFactory/getDefault)))
+    (when safe
+      (.safe mob safe))
+    (when w
+      (.w mob w))
+    (when w-timeout
+      (.wtimeout mob w-timeout))
+    (when j
+      (.j mob j))
+    (when fsync
+      (.fsync mob fsync))
+    (.build mob)))
+
 (def server-list
   (let [servers (vals (get-in env/config [:mongodb :servers]))]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
@@ -129,14 +166,15 @@
     (let [conf (:mongodb env/config)
           db   (:dbname conf)
           user (-> conf :credentials :username)
-          pw   (-> conf :credentials :password)]
-      (connect! server-list db user pw)))
-  ([servers db username password]
+          pw   (-> conf :credentials :password)
+          ssl  (:ssl conf)]
+      (connect! server-list db user pw ssl)))
+  ([servers db username password ssl]
     (if @connected
       (debug "Already connected!")
       (do
-        (debug "Connecting to DB:" servers)
-        (m/connect! servers (m/mongo-options))
+        (println "Connecting to DB:" servers (if ssl "using ssl" "without encryption"))
+        (m/connect! servers (mongo-options :ssl ssl))
         (reset! connected true)
         (m/set-default-write-concern! WriteConcern/SAFE)
         (when (and username password)
