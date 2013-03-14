@@ -258,3 +258,8 @@ selectm.remove: Poista
 selectm.ok: Ok
 selectm.cancel: Peruuta
 
+create.search-map: Määritä sijainti
+create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko kartalta varmasti valittu oikea kiinteistö? Ovatko alle haetut tiedot oikeat? Kun olet tarkistanut tiedot, paina "Jatka".
+
+navigation: Omat hankkeet
+
