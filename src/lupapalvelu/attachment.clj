@@ -175,22 +175,33 @@
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
-(defn get-file-ids
+(defn attachment-file-ids
   "Gets all file-ids from attachment."
-  [attachments attachmentId]
+  [{:keys [attachments]} attachmentId]
   (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
         versions   (:versions attachment)
         file-ids   (map :fileId versions)]
     file-ids))
 
+(defn file-id-in-application?
+  "tests that file-id is referenced from application"
+  [application attachmentId file-id]
+  (let [file-ids (attachment-file-ids application attachmentId)]
+    (if (some #{file-id} file-ids) true false)))
+
 (defn delete-attachment
-  "Deletes attachment and all it's versions. Is not atomic: first deletes files, then removes application pointers."
-  [{:keys [id attachments]} attachmentId]
-  (info "1/3 deleting attachment" attachmentId)
-  (dorun (map mongo/delete-file (get-file-ids attachments attachmentId)))
-  (info "2/3 deleted attachment" attachmentId)
+  "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
+  [{:keys [id attachments] :as application} attachmentId]
+  (info "1/3 deleting files" attachmentId)
+  (dorun (map mongo/delete-file (attachment-file-ids application attachmentId)))
+  (info "2/3 deleted files" attachmentId)
   (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
   (info "3/3 deleted attachment meta-data" attachmentId))
+
+(defn delete-attachment-version
+  "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
+  [{:keys [id attachments] :as application} attachmentId fileId]
+  (println "DELETED:" fileId))
 
 ;;
 ;; Actions
@@ -274,17 +285,15 @@
       (ok))))
 
 (defcommand "delete-attachment-version"
-  {:description "Delete attachement version. does not delete comments."
+  {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
    :states      [:draft :open]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
-    (fn [{:keys [attachments]}]
-      (let [file-ids (get-file-ids attachments attachmentId)]
-        ;; test that the file-id is linked to the application
-        (if (some #{fileId} file-ids)
-          (mongo/delete-file fileId)
-          (fail :file_not_linked_to_the_document))))))
+    (fn [application]
+      (if (file-id-in-application? application attachmentId fileId)
+        (delete-attachment-version application attachmentId fileId)
+        (fail :file_not_linked_to_the_document)))))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
