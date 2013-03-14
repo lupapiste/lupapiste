@@ -331,7 +331,7 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc]
+(defn- get-all-attachments [application loc lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
@@ -341,9 +341,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application "fi")))
+          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application "fi"))
+        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -358,7 +358,7 @@
 (defn output-all-attachments [application-id user lang]
   (let [loc (i18n/localizer lang)]
     (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
-      {:body (temp-file-input-stream (get-all-attachments application loc))
+      {:body (temp-file-input-stream (get-all-attachments application loc lang))
        :status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
