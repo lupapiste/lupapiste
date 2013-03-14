@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
-  Create application  create-app  753  75341600250021
+  Create application  create-app  753  75341600250021  empty-application-create-new
   It is possible to add operation
 
 Mikko sees application in list
@@ -17,7 +17,7 @@ Mikko sees application in list
   Request should be visible  create-app
 
 Mikko creates a new inforequest
-  Create inforequest  create-info  753  75341600250022  Hoblaa
+  Create inforequest  create-info  753  75341600250022  Hoblaa  applications-create-new
   Wait until  Element text should be  //span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
   Wait until  Element text should be  //span[@data-test-id='inforequest-application-operation']  Asuinrakennuksen rakentaminen
 
@@ -46,7 +46,7 @@ Mikko inspects inforequest and sees his initial comments
 
 Mikko creates new application
   Go to page  applications
-  Create application  create-app-2  753  75341600250023
+  Create application  create-app-2  753  75341600250023  applications-create-new
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info
@@ -75,7 +75,7 @@ Mikko has worked really hard and now he needs some strong coffee
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application  create-veikko-auth-app  837  75341600250021
+  Create application  create-veikko-auth-app  837  75341600250021  empty-application-create-new
   Wait until  Application state should be  open
   It is possible to add operation
 
