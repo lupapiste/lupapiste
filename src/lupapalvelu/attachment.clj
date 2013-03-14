@@ -119,6 +119,17 @@
 (defn attachment-latest-version [attachments attachment-id]
   (:version (:latestVersion (some #(when (= attachment-id (:id %)) %) attachments))))
 
+(defn version-number
+  [{{:keys [major minor]} :version}]
+  (+ (* 1000 major) minor))
+
+(defn latest-version-after-removing-file [attachments attachment-id fileId]
+  (let [attachment (some #(when (= attachment-id (:id %)) %) attachments)
+        versions   (:versions attachment)
+        sorted     (sort-by version-number versions)
+        latest     (last sorted)]
+    latest))
+
 (defn- set-attachment-version
   ([application-id attachment-id file-id filename content-type size now user]
     (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
@@ -201,14 +212,16 @@
 (defn delete-attachment-version
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
   [{:keys [id attachments] :as application} attachmentId fileId]
-  (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
-  (mongo/delete-file fileId)
-  (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
-  (mongo/update
-    :applications
-    {:_id id :attachments {$elemMatch {:id attachmentId}}}
-    {$pull {:attachments.$.versions {:fileId fileId}}})
-  (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId))
+  (let [latest-version (attachment-latest-version attachments attachmentId)]
+    (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
+    (mongo/delete-file fileId)
+    (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
+    (mongo/update
+      :applications
+      {:_id id :attachments {$elemMatch {:id attachmentId}}}
+      {$pull {:attachments.$.versions {:fileId fileId}}
+       $set  {:attachments.$.latestVersion latest-version}})
+    (infof "3/3 deleted meta-data of file %s of attachment" fileId attachmentId)))
 
 ;;
 ;; Actions
