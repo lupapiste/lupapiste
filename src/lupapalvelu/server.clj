@@ -42,12 +42,13 @@
 
 (defn -main [& _]
   (info "Server starting")
-  (infof "Running on Java %s %s %s (%s) [%s]"
-    (System/getProperty "java.vm.vendor")
+  (infof "Running on %s version %s (%s) [%s], trustStore is %s"
     (System/getProperty "java.vm.name")
     (System/getProperty "java.runtime.version")
     (System/getProperty "java.vm.info")
-    (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful"))
+    (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
+    (System/getProperty "javax.net.ssl.trustStore"))
+
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)
