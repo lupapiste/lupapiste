@@ -70,10 +70,9 @@
     authority-after-assignation => (contains {:id (:id authority)})
     (fact "Authority is not able to submit"
           (let [resp (query sonja :allowed-actions :id application-id)]
-                (success resp) => true
-                (get-in resp [:actions :submit-application :ok]) => falsey))
-
-    ))
+            (success resp) => true
+            (get-in resp [:actions :submit-application :ok]) => falsey
+            (unauthorized (command sonja :submit-application :id application-id))))))
 
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (:id (create-app pena :municipality sonja-muni))
