@@ -30,7 +30,7 @@
           self.callback();
           // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
           // The docgen already has code to remove actual document (that's the self.callback() above), just the
-          // "operations" list should be changed. 
+          // "operations" list should be changed.
           repository.load(self.appId);
         })
         .call();
@@ -66,17 +66,17 @@
   var removeApplicationModel = new function() {
     var self = this;
 
-    self.applicationId = ko.observable();
+    self.applicationId = null;
 
     self.init = function(applicationId) {
-      self.applicationId(applicationId);
+      self.applicationId = applicationId;
       LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
       return self;
     };
 
     self.ok = function() {
       ajax
-        .command("cancel-application", {id: self.applicationId()})
+        .command("cancel-application", {id: self.applicationId})
         .success(function() {
           window.location.hash = "!/applications";
         })
@@ -84,9 +84,32 @@
       return false;
     };
 
-    self.cancel = function() { return true; };
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+    });
+  }();
 
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+  var submitApplicationModel = new function() {
+    var self = this;
+
+    self.applicationId = null;
+
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-submit");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax.command("submit-application", {id: self.applicationId})
+        .success(function() { repository.load(self.applicationId); })
+        .call();
+      return false;
+    };
+
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
+    });
   }();
 
   function getOperations(docs) {
@@ -105,7 +128,7 @@
     }
     return _.map(ops, function(v, k) { return {op: k, count: v}; });
   }
-  
+
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -157,14 +180,8 @@
       });
     },
 
-    submitApplication: function(model) {
-      var applicationId = application.id();
-      ajax.command("submit-application", { id: applicationId})
-        .success(function() {
-          notify.success("hakemus j\u00E4tetty",model);
-          repository.load(applicationId);
-        })
-        .call();
+    submitApplication: function() {
+      submitApplicationModel.init(application.id());
       return false;
     },
     
@@ -250,7 +267,7 @@
     },
 
     exportPdf: function() {
-      window.open("/api/pdf-export/" + loc.currentLanguage + "/" + application.id(), "_blank");
+      window.open("/api/pdf-export/" + application.id() + "?lang=" + loc.currentLanguage, "_blank");
       return false;
     },
 
@@ -259,7 +276,7 @@
       window.location.hash = "#!/application/" + application.id() + "/" + element.name;
     }
   };
-    
+
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
   var attachmentsByGroup = ko.observableArray();
@@ -278,10 +295,10 @@
 
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
-    if (isInitializing) return;
+    if (isInitializing) { return; }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok('assign-application')) return;
+    if (!authorizationModel.ok('assign-application')) { return; }
 
     var assigneeId = value ? value : null;
 
@@ -334,9 +351,9 @@
       commentModel.setComments(app.comments);
 
       // Operations:
-      
+
       application.operations(getOperations(app.documents));
-      
+
       // Attachments:
 
       var statuses = {
@@ -362,13 +379,13 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
-      
-      if(x == 0 && y == 0) {
+
+      if(x === 0 && y === 0) {
         $('#application-map').css("display", "none");
       } else {
         $('#application-map').css("display", "inline-block");
       }
-      
+
       (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
 
       if (application.shapes && application.shapes().length > 0) {

@@ -15,14 +15,10 @@
         </div>
         <div data-bind="with: application" class="application_summary_info">
           <h1><span data-bind="ltext: permitType"></span><span data-bind="text: address" data-test-id="application-title"></span></h1>
-          <!-- ID: -->
+          <!-- Property ID: -->
           <div>
-            <p data-bind="ltext: 'application.id'"></p>
-            <span
-              data-bind="text: id, attr: {'data-test-value': id}"
-              data-test-id="application-id"
-              class="application_summary_text">
-            </span>
+            <p data-bind="ltext: 'application.property'"></p>
+            <span class="application_summary_text" data-bind="text: propertyId" data-test-id="application-property-id"></span>
           </div>
           <!-- State: -->
           <div>
@@ -33,10 +29,22 @@
               class="application_summary_text">
             </span>
           </div>
-          <!-- Property ID: -->
+          <!-- Submitted: -->
+          <div data-bind="with: $root.applicationModel.data">
+            <p data-bind="ltext: 'application.submissionDate'"></p>
+            <span data-bind="if: $data.submitted">
+              <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
+            </span>
+          </div>
+        
+          <!-- ID: -->
           <div>
-            <p data-bind="ltext: 'application.property'"></p>
-            <span class="application_summary_text" data-bind="text: propertyId" data-test-id="application-property-id"></span>
+            <p data-bind="ltext: 'application.id'"></p>
+            <span
+              data-bind="text: id, attr: {'data-test-value': id}"
+              data-test-id="application-id"
+              class="application_summary_text">
+            </span>
           </div>
           <!-- Authorities: -->
           <!-- ko if: $root.authorization.ok('assign-application') -->
@@ -68,15 +76,8 @@
               </li>
             </ul>
           </div>
-
-          <!-- Submitted: -->
-          <div data-bind="with: $root.applicationModel.data">
-            <p data-bind="ltext: 'application.submissionDate'"></p>
-            <span data-bind="if: $data.submitted">
-              <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
-            </span>
-          </div>
         </div>
+
         
         <!-- Actions: -->
         <div data-bind="with: application" class="application_actions">
@@ -84,12 +85,12 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="ltext: 'municipality.' + municipality()"></p>
           </div>
-          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn-primary"></button>
+          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn"></button>
           <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class=""></button>
           <button data-bind="ltext: 'application.requestForComplement', click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement"     class=""></button>
           <button data-bind="ltext: 'application.addOperation',       click: addOperation,       visible: $root.authorization.ok('add-operation'),       enable: $root.authorization.ok('add-operation')"       data-test-id="add-operation"           class=""></button>
           <button data-bind="ltext: 'application.pdf',                click: exportPdf"                                                                                                                         data-test-id="application-pdf-btn"     class=""></button>
-          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn-decline "></button>
+          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn"></button>
         </div>
       
         <!-- Tabs: -->
@@ -228,7 +229,7 @@
               data-test-id="add-attachment">
           </button>
           <button
-              data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates'"
+              data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
               class="btn">                
           </button>
         </div>

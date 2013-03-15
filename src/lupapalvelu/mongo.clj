@@ -39,8 +39,8 @@
 
 (defn update
   "Updates data into collection by query. Always returns nil."
-   [collection query data]
-  (mc/update collection query data)
+  [collection query data & opts]
+  (apply mc/update collection query data opts)
   nil)
 
 (defn update-by-id
@@ -107,6 +107,10 @@
      :content-length (.getLength attachment)
      :file-name (.getFilename attachment)
      :application (.getString (.getMetaData attachment) "application")}))
+
+(defn delete-file [file-id]
+  (info "removing file" file-id)
+  (gfs/remove {:_id file-id}))
 
 (defn count
   "returns count of objects in collection"

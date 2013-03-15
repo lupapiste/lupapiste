@@ -330,11 +330,11 @@ Open inforequest
 
 Request should be visible
   [Arguments]  ${address}
-  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
 Request should not be visible
   [Arguments]  ${address}
-  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+  Wait Until  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
 #
 # Comments:
