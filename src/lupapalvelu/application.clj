@@ -153,7 +153,10 @@
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :complement-needed]
+   :validators [(fn [command application]
+                  (when-not (domain/is-owner-or-writer? application (-> command :user :id))
+                    (fail :error.unauthorized)))]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]

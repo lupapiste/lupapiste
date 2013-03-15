@@ -52,8 +52,8 @@
       (fact "Veikko can reject attachment"
         (reject-attachment application-id (first attachment-ids)))
 
-      (fact "Veikko submits the application"
-        (success (command veikko :submit-application :id application-id)) => true
+      (fact "Pena submits the application"
+        (success (command pena :submit-application :id application-id)) => true
         (-> (query veikko :application :id application-id) :application :state) => "submitted")
 
       (fact "Veikko can still approve attachment"
