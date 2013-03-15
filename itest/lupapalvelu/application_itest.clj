@@ -67,10 +67,13 @@
     application => truthy
     (success resp) => true
     authority-before-assignation => nil
-    ;; TODO: why is this returned in different format?
-    ;;   Expected: {:id "777777777777777777000023", :lastName "Sibbo", :firstName "Sonja"}
-    ;;     Actual: {:role "authority", :lastName "Sibbo", :firstName "Sonja", :username "sonja", :id "777777777777777777000023"}
-    authority-after-assignation => (contains {:id (:id authority)})))
+    authority-after-assignation => (contains {:id (:id authority)})
+    (fact "Authority is not able to submit"
+          (let [resp (query sonja :allowed-actions :id application-id)]
+                (success resp) => true
+                (get-in resp [:actions :submit-application :ok]) => falsey))
+
+    ))
 
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (:id (create-app pena :municipality sonja-muni))
