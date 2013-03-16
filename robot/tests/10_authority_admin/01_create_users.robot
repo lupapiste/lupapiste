@@ -1,13 +1,14 @@
 *** Settings ***
 
 Documentation   Authority admin creates users
-Suite setup     Sipoo logs in
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
 Authority admin goes to admin page
+  Sipoo logs in
   Wait until page contains element  test-authority-admin-users-table
 
 Authority admin creates three users
