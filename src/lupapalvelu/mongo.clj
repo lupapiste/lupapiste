@@ -177,7 +177,7 @@
     (if @connected
       (debug "Already connected!")
       (do
-        (println "Connecting to DB:" servers (if ssl "using ssl" "without encryption"))
+        (debug "Connecting to DB:" servers (if ssl "using ssl" "without encryption"))
         (m/connect! servers (mongo-options :ssl ssl))
         (reset! connected true)
         (m/set-default-write-concern! WriteConcern/SAFE)
