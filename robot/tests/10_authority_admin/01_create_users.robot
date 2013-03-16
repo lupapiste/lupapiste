@@ -11,12 +11,10 @@ Authority admin goes to admin page
   Wait until page contains element  test-authority-admin-users-table
 
 Authority admin creates three users
-  Sleep  1
+  Wait Until  Element Should Be Visible  //tr[@class="user-row"]
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
   Create user  heikki.virtanen@example.com  Heikki  Virtanen  123456
   Create user  hessu.kesa@example.com  Hessu  Kesa  123456
-  Wait Until  Element Should Be Visible  test-authority-admin-users-table
-  Sleep  1
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
   Logout
@@ -58,3 +56,4 @@ Create user
   Input text       user-password  ${password}
   Click element    test-create-user-save
   Wait Until  Element Should Not Be Visible  dialog-add-user
+  Wait Until  Page Should Contain  ${email}
