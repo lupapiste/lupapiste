@@ -257,7 +257,7 @@ Create inforequest the fast way
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
-  Go to page  applications 
+  Go to page  applications
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-application
   Wait Until  Element should be visible  application
@@ -300,12 +300,13 @@ Prepare new request
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
-  Confirm closing
+  Confirm  dialog-confirm-cancel
 
-Confirm closing
-  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-yes"]
-  Click by test id  confirm-yes
-  Wait Until  Element Should Not Be Visible  dialog-confirm-cancel
+Confirm
+  [Arguments]  ${modalId}
+  Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Wait Until  Element Should Not Be Visible  ${modalId}
 
 It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
