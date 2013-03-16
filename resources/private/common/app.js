@@ -11,16 +11,15 @@ if (typeof LUPAPISTE === "undefined") {
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
  LUPAPISTE.App = function (startPage, allowAnonymous) {
- 
- "use strict";
- 
- var self = this;
- 
+  "use strict";
+
+  var self = this;
+
   self.startPage = startPage;
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
-  
+
   self.createLogo = function () {
     var href = "#!/" + self.startPage;
     var link$ = $("<a class='brand' href='" + href + "'></a>");
@@ -77,6 +76,13 @@ if (typeof LUPAPISTE === "undefined") {
 
     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
       LUPAPISTE.ModalDialog.init();
+
+      $(document.documentElement).keyup(function (event) {
+        var escape = 27;
+        if (event.keyCode === escape) {
+          LUPAPISTE.ModalDialog.close();
+        }
+      });
     }
     var navWrapper = $("<div class='nav-wrapper'></div>");
     navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
@@ -84,7 +90,7 @@ if (typeof LUPAPISTE === "undefined") {
       navWrapper.append(self.createUserMenu());
       navWrapper.append(self.createNaviLinks());
     }
-    $("nav").append(navWrapper)
+    $("nav").append(navWrapper);
   };
   $(self.domReady);
 
