@@ -21,7 +21,7 @@
 (def ui-components
   {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.1.custom.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
    :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js" "jquery.cookie.js"]}
-   :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js"]}
+   :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
    :underscore   {:js ["underscore-1.4.4-min.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
 
@@ -38,7 +38,7 @@
    :selectm      {:js   ["selectm.js"]
                   :html ["selectm.html"]
                   :css  ["selectm.css"]}
-   
+
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js" "datepicker.js"]
