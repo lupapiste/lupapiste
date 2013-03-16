@@ -312,6 +312,12 @@ Confirm
 
 It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
+
+Submit application
+  Click enabled by test id  application-submit-btn
+  Confirm  dialog-confirm-submit
+  Wait until  Application state should be  submitted
+
 #
 # Jump to application or inforequest:
 #

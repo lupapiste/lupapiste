@@ -28,9 +28,7 @@ Submit date is not be visible
   Element should not be visible  xpath=//span[@data-test-id='application-submitted-date']
 
 Mikko submits application
-  Click element  xpath=//*[@data-test-id='application-submit-btn']
-  Confirm  dialog-confirm-submit
-  Wait until  Application state should be  submitted
+  Submit application
 
 Mikko cant re-submit application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']

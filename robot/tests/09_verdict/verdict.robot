@@ -16,9 +16,8 @@ Application does not have verdict
   Set suite variable  ${APPLICATION ID}  ${ID}
 
 Mikko submits application
-  Click by test id  application-submit-btn
-  Wait until  Application state should be  submitted
-  
+  Submit application
+
 Mikko goes for lunch
   Logout
 
@@ -33,7 +32,7 @@ Solita Admin can log in and gives verdict
 Mikko sees that the application has verdict
   Mikko logs in
   Open application  verdict-app  75341600250030
-  Open tab  verdict 
+  Open tab  verdict
   Element Text Should Be  xpath=//span[@data-test-id='application-verdict']  onneksi olkoon!
   Logout
 

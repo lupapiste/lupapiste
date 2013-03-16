@@ -62,9 +62,7 @@ Mikko closes application at Latokuja 3
 Mikko decides to submit create-app
   Open application  create-app  75341600250021
   Wait until  Application state should be  draft
-  Click by test id  application-submit-btn
-  Confirm  dialog-confirm-submit
-  Wait until  Application state should be  submitted
+  Submit application
 
 Mikko still sees the submitted app in applications list
   Go to page  applications
