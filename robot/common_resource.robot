@@ -74,10 +74,10 @@ Wait until
 Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
 
-Kill dev-debug
+Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
 
-Show dev-debug
+Show dev-box
   Execute Javascript  $(".dev-debug").show();
 
 #
@@ -133,7 +133,7 @@ User logs in
   [Arguments]  ${login}  ${password}  ${username}
   Login  ${login}  ${password}
   User should be logged in  ${username}
-  Kill dev-debug
+  Kill dev-box
 
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
@@ -247,12 +247,14 @@ Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
+  Kill dev-box
   Open application  ${address}  ${propertyId}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
+  Kill dev-box
   Open inforequest  ${address}  ${propertyId}
 
 Create application
@@ -353,10 +355,10 @@ Add comment
 #
 
 Apply minimal fixture now
-  Show dev-debug
+  Show dev-box
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
-  Kill dev-debug
+  Kill dev-box
 
 #
 # Application state check:
