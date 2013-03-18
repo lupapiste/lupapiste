@@ -33,9 +33,13 @@
 ;; Helpers
 ;;
 
+(defonce apis (atom #{}))
+
 (defmacro defjson [path params & content]
-  `(defpage ~path ~params
-     (resp/json (do ~@content))))
+  `(do
+     (swap! apis conj ~path)
+     (defpage ~path ~params
+       (resp/json (do ~@content)))))
 
 (defn from-json [request]
   (json/decode (slurp (:body request)) true))
