@@ -13,8 +13,7 @@
       $("#create-part-2").hide()
       $("#create-part-3").hide();
     };
-
-
+    
     self.goPhase2 = function() {
       $("#create-part-1").hide();
       $("#create-part-2").show();
@@ -25,6 +24,8 @@
       $("#create-part-3").show();
     };
 
+    self.useManualEntry = ko.observable(false);
+    
     self.municipalities = ko.observableArray([]);
     self.map = null;
 
@@ -135,6 +136,7 @@
                 x = data.x,
                 y = data.y;
             self
+              .useManualEntry(false)
               .setXY(x, y)
               .center(x, y, 11)
               .setAddress(data)
@@ -143,10 +145,13 @@
               .searchPropertyId(x, y);
           }
         })
+        .error(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
 
+    window.useManualEntry = self.useManualEntry;
+    
     self.searchPointByPropertyId = function(propertyId) {
       var requestId = self.updateRequestId;
       ajax
@@ -158,6 +163,7 @@
                 x = data.x,
                 y = data.y;
             self
+              .useManualEntry(false)
               .setXY(x, y)
               .center(x, y, 11)
               .setPropertyId(propertyId)
@@ -166,6 +172,7 @@
               .searchAddress(x, y);
           }
         })
+        .error(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
