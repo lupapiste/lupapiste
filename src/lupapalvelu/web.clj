@@ -33,9 +33,15 @@
 ;; Helpers
 ;;
 
+(defonce apis (atom #{}))
+
 (defmacro defjson [path params & content]
-  `(defpage ~path ~params
-     (resp/json (do ~@content))))
+  `(let [[m# p#] (if (string? ~path) [:get ~path] ~path)]
+     (swap! apis conj {(keyword m#) p#})
+     (defpage ~path ~params
+       (resp/json (do ~@content)))))
+
+(defjson "/system/apis" [] @apis)
 
 (defn from-json [request]
   (json/decode (slurp (:body request)) true))
@@ -318,10 +324,10 @@
 ;;
 
 (env/in-dev
-  (defjson "/api/spy" []
+  (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
-  (defpage "/api/by-id/:collection/:id" {:keys [collection id]}
+  (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"})))))
