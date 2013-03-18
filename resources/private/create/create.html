@@ -8,8 +8,9 @@
         <p data-bind="ltext: 'newRequest.locationInfo'"></p>
         <label data-bind="ltext: 'create.search-map'" for="create-search" class="form-label"></label>
         <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search"/>
-
-        <button data-bind="click: searchNow, ltext: 'search'" class="btn btn-primary" data-test-id="create-search-button"></button>
+        <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
+          <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
+        </button>
       </div>
       <div class="selected-location">
         <div class="map-select-info">
@@ -44,10 +45,12 @@
               class="form-input text long"></input>
           </div>
           <button
-              data-bind="enable: addressOk, click: goPhase2, ltext: 'continue'"
+              data-bind="enable: addressOk, click: goPhase2"
               class="btn btn-primary"
               data-test-id="create-continue"
               id="create-location-continue">
+            <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
+            
           </button>
         </div>
         <div id="create-map" class="map create-application-map" style="width: 75%; height: 500px;"></div>
