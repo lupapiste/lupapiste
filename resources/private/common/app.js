@@ -51,7 +51,7 @@ if (typeof LUPAPISTE === "undefined") {
     if (!self.allowAnonymous) {
       userMenu$.append(" ");
       userMenu$.append($("<a>")
-        .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
+        .attr("href", "/app/" + loc.getCurrentLanguage() + "/logout")
         .text(loc("logout")));
     }
     return userMenu$;
@@ -183,7 +183,7 @@ if (typeof LUPAPISTE === "undefined") {
   });
 
   hub.subscribe("logout", function () {
-    window.location = "/" + loc.getCurrentLanguage() + "/logout";
+    window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
   });
 
 };
