@@ -62,7 +62,9 @@
     <section id="create-part-2">
 
       <h1 data-bind="ltext: 'newRequest.descTitle'"></h1>
-      <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text" ></p>
+      <span class="icon info-big right-align"></span>
+      <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text" >
+      </p>
 
       <div class="create-content">
         <div class="tree" data-bind="visible: operations">
@@ -75,8 +77,12 @@
         </div>
 
         <div class="create-buttons">
-          <button data-bind="click: goPhase3, visible: operation, ltext: 'newRequest.newInforequest'"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary"></button>
-          <button data-bind="click: createApplication, visible: operation, ltext: 'newRequest.newApplication'" data-test-id="create-application" class="btn btn-primary"></button>
+          <button data-bind="click: goPhase3, visible: operation"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
+            <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>
+          </button>
+          <button data-bind="click: createApplication, visible: operation" data-test-id="create-application" class="btn btn-primary">
+            <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
+          </button>
         </div>
       </div>
 
