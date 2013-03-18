@@ -196,10 +196,9 @@
   (redirect-to-frontpage lang))
 
 (defpage "/" []
-  (let [application-page (user/applicationpage-for (:role (current-user)))]
-    (if (and application-page (logged-in?))
-      (redirect default-lang application-page)
-      (redirect-to-frontpage default-lang))))
+  (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+    (redirect default-lang application-page)
+    (redirect-to-frontpage default-lang)))
 
 ;;
 ;; FROM SADE
