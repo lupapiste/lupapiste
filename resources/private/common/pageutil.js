@@ -16,12 +16,12 @@ var pageutil = (function() {
   
   function showAjaxWait() {
     console.log("show");
-    $('.ajax-wait').css("display", "inline-block");
+    $('.ajax-loader-container').css("display", "inline-block");
   }
 
   function hideAjaxWait() {
     console.log("hide");
-    $('.ajax-wait').css("display", "none");
+    $('.ajax-loader-container').css("display", "none");
   }
   
   return {
