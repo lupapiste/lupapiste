@@ -41,7 +41,7 @@
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                             :checksum :ignore}]]
-  :aliases {"verify" ["with-profile" "dev,alltests" "do" "nitpicker" "midje"]}
+  :aliases {"verify" ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")
