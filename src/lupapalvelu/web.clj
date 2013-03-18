@@ -37,7 +37,7 @@
 
 (defmacro defjson [path params & content]
   `(let [[m# p#] (if (string? ~path) [:get ~path] ~path)]
-     (swap! apis conj [(keyword m#) p#])
+     (swap! apis conj {(keyword m#) p#})
      (defpage ~path ~params
        (resp/json (do ~@content)))))
 
