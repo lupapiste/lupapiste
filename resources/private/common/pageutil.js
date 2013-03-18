@@ -1,5 +1,8 @@
 var pageutil = (function() {
   "use strict";
+  
+  var ajaxImg;
+  var ajaxLoaderContainer;
 
   /**
    * Returns HTTP GET parameter value or null if the parameter is not set.
@@ -15,15 +18,23 @@ var pageutil = (function() {
   }
   
   function showAjaxWait() {
-    console.log("show");
-    $('.ajax-loader-container').css("display", "inline-block");
+    ajaxImg.hide();
+    ajaxLoaderContainer.show();
+    setTimeout(function() {
+      ajaxImg.show();
+    }, 500);
   }
 
   function hideAjaxWait() {
-    console.log("hide");
-    $('.ajax-loader-container').css("display", "none");
+    ajaxLoaderContainer.hide();
   }
   
+  $(function() {
+    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader">');
+    ajaxLoaderContainer = $('<div class="ajax-loader-container">').append(ajaxImg);
+    $('body').append(ajaxLoaderContainer);
+  });
+
   return {
     getURLParameter:  getURLParameter,
     showAjaxWait:     showAjaxWait,
