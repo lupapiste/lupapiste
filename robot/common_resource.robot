@@ -74,10 +74,10 @@ Wait until
 Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
 
-Kill dev-debug
+Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
 
-Show dev-debug
+Show dev-box
   Execute Javascript  $(".dev-debug").show();
 
 #
@@ -133,7 +133,7 @@ User logs in
   [Arguments]  ${login}  ${password}  ${username}
   Login  ${login}  ${password}
   User should be logged in  ${username}
-  Kill dev-debug
+  Kill dev-box
 
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
@@ -247,17 +247,19 @@ Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
   Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
+  Kill dev-box
   Open application  ${address}  ${propertyId}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
   Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
+  Kill dev-box
   Open inforequest  ${address}  ${propertyId}
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
-  Go to page  applications 
+  Go to page  applications
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-application
   Wait Until  Element should be visible  application
@@ -300,15 +302,22 @@ Prepare new request
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
-  Confirm closing
+  Confirm  dialog-confirm-cancel
 
-Confirm closing
-  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-yes"]
-  Click by test id  confirm-yes
-  Wait Until  Element Should Not Be Visible  dialog-confirm-cancel
+Confirm
+  [Arguments]  ${modalId}
+  Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Wait Until  Element Should Not Be Visible  ${modalId}
 
 It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
+
+Submit application
+  Click enabled by test id  application-submit-btn
+  Confirm  dialog-confirm-submit
+  Wait until  Application state should be  submitted
+
 #
 # Jump to application or inforequest:
 #
@@ -352,10 +361,10 @@ Add comment
 #
 
 Apply minimal fixture now
-  Show dev-debug
+  Show dev-box
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
-  Kill dev-debug
+  Kill dev-box
 
 #
 # Application state check:

@@ -280,3 +280,4 @@ attachment.zip.pdf.filename.submitted: jatetty-hakemus.pdf
 
 application.requestForComplement: Palauta täydennettäväksi
 complement-needed: Täydennettävänä
+application.requestForComplement: Pyydä täydennyksiä

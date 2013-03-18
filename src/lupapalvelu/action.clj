@@ -152,7 +152,7 @@
   [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
   (with-application command
     (fn [application]
-      (if (= "draft" (:state application))
+      (when (and (= "draft" (:state application)) (not (s/blank? text)))
         (executed "open-application" command))
       (mongo/update-by-id
         :applications

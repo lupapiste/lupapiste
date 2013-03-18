@@ -77,5 +77,5 @@
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)]
       (fact (:katunimi body) => "Luhtaankatu")
-      (fact (:katunumero body) => "3")
+      (fact (:katunumero body) => #"\d")
       (fact (:kuntanimiFin body) => "Tampere"))))

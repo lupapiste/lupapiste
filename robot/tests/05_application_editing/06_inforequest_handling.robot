@@ -41,7 +41,7 @@ Mikko opens inforequest for cancellation
 Mikko cancels an inforequest
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
   Click enabled by test id  inforequest-cancel-btn
-  Confirm closing
+  Confirm  dialog-confirm-cancel
 
 Mikko does not see the cancelled inforequest
   Wait until  Element should be visible  applications-list
