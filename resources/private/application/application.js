@@ -337,6 +337,8 @@
 
   function showApplication(applicationDetails) {
     isInitializing = true;
+    pageutil.showWaitForLoading();
+    
     authorizationModel.refresh(applicationDetails.application,function() {
 
       // new data mapping
@@ -402,6 +404,7 @@
       application.assignee(assigneeId);
 
       isInitializing = false;
+      pageutil.hideWaitForLoading();
     });
   }
 

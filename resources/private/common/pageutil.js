@@ -13,9 +13,21 @@ var pageutil = (function() {
     }
     return null;
   }
+  
+  function showWaitForLoading() {
+    console.log("wait for loading");
+    $('.wait-for-loading').show();
+  }
 
+  function hideWaitForLoading() {
+    console.log("hide wait for loading");
+    $('.wait-for-loading').hide();
+  }
+  
   return {
-    getURLParameter:  getURLParameter
+    getURLParameter:  getURLParameter,
+    hideWaitForLoading: hideWaitForLoading,
+    showWaitForLoading: showWaitForLoading,
   };
 
 })();
