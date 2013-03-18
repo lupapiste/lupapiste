@@ -36,10 +36,12 @@
 (defonce apis (atom #{}))
 
 (defmacro defjson [path params & content]
-  `(do
-     (swap! apis conj ~path)
+  `(let [[m# p#] (if (string? ~path) [:get ~path] ~path)]
+     (swap! apis conj [(keyword m#) p#])
      (defpage ~path ~params
        (resp/json (do ~@content)))))
+
+(defjson "/system/apis" [] @apis)
 
 (defn from-json [request]
   (json/decode (slurp (:body request)) true))
