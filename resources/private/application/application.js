@@ -73,7 +73,6 @@
       LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
       return self;
     };
-
     self.ok = function() {
       ajax
         .command("cancel-application", {id: self.applicationId})
@@ -486,6 +485,18 @@
     var tab = e.pagePath[1];
     selectTab(tab || "info");
     if(newId !== currentId || !tab) {
+      currentId = newId;
+      applicationMap.updateSize();
+      inforequestMap.updateSize();
+      repository.load(currentId);
+    }
+  };
+
+  var initApplication = function(e) {
+    var newId = e.pagePath[0];
+    var tab = e.pagePath[1];
+    selectTab(tab || "info");
+    if(newId !== currentId || !tab) {
       pageutil.showAjaxWait();
       currentId = newId;
       applicationMap.updateSize();
@@ -529,8 +540,19 @@
     
   };
   
-  hub.onPageChange("application", initApplication);
-  hub.onPageChange("inforequest", initApplication);
+  function initPage(kind, e) {
+    var newId = e.pagePath[0];
+    var tab = e.pagePath[1];
+    selectTab(tab || "info");
+    if (newId !== currentId || !tab) {
+      currentId = newId;
+      ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
+      repository.load(currentId);
+    }
+  };
+
+  hub.onPageChange("application", _.partial(initPage, "application"));
+  hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
   $(function() {
     applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
