@@ -16,12 +16,12 @@ var pageutil = (function() {
   
   function showWaitForLoading() {
     console.log("wait for loading");
-    $('.wait-for-loading').show();
+    $('.wait-for-loading').css("display", "inline-block");
   }
 
   function hideWaitForLoading() {
     console.log("hide wait for loading");
-    $('.wait-for-loading').hide();
+    $('.wait-for-loading').css("display", "none");
   }
   
   return {

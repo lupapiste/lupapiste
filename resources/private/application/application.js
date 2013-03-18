@@ -337,7 +337,6 @@
 
   function showApplication(applicationDetails) {
     isInitializing = true;
-    pageutil.showWaitForLoading();
     
     authorizationModel.refresh(applicationDetails.application,function() {
 
@@ -487,6 +486,7 @@
     var tab = e.pagePath[1];
     selectTab(tab || "info");
     if(newId !== currentId || !tab) {
+      pageutil.showWaitForLoading();
       currentId = newId;
       applicationMap.updateSize();
       inforequestMap.updateSize();
