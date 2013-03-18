@@ -22,7 +22,7 @@ var pageutil = (function() {
     ajaxLoaderContainer.show();
     setTimeout(function() {
       ajaxImg.show();
-    }, 500);
+    }, 300);
   }
 
   function hideAjaxWait() {
