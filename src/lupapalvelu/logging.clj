@@ -1,14 +1,13 @@
 (ns lupapalvelu.logging
   (:use [clojure.tools.logging]
         [clj-logging-config.log4j])
-  (:require [lupapalvelu.env :as env])
-  (:import [org.apache.log4j DailyRollingFileAppender EnhancedPatternLayout]))
-
+  (:require [lupapalvelu.env :as env]
+            [clojure.java.io :as io])
+  (:import [org.apache.log4j FileAppender EnhancedPatternLayout]))
 
 (def pattern "%-7p %d (%r) [%X{sessionId}] [%X{applicationId}] [%X{userId}] %c:%L - %m%n")
 
-(defn daily-rolling-midnight-appender [pattern file]
-  (DailyRollingFileAppender. (EnhancedPatternLayout. pattern) file "'.'yyyy-MM-dd"))
+(defn to-file [file] (FileAppender. (EnhancedPatternLayout. pattern) file true))
 
 (def default {:level env/log-level :pattern pattern})
 
@@ -16,7 +15,7 @@
               "lupapalvelu"          default
               "ontodev.excel"        default
               "org"                  (assoc default :level :info)
-              "events"               {:out (daily-rolling-midnight-appender pattern "target/logs/events.log")})
+              "events"               {:out (to-file (.getPath (io/file env/log-dir "logs" "events.log")))})
 
 (defn unsecure-log-event [level event]
   (with-logs "events" level level
