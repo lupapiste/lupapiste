@@ -336,6 +336,7 @@
 
   function showApplication(applicationDetails) {
     isInitializing = true;
+    
     authorizationModel.refresh(applicationDetails.application,function() {
 
       // new data mapping
@@ -401,6 +402,7 @@
       application.assignee(assigneeId);
 
       isInitializing = false;
+      pageutil.hideAjaxWait();
     });
   }
 
@@ -518,6 +520,7 @@
     var tab = e.pagePath[1];
     selectTab(tab || "info");
     if (newId !== currentId || !tab) {
+      pageutil.showAjaxWait();
       currentId = newId;
       ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
       repository.load(currentId);
