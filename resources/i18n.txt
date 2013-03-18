@@ -73,6 +73,7 @@ hakija.henkilo.turvakieltoKytkin: Turvakielto
 paasuunnittelija.turvakieltoKytkin: Turvakielto
 suunnittelija.turvakieltoKytkin: Turvakielto
 maksaja.henkilo.turvakieltoKytkin: Turvakielto
+uusiRakennus.lammitys.muu-lammonlahde: Muu lämmönlähde
 
 applications.operation: Toimenpide
 

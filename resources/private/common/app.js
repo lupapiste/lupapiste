@@ -58,8 +58,10 @@ if (typeof LUPAPISTE === "undefined") {
   };
 
   self.createNaviLinks = function () {
+    var icon$ = $('<span>').attr("class", "icon document-white");
     var navi$ = $('<span>').attr("href", "#").text(loc('navigation'));
     var naviBox$ = $('<a>').attr("class", "main-nav").attr("href", "#");
+    naviBox$.append(icon$);
     naviBox$.append(navi$);
     return naviBox$;
   };

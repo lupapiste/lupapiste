@@ -84,7 +84,7 @@ var selectionTree = (function () {
       if (self.data) {
         var n = self.make(self.data);
         self.stack.push(n);
-        $(n).css("margin-left", self.width).animate({"margin-left": 0}, self.speed);
+        $(n).css("margin-left", self.width).animate({ "margin-left": 0 }, self.speed);
         self.content.append(n);
       }
       return self;
@@ -115,7 +115,7 @@ var selectionTree = (function () {
     self.gostartEventHandler = stopProp(self.gostart);
 
 
-    self.make = function(t) {
+    self.make = function (t) {
       var d = document.createElement("div");
       var link;
       var icon;
@@ -124,7 +124,7 @@ var selectionTree = (function () {
 
       if (self.stack.length > 0) {
         icon = document.createElement("span");
-        icon.className = "font-icon icon-tree-back";
+        icon.className = "icon inline-left drill-left-black";
         link = document.createElement("a");
         link.className = "tree-back";
         link.innerHTML = loc("tree.back");
@@ -136,7 +136,7 @@ var selectionTree = (function () {
 
       if (self.stack.length > 1) {
         icon = document.createElement("span");
-        icon.className = "font-icon icon-tree-start";
+        icon.className = "icon inline-left drill-left-all-black";
         link = document.createElement("a");
         link.className = "tree-start";
         link.innerHTML = loc("tree.start");
@@ -149,11 +149,14 @@ var selectionTree = (function () {
       return d;
     };
 
-    self.makeLink = function(key, val, d) {
+    self.makeLink = function (key, val, d) {
+      var icon = document.createElement("span");
+      icon.className = "icon drill-right-orange inline-right";
       var link = document.createElement("a");
       link.innerHTML = loc(self.prefix + "." + key);
       link.href = "#";
       link.onclick = self.makeHandler(key, val, d);
+      link.appendChild(icon);
       return link;
     };
 
