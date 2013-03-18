@@ -14,20 +14,20 @@ var pageutil = (function() {
     return null;
   }
   
-  function showWaitForLoading() {
-    console.log("wait for loading");
-    $('.wait-for-loading').css("display", "inline-block");
+  function showAjaxWait() {
+    console.log("show");
+    $('.ajax-wait').css("display", "inline-block");
   }
 
-  function hideWaitForLoading() {
-    console.log("hide wait for loading");
-    $('.wait-for-loading').css("display", "none");
+  function hideAjaxWait() {
+    console.log("hide");
+    $('.ajax-wait').css("display", "none");
   }
   
   return {
     getURLParameter:  getURLParameter,
-    hideWaitForLoading: hideWaitForLoading,
-    showWaitForLoading: showWaitForLoading,
+    showAjaxWait:     showAjaxWait,
+    hideAjaxWait:     hideAjaxWait,
   };
 
 })();

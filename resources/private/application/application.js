@@ -403,7 +403,7 @@
       application.assignee(assigneeId);
 
       isInitializing = false;
-      pageutil.hideWaitForLoading();
+      pageutil.hideAjaxWait();
     });
   }
 
@@ -486,7 +486,7 @@
     var tab = e.pagePath[1];
     selectTab(tab || "info");
     if(newId !== currentId || !tab) {
-      pageutil.showWaitForLoading();
+      pageutil.showAjaxWait();
       currentId = newId;
       applicationMap.updateSize();
       inforequestMap.updateSize();
