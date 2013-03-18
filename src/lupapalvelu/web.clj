@@ -327,12 +327,12 @@
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
   
   (defpage [:get "/api/proxy-ctrl"] []
-    (resp/json {:ok true :data @env/proxy-off}))
+    (resp/json {:ok true :data (not @env/proxy-off)}))
   
   (defpage [:post "/api/proxy-ctrl/:value"] {value :value}
-    (let [new-value (condp = value
-                      true   true
-                      "true" true
-                      "on"   true
-                      false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly new-value))}))))
+    (let [on (condp = value
+               true   true
+               "true" true
+               "on"   true
+               false)]
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
