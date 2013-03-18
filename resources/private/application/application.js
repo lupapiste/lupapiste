@@ -480,31 +480,6 @@
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
-  var initApplication = function(e) {
-    var newId = e.pagePath[0];
-    var tab = e.pagePath[1];
-    selectTab(tab || "info");
-    if(newId !== currentId || !tab) {
-      currentId = newId;
-      applicationMap.updateSize();
-      inforequestMap.updateSize();
-      repository.load(currentId);
-    }
-  };
-
-  var initApplication = function(e) {
-    var newId = e.pagePath[0];
-    var tab = e.pagePath[1];
-    selectTab(tab || "info");
-    if(newId !== currentId || !tab) {
-      pageutil.showAjaxWait();
-      currentId = newId;
-      applicationMap.updateSize();
-      inforequestMap.updateSize();
-      repository.load(currentId);
-    }
-  };
-
   var attachmentTemplatesModel = new function() {
     var self = this;
 
@@ -545,6 +520,7 @@
     var tab = e.pagePath[1];
     selectTab(tab || "info");
     if (newId !== currentId || !tab) {
+      pageutil.showAjaxWait();
       currentId = newId;
       ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
       repository.load(currentId);
