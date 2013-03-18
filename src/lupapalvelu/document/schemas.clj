@@ -295,8 +295,9 @@
                                          {:name "turve"}
                                          {:name "maal\u00e4mp\u00f6"}
                                          {:name "puu"}
-                                         {:name "muu" :type :string :size "s"} ;TODO tukii tekstille
-                                         {:name "ei tiedossa"}]}]}
+                                         {:name "muu" :type :string :size "s"}
+                                         {:name "ei tiedossa"}]}
+                                 {:name "muu-lammonlahde" :type :text :size "s"}]}
                          {:name "verkostoliittymat" :type :group
                           :body [{:name "viemariKytkin" :type :checkbox}
                                  {:name "vesijohtoKytkin" :type :checkbox}
