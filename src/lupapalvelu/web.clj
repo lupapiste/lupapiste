@@ -151,7 +151,7 @@
       failure))
 
 ;; CSS & JS
-(defpage [:get ["/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
+(defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
   (single-resource (keyword res-type) (keyword app) (resp/status 401 "Unauthorized\r\n")))
 
 ;; Single Page App HTML
@@ -163,10 +163,13 @@
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
 
-(defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" (name lang) "/welcome#")))
+(defn redirect [lang page]
+  (resp/redirect (str "/app/" (name lang) "/" page)))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+(defn redirect-to-frontpage [lang]
+  (redirect lang "welcome"))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
   ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (when (and hashbang (local? hashbang))
     (session/put! :hashbang hashbang))
@@ -175,9 +178,6 @@
 ;;
 ;; Login/logout:
 ;;
-
-(defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" (name lang) "/welcome")))
 
 (defn- logout! []
   (session/clear!)
@@ -191,16 +191,15 @@
   (logout!)
   (resp/redirect "/"))
 
-(defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
+(defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
   (redirect-to-frontpage lang))
 
 (defpage "/" []
-  (if (logged-in?)
-    (if-let [application-page (user/applicationpage-for (:role (current-user)))]
-      (resp/redirect (str "/" default-lang application-page))
-      (redirect-to-frontpage default-lang))
-    (redirect-to-frontpage default-lang)))
+  (let [application-page (user/applicationpage-for (:role (current-user)))]
+    (if (and application-page (logged-in?))
+      (redirect default-lang application-page)
+      (redirect-to-frontpage default-lang))))
 
 ;;
 ;; FROM SADE
