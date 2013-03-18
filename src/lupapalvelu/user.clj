@@ -8,7 +8,8 @@
             [lupapalvelu.util :as util]
             [noir.session :as session]))
 
-(defn applicationpage-for [role] (kebab/->kebab-case role))
+(defn applicationpage-for [role]
+  (kebab/->kebab-case role))
 
 (defcommand "login"
   {:parameters [:username :password]}
