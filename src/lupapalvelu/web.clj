@@ -286,7 +286,7 @@
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
-    (if env/proxy-off
+    (if @env/proxy-off
       {:status 503}
       ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
@@ -324,4 +324,15 @@
   (defpage "/api/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
-      (resp/status 404 (resp/json {:ok false :text "not found"})))))
+      (resp/status 404 (resp/json {:ok false :text "not found"}))))
+  
+  (defpage [:get "/api/proxy-ctrl"] []
+    (resp/json {:ok true :data @env/proxy-off}))
+  
+  (defpage [:post "/api/proxy-ctrl/:value"] {value :value}
+    (let [new-value (condp = value
+                      true   true
+                      "true" true
+                      "on"   true
+                      false)]
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly new-value))}))))
