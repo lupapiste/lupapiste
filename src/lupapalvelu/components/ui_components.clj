@@ -97,8 +97,7 @@
                      :html ["index.html" "admin.html"]}
 
    :tree    {:depends [:jquery]
-             :js ["tree.js"]
-             :css ["tree.css"]}
+             :js ["tree.js"]}
 
    :admin   {:depends [:common :map :buildinfo :mypage :debug]
              :js ["admin.js"]
