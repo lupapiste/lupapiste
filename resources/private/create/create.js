@@ -17,11 +17,13 @@
     self.goPhase2 = function() {
       $("#create-part-1").hide();
       $("#create-part-2").show();
+      window.scrollTo(0,0);
     };
 
     self.goPhase3 = function() {
       $("#create-part-2").hide();
       $("#create-part-3").show();
+      window.scrollTo(0,0);
     };
 
     self.useManualEntry = ko.observable(false);

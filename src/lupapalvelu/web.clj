@@ -33,9 +33,15 @@
 ;; Helpers
 ;;
 
+(defonce apis (atom #{}))
+
 (defmacro defjson [path params & content]
-  `(defpage ~path ~params
-     (resp/json (do ~@content))))
+  `(let [[m# p#] (if (string? ~path) [:get ~path] ~path)]
+     (swap! apis conj {(keyword m#) p#})
+     (defpage ~path ~params
+       (resp/json (do ~@content)))))
+
+(defjson "/system/apis" [] @apis)
 
 (defn from-json [request]
   (json/decode (slurp (:body request)) true))
@@ -145,7 +151,7 @@
       failure))
 
 ;; CSS & JS
-(defpage [:get ["/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
+(defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
   (single-resource (keyword res-type) (keyword app) (resp/status 401 "Unauthorized\r\n")))
 
 ;; Single Page App HTML
@@ -157,10 +163,13 @@
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
 
-(defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" (name lang) "/welcome#")))
+(defn redirect [lang page]
+  (resp/redirect (str "/app/" (name lang) "/" page)))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+(defn redirect-to-frontpage [lang]
+  (redirect lang "welcome"))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
   ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (when (and hashbang (local? hashbang))
     (session/put! :hashbang hashbang))
@@ -169,9 +178,6 @@
 ;;
 ;; Login/logout:
 ;;
-
-(defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" (name lang) "/welcome")))
 
 (defn- logout! []
   (session/clear!)
@@ -185,15 +191,13 @@
   (logout!)
   (resp/redirect "/"))
 
-(defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
+(defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
   (redirect-to-frontpage lang))
 
 (defpage "/" []
-  (if (logged-in?)
-    (if-let [application-page (user/applicationpage-for (:role (current-user)))]
-      (resp/redirect (str "/" default-lang application-page))
-      (redirect-to-frontpage default-lang))
+  (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+    (redirect default-lang application-page)
     (redirect-to-frontpage default-lang)))
 
 ;;
@@ -318,10 +322,10 @@
 ;;
 
 (env/in-dev
-  (defjson "/api/spy" []
+  (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
-  (defpage "/api/by-id/:collection/:id" {:keys [collection id]}
+  (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))

@@ -553,9 +553,8 @@ var docgen = (function() {
       title.onclick = accordion.click;
       if (self.spec.info.removable) {
         $(title)
-          .append($("<button>")
-            .addClass("icon-remove")
-            .text("[X]")
+          .append($("<span>")
+            .addClass("icon remove inline-right")
             .click(removeDoc));
       }
 
