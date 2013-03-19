@@ -145,11 +145,12 @@
               .searchPropertyId(x, y);
           }
         })
-        .error(_.partial(self.useManualEntry, true))
+        .fail(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
 
+    self.useManualEntry.subscribe(function() { console.log("useManualEntry=", self.useManualEntry()); });
     window.useManualEntry = self.useManualEntry;
     
     self.searchPointByPropertyId = function(propertyId) {
@@ -172,7 +173,7 @@
               .searchAddress(x, y);
           }
         })
-        .error(_.partial(self.useManualEntry, true))
+        .fail(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
