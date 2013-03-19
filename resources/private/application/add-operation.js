@@ -58,7 +58,7 @@
       var icon = $("<span>").addClass("icon inline-left drill-left-black");
       e.append($("<a>")
         .addClass("tree-back")
-        .html(loc('back'))
+        .text(loc('back'))
         .append(icon)
         .click(self.tree.goback));
       return e[0];
