@@ -13,7 +13,10 @@
        (make-sort {:iSortCol_0 4 :sSortDir_0 "asc"}) => {:submitted 1}
        (make-sort {:iSortCol_0 5 :sSortDir_0 "asc"}) => {:modified 1}
        (make-sort {:iSortCol_0 6 :sSortDir_0 "asc"}) => {:state 1}
-       (make-sort {:iSortCol_0 7 :sSortDir_0 "asc"}) => {:authority 1})
+       (make-sort {:iSortCol_0 7 :sSortDir_0 "asc"}) => {:authority 1}
+       (make-sort {:iSortCol_0 {:injection "attempt"} :sSortDir_0 "; drop database;"}) => {}
+       (make-sort {}) => {}
+       (make-sort nil) => {})
 
 (def make-documents #'lupapalvelu.application/make-documents)
 
