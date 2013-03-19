@@ -85,31 +85,31 @@ var docgen = (function() {
 
     // Form field builders
 
-    function buildCheckbox(spec, model, path, save) {
+    function buildCheckbox(subSchema, model, path, save) {
       var myPath = path.join(".");
       var span = makeEntrySpan();
-      span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
+      span.appendChild(makeInput("checkbox", myPath, model[subSchema.name], save));
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
 
-    function buildString(spec, model, path, save, partOfChoice) {
+    function buildString(subSchema, model, path, save, partOfChoice) {
       var myPath = path.join(".");
       var span =  makeEntrySpan();
-      var type = (spec.subtype === "email") ? "email" : "text";
-      var sizeClass = self.sizeClasses[spec.size] || "";
-      var input = makeInput(type, myPath, model[spec.name], save, sizeClass);
+      var type = (subSchema.subtype === "email") ? "email" : "text";
+      var sizeClass = self.sizeClasses[subSchema.size] || "";
+      var input = makeInput(type, myPath, model[subSchema.name], save, sizeClass);
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
 
-      if (spec.unit) {
+      if (subSchema.unit) {
         var inputAndUnit = document.createElement("span");
         inputAndUnit.className = "form-input-and-unit";
         inputAndUnit.appendChild(input);
 
         var unit = document.createElement("span");
         unit.className = "form-string-unit";
-        unit.appendChild(document.createTextNode(loc("unit." + spec.unit)));
+        unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
         inputAndUnit.appendChild(unit);
         span.appendChild(inputAndUnit);
       } else {
@@ -119,27 +119,27 @@ var docgen = (function() {
       return span;
     }
 
-    function buildText(spec, model, path, save) {
+    function buildText(subSchema, model, path, save) {
       var myPath = path.join(".");
       var input = document.createElement("textarea");
       var span = makeEntrySpan();
 
       input.name = myPath;
-      input.setAttribute("rows", spec.rows || "10");
-      input.setAttribute("cols", spec.cols || "40");
+      input.setAttribute("rows", subSchema.rows || "10");
+      input.setAttribute("cols", subSchema.cols || "40");
       input.className = "form-input textarea";
       input.onchange = save;
-      input.value = model[spec.name] || "";
+      input.value = model[subSchema.name] || "";
 
       span.appendChild(makeLabel("text", myPath));
       span.appendChild(input);
       return span;
     }
 
-    function buildDate(spec, model, path, save) {
+    function buildDate(subSchema, model, path, save) {
       var lang = loc.getCurrentLanguage();
       var myPath = path.join(".");
-      var value = model[spec.name] || "";
+      var value = model[subSchema.name] || "";
       var span = makeEntrySpan();
 
       span.appendChild(makeLabel("date", myPath));
@@ -157,10 +157,10 @@ var docgen = (function() {
       return span;
     }
 
-    function buildSelect(spec, model, path, save) {
+    function buildSelect(subSchema, model, path, save) {
       var myPath = path.join(".");
       var select = document.createElement("select");
-      var selectedOption = model[spec.name] || "";
+      var selectedOption = model[subSchema.name] || "";
       var option = document.createElement("option");
       var span = makeEntrySpan();
 
@@ -175,7 +175,7 @@ var docgen = (function() {
       }
       select.appendChild(option);
 
-      $.each(spec.body, function (i, o) {
+      $.each(subSchema.body, function (i, o) {
         var name = o.name;
         var option = document.createElement("option");
         option.value = name;
@@ -192,31 +192,31 @@ var docgen = (function() {
       return span;
     }
 
-    function buildGroup(spec, model, path, save, partOfChoice) {
+    function buildGroup(subSchema, model, path, save, partOfChoice) {
       var myPath = path.join(".");
-      var name = spec.name;
+      var name = subSchema.name;
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
 
-      appendElements(partsDiv, spec, myModel, path, save, partOfChoice);
+      appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
-      div.className = spec.layout === "vertical" ? "form-choice" : "form-group";
+      div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
       div.appendChild(makeLabel("group", myPath, true));
       div.appendChild(partsDiv);
       return div;
     }
 
-    function buildRadioGroup(spec, model, path, save) {
+    function buildRadioGroup(subSchema, model, path, save) {
       var myPath = path.join(".");
-      var myModel = model[spec.name] || _.first(spec.body).name;
+      var myModel = model[subSchema.name] || _.first(subSchema.body).name;
       var partsDiv = document.createElement("div");
       var span = makeEntrySpan();
 
       partsDiv.id = pathStrToID(myPath);
 
-      $.each(spec.body, function (i, o) {
+      $.each(subSchema.body, function (i, o) {
         var pathForId = myPath + "." + o.name;
         var input = makeInput("radio", myPath, o.name, save);
         input.id = pathStrToID(pathForId);
@@ -230,10 +230,10 @@ var docgen = (function() {
       return partsDiv;
     }
 
-    function buildBuildingSelector(spec, model, path, save) {
+    function buildBuildingSelector(subSchema, model, path, save) {
       var myPath = path.join(".");
       var select = document.createElement("select");
-      var selectedOption = model[spec.name] || "";
+      var selectedOption = model[subSchema.name] || "";
       var option = document.createElement("option");
       var span = makeEntrySpan();
 
@@ -291,12 +291,12 @@ var docgen = (function() {
       return span;
     }
 
-    function buildPersonSelector(spec, model, path, save) {
+    function buildPersonSelector(subSchema, model, path, save) {
       var span = makeEntrySpan();
       var myPath = path.join(".");
       var myNs = path.slice(0,path.length-1).join(".");
       var select = document.createElement("select");
-      var selectedOption = model[spec.name] || "";
+      var selectedOption = model[subSchema.name] || "";
 
       select.name = myPath;
       select.className = "form-input combobox long";
@@ -357,11 +357,11 @@ var docgen = (function() {
       return span;
     }
 
-    function buildUnknown(spec, model, path) {
+    function buildUnknown(subSchema, model, path) {
       var div = document.createElement("div");
 
-      error("Unknown element type:", spec.type, path);
-      div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
+      error("Unknown element type:", subSchema.type, path);
+      div.appendChild(document.createTextNode("Unknown element type: " + subSchema.type + " (path = " + path.join(".") + ")"));
       return div;
     }
 
@@ -379,21 +379,21 @@ var docgen = (function() {
       unknown: buildUnknown
     };
 
-    function build(spec, model, path, save, partOfChoice) {
+    function build(subSchema, model, path, save, partOfChoice) {
 
-      var myName = spec.name;
+      var myName = subSchema.name;
       var myPath = path.concat([myName]);
-      var builder = builders[spec.type] || buildUnknown;
+      var builder = builders[subSchema.type] || buildUnknown;
       var repeatingId = myPath.join("-");
 
       function makeElem(myModel, id) {
-        var elem = builder(spec, myModel, myPath.concat([id]), save, partOfChoice);
+        var elem = builder(subSchema, myModel, myPath.concat([id]), save, partOfChoice);
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
         return elem;
       }
 
-      if (spec.repeating) {
+      if (subSchema.repeating) {
         var models = model[myName] || [{}];
 
         var elements = _.map(models, function(val, key) {
@@ -421,16 +421,16 @@ var docgen = (function() {
         return elements;
       }
 
-      return builder(spec, model, myPath, save, partOfChoice);
+      return builder(subSchema, model, myPath, save, partOfChoice);
     }
 
     function getSelectOneOfDefinition(schema) {
-      var selectOneOfSchema = _.find(schema.body, function(spec){
-        return spec.name === SELECT_ONE_OF_GROUP_KEY && spec.type === "radioGroup";
+      var selectOneOfSchema = _.find(schema.body, function(subSchema){
+        return subSchema.name === SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
       });
 
       if (selectOneOfSchema) {
-        return _.map(selectOneOfSchema.body, function(spec) {return spec.name;}) || [];
+        return _.map(selectOneOfSchema.body, function(subSchema) {return subSchema.name;}) || [];
       }
 
       return [];
@@ -448,14 +448,14 @@ var docgen = (function() {
 
       var selectOneOf = getSelectOneOfDefinition(schema);
 
-      _.each(schema.body, function(spec) {
-          var children = build(spec, model, path, save, partOfChoice);
+      _.each(schema.body, function(subSchema) {
+          var children = build(subSchema, model, path, save, partOfChoice);
           if (!_.isArray(children)) {
             children = [children];
           }
           _.each(children, function(elem) {
-            if (_.indexOf(selectOneOf, spec.name) >= 0) {
-              elem.setAttribute("data-select-one-of", spec.name);
+            if (_.indexOf(selectOneOf, subSchema.name) >= 0) {
+              elem.setAttribute("data-select-one-of", subSchema.name);
               $(elem).hide();
             }
 
@@ -523,7 +523,8 @@ var docgen = (function() {
 
     function removeDoc(e) {
       var n = $(e.target).parent();
-      self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.schema.info.name + "._group_label"), removeThis.bind(n));
+      var documentName = loc(self.schemaName + "._group_label");
+      self.removeCallback(self.appId, self.docId, documentName, removeThis.bind(n));
       return false;
     }
 
