@@ -64,8 +64,7 @@
 
    :applications {:depends [:common :repository :invites]
                   :html ["applications.html"]
-                  :js ["applications.js"]
-                  :css ["applications.css"]}
+                  :js ["applications.js"]}
 
    :attachment   {:depends [:common :repository]
                   :js ["attachment.js" "attachmentTypeSelect.js"]
