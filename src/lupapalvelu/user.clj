@@ -3,14 +3,13 @@
         [lupapalvelu.core]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
+            [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [lupapalvelu.util :as util]
             [noir.session :as session]))
 
-(def applicationpage-for {"applicant"      "/applicant"
-                          "authority"      "/authority"
-                          "authorityAdmin" "/authority-admin"
-                          "admin"          "/admin"})
+(defn applicationpage-for [role]
+  (kebab/->kebab-case role))
 
 (defcommand "login"
   {:parameters [:username :password]}

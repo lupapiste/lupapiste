@@ -15,7 +15,7 @@ var loc;
   hub.subscribe("change-lang", function(e) {
     var lang = e.lang;
     if (_.contains(loc.supported, lang)) {
-      var url = location.href.replace("/" + loc.currentLanguage + "/", "/" + lang + "/");
+      var url = location.href.replace("/app/" + loc.currentLanguage + "/", "/app/" + lang + "/");
       window.location = url;
     }
   });
@@ -26,8 +26,8 @@ var loc;
 
   function resolveLang() {
     var url = window.parent ? window.parent.location.pathname : location.pathname;
-    var langEndI = url.indexOf("/", 1);
-    var lang = langEndI > 0 ? url.substring(1, langEndI) : null;
+    var langEndI = url.indexOf("/", 5);
+    var lang = langEndI > 0 ? url.substring(5, langEndI) : null;
     return _.contains(loc.supported, lang) ? lang : "fi";
   }
 
