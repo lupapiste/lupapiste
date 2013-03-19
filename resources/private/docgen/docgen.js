@@ -523,7 +523,13 @@ var docgen = (function() {
 
     function removeDoc(e) {
       var n = $(e.target).parent();
+      var op = self.schema.info.op;
+
       var documentName = loc(self.schemaName + "._group_label");
+      if (op) {
+        documentName = loc(op + "._group_label");
+      }
+
       self.removeCallback(self.appId, self.docId, documentName, removeThis.bind(n));
       return false;
     }
