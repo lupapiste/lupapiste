@@ -12,6 +12,7 @@
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.1.0" :exclusions [commons-codec]]
                  [clj-http "0.6.4" :exclusions [commons-codec]]
+                 [camel-snake-kebab "0.1.0"]
                  [digest "1.4.2"]
                  [clj-time "0.4.4"]
                  [org.apache.commons/commons-lang3 "3.1"] ; Already a dependency but required explicitly
@@ -40,6 +41,7 @@
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                             :checksum :ignore}]]
+  :aliases {"verify" ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

@@ -13,10 +13,10 @@ ${DEFAULT_SPEED}                0
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/fi/welcome#!/login
-${LOGOUT URL}                   ${SERVER}/fi/logout
-${APPLICATIONS PATH}            /fi/applicant#!/applications
-${AUTHORITY APPLICATIONS PATH}  /fi/authority#!/applications
+${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
+${LOGOUT URL}                   ${SERVER}/app/fi/logout
+${APPLICATIONS PATH}            /app/fi/applicant#!/applications
+${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/fixture
 
 ${SELENIUM}                     ${EMPTY}
