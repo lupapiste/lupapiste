@@ -10,7 +10,7 @@ var docgen = (function() {
     return appendButton;
   }
 
-  LUPAPISTE.DocModel = function(spec, model, saveCallback, removeCallback, docId, appId) {
+  LUPAPISTE.DocModel = function(schema, model, saveCallback, removeCallback, docId, appId) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -18,7 +18,7 @@ var docgen = (function() {
 
     var self = this;
 
-    self.spec = spec;
+    self.schema = schema;
     self.model = model;
     self.saveCallback = saveCallback;
     self.removeCallback = removeCallback;
@@ -95,13 +95,11 @@ var docgen = (function() {
     function buildString(spec, model, path, save, specId, partOfChoice) {
       var myPath = path.join(".");
       var span =  makeEntrySpan();
-      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
-
-
-
       var type = (spec.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[spec.size] || "";
       var input = makeInput(type, myPath, model[spec.name], save, sizeClass);
+
+      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
 
       if (spec.unit) {
         var inputAndUnit = document.createElement("span");
@@ -122,8 +120,9 @@ var docgen = (function() {
 
     function buildText(spec, model, path, save, specId) {
       var myPath = path.join(".");
-
       var input = document.createElement("textarea");
+      var span = makeEntrySpan();
+
       input.name = myPath;
       input.setAttribute("rows", spec.rows || "10");
       input.setAttribute("cols", spec.cols || "40");
@@ -131,7 +130,6 @@ var docgen = (function() {
       input.onchange = save;
       input.value = model[spec.name] || "";
 
-      var span = makeEntrySpan();
       span.appendChild(makeLabel("text", myPath, specId));
       span.appendChild(input);
       return span;
@@ -141,8 +139,8 @@ var docgen = (function() {
       var lang = loc.getCurrentLanguage();
       var myPath = path.join(".");
       var value = model[spec.name] || "";
-
       var span = makeEntrySpan();
+
       span.appendChild(makeLabel("date", myPath, specId));
 
       // date
@@ -160,15 +158,15 @@ var docgen = (function() {
 
     function buildSelect(spec, model, path, save, specId) {
       var myPath = path.join(".");
-
       var select = document.createElement("select");
+      var selectedOption = model[spec.name] || "";
+      var option = document.createElement("option");
+      var span = makeEntrySpan();
+
       select.name = myPath;
       select.className = "form-input combobox";
       select.onchange = save;
 
-      var selectedOption = model[spec.name] || "";
-
-      var option = document.createElement("option");
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
       if (selectedOption === "") {
@@ -188,7 +186,6 @@ var docgen = (function() {
         select.appendChild(option);
       });
 
-      var span = makeEntrySpan();
       span.appendChild(makeLabel("select", myPath, specId, true));
       span.appendChild(select);
       return span;
@@ -198,11 +195,11 @@ var docgen = (function() {
       var myPath = path.join(".");
       var name = spec.name;
       var myModel = model[name] || {};
-
       var partsDiv = document.createElement("div");
+      var div = document.createElement("div");
+
       appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice);
 
-      var div = document.createElement("div");
       div.id = pathStrToGroupID(myPath);
       div.className = spec.layout === "vertical" ? "form-choice" : "form-group";
       div.appendChild(makeLabel("group", myPath, specId, true));
@@ -213,11 +210,10 @@ var docgen = (function() {
     function buildRadioGroup(spec, model, path, save, specId) {
       var myPath = path.join(".");
       var myModel = model[spec.name] || _.first(spec.body).name;
-
       var partsDiv = document.createElement("div");
-      partsDiv.id = pathStrToID(myPath);
-
       var span = makeEntrySpan();
+
+      partsDiv.id = pathStrToID(myPath);
 
       $.each(spec.body, function (i, o) {
         var pathForId = myPath + "." + o.name;
@@ -235,8 +231,11 @@ var docgen = (function() {
 
     function buildBuildingSelector(spec, model, path, save) {
       var myPath = path.join(".");
-
       var select = document.createElement("select");
+      var selectedOption = model[spec.name] || "";
+      var option = document.createElement("option");
+      var span = makeEntrySpan();
+
       select.name = myPath;
       select.className = "form-input combobox really-long";
       select.onchange = function(event) {
@@ -252,9 +251,6 @@ var docgen = (function() {
         return false;
       };
 
-      var selectedOption = model[spec.name] || "";
-
-      var option = document.createElement("option");
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
       if (selectedOption === "") {
@@ -289,7 +285,6 @@ var docgen = (function() {
         })
         .call();
 
-      var span = makeEntrySpan();
       span.appendChild(makeLabel("select", "", "buildingSelector", true));
       span.appendChild(select);
       return span;
@@ -297,14 +292,13 @@ var docgen = (function() {
 
     function buildPersonSelector(spec, model, path, save, specId) {
       var span = makeEntrySpan();
-
       var myPath = path.join(".");
       var myNs = path.slice(0,path.length-1).join(".");
-
       var select = document.createElement("select");
+      var selectedOption = model[spec.name] || "";
+
       select.name = myPath;
       select.className = "form-input combobox long";
-      var selectedOption = model[spec.name] || "";
       select.onchange = function(event) {
         var target = getEvent(event).target;
         var userId = target.value;
@@ -363,8 +357,9 @@ var docgen = (function() {
     }
 
     function buildUnknown(spec, model, path) {
-      error("Unknown element type:", spec.type, path);
       var div = document.createElement("div");
+
+      error("Unknown element type:", spec.type, path);
       div.appendChild(document.createTextNode("Unknown element type: " + spec.type + " (path = " + path.join(".") + ")"));
       return div;
     }
@@ -527,42 +522,44 @@ var docgen = (function() {
 
     function removeDoc(e) {
       var n = $(e.target).parent();
-      self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.spec.info.name + "._group_label"), removeThis.bind(n));
+      self.removeCallback(n.attr("data-app-id"), n.attr("data-doc-id"), loc(self.schema.info.name + "._group_label"), removeThis.bind(n));
       return false;
     }
 
     function buildElement() {
-      var specId = self.spec.info.name;
-      var op = self.spec.info.op;
+      var schemaName = self.schema.info.name;
+      var op = self.schema.info.op;
       var save = makeSaverDelegate(self.saveCallback, self.eventData);
 
       var section = document.createElement("section");
-      section.className = "accordion";
-
       var icon = document.createElement("span");
-      icon.className = "font-icon icon-expanded";
       var title = document.createElement("h2");
+
+      var sectionContainer = document.createElement("div");
+      var elements = document.createElement("article");
+
+      section.className = "accordion";
+      icon.className = "font-icon icon-expanded";
       title.appendChild(icon);
+
       if (op) {
         title.appendChild(document.createTextNode(loc(op + "._group_label")));
       } else {
-        title.appendChild(document.createTextNode(loc(specId + "._group_label")));
+        title.appendChild(document.createTextNode(loc(schemaName + "._group_label")));
       }
       title.setAttribute("data-doc-id", self.docId);
       title.setAttribute("data-app-id", self.appId);
       title.onclick = accordion.click;
-      if (self.spec.info.removable) {
+      if (self.schema.info.removable) {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
             .click(removeDoc));
       }
 
-      var sectionContainer = document.createElement("div");
       sectionContainer.className = "accordion_content expanded";
 
-      var elements = document.createElement("article");
-      appendElements(elements, self.spec, self.model, [], save, specId);
+      appendElements(elements, self.schema, self.model, [], save, schemaName);
 
       sectionContainer.appendChild(elements);
       section.appendChild(title);
