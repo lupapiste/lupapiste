@@ -72,7 +72,7 @@ $(function() {
         .append($("<label>").text("Toggle hidden"))
         .append($("<br>"))
         .append($("<input type='checkbox' data-id='proxy'>").click(function(e) { ajax.post("/api/proxy-ctrl/" + ($(e.target).prop("checked") ? "on" : "off")).call(); }))
-        .append($("<label>").text("Proxy"))
+        .append($("<label>").text("Proxy enabled"))
         .append($("<p>").text("Apply:")
           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
           .append($("<br>"))
