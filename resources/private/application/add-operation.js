@@ -55,7 +55,7 @@
             }, 200);
           return false;
         }));
-      var icon = $("<span>").addClass("font-icon icon-tree-back");
+      var icon = $("<span>").addClass("icon inline-left drill-left-black");
       e.append($("<a>")
         .addClass("tree-back")
         .html(loc('back'))
