@@ -37,7 +37,7 @@
       var e = $("<div>").addClass("tree-magic");
       e.append($("<a>")
         .addClass("tree-action")
-        .html(loc('addOperation'))
+        .text(loc('addOperation'))
         .click(function(e) {
           ajax
             .command("add-operation", {id: self.application.id, operation: val.op})
