@@ -45,12 +45,12 @@ var docgen = (function() {
 
     function makeLabel(type, pathStr, groupLabel) {
       var label = document.createElement("label");
+      var path = groupLabel ? pathStr + "._group_label" : pathStr;
+      var locKey = (self.schemaName + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+
       label.id = pathStrToLabelID(pathStr);
       label.htmlFor = pathStrToID(pathStr);
       label.className = "form-label form-label-" + type;
-
-      var path = groupLabel ? pathStr + "._group_label" : pathStr;
-      var locKey = (self.schemaName + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
       label.innerHTML = loc(locKey);
       return label;
     }
@@ -104,10 +104,11 @@ var docgen = (function() {
 
       if (subSchema.unit) {
         var inputAndUnit = document.createElement("span");
+        var unit = document.createElement("span");
+
         inputAndUnit.className = "form-input-and-unit";
         inputAndUnit.appendChild(input);
 
-        var unit = document.createElement("span");
         unit.className = "form-string-unit";
         unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
         inputAndUnit.appendChild(unit);
@@ -178,8 +179,9 @@ var docgen = (function() {
       $.each(subSchema.body, function (i, o) {
         var name = o.name;
         var option = document.createElement("option");
-        option.value = name;
         var locKey = self.schemaName + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
+
+        option.value = name;
         option.appendChild(document.createTextNode(loc(locKey)));
         if (selectedOption === name) {
           option.selected = "selected";
@@ -297,6 +299,7 @@ var docgen = (function() {
       var myNs = path.slice(0,path.length-1).join(".");
       var select = document.createElement("select");
       var selectedOption = model[subSchema.name] || "";
+      var option = document.createElement("option");
 
       select.name = myPath;
       select.className = "form-input combobox long";
@@ -311,7 +314,6 @@ var docgen = (function() {
           .call();
         return false;
       };
-      var option = document.createElement("option");
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
       if (selectedOption === "") {
@@ -395,7 +397,6 @@ var docgen = (function() {
 
       if (subSchema.repeating) {
         var models = model[myName] || [{}];
-
         var elements = _.map(models, function(val, key) {
           var myModel = {};
           myModel[myName] = val;
@@ -487,13 +488,12 @@ var docgen = (function() {
       return function (event, callback) {
         var target = getEvent(event).target;
         var path = target.name;
+        var loader = loaderImg();
+        var label = document.getElementById(pathStrToLabelID(path));
         var value = target.value;
         if (target.type === "checkbox") {
           value = target.checked;
         }
-
-        var loader = loaderImg();
-        var label = document.getElementById(pathStrToLabelID(path));
         if (label) {
           label.appendChild(loader);
         }
