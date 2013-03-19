@@ -51,15 +51,17 @@ if (typeof LUPAPISTE === "undefined") {
     if (!self.allowAnonymous) {
       userMenu$.append(" ");
       userMenu$.append($("<a>")
-        .attr("href", "/" + loc.getCurrentLanguage() + "/logout")
+        .attr("href", "/app/" + loc.getCurrentLanguage() + "/logout")
         .text(loc("logout")));
     }
     return userMenu$;
   };
 
   self.createNaviLinks = function () {
+    var icon$ = $('<span>').attr("class", "icon document-white");
     var navi$ = $('<span>').attr("href", "#").text(loc('navigation'));
     var naviBox$ = $('<a>').attr("class", "main-nav").attr("href", "#");
+    naviBox$.append(icon$);
     naviBox$.append(navi$);
     return naviBox$;
   };
@@ -183,7 +185,7 @@ if (typeof LUPAPISTE === "undefined") {
   });
 
   hub.subscribe("logout", function () {
-    window.location = "/" + loc.getCurrentLanguage() + "/logout";
+    window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
   });
 
 };
