@@ -19,6 +19,7 @@ var docgen = (function() {
     var self = this;
 
     self.schema = schema;
+    self.schemaName = schema.info.name;
     self.model = model;
     self.saveCallback = saveCallback;
     self.removeCallback = removeCallback;
@@ -42,14 +43,14 @@ var docgen = (function() {
       return "group-" + pathStrToID(pathStr);
     }
 
-    function makeLabel(type, pathStr, specId, groupLabel) {
+    function makeLabel(type, pathStr, groupLabel) {
       var label = document.createElement("label");
       label.id = pathStrToLabelID(pathStr);
       label.htmlFor = pathStrToID(pathStr);
       label.className = "form-label form-label-" + type;
 
       var path = groupLabel ? pathStr + "._group_label" : pathStr;
-      var locKey = (specId + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+      var locKey = (self.schemaName + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
       label.innerHTML = loc(locKey);
       return label;
     }
@@ -84,22 +85,22 @@ var docgen = (function() {
 
     // Form field builders
 
-    function buildCheckbox(spec, model, path, save, specId) {
+    function buildCheckbox(spec, model, path, save) {
       var myPath = path.join(".");
       var span = makeEntrySpan();
       span.appendChild(makeInput("checkbox", myPath, model[spec.name], save));
-      span.appendChild(makeLabel("checkbox", myPath, specId));
+      span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
 
-    function buildString(spec, model, path, save, specId, partOfChoice) {
+    function buildString(spec, model, path, save, partOfChoice) {
       var myPath = path.join(".");
       var span =  makeEntrySpan();
       var type = (spec.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[spec.size] || "";
       var input = makeInput(type, myPath, model[spec.name], save, sizeClass);
 
-      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath, specId));
+      span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
 
       if (spec.unit) {
         var inputAndUnit = document.createElement("span");
@@ -118,7 +119,7 @@ var docgen = (function() {
       return span;
     }
 
-    function buildText(spec, model, path, save, specId) {
+    function buildText(spec, model, path, save) {
       var myPath = path.join(".");
       var input = document.createElement("textarea");
       var span = makeEntrySpan();
@@ -130,18 +131,18 @@ var docgen = (function() {
       input.onchange = save;
       input.value = model[spec.name] || "";
 
-      span.appendChild(makeLabel("text", myPath, specId));
+      span.appendChild(makeLabel("text", myPath));
       span.appendChild(input);
       return span;
     }
 
-    function buildDate(spec, model, path, save, specId) {
+    function buildDate(spec, model, path, save) {
       var lang = loc.getCurrentLanguage();
       var myPath = path.join(".");
       var value = model[spec.name] || "";
       var span = makeEntrySpan();
 
-      span.appendChild(makeLabel("date", myPath, specId));
+      span.appendChild(makeLabel("date", myPath));
 
       // date
       $("<input>", {
@@ -156,7 +157,7 @@ var docgen = (function() {
       return span;
     }
 
-    function buildSelect(spec, model, path, save, specId) {
+    function buildSelect(spec, model, path, save) {
       var myPath = path.join(".");
       var select = document.createElement("select");
       var selectedOption = model[spec.name] || "";
@@ -178,7 +179,7 @@ var docgen = (function() {
         var name = o.name;
         var option = document.createElement("option");
         option.value = name;
-        var locKey = specId + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
+        var locKey = self.schemaName + "." + myPath.replace(/\.\d+\./g, ".") + "." + name;
         option.appendChild(document.createTextNode(loc(locKey)));
         if (selectedOption === name) {
           option.selected = "selected";
@@ -186,28 +187,28 @@ var docgen = (function() {
         select.appendChild(option);
       });
 
-      span.appendChild(makeLabel("select", myPath, specId, true));
+      span.appendChild(makeLabel("select", myPath, true));
       span.appendChild(select);
       return span;
     }
 
-    function buildGroup(spec, model, path, save, specId, partOfChoice) {
+    function buildGroup(spec, model, path, save, partOfChoice) {
       var myPath = path.join(".");
       var name = spec.name;
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
 
-      appendElements(partsDiv, spec, myModel, path, save, specId, partOfChoice);
+      appendElements(partsDiv, spec, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
       div.className = spec.layout === "vertical" ? "form-choice" : "form-group";
-      div.appendChild(makeLabel("group", myPath, specId, true));
+      div.appendChild(makeLabel("group", myPath, true));
       div.appendChild(partsDiv);
       return div;
     }
 
-    function buildRadioGroup(spec, model, path, save, specId) {
+    function buildRadioGroup(spec, model, path, save) {
       var myPath = path.join(".");
       var myModel = model[spec.name] || _.first(spec.body).name;
       var partsDiv = document.createElement("div");
@@ -222,7 +223,7 @@ var docgen = (function() {
         input.checked = o.name === myModel;
 
         span.appendChild(input);
-        span.appendChild(makeLabel("radio", pathForId, specId));
+        span.appendChild(makeLabel("radio", pathForId));
       });
 
       partsDiv.appendChild(span);
@@ -290,7 +291,7 @@ var docgen = (function() {
       return span;
     }
 
-    function buildPersonSelector(spec, model, path, save, specId) {
+    function buildPersonSelector(spec, model, path, save) {
       var span = makeEntrySpan();
       var myPath = path.join(".");
       var myNs = path.slice(0,path.length-1).join(".");
@@ -343,10 +344,10 @@ var docgen = (function() {
       // new invite
       $("<button>", {
         "class": "icon-remove",
-        "data-test-id": "application-invite-"+specId,
+        "data-test-id": "application-invite-"+self.schemaName,
         text: loc("personSelector.invite"),
         click: function() {
-          $("#invite-document-name").val(specId).change();
+          $("#invite-document-name").val(self.schemaName).change();
           $("#invite-document-id").val(self.docId).change();
           LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
           return false;
@@ -378,7 +379,7 @@ var docgen = (function() {
       unknown: buildUnknown
     };
 
-    function build(spec, model, path, save, specId, partOfChoice) {
+    function build(spec, model, path, save, partOfChoice) {
 
       var myName = spec.name;
       var myPath = path.concat([myName]);
@@ -386,7 +387,7 @@ var docgen = (function() {
       var repeatingId = myPath.join("-");
 
       function makeElem(myModel, id) {
-        var elem = builder(spec, myModel, myPath.concat([id]), save, specId, partOfChoice);
+        var elem = builder(spec, myModel, myPath.concat([id]), save, partOfChoice);
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
         return elem;
@@ -401,7 +402,7 @@ var docgen = (function() {
           return makeElem(myModel, key);
         });
 
-        var appendButton = makeButton(myPath.join("_") + "_append", loc(specId + "."+  myPath.join(".") + "._append_label"));
+        var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaName + "."+  myPath.join(".") + "._append_label"));
 
         var appender = function() {
           var parent$ = $(this.parentNode);
@@ -420,7 +421,7 @@ var docgen = (function() {
         return elements;
       }
 
-      return builder(spec, model, myPath, save, specId, partOfChoice);
+      return builder(spec, model, myPath, save, partOfChoice);
     }
 
     function getSelectOneOfDefinition(schema) {
@@ -435,7 +436,7 @@ var docgen = (function() {
       return [];
     }
 
-    function appendElements(body, schema, model, path, save, specId, partOfChoice) {
+    function appendElements(body, schema, model, path, save, partOfChoice) {
 
       function toggleSelectedGroup(value) {
         $(body)
@@ -448,7 +449,7 @@ var docgen = (function() {
       var selectOneOf = getSelectOneOfDefinition(schema);
 
       _.each(schema.body, function(spec) {
-          var children = build(spec, model, path, save, specId, partOfChoice);
+          var children = build(spec, model, path, save, partOfChoice);
           if (!_.isArray(children)) {
             children = [children];
           }
@@ -527,7 +528,6 @@ var docgen = (function() {
     }
 
     function buildElement() {
-      var schemaName = self.schema.info.name;
       var op = self.schema.info.op;
       var save = makeSaverDelegate(self.saveCallback, self.eventData);
 
@@ -545,7 +545,7 @@ var docgen = (function() {
       if (op) {
         title.appendChild(document.createTextNode(loc(op + "._group_label")));
       } else {
-        title.appendChild(document.createTextNode(loc(schemaName + "._group_label")));
+        title.appendChild(document.createTextNode(loc(self.schemaName + "._group_label")));
       }
       title.setAttribute("data-doc-id", self.docId);
       title.setAttribute("data-app-id", self.appId);
@@ -559,7 +559,7 @@ var docgen = (function() {
 
       sectionContainer.className = "accordion_content expanded";
 
-      appendElements(elements, self.schema, self.model, [], save, schemaName);
+      appendElements(elements, self.schema, self.model, [], save);
 
       sectionContainer.appendChild(elements);
       section.appendChild(title);
@@ -596,9 +596,9 @@ var docgen = (function() {
 
     var docgenDiv = $(containerSelector).empty();
     _.each(sortedDocs, function(doc) {
-      docgenDiv.append(new LUPAPISTE.DocModel(doc.schema, doc.body, save, removeDocModel.init, doc.id, applicationId).element);
-
       var schema = doc.schema;
+
+      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.body, save, removeDocModel.init, doc.id, applicationId).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
