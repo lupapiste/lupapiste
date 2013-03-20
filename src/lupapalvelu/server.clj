@@ -20,8 +20,7 @@
             [lupapalvelu.operations]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n]
-            [sade.security-headers :as headers])
-  (:gen-class))
+            [sade.security-headers :as headers]))
 
 (def custom-content-type {".eot"   "application/vnd.ms-fontobject"
                           ".ttf"   "font/ttf"
