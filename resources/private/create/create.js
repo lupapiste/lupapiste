@@ -153,7 +153,6 @@
     };
 
     self.useManualEntry.subscribe(function() { console.log("useManualEntry=", self.useManualEntry()); });
-    window.useManualEntry = self.useManualEntry;
     
     self.searchPointByPropertyId = function(propertyId) {
       var requestId = self.updateRequestId;
@@ -276,16 +275,24 @@
         onSelect:        model.searchNow
       });
 
-    var tree = selectionTree.create(
-        $("#create .tree-content"),
-        $("#create .tree-breadcrumbs"),
-        model.operation,
-        generateInfo,
-        "operations");
+    function operations2tree(e) {
+      var name = e[0],
+          value = e[1],
+          key = {key: name, text: name},
+          target = _.isArray(value) ? _.map(value, operations2tree) : {key: value.op, text: loc("operation", value.op), desc: value.text};
+      return [key, target];
+    }
 
-    model.operations.subscribe(tree.reset);
-
-    window.model = model;
+    var tree = $("#create .operation-tree").selectTree({
+      title: $("#create-templates .tree-title")
+    });
+    
+    model.operations.subscribe(function(v) {
+      tree.reset(_.map(v, operations2tree));
+    });
+    
+    hub.subscribe({type: "keyup", keyCode: 37}, tree.goBack);
+    
   });
 
 })();

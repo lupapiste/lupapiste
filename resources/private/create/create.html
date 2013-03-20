@@ -82,6 +82,8 @@
       <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text" >
       </p>
 
+      <div class="operation-tree tree-control"></div>
+      
       <div class="create-content">
         <div class="tree" data-bind="visible: operations">
           <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
@@ -127,7 +129,21 @@
       </div>
 
     </section>
-
+    
   </section>
+  
+  <section class="page" id="create-templates">
+  
+    <div class="tree-title">
+      <span style="margin-left: 10px;" data-bind="visible: stack().length == 0, ltext: 'create.choose-op'">
+      </span>
+      <span style="margin-left: 10px;" data-bind="visible: stack().length > 0, foreach: stack">
+        <span data-bind="visible: $index"> / </span>
+        <span data-bind="text: text"></span>
+      </span>
+    </div>
+    
+  </section>
+  
 </body>
 </html>
