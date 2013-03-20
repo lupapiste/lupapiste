@@ -151,7 +151,7 @@
           (notifications/send-notifications-on-application-state-change application-id host))
         (catch org.xml.sax.SAXParseException e
           (.printStackTrace e)
-          (fail (.getMessage e))))))
+          (fail (.getMessage e)))))))
 
 (defcommand "submit-application"
   {:parameters [:id]
