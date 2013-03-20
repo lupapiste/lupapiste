@@ -19,6 +19,7 @@
             [lupapalvelu.user]
             [lupapalvelu.operations]
             [lupapalvelu.proxy-services]
+            [lupapalvelu.i18n]
             [sade.security-headers :as headers])
   (:gen-class))
 
@@ -42,7 +43,7 @@
         resp))))
 
 (defn -main [& _]
-  (info "Server starting")
+  (infof "Server starting in %s mode" env/mode)
   (infof "Running on %s version %s (%s) [%s], trustStore is %s"
     (System/getProperty "java.vm.name")
     (System/getProperty "java.runtime.version")
