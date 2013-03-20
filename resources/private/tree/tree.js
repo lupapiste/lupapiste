@@ -58,6 +58,7 @@
     self.stateNop = _.partial(self.setClickHandler, nop);
 
     self.makeFinal = function(data) {
+      self.onSelect(data);
       return self.lastTemplate.clone().addClass("tree-page").applyBindings(data);
     }
     
