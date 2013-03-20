@@ -222,7 +222,7 @@
     self.create = function(infoRequest) {
       ajax.command("create-application", {
         infoRequest: infoRequest,
-        operation: self.operation().op,
+        operation: self.operation(),
         y: self.y(),
         x: self.x(),
         address: self.address(),
@@ -278,13 +278,15 @@
     function operations2tree(e) {
       var name = e[0],
           value = e[1],
-          key = {key: name, text: name},
-          target = _.isArray(value) ? _.map(value, operations2tree) : {key: value.op, text: loc("operation", value.op), desc: value.text};
+          key = {text: name},
+          target = _.isArray(value) ? _.map(value, operations2tree) : value;
       return [key, target];
     }
 
     var tree = $("#create .operation-tree").selectTree({
-      title: $("#create-templates .tree-title")
+      title: $("#create-templates .tree-title"),
+      last:  $("#create-templates .tree-last"),
+      onSelect: function(v) { model.operation(v ? v.op : null); }
     });
     
     model.operations.subscribe(function(v) {
