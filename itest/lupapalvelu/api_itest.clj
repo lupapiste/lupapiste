@@ -7,12 +7,12 @@
   (apply-remote-minimal)
 
   (fact "Disabled user must not be able to create an application!"
-        (invalid-csrf-token (create-app dummy)) => true)
+    (invalid-csrf-token (create-app dummy)) => true)
 
   (let [resp  (create-app mikko :municipality sonja-muni)
         id    (:id resp)]
     (fact "Mikko must be able to create an application!"
-          (success resp) => true)
+      (success resp) => true)
 
     (let [resp  (query mikko :application :id id)
           application (:application resp)
@@ -29,39 +29,39 @@
           (:id (first (:applications listing))) => id))
 
       (fact "Disabled user must not see Mikko's application!"
-            (invalid-csrf-token (query dummy :application :id id)) => true)
+        (invalid-csrf-token (query dummy :application :id id)) => true)
 
       (fact "Teppo must not see Mikko's application!"
-            (unauthorized (query teppo :application :id id)) => true)
+        (unauthorized (query teppo :application :id id)) => true)
 
       (fact "Mikko must be able to comment!"
-            (success (command mikko :add-comment :id id :text "mikko@example.com" :target "application")) => true)
+        (success (command mikko :add-comment :id id :text "mikko@example.com" :target "application")) => true)
 
       (fact "Teppo must not be able to comment!"
-            (unauthorized (command teppo :add-comment :id id :text "teppo@example.com" :target "application")) => true)
+        (unauthorized (command teppo :add-comment :id id :text "teppo@example.com" :target "application")) => true)
 
       (fact "Veikko must not be able to comment!"
-            (unauthorized (command veikko :add-comment :id id :text "sonja" :target "application")) => true)
+        (unauthorized (command veikko :add-comment :id id :text "sonja" :target "application")) => true)
 
       (fact "Sonja must be able to see the application!"
-            (let [listing (query sonja :applications)]
-              (success listing) => true
-              (:id (first (:applications listing))) => id))
+        (let [listing (query sonja :applications)]
+          (success listing) => true
+          (:id (first (:applications listing))) => id))
 
       (fact "Sonja must be able to comment!"
-            (success (command sonja :add-comment :id id :text "sonja" :target "application")) => true)
+        (success (command sonja :add-comment :id id :text "sonja" :target "application")) => true)
 
       (fact "Mikko must not be able to assign to himself!"
-            (unauthorized (command mikko :assign-to-me :id id)) => true)
+        (unauthorized (command mikko :assign-to-me :id id)) => true)
 
       (fact "Teppo must not be able to assign to himself!"
-            (unauthorized (command teppo :assign-to-me :id id)) => true)
+        (unauthorized (command teppo :assign-to-me :id id)) => true)
 
       (fact "Veikko must not be able to assign to himself!"
-            (unauthorized (command veikko :assign-to-me :id id)) => true)
+        (unauthorized (command veikko :assign-to-me :id id)) => true)
 
       (fact "Sonja must be able to assign to herself!"
-            (success (command sonja :assign-to-me :id id)) => true)
+        (success (command sonja :assign-to-me :id id)) => true)
 
       (fact "Assigning to document"
         (let [paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
