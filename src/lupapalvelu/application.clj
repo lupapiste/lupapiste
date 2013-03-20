@@ -148,10 +148,10 @@
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
-          (notifications/send-notifications-on-application-state-change application-id host))
-        (catch org.xml.sax.SAXParseException e
-          (.printStackTrace e)
-          (fail (.getMessage e)))))))
+          (notifications/send-notifications-on-application-state-change application-id host)
+          (catch org.xml.sax.SAXParseException e
+            (.printStackTrace e)
+            (fail (.getMessage e))))))))
 
 (defcommand "submit-application"
   {:parameters [:id]
