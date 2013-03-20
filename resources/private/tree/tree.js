@@ -6,24 +6,21 @@
   function Tree(context, args) {
     var self = this;
 
-    var template = args.template || $(".default-tree-template");
-    self.linkTemplate = $(".tree-link", template);
-    self.finalTemplate = $(".tree-final", template);
-    var e = $(".tree-control", template).clone();
-    context.append(e);
-    self.content = $(".tree-content", e);
-    self.content.click(function(event) {
-      var e = getEvent(event);
-      e.preventDefault();
-      e.stopPropagation();
-      self.clickHandler(e);
-      return false;
-    });
+    var defaultTemplate = args.template || $(".default-tree-template");
+    
+    var titleTemplate = args.title || $(".tree-title", defaultTemplate);
+    var contentTemplate = args.content || $(".tree-content", defaultTemplate);
+    var navTemplate = args.content || $(".tree-nav", defaultTemplate);
+    
+    self.linkTemplate = args.link || $(".tree-link", defaultTemplate);
+    self.lastTemplate = args.last || $(".tree-last", defaultTemplate);
 
     self.onSelect = args.onSelect || nop;
     self.data = [];
-    self.moveLeft  = {"margin-left": "-=400"};
-    self.moveRight = {"margin-left": "+=400"};
+    self.speed = args.speed || 500;
+    self.width = args.width || 400;
+    self.moveLeft  = {"margin-left": "-=" + self.width};
+    self.moveRight = {"margin-left": "+=" + self.width};
     
     self.clickGo = function(e) {
       self.stateNop();
@@ -34,18 +31,19 @@
           nextElement = link[1],
           next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
       self.model.stack.push(selectedLink);
-      self.content.append(next).animate(self.moveLeft, 500, self.stateGo);
+      self.content.append(next).animate(self.moveLeft, self.speed, self.stateGo);
       return false;
     };
     
     self.goBack = function() {
+      if (self.model.stack().length < 1) return false;
       self.stateNop();
       self.model.stack.pop();
-      self.content.animate(self.moveRight, 500, function() {
-        $(".tree-page", self.content).filter(":last").remove();
+      self.content.animate(self.moveRight, self.speed, function() {
         self.stateGo();
+        $(".tree-page", self.content).filter(":last").remove();
       });
-      return false;
+      return self;
     };
     
     self.setClickHandler = function(handler) { self.clickHandler = handler; return self; }
@@ -53,7 +51,7 @@
     self.stateNop = _.partial(self.setClickHandler, nop);
 
     self.makeFinal = function(data) {
-      return self.finalTemplate.clone().addClass("tree-page").applyBindings(data);
+      return self.lastTemplate.clone().addClass("tree-page").applyBindings(data);
     }
     
     self.makeLinks = function(data) {
@@ -72,7 +70,7 @@
       self.stateNop();
       self.data = data;
       self.model.stack.removeAll();
-      self.content.empty().css("margin-left", "400px").append(self.makeLinks(data)).animate(self.moveLeft, 500, self.stateGo);
+      self.content.empty().css("margin-left", "" + self.width + "px").append(self.makeLinks(data)).animate(self.moveLeft, self.speed, self.stateGo);
       return self;
     };
     
@@ -82,7 +80,19 @@
       goStart: function() { self.reset(self.data); return false; }
     };
 
-    ko.applyBindings(self.model, e[0]);
+    self.content = contentTemplate.clone().click(function(event) {
+      var e = getEvent(event);
+      e.preventDefault();
+      e.stopPropagation();
+      self.clickHandler(e);
+      return false;
+    });
+    
+    context
+      .append(titleTemplate.clone())
+      .append(self.content)
+      .append(navTemplate.clone())
+      .applyBindings(self.model);
   }
   
   $.fn.applyBindings = function(model) {
@@ -91,7 +101,12 @@
   };
   
   $.fn.selectTree = function(arg) {
-    return _.isArray(arg) ? this.data("tree-data").reset(arg) : this.data("tree-data", new Tree(this, arg));
+    return new Tree(this, arg);
   };
+
+  var api = {};
+  api.reset = function(data) { self.reset(data); return api; };
+  api.back = function() { self.goBack(); return api; };
+  return api;
   
 })(jQuery);
