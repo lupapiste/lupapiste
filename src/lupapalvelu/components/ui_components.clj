@@ -99,6 +99,7 @@
 
    :tree    {:depends [:jquery]
              :js ["tree.js"]
+             :html ["tree.html"]
              :css ["tree.css"]}
 
    :admin   {:depends [:common :map :buildinfo :mypage :debug]
