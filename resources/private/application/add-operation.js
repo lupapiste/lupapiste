@@ -83,6 +83,7 @@
   });
 
   $(function() {
+    /*
     var tree = selectionTree.create(
         $("#add-operation .tree-content"),
         $("#add-operation .tree-breadcrumbs"),
@@ -91,6 +92,7 @@
         "operations");
     model.tree = tree;
     ko.applyBindings(model, $("#add-operation")[0]);
+    */
   });
 
 })();
