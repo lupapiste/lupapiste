@@ -268,6 +268,7 @@ selectm.cancel: Peruuta
 
 create.search-map: Anna hankkeen osoite tai kiinteistötunnus
 create.search-check-prompt: Tarkista vielä valitun sijainnin oikeellisuus. Onko kartalta varmasti valittu oikea kiinteistö? Voit valita kartalta klikkaamalla oikean kiinteistön. Ovatko alle haetut tiedot oikeat? Kun olet tarkistanut tiedot, paina "Jatka".
+create.choose-op: Valitse toimenpide:
 
 navigation: Omat hankkeet
 
@@ -284,3 +285,4 @@ complement-needed: Täydennettävänä
 application.requestForComplement: Pyydä täydennyksiä
 
 integration.getAddressNotEorking: Maanmittauslaitoksen palvelu ei toimi taaskaan! Anna tiedot käsin.
+
