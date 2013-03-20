@@ -18,16 +18,15 @@
 
     self.onSelect = args.onSelect || nop;
     self.data = [];
-    self.speed = args.speed || 500;
-    self.width = args.width || 400;
+    self.width = args.width || context.width();
+    self.speed = args.speed || self.width / 2;
     self.moveLeft  = {"margin-left": "-=" + self.width};
     self.moveRight = {"margin-left": "+=" + self.width};
     
     function findTreeData(target) {
+      if (!target) return null;
       var data = target.data("tree-link-data");
-      if (data) return data;
-      var parent = target.parent();
-      return parent ? findTreeData(parent) : null;
+      return data ? data : findTreeData(target.parent())
     }
     
     self.clickGo = function(e) {
@@ -64,11 +63,11 @@
     self.makeFinal = function(data) {
       self.onSelect(data);
       self.atFinal = true;
-      return self.lastTemplate.clone().addClass("tree-page").applyBindings(data);
+      return self.lastTemplate.clone().addClass("tree-page").css("width", self.width + "px").applyBindings(data);
     }
     
     self.makeLinks = function(data) {
-      return _.reduce(data, self.appendLink, $("<div>").addClass("tree-page"));
+      return _.reduce(data, self.appendLink, $("<div>").addClass("tree-page").css("width", self.width + "px"));
     };
     
     self.appendLink = function(div, linkData) {
