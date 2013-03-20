@@ -37,7 +37,7 @@
       var e = $("<div>").addClass("tree-magic");
       e.append($("<a>")
         .addClass("tree-action")
-        .html(loc('addOperation'))
+        .text(loc('addOperation'))
         .click(function(e) {
           ajax
             .command("add-operation", {id: self.application.id, operation: val.op})
@@ -55,10 +55,10 @@
             }, 200);
           return false;
         }));
-      var icon = $("<span>").addClass("font-icon icon-tree-back");
+      var icon = $("<span>").addClass("icon inline-left drill-left-black");
       e.append($("<a>")
         .addClass("tree-back")
-        .html(loc('back'))
+        .text(loc('back'))
         .append(icon)
         .click(self.tree.goback));
       return e[0];

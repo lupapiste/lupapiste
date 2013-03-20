@@ -195,10 +195,18 @@
   (logout!)
   (redirect-to-frontpage lang))
 
-(defpage "/" []
-  (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
-    (redirect default-lang application-page)
-    (redirect-to-frontpage default-lang)))
+(defn- landing-page
+  ([]
+    (landing-page default-lang))
+  ([lang]
+    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+      (redirect lang application-page)
+      (redirect-to-frontpage lang))))
+
+(defpage "/" [] (landing-page))
+(defpage "/app/" [] (landing-page))
+(defpage [:get ["/app/:lang"  :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
+(defpage [:get ["/app/:lang/" :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
 
 ;;
 ;; FROM SADE
