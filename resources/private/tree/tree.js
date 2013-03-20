@@ -1,171 +1,97 @@
-var selectionTree = (function () {
+;(function($) {
   "use strict";
 
-  function defaultContentFactory(name) {
-    var e = document.createElement("div");
-    e.setAttribute("class", "tree-result");
-    e.innerHTML = name;
-    return e;
-  }
+  function nop() { }
 
-  function stopProp(f) {
-    return function (e) {
-      var event = getEvent(e);
-      event.stopPropagation();
-      event.preventDefault();
-      f();
-      return false;
-    };
-  }
-
-  function Tree(content, breadcrumbs, callback, contentFactory, locKeyPrefix) {
+  function Tree(context, args) {
     var self = this;
 
-    self.data = null;
-    self.content = $(content);
-    self.breadcrumbs = $(breadcrumbs);
-    self.callback = callback;
-    self.makeTerminalElement = contentFactory || defaultContentFactory;
-    self.prefix = locKeyPrefix || "tree";
+    var template = args.template || $(".default-tree-template");
+    self.linkTemplate = $(".tree-link", template);
+    self.finalTemplate = $(".tree-final", template);
+    var e = $(".tree-control", template).clone();
+    context.append(e);
+    self.content = $(".tree-content", e);
+    self.content.click(function(event) {
+      var e = getEvent(event);
+      e.preventDefault();
+      e.stopPropagation();
+      self.clickHandler(e);
+      return false;
+    });
 
-    self.width = content.parent().width();
-    self.speed = self.width / 2; // magical, but good.
-    self.crumbs = [];
-    self.stack = [];
-
-    self.goback = function () {
-      if (self.stack.length > 1) {
-        var d = self.stack.pop();
-        var n = self.stack[self.stack.length - 1];
-        $(d).animate({ "margin-left": self.width }, self.speed, function () { d.parentNode.removeChild(d); });
-        $(n).animate({ "margin-left": 0 }, self.speed);
-        self.crumbs.pop();
-        self.breadcrumbs.text(self.crumbs.join(" / "));
-      }
-      return self;
+    self.onSelect = args.onSelect || nop;
+    self.data = [];
+    self.moveLeft  = {"margin-left": "-=400"};
+    self.moveRight = {"margin-left": "+=400"};
+    
+    self.clickGo = function(e) {
+      self.stateNop();
+      var target = $(e.target),
+          link = target.data("tree-link-data");
+      if (!link) return false;
+      var selectedLink = link[0],
+          nextElement = link[1],
+          next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
+      self.model.stack.push(selectedLink);
+      self.content.append(next).animate(self.moveLeft, 500, self.stateGo);
+      return false;
     };
-
-    self.gostart = function () {
-      if (self.stack.length > 0) {
-        var d = self.stack.pop();
-        $(d).animate({ "margin-left": self.width }, self.speed, self.gostart2);
-        self.breadcrumbs.animate({ "opacity": 0.0 }, self.speed, function () { self.breadcrumbs.text("").css("opacity", 1.0); });
-        var p = d.parentNode;
-        _.each(self.stack, function (n) { p.removeChild(n); });
-      } else {
-        self.gostart2();
-      }
+    
+    self.goBack = function() {
+      self.stateNop();
+      self.model.stack.pop();
+      self.content.animate(self.moveRight, 500, function() {
+        $(".tree-page", self.content).filter(":last").remove();
+        self.stateGo();
+      });
+      return false;
     };
+    
+    self.setClickHandler = function(handler) { self.clickHandler = handler; return self; }
+    self.stateGo = _.partial(self.setClickHandler, self.clickGo);
+    self.stateNop = _.partial(self.setClickHandler, nop);
 
-    self.gostart2 = function () {
-      self.crumbs = [];
-      self.stack = [];
-      self.content.empty();
-      if (self.data) {
-        var n = self.make(self.data);
-        self.stack.push(n);
-        $(n).css("margin-left", -self.width);
-        self.content.append(n);
-        $(n).animate({ "margin-left": 0 }, self.speed);
-      }
-      return self;
-    };
-
-    self.reset = function (newData) {
-      if (self.stack.length > 0) {
-        var d = self.stack[0];
-        $(d).animate({ "margin-left": self.width }, self.speed);
-      }
-      self.crumbs = [];
-      self.stack = [];
-      self.breadcrumbs.text("");
-      self.content.empty();
-      if (newData) { self.data = newData; }
-      if (self.data) {
-        var n = self.make(self.data);
-        self.stack.push(n);
-        $(n).css("margin-left", self.width).animate({ "margin-left": 0 }, self.speed);
-        self.content.append(n);
-      }
-      return self;
-    };
-
-    self.makeHandler = function (key, val, d) {
-      return function (e) {
-        var event = getEvent(e);
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        self.crumbs.push(loc(self.prefix + "." + key));
-        self.breadcrumbs.text(self.crumbs.join(" / "));
-
-        var terminal = !_.isArray(val);
-        var next = terminal ? self.makeTerminalElement(val, key) : self.make(val);
-        self.stack.push(next);
-        d.parentNode.appendChild(next);
-        var done = (terminal && self.callback) ? self.callback.bind(self, val) : null;
-        $(d).animate({ "margin-left": -self.width }, self.speed, done);
-
-        return false;
-      };
-    };
-
-    self.gobackEventHandler = stopProp(self.goback);
-    self.gostartEventHandler = stopProp(self.gostart);
-
-
-    self.make = function (t) {
-      var d = document.createElement("div");
-      var link;
-      var icon;
-      d.setAttribute("class", "tree-magic");
-      _.each(t, function (v) { d.appendChild(self.makeLink(v[0], v[1], d)); });
-
-      if (self.stack.length > 0) {
-        icon = document.createElement("span");
-        icon.className = "icon inline-left drill-left-black";
-        link = document.createElement("a");
-        link.className = "tree-back";
-        link.innerHTML = loc("tree.back");
-        link.href = "#";
-        link.onclick = self.gobackEventHandler;
-        link.appendChild(icon);
-        d.appendChild(link);
-      }
-
-      if (self.stack.length > 1) {
-        icon = document.createElement("span");
-        icon.className = "icon inline-left drill-left-all-black";
-        link = document.createElement("a");
-        link.className = "tree-start";
-        link.innerHTML = loc("tree.start");
-        link.href = "#";
-        link.onclick = self.gostartEventHandler;
-        link.appendChild(icon);
-        d.appendChild(link);
-      }
-
-      return d;
-    };
-
-    self.makeLink = function (key, val, d) {
-      var icon = document.createElement("span");
-      icon.className = "icon drill-right-orange inline-right";
-      var link = document.createElement("a");
-      link.innerHTML = loc(self.prefix + "." + key);
-      link.href = "#";
-      link.onclick = self.makeHandler(key, val, d);
-      link.appendChild(icon);
-      return link;
-    };
-
-  }
-
-  return {
-    create: function (content, breadcrumbs, callback, contentFactory, locKeyPrefix) {
-      return new Tree(content, breadcrumbs, callback, contentFactory, locKeyPrefix);
+    self.makeFinal = function(data) {
+      return self.finalTemplate.clone().addClass("tree-page").applyBindings(data);
     }
-  };
+    
+    self.makeLinks = function(data) {
+      return _.reduce(data, self.appendLink, $("<div>").addClass("tree-page"));
+    };
+    
+    self.appendLink = function(div, linkData) {
+      var link = self.linkTemplate
+        .clone()
+        .data("tree-link-data", linkData)
+        .applyBindings(linkData[0]);
+      return div.append(link);
+    };
+    
+    self.reset = function(data) {
+      self.stateNop();
+      self.data = data;
+      self.model.stack.removeAll();
+      self.content.empty().css("margin-left", "400px").append(self.makeLinks(data)).animate(self.moveLeft, 500, self.stateGo);
+      return self;
+    };
+    
+    self.model = {
+      stack: ko.observableArray([]),
+      goBack: self.goBack,
+      goStart: function() { self.reset(self.data); return false; }
+    };
 
-})();
+    ko.applyBindings(self.model, e[0]);
+  }
+  
+  $.fn.applyBindings = function(model) {
+    _.each(this, _.partial(ko.applyBindings, model));
+    return this;
+  };
+  
+  $.fn.selectTree = function(arg) {
+    return _.isArray(arg) ? this.data("tree-data").reset(arg) : this.data("tree-data", new Tree(this, arg));
+  };
+  
+})(jQuery);

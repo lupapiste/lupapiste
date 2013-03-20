@@ -285,6 +285,7 @@
 
     model.operations.subscribe(tree.reset);
 
+    window.model = model;
   });
 
 })();
