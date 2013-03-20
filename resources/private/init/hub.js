@@ -54,11 +54,6 @@ var hub = (function() {
         count++;
       }
     }
-
-    if (count === 0) {
-      warn("No subscribers for message with type:", type);
-    }
-
     return count;
   }
 
