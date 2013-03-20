@@ -370,6 +370,8 @@
                   :state
                   :authority])
 
+(def order-by (assoc col-sources 0 :infoRequest, 2 nil, 3 nil))
+
 (def col-map (zipmap col-sources (map str (range))))
 
 (defn add-field [application data [app-field data-field]]
@@ -392,6 +394,11 @@
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
 
+(defn make-sort [params]
+  (let [col (get order-by (:iSortCol_0 params))
+        dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
+    (if col {col dir} {})))
+
 (defn applications-for-user [user params]
   (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
@@ -401,6 +408,7 @@
         limit       (params :iDisplayLength)
         apps        (query/with-collection "applications"
                       (query/find query)
+                      (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
