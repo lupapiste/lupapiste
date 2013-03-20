@@ -333,6 +333,10 @@
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
+  (defjson "/dev/actions" []
+    (execute (enriched (core/query "actions" (from-query)))))
+
+
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
