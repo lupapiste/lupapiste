@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation  Mikko adds an attachment
-Suite setup     Mikko logs in
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
@@ -10,12 +9,19 @@ Variables      variables.py
 
 Mikko goes to empty attachments tab
   [Tags]  attachments
+  Mikko logs in
   Create application the fast way  attachments  753  75341600250030
   Open tab  attachments
 
-Mikko adds txt attachment
+Mikko adds txt attachment without comment
+  [Tags]  attachments
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Application state should be  draft
+
+Mikko adds txt attachment with comment
   [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}
+  Wait Until  Application state should be  open
 
 *** Keywords ***
 
@@ -25,7 +31,7 @@ Attachment count is
 
 Add attachment
   [Arguments]  ${path}  ${description}
-  Wait and click   add-attachment
+  Wait and click   xpath=//button[@data-test-id="add-attachment"]
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']

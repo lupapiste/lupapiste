@@ -22,7 +22,9 @@
             [lupapalvelu.municipality]
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
+            [sade.status :as status]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery]))
@@ -31,9 +33,15 @@
 ;; Helpers
 ;;
 
+(defonce apis (atom #{}))
+
 (defmacro defjson [path params & content]
-  `(defpage ~path ~params
-     (resp/json (do ~@content))))
+  `(let [[m# p#] (if (string? ~path) [:get ~path] ~path)]
+     (swap! apis conj {(keyword m#) p#})
+     (defpage ~path ~params
+       (resp/json (do ~@content)))))
+
+(defjson "/system/apis" [] @apis)
 
 (defn from-json [request]
   (json/decode (slurp (:body request)) true))
@@ -56,7 +64,7 @@
   (get-in request [:cookies "ring-session" :value]))
 
 (defn client-ip [request]
-  (or (get-in request [:headers "real-ip"]) (get-in request [:remote-addr])))
+  (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
 (defn web-stuff []
   (let [request (request/ring-request)]
@@ -79,13 +87,15 @@
 (defn nobody [] false)
 
 ;;
-;; API:
+;; Status
 ;;
+
+(status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
+(status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
+(status/defstatus :mode  env/mode)
 
 (defjson "/api/buildinfo" []
   (ok :data (assoc env/buildinfo :server-mode env/mode)))
-
-(defjson "/api/ping" [] (ok))
 
 ;;
 ;; Commands
@@ -141,22 +151,33 @@
       failure))
 
 ;; CSS & JS
-(defpage [:get ["/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
+(defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
   (single-resource (keyword res-type) (keyword app) (resp/status 401 "Unauthorized\r\n")))
 
 ;; Single Page App HTML
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
 
-(defpage [:get ["/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app}
-  (single-resource :html (keyword app) (resp/redirect "/fi/welcome#")))
+(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
+
+(defn redirect [lang page]
+  (resp/redirect (str "/app/" (name lang) "/" page)))
+
+(defn redirect-to-frontpage [lang]
+  (redirect lang "welcome"))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when (and hashbang (local? hashbang))
+    (session/put! :hashbang hashbang))
+  (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
 ;;
 ;; Login/logout:
 ;;
-
-(defn- redirect-to-frontpage [lang]
-  (resp/redirect (str "/" lang "/welcome")))
 
 (defn- logout! []
   (session/clear!)
@@ -170,20 +191,29 @@
   (logout!)
   (resp/redirect "/"))
 
-(defpage [:get ["/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
+(defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
   (redirect-to-frontpage lang))
 
-(defpage "/" []
-  (if (logged-in?)
-    (if-let [application-page (user/applicationpage-for (:role (current-user)))]
-      (resp/redirect (str "/" default-lang application-page))
-      (redirect-to-frontpage default-lang))
-    (redirect-to-frontpage default-lang)))
+(defn- landing-page
+  ([]
+    (landing-page default-lang))
+  ([lang]
+    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+      (redirect lang application-page)
+      (redirect-to-frontpage lang))))
+
+(defpage "/" [] (landing-page))
+(defpage "/app/" [] (landing-page))
+(defpage [:get ["/app/:lang"  :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
+(defpage [:get ["/app/:lang/" :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
 
 ;;
 ;; FROM SADE
 ;;
+
+(defjson "/system/ping" [] {:ok true})
+(defjson "/system/status" [] (status/status))
 
 (defpage "/security/activate/:activation-key" {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
@@ -256,10 +286,10 @@
 (defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
 
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
-  (attachment/output-all-attachments application-id (current-user)))
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
+  (attachment/output-all-attachments application-id (current-user) lang))
 
-(defpage [:get ["/api/pdf-export/:lang/:application-id" :lang #"[a-z]{2}"]] {lang :lang application-id :application-id}
+(defpage "/api/pdf-export/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
   (ke6666/export application-id (current-user) lang))
 
 ;;
@@ -300,6 +330,10 @@
 ;;
 
 (env/in-dev
-  (defjson "/api/spy" []
-    (dissoc (request/ring-request) :body)))
+  (defjson "/dev/spy" []
+    (dissoc (request/ring-request) :body))
 
+  (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
+    (if-let [r (mongo/by-id collection id)]
+      (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"})))))

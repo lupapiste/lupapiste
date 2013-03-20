@@ -51,3 +51,17 @@
     (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :4}) => truthy)
     (fact (allowed-attachment-type-for? allowed-types {:type-group :b :type-id :5}) => falsey)
     (fact (allowed-attachment-type-for? allowed-types {:type-group :c :type-id :1}) => falsey)))
+
+(fact "version number"
+  (version-number {:version {:major 1 :minor 16}}) => 1016)
+
+(fact "Find latest version"
+  (let [attachments [{:id :attachment1
+                      :versions []}
+                     {:id :attachment2
+                      :versions [{:version { :major 1 :minor 0 }
+                                  :fileId :file1}
+                                 {:version { :major 1 :minor 1 }
+                                  :fileId :file2}]}]]
+    (latest-version-after-removing-file attachments :attachment2 :file1) => {:version { :major 1 :minor 1}
+                                                                             :fileId :file2}))

@@ -1,20 +1,11 @@
 <!DOCTYPE html>
 <html >
 <body>
-  <section class="page" id="attachment" data-bind="with: attachment">
-    <div class="breadcrumb">
-      <a href="#!/applications" id="test-applications" data-bind="ltext: 'permitApplications'">Lupahakemukset</a>
-      /
-      <a data-bind="attr: {href: '#!/application/' + application.id() }" id="test-applications">
-        <span data-bind="text: application.title"></span>
-      </a>
-      /
-      <span data-bind="ltext: name"></span>
-    </div>
+  <section class="page container" id="attachment" data-bind="with: attachment">
     <div>
       <div class="attachment-info">
         <h1>
-          <span data-bind="ltext: name"></span>
+          <span data-bind="text: application.title"></span> : <span data-bind="ltext: name"></span>
           <span data-bind="if: latestVersion">
             <span data-bind="ltext: 'attachment.version'">versio</span>
             <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
@@ -22,9 +13,12 @@
             <span data-bind="dateTimeString: latestVersion().created"></span>
           </span>
         </h1>
+        <a class="btn attachment-back" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }, ltext: 'attachment.return'"></a>
         <div class="form-entry">
           <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <div id="attachment-type-select-list-container"></div>
+          <br>
+          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment" style="margin-left: 0">Poista liite</button>
         </div>
       </div>
 
@@ -58,6 +52,7 @@
               <th data-bind="ltext: 'attachment.version'">Versio</th>
               <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
               <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
+              <th data-bind="ltext: 'attachment.actions'">Toiminto</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: versions()">
@@ -69,6 +64,7 @@
                 <span data-bind="fullName: user"></span>
                 (<span data-bind="ltext: user.role"></span>)
               </td>
+              <td><a data-bind="click: $root.attachment.deleteVersion, ltext: 'remove'" ></a></td>
             </tr>
           </tbody>
         </table>
@@ -102,11 +98,19 @@
               </tbody>
             </table>
             <form>
-              <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-                        class="conversation-input" id="attachment.commentText" rows="3"></textarea>
-              <button id="attachment.addComment"
+              <textarea
+                data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+                id="attachment.commentText"
+                class="conversation-input"
+                rows="3">
+              </textarea>
+              <button
                   data-bind="disable: disabled, click: submit, ltext: 'attachment.send'"
-                  type="submit" class="btn btn-primary">Lähetä viesti</button>
+                  id="attachment.addComment"
+                  type="submit"
+                  class="btn btn-primary">
+                Lähetä viesti
+              </button>
             </form>
           </div>
       </div>

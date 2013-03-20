@@ -11,6 +11,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
@@ -33,6 +34,11 @@
         (get-in body [:yritys :yritysnimi])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str first-name \space last-name))))))
+
+(defn get-application-operation [app]
+  (if (:infoRequest app)
+    (:initialOp app)
+    (some (comp :op :info :schema) (:documents app))))
 
 ;; Meta-fields:
 ;;
@@ -86,25 +92,33 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft]}
+  [{{:keys [host]} :web :as command}]
   [command]
   (with-application command
     (fn [{id :id}]
+      (let [new-state :open]
       (mongo/update-by-id :applications id
         {$set {:modified (:created command)
-               :state :open
-               :opened (:created command)}}))))
+               :state new-state
+               :opened (:created command)}})
+      (notifications/send-notifications-on-application-state-change id host)))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft :open :submitted]}
+  [{{:keys [host]} :web :as command}]
   [command]
-  (mongo/update-by-id :applications (-> command :data :id)
-                      {$set {:modified (:created command)
-                             :state :canceled}})
-  (ok))
+  (with-application command
+    (fn [{id :id}]
+      (let [new-state :canceled]
+        (mongo/update-by-id :applications (-> command :data :id)
+                            {$set {:modified (:created command)
+                                   :state new-state}})
+        (notifications/send-notifications-on-application-state-change id host)
+        (ok)))))
 
-(defcommand "approve-application"
+(defcommand "request-for-complement"
   {:parameters [:id]
    :roles      [:authority]
    :authority  true
@@ -112,27 +126,55 @@
   [command]
   (with-application command
     (fn [application]
-      (if (nil? (:authority application))
-        (executed "assign-to-me" command))
-      (try (rl-mapping/get-application-as-krysp application)
+      (let [application-id (:id application)]
         (mongo/update
           :applications {:_id (:id application) :state :submitted}
+          {$set {:state :complement-needed}})
+        (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
+
+(defcommand "approve-application"
+  {:parameters [:id]
+   :roles      [:authority]
+   :authority  true
+   :states     [:submitted]}
+  [{{:keys [host]} :web :as command}]
+  (with-application command
+    (fn [application]
+      (let [new-state :submitted
+            application-id (:id application)]
+        (if (nil? (:authority application))
+          (executed "assign-to-me" command))
+        (rl-mapping/get-application-as-krysp application)
+        (mongo/update
+          :applications {:_id (:id application) :state new-state}
           {$set {:state :sent}})
-        (catch org.xml.sax.SAXParseException e
-          (.printStackTrace e)
-          (fail (.getMessage e)))))))
+        (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
-  [command]
+   :states     [:draft :open :complement-needed]
+   :validators [(fn [command application]
+                  (when-not (domain/is-owner-or-writer? application (-> command :user :id))
+                    (fail :error.unauthorized)))]}
+  [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
-      (mongo/update
-        :applications {:_id (:id application)}
-          {$set {:state :submitted
-                 :submitted (:created command) }}))))
+      (let [new-state :submitted
+            application-id (:id application)]
+        (mongo/update
+          :applications
+          {:_id application-id}
+          {$set {:state new-state
+                 :submitted (:created command) }})
+        (try
+          (mongo/insert
+            :submitted-applications
+            (assoc (dissoc application :id) :_id application-id))
+          (catch com.mongodb.MongoException$DuplicateKey e
+            ; This is ok. Only the first submit is saved.
+            ))
+        (notifications/send-notifications-on-application-state-change application-id host)))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
@@ -172,7 +214,9 @@
 
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
-        make                  (fn [schema-name] {:id (mongo/create-id) :schema (schemas/schemas schema-name) :created created
+        make                  (fn [schema-name] {:id (mongo/create-id)
+                                                 :schema (schemas/schemas schema-name)
+                                                 :created created
                                                  :body (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info))
                                                          {})})
@@ -191,8 +235,12 @@
   (let [v (str v)]
     (if (s/blank? v) 0.0 (Double/parseDouble v))))
 
+(defn- permit-type-from-operation [operation]
+  ;; TODO operation to permit type mapping???
+  "buildingPermit")
+
 (defcommand "create-application"
-  {:parameters [:operation :permitType :x :y :address :propertyId :municipality]
+  {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]}
   [command]
   (let [{:keys [user created data]} command
@@ -205,28 +253,28 @@
             owner         (role user :owner :type :owner)
             op            (keyword (:operation data))
             info-request? (if (:infoRequest data) true false)
+            state         (if (or info-request? (= :authority user-role)) :open :draft)
             make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
-        (mongo/insert :applications
-                      {:id            id
-                       :created       created
-                       :opened        (when (= :authority user-role) created)
-                       :modified      created
-                       :infoRequest   info-request?
-                       :state         (if (or info-request? (= :authority user-role)) :open :draft)
-                       :municipality  (:municipality data)
-                       :location      {:x (->double (:x data)) :y (->double (:y data))}
-                       :address       (:address data)
-                       :propertyId    (:propertyId data)
-                       :title         (:address data)
-                       :auth          [owner]
-                       :operations    [{:operation op :created created}]
-                       :documents     (if info-request? [] (make-documents user created nil op))
-                       :attachments   (if info-request? [] (make-attachments created op))
-                       :allowedAttachmentTypes (if info-request?
-                                                 [[:muut [:muu]]]
-                                                 (partition 2 attachment/attachment-types))
-                       :comments      (map make-comment (:messages data))
-                       :permitType    (keyword (:permitType data))})
+        (mongo/insert :applications {:id            id
+                                     :created       created
+                                     :opened        (when (= state :open) created)
+                                     :modified      created
+                                     :infoRequest   info-request?
+                                     :initialOp     op
+                                     :state         state
+                                     :municipality  (:municipality data)
+                                     :location      {:x (->double (:x data)) :y (->double (:y data))}
+                                     :address       (:address data)
+                                     :propertyId    (:propertyId data)
+                                     :title         (:address data)
+                                     :auth          [owner]
+                                     :documents     (if info-request? [] (make-documents user created nil op))
+                                     :attachments   (if info-request? [] (make-attachments created op))
+                                     :allowedAttachmentTypes (if info-request?
+                                                               [[:muut [:muu]]]
+                                                               (partition 2 attachment/attachment-types))
+                                     :comments      (map make-comment (:messages data))
+                                     :permitType    (permit-type-from-operation op)})
         (ok :id id))
       (fail :error.unauthorized))))
 
@@ -242,21 +290,20 @@
             documents  (:documents application)
             op         (keyword (get-in command [:data :operation]))
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$push {:operations {:operation op :created created}}
-                                              $pushAll {:documents new-docs}
+        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
                                               $set {:modified created}})
         (ok)))))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open]}
+   :states     [:draft :open :answered]}
   [command]
   (with-application command
     (fn [inforequest]
       (let [id       (get-in command [:data :id])
             created  (:created command)
-            op       (-> inforequest :operations first :operation keyword)]
+            op       (keyword (:initialOp inforequest))]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
@@ -316,12 +363,14 @@
 
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   :address
-                  :title
+                  get-application-operation
                   get-applicant-name
                   :submitted
                   :modified
                   :state
                   :authority])
+
+(def order-by (assoc col-sources 0 :infoRequest, 2 nil, 3 nil))
 
 (def col-map (zipmap col-sources (map str (range))))
 
@@ -343,7 +392,12 @@
         "inforequests" {:infoRequest true}
         nil)
       (when-not (blank? search)
-        {:title {$regex search $options "i"}}))))
+        {:address {$regex search $options "i"}}))))
+
+(defn make-sort [params]
+  (let [col (get order-by (:iSortCol_0 params))
+        dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
+    (if col {col dir} {})))
 
 (defn applications-for-user [user params]
   (let [user-query  (domain/application-query-for user)
@@ -354,6 +408,7 @@
         limit       (params :iDisplayLength)
         apps        (query/with-collection "applications"
                       (query/find query)
+                      (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
@@ -368,3 +423,17 @@
   {:parameters [:params]}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
+
+;
+; Query that returns number of applications or info-requests user has:
+;
+
+(defquery "applications-count"
+  {:parameters [:kind]}
+  [{user :user {kind :kind} :data}]
+  (let [base-query (domain/application-query-for user)
+        query (condp = kind
+                "inforequests" (assoc base-query :infoRequest true)
+                "applications" (assoc base-query :infoRequest false)
+                "both"         base-query)]
+    (ok :data (mongo/count :applications query))))

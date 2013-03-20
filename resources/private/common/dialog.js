@@ -66,11 +66,11 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
 };
 
-LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized">'
-  + '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>'
-  + '<div class="dialog-content"><p></p>'
-  + '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>'
-  + '<button class="btn btn-dialog close" data-test-id="confirm-no"></button></div></div>';
+LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized">' +
+  '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
+  '<div class="dialog-content"><p></p>' +
+  '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>' +
+  '<button class="btn btn-dialog close" data-test-id="confirm-no"></button></div></div>';
 
 /**
  * Lupapiste Modal Dialog window.
@@ -80,6 +80,7 @@ LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
 LUPAPISTE.ModalDialog.dynamicDialogs = [];
 
 LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle, noHandler) {
+  "use strict";
   var dialog$ = $(LUPAPISTE.Modal.YesNoTemplate).attr("id", id);
   dialog$.find(".dialog-title").text(title);
   dialog$.find(".dialog-content p").text(content);
@@ -110,14 +111,14 @@ LUPAPISTE.ModalDialog.init = function() {
   // Click any element that has .modal class and data-windows-id that
   // references to modal window container element ID.
   $(".modal").click(function (e) {
-   e.preventDefault();
-   var id = $(this).attr('data-window-id');
-   if (id) {
-     LUPAPISTE.ModalDialog.open("#" + id);
-   } else {
-     warn("No 'data-window-id' attribute");
-   }
-   return false;
+    e.preventDefault();
+    var id = $(this).attr('data-window-id');
+    if (id) {
+      LUPAPISTE.ModalDialog.open("#" + id);
+    } else {
+      warn("No 'data-window-id' attribute");
+    }
+    return false;
   });
 
   // Register modal window closing handlers

@@ -13,10 +13,10 @@ ${DEFAULT_SPEED}                0
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
-${LOGIN URL}                    ${SERVER}/fi/welcome#!/login
-${LOGOUT URL}                   ${SERVER}/fi/logout
-${APPLICATIONS PATH}            /fi/applicant#!/applications
-${AUTHORITY APPLICATIONS PATH}  /fi/authority#!/applications
+${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
+${LOGOUT URL}                   ${SERVER}/app/fi/logout
+${APPLICATIONS PATH}            /app/fi/applicant#!/applications
+${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/fixture
 
 ${SELENIUM}                     ${EMPTY}
@@ -73,6 +73,13 @@ Wait until
 
 Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  10
+
+Kill dev-box
+  Execute Javascript  $(".dev-debug").hide();
+
+Show dev-box
+  Execute Javascript  $(".dev-debug").show();
+
 #
 # Navigation
 #
@@ -126,6 +133,7 @@ User logs in
   [Arguments]  ${login}  ${password}  ${username}
   Login  ${login}  ${password}
   User should be logged in  ${username}
+  Kill dev-box
 
 Applicant logs in
   [Arguments]  ${login}  ${password}  ${username}
@@ -237,27 +245,29 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"permitType":"buildingPermit","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
-  Open application  ${address}
+  Kill dev-box
+  Open application  ${address}  ${propertyId}
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"permitType":"infoRequest","operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
   Reload Page
-  Open inforequest  ${address}
+  Kill dev-box
+  Open inforequest  ${address}  ${propertyId}
 
 Create application
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
   Go to page  applications
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-application
   Wait Until  Element should be visible  application
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${button}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   Sleep  1
@@ -266,18 +276,19 @@ Create inforequest
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
   Click by test id  create-inforequest
   Wait Until  Element should be visible  inforequest
-  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
+  Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Prepare new request
-  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
   Execute Javascript  window.location.hash = "!/applications";
-  Click by test id  applications-create-new
-  Wait Until  Element should be visible  xpath=//input[@data-test-id="create-address"]
+  Click by test id  ${button}
+  Wait and click  xpath=//button[@data-test-id="create-search-button"]
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
   Select From List by test id  create-municipality-select  ${municipality}
   Input text by test id  create-property-id  ${propertyId}
+  Sleep  1
   Click by test id  create-continue
   # Going too fast causes negative margins
   Set Selenium Speed  ${SLOW_SPEED}
@@ -291,15 +302,22 @@ Prepare new request
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click by test id  application-cancel-btn
-  Confirm closing
+  Confirm  dialog-confirm-cancel
 
-Confirm closing
-  Wait until  Element should be visible  xpath=//button[@data-test-id="confirm-yes"]
-  Click by test id  confirm-yes
-  Wait Until  Element Should Not Be Visible  dialog-confirm-cancel
+Confirm
+  [Arguments]  ${modalId}
+  Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Click Element  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
+  Wait Until  Element Should Not Be Visible  ${modalId}
 
 It is possible to add operation
   Wait until  Element should be visible  xpath=//button[@data-test-id="add-operation"]
+
+Submit application
+  Click enabled by test id  application-submit-btn
+  Confirm  dialog-confirm-submit
+  Wait until  Application state should be  submitted
+
 #
 # Jump to application or inforequest:
 #
@@ -310,22 +328,22 @@ Open the request
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
 
 Open application
-  [Arguments]  ${address}
+  [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  ${address}
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
-  [Arguments]  ${address}
+  [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-title']  ${address}
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
   [Arguments]  ${address}
-  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+  Wait Until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
 Request should not be visible
   [Arguments]  ${address}
-  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+  Wait Until  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
 #
 # Comments:
@@ -343,8 +361,10 @@ Add comment
 #
 
 Apply minimal fixture now
+  Show dev-box
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
+  Kill dev-box
 
 #
 # Application state check:
@@ -354,3 +374,7 @@ Application state should be
   [Arguments]  ${state}
   ${s} =  Get Element Attribute  xpath=//span[@data-test-id='application-state']@data-test-state
   Should be equal  ${s}  ${state}
+
+Permit type should be
+  [Arguments]  ${type}
+  Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}

@@ -2,14 +2,15 @@
   (:refer-clojure :exclude [count])
   (:use monger.operators
         clojure.tools.logging)
-  (:require [monger.core :as m]
+  (:require [lupapalvelu.env :as env]
+            [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
             [monger.gridfs :as gfs])
-  (:import [org.bson.types ObjectId]
+  (:import [javax.net.ssl SSLSocketFactory]
+           [org.bson.types ObjectId]
+           [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
            [com.mongodb.gridfs GridFS GridFSInputFile]))
-
-(def ^:const mongouri "mongodb://127.0.0.1/lupapalvelu")
 
 ;;
 ;; Utils
@@ -38,8 +39,8 @@
 
 (defn update
   "Updates data into collection by query. Always returns nil."
-   [collection query data]
-  (mc/update collection query data)
+  [collection query data & opts]
+  (apply mc/update collection query data opts)
   nil)
 
 (defn update-by-id
@@ -107,6 +108,10 @@
      :file-name (.getFilename attachment)
      :application (.getString (.getMetaData attachment) "application")}))
 
+(defn delete-file [file-id]
+  (info "removing file" file-id)
+  (gfs/remove {:_id file-id}))
+
 (defn count
   "returns count of objects in collection"
   ([collection]
@@ -118,26 +123,96 @@
 ;; Bootstrappin'
 ;;
 
+;; From monger.core, pimped with SSL option
+(defn mongo-options
+  [& { :keys [connections-per-host threads-allowed-to-block-for-connection-multiplier
+              max-wait-time connect-timeout socket-timeout socket-keep-alive auto-connect-retry max-auto-connect-retry-time ssl
+              safe w w-timeout fsync j] :or [auto-connect-retry true] }]
+  (let [mob (MongoClientOptions$Builder.)]
+    (when connections-per-host
+      (.connectionsPerHost mob connections-per-host))
+    (when threads-allowed-to-block-for-connection-multiplier
+      (.threadsAllowedToBlockForConnectionMultiplier mob threads-allowed-to-block-for-connection-multiplier))
+    (when max-wait-time
+      (.maxWaitTime mob max-wait-time))
+    (when connect-timeout
+      (.connectTimeout mob connect-timeout))
+    (when socket-timeout
+      (.socketTimeout mob socket-timeout))
+    (when socket-keep-alive
+      (.socketKeepAlive mob socket-keep-alive))
+    (when auto-connect-retry
+      (.autoConnectRetry mob auto-connect-retry))
+    (when max-auto-connect-retry-time
+      (.maxAutoConnectRetryTime mob max-auto-connect-retry-time))
+    (when ssl
+      (.socketFactory mob (SSLSocketFactory/getDefault)))
+    (when safe
+      (.safe mob safe))
+    (when w
+      (.w mob w))
+    (when w-timeout
+      (.wtimeout mob w-timeout))
+    (when j
+      (.j mob j))
+    (when fsync
+      (.fsync mob fsync))
+    (.build mob)))
+
+(def server-list
+  (let [servers (vals (get-in env/config [:mongodb :servers]))]
+    (map #(apply m/server-address [(:host %) (:port %)]) servers)))
+
 (def connected (atom false))
 
 (defn connect!
   ([]
-    (connect! mongouri))
-  ([uri]
+    (let [conf (:mongodb env/config)
+          db   (:dbname conf)
+          user (-> conf :credentials :username)
+          pw   (-> conf :credentials :password)
+          ssl  (:ssl conf)]
+      (connect! server-list db user pw ssl)))
+  ([servers db username password ssl]
     (if @connected
       (debug "Already connected!")
       (do
-        (debug "Connecting to DB:" uri)
-        (m/connect-via-uri! uri)
-        (debug "DB is" (.getName (m/get-db)))
-        (reset! connected true)))))
+        (debug "Connecting to DB:" servers (if ssl "using ssl" "without encryption"))
+        (m/connect! servers (mongo-options :ssl ssl))
+        (reset! connected true)
+        (m/set-default-write-concern! WriteConcern/SAFE)
+        (when (and username password)
+          (m/authenticate (m/get-db db) username (.toCharArray password))
+          (debugf "Authenticated to DB '%s' as '%s'" db username))
+        (m/use-db! db)
+        (debug "DB is" (.getName (m/get-db)))))))
+
+(defn disconnect! []
+  (if @connected
+    (do
+      (m/disconnect!)
+      (reset! connected false))
+    (debug "Not connected")))
+
+(defn ensure-indexes []
+  (debug "ensure-indexes")
+  (mc/ensure-index :users {:username 1} {:unique true})
+  (mc/ensure-index :users {:email 1} {:unique true})
+  (mc/ensure-index :users {:municipality 1} {:sparse true})
+  (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
+  (mc/ensure-index "users" {:personId 1} {:unique true :sparse true :dropDups (env/in-dev)})
+  (mc/ensure-index :applications {:municipality 1})
+  (mc/ensure-index :applications {:auth.id 1})
+  (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
+  (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
+  (mc/ensure-index :activation {:email 1})
+  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
+  (mc/ensure-index :municipalities {:municipalityCode 1}))
 
 (defn clear! []
-  (warn "Clearing MongoDB:" mongouri)
+  (warn "Clearing MongoDB")
   (gfs/remove-all)
-  (db/drop-db (m/get-db))
-  (mc/ensure-index :users {:email 1} {:unique true})
-  (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
-  (mc/ensure-index :activations {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
-  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
-  #_(mc/ensure-index "users" {:personId 1} {:unique true}))
+  ; Collections must be dropped individially, otherwise index cache will be stale
+  (doseq [coll (db/get-collection-names)]
+    (when-not (.startsWith coll "system") (mc/drop coll)))
+  (ensure-indexes))

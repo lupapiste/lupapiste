@@ -1,5 +1,8 @@
 var pageutil = (function() {
   "use strict";
+  
+  var ajaxImg;
+  var ajaxLoaderContainer;
 
   /**
    * Returns HTTP GET parameter value or null if the parameter is not set.
@@ -13,9 +16,29 @@ var pageutil = (function() {
     }
     return null;
   }
+  
+  function showAjaxWait() {
+    ajaxImg.hide();
+    ajaxLoaderContainer.show();
+    setTimeout(function() {
+      ajaxImg.show();
+    }, 300);
+  }
+
+  function hideAjaxWait() {
+    ajaxLoaderContainer.hide();
+  }
+  
+  $(function() {
+    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader">');
+    ajaxLoaderContainer = $('<div class="ajax-loader-container">').append(ajaxImg);
+    $('body').append(ajaxLoaderContainer);
+  });
 
   return {
-    getURLParameter:  getURLParameter
+    getURLParameter:  getURLParameter,
+    showAjaxWait:     showAjaxWait,
+    hideAjaxWait:     hideAjaxWait,
   };
 
 })();

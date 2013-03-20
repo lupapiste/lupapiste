@@ -17,11 +17,12 @@ There are no attachments at this stage
 Mikko creates new application from inforequest
   Click by test id  inforequest-convert-to-application
   Wait until  Element should be visible  application
-  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-title']  create-app-from-info
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  75341600250030
+#  Permit type should be  Rakennuslupahakemus
 
 Proper attachment templates are present
   Open tab  attachments
-  # Element should be visible  xpath=//*[@data-test-id='application-attachments-table']
+  Wait until  Element should be visible  xpath=//tr[@class='attachment-group-header']
   # Element should not be visible  xpath=//*[@data-test-id='application-attachments-no-attachments']
 
 Mikko closes application

@@ -9,6 +9,7 @@
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
+            [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.action]
             [lupapalvelu.admin]
             [lupapalvelu.application]
@@ -42,40 +43,39 @@
 
 (defn -main [& _]
   (info "Server starting")
-  (infof "Running on Java %s %s %s (%s) [%s]"
-    (System/getProperty "java.vm.vendor")
+  (infof "Running on %s version %s (%s) [%s], trustStore is %s"
     (System/getProperty "java.vm.name")
     (System/getProperty "java.runtime.version")
     (System/getProperty "java.vm.info")
-    (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful"))
-  (infof "Running on Clojure %d.%d.%d"
-    (:major *clojure-version*)
-    (:minor *clojure-version*)
-    (:incremental *clojure-version*))
+    (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
+    (System/getProperty "javax.net.ssl.trustStore"))
+
+  (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
+  (mongo/ensure-indexes)
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
-  (server/add-middleware web/anti-csrf)
+  (env/dev-mode?) (server/add-middleware web/anti-csrf)
   (server/add-middleware web/apikey-authentication)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init)))
-  (with-logs "lupapalvelu"
-    (server/start env/port {:mode env/mode
-                            :jetty-options {:ssl? true
-                                            :ssl-port 8443
-                                            :keystore "./keystore"
-                                            :key-password "lupapiste"}
-                            :ns 'lupapalvelu.web
-                            :session-cookie-attrs (:cookie env/config)}))
-  (info "Server running")
   (env/in-dev
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9000))
-  ; Sensible return value for -main for repl use.
-  "ready")
+  (with-logs "lupapalvelu"
+    (server/start env/port {:mode env/mode
+                            :ns 'lupapalvelu.web
+                            :jetty-options (if env/dev-mode?
+                                             {:ssl? true
+                                              :ssl-port 8443
+                                              :keystore "./keystore"
+                                              :key-password "lupapiste"}
+                                             {})
+                            :session-cookie-attrs (:cookie env/config)}))
+  "ok")
 
 (comment
   (-main))

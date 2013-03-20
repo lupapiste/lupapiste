@@ -26,7 +26,13 @@
     self.ok = function() {
       ajax
         .command("remove-doc", {id: self.appId(), docId: self.docId()})
-        .success(self.callback)
+        .success(function() {
+          self.callback();
+          // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
+          // The docgen already has code to remove actual document (that's the self.callback() above), just the
+          // "operations" list should be changed.
+          repository.load(self.appId);
+        })
         .call();
       return false;
     };
@@ -60,17 +66,16 @@
   var removeApplicationModel = new function() {
     var self = this;
 
-    self.applicationId = ko.observable();
+    self.applicationId = null;
 
     self.init = function(applicationId) {
-      self.applicationId(applicationId);
+      self.applicationId = applicationId;
       LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel");
       return self;
     };
-
     self.ok = function() {
       ajax
-        .command("cancel-application", {id: self.applicationId()})
+        .command("cancel-application", {id: self.applicationId})
         .success(function() {
           window.location.hash = "!/applications";
         })
@@ -78,18 +83,57 @@
       return false;
     };
 
-    self.cancel = function() { return true; };
-
-    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel",
-        loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+    });
   }();
 
+  var submitApplicationModel = new function() {
+    var self = this;
+
+    self.applicationId = null;
+
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-submit");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax.command("submit-application", {id: self.applicationId})
+        .success(function() { repository.load(self.applicationId); })
+        .call();
+      return false;
+    };
+
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
+    });
+  }();
+
+  function getOperations(docs) {
+    var ops = {};
+    if (docs) {
+      _.each(docs, function(doc) {
+        var op = doc.schema.info.op;
+        if (op) {
+          if (ops[op]) {
+            ops[op] += 1;
+          } else {
+            ops[op] = 1;
+          }
+        }
+      });
+    }
+    return _.map(ops, function(v, k) { return {op: k, count: v}; });
+  }
 
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
     state: ko.observable(),
     location: ko.observable(),
+    municipality: ko.observable(),
     permitType: ko.observable(),
     propertyId: ko.observable(),
     title: ko.observable(),
@@ -99,6 +143,7 @@
     hasAttachment: ko.observable(false),
     address: ko.observable(),
     verdict: ko.observable(),
+    initialOp: ko.observable(),
     operations: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
@@ -114,6 +159,7 @@
       window.open(url);
       var applicationId = application.id();
 
+      // FIXME: Can't just subscribe repeatedly.
       hub.subscribe("map-initialized", function() {
         if(application.shapes && application.shapes().length > 0) {
           oskariDrawShape(application.shapes()[0]);
@@ -122,6 +168,7 @@
         oskariSetMarker(application.location().x(), application.location().y());
       });
 
+      // FIXME: Can't just subscribe repeatedly.
       hub.subscribe("map-draw-done", function(e) {
         var drawing = "" + e.data.drawing;
         ajax.command("save-application-shape", {id: applicationId, shape: drawing})
@@ -132,11 +179,16 @@
       });
     },
 
-    submitApplication: function(model) {
+    submitApplication: function() {
+      submitApplicationModel.init(application.id());
+      return false;
+    },
+    
+    requestForComplement: function(model) {
       var applicationId = application.id();
-      ajax.command("submit-application", { id: applicationId})
+      ajax.command("request-for-complement", { id: applicationId})
         .success(function() {
-          notify.success("hakemus j\u00E4tetty",model);
+          notify.success("pyynt\u00F6 l\u00E4hetetty",model);
           repository.load(applicationId);
         })
         .call();
@@ -215,7 +267,7 @@
     },
 
     exportPdf: function() {
-      window.open("/api/pdf-export/" + loc.currentLanguage + "/" + application.id(), "_blank");
+      window.open("/api/pdf-export/" + application.id() + "?lang=" + loc.currentLanguage, "_blank");
       return false;
     },
 
@@ -243,10 +295,10 @@
 
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
-    if (isInitializing) return;
+    if (isInitializing) { return; }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok('assign-application')) return;
+    if (!authorizationModel.ok('assign-application')) { return; }
 
     var assigneeId = value ? value : null;
 
@@ -285,6 +337,7 @@
 
   function showApplication(applicationDetails) {
     isInitializing = true;
+    
     authorizationModel.refresh(applicationDetails.application,function() {
 
       // new data mapping
@@ -297,6 +350,10 @@
 
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
+
+      // Operations:
+
+      application.operations(getOperations(app.documents));
 
       // Attachments:
 
@@ -323,6 +380,13 @@
       var location = application.location();
       var x = location.x();
       var y = location.y();
+
+      if(x === 0 && y === 0) {
+        $('#application-map').css("display", "none");
+      } else {
+        $('#application-map').css("display", "inline-block");
+      }
+
       (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
 
       if (application.shapes && application.shapes().length > 0) {
@@ -339,6 +403,7 @@
       application.assignee(assigneeId);
 
       isInitializing = false;
+      pageutil.hideAjaxWait();
     });
   }
 
@@ -416,20 +481,55 @@
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
-  var initApplication = function(e) {
+  var attachmentTemplatesModel = new function() {
+    var self = this;
+
+    self.ok = function(ids) {
+      ajax.command("create-attachments", {id: application.id(), attachmentTypes: ids})
+        .success(function() { repository.load(application.id()); })
+        .complete(LUPAPISTE.ModalDialog.close)
+        .call();
+    };
+    
+    self.init = function() {
+      self.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
+      self.selectm.ok(self.ok).cancel(LUPAPISTE.ModalDialog.close);
+      return self;
+    };
+    
+    self.show = function() {
+      var data = _.map(application.allowedAttachmentTypes(), function(g) {
+        var groupId = g[0];
+        var groupText = loc("attachmentType." + groupId + "._group_label");
+        var attachemntIds = g[1];
+        var attachments = _.map(attachemntIds, function(a) {
+          var id = {"type-group": groupId, "type-id": a};
+          var text = loc("attachmentType." + groupId + "." + a);
+          return {id: id, text: text};
+        });
+        return [groupText, attachments];
+      });
+      self.selectm.reset(data);
+      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
+      return self;
+    };
+    
+  };
+  
+  function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
     selectTab(tab || "info");
-    if(newId !== currentId || !tab) {
+    if (newId !== currentId || !tab) {
+      pageutil.showAjaxWait();
       currentId = newId;
-      applicationMap.updateSize();
-      inforequestMap.updateSize();
+      ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
       repository.load(currentId);
     }
   };
 
-  hub.onPageChange("application", initApplication);
-  hub.onPageChange("inforequest", initApplication);
+  hub.onPageChange("application", _.partial(initPage, "application"));
+  hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
   $(function() {
     applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
@@ -446,11 +546,14 @@
       authorization: authorizationModel,
       accordian: accordian,
       removeDocModel: removeDocModel,
-      removeApplicationModel: removeApplicationModel
+      removeApplicationModel: removeApplicationModel,
+      attachmentTemplatesModel: attachmentTemplatesModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
+    
+    attachmentTemplatesModel.init();
   });
 
 })();
