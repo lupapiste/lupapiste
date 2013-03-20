@@ -44,6 +44,10 @@
     
     self.goBack = function() {
       if (self.model.stack().length < 1) return false;
+      if (self.atFinal) {
+        self.atFinal = false;
+        self.onSelect(null);
+      }
       self.stateNop();
       self.model.stack.pop();
       self.content.animate(self.moveRight, self.speed, function() {
@@ -59,6 +63,7 @@
 
     self.makeFinal = function(data) {
       self.onSelect(data);
+      self.atFinal = true;
       return self.lastTemplate.clone().addClass("tree-page").applyBindings(data);
     }
     
