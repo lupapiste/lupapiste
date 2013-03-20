@@ -68,7 +68,7 @@
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :ns 'lupapalvelu.web
-                            :jetty-options (if env/dev-mode?
+                            :jetty-options (if (env/dev-mode?)
                                              {:ssl? true
                                               :ssl-port 8443
                                               :keystore "./keystore"
