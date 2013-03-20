@@ -134,7 +134,7 @@
     (validate xml-s)
 
     (with-open [out-file (writer tempfile)]
-      (emit xml out-file)
-      )
+      (emit xml out-file))
     ;todoo liitetiedostot
-   (.renameTo tempfile outfile)))
+    (when (fs/exists? outfile) (fs/delete outfile))
+    (fs/rename tempfile outfile)))
