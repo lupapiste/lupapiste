@@ -70,9 +70,10 @@ if (typeof LUPAPISTE === "undefined") {
   * Complete the App initialization after DOM is loaded.
   */
   self.domReady = function () {
-    $(window).hashchange(self.hashChanged);
-    $(window).hashchange();
-    $(window).unload(self.unload);
+    $(window)
+      .hashchange(self.hashChanged)
+      .hashchange()
+      .unload(self.unload);
 
     self.connectionCheck();
 
