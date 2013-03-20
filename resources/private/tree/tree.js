@@ -6,6 +6,7 @@
   function Tree(context, args) {
     var self = this;
 
+    args = args || {};
     var defaultTemplate = args.template || $(".default-tree-template");
     
     var titleTemplate = args.title || $(".tree-title", defaultTemplate);
@@ -22,16 +23,22 @@
     self.moveLeft  = {"margin-left": "-=" + self.width};
     self.moveRight = {"margin-left": "+=" + self.width};
     
+    function findTreeData(target) {
+      var data = target.data("tree-link-data");
+      if (data) return data;
+      var parent = target.parent();
+      return parent ? findTreeData(parent) : null;
+    }
+    
     self.clickGo = function(e) {
-      self.stateNop();
       var target = $(e.target),
-          link = target.data("tree-link-data");
+          link = findTreeData(target);
       if (!link) return false;
       var selectedLink = link[0],
           nextElement = link[1],
           next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
       self.model.stack.push(selectedLink);
-      self.content.append(next).animate(self.moveLeft, self.speed, self.stateGo);
+      self.stateNop().content.append(next).animate(self.moveLeft, self.speed, self.stateGo);
       return false;
     };
     
@@ -94,11 +101,6 @@
       .append(navTemplate.clone())
       .applyBindings(self.model);
   }
-  
-  $.fn.applyBindings = function(model) {
-    _.each(this, _.partial(ko.applyBindings, model));
-    return this;
-  };
   
   $.fn.selectTree = function(arg) {
     return new Tree(this, arg);
