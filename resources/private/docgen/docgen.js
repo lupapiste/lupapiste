@@ -92,6 +92,11 @@ var docgen = (function() {
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
+    
+    function setMaxLen(input, subSchema) {
+      var maxLen = subSchema["max-len"] || 255; // if you change the default, change in model.clj, too
+      input.setAttribute("maxlength", maxLen);
+    }
 
     function buildString(subSchema, model, path, save, partOfChoice) {
       var myPath = path.join(".");
@@ -99,6 +104,7 @@ var docgen = (function() {
       var type = (subSchema.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       var input = makeInput(type, myPath, model[subSchema.name], save, sizeClass);
+      setMaxLen(input, subSchema);
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
 
@@ -128,6 +134,8 @@ var docgen = (function() {
       input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
       input.setAttribute("cols", subSchema.cols || "40");
+      setMaxLen(input, subSchema);
+      
       input.className = "form-input textarea";
       input.onchange = save;
       input.value = model[subSchema.name] || "";
