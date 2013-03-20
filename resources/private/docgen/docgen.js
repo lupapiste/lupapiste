@@ -99,6 +99,9 @@ var docgen = (function() {
       var type = (subSchema.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       var input = makeInput(type, myPath, model[subSchema.name], save, sizeClass);
+      if(subSchema["max-len"]) {
+        input.setAttribute("maxlength", subSchema["max-len"]);
+      }
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
 
@@ -128,6 +131,11 @@ var docgen = (function() {
       input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
       input.setAttribute("cols", subSchema.cols || "40");
+      
+      if(subSchema["max-len"]) {
+        input.setAttribute("maxlength", subSchema["max-len"]);
+      }
+      
       input.className = "form-input textarea";
       input.onchange = save;
       input.value = model[subSchema.name] || "";

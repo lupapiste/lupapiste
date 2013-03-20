@@ -411,7 +411,7 @@
     [{:info {:name "hankkeen-kuvaus"
              :order 1}
       :body [{:name "kuvaus" :type :text :max-len 4000}
-             {:name "poikkeamat" :type :text}]}
+             {:name "poikkeamat" :type :text :max-len 4000}]}
 
      {:info {:name "uusiRakennus"}
       :body (body rakennuksen-omistajat rakennuksen-tiedot)}
