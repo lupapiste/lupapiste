@@ -4,9 +4,9 @@
          [clojure.java.io]
          [lupapalvelu.document.krysp :only [application-to-canonical]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]]
-         [lupapalvelu.env :as env]
-         ))
+         [lupapalvelu.xml.krysp.validator :only [validate]])
+  (:require [lupapalvelu.env :as env]
+            [me.raynes.fs :as fs]))
 
 ;RakVal
 
@@ -123,12 +123,14 @@
                                                {:tag :rakennelmatieto}]}]}]}]}]})
 
 (defn get-application-as-krysp [application]
-  (let [canonical (application-to-canonical application)
-        xml (element-to-xml canonical rakennuslupa_to_krysp)
-        xml-s (indent-str xml)
-        file-name (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus/Lupapiste" (:id application))
-        tempfile (file (str file-name ".tmp"))
-        outfile (file (str file-name ".xml"))]
+  (let [canonical  (application-to-canonical application)
+        xml        (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s      (indent-str xml)
+        output-dir (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus")
+        _          (fs/mkdirs output-dir)
+        file-name  (str output-dir "/Lupapiste" (:id application))
+        tempfile   (file (str file-name ".tmp"))
+        outfile    (file (str file-name ".xml"))]
     (validate xml-s)
 
     (with-open [out-file (writer tempfile)]
