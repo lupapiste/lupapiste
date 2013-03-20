@@ -68,10 +68,12 @@
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :ns 'lupapalvelu.web
-                            :jetty-options {:ssl? true
-                                            :ssl-port 8443
-                                            :keystore "./keystore"
-                                            :key-password "lupapiste"}
+                            :jetty-options (if env/dev-mode?
+                                             {:ssl? true
+                                              :ssl-port 8443
+                                              :keystore "./keystore"
+                                              :key-password "lupapiste"}
+                                             {})
                             :session-cookie-attrs (:cookie env/config)}))
   "ok")
 
