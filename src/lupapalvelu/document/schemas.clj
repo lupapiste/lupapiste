@@ -349,8 +349,8 @@
                           :body huoneisto}])
 
 
-(def rakennelma (body {:name "kuvaus" :type :text}))
-(def maisematyo (body {:name "kuvaus" :type :text}))
+(def rakennelma (body {:name "kuvaus" :type :text :max-len 4000}))
+(def maisematyo (body {:name "kuvaus" :type :text :max-len 4000}))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group :repeating true
@@ -410,8 +410,8 @@
   (to-map-by-name
     [{:info {:name "hankkeen-kuvaus"
              :order 1}
-      :body [{:name "kuvaus" :type :text}
-             {:name "poikkeamat" :type :text}]}
+      :body [{:name "kuvaus" :type :text :max-len 4000}
+             {:name "poikkeamat" :type :text :max-len 4000}]}
 
      {:info {:name "uusiRakennus"}
       :body (body rakennuksen-omistajat rakennuksen-tiedot)}

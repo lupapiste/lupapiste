@@ -10,8 +10,8 @@
 ;;
 ;; Validation:
 ;;
-
-(def default-max-len 64)
+;; if you changes this value, change it in docgen.js, too
+(def default-max-len 255)
 
 (defmulti validate (fn [elem _] (keyword (:type elem))))
 
