@@ -78,14 +78,10 @@ if (typeof LUPAPISTE === "undefined") {
 
     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
       LUPAPISTE.ModalDialog.init();
-
-      $(document.documentElement).keyup(function (event) {
-        var escape = 27;
-        if (event.keyCode === escape) {
-          LUPAPISTE.ModalDialog.close();
-        }
-      });
     }
+
+    $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
+    
     var navWrapper = $("<div class='nav-wrapper'></div>");
     navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
     if (!self.allowAnonymous) {
@@ -95,6 +91,8 @@ if (typeof LUPAPISTE === "undefined") {
     $("nav").append(navWrapper);
   };
   $(self.domReady);
+  
+  hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
 
   /**
   * Window unload event handler
