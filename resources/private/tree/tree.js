@@ -7,8 +7,8 @@
     var self = this;
 
     args = args || {};
-    var defaultTemplate = args.template || $(".default-tree-template");
     
+    var defaultTemplate = args.template || $(".default-tree-template");
     var titleTemplate = args.title || $(".tree-title", defaultTemplate);
     var contentTemplate = args.content || $(".tree-content", defaultTemplate);
     var navTemplate = args.nav || $(".tree-nav", defaultTemplate);
@@ -17,6 +17,7 @@
     self.lastTemplate = args.last || $(".tree-last", defaultTemplate);
 
     self.onSelect = args.onSelect || nop;
+    self.baseModel = args.baseModel || {};
     self.data = [];
     self.width = args.width || context.width();
     self.speed = args.speed || self.width / 2;
@@ -24,9 +25,15 @@
     self.moveRight = {"margin-left": "+=" + self.width};
     
     function findTreeData(target) {
-      if (!target) return null;
-      var data = target.data("tree-link-data");
-      return data ? data : findTreeData(target.parent())
+      var c = 100,
+          data;
+      while (c) {
+        data = target.data("tree-link-data");
+        if (data) return data;
+        target = target.parent();
+        c--;
+      }
+      return null;
     }
     
     self.clickGo = function(e) {
@@ -63,7 +70,11 @@
     self.makeFinal = function(data) {
       self.model.selected(data);
       self.onSelect(data);
-      return self.lastTemplate.clone().addClass("tree-page").css("width", self.width + "px").applyBindings(data);
+      return self.lastTemplate
+        .clone()
+        .addClass("tree-page")
+        .css("width", self.width + "px")
+        .applyBindings(_.extend({}, self.baseModel, data));
     }
     
     self.makeLinks = function(data) {
@@ -74,7 +85,7 @@
       var link = self.linkTemplate
         .clone()
         .data("tree-link-data", linkData)
-        .applyBindings(linkData[0]);
+        .applyBindings(_.extend({}, self.baseModel, linkData[0]));
       return div.append(link);
     };
     
@@ -82,7 +93,11 @@
       self.stateNop();
       self.data = data;
       self.model.stack.removeAll();
-      self.content.empty().css("margin-left", "" + self.width + "px").append(self.makeLinks(data)).animate(self.moveLeft, self.speed, self.stateGo);
+      self.content
+        .empty()
+        .css("margin-left", "" + self.width + "px")
+        .append(self.makeLinks(data))
+        .animate(self.moveLeft, self.speed, self.stateGo);
       return self;
     };
     
@@ -105,17 +120,18 @@
       .append(titleTemplate.clone())
       .append(self.content)
       .append(navTemplate.clone())
-      .applyBindings(self.model);
+      .applyBindings(_.extend({}, self.baseModel, self.model));
+    
+    return util.fluentify({
+      reset:    function(data) { self.reset(data); },
+      back:     function() { self.goBack(); },
+      selected: self.model.selected
+    });
+    
   }
   
   $.fn.selectTree = function(arg) {
     return new Tree(this, arg);
   };
 
-  var api = {};
-  api.reset = function(data) { self.reset(data); return api; };
-  api.back = function() { self.goBack(); return api; };
-  api.selected = self.model.selected;
-  return api;
-  
 })(jQuery);
