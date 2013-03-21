@@ -126,8 +126,9 @@
       .applyBindings(_.extend({}, self.baseModel, self.model));
     
     return util.fluentify({
-      reset:    function(data) { self.reset(data); },
-      back:     function() { self.goBack(); },
+      reset:    self.reset,
+      back:     self.model.goBack,
+      start:    self.model.goStart,
       selected: self.model.selected
     });
     
