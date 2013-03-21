@@ -132,15 +132,16 @@
   (let [canonical (application-to-canonical application)
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)
-        file-name (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus/Lupapiste" (:id application))
+        output-dir (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus")
+        _          (fs/mkdirs output-dir)
+        file-name  (str output-dir "/Lupapiste" (:id application))
         tempfile (file (str file-name ".tmp"))
         outfile (file (str file-name ".xml"))]
     (validate xml-s)
-    (clojure.pprint/pprint  canonical)
 
     (with-open [out-file (writer tempfile)]
-      (emit xml out-file)
-      )
+      (emit xml out-file))
     ;todoo liitetiedostot
-    ;
-   (.renameTo tempfile outfile)))
+    (when (fs/exists? outfile) (fs/delete outfile))
+    (fs/rename tempfile outfile)))
+
