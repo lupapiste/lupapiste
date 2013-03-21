@@ -312,7 +312,7 @@ var docgen = (function() {
 
       select.name = myPath;
       select.className = "form-input combobox long";
-      select.onchange = function(e) {
+      select.onchange = function() {
         var event = getEvent(event);
         var target = event.target;
         var userId = target.value;
