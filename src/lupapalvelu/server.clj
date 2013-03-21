@@ -5,7 +5,7 @@
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]

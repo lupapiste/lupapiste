@@ -1,17 +1,17 @@
 (ns lupapalvelu.action
   (:use [monger.operators]
         [clojure.tools.logging]
-        [lupapalvelu.strings :only [suffix]]
+        [sade.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [clojure.string :as s]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
-            [lupapalvelu.env :as env]
+            [sade.email :as email]
+            [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
@@ -70,14 +70,9 @@
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
               (future
-                (if (not= (suffix email "@") "example.com")
-                  (try
-                    (info "sending email to" email)
-                    (if (email/send-email email (:title application) (invite-body user application-id host))
+                (if (email/send-mail? email (:title application) (invite-body user application-id host))
                       (info "email was sent successfully")
-                      (error "email could not be delivered."))
-                    (catch Exception e (info e (.getMessage e))))
-                  (info "we are not sending emails to @example.com domain.")))
+                  (error "email could not be delivered.")))
               nil)))))))
 
 (defcommand "approve-invite"
@@ -120,15 +115,15 @@
 
 (env/in-dev
   (defcommand "create-apikey"
-    {:parameters [:username :password]}
-    [command]
-    (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
-      (let [apikey (security/create-apikey)]
-        (mongo/update
-          :users
-          {:username (:username user)}
-          {$set {"private.apikey" apikey}})
-        (ok :apikey apikey))
+  {:parameters [:username :password]}
+  [command]
+  (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
+    (let [apikey (security/create-apikey)]
+      (mongo/update
+        :users
+        {:username (:username user)}
+        {$set {"private.apikey" apikey}})
+      (ok :apikey apikey))
       (fail :error.unauthorized))))
 
 (defcommand "register-user"
@@ -141,10 +136,7 @@
       (do
         (future
           (let [pimped_user (merge user {:_id (:id user)})] ;; FIXME
-            (sadesecurity/send-activation-mail-for {:user pimped_user
-                                                    :from "lupapiste@solita.fi"
-                                                    :service-name "Lupapiste"
-                                                    :host-url (sadeclient/uri)})))
+            (sadesecurity/send-activation-mail-for pimped_user)))
         (ok :id (:_id user)))
       (fail :error.create_user))))
 

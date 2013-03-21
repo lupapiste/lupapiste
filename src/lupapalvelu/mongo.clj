@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [count])
   (:use monger.operators
         clojure.tools.logging)
-  (:require [lupapalvelu.env :as env]
+  (:require [sade.env :as env]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]

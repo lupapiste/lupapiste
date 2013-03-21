@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.util :as util])
+            [sade.util :as util])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
 (defn non-private [map] (dissoc map :private))

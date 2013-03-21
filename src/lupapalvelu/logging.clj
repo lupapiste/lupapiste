@@ -1,7 +1,7 @@
 (ns lupapalvelu.logging
   (:use [clojure.tools.logging]
         [clj-logging-config.log4j])
-  (:require [lupapalvelu.env :as env]
+  (:require [sade.env :as env]
             [clojure.java.io :as io])
   (:import [org.apache.log4j FileAppender EnhancedPatternLayout]))
 
