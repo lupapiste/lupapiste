@@ -16,7 +16,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
-            [lupapalvelu.util :as util]
+            [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 

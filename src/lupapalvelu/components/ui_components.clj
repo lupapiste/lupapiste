@@ -3,7 +3,7 @@
   (:require [lupapalvelu.components.core :as c]
             [lupapalvelu.env :as env]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.util :as util]
+            [sade.util :as util]
             [cheshire.core :as json]))
 
 (def debugjs {:depends [:init :jquery]
