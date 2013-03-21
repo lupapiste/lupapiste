@@ -8,14 +8,22 @@
 
     args = args || {};
     
-    var defaultTemplate = args.template || $(".default-tree-template");
-    var titleTemplate = args.title || $(".tree-title", defaultTemplate);
-    var contentTemplate = args.content || $(".tree-content", defaultTemplate);
-    var navTemplate = args.nav || $(".tree-nav", defaultTemplate);
+    var defaultTemplate = $(".default-tree-template");
+    var template = args.template || defaultTemplate;
     
-    self.linkTemplate = args.link || $(".tree-link", defaultTemplate);
-    self.lastTemplate = args.last || $(".tree-last", defaultTemplate);
-
+    var findTemplate = function(name) {
+      if (args[name]) return args[name];
+      var e = $(".tree-" + name, template);
+      return (e && e.length) ? e : $(".tree-" + name, defaultTemplate);
+    };
+    
+    var titleTemplate = findTemplate("title");
+    var contentTemplate = findTemplate("content");
+    var navTemplate = findTemplate("nav");
+    
+    self.linkTemplate = findTemplate("link");
+    self.lastTemplate = findTemplate("last");
+    
     self.onSelect = args.onSelect || nop;
     self.baseModel = args.baseModel || {};
     self.data = [];
