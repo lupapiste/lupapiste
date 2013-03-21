@@ -101,7 +101,6 @@
              :js ["tree.js"]
              :html ["tree.html"]
              :css ["tree.css"]}
-             :js ["tree.js"]}
 
    :admin   {:depends [:common :map :buildinfo :mypage :debug]
              :js ["admin.js"]
