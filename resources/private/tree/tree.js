@@ -96,11 +96,13 @@
       self.stateNop();
       self.data = data;
       self.model.stack.removeAll();
-      self.content
-        .empty()
-        .css("margin-left", "" + self.width + "px")
-        .append(self.makeLinks(data))
-        .animate(self.moveLeft, self.speed, self.stateGo);
+      self.content.empty();
+      if (self.data && self.data.length) {
+        self.content
+          .css("margin-left", "" + self.width + "px")
+          .append(self.makeLinks(data))
+          .animate({"margin-left": "0px"}, self.speed, self.stateGo);
+      }
       return self;
     };
     
