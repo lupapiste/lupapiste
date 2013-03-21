@@ -25,7 +25,8 @@
    :underscore   {:js ["underscore-1.4.4-min.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
 
-   :init         {:js [conf "hub.js" "log.js"]}
+   :init         {:js [conf "hub.js" "log.js"]
+                  :depends [:underscore]}
 
    :map          {:depends [:init :jquery]
                   :js ["openlayers.2.12.js" "gis.js"]}
@@ -40,7 +41,7 @@
                   :css  ["selectm.css"]}
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                  :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
+                  :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "comment.js" "authorization.js" "datepicker.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
