@@ -112,6 +112,7 @@ var ajax = (function() {
     };
 
     self.pending = function(listener, timeout) {
+      if (!listener) return self;
       if (!_.isFunction(listener)) throw "Argument must be a function: " + listener;
       self.pendingListener = listener;
       self.pendingTimeout = timeout || 100;
