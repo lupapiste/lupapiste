@@ -6,6 +6,7 @@
   (:require [clojure.string :as s]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
+            [lupapalvelu.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
@@ -117,17 +118,18 @@
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
-(defcommand "create-apikey"
-  {:parameters [:username :password]}
-  [command]
-  (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
-    (let [apikey (security/create-apikey)]
-      (mongo/update
-        :users
-        {:username (:username user)}
-        {$set {"private.apikey" apikey}})
-      (ok :apikey apikey))
-    (fail :error.unauthorized)))
+(env/in-dev
+  (defcommand "create-apikey"
+    {:parameters [:username :password]}
+    [command]
+    (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
+      (let [apikey (security/create-apikey)]
+        (mongo/update
+          :users
+          {:username (:username user)}
+          {$set {"private.apikey" apikey}})
+        (ok :apikey apikey))
+      (fail :error.unauthorized))))
 
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
