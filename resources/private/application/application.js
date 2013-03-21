@@ -223,7 +223,8 @@
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
           repository.load(applicationId);
-        })
+        })//FIXME parempi/tyylikaampi virheilmoitus
+        .error(function(resp) {alert(resp.text);})
         .call();
       return false;
     },
