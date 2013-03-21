@@ -340,72 +340,69 @@
   function showApplication(applicationDetails) {
     isInitializing = true;
 
-    var jqxhr = authorizationModel.refresh(applicationDetails.application);
+    authorizationModel.refresh(applicationDetails.application, function() {
+      // new data mapping
 
-    // new data mapping
+      var app = applicationDetails.application;
+      applicationModel.data(ko.mapping.fromJS(app));
+      ko.mapping.fromJS(app, {}, application);
 
-    var app = applicationDetails.application;
-    applicationModel.data(ko.mapping.fromJS(app));
-    ko.mapping.fromJS(app, {}, application);
+      // Comments:
 
-    // Comments:
+      commentModel.setApplicationId(app.id);
+      commentModel.setComments(app.comments);
 
-    commentModel.setApplicationId(app.id);
-    commentModel.setComments(app.comments);
+      // Operations:
 
-    // Operations:
+      application.operations(getOperations(app.documents));
 
-    application.operations(getOperations(app.documents));
+      // Attachments:
 
-    // Attachments:
+      var statuses = {
+        requires_user_action: "missing",
+        requires_authority_action: "new",
+        ok: "ok"
+      };
 
-    var statuses = {
-      requires_user_action: "missing",
-      requires_authority_action: "new",
-      ok: "ok"
-    };
+      application.hasAttachment(false);
 
-    application.hasAttachment(false);
+      attachments(_.map(app.attachments || [], function(a) {
+        a.statusName = statuses[a.state] || "unknown";
+        a.latestVersion = _.last(a.versions);
+        if (a.versions && a.versions.length) { application.hasAttachment(true); }
+        return a;
+      }));
 
-    attachments(_.map(app.attachments || [], function(a) {
-      a.statusName = statuses[a.state] || "unknown";
-      a.latestVersion = _.last(a.versions);
-      if (a.versions && a.versions.length) { application.hasAttachment(true); }
-      return a;
-    }));
+      attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 
-    attachmentsByGroup(getAttachmentsByGroup(app.attachments));
+      initAuthoritiesSelectList(applicationDetails.authorities);
 
-    initAuthoritiesSelectList(applicationDetails.authorities);
+      // Update map:
+      var location = application.location();
+      var x = location.x();
+      var y = location.y();
 
-    // Update map:
-    var location = application.location();
-    var x = location.x();
-    var y = location.y();
+      if(x === 0 && y === 0) {
+        $('#application-map').css("display", "none");
+      } else {
+        $('#application-map').css("display", "inline-block");
+      }
 
-    if(x === 0 && y === 0) {
-      $('#application-map').css("display", "none");
-    } else {
-      $('#application-map').css("display", "inline-block");
-    }
+      (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
 
-    (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
+      if (application.shapes && application.shapes().length > 0) {
+        applicationMap.drawShape(application.shapes()[0]);
+        inforequestMap.drawShape(application.shapes()[0]);
+      }
 
-    if (application.shapes && application.shapes().length > 0) {
-      applicationMap.drawShape(application.shapes()[0]);
-      inforequestMap.drawShape(application.shapes()[0]);
-    }
+      docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
+      docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
-    docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
-    docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
+      // set the value behind assignee selection list
+      var assignee = resolveApplicationAssignee(app.authority);
+      var assigneeId = assignee ? assignee.id : null;
+      application.assignee(assigneeId);
 
-    // set the value behind assignee selection list
-    var assignee = resolveApplicationAssignee(app.authority);
-    var assigneeId = assignee ? assignee.id : null;
-    application.assignee(assigneeId);
-
-
-    jqxhr.done(function() {
       isInitializing = false;
       pageutil.hideAjaxWait();
     });
