@@ -108,8 +108,8 @@
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (get-in action [:data :id] "???")
-     :userId        (get-in action [:user :id] "???")}
+    {:applicationId (get-in action [:data :id] "")
+     :userId        (get-in action [:user :id] "")}
     (core/execute action)))
 
 (defjson [:post "/api/command/:name"] {name :name}
@@ -333,6 +333,9 @@
 (env/in-dev
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
+
+  (defjson "/dev/actions" []
+    (execute (enriched (core/query "actions" (from-query)))))
 
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]

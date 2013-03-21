@@ -274,8 +274,8 @@
                                          {:name "kivi"}
                                          {:name "puu"}
                                          {:name "lasi"}
-                                         {:name "muumateriaali" :type :string :size "s"}
-                                         {:name "ei tiedossa"}]}]}
+                                         {:name "ei tiedossa"}]}
+                                 {:name "muuMateriaali" :type :string :size "s"}]}
                          {:name "lammitys"
                           :type :group
                           :body [{:name "lammitystapa" :type :select

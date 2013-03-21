@@ -322,9 +322,7 @@
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [{created :created
-    user    :user
-    {:keys [id attachmentId attachmentType filename tempfile size text]} :data}]
+  [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text]} :data :as command}]
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
@@ -335,15 +333,15 @@
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (io/file tempfile))
             (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
-              (executed (assoc (command "add-comment"
-                                        {:id id
-                                         :text text,
-                                         :target {:type :attachment
-                                                  :id (:id attachment-version)
-                                                  :version (:version attachment-version)
-                                                  :filename (:filename attachment-version)
-                                                  :fileId (:fileId attachment-version)}})
-                               :user user))
+              (executed "add-comment"
+                (-> command
+                  (assoc :data {:id id
+                                :text text,
+                                :target {:type :attachment
+                                         :id (:id attachment-version)
+                                         :version (:version attachment-version)
+                                         :filename (:filename attachment-version)
+                                         :fileId (:fileId attachment-version)}})))
               (fail :error.unknown)))
           (fail :error.illegal-attachment-type))
         (fail :error.no-such-application))

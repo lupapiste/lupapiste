@@ -60,7 +60,10 @@
 (defn find-authorities-in-applications-municipality [app]
   (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
-(defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+(defquery "application"
+  {:authenticated true
+   :parameters [:id]}
+  [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
     (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
@@ -314,14 +317,6 @@
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))
-
-(defquery "get-users-in-application"
-  {:parameters [:id]
-   :roles      [:applicant :authority]}
-  [query]
-  (with-application query
-    (fn [{:keys [auth]}]
-      (ok :users auth))))
 
 ;;
 ;; krysp enrichment

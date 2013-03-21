@@ -7,6 +7,7 @@
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
             [sade.email :as email]
+            [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
@@ -70,7 +71,7 @@
                 {$push {:auth auth}})
               (future
                 (if (email/send-mail? email (:title application) (invite-body user application-id host))
-                  (info "email was sent successfully")
+                      (info "email was sent successfully")
                   (error "email could not be delivered.")))
               nil)))))))
 
@@ -112,7 +113,8 @@
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
-(defcommand "create-apikey"
+(env/in-dev
+  (defcommand "create-apikey"
   {:parameters [:username :password]}
   [command]
   (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
@@ -122,7 +124,7 @@
         {:username (:username user)}
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey))
-    (fail :error.unauthorized)))
+      (fail :error.unauthorized))))
 
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
