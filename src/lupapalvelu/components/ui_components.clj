@@ -1,9 +1,9 @@
 (ns lupapalvelu.components.ui-components
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.components.core :as c]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.util :as util]
+            [sade.util :as util]
             [cheshire.core :as json]))
 
 (def debugjs {:depends [:init :jquery]
@@ -65,8 +65,7 @@
 
    :applications {:depends [:common :repository :invites]
                   :html ["applications.html"]
-                  :js ["applications.js"]
-                  :css ["applications.css"]}
+                  :js ["applications.js"]}
 
    :attachment   {:depends [:common :repository]
                   :js ["attachment.js" "attachmentTypeSelect.js"]
@@ -102,6 +101,7 @@
              :js ["tree.js"]
              :html ["tree.html"]
              :css ["tree.css"]}
+             :js ["tree.js"]}
 
    :admin   {:depends [:common :map :buildinfo :mypage :debug]
              :js ["admin.js"]

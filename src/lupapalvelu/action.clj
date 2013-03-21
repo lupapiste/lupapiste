@@ -1,16 +1,17 @@
 (ns lupapalvelu.action
   (:use [monger.operators]
         [clojure.tools.logging]
-        [lupapalvelu.strings :only [suffix]]
+        [sade.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [clojure.string :as s]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
+            [sade.email :as email]
+            [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
@@ -29,7 +30,7 @@
   (format
     (str
       "Tervehdys,\n\n%s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/fi/applicant?hashbang=!/application/%s#!/application/%s\n\n"
+      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/app/fi/applicant?hashbang=!/application/%s#!/application/%s\n\n"
       "Yst\u00E4v\u00E4llisin terveisin,\n\n"
       "Lupapiste.fi")
     (:firstName user)
@@ -69,14 +70,9 @@
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
               (future
-                (if (not= (suffix email "@") "example.com")
-                  (try
-                    (info "sending email to" email)
-                    (if (email/send-email email (:title application) (invite-body user application-id host))
+                (if (email/send-mail? email (:title application) (invite-body user application-id host))
                       (info "email was sent successfully")
-                      (error "email could not be delivered."))
-                    (catch Exception e (info e (.getMessage e))))
-                  (info "we are not sending emails to @example.com domain.")))
+                  (error "email could not be delivered.")))
               nil)))))))
 
 (defcommand "approve-invite"
@@ -117,7 +113,8 @@
         {$pull {:auth {$and [{:username email}
                              {:type {$ne :owner}}]}}}))))
 
-(defcommand "create-apikey"
+(env/in-dev
+  (defcommand "create-apikey"
   {:parameters [:username :password]}
   [command]
   (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
@@ -127,7 +124,7 @@
         {:username (:username user)}
         {$set {"private.apikey" apikey}})
       (ok :apikey apikey))
-    (fail :error.unauthorized)))
+      (fail :error.unauthorized))))
 
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
@@ -139,10 +136,7 @@
       (do
         (future
           (let [pimped_user (merge user {:_id (:id user)})] ;; FIXME
-            (sadesecurity/send-activation-mail-for {:user pimped_user
-                                                    :from "lupapiste@solita.fi"
-                                                    :service-name "Lupapiste"
-                                                    :host-url (sadeclient/uri)})))
+            (sadesecurity/send-activation-mail-for pimped_user)))
         (ok :id (:_id user)))
       (fail :error.create_user))))
 

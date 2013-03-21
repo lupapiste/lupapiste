@@ -3,7 +3,10 @@
          [clojure.data.xml]
          [clojure.java.io]
          [lupapalvelu.document.krysp :only [application-to-canonical]]
-         [lupapalvelu.xml.emit :only [element-to-xml]]))
+         [lupapalvelu.xml.emit :only [element-to-xml]]
+         [lupapalvelu.xml.krysp.validator :only [validate]])
+  (:require [sade.env :as env]
+            [me.raynes.fs :as fs]))
 
 ;RakVal
 
@@ -120,9 +123,18 @@
                                                {:tag :rakennelmatieto}]}]}]}]}]})
 
 (defn get-application-as-krysp [application]
-  (let [
-        canonical (application-to-canonical application)
-        xml (element-to-xml canonical rakennuslupa_to_krysp )]
-    ;(with-open [out-file (writer "/Users/terotu/example-krysp.xml" )]
-    ; (emit xml out-file))
-    ))
+  (let [canonical  (application-to-canonical application)
+        xml        (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s      (indent-str xml)
+        output-dir (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus")
+        _          (fs/mkdirs output-dir)
+        file-name  (str output-dir "/Lupapiste" (:id application))
+        tempfile   (file (str file-name ".tmp"))
+        outfile    (file (str file-name ".xml"))]
+    (validate xml-s)
+
+    (with-open [out-file (writer tempfile)]
+      (emit xml out-file))
+    ;todoo liitetiedostot
+    (when (fs/exists? outfile) (fs/delete outfile))
+    (fs/rename tempfile outfile)))

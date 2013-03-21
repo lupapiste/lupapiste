@@ -44,6 +44,7 @@
       var handle = setTimeout(_.partial(self.pending, true), 100);
       ajax
         .command("add-operation", {id: self.application.id, operation: op.op})
+        .pending(self.pending)
         .success(function() {
           clearTimeout(handle);
           self.pending(false);

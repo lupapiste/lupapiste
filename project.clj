@@ -22,9 +22,11 @@
                  [com.draines/postal "1.9.2"]
                  [org.clojure/data.xml "0.0.7"]
                  [swiss-arrows "0.1.0"]
+                 [me.raynes/fs "1.4.0"]
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.6"]]
+  :plugins [[org.timmc/lein-otf "2.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.5-alpha9" :exclusions [org.clojure/clojure]]
                                   [ring-mock "0.1.1"]]
                    :plugins [[lein-midje "2.0.1"]
@@ -41,7 +43,8 @@
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                             :checksum :ignore}]]
-  :aliases {"verify" ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
-  :main lupapalvelu.server
+  :aliases {"integration" ["with-profile" "dev,itest" "midje"]
+            "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
+  :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

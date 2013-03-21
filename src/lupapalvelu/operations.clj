@@ -44,114 +44,124 @@
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
 
-(def ^:private rakennuksen_liitteet [:hakija [:valtakirja]
-                                     :rakennuspaikka [:ote_alueen_peruskartasta]
-                                     :paapiirustus [:asemapiirros
-                                                    :pohjapiirros
-                                                    :julkisivupiirros
-                                                    :leikkauspiirros]
-                                     :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset]])
+(def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
+                                                          :pohjapiirros
+                                                          :julkisivupiirros
+                                                          :leikkauspiirros]
+                                           :rakennuspaikka [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
+
+(def ^:private rakennuksen_muutos_liitteet [:paapiirustus [:pohjapiirros
+                                                          :julkisivupiirros]])
+
+(def ^:private rakennuksen_laajennuksen_liitteet [:paapiirustus [:asemapiirros
+                                                          :pohjapiirros
+                                                          :julkisivupiirros
+                                                          :leikkauspiirros]])
+
+(def ^:private kaupunkikuva_toimenpide_liitteet [:paapiirustus [:asemapiirros
+                                                                :julkisivupiirros]])
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
                                  :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments uuden_rakennuksen_liitteet}
    :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
                                  :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments uuden_rakennuksen_liitteet}
    :varasto-tms                 {:schema "uusiRakennus"
                                  :schema-data [[["kaytto" "kayttotarkoitus"] schemas/talousrakennus]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments uuden_rakennuksen_liitteet}
    :julkinen-rakennus           {:schema "uusiRakennus"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments uuden_rakennuksen_liitteet}
    :muu-uusi-rakentaminen       {:schema "uusiRakennus"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments uuden_rakennuksen_liitteet}
    :laajentaminen               {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/perustusten-korjaus]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :kayttotark-muutos           {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_muutos_liitteet}
    :julkisivu-muutos            {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :jakaminen-tai-yhdistaminen  {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :takka-tai-hormi             {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :parveke-tai-terassi         {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :muu-laajentaminen           {:schema "rakennuksen-muuttaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments rakennuksen_laajennuksen_liitteet}
    :auto-katos                  {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments kaupunkikuva_toimenpide_liitteet}
    :masto-tms                   {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments kaupunkikuva_toimenpide_liitteet}
    :mainoslaite                 {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments kaupunkikuva_toimenpide_liitteet}
    :aita                        {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments kaupunkikuva_toimenpide_liitteet}
    :maalampo                    {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments kaupunkikuva_toimenpide_liitteet}
    :jatevesi                    {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments kaupunkikuva_toimenpide_liitteet}
    :muu-rakentaminen            {:schema "kaupunkikuvatoimenpide"
                                  :required common-schemas
-                                 :attachments rakennuksen_liitteet}
+                                 :attachments kaupunkikuva_toimenpide_liitteet}
    :purkaminen                  {:schema "purku"
                                  :required common-schemas
-                                 :attachments []}
+                                 :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+                                                      :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta]]}
    :kaivuu                      {:schema "maisematyo"
                                  :required common-schemas
-                                 :attachments []}
+                                 :attachments [:paapiirustus [:asemapiirros]]}
    :puun-kaataminen             {:schema "maisematyo"
                                  :required common-schemas
-                                 :attachments []}
+                                 :attachments [:paapiirustus [:asemapiirros]]}
    :muu-maisema-toimenpide      {:schema "maisematyo"
                                  :required  common-schemas
-                                 :attachments []}
+                                 :attachments [:paapiirustus [:asemapiirros]]}
    :tontin-ajoliittyman-muutos  {:schema "maisematyo"
                                  :required  common-schemas
-                                 :attachments []}
+                                 :attachments [:paapiirustus [:asemapiirros]]}
    :paikoutysjarjestus-muutos   {:schema "maisematyo"
                                  :required  common-schemas
-                                 :attachments []}
+                                 :attachments [:paapiirustus [:asemapiirros]]}
    :kortteli-yht-alue-muutos    {:schema "maisematyo"
                                  :required  common-schemas
-                                 :attachments []}
+                                 :attachments [:paapiirustus [:asemapiirros]]}
    :muu-tontti-tai-kort-muutos {:schema "maisematyo"
                                  :required  common-schemas
-                                 :attachments []}})
+                                 :attachments [:paapiirustus [:asemapiirros]]}})
 
 
 ; Sanity checks:

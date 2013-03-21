@@ -6,7 +6,7 @@
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
@@ -16,7 +16,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
-            [lupapalvelu.util :as util]
+            [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
@@ -60,7 +60,10 @@
 (defn find-authorities-in-applications-municipality [app]
   (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
-(defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+(defquery "application"
+  {:authenticated true
+   :parameters [:id]}
+  [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
     (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
@@ -144,11 +147,14 @@
             application-id (:id application)]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (rl-mapping/get-application-as-krysp application)
-        (mongo/update
-          :applications {:_id (:id application) :state new-state}
-          {$set {:state :sent}})
-        (notifications/send-notifications-on-application-state-change application-id host)))))
+        (try (rl-mapping/get-application-as-krysp application)
+          (mongo/update
+            :applications {:_id (:id application) :state new-state}
+            {$set {:state :sent}})
+          (notifications/send-notifications-on-application-state-change application-id host)
+          (catch org.xml.sax.SAXParseException e
+            (.printStackTrace e)
+            (fail (.getMessage e))))))))
 
 (defcommand "submit-application"
   {:parameters [:id]
@@ -312,14 +318,6 @@
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))
 
-(defquery "get-users-in-application"
-  {:parameters [:id]
-   :roles      [:applicant :authority]}
-  [query]
-  (with-application query
-    (fn [{:keys [auth]}]
-      (ok :users auth))))
-
 ;;
 ;; krysp enrichment
 ;;
@@ -370,6 +368,8 @@
                   :state
                   :authority])
 
+(def order-by (assoc col-sources 0 :infoRequest, 2 nil, 3 nil))
+
 (def col-map (zipmap col-sources (map str (range))))
 
 (defn add-field [application data [app-field data-field]]
@@ -392,6 +392,11 @@
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
 
+(defn make-sort [params]
+  (let [col (get order-by (:iSortCol_0 params))
+        dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
+    (if col {col dir} {})))
+
 (defn applications-for-user [user params]
   (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
@@ -401,6 +406,7 @@
         limit       (params :iDisplayLength)
         apps        (query/with-collection "applications"
                       (query/find query)
+                      (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)

@@ -281,6 +281,8 @@ navigation: Omat hankkeet
 
 application.submit.areyousure.title: Jätä hakemus käsiteltäväksi
 application.submit.areyousure.message: Oletko varma että haluat jättää hakemuksen käsiteltäväksi? Hakemuksen käsittely saattaa maksaa.
+application.next-tab: Jatka seuraavaan osioon
+application.previous-tab: Palaa edelliseen osioon
 
 attachment.zip.filename: liitteet.zip
 attachment.zip.pdf.filename.current: hakemus.pdf
@@ -292,3 +294,17 @@ application.requestForComplement: Pyydä täydennyksiä
 
 integration.getAddressNotEorking: Maanmittauslaitoksen palvelu ei toimi taaskaan! Anna tiedot käsin.
 
+rakennuksen-muuttaminen.lammitys.muu-lammonlahde: Muu lämmönlähde
+uusiRakennus.rakenne.kantavaRakennusaine.teräs: Teräs
+uusiRakennus.rakenne.muuRakennusaine: Muu rakennusaine
+uusiRakennus.rakenne.muuMateriaali: Muu Materiaali
+uusiRakennus.lammitys.lammitystapa.suorasahkö: Suorasähkö
+rakennuksen-muuttaminen.rakenne.kantavaRakennusaine.teräs:
+rakennuksen-muuttaminen.rakenne.muuRakennusaine: Muu rakennusaine
+rakennuksen-muuttaminen.rakenne.muuMateriaali: Muu Materiaali
+rakennuksen-muuttaminen.lammitys.lammitystapa.suorasahkö: Suorasähkö
+purku.rakenne.kantavaRakennusaine.teräs: Teräs
+purku.rakenne.muuRakennusaine: Muu rakennusaine
+purku.rakenne.muuMateriaali: Muu Materiaali
+purku.lammitys.lammitystapa.suorasahkö: Suorasähkö
+purku.lammitys.muu-lammonlahde: Muu  Lämmönlähde

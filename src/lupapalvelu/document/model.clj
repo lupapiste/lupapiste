@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.model
   (:use [clojure.tools.logging]
-        [lupapalvelu.strings]
+        [sade.strings]
         [lupapalvelu.document.schemas :only [schemas]]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
@@ -10,8 +10,8 @@
 ;;
 ;; Validation:
 ;;
-
-(def default-max-len 64)
+;; if you changes this value, change it in docgen.js, too
+(def default-max-len 255)
 
 (defmulti validate (fn [elem _] (keyword (:type elem))))
 

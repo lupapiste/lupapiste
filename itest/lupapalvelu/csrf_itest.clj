@@ -11,7 +11,7 @@
   (invalid-csrf-token (query nil :allowed-actions)) => true)
 
 (fact "Calling a non-protected resource returns a csrf token"
-  (let [resp (c/get (str (server-address) "/"))
+  (let [resp (c/get (str (server-address) "/app/fi/welcome"))
         cookie (get-in resp [:cookies "lupapiste-token"])]
     (:status resp) => 200
     cookie => truthy
