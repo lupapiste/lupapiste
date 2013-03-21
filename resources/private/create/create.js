@@ -275,20 +275,19 @@
         onSelect:        model.searchNow
       });
 
-    function operations2tree(e) {
-      var name = e[0],
-          value = e[1],
-          key = {text: name},
-          target = _.isArray(value) ? _.map(value, operations2tree) : value;
-      return [key, target];
-    }
-
     var tree = $("#create .operation-tree").selectTree({
       title: $("#create-templates .tree-title"),
       last:  $("#create-templates .tree-last"),
+      nav:   $("#create-templates .tree-nav"),
       onSelect: function(v) { model.operation(v ? v.op : null); }
     });
     
+    function operations2tree(e) {
+      var name = e[0],
+          value = e[1];
+      return [{text: name}, _.isArray(value) ? _.map(value, operations2tree) : value];
+    }
+
     model.operations.subscribe(function(v) {
       tree.reset(_.map(v, operations2tree));
     });

@@ -123,13 +123,22 @@
   
   <section class="page" id="create-templates">
   
-    <div class="tree-title">
-      <span style="margin-left: 10px;" data-bind="visible: stack().length == 0, ltext: 'create.choose-op'">
+    <div class="tree-title" style="padding-left: 10px;">
+      <span data-bind="visible: stack().length == 0, ltext: 'create.choose-op'">
       </span>
-      <span style="margin-left: 10px;" data-bind="visible: stack().length > 0, foreach: stack">
+      <span data-bind="visible: stack().length > 0, foreach: stack">
         <span data-bind="visible: $index"> / </span>
         <span data-bind="text: text"></span>
       </span>
+    </div>
+    
+    <div class="tree-nav">
+      <button class="tree-back" data-bind="click: goBack, enable: stack().length > 0">
+        <span class="icon inline-left drill-left-black"></span>
+      </button>
+      <button class="tree-start" data-bind="click: goStart, enable: stack().length > 1">
+        <span class="icon inline-left drill-left-all-black"></span>
+      </button>
     </div>
     
     <div class="tree-link">
