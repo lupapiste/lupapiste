@@ -38,6 +38,8 @@ operations.tree.Muu-tontti-tai-korttelialueen-jarjestelymuutos: Muu tontti- tai 
 operations.selected: Valittu toimenpide:
 operations.add: Lisää toimenpide
 
-operations.desc.asuinrakennus: Tottahan nyt asuinrakennuksen rakentaminen vaati luvan.
+operations.asuinrakennus.desc: Tottahan nyt asuinrakennuksen rakentaminen vaati luvan.
 
 create.choose-op: Valitse toimenpide:
+integration.getAddressNotWorking: Kolmannenosapuolen osoitehakupalvelu ei ole käytettävissä, ole hyvä ja syötä osoite ja kunta:
+ 
