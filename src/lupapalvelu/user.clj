@@ -5,7 +5,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
-            [lupapalvelu.util :as util]
+            [sade.util :as util]
             [noir.session :as session]))
 
 (defn applicationpage-for [role]

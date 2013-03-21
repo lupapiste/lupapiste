@@ -5,7 +5,7 @@
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
@@ -19,8 +19,8 @@
             [lupapalvelu.user]
             [lupapalvelu.operations]
             [lupapalvelu.proxy-services]
-            [sade.security-headers :as headers])
-  (:gen-class))
+            [lupapalvelu.i18n]
+            [sade.security-headers :as headers]))
 
 (def custom-content-type {".eot"   "application/vnd.ms-fontobject"
                           ".ttf"   "font/ttf"
@@ -42,7 +42,7 @@
         resp))))
 
 (defn -main [& _]
-  (info "Server starting")
+  (infof "Server starting in %s mode" env/mode)
   (infof "Running on %s version %s (%s) [%s], trustStore is %s"
     (System/getProperty "java.vm.name")
     (System/getProperty "java.runtime.version")
@@ -68,7 +68,7 @@
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :ns 'lupapalvelu.web
-                            :jetty-options (if env/dev-mode?
+                            :jetty-options (if (env/dev-mode?)
                                              {:ssl? true
                                               :ssl-port 8443
                                               :keystore "./keystore"

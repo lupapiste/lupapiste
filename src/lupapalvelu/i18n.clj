@@ -3,7 +3,7 @@
             [clojure.string :as s]
             [ontodev.excel :as xls]
             [cheshire.core :as json]
-            [lupapalvelu.env :as env]))
+            [sade.env :as env]))
 
 (defn- add-term [row result lang]
   (let [k (get row "key")

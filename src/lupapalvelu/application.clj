@@ -6,7 +6,7 @@
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]
@@ -16,7 +16,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
-            [lupapalvelu.util :as util]
+            [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
@@ -60,7 +60,10 @@
 (defn find-authorities-in-applications-municipality [app]
   (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
-(defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+(defquery "application"
+  {:authenticated true
+   :parameters [:id]}
+  [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
     (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
@@ -148,10 +151,10 @@
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
-          (notifications/send-notifications-on-application-state-change application-id host))
-        (catch org.xml.sax.SAXParseException e
-          (.printStackTrace e)
-          (fail (.getMessage e)))))))
+          (notifications/send-notifications-on-application-state-change application-id host)
+          (catch org.xml.sax.SAXParseException e
+            (.printStackTrace e)
+            (fail (.getMessage e))))))))
 
 (defcommand "submit-application"
   {:parameters [:id]
@@ -314,14 +317,6 @@
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))
-
-(defquery "get-users-in-application"
-  {:parameters [:id]
-   :roles      [:applicant :authority]}
-  [query]
-  (with-application query
-    (fn [{:keys [auth]}]
-      (ok :users auth))))
 
 ;;
 ;; krysp enrichment

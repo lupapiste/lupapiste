@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.model
   (:use [clojure.tools.logging]
-        [lupapalvelu.strings]
+        [sade.strings]
         [lupapalvelu.document.schemas :only [schemas]]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]

@@ -11,7 +11,7 @@
             [noir.session :as session]
             [noir.server :as server]
             [noir.cookies :as cookies]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
@@ -108,8 +108,8 @@
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (get-in action [:data :id] "???")
-     :userId        (get-in action [:user :id] "???")}
+    {:applicationId (get-in action [:data :id] "")
+     :userId        (get-in action [:user :id] "")}
     (core/execute action)))
 
 (defjson [:post "/api/command/:name"] {name :name}
@@ -215,7 +215,8 @@
 (defjson "/system/ping" [] {:ok true})
 (defjson "/system/status" [] (status/status))
 
-(defpage "/security/activate/:activation-key" {key :activation-key}
+(def activation-route (str (-> env/config :activation :path) ":activation-key"))
+(defpage activation-route {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
@@ -268,7 +269,7 @@
         result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.0.html"
                                            {:applicationId applicationId
                                             :attachmentId attachmentId
                                             :attachmentType (or attachmentType "")
@@ -332,6 +333,9 @@
 (env/in-dev
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
+
+  (defjson "/dev/actions" []
+    (execute (enriched (core/query "actions" (from-query)))))
 
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]

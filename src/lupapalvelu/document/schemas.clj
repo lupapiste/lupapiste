@@ -274,8 +274,8 @@
                                          {:name "kivi"}
                                          {:name "puu"}
                                          {:name "lasi"}
-                                         {:name "muumateriaali" :type :string :size "s"}
-                                         {:name "ei tiedossa"}]}]}
+                                         {:name "ei tiedossa"}]}
+                                 {:name "muuMateriaali" :type :string :size "s"}]}
                          {:name "lammitys"
                           :type :group
                           :body [{:name "lammitystapa" :type :select
@@ -474,8 +474,4 @@
 
        {:info {:name "lisatiedot"
                :order 100}
-        :body [{:name "toimitustapa" :type :select
-                :body [{:name "s\u00e4hk\u00f6isesti"}
-                       {:name "noudetaan"}
-                       {:name "postitse"}]}
-               {:name "suoramarkkinointikielto" :type :checkbox}]}]))
+        :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))

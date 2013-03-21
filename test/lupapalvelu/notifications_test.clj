@@ -1,6 +1,5 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.email :as email])
+  (:require [lupapalvelu.mongo :as mongo])
   (:use lupapalvelu.notifications
         midje.sweet))
 

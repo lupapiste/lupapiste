@@ -3,7 +3,7 @@
         [lupapalvelu.components.ui-components :only [ui-components]])
   (:require [clojure.java.io :as io]
             [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
