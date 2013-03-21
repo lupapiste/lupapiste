@@ -250,8 +250,10 @@ var docgen = (function() {
 
       select.name = myPath;
       select.className = "form-input combobox really-long";
-      select.onchange = function(event) {
-        var target = getEvent(event).target;
+      select.onchange = function(e) {
+        var event = getEvent(e);
+        var target = event.target;
+        
         var buildingId = target.value;
         ajax
           .command("merge-details-from-krysp", {id: self.appId, buildingId: buildingId})
@@ -312,8 +314,8 @@ var docgen = (function() {
 
       select.name = myPath;
       select.className = "form-input combobox long";
-      select.onchange = function() {
-        var event = getEvent(event);
+      select.onchange = function(e) {
+        var event = getEvent(e);
         var target = event.target;
         var userId = target.value;
         ajax
@@ -490,8 +492,9 @@ var docgen = (function() {
     }
 
     function makeSaverDelegate(save, eventData) {
-      return function (event, callback) {
-        var target = getEvent(event).target;
+      return function (e, callback) {
+        var event = getEvent(e);
+        var target = event.target;
         var path = target.name;
         var loader = loaderImg();
         var label = document.getElementById(pathStrToLabelID(path));
