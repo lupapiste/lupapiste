@@ -251,7 +251,7 @@
 
   $(function() {
 
-    ko.applyBindings(model, $("#create")[0]);
+    $("#create").applyBindings(model);
 
     $("#create-search")
       .keypress(function(e) {
