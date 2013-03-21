@@ -115,6 +115,7 @@ operations.tree.Korttelin yhteisiin alueisiin liittyva muutos: Korttelin yhteisi
 operations.tree.Muu-tontti-tai-korttelialueen-jarjestelymuutos: Muu tontti- tai korttelialueen järjestelymuutos
 
 operations.selected: Valittu toimenpide:
+operations.add: Lisää toimenpide
 
 # Legacy:
 operations.tree.default-description: Hankkeesi vaatii <b>todennäköisesti</b> luvan.<br/><br/>Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
