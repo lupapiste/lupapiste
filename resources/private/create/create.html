@@ -140,7 +140,7 @@
     <div class="tree-last">
       
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
-      <div data-bind="html: loc('operations.desc', op)"></div>
+      <div data-bind="html: loc('operations', op, 'desc')"></div>
 
       <div class="create-buttons">
         <button data-bind="click: goPhase3"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
