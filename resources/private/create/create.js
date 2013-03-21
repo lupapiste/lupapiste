@@ -272,7 +272,7 @@
     
     function operations2tree(e) {
       var key = e[0], value = e[1];
-      return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : value];
+      return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : {op: value}];
     }
 
     model.operations.subscribe(function(v) {
@@ -280,6 +280,8 @@
     });
     
     hub.subscribe({type: "keyup", keyCode: 37}, tree.back);
+    hub.subscribe({type: "keyup", keyCode: 33}, tree.start);
+    hub.subscribe({type: "keyup", keyCode: 36}, tree.start);
     
   });
 
