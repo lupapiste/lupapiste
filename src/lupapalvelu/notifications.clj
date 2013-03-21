@@ -1,4 +1,4 @@
-(ns lupapalvelu.notifications  
+(ns lupapalvelu.notifications
   (:use [monger.operators]
         [clojure.tools.logging]
         [sade.strings :only [suffix]]
@@ -7,16 +7,16 @@
             [net.cgrand.enlive-html :as enlive]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
+            [sade.email :as email]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
-            [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.components.core :as c]))
 
-(def mail-agent (agent nil)) 
+(def mail-agent (agent nil))
 
 (defn get-styles []
   (slurp (io/resource "email-templates/styles.css")))
@@ -34,7 +34,7 @@
 (defn send-mail-to-recipients [recipients title msg]
   (doseq [recipient recipients]
     (send-off mail-agent (fn [_]
-                           (if (email/send-email recipient title msg)
+                           (if (email/send-mail recipient title msg)
                              (info "email was sent successfully")
                              (error "email could not be delivered."))))))
 
@@ -62,7 +62,7 @@
   (if (= :authority (keyword (:role user-commenting)))
     (let [recipients (get-email-recipients-for-new-comment application)
           msg (get-message-for-new-comment application host)]
-      (send-mail-to-recipients recipients 
+      (send-mail-to-recipients recipients
                                (get-email-title application "new-comment-email-title")
                                msg))))
 
@@ -70,7 +70,7 @@
 (defn get-message-for-application-state-change [application host]
   (let [application-id (:id application)
         e (enlive/html-resource "email-templates/application-state-change.html")]
-    
+
     (apply str (enlive/emit* (-> e
                                (replace-style (get-styles))
                                (replace-application-link "#application-link-" application "fi" "" host)
@@ -96,7 +96,7 @@
                                (replace-style (get-styles))
                                (replace-application-link "#verdict-link-" application "fi" "/verdict" host)
                                (replace-application-link "#verdict-link-" application "sv" "/verdict" host))))))
-  
+
 (defn send-notifications-on-verdict [application-id host]
   (let [application (mongo/by-id :applications application-id)
         recipients (get-email-recipients-for-application application)

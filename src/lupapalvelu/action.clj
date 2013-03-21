@@ -6,11 +6,11 @@
   (:require [clojure.string :as s]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
+            [sade.email :as email]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.client :as client]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.email :as email]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
@@ -69,14 +69,9 @@
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
               (future
-                (if (not= (suffix email "@") "example.com")
-                  (try
-                    (info "sending email to" email)
-                    (if (email/send-email email (:title application) (invite-body user application-id host))
-                      (info "email was sent successfully")
-                      (error "email could not be delivered."))
-                    (catch Exception e (info e (.getMessage e))))
-                  (info "we are not sending emails to @example.com domain.")))
+                (if (email/send-mail? email (:title application) (invite-body user application-id host))
+                  (info "email was sent successfully")
+                  (error "email could not be delivered.")))
               nil)))))))
 
 (defcommand "approve-invite"
