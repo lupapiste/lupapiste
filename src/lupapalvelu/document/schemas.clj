@@ -263,10 +263,10 @@
                                  {:name "kantavaRakennusaine" :type :select
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
-                                         {:name "teras"}
+                                         {:name "ter\u00e4s"}
                                          {:name "puu"}
-                                         {:name "muurakennusaine" :type :string :size "s"}
                                          {:name "ei tiedossa"}]}
+                                 {:name "muuRakennusaine" :type :string :size "s"}
                                  {:name "julkisivu" :type :select
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
@@ -274,14 +274,14 @@
                                          {:name "kivi"}
                                          {:name "puu"}
                                          {:name "lasi"}
-                                         {:name "muumateriaali" :type :string :size "s"}
-                                         {:name "ei tiedossa"}]}]}
+                                         {:name "ei tiedossa"}]}
+                                 {:name "muuMateriaali" :type :string :size "s"}]}
                          {:name "lammitys"
                           :type :group
                           :body [{:name "lammitystapa" :type :select
                                   :body [{:name "vesikeskus"}
                                          {:name "ilmakeskus"}
-                                         {:name "suorasahko"}
+                                         {:name "suorasahk\u00f6"}
                                          {:name "uuni"}
                                          {:name "eiLammitysta"}
                                          {:name "ei tiedossa"}]}
@@ -349,8 +349,8 @@
                           :body huoneisto}])
 
 
-(def rakennelma (body {:name "kuvaus" :type :text}))
-(def maisematyo (body {:name "kuvaus" :type :text}))
+(def rakennelma (body {:name "kuvaus" :type :text :max-len 4000}))
+(def maisematyo (body {:name "kuvaus" :type :text :max-len 4000}))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group :repeating true
@@ -369,7 +369,7 @@
                                                   {:name "sosiaaliturvarahasto"}
                                                   {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
                                                   {:name "ei tiedossa"}]}
-                                                {:name "muu-omistajalaji" :type :text :size "s"}])}])
+                                                {:name "muu-omistajalaji" :type :string :size "s"}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
@@ -410,8 +410,8 @@
   (to-map-by-name
     [{:info {:name "hankkeen-kuvaus"
              :order 1}
-      :body [{:name "kuvaus" :type :text}
-             {:name "poikkeamat" :type :text}]}
+      :body [{:name "kuvaus" :type :text :max-len 4000}
+             {:name "poikkeamat" :type :text :max-len 4000}]}
 
      {:info {:name "uusiRakennus"}
       :body (body rakennuksen-omistajat rakennuksen-tiedot)}
