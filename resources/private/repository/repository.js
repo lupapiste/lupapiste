@@ -1,11 +1,11 @@
 var repository = (function() {
   "use strict";
 
-  function load(id) {
+  function load(id, pending) {
     ajax
       .query("application", {id: id})
+      .pending(pending)
       .success(function(data) {
-        debug("loaded application "+data.application.id);
         hub.send("application-loaded", {applicationDetails: data});
       })
       .error(function() { window.location.hash = "!/404"; })
@@ -20,4 +20,5 @@ var repository = (function() {
     load: load,
     loaded: loaded
   };
+  
 })();
