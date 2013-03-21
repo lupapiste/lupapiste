@@ -84,15 +84,6 @@
 
       <div class="operation-tree tree-control"></div>
       
-      <div class="create-buttons">
-        <button data-bind="click: goPhase3, visible: operation"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
-          <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>
-        </button>
-        <button data-bind="click: createApplication, visible: operation" data-test-id="create-application" class="btn btn-primary">
-          <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
-        </button>
-      </div>
-
     </section>
 
     <!-- Phase 3: -->
@@ -149,6 +140,14 @@
     <div class="tree-last">
       <div data-bind="text: loc('operations', op)"></div>
       <div data-bind="html: loc(text)"></div>
+      <div class="create-buttons">
+        <button data-bind="click: goPhase3, visible: operation"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
+          <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>
+        </button>
+        <button data-bind="click: createApplication, visible: operation" data-test-id="create-application" class="btn btn-primary">
+          <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
+        </button>
+      </div>
     </div>
     
   </section>

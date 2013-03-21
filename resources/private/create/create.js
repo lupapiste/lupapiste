@@ -44,7 +44,7 @@
     self.links = ko.observableArray();
     self.operations = ko.observable(null);
     self.requestType = ko.observable();
-
+    
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
 
     self.clear = function() {
@@ -275,24 +275,25 @@
         onSelect:        model.searchNow
       });
 
+    var templates = $("#create-templates");
     var tree = $("#create .operation-tree").selectTree({
-      title: $("#create-templates .tree-title"),
-      last:  $("#create-templates .tree-last"),
-      nav:   $("#create-templates .tree-nav"),
-      onSelect: function(v) { model.operation(v ? v.op : null); }
+      title: $(".tree-title", templates),
+      last:  $(".tree-last", templates),
+      nav:   $(".tree-nav", templates),
+      onSelect: function(v) { model.operation(v ? v.op : null); },
+      baseModel: model
     });
     
     function operations2tree(e) {
-      var name = e[0],
-          value = e[1];
-      return [{text: name}, _.isArray(value) ? _.map(value, operations2tree) : value];
+      var key = e[0], value = e[1];
+      return [{text: key}, _.isArray(value) ? _.map(value, operations2tree) : value];
     }
 
     model.operations.subscribe(function(v) {
       tree.reset(_.map(v, operations2tree));
     });
     
-    hub.subscribe({type: "keyup", keyCode: 37}, tree.goBack);
+    hub.subscribe({type: "keyup", keyCode: 37}, tree.back);
     
   });
 
