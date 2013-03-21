@@ -90,6 +90,10 @@
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
 
+(def liiteet {:tag :Liite :child [{:tag :kuvaus}
+                                  {:tag :linkkiliitteeseen}
+                                  {:tag :kuvaus}]})
+
 
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.4/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.4/rakennusvalvonta.xsd"
@@ -120,7 +124,9 @@
                                                {:tag :kaupunkikuvaToimenpide}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
-                                               {:tag :rakennelmatieto}]}]}]}]}]})
+                                               {:tag :rakennelmatieto}]}]}
+                             {:tag :liitetieto
+                              :child [liiteet]}]}]}]})
 
 (defn get-application-as-krysp [application]
   (let [canonical (application-to-canonical application)
@@ -130,9 +136,11 @@
         tempfile (file (str file-name ".tmp"))
         outfile (file (str file-name ".xml"))]
     (validate xml-s)
+    (clojure.pprint/pprint  canonical)
 
     (with-open [out-file (writer tempfile)]
       (emit xml out-file)
       )
     ;todoo liitetiedostot
+    ;
    (.renameTo tempfile outfile)))
