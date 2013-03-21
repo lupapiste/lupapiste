@@ -183,7 +183,7 @@
       submitApplicationModel.init(application.id());
       return false;
     },
-    
+
     requestForComplement: function(model) {
       var applicationId = application.id();
       ajax.command("request-for-complement", { id: applicationId})
@@ -337,7 +337,7 @@
 
   function showApplication(applicationDetails) {
     isInitializing = true;
-    
+
     authorizationModel.refresh(applicationDetails.application,function() {
 
       // new data mapping
@@ -394,8 +394,8 @@
         inforequestMap.drawShape(application.shapes()[0]);
       }
 
-      docgen.displayDocuments("#applicationDocgen", removeDocModel, application.id(), _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
-      docgen.displayDocuments("#partiesDocgen",     removeDocModel, application.id(), _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
+      docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
+      docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
@@ -490,13 +490,13 @@
         .complete(LUPAPISTE.ModalDialog.close)
         .call();
     };
-    
+
     self.init = function() {
       self.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
       self.selectm.ok(self.ok).cancel(LUPAPISTE.ModalDialog.close);
       return self;
     };
-    
+
     self.show = function() {
       var data = _.map(application.allowedAttachmentTypes(), function(g) {
         var groupId = g[0];
@@ -513,9 +513,8 @@
       LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
       return self;
     };
-    
-  };
-  
+  }();
+
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
@@ -526,7 +525,7 @@
       ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
       repository.load(currentId);
     }
-  };
+  }
 
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
@@ -552,7 +551,7 @@
 
     ko.applyBindings(bindings, $("#application")[0]);
     ko.applyBindings(bindings, $("#inforequest")[0]);
-    
+
     attachmentTemplatesModel.init();
   });
 

@@ -10,7 +10,7 @@ var docgen = (function() {
     return appendButton;
   }
 
-  LUPAPISTE.DocModel = function(schema, model, saveCallback, removeCallback, docId, appId) {
+  LUPAPISTE.DocModel = function(schema, model, saveCallback, removeCallback, docId, application) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -24,8 +24,9 @@ var docgen = (function() {
     self.saveCallback = saveCallback;
     self.removeCallback = removeCallback;
     self.docId = docId;
-    self.appId = appId;
-    self.eventData = {doc: docId, app: appId};
+    self.appId = application.id;
+    self.application = application;
+    self.eventData = {doc: docId, app: self.appId};
 
     self.sizeClasses = {"s" : "form-input short", "m" : "form-input medium"};
 
@@ -92,7 +93,7 @@ var docgen = (function() {
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
-    
+
     function setMaxLen(input, subSchema) {
       var maxLen = subSchema["max-len"] || 255; // if you change the default, change in model.clj, too
       input.setAttribute("maxlength", maxLen);
@@ -135,7 +136,7 @@ var docgen = (function() {
       input.setAttribute("rows", subSchema.rows || "10");
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
-      
+
       input.className = "form-input textarea";
       input.onchange = save;
       input.value = model[subSchema.name] || "";
@@ -253,10 +254,10 @@ var docgen = (function() {
         var target = getEvent(event).target;
         var buildingId = target.value;
         ajax
-          .command("merge-details-from-krysp", {id: appId, buildingId: buildingId})
+          .command("merge-details-from-krysp", {id: self.appId, buildingId: buildingId})
           .success(function() {
             save(event);
-            repository.load(appId);
+            repository.load(self.appId);
           })
           .call();
         return false;
@@ -270,7 +271,7 @@ var docgen = (function() {
       select.appendChild(option);
 
       ajax
-        .command("get-building-info-from-legacy", {id: appId})
+        .command("get-building-info-from-legacy", {id: self.appId})
         .success(function(data) {
           $.each(data.data, function (i, building) {
             var name = building.buildingId;
@@ -315,9 +316,9 @@ var docgen = (function() {
         var target = getEvent(event).target;
         var userId = target.value;
         ajax
-          .command("set-user-to-document", {id: appId, documentId: docId, userId: userId, path: myNs})
+          .command("set-user-to-document", {id: self.appId, documentId: docId, userId: userId, path: myNs})
           .success(function() {
-            save(event,function() { repository.load(appId); });
+            save(event,function() { repository.load(self.appId); });
           })
           .call();
         return false;
@@ -330,7 +331,7 @@ var docgen = (function() {
       select.appendChild(option);
 
       ajax
-        .query("get-users-in-application", {id: appId}) //TODO: read from local cache!
+        .query("get-users-in-application", {id: self.appId}) //TODO: read from local cache!
         .success(function(data) {
           $.each(data.users, function (i, user) {
             // LUPA-89: don't print fully empty names
@@ -470,7 +471,7 @@ var docgen = (function() {
 
             body.appendChild(elem);
           });
-      });
+        });
 
       if (selectOneOf.length) {
         // Show current selection or the first of the group
@@ -605,7 +606,7 @@ var docgen = (function() {
     return num * 10000000000 + doc.created/1000;
   }
 
-  function displayDocuments(containerSelector, removeDocModel, applicationId, documents) {
+  function displayDocuments(containerSelector, removeDocModel, application, documents) {
 
     var sortedDocs = _.sortBy(documents, getDocumentOrder);
 
@@ -613,7 +614,7 @@ var docgen = (function() {
     _.each(sortedDocs, function(doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.body, save, removeDocModel.init, doc.id, applicationId).element);
+      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.body, save, removeDocModel.init, doc.id, application).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -621,10 +622,10 @@ var docgen = (function() {
         $(btn).click(function() {
           var self = this;
           ajax
-            .command("create-doc", {schema: schema.info.name, id: applicationId})
+            .command("create-doc", {schema: schema.info.name, id: application.id})
             .success(function(data) {
               var newDocId = data.doc;
-              var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, applicationId).element;
+              var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application).element;
               $(self).before(newElem);
             })
             .call();
