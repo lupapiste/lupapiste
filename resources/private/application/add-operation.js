@@ -27,13 +27,12 @@
         .title(application.title)
         .url("#!/application/" + application.id);
       var id = application.id;
-      var handle = setTimeout(_.partial(self.waitingOperations, true), 100);
       ajax
         .query("municipality", {municipality: application.municipality})
+        .pending(self.waitingOperations)
         .success(function (data) {
           if (self.application.id === id) {
-            clearTimeout(handle);
-            self.waitingOperations(false).operations(data.operations);
+            self.operations(data.operations);
           }
         })
         .call();
@@ -41,13 +40,10 @@
     };
 
     self.addOperation = function(op) {
-      var handle = setTimeout(_.partial(self.pending, true), 100);
       ajax
         .command("add-operation", {id: self.application.id, operation: op.op})
         .pending(self.pending)
         .success(function() {
-          clearTimeout(handle);
-          self.pending(false);
           window.location.hash = self.url();
         })
         .call();
