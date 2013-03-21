@@ -274,6 +274,8 @@ navigation: Omat hankkeet
 
 application.submit.areyousure.title: Jätä hakemus käsiteltäväksi
 application.submit.areyousure.message: Oletko varma että haluat jättää hakemuksen käsiteltäväksi? Hakemuksen käsittely saattaa maksaa.
+application.next-tab: Jatka seuraavaan osioon
+application.previous-tab: Palaa edelliseen osioon
 
 attachment.zip.filename: liitteet.zip
 attachment.zip.pdf.filename.current: hakemus.pdf

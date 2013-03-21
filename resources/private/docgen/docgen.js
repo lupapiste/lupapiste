@@ -311,8 +311,9 @@ var docgen = (function() {
 
       select.name = myPath;
       select.className = "form-input combobox long";
-      select.onchange = function(event) {
-        var target = getEvent(event).target;
+      select.onchange = function(e) {
+        var event = getEvent(event);
+        var target = event.target;
         var userId = target.value;
         ajax
           .command("set-user-to-document", {id: appId, documentId: docId, userId: userId, path: myNs})
@@ -330,7 +331,7 @@ var docgen = (function() {
       select.appendChild(option);
 
       ajax
-        .command("get-users-in-application", {id: appId})
+        .query("get-users-in-application", {id: appId}) //TODO: read from local cache!
         .success(function(data) {
           $.each(data.users, function (i, user) {
             // LUPA-89: don't print fully empty names
