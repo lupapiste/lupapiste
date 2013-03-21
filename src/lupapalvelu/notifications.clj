@@ -1,7 +1,7 @@
 (ns lupapalvelu.notifications  
   (:use [monger.operators]
         [clojure.tools.logging]
-        [lupapalvelu.strings :only [suffix]]
+        [sade.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [clojure.java.io :as io]
             [net.cgrand.enlive-html :as enlive]
