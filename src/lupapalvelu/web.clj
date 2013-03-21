@@ -11,7 +11,7 @@
             [noir.session :as session]
             [noir.server :as server]
             [noir.cookies :as cookies]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
@@ -215,7 +215,8 @@
 (defjson "/system/ping" [] {:ok true})
 (defjson "/system/status" [] (status/status))
 
-(defpage "/security/activate/:activation-key" {key :activation-key}
+(def activation-route (str (-> env/config :activation :path) ":activation-key"))
+(defpage activation-route {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))

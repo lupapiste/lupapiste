@@ -7,7 +7,7 @@
   (:require [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.strings :as strings]
+            [sade.strings :as strings]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.i18n :as i18n])

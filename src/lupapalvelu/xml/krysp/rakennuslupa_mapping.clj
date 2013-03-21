@@ -5,7 +5,7 @@
          [lupapalvelu.document.krysp :only [application-to-canonical]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]])
-  (:require [lupapalvelu.env :as env]
+  (:require [sade.env :as env]
             [me.raynes.fs :as fs]))
 
 ;RakVal

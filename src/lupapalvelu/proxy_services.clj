@@ -7,7 +7,7 @@
             [lupapalvelu.wfs :as wfs])
   (:use [clojure.data.zip.xml]
         [clojure.tools.logging]
-        [lupapalvelu.util :only [dissoc-in select]]))
+        [sade.util :only [dissoc-in select]]))
 
 ;;
 ;; NLS:
