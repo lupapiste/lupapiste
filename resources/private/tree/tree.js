@@ -11,7 +11,7 @@
     
     var titleTemplate = args.title || $(".tree-title", defaultTemplate);
     var contentTemplate = args.content || $(".tree-content", defaultTemplate);
-    var navTemplate = args.content || $(".tree-nav", defaultTemplate);
+    var navTemplate = args.nav || $(".tree-nav", defaultTemplate);
     
     self.linkTemplate = args.link || $(".tree-link", defaultTemplate);
     self.lastTemplate = args.last || $(".tree-last", defaultTemplate);
@@ -43,8 +43,8 @@
     
     self.goBack = function() {
       if (self.model.stack().length < 1) return false;
-      if (self.atFinal) {
-        self.atFinal = false;
+      if (self.model.selected()) {
+        self.model.selected(null);
         self.onSelect(null);
       }
       self.stateNop();
@@ -61,8 +61,8 @@
     self.stateNop = _.partial(self.setClickHandler, nop);
 
     self.makeFinal = function(data) {
+      self.model.selected(data);
       self.onSelect(data);
-      self.atFinal = true;
       return self.lastTemplate.clone().addClass("tree-page").css("width", self.width + "px").applyBindings(data);
     }
     
@@ -88,6 +88,7 @@
     
     self.model = {
       stack: ko.observableArray([]),
+      selected: ko.observable(),
       goBack: self.goBack,
       goStart: function() { self.reset(self.data); return false; }
     };
@@ -114,6 +115,7 @@
   var api = {};
   api.reset = function(data) { self.reset(data); return api; };
   api.back = function() { self.goBack(); return api; };
+  api.selected = self.model.selected;
   return api;
   
 })(jQuery);
