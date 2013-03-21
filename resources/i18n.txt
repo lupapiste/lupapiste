@@ -39,3 +39,5 @@ operations.selected: Valittu toimenpide:
 operations.add: Lisää toimenpide
 
 operations.desc.asuinrakennus: Tottahan nyt asuinrakennuksen rakentaminen vaati luvan.
+
+create.choose-op: Valitse toimenpide:

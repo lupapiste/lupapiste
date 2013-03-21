@@ -152,8 +152,6 @@
       return self;
     };
 
-    self.useManualEntry.subscribe(function() { console.log("useManualEntry=", self.useManualEntry()); });
-    
     self.searchPointByPropertyId = function(propertyId) {
       var requestId = self.updateRequestId;
       ajax
