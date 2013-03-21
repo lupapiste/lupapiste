@@ -5,7 +5,7 @@
             [clojure.xml :as xml]
             [clojure.zip :as zip])
   (:use [clojure.data.zip.xml :only [xml-> text]]
-        [lupapalvelu.env :only [config]]
+        [sade.env :only [config]]
         [sade.strings :only [starts-with-i]]))
 
 (def ^:private auth [(:username (:nls config)) (:password (:nls config))])

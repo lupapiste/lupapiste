@@ -1,7 +1,7 @@
 (ns lupapalvelu.components.ui-components
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.components.core :as c]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.i18n :as i18n]
             [sade.util :as util]
             [cheshire.core :as json]))

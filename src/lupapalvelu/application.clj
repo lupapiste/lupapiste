@@ -6,7 +6,7 @@
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.model :as model]

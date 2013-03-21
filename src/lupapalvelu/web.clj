@@ -11,7 +11,7 @@
             [noir.session :as session]
             [noir.server :as server]
             [noir.cookies :as cookies]
-            [lupapalvelu.env :as env]
+            [sade.env :as env]
             [lupapalvelu.core :as core]
             [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
