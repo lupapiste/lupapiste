@@ -20,7 +20,6 @@ var loc;
     term = loc.terms[key];
 
     if (term === undefined) {
-      throw "Not found";
       debug("Missing localization key", key);
       return "$$NOT_FOUND$$" + key;
     }
