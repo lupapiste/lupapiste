@@ -25,17 +25,12 @@
     self.moveRight = {"margin-left": "+=" + self.width};
     
     function findTreeData(target) {
-      var c = 100,
-          data;
-      while (c) {
-        data = target.data("tree-link-data");
-        if (data) return data;
-        target = target.parent();
-        c--;
-      }
-      return null;
+      var data = target.data("tree-link-data");
+      if (data) return data;
+      var parent = target.parent();
+      return (parent.length) ? findTreeData(parent) : null;
     }
-    
+
     self.clickGo = function(e) {
       var target = $(e.target),
           link = findTreeData(target);
