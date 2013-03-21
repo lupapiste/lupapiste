@@ -89,7 +89,7 @@
   }
 
   hub.onPageChange('register', function() {
-    var urlPrefix = "/" + loc.getCurrentLanguage() + "/welcome";
+    var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
     $.get('/vetuma', {success: urlPrefix + '#!/register2',
                       cancel:  urlPrefix + '#!/register/cancel',
                       error:   urlPrefix + '#!/register/error'}, function(d) {
