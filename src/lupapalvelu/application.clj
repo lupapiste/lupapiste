@@ -318,14 +318,6 @@
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))
 
-(defquery "get-users-in-application"
-  {:parameters [:id]
-   :roles      [:applicant :authority]}
-  [query]
-  (with-application query
-    (fn [{:keys [auth]}]
-      (ok :users auth))))
-
 ;;
 ;; krysp enrichment
 ;;

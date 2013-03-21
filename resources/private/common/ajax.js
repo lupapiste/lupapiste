@@ -106,8 +106,7 @@ var ajax = (function() {
     };
 
     self.call = function() {
-      $.ajax(self.request);
-      return self;
+      return $.ajax(self.request);
     };
 
     self.header = function(key, value) {
