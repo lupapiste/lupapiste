@@ -272,8 +272,10 @@
     },
 
     changeTab: function(model,event) {
-      var element = event.target;
-      window.location.hash = "#!/application/" + application.id() + "/" + element.name;
+      var $target = $(event.target);
+      if ($target.is("span")) { $target = $target.parent(); }
+      window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
+      window.scrollTo(0,0);
     }
   };
 
@@ -470,7 +472,7 @@
 
   function markTabActive(id) {
     $("#applicationTabs li").removeClass("active");
-    $("a[name='"+id+"']").parent().addClass("active");
+    $("a[data-target='"+id+"']").parent().addClass("active");
   }
 
   function selectTab(tab) {

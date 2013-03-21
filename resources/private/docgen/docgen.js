@@ -312,8 +312,9 @@ var docgen = (function() {
 
       select.name = myPath;
       select.className = "form-input combobox long";
-      select.onchange = function(event) {
-        var target = getEvent(event).target;
+      select.onchange = function(e) {
+        var event = getEvent(event);
+        var target = event.target;
         var userId = target.value;
         ajax
           .command("set-user-to-document", {id: self.appId, documentId: docId, userId: userId, path: myNs})
