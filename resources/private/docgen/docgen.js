@@ -330,24 +330,19 @@ var docgen = (function() {
       }
       select.appendChild(option);
 
-      ajax
-        .query("get-users-in-application", {id: self.appId}) //TODO: read from local cache!
-        .success(function(data) {
-          $.each(data.users, function (i, user) {
-            // LUPA-89: don't print fully empty names
-            if(user.firstName && user.lastName) {
-              var option = document.createElement("option");
-              var value = user.id;
-              option.value = value;
-              option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
-              if (selectedOption === value) {
-                option.selected = "selected";
-              }
-              select.appendChild(option);
-            }
-          });
-        })
-        .call();
+      _.each(self.application.auth, function (user) {
+        // LUPA-89: don't print fully empty names
+        if(user.firstName && user.lastName) {
+          var option = document.createElement("option");
+          var value = user.id;
+          option.value = value;
+          option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
+          if (selectedOption === value) {
+            option.selected = "selected";
+          }
+          select.appendChild(option);
+        }
+      });
 
       span.appendChild(makeLabel("select", "", "personSelector", true));
       span.appendChild(select);
