@@ -331,7 +331,7 @@ var docgen = (function() {
       select.appendChild(option);
 
       ajax
-        .command("get-users-in-application", {id: appId})
+        .query("get-users-in-application", {id: appId}) //TODO: read from local cache!
         .success(function(data) {
           $.each(data.users, function (i, user) {
             // LUPA-89: don't print fully empty names

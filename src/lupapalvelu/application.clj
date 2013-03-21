@@ -60,7 +60,10 @@
 (defn find-authorities-in-applications-municipality [app]
   (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
 
-(defquery "application" {:authenticated true, :parameters [:id]} [{{id :id} :data user :user}]
+(defquery "application"
+  {:authenticated true
+   :parameters [:id]}
+  [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
     (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
     (fail :error.not-found)))
@@ -144,11 +147,14 @@
             application-id (:id application)]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (rl-mapping/get-application-as-krysp application)
-        (mongo/update
-          :applications {:_id (:id application) :state new-state}
-          {$set {:state :sent}})
-        (notifications/send-notifications-on-application-state-change application-id host)))))
+        (try (rl-mapping/get-application-as-krysp application)
+          (mongo/update
+            :applications {:_id (:id application) :state new-state}
+            {$set {:state :sent}})
+          (notifications/send-notifications-on-application-state-change application-id host)
+          (catch org.xml.sax.SAXParseException e
+            (.printStackTrace e)
+            (fail (.getMessage e))))))))
 
 (defcommand "submit-application"
   {:parameters [:id]
