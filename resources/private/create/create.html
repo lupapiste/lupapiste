@@ -119,7 +119,7 @@
       </span>
       <span data-bind="visible: stack().length > 0, foreach: stack">
         <span data-bind="visible: $index"> / </span>
-        <span data-bind="text: text"></span>
+        <span data-bind="text: loc('operations.tree', op)"></span>
       </span>
     </div>
     
@@ -133,13 +133,15 @@
     </div>
     
     <div class="tree-link">
-      <span data-bind="ltext: text"></span>
+      <span data-bind="text: loc('operations.tree', op)"></span>
       <span style="position: absolute; right: 10px;">&#x25b6;</span>
     </div>
     
     <div class="tree-last">
-      <div data-bind="text: loc('operations', op)"></div>
-      <div data-bind="html: loc(text)"></div>
+      
+      <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
+      <div data-bind="html: loc('operations.desc', op)"></div>
+
       <div class="create-buttons">
         <button data-bind="click: goPhase3, visible: operation"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
           <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>
@@ -148,6 +150,7 @@
           <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
         </button>
       </div>
+      
     </div>
     
   </section>

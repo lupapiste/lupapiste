@@ -77,45 +77,50 @@ uusiRakennus.lammitys.muu-lammonlahde: Muu lämmönlähde
 
 applications.operation: Toimenpide
 
-operations.Rakentaminen ja purkaminen: Rakentaminen ja purkaminen
-operations.Elinympariston muuttaminen: Elinympäristön muuttaminen
-operations.Rakennuksen korjaaminen tai muuttaminen: Rakennuksen korjaaminen tai muuttaminen
-operations.Rakennelman rakentaminen: Rakennelman rakentaminen
-operations.Rakennuksen purkaminen: Rakennuksen purkaminen
-operations.Uuden rakennuksen rakentaminen: Uuden rakennuksen rakentaminen
-operations.Asuinrakennus: Asuinrakennuksen rakentaminen
-operations.Vapaa-ajan asuinrakennus: Vapaa-ajan asuinrakennuksen rakentaminen
-operations.Varasto, sauna, autotalli tai muu talousrakennus: Varaston, saunan, autotallin tai muun talousrakennuksen rakentaminen
-operations.Julkinen rakennus: Julkisen rakennuksen rakentaminen
-operations.Muun rakennuksen rakentaminen: Muun rakennuksen rakentaminen
-operations.Rakennuksen laajentaminen tai korjaaminen: Rakennuksen laajentaminen tai korjaaminen
-operations.Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen: Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen
-operations.Kayttotarkoituksen muutos: Rakennuksen tai sen osan käyttötarkoituksen muuttaminen
-operations.Rakennuksen julkisivun tai katon muuttaminen: Rakennuksen julkisivun tai katon muuttaminen
-operations.Asuinhuoneiston jakaminen tai yhdistaminen: Asuinhuoneiston jakaminen tai yhdistäminen
-operations.Markatilan laajentaminen: Märkätilan muuttaminen tai laajentaminen
-operations.Takan ja savuhormin rakentaminen: Takan ja savuhormin rakentaminen
-operations.Parvekkeen tai terassin lasittaminen: Parvekkeen tai terassin rakentaminen tai lasittaminen
-operations.Muu rakennuksen muutostyo: Muu rakennuksen muutostyö
-operations.Auto- tai grillikatos, vaja, kioski tai vastaava:Auto- tai grillikatoksen, vajan, kioskin tai vastaavan rakentaminen
-operations.Masto, piippu, sailio, laituri tai vastaava: Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen
-operations.Mainoslaite: Mainos- tai muun laitteen asentaminen
-operations.Aita: Aidan rakentaminen
-operations.Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen: Maalämpökaivon poraaminen tai lämmönkeruuputkiston asentaminen
-operations.Rakennuksen jatevesijarjestelman uusiminen: Rakennuksen jätevesijärjestelmän uusiminen tai rakentaminen
-operations.Muun rakennelman rakentaminen: Muun rakennelman rakentaminen
-operations.Maisemaa muutava toimenpide: Maisemaa muuttava toimenpide
-operations.Tontti tai korttelialueen jarjestelymuutos: Tontti- tai korttelialueen järjestelymuutos
-operations.Kaivaminen, louhiminen tai maan tayttaminen:Kaivaminen, louhiminen tai maan täyttäminen
-operations.Puun kaataminen: Puun kaataminen
-operations.Muu maisemaa muuttava toimenpide: Muu maisemaa muuttava toimenpide
-operations.Tontin ajoliittyman muutos: Tontin ajoliittymän muutos
-operations.Paikoitusjarjestelyihin liittyvat muutokset: Paikoitusjärjestelyihin liittyvät muutokset
-operations.Korttelin yhteisiin alueisiin liittyva muutos: Korttelin yhteisiin alueisiin liittyvä muutos
-operations.Muu-tontti-tai-korttelialueen-jarjestelymuutos: Muu tontti- tai korttelialueen järjestelymuutos
-operations.default-description: Hankkeesi vaatii <b>todennäköisesti</b> luvan.<br/><br/>Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.tree.Rakentaminen ja purkaminen: Rakentaminen ja purkaminen
+operations.tree.Elinympariston muuttaminen: Elinympäristön muuttaminen
+operations.tree.Rakennuksen korjaaminen tai muuttaminen: Rakennuksen korjaaminen tai muuttaminen
+operations.tree.Rakennelman rakentaminen: Rakennelman rakentaminen
+operations.tree.Rakennuksen purkaminen: Rakennuksen purkaminen
+operations.tree.Uuden rakennuksen rakentaminen: Uuden rakennuksen rakentaminen
+operations.tree.Asuinrakennus: Asuinrakennuksen rakentaminen
+operations.tree.Vapaa-ajan asuinrakennus: Vapaa-ajan asuinrakennuksen rakentaminen
+operations.tree.Varasto, sauna, autotalli tai muu talousrakennus: Varaston, saunan, autotallin tai muun talousrakennuksen rakentaminen
+operations.tree.Julkinen rakennus: Julkisen rakennuksen rakentaminen
+operations.tree.Muun rakennuksen rakentaminen: Muun rakennuksen rakentaminen
+operations.tree.Rakennuksen laajentaminen tai korjaaminen: Rakennuksen laajentaminen tai korjaaminen
+operations.tree.Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen: Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen
+operations.tree.Kayttotarkoituksen muutos: Rakennuksen tai sen osan käyttötarkoituksen muuttaminen
+operations.tree.Rakennuksen julkisivun tai katon muuttaminen: Rakennuksen julkisivun tai katon muuttaminen
+operations.tree.Asuinhuoneiston jakaminen tai yhdistaminen: Asuinhuoneiston jakaminen tai yhdistäminen
+operations.tree.Markatilan laajentaminen: Märkätilan muuttaminen tai laajentaminen
+operations.tree.Takan ja savuhormin rakentaminen: Takan ja savuhormin rakentaminen
+operations.tree.Parvekkeen tai terassin lasittaminen: Parvekkeen tai terassin rakentaminen tai lasittaminen
+operations.tree.Muu rakennuksen muutostyo: Muu rakennuksen muutostyö
+operations.tree.Auto- tai grillikatos, vaja, kioski tai vastaava:Auto- tai grillikatoksen, vajan, kioskin tai vastaavan rakentaminen
+operations.tree.Masto, piippu, sailio, laituri tai vastaava: Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen
+operations.tree.Mainoslaite: Mainos- tai muun laitteen asentaminen
+operations.tree.Aita: Aidan rakentaminen
+operations.tree.Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen: Maalämpökaivon poraaminen tai lämmönkeruuputkiston asentaminen
+operations.tree.Rakennuksen jatevesijarjestelman uusiminen: Rakennuksen jätevesijärjestelmän uusiminen tai rakentaminen
+operations.tree.Muun rakennelman rakentaminen: Muun rakennelman rakentaminen
+operations.tree.Maisemaa muutava toimenpide: Maisemaa muuttava toimenpide
+operations.tree.Tontti tai korttelialueen jarjestelymuutos: Tontti- tai korttelialueen järjestelymuutos
+operations.tree.Kaivaminen, louhiminen tai maan tayttaminen:Kaivaminen, louhiminen tai maan täyttäminen
+operations.tree.Puun kaataminen: Puun kaataminen
+operations.tree.Muu maisemaa muuttava toimenpide: Muu maisemaa muuttava toimenpide
+operations.tree.Tontin ajoliittyman muutos: Tontin ajoliittymän muutos
+operations.tree.Paikoitusjarjestelyihin liittyvat muutokset: Paikoitusjärjestelyihin liittyvät muutokset
+operations.tree.Korttelin yhteisiin alueisiin liittyva muutos: Korttelin yhteisiin alueisiin liittyvä muutos
+operations.tree.Muu-tontti-tai-korttelialueen-jarjestelymuutos: Muu tontti- tai korttelialueen järjestelymuutos
+
+operations.selected: Valittu toimenpide:
+
+# Legacy:
+operations.tree.default-description: Hankkeesi vaatii <b>todennäköisesti</b> luvan.<br/><br/>Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
 
 operations.asuinrakennus: Asuinrakennuksen rakentaminen
+operations.desc.asuinrakennus: Tottahan nyt asuinrakennuksen rakentaminen vaati luvan.
 operations.perus-tai-kant-rak-muutos: Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen
 operations.varasto-tms: Varaston, saunan, autotallin tai muun talousrakennuksen rakentaminen
 operations.vapaa-ajan-asuinrakennus: Vapaa-ajan asuinrakennuksen rakentaminen

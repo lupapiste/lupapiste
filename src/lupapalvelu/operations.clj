@@ -2,7 +2,7 @@
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]))
 
-(def default-description "operations.default-description")
+(def default-description "operations.tree.default-description")
 
 (def ^:private operations-tree
   [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" {:op :asuinrakennus :text default-description}]

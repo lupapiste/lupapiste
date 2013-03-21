@@ -242,17 +242,6 @@
 
   }();
 
-  function toLink(l) {
-    return $("<li>").append($("<a>").attr("href", l.url).attr("target", "_blank").text(l.name[loc.getCurrentLanguage()]));
-  }
-
-  function generateInfo(value) {
-    var e$ = $("<div>").attr("class", "tree-result").append($("<p>").text(loc(value.text)));
-    var ul$ = $("<ul>");
-    _.each(_.map(model.links(), toLink), function (l) {ul$.append(l);});
-    return e$.append(ul$)[0];
-  }
-
   hub.onPageChange("create", model.clear);
 
   ajax
@@ -275,18 +264,15 @@
         onSelect:        model.searchNow
       });
 
-    var templates = $("#create-templates");
     var tree = $("#create .operation-tree").selectTree({
-      title: $(".tree-title", templates),
-      last:  $(".tree-last", templates),
-      nav:   $(".tree-nav", templates),
+      template: $("#create-templates"),
       onSelect: function(v) { model.operation(v ? v.op : null); },
       baseModel: model
     });
     
     function operations2tree(e) {
       var key = e[0], value = e[1];
-      return [{text: key}, _.isArray(value) ? _.map(value, operations2tree) : value];
+      return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : value];
     }
 
     model.operations.subscribe(function(v) {
