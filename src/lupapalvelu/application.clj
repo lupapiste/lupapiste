@@ -144,11 +144,14 @@
             application-id (:id application)]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (rl-mapping/get-application-as-krysp application)
-        (mongo/update
-          :applications {:_id (:id application) :state new-state}
-          {$set {:state :sent}})
-        (notifications/send-notifications-on-application-state-change application-id host)))))
+        (try (rl-mapping/get-application-as-krysp application)
+          (mongo/update
+            :applications {:_id (:id application) :state new-state}
+            {$set {:state :sent}})
+          (notifications/send-notifications-on-application-state-change application-id host)
+          (catch org.xml.sax.SAXParseException e
+            (.printStackTrace e)
+            (fail (.getMessage e))))))))
 
 (defcommand "submit-application"
   {:parameters [:id]
