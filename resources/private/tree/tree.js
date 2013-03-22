@@ -1,7 +1,7 @@
 ;(function($) {
   "use strict";
 
-  function nop() { }
+  function nop() { return true; }
 
   function Tree(context, args) {
     var self = this;
@@ -42,7 +42,7 @@
     self.clickGo = function(e) {
       var target = $(e.target),
           link = findTreeData(target);
-      if (!link) return false;
+      if (!link) return true;
       var selectedLink = link[0],
           nextElement = link[1],
           next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
@@ -113,13 +113,7 @@
       goStart: function() { self.reset(self.data); return false; }
     };
 
-    self.content = contentTemplate.clone().click(function(event) {
-      var e = getEvent(event);
-      e.preventDefault();
-      e.stopPropagation();
-      self.clickHandler(e);
-      return false;
-    });
+    self.content = contentTemplate.clone().click(function(e) { return self.clickHandler(getEvent(e)); });
     
     context
       .append(titleTemplate.clone())
