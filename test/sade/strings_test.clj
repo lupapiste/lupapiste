@@ -56,3 +56,16 @@
   (fact (starts-with "foo" "ba")   => falsey)
   (fact (starts-with "foo" nil)    => falsey)
   (fact (starts-with nil "ba")     => falsey))
+
+(fact (numeric? ["0"]) => false)
+
+(facts
+  (fact (decimal-number? "1") => true)
+  (fact (decimal-number? "1.1") => true)
+  (fact (decimal-number? "a") => false)
+  (fact (decimal-number? "") => false)
+  (fact (decimal-number? nil) => false)
+  (fact (decimal-number? "a.0") => false)
+  (fact (decimal-number? ".0") => false)
+  (fact (decimal-number? "..0") => false)
+  (fact (decimal-number? "123123132.456465465465464") => true))
