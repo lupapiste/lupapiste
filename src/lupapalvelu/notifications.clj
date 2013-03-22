@@ -77,8 +77,7 @@
                                          (enlive/transform [:#name] (enlive/content (str (:firstName user) " " (:lastName user))))
                                          (replace-application-link "#link-" application "fi" "" host)
                                          )))]
-    #_ (send-mail-to-recipients email title msg)
-    msg))
+    (send-mail-to-recipients email title msg)))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
