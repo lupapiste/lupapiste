@@ -15,8 +15,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
-(defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
-
 (defquery "invites"
   {:authenticated true}
   [{{:keys [id]} :user}]
