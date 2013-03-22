@@ -250,10 +250,10 @@
                          {:name "mitat"
                           :type :group
                           :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
+                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
                                  {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
-                                 {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number}
                                  {:name "kerrosluku" :type :string :size "s" :subtype :number}
-                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}]}
+                                 {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number}]}
                          {:name "rakenne"
                           :type :group
                           :body [{:name "rakentamistapa" :type :select
