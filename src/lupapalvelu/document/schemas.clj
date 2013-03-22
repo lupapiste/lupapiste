@@ -457,7 +457,6 @@
       :body [{:name "kiinteisto"
               :type :group
               :body [{:name "maaraalaTunnus" :type :string}
-                     {:name "kokotilaKytkin" :type :checkbox}
                      {:name "kylaNimi" :type :string}
                      {:name "tilanNimi" :type :string}]}
              {:name "hallintaperuste" :type :select
