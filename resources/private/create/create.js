@@ -13,8 +13,7 @@
       $("#create-part-2").hide()
       $("#create-part-3").hide();
     };
-
-
+    
     self.goPhase2 = function() {
       $("#create-part-1").hide();
       $("#create-part-2").show();
@@ -27,6 +26,8 @@
       window.scrollTo(0,0);
     };
 
+    self.useManualEntry = ko.observable(false);
+    
     self.municipalities = ko.observableArray([]);
     self.map = null;
 
@@ -43,7 +44,7 @@
     self.links = ko.observableArray();
     self.operations = ko.observable(null);
     self.requestType = ko.observable();
-
+    
     self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
 
     self.clear = function() {
@@ -137,6 +138,7 @@
                 x = data.x,
                 y = data.y;
             self
+              .useManualEntry(false)
               .setXY(x, y)
               .center(x, y, 11)
               .setAddress(data)
@@ -145,6 +147,7 @@
               .searchPropertyId(x, y);
           }
         })
+        .fail(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
@@ -160,6 +163,7 @@
                 x = data.x,
                 y = data.y;
             self
+              .useManualEntry(false)
               .setXY(x, y)
               .center(x, y, 11)
               .setPropertyId(propertyId)
@@ -168,6 +172,7 @@
               .searchAddress(x, y);
           }
         })
+        .fail(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
@@ -215,7 +220,7 @@
     self.create = function(infoRequest) {
       ajax.command("create-application", {
         infoRequest: infoRequest,
-        operation: self.operation().op,
+        operation: self.operation(),
         y: self.y(),
         x: self.x(),
         address: self.address(),
@@ -235,17 +240,6 @@
 
   }();
 
-  function toLink(l) {
-    return $("<li>").append($("<a>").attr("href", l.url).attr("target", "_blank").text(l.name[loc.getCurrentLanguage()]));
-  }
-
-  function generateInfo(value) {
-    var e$ = $("<div>").attr("class", "tree-result").append($("<p>").text(loc(value.text)));
-    var ul$ = $("<ul>");
-    _.each(_.map(model.links(), toLink), function (l) {ul$.append(l);});
-    return e$.append(ul$)[0];
-  }
-
   hub.onPageChange("create", model.clear);
 
   ajax
@@ -255,7 +249,7 @@
 
   $(function() {
 
-    ko.applyBindings(model, $("#create")[0]);
+    $("#create").applyBindings(model);
 
     $("#create-search")
       .keypress(function(e) {
@@ -268,15 +262,25 @@
         onSelect:        model.searchNow
       });
 
-    var tree = selectionTree.create(
-        $("#create .tree-content"),
-        $("#create .tree-breadcrumbs"),
-        model.operation,
-        generateInfo,
-        "operations");
+    var tree = $("#create .operation-tree").selectTree({
+      template: $("#create-templates"),
+      onSelect: function(v) { model.operation(v ? v.op : null); },
+      baseModel: model
+    });
+    
+    function operations2tree(e) {
+      var key = e[0], value = e[1];
+      return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : {op: value}];
+    }
 
-    model.operations.subscribe(tree.reset);
-
+    model.operations.subscribe(function(v) {
+      tree.reset(_.map(v, operations2tree));
+    });
+    
+    hub.subscribe({type: "keyup", keyCode: 37}, tree.back);
+    hub.subscribe({type: "keyup", keyCode: 33}, tree.start);
+    hub.subscribe({type: "keyup", keyCode: 36}, tree.start);
+    
   });
 
 })();

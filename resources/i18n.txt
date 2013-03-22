@@ -1,2 +1,76 @@
+operations.tree.Rakentaminen ja purkaminen: Rakentaminen ja purkaminen
+operations.tree.Elinympariston muuttaminen: Elinympäristön muuttaminen
+operations.tree.Rakennuksen korjaaminen tai muuttaminen: Rakennuksen korjaaminen tai muuttaminen
+operations.tree.Rakennelman rakentaminen: Rakennelman rakentaminen
+operations.tree.Rakennuksen purkaminen: Rakennuksen purkaminen
+operations.tree.Uuden rakennuksen rakentaminen: Uuden rakennuksen rakentaminen
+operations.tree.Asuinrakennus: Asuinrakennuksen rakentaminen
+operations.tree.Vapaa-ajan asuinrakennus: Vapaa-ajan asuinrakennuksen rakentaminen
+operations.tree.Varasto, sauna, autotalli tai muu talousrakennus: Varaston, saunan, autotallin tai muun talousrakennuksen rakentaminen
+operations.tree.Julkinen rakennus: Julkisen rakennuksen rakentaminen
+operations.tree.Muun rakennuksen rakentaminen: Muun rakennuksen rakentaminen
+operations.tree.Rakennuksen laajentaminen tai korjaaminen: Rakennuksen laajentaminen tai korjaaminen
+operations.tree.Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen: Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen
+operations.tree.Kayttotarkoituksen muutos: Rakennuksen tai sen osan käyttötarkoituksen muuttaminen
+operations.tree.Rakennuksen julkisivun tai katon muuttaminen: Rakennuksen julkisivun tai katon muuttaminen
+operations.tree.Asuinhuoneiston jakaminen tai yhdistaminen: Asuinhuoneiston jakaminen tai yhdistäminen
+operations.tree.Markatilan laajentaminen: Märkätilan muuttaminen tai laajentaminen
+operations.tree.Takan ja savuhormin rakentaminen: Takan ja savuhormin rakentaminen
+operations.tree.Parvekkeen tai terassin lasittaminen: Parvekkeen tai terassin rakentaminen tai lasittaminen
+operations.tree.Muu rakennuksen muutostyo: Muu rakennuksen muutostyö
+operations.tree.Auto- tai grillikatos, vaja, kioski tai vastaava:Auto- tai grillikatoksen, vajan, kioskin tai vastaavan rakentaminen
+operations.tree.Masto, piippu, sailio, laituri tai vastaava: Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen
+operations.tree.Mainoslaite: Mainos- tai muun laitteen asentaminen
+operations.tree.Aita: Aidan rakentaminen
+operations.tree.Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen: Maalämpökaivon poraaminen tai lämmönkeruuputkiston asentaminen
+operations.tree.Rakennuksen jatevesijarjestelman uusiminen: Rakennuksen jätevesijärjestelmän uusiminen tai rakentaminen
+operations.tree.Muun rakennelman rakentaminen: Muun rakennelman rakentaminen
+operations.tree.Maisemaa muutava toimenpide: Maisemaa muuttava toimenpide
+operations.tree.Tontti tai korttelialueen jarjestelymuutos: Tontti- tai korttelialueen järjestelymuutos
+operations.tree.Kaivaminen, louhiminen tai maan tayttaminen:Kaivaminen, louhiminen tai maan täyttäminen
+operations.tree.Puun kaataminen: Puun kaataminen
+operations.tree.Muu maisemaa muuttava toimenpide: Muu maisemaa muuttava toimenpide
+operations.tree.Tontin ajoliittyman muutos: Tontin ajoliittymän muutos
+operations.tree.Paikoitusjarjestelyihin liittyvat muutokset: Paikoitusjärjestelyihin liittyvät muutokset
+operations.tree.Korttelin yhteisiin alueisiin liittyva muutos: Korttelin yhteisiin alueisiin liittyvä muutos
+operations.tree.Muu-tontti-tai-korttelialueen-jarjestelymuutos: Muu tontti- tai korttelialueen järjestelymuutos
 
+operations.selected: Valittu toimenpide:
+operations.add: Lisää toimenpide
 
+operations.asuinrakennus.desc: Tottahan nyt asuinrakennuksen rakentaminen vaati luvan.
+
+create.choose-op: Valitse toimenpide:
+integration.getAddressNotWorking: Kolmannenosapuolen osoitehakupalvelu ei ole käytettävissä, ole hyvä ja syötä osoite ja kunta:
+ 
+municipality.links: Kunnan rakennusvalvonnan suosittelemat linkit:
+
+operations.asuinrakennus.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.perus-tai-kant-rak-muutos.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.varasto-tms.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.vapaa-ajan-asuinrakennus.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.julkinen-rakennus.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.muu-uusi-rakentaminen.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.laajentaminen.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.kayttotark-muutos.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.julkisivu-muutos.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.jakaminen-tai-yhdistaminen.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.markatilan-laajentaminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.takka-tai-hormi.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.parveke-tai-terassi.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.muu-laajentaminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.auto-katos.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.masto-tms.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.mainoslaite.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.maalampo.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.aita.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.purkaminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.kaivuu.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.puun-kaataminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.muu-maisema-toimenpide.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.tontin-ajoliittyman-muutos.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.paikoutysjarjestus-muutos.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.kortteli-yht-alue-muutos.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.muu-tontti-tai-kort-muutos.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.jatevesi.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.muu-rakentaminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.

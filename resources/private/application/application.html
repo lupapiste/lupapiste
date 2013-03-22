@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-  <section class="page" id="application">    
+  <section class="page" id="application">
     <div class="application_summary">
       <div class=" container">
         <div class="application-map-container">
@@ -35,7 +35,7 @@
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
             </span>
           </div>
-        
+
           <!-- ID: -->
           <div>
             <p data-bind="ltext: 'application.id'"></p>
@@ -77,12 +77,12 @@
           </div>
         </div>
 
-        
+
         <!-- Actions: -->
         <div data-bind="with: application" class="application_actions">
           <div class="muncipality-info">
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
-            <p data-bind="ltext: 'municipality.' + municipality()"></p>
+            <p data-bind="text: loc('municipality', municipality())"></p>
           </div>
           <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn"></button>
           <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class=""></button>
@@ -91,7 +91,7 @@
           <button data-bind="ltext: 'application.pdf',                click: exportPdf"                                                                                                                         data-test-id="application-pdf-btn"     class=""></button>
           <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn"></button>
         </div>
-      
+
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
@@ -161,7 +161,7 @@
             <a class="btn process-next" data-bind="click: $root.application.changeTab" href="#" data-target="attachments"><span data-bind="ltext: 'application.next-tab'"></span></span><span class="icon drill-right-orange inline-right"></span></a>
             <a class="btn process-previous" data-bind="click: $root.application.changeTab" href="#" data-target="info"><span data-bind="ltext: 'application.previous-tab'"></span></span><span class="icon drill-left-black-bigger inline-left"></span></a>
           </div>
-        
+
         </div>
 
         <div id="application-attachments-tab" class="tab-content">
@@ -236,7 +236,7 @@
             </button>
             <button
                 data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments')"
-                class="btn">                
+                class="btn">
             </button>
           </div>
           <div class="process-nav">
@@ -289,13 +289,13 @@
           </div>
           <div class="process-nav">
           </div>
-          
+
         </div>
 
       </div>
     </div>
     <div id="boxes">
-    
+
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.addInvite'">Lis&auml;&auml; valtuutus</p>
@@ -335,7 +335,7 @@
           </div>
         </div>
       </div>
-      
+
       <div id="dialog-add-attachment-templates" class="window autosized" style="width: 600px; height: 500px;">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
@@ -345,7 +345,7 @@
           <div class="attachment-templates"></div>
         </div>
       </div>
-      
+
     </div>
   </section>
 </body>
