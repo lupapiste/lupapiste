@@ -130,6 +130,9 @@
 
 (defn get-application-as-krysp [application]
   (let [canonical (application-to-canonical application)
+        ;hae liitetiedostot
+        ;muodosta liitetiedostos data
+        ;liitä canoonisen malliin
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)
         output-dir (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus")
@@ -141,7 +144,7 @@
 
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
-    ;todoo liitetiedostot
+    ;tallenna liitetiedostot
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
 
