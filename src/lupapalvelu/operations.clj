@@ -80,7 +80,7 @@
    :muu-uusi-rakentaminen       {:schema "uusiRakennus"
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
-   :laajentaminen               {:schema "rakennuksen-muuttaminen"
+   :laajentaminen               {:schema "rakennuksen-laajentaminen"
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet}

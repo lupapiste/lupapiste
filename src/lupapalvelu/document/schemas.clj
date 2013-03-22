@@ -392,6 +392,31 @@
                                muutostyonlaji
                                olemassaoleva-rakennus))
 
+(def rakennuksen-laajentaminen (body [{:name "laajennuksen-tiedot"
+                                       :type :group
+                                       :body [{:name "perusparannuskytkin" :type :checkbox}
+                                                     {:name "mitat"
+                                                      :type :group
+                                                      :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
+                                                             {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
+                                                             {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
+                                                             {:name "huoneistoala"
+                                                              :type :group
+                                                              :repeating true
+                                                              :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
+                                                                     {:name "kayttotarkoitusKoodi" :type :select
+                                                                      :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
+                                                                             {:name "myymälä, majoitus- ja ravitsemustilaa"}
+                                                                             {:name "hoitotilaa"}
+                                                                             {:name "toimisto- ja hallintotilaa"}
+                                                                             {:name "kokoontumistilaa"}
+                                                                             {:name "opetustilaa"}
+                                                                             {:name "tuotantotilaa(teollisuus)"}
+                                                                             {:name "varastotilaa"}
+                                                                             {:name "muuta huoneistoalaan kuuluvaa tilaa"}
+                                                                             {:name "ei tiedossa"}]}]}]}]}]
+                                     olemassaoleva-rakennus))
+
 (def purku (body
              {:name "poistumanSyy" :type :select
               :body [{:name "purettu uudisrakentamisen vuoksi"}
@@ -418,6 +443,9 @@
 
      {:info {:name "rakennuksen-muuttaminen"}
       :body rakennuksen-muuttaminen}
+
+     {:info {:name "rakennuksen-laajentaminen"}
+      :body rakennuksen-laajentaminen}
 
      {:info {:name "purku"}
       :body purku}
