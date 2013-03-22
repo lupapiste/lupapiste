@@ -70,6 +70,9 @@ $(function() {
         .append($("<br>"))
         .append($("<input type='checkbox'>").click(function() { $(".page").toggleClass("visible"); }))
         .append($("<label>").text("Toggle hidden"))
+        .append($("<br>"))
+        .append($("<input type='checkbox' data-id='proxy'>").click(function(e) { ajax.post("/api/proxy-ctrl/" + ($(e.target).prop("checked") ? "on" : "off")).call(); }))
+        .append($("<label>").text("Proxy enabled"))
         .append($("<p>").text("Apply:")
           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
           .append($("<br>"))
@@ -101,6 +104,11 @@ $(function() {
     })
     .call();
 
+  ajax
+    .get("/api/proxy-ctrl")
+    .success(function(data) { $("footer input[data-id='proxy']").prop("checked", data.data ? "checked" : ""); })
+    .call();
+  
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
 

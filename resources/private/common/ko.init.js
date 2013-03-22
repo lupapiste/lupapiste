@@ -1,4 +1,4 @@
-;(function() {
+;(function($) {
   "use strict";
 
   //
@@ -118,4 +118,10 @@
       $(element).text(version);
     }
   };
-})();
+
+  $.fn.applyBindings = function(model) {
+    _.each(this, _.partial(ko.applyBindings, model));
+    return this;
+  };
+  
+})(jQuery);

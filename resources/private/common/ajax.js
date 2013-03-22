@@ -6,6 +6,14 @@ var ajax = (function() {
   function Call(url, type) {
     var self = this;
 
+    self.onComplete = function(jqXHR, textStatus) {
+      if (self.pendingListener) {
+        clearTimeout(self.pendingHandler);
+        self.pendingListener(false);
+      }
+      self.completeHandler(jqXHR, textStatus);
+    };
+    
     self.callId = callId++;
     self.request = {
       url:       url,
@@ -15,6 +23,7 @@ var ajax = (function() {
       cache:     false,
       timeout:   60000,
       rawData:   false,
+      complete:  self.onComplete,
       success: function(e) {
         var handler = (self.rawData || e.ok) ? self.successHandler : self.errorHandler;
         handler(e);
@@ -22,9 +31,6 @@ var ajax = (function() {
       error: function(jqXHR, textStatus, errorThrown) {
         self.failHandler(jqXHR, textStatus, errorThrown);
         return false;
-      },
-      complete: function(jqXHR, textStatus) {
-        self.completeHandler(jqXHR, textStatus);
       },
       beforeSend: function(request) {
         _.each(self.headers, function(value, key) { request.setRequestHeader(key, value); });
@@ -105,7 +111,19 @@ var ajax = (function() {
       return self;
     };
 
+    self.pending = function(listener, timeout) {
+      if (!listener) return self;
+      if (!_.isFunction(listener)) throw "Argument must be a function: " + listener;
+      self.pendingListener = listener;
+      self.pendingTimeout = timeout || 100;
+      self.pendingListener(false);
+      return self;
+    };
+    
     self.call = function() {
+      if (self.pendingListener) {
+        self.pendingHandler = setTimeout(_.partial(self.pendingListener, true), self.pendingTimeout);
+      }
       return $.ajax(self.request);
     };
 

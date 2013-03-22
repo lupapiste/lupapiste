@@ -5,17 +5,38 @@
 
     <h1 data-bind="ltext: 'addOperation'"></h1>
 
-    <div class="tree" data-bind="visible: treeReady">
-      <div class="tree-title">&nbsp;<span class="tree-breadcrumbs"></span></div>
-      <div class="tree-content">
-      </div>
+    <div data-bind="visible: operations">
+      <div class="operation-tree tree-control"></div>
     </div>
-    <div class="tree" data-bind="visible: !treeReady()">
+    
+    <div data-bind="visible: waitingOperations">
       <img src="/img/ajax-loader.gif"/>
     </div>
 
-    <a href="#" data-bind="attr: {href: url}, ltext: 'cancel'" class="btn-tree-back"></a>
+    <a href="#" data-bind="attr: {href: url}" class="btn">
+      <span class="icon drill-left-black-bigger inline-left"></span>
+      <span data-bind="ltext: 'cancel'"></span>
+    </a>
 
   </section>
+  
+  <section class="page" id="add-operation-templates">
+  
+    <div class="tree-last">
+      
+      <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
+
+      <button data-bind="click: addOperation" class="btn btn-primary">
+        <span data-bind="ltext: 'operations.add'"></span>
+        <span class="icon add left-align"></span>
+      </button>
+      
+      <div data-bind="visible: pending">
+        <img src="/img/ajax-loader.gif" alt="lataa" />
+      </div>
+    </div>
+    
+  </section>
+  
 </body>
 </html>
