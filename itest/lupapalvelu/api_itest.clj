@@ -3,12 +3,6 @@
         [midje.sweet])
   (:require [lupapalvelu.domain :as domain]))
 
-(facts "one can"
-  (fact ".. list actions"
-    (query mikko :actions) => truthy)
-  (fact ".. list allowed actions"
-    (query mikko :allowed-actions) => truthy))
-
 (facts "Secury! SECURITY!!"
   (apply-remote-minimal)
 
