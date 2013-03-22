@@ -15,7 +15,10 @@
       => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
 
 (fact "invite"
-  (send-invite ..email.. ..text.. {:id 1} {:firstName "Ihana" :lastName "Krapula"} ..host..) => (contains "Ihana Krapula"))
+  (with-redefs [send-mail-to-recipients (fn [email title msg] msg)]
+    (send-invite ..email.. ..text.. {:id 1} {:firstName "Ihana" :lastName "Krapula"} ..host..) => (contains "Ihana Krapula")))
+    #_  (provided
+          (send-mail-to-recipients ..email.. anything msg) => msg)
 
 (fact "Each user in auth-array gets email from authority comment."
   (get-email-recipients-for-new-comment { :auth [{:id "a" :role "owner"} {:id "b" :role "writer"} {:id "c" :role "unknown"}] :title "title" }) => [ "a@foo.com" "b@foo.com" "c@foo.com"]
