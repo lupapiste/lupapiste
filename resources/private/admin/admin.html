@@ -25,6 +25,7 @@
       <h3>Toiminnot</h3>
       <table>
         <thead>
+          <th>status</th>
           <th>toiminto</th>
           <th>tyyppi</th>
           <th>roolit</th>
@@ -33,6 +34,8 @@
         </thead>
         <tbody data-bind="foreach: actions.data">
           <tr>
+            <td data-bind="attr: {class: $data.description !== undefined ? 'btn-primary' : 'btn-decline'}">
+            </td>
             <td data-bind="text: name"></td>
             <td data-bind="text: type"></td>
             <td>
