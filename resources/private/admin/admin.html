@@ -23,16 +23,36 @@
         <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
       </ul>
       <h3>Toiminnot</h3>
-      <ul data-bind="foreach: actions.data">
-        <li>
-          <span data-bind="text: name"></span>
-          (<span data-bind="text: type"></span>)
-          <!-- ko if: $data.roles --><div data-bind="foreach: roles"><span data-bind="text: $data"></div><!-- /ko -->
-          <!-- ko if: $data.parameters --><div data-bind="foreach: parameters"><span data-bind="text: $data"></div><!-- /ko -->
-          <!-- ko if: $data.description --><span data-bind="text: description"></span><!-- /ko -->
-        </li>
-      </ul>
-
+      <table>
+        <thead>
+          <th>toiminto</th>
+          <th>tyyppi</th>
+          <th>roolit</th>
+          <th>parametrit</th>
+          <th>kuvaus</th>
+        </thead>
+        <tbody data-bind="foreach: actions.data">
+          <tr>
+            <td data-bind="text: name"></td>
+            <td data-bind="text: type"></td>
+            <td>
+              <!-- ko if: $data.roles -->
+              <ul data-bind="foreach: roles">
+                <li data-bind="text: $data"></li>
+              </ul>
+              <!-- /ko -->
+            </td>
+            <td>
+              <!-- ko if: $data.parameters -->
+              <ul data-bind="foreach: parameters">
+                <li data-bind="text: $data"></li>
+              </ul>
+              <!-- /ko -->
+            </td>
+            <td data-bind="text: type"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </body>
