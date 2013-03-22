@@ -314,7 +314,7 @@
                                  {:name "lamminvesiKytkin" :type :checkbox}
                                  {:name "aurinkopaneeliKytkin" :type :checkbox}
                                  {:name "saunoja" :type :string :subtype :number :unit "kpl"}
-                                 {:name "vaestonsuoja" :type :string :subtype :number}]}
+                                 {:name "vaestonsuoja" :type :string :subtype :number :unit "hengelle"}]}
                          {:name "luokitus"
                           :type :group
                           :body [{:name "energialuokka" :type :select
