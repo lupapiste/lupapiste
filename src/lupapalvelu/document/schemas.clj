@@ -313,7 +313,7 @@
                                  {:name "koneellinenilmastointiKytkin" :type :checkbox}
                                  {:name "lamminvesiKytkin" :type :checkbox}
                                  {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                 {:name "saunoja" :type :string :subtype :number}
+                                 {:name "saunoja" :type :string :subtype :number :unit "kpl"}
                                  {:name "vaestonsuoja" :type :string :subtype :number}]}
                          {:name "luokitus"
                           :type :group
