@@ -8,7 +8,16 @@
         [sade.env :only [config]]
         [sade.strings :only [starts-with-i]]))
 
-(def ^:private auth [(:username (:nls config)) (:password (:nls config))])
+(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
+(def maasto "https://ws.nls.fi/maasto/wfs")
+(def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
+
+(def ^:private auth
+  (let [conf (:nls config)]
+    {:raster     [(:username (:raster conf)) (:password (:raster conf))]
+     ktjkii      [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
+     maasto      [(:username (:maasto conf)) (:password (:maasto conf))]
+     nearestfeature [(:username (:maasto conf)) (:password (:maasto conf))]}))
 
 (def ^:private timeout 30000)
 
@@ -134,10 +143,6 @@
                   zip/xml-zip)]
     (xml-> features :gml:featureMember)))
 
-(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
-(def maasto "https://ws.nls.fi/maasto/wfs")
-(def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
-
 (defn execute
   "Takes a query (in XML) and returns a vector. If the first element of that
    vector is :ok, then the next element is a list of features that match the
@@ -146,7 +151,8 @@
   [url q]
   (deref
     (future
-      (let [response (client/post url {:body q :basic-auth auth :throw-exceptions false})]
+      (println "execute" url)
+      (let [response (client/post url {:body q :basic-auth (get auth url) :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
           [:error response])))
@@ -165,9 +171,10 @@
   [url q]
   (deref
     (future
+      (println "GET" url)
       (let [response (client/get url
                                  {:query-params q
-                                  :basic-auth auth
+                                  :basic-auth (get auth url)
                                   :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
@@ -180,8 +187,11 @@
 ;;
 
 (defn raster-images [request]
-  (client/get "https://ws.nls.fi/rasteriaineistot/image"
-    {:query-params (:query-params request)
-     :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-     :basic-auth auth
-     :as :stream}))
+  (let [layer (get-in request [:query-params "LAYERS"])
+        basic-auth (if (re-matches #"ktj_kiinteisto.*" layer)
+                     (get auth ktjkii) (:raster auth))]
+    (client/get "https://ws.nls.fi/rasteriaineistot/image"
+                {:query-params (:query-params request)
+                 :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+                 :basic-auth basic-auth
+                 :as :stream})))
