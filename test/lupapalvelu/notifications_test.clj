@@ -3,6 +3,9 @@
   (:use lupapalvelu.notifications
         midje.sweet))
 
+(facts "email title"
+  (get-email-title {:title "Haavikontie 9, Tampere"} "comment") => "Lupapiste: Haavikontie 9, Tampere")
+
 (fact "create application link"
   (fact "..for application"
     (get-application-link {:id 1} "fi" "" "http://localhost:8080")

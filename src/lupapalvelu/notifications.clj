@@ -33,17 +33,20 @@
   (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients [recipients title msg]
-  (doseq [recipient recipients]
+  (doseq [recipient (flatten [recipients])]
     (send-off mail-agent (fn [_]
                            (if (email/send-mail recipient title msg)
                              (info "email was sent successfully")
                              (error "email could not be delivered."))))))
 
 (defn get-email-title [application title-key]
-  (str (i18n/with-lang "fi" (i18n/loc (str "email-title-prefix")))
-       (:title application)
-       (i18n/with-lang "fi" (i18n/loc (str "email-title-delimiter")))
-       (i18n/with-lang "fi" (i18n/loc (str title-key)))))
+  (i18n/with-lang "fi"
+    (str
+      #_(i18n/loc (str "email-title-prefix"))
+      "Lupapiste: "
+      (:title application)
+      #_(i18n/loc (str "email-title-delimiter"))
+      #_(i18n/loc (str title-key)))))
 
 ; new comment
 (defn get-message-for-new-comment [application host]
@@ -71,9 +74,10 @@
   (let [title (get-email-title application "new-comment-email-title")
         msg   (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/invite.html")
                                          (replace-style (get-styles))
+                                         (enlive/transform [:#name] (enlive/content (str (:firstName user) " " (:lastName user))))
                                          (replace-application-link "#link-" application "fi" "" host)
                                          )))]
-    #_(send-mail-to-recipients recipients title msg)
+    #_ (send-mail-to-recipients email title msg)
     msg))
 
 ; application opened
