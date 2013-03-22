@@ -142,6 +142,15 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
       <div data-bind="html: loc('operations', op, 'desc')"></div>
 
+      <div class="municipality-links" data-bind="visible: links">
+        <div data-bind="ltext: 'municipality.links'"></div>
+        <ul data-bind="foreach: links">
+          <li>
+            <a data-bind="text: name.fi, attr: {href: url}" href="#" target="_blank"></a>
+          </li>
+        </ul>
+      </div>
+      
       <div class="create-buttons">
         <button data-bind="click: goPhase3"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
           <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>
