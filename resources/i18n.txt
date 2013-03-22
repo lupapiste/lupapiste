@@ -43,3 +43,6 @@ operations.asuinrakennus.desc: Tottahan nyt asuinrakennuksen rakentaminen vaati 
 create.choose-op: Valitse toimenpide:
 integration.getAddressNotWorking: Kolmannenosapuolen osoitehakupalvelu ei ole käytettävissä, ole hyvä ja syötä osoite ja kunta:
  
+municipality.links: Kunnan rakennusvalvonnan suosittelemat linkit:
+
+operations.kaivuu.desc: 

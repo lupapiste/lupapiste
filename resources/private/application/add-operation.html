@@ -13,7 +13,10 @@
       <img src="/img/ajax-loader.gif"/>
     </div>
 
-    <a href="#" data-bind="attr: {href: url}, ltext: 'cancel'" class="btn-tree-back"></a>
+    <a href="#" data-bind="attr: {href: url}" class="btn">
+      <span class="icon drill-left-black-bigger inline-left"></span>
+      <span data-bind="ltext: 'cancel'"></span>
+    </a>
 
   </section>
   
@@ -22,7 +25,6 @@
     <div class="tree-last">
       
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
-      <div data-bind="html: loc('operations.desc', op)"></div>
 
       <button data-bind="click: addOperation" class="btn btn-primary">
         <span data-bind="ltext: 'operations.add'"></span>
@@ -30,9 +32,8 @@
       </button>
       
       <div data-bind="visible: pending">
-        <img src="/img/ajax-loader.gif"/>
+        <img src="/img/ajax-loader.gif" alt="lataa" />
       </div>
-      
     </div>
     
   </section>
