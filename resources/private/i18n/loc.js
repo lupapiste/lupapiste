@@ -3,12 +3,27 @@ var loc;
 ;(function() {
   "use strict";
 
-  loc = function(key) {
-    var term = loc.terms[key];
+  function not(v) { return !v; }
+  
+  loc = function() {
+    var term, i, len, key = arguments[0];
+
+    if (_.some(arguments, not)) return null;
+    
+    if (arguments.length > 1) {
+      len = arguments.length;
+      for (i = 1; i < len; i++) {
+        key = key + "." + arguments[i];
+      }
+    }
+
+    term = loc.terms[key];
+
     if (term === undefined) {
       debug("Missing localization key", key);
       return "$$NOT_FOUND$$" + key;
     }
+    
     return term;
   };
 

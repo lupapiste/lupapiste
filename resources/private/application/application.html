@@ -82,7 +82,7 @@
         <div data-bind="with: application" class="application_actions">
           <div class="muncipality-info">
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
-            <p data-bind="ltext: 'municipality.' + municipality()"></p>
+            <p data-bind="text: loc('municipality', municipality())"></p>
           </div>
           <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn"></button>
           <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class=""></button>

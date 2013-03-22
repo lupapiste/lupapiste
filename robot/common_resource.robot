@@ -270,7 +270,7 @@ Create inforequest
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
-  Sleep  1
+  # Sleep  1
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
@@ -290,12 +290,12 @@ Prepare new request
   Input text by test id  create-property-id  ${propertyId}
   Sleep  1
   Click by test id  create-continue
-  # Going too fast causes negative margins
+  # Going too fast causes animation to stop
   Set Selenium Speed  ${SLOW_SPEED}
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennuksen rakentaminen"]
-  Wait until  Element should be visible  xpath=//div[@class='tree-result']
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
+  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set Selenium Speed  ${DEFAULT_SPEED}
 
 # Closes the application that is currently open by clicking cancel button
@@ -378,3 +378,15 @@ Application state should be
 Permit type should be
   [Arguments]  ${type}
   Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}
+
+#
+# Proxy control:
+#
+
+Set integration proxy on
+  Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
+   
+Set integration proxy off
+  Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
+   
+  

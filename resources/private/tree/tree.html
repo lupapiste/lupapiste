@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <body>
+
+    <section id="tree-template" class="page" style="display: none;">
+    
+      <div class="default-tree-template">
+        
+        <div class="tree-title">
+          <span style="margin-left: 10px;" data-bind="foreach: stack">
+            <span data-bind="visible: $index"> / </span>
+            <span data-bind="text: text"></span>
+          </span>
+        </div>
+        
+        <div class="tree-content"></div>
+        
+        <div class="tree-nav">
+          <button class="tree-back" data-bind="click: goBack, enable: stack().length > 0">
+            &#x25c0;
+          </button>
+          <button class="tree-start" data-bind="click: goStart, enable: stack().length > 1">
+            &#x25c0;&#x25c0;
+          </button>
+        </div>
+        
+        <div class="tree-link">
+          <span data-bind="text: text"></span>
+          <span style="position: absolute; right: 10px;">&#x25b6;</span>
+        </div>
+        
+        <div class="tree-last">
+          <span data-bind="text: text"></span>
+        </div>
+        
+      </div>
+
+    </section>
+
+  </body>
+</html>

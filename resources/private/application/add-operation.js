@@ -7,62 +7,48 @@
 
     self.title = ko.observable();
     self.url = ko.observable();
+    self.operations = ko.observable();
     self.operation = ko.observable();
-    self.treeReady = ko.observable(false);
-    self.tree = null;
-
+    self.pending = ko.observable();
+    self.waitingOperations = ko.observable();
+    
     self.clear = function() {
       self.application = null;
-      return self.title("").url("").operation(null).treeReady(false);
+      return self.title("").url("").operations(null).operation(null).pending(false).waitingOperations(false);
     };
 
     self.init = function(application) {
       self.application = application;
-
-      self.operation(null).treeReady(false).title(application.title).url("#!/application/" + application.id);
+      self
+        .operations(null)
+        .operation(null)
+        .pending(false)
+        .waitingOperations(false)
+        .title(application.title)
+        .url("#!/application/" + application.id);
       var id = application.id;
       ajax
         .query("municipality", {municipality: application.municipality})
-        .success(function (data) { if (self.application.id === id) { self.setOperations(data.operations).treeReady(true); }})
+        .pending(self.waitingOperations)
+        .success(function (data) {
+          if (self.application.id === id) {
+            self.operations(data.operations);
+          }
+        })
         .call();
       return self;
     };
 
-    self.setOperations = function(operations) {
-      if (self.tree) { self.tree.reset(operations); }
-      return self;
+    self.addOperation = function(op) {
+      ajax
+        .command("add-operation", {id: self.application.id, operation: op.op})
+        .pending(self.pending)
+        .success(function() {
+          window.location.hash = self.url();
+        })
+        .call();
     };
-
-    self.generateLast = function(val) {
-      var e = $("<div>").addClass("tree-magic");
-      e.append($("<a>")
-        .addClass("tree-action")
-        .text(loc('addOperation'))
-        .click(function(e) {
-          ajax
-            .command("add-operation", {id: self.application.id, operation: val.op})
-            .success(function() {
-                window.location.hash = self.url();
-            })
-            .call();
-          var target = $(e.target);
-          setTimeout(function() {
-              target
-                .parent()
-                .empty()
-                .append($("<img>")
-                  .attr("src", "/img/ajax-loader.gif"));
-            }, 200);
-          return false;
-        }));
-      var icon = $("<span>").addClass("icon inline-left drill-left-black");
-      e.append($("<a>")
-        .addClass("tree-back")
-        .text(loc('back'))
-        .append(icon)
-        .click(self.tree.goback));
-      return e[0];
-    };
+    
   }
 
   var model = new Model();
@@ -83,14 +69,29 @@
   });
 
   $(function() {
-    var tree = selectionTree.create(
-        $("#add-operation .tree-content"),
-        $("#add-operation .tree-breadcrumbs"),
-        model.operation,
-        model.generateLast,
-        "operations");
-    model.tree = tree;
-    ko.applyBindings(model, $("#add-operation")[0]);
+
+    $("#add-operation").applyBindings(model);
+
+    var tree = $("#add-operation .operation-tree").selectTree({
+      template: $("#create-templates"),
+      last: $("#add-operation-templates .tree-last"),
+      onSelect: function(v) { model.operation(v ? v.op : null); },
+      baseModel: model
+    });
+    
+    function operations2tree(e) {
+      var key = e[0], value = e[1];
+      return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : {op: value}];
+    }
+
+    model.operations.subscribe(function(v) {
+      tree.reset(_.map(v, operations2tree));
+    });
+    
+    hub.subscribe({type: "keyup", keyCode: 37}, tree.back);
+    hub.subscribe({type: "keyup", keyCode: 33}, tree.start);
+    hub.subscribe({type: "keyup", keyCode: 36}, tree.start);
+    
   });
 
 })();

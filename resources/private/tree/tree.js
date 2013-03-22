@@ -1,171 +1,137 @@
-var selectionTree = (function () {
+;(function($) {
   "use strict";
 
-  function defaultContentFactory(name) {
-    var e = document.createElement("div");
-    e.setAttribute("class", "tree-result");
-    e.innerHTML = name;
-    return e;
-  }
+  function nop() { return true; }
 
-  function stopProp(f) {
-    return function (e) {
-      var event = getEvent(e);
-      event.stopPropagation();
-      event.preventDefault();
-      f();
-      return false;
-    };
-  }
-
-  function Tree(content, breadcrumbs, callback, contentFactory, locKeyPrefix) {
+  function Tree(context, args) {
     var self = this;
 
-    self.data = null;
-    self.content = $(content);
-    self.breadcrumbs = $(breadcrumbs);
-    self.callback = callback;
-    self.makeTerminalElement = contentFactory || defaultContentFactory;
-    self.prefix = locKeyPrefix || "tree";
-
-    self.width = content.parent().width();
-    self.speed = self.width / 2; // magical, but good.
-    self.crumbs = [];
-    self.stack = [];
-
-    self.goback = function () {
-      if (self.stack.length > 1) {
-        var d = self.stack.pop();
-        var n = self.stack[self.stack.length - 1];
-        $(d).animate({ "margin-left": self.width }, self.speed, function () { d.parentNode.removeChild(d); });
-        $(n).animate({ "margin-left": 0 }, self.speed);
-        self.crumbs.pop();
-        self.breadcrumbs.text(self.crumbs.join(" / "));
-      }
-      return self;
+    args = args || {};
+    
+    var defaultTemplate = $(".default-tree-template");
+    var template = args.template || defaultTemplate;
+    
+    var findTemplate = function(name) {
+      if (args[name]) return args[name];
+      var e = $(".tree-" + name, template);
+      return (e && e.length) ? e : $(".tree-" + name, defaultTemplate);
     };
-
-    self.gostart = function () {
-      if (self.stack.length > 0) {
-        var d = self.stack.pop();
-        $(d).animate({ "margin-left": self.width }, self.speed, self.gostart2);
-        self.breadcrumbs.animate({ "opacity": 0.0 }, self.speed, function () { self.breadcrumbs.text("").css("opacity", 1.0); });
-        var p = d.parentNode;
-        _.each(self.stack, function (n) { p.removeChild(n); });
-      } else {
-        self.gostart2();
-      }
-    };
-
-    self.gostart2 = function () {
-      self.crumbs = [];
-      self.stack = [];
-      self.content.empty();
-      if (self.data) {
-        var n = self.make(self.data);
-        self.stack.push(n);
-        $(n).css("margin-left", -self.width);
-        self.content.append(n);
-        $(n).animate({ "margin-left": 0 }, self.speed);
-      }
-      return self;
-    };
-
-    self.reset = function (newData) {
-      if (self.stack.length > 0) {
-        var d = self.stack[0];
-        $(d).animate({ "margin-left": self.width }, self.speed);
-      }
-      self.crumbs = [];
-      self.stack = [];
-      self.breadcrumbs.text("");
-      self.content.empty();
-      if (newData) { self.data = newData; }
-      if (self.data) {
-        var n = self.make(self.data);
-        self.stack.push(n);
-        $(n).css("margin-left", self.width).animate({ "margin-left": 0 }, self.speed);
-        self.content.append(n);
-      }
-      return self;
-    };
-
-    self.makeHandler = function (key, val, d) {
-      return function (e) {
-        var event = getEvent(e);
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        self.crumbs.push(loc(self.prefix + "." + key));
-        self.breadcrumbs.text(self.crumbs.join(" / "));
-
-        var terminal = !_.isArray(val);
-        var next = terminal ? self.makeTerminalElement(val, key) : self.make(val);
-        self.stack.push(next);
-        d.parentNode.appendChild(next);
-        var done = (terminal && self.callback) ? self.callback.bind(self, val) : null;
-        $(d).animate({ "margin-left": -self.width }, self.speed, done);
-
-        return false;
-      };
-    };
-
-    self.gobackEventHandler = stopProp(self.goback);
-    self.gostartEventHandler = stopProp(self.gostart);
-
-
-    self.make = function (t) {
-      var d = document.createElement("div");
-      var link;
-      var icon;
-      d.setAttribute("class", "tree-magic");
-      _.each(t, function (v) { d.appendChild(self.makeLink(v[0], v[1], d)); });
-
-      if (self.stack.length > 0) {
-        icon = document.createElement("span");
-        icon.className = "icon inline-left drill-left-black";
-        link = document.createElement("a");
-        link.className = "tree-back";
-        link.innerHTML = loc("tree.back");
-        link.href = "#";
-        link.onclick = self.gobackEventHandler;
-        link.appendChild(icon);
-        d.appendChild(link);
-      }
-
-      if (self.stack.length > 1) {
-        icon = document.createElement("span");
-        icon.className = "icon inline-left drill-left-all-black";
-        link = document.createElement("a");
-        link.className = "tree-start";
-        link.innerHTML = loc("tree.start");
-        link.href = "#";
-        link.onclick = self.gostartEventHandler;
-        link.appendChild(icon);
-        d.appendChild(link);
-      }
-
-      return d;
-    };
-
-    self.makeLink = function (key, val, d) {
-      var icon = document.createElement("span");
-      icon.className = "icon drill-right-orange inline-right";
-      var link = document.createElement("a");
-      link.innerHTML = loc(self.prefix + "." + key);
-      link.href = "#";
-      link.onclick = self.makeHandler(key, val, d);
-      link.appendChild(icon);
-      return link;
-    };
-
-  }
-
-  return {
-    create: function (content, breadcrumbs, callback, contentFactory, locKeyPrefix) {
-      return new Tree(content, breadcrumbs, callback, contentFactory, locKeyPrefix);
+    
+    var titleTemplate = findTemplate("title");
+    var contentTemplate = findTemplate("content");
+    var navTemplate = findTemplate("nav");
+    
+    self.linkTemplate = findTemplate("link");
+    self.lastTemplate = findTemplate("last");
+    
+    self.onSelect = args.onSelect || nop;
+    self.baseModel = args.baseModel || {};
+    self.data = [];
+    self.width = args.width || context.width();
+    self.speed = args.speed || self.width / 2;
+    self.moveLeft  = {"margin-left": "-=" + self.width};
+    self.moveRight = {"margin-left": "+=" + self.width};
+    
+    function findTreeData(target) {
+      var data = target.data("tree-link-data");
+      if (data) return data;
+      var parent = target.parent();
+      return (parent.length) ? findTreeData(parent) : null;
     }
+
+    self.clickGo = function(e) {
+      var target = $(e.target),
+          link = findTreeData(target);
+      if (!link) return true;
+      var selectedLink = link[0],
+          nextElement = link[1],
+          next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
+      self.model.stack.push(selectedLink);
+      self.stateNop().content.append(next).animate(self.moveLeft, self.speed, self.stateGo);
+      return false;
+    };
+    
+    self.goBack = function() {
+      if (self.model.stack().length < 1) return false;
+      if (self.model.selected()) {
+        self.model.selected(null);
+        self.onSelect(null);
+      }
+      self.stateNop();
+      self.model.stack.pop();
+      self.content.animate(self.moveRight, self.speed, function() {
+        self.stateGo();
+        $(".tree-page", self.content).filter(":last").remove();
+      });
+      return self;
+    };
+    
+    self.setClickHandler = function(handler) { self.clickHandler = handler; return self; }
+    self.stateGo = _.partial(self.setClickHandler, self.clickGo);
+    self.stateNop = _.partial(self.setClickHandler, nop);
+
+    self.makeFinal = function(data) {
+      self.model.selected(data);
+      self.onSelect(data);
+      return self.lastTemplate
+        .clone()
+        .addClass("tree-page")
+        .css("width", self.width + "px")
+        .applyBindings(_.extend({}, self.baseModel, data));
+    }
+    
+    self.makeLinks = function(data) {
+      return _.reduce(data, self.appendLink, $("<div>").addClass("tree-page").css("width", self.width + "px"));
+    };
+    
+    self.appendLink = function(div, linkData) {
+      var link = self.linkTemplate
+        .clone()
+        .data("tree-link-data", linkData)
+        .applyBindings(_.extend({}, self.baseModel, linkData[0]));
+      return div.append(link);
+    };
+    
+    self.reset = function(data) {
+      self.stateNop();
+      self.data = data;
+      self.model.stack.removeAll();
+      self.content.empty();
+      if (self.data && self.data.length) {
+        self.content
+          .css("margin-left", "" + self.width + "px")
+          .append(self.makeLinks(data))
+          .animate({"margin-left": "0px"}, self.speed, self.stateGo);
+      }
+      return self;
+    };
+    
+    self.model = {
+      stack: ko.observableArray([]),
+      selected: ko.observable(),
+      goBack: self.goBack,
+      goStart: function() { self.reset(self.data); return false; }
+    };
+
+    self.content = contentTemplate.clone().click(function(e) { return self.clickHandler(getEvent(e)); });
+    
+    context
+      .append(titleTemplate.clone())
+      .append(self.content)
+      .append(navTemplate.clone())
+      .applyBindings(_.extend({}, self.baseModel, self.model));
+    
+    return util.fluentify({
+      reset:    self.reset,
+      back:     self.model.goBack,
+      start:    self.model.goStart,
+      selected: self.model.selected
+    });
+    
+  }
+  
+  $.fn.selectTree = function(arg) {
+    return new Tree(this, arg);
   };
 
-})();
+})(jQuery);
