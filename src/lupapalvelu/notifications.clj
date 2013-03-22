@@ -59,12 +59,19 @@
   (get-email-recipients-for-application application))
 
 (defn send-notifications-on-new-comment [application user-commenting comment-text host]
-  (if (= :authority (keyword (:role user-commenting)))
+  (when (= :authority (keyword (:role user-commenting)))
     (let [recipients (get-email-recipients-for-new-comment application)
-          msg (get-message-for-new-comment application host)]
-      (send-mail-to-recipients recipients
-                               (get-email-title application "new-comment-email-title")
-                               msg))))
+          msg        (get-message-for-new-comment application host)
+          title      (get-email-title application "new-comment-email-title")]
+      (send-mail-to-recipients recipients title msg))))
+
+;; invite
+(defn invite [application user-commenting comment-text host]
+  (when (= :authority (keyword (:role user-commenting)))
+    (let [recipients (get-email-recipients-for-new-comment application)
+          msg        (get-message-for-new-comment application host)
+          title      (get-email-title application "new-comment-email-title")]
+      (send-mail-to-recipients recipients title msg))))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
@@ -83,11 +90,10 @@
 
 (defn send-notifications-on-application-state-change [application-id host]
   (let [application (mongo/by-id :applications application-id)
-        recipients (get-email-recipients-for-application application)
-        msg (get-message-for-application-state-change application host)]
-    (send-mail-to-recipients recipients
-                             (get-email-title application "state-change-email-title")
-                             msg)))
+        recipients  (get-email-recipients-for-application application)
+        msg         (get-message-for-application-state-change application host)
+        title       (get-email-title application "state-change-email-title")]
+    (send-mail-to-recipients recipients title msg)))
 
 ; verdict given
 (defn get-message-for-verdict [application host]
@@ -99,8 +105,7 @@
 
 (defn send-notifications-on-verdict [application-id host]
   (let [application (mongo/by-id :applications application-id)
-        recipients (get-email-recipients-for-application application)
-        msg (get-message-for-verdict application host)]
-    (send-mail-to-recipients recipients
-                             (get-email-title application "verdict-email-title")
-                             msg)))
+        recipients  (get-email-recipients-for-application application)
+        msg         (get-message-for-verdict application host)
+        title       (get-email-title application "verdict-email-title")]
+    (send-mail-to-recipients recipients title msg)))
