@@ -22,6 +22,17 @@
       <ul data-bind="foreach: activations.data">
         <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
       </ul>
+      <h3>Toiminnot</h3>
+      <ul data-bind="foreach: actions.data">
+        <li>
+          <span data-bind="text: name"></span>
+          (<span data-bind="text: type"></span>)
+          <!-- ko if: $data.roles --><div data-bind="foreach: roles"><span data-bind="text: $data"></div><!-- /ko -->
+          <!-- ko if: $data.parameters --><div data-bind="foreach: parameters"><span data-bind="text: $data"></div><!-- /ko -->
+          <!-- ko if: $data.description --><span data-bind="text: description"></span><!-- /ko -->
+        </li>
+      </ul>
+
     </div>
   </section>
 </body>
