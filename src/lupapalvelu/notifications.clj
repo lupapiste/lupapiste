@@ -22,8 +22,9 @@
   (slurp (io/resource "email-templates/styles.css")))
 
 (defn get-application-link [application lang suffix host]
-  (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
-    (str host "/" lang "/applicant#!" permit-type-path (:id application) suffix)))
+  (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest" "/application")
+        full-path        (str permit-type-path "/" (:id application) suffix)]
+    (str host "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
 
 (defn replace-style [e style]
   (enlive/transform e [:style] (enlive/content style)))
@@ -66,12 +67,14 @@
       (send-mail-to-recipients recipients title msg))))
 
 ;; invite
-(defn invite [application user-commenting comment-text host]
-  (when (= :authority (keyword (:role user-commenting)))
-    (let [recipients (get-email-recipients-for-new-comment application)
-          msg        (get-message-for-new-comment application host)
-          title      (get-email-title application "new-comment-email-title")]
-      (send-mail-to-recipients recipients title msg))))
+(defn send-invite [email text application user host]
+  (let [title (get-email-title application "new-comment-email-title")
+        msg   (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/invite.html")
+                                         (replace-style (get-styles))
+                                         (replace-application-link "#link-" application "fi" "" host)
+                                         )))]
+    #_(send-mail-to-recipients recipients title msg)
+    msg))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
