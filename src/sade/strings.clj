@@ -30,7 +30,12 @@
   (when (clojure.core/and s prefix)
     (.startsWith (.toLowerCase s) (.toLowerCase prefix))))
 
-;; Commons-lang3 wrappers
+;; Commons-lang3 wrapper
 (defn numeric?
-  "http://commons.apache.org/lang/api-release/org/apache/commons/lang3/StringUtils.html#isNumeric(java.lang.CharSequence)"
-  [s] (StringUtils/isNumeric s))
+  "http://commons.apache.org/proper/commons-lang/javadocs/api-3.1/org/apache/commons/lang3/StringUtils.html#isNumeric(java.lang.CharSequence)"
+  [s] (and (string? s) (StringUtils/isNumeric s)))
+
+(defn decimal-number? [s]
+  (or (numeric? s) (if (and (string? s) (re-matches #"^\d+\.\d+$" s)) true false)))
+
+
