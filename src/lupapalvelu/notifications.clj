@@ -21,9 +21,9 @@
 (defn get-styles []
   (slurp (io/resource "email-templates/styles.css")))
 
-(defn get-application-link [application lang suffix host]
-  (let [permit-type-path (if (:infoRequest application) "/inforequest" "/application")
-        full-path        (str permit-type-path "/" (:id application) suffix)]
+(defn get-application-link [{:keys [infoRequest id]} lang suffix host]
+  (let [permit-type-path (if infoRequest "/inforequest" "/application")
+        full-path        (str permit-type-path "/" id suffix)]
     (str host "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
 
 (defn replace-style [e style]

@@ -14,6 +14,9 @@
     (get-application-link {:id 1 :infoRequest true} "fi" "/comment" "http://localhost:8080")
       => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
 
+(fact "invite"
+  (send-invite ..email.. ..text.. {:id 1} {:firstName "Ihana" :lastName "Krapula"} ..host..) => (contains "Ihana Krapula"))
+
 (fact "Each user in auth-array gets email from authority comment."
   (get-email-recipients-for-new-comment { :auth [{:id "a" :role "owner"} {:id "b" :role "writer"} {:id "c" :role "unknown"}] :title "title" }) => [ "a@foo.com" "b@foo.com" "c@foo.com"]
   (provided (mongo/by-id :users "a") => {:email "a@foo.com"}
