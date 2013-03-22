@@ -406,7 +406,7 @@
                                                               :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
                                                                      {:name "kayttotarkoitusKoodi" :type :select
                                                                       :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
-                                                                             {:name "myymälä, majoitus- ja ravitsemustilaa"}
+                                                                             {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
                                                                              {:name "hoitotilaa"}
                                                                              {:name "toimisto- ja hallintotilaa"}
                                                                              {:name "kokoontumistilaa"}
