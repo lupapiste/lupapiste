@@ -22,7 +22,7 @@
   (slurp (io/resource "email-templates/styles.css")))
 
 (defn get-application-link [application lang suffix host]
-  (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest" "/application")
+  (let [permit-type-path (if (:infoRequest application) "/inforequest" "/application")
         full-path        (str permit-type-path "/" (:id application) suffix)]
     (str host "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
 
