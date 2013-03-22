@@ -347,7 +347,11 @@ var docgen = (function() {
         }
       });
 
-      span.appendChild(makeLabel("select", "", "personSelector", true));
+      var label = document.createElement("label");
+      var locKey = ('person-selector');
+      label.className = "form-label form-label-select";
+      label.innerHTML = loc(locKey);
+      span.appendChild(label);
       span.appendChild(select);
 
       // new invite

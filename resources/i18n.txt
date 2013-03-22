@@ -74,3 +74,5 @@ operations.kortteli-yht-alue-muutos.desc: Hankkeesi vaatii todennäköisesti luv
 operations.muu-tontti-tai-kort-muutos.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
 operations.jatevesi.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
 operations.muu-rakentaminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+
+person-selector: Valitse henkilö
