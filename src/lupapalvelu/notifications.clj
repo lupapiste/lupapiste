@@ -84,13 +84,12 @@
 (defn get-message-for-application-state-change [application host]
   (let [application-id (:id application)
         e (enlive/html-resource "email-templates/application-state-change.html")]
-
     (apply str (enlive/emit* (-> e
                                (replace-style (get-styles))
                                (replace-application-link "#application-link-" application "fi" "" host)
                                (replace-application-link "#application-link-" application "sv" "" host)
-                               (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
-                               (enlive/transform [(keyword "#state-sv")] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application)))))))))))
+                               (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
+                               (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application)))))))))))
 
 (defn get-email-recipients-for-application-state-change [application]
   (get-email-recipients-for-application application))
