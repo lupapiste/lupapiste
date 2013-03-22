@@ -16,7 +16,8 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (defquery "invites"
-  {:authenticated true}
+  {:authenticated true
+   :verified true}
   [{{:keys [id]} :user}]
   (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
         projection (assoc filter :_id 0)
@@ -39,7 +40,8 @@
 
 (defcommand "invite"
   {:parameters [:id :email :title :text :documentName]
-   :roles      [:applicant]}
+   :roles      [:applicant]
+   :verified   true}
   [{created :created
     user    :user
     {:keys [id email title text documentName documentId]} :data {:keys [host]} :web :as command}]
@@ -75,7 +77,8 @@
 
 (defcommand "approve-invite"
   {:parameters [:id]
-   :roles      [:applicant]}
+   :roles      [:applicant]
+   :verified   true}
   [{user :user :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
