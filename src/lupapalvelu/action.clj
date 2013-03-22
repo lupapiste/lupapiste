@@ -25,19 +25,6 @@
         invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
 
-(defn invite-body [user id host]
-  (format
-    (str
-      "Tervehdys,\n\n%s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/app/fi/applicant?hashbang=!/application/%s#!/application/%s\n\n"
-      "Yst\u00E4v\u00E4llisin terveisin,\n\n"
-      "Lupapiste.fi")
-    (:firstName user)
-    (:lastName user)
-    host
-    id
-    id))
-
 (defcommand "invite"
   {:parameters [:id :email :title :text :documentName]
    :roles      [:applicant]
@@ -69,11 +56,7 @@
                 {:_id application-id
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
-              (future
-                (if (email/send-mail? email (:title application) (invite-body user application-id host))
-                      (info "email was sent successfully")
-                  (error "email could not be delivered.")))
-              nil)))))))
+              (notifications/send-invite email text application user host))))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]

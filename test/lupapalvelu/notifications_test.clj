@@ -4,9 +4,12 @@
         midje.sweet))
 
 (fact "create application link"
-  (get-application-link {:id 1} "fi" "" "http://localhost:8080") => "http://localhost:8080/app/fi/applicant?hashbang=!/application/1#!/application/1"
-  (get-application-link {:id 1 :infoRequest true} "fi" "/comment" "http://localhost:8080")
-    => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment")
+  (fact "for application"
+    (get-application-link {:id 1} "fi" "" "http://localhost:8080")
+      => "http://localhost:8080/app/fi/applicant?hashbang=!/application/1#!/application/1")
+  (fact "for inforequest"
+    (get-application-link {:id 1 :infoRequest true} "fi" "/comment" "http://localhost:8080")
+      => "http://localhost:8080/app/fi/applicant?hashbang=!/inforequest/1/comment#!/inforequest/1/comment"))
 
 ; new comment
 (fact "Each user in auth-array gets email from authority comment."
