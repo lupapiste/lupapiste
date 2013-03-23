@@ -21,7 +21,7 @@
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.9.2"]
                  [org.clojure/data.xml "0.0.7"]
-                 [swiss-arrows "0.1.0"]
+                 [swiss-arrows "0.5.1"]
                  [me.raynes/fs "1.4.0"]
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
