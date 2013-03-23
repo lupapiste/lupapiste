@@ -361,10 +361,8 @@ Add comment
 #
 
 Apply minimal fixture now
-  Show dev-box
-  Click element  debug-apply-minimal
-  Wait until  Element should be visible  debug-apply-done
-  Kill dev-box
+  Execute Javascript  ajax.query("apply-fixture", {"name":"minimal"}).success(function(){alert('OK')}).call();
+  Wait Until  Alert Should Be Present
 
 #
 # Application state check:
@@ -385,8 +383,7 @@ Permit type should be
 
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
-   
+
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
-   
-  
+
