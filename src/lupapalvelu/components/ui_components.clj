@@ -13,7 +13,7 @@
 
 (defn- conf []
   (let [js-conf {:maps (:maps env/config)
-                 :fileExtension mime/allowed-extensions}
+                 :fileExtensions mime/allowed-extensions}
         data (json/generate-string js-conf)]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
