@@ -28,7 +28,9 @@
 
     self.useManualEntry = ko.observable(false);
     
+    self.municipalitiesById = ko.observable();
     self.municipalities = ko.observableArray([]);
+    
     self.map = null;
 
     self.search = ko.observable("");
@@ -45,13 +47,12 @@
     self.operations = ko.observable(null);
     self.requestType = ko.observable();
     
-    self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
+    self.addressOk = ko.computed(function() { return self.municipalityCode() && !isBlank(self.address()); });
 
     self.clear = function() {
-
       self.goPhase1();
       if (!self.map) {
-        self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
+        self.map = gis.makeMap("create-map").center(404168, 7205000, -1);
         self.map.addClickHandler(self.click);
       }
       self.map.clear().updateSize();
@@ -73,16 +74,15 @@
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
     self.setPropertyId = function(value) { return  self.propertyId(value); };
-    self.setMunicipality = function(value) { return isBlank(value) ? self.municipalityCode(null).municipality("") : self.municipalityCode(value).municipality(loc("municipality." + value)); };
+    self.setMunicipality = function(id) { return self.municipalityCode(id).municipality(loc("municipality", id)); };
     self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
 
-    self.municipalityCode.subscribe(function(v) {
-      self.operations(null).links.removeAll();
-      if (!v || v.length === 0) { return; }
-      ajax
-        .query("municipality", {municipality: v})
-        .success(function (data) { if (self.municipalityCode() === v) { self.operations(data.operations).links(data.links); }})
-        .call();
+    self.municipalityCode.subscribe(function(id) {
+      if (!id) return;
+      var m = self.municipalitiesById()[id];
+      self
+        .operations(m ? m.operations : null)
+        .links(m ? m.links : null)
     });
 
     //
@@ -101,8 +101,8 @@
     self.click = function(x, y) {
       self
         .setXY(x, y)
-        .setPropertyId("")
-        .setMunicipality("")
+        .setPropertyId(null)
+        .setMunicipality(null)
         .beginUpdateRequest()
         .searchMunicipality(x, y)
         .searchPropertyId(x, y)
@@ -185,7 +185,7 @@
       var requestId = self.updateRequestId;
       ajax
         .query("municipality-by-location", {x: x, y: y})
-        .success(self.onResponse(requestId, function(data) { self.setMunicipality(data.result); }))
+        .success(self.onResponse(requestId, function(data) { self.setMunicipality(data.id); }))
         .error(self.onResponse(requestId, function() { self.setMunicipality(null); }))
         .call();
       return self;
@@ -241,10 +241,15 @@
   }();
 
   hub.onPageChange("create", model.clear);
-
+  
   ajax
     .query("municipalities-for-new-application")
-    .success(function(data) { model.municipalities(data.municipalities); })
+    .success(function(data) {
+      var d = data.municipalities;
+      model
+        .municipalitiesById(_.reduce(d, function(d, m) { d[m.id] = m; return d; }, {}))
+        .municipalities(_.sortBy(d, function(m) { return m.name[loc.currentLanguage]; }));
+    })
     .call();
 
   $(function() {
