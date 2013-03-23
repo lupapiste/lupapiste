@@ -1,8 +1,6 @@
-if (typeof LUPAPISTE === "undefined") {
-  var LUPAPISTE = {};
-}
-
+var LUPAPISTE = LUPAPISTE || {};
 LUPAPISTE.Upload = {
+    fileExtensions: LUPAPISTE.config.fileExtensions.join(", "),
     applicationId: ko.observable(),
     attachmentId: ko.observable(),
     attachmentType: ko.observable(),
