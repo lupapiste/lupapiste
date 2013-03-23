@@ -1,8 +1,11 @@
 var attachment = (function() {
   "use strict";
 
-  var applicationId;
-  var attachmentId;
+  var applicationId = null;
+  var uploadingApplicationId = null;
+  var attachmentId = null;
+  var model = null;
+
   var commentModel = new comments.create();
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
@@ -93,7 +96,7 @@ var attachment = (function() {
     };
   }
 
-  var model = {
+  model = {
     attachmentId:   ko.observable(),
     application: {
       id:     ko.observable(),
@@ -106,32 +109,35 @@ var attachment = (function() {
     type:           ko.observable(),
     attachmentType: ko.observable(),
     allowedAttachmentTypes: ko.observableArray(),
+    previewDisabled: ko.observable(false),
 
     hasPreview: function() {
-      return this.isImage() || this.isPdf() || this.isPlainText();
+      return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
     },
 
     isImage: function() {
-      var version = this.latestVersion();
+      var version = model.latestVersion();
       if (!version) { return false; }
       var contentType = version.contentType;
       return contentType && contentType.indexOf('image/') === 0;
     },
 
     isPdf: function() {
-      var version = this.latestVersion();
+      var version = model.latestVersion();
       if (!version) { return false; }
       return version.contentType === "application/pdf";
     },
 
     isPlainText: function() {
-      var version = this.latestVersion();
+      var version = model.latestVersion();
       if (!version) { return false; }
       return version.contentType === "text/plain";
     },
 
     newAttachmentVersion: function() {
-      initFileUpload(this.application.id(), this.attachmentId(), this.attachmentType(), false);
+      initFileUpload(model.application.id(), model.attachmentId(), model.attachmentType(), false);
+
+      model.previewDisabled(true);
 
       // Upload dialog is opened manually here, because click event binding to
       // dynamic content rendered by Knockout is not possible
@@ -139,12 +145,14 @@ var attachment = (function() {
     },
 
     deleteAttachment: function() {
+      model.previewDisabled(true);
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     },
 
-    deleteVersion: function(model) {
-      var fileId = model.fileId;
+    deleteVersion: function(fileModel) {
+      var fileId = fileModel.fileId;
       deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
+      model.previewDisabled(true);
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment-version");
     }
   };
@@ -219,6 +227,13 @@ var attachment = (function() {
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
+    model.previewDisabled(false);
+  });
+  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment"}, function() {
+    model.previewDisabled(false);
+  });
+  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment-version"}, function() {
+    model.previewDisabled(false);
   });
 
   $(function() {
@@ -234,7 +249,6 @@ var attachment = (function() {
     resetUploadIframe();
   });
 
-  var uploadingApplicationId;
 
   function uploadDone() {
     if (uploadingApplicationId) {
