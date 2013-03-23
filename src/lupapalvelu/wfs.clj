@@ -151,7 +151,6 @@
   [url q]
   (deref
     (future
-      (println "execute" url)
       (let [response (client/post url {:body q :basic-auth (get auth url) :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
@@ -171,7 +170,6 @@
   [url q]
   (deref
     (future
-      (println "GET" url)
       (let [response (client/get url
                                  {:query-params q
                                   :basic-auth (get auth url)
