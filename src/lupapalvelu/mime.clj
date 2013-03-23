@@ -18,7 +18,7 @@
 (def mime-type-pattern
   (re-pattern
     (join "|" [
-          "(image/.+)"
+          "(image/(gif|jpeg|png|tiff|vnd.dwg|x-pict))"
           "(text/(plain|rtf))"
           (str "(application/("
                (join "|" [
