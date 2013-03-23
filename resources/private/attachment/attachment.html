@@ -26,7 +26,7 @@
       <div class="file-preview" data-bind="visible: hasPreview()">
         <div class="file-preview-image" data-bind="if: isImage()">
           <a data-bind="attr: {href: '/api/view-attachment/' + latestVersion().fileId}">
-            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" />
+            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
           </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
