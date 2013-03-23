@@ -34,9 +34,9 @@
             <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
             <select
               data-bind="visible: useManualEntry,
-                         options: municipalities,
-                         optionsText: getMunicipalityName,
-                         optionsValue: 'municipalityCode',
+                         options: municipalities.municipalities,
+                         optionsText: function(m) { return loc('municipality', m.id); },
+                         optionsValue: 'id',
                          value: municipalityCode,
                          optionsCaption: loc('choose')"
               data-test-id="create-municipality-select"
