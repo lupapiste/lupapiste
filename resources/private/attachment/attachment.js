@@ -28,6 +28,9 @@ var attachment = (function() {
       .success(function() {
         repository.load(applicationId);
       })
+      .error(function(e) {
+        repository.load(applicationId);
+      })
       .call();
     return false;
   }
@@ -68,6 +71,9 @@ var attachment = (function() {
           notify.success("liite hyl\u00E4tty",model);
           repository.load(id);
         })
+        .error(function() {
+          repository.load(id);
+        })
         .call();
       return false;
     };
@@ -77,6 +83,9 @@ var attachment = (function() {
       ajax.command("approve-attachment", { id: id, attachmentId: self.attachmentId})
         .success(function() {
           notify.success("liite hyv\u00E4ksytty",model);
+          repository.load(id);
+        })
+        .error(function() {
           repository.load(id);
         })
         .call();
