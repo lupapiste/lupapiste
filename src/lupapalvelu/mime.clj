@@ -36,3 +36,8 @@
 (defn allowed-file? [filename]
   (when-let [t (mime-type filename)]
       (re-matches mime-type-pattern t)))
+
+(defn allowed-extensions []
+  (keys
+    (into (sorted-map)
+          (filter #(re-matches mime-type-pattern (second %)) mime-types))))
