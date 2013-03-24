@@ -52,8 +52,6 @@
     self.operations = ko.observable(null);
     self.requestType = ko.observable();
     
-    self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.address()); });
-
     self.clear = function() {
       self.goPhase1();
       if (!self.map) {
@@ -80,7 +78,9 @@
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
     self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
 
-    self.municipality.subscribe(function(m) { return self.municipalityCode(m ? m.id : null); });
+    self.municipality.subscribe(function(m) { var id = m ? m.id : null; if (self.municipalityCode() != id) self.municipalityCode(id); });
+    self.municipalityCode.subscribe(function(c) { municipalities.findById(c, self.municipality); });
+    self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.address()); });
       
     //
     // Concurrency control:
@@ -225,11 +225,6 @@
     self.createApplication = self.create.bind(self, false);
     self.createInfoRequest = self.create.bind(self, true);
 
-    self.getMunicipalityName = function(m) {
-      console.log("N:", m);
-      return m.name[loc.currentLanguage];
-    };
-    
   }();
 
   hub.onPageChange("create", model.clear);
