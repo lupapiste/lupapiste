@@ -8,9 +8,9 @@
     <div data-bind="visible: operations">
       <div class="operation-tree tree-control"></div>
     </div>
-    
+
     <div data-bind="visible: waitingOperations">
-      <img src="/img/ajax-loader.gif"/>
+      <img src="/img/ajax-loader.gif" alt="..."/>
     </div>
 
     <a href="#" data-bind="attr: {href: url}" class="btn">
@@ -19,24 +19,24 @@
     </a>
 
   </section>
-  
+
   <section class="page" id="add-operation-templates">
-  
+
     <div class="tree-last">
-      
+
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
 
       <button data-bind="click: addOperation" class="btn btn-primary">
         <span data-bind="ltext: 'operations.add'"></span>
         <span class="icon add left-align"></span>
       </button>
-      
+
       <div data-bind="visible: pending">
-        <img src="/img/ajax-loader.gif" alt="lataa" />
+        <img src="/img/ajax-loader.gif" alt="..." />
       </div>
     </div>
-    
+
   </section>
-  
+
 </body>
 </html>

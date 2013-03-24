@@ -1,2 +1,4 @@
-body {padding-top: 1em;}
-optgroup + .default-option {display: none;}
+body {padding-top: 1em}
+#initLoader {text-align:center;line-height:150px}
+#initLoader img {vertical-align:bottom}
+#attachmentUploadForm {display:none}

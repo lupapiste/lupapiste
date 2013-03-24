@@ -18,7 +18,7 @@
 (def mime-type-pattern
   (re-pattern
     (join "|" [
-          "(image/.+)"
+          "(image/(gif|jpeg|png|tiff|vnd.dwg|x-pict))"
           "(text/(plain|rtf))"
           (str "(application/("
                (join "|" [
@@ -28,6 +28,10 @@
                      "vnd\\.oasis\\.opendocument\\..+"
                      "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
 
+(def allowed-extensions
+  (keys
+    (into (sorted-map)
+          (filter #(re-matches mime-type-pattern (second %)) mime-types))))
 
 (defn mime-type [filename]
   (when filename

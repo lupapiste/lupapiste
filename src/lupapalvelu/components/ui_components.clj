@@ -1,8 +1,9 @@
 (ns lupapalvelu.components.ui-components
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.components.core :as c]
-            [sade.env :as env]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mime :as mime]
+            [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]))
 
@@ -11,7 +12,8 @@
               :name "common"})
 
 (defn- conf []
-  (let [js-conf (util/sub-map env/config [:maps])
+  (let [js-conf {:maps (:maps env/config)
+                 :fileExtensions mime/allowed-extensions}
         data (json/generate-string js-conf)]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
