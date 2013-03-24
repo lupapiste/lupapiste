@@ -311,7 +311,7 @@
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
             <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
-            <h1 class="form-error" data-bind="visible: error, text: error"></h1>
+            <div class="form-error" data-bind="visible: error, text: error"></div><br/><br/>
           </form>
         </div>
       </div>

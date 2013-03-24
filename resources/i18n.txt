@@ -79,3 +79,5 @@ person-selector: Valitse henkilö
 
 attachment.upload.instructions: Suurin sallittu tiedostokoko on 100 Mt. Sallitut tiedostomuodot ovat:
 
+invite.error.missing-parameters: täytä kaikki kentät.
+invite.already-has-auth: olet jo kutsunut kyseisen henkilön.

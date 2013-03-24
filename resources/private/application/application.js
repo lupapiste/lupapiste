@@ -445,7 +445,7 @@
           LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
-          self.error(d.text);
+          self.error(loc('invite',d.text));
         })
         .call();
       return false;
