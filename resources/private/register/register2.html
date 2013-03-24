@@ -54,6 +54,15 @@
             <input class="form-input text long" id="test-register-confirmPassword" data-bind="value: confirmPassword, valueUpdate: 'afterkeydown'" type="password" required="required" />
           </div>
         </div>
+        <div class="form-group">
+          <div class="form-entry">
+            <label>
+              <input type="checkbox" id="acceptTerms" required="required" data-bind="checked: acceptTerms" value="true">
+              <span data-bind="ltext: 'register.accept-terms.label'"></span>
+              <a href="about#!/terms" target="_new" data-bind="ltext: 'register.accept-terms.link'"></a>
+            </label>
+          </div>
+        </div>
         <div>
           <button id="test-register-submit" data-bind="disable: disabled, click: submit, ltext: 'register.register-action'" type="submit" class="btn btn-primary">Rekisteröidy</button>
           <button data-bind="click: reset, ltext: 'cancel'" type="button" class="btn">Peruuta</button>

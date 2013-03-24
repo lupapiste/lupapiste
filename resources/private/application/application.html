@@ -310,6 +310,9 @@
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
             <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
+            <div data-bind="visible: error" >
+              <div data-bind="ltext: error" class="context-error"></div>
+            </div>
             <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
             <div class="form-error" data-bind="visible: error, text: error"></div><br/><br/>
           </form>

@@ -129,6 +129,7 @@
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
                    :welcome anyone
+                   :about anyone
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
@@ -341,10 +342,10 @@
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
-  
+
   (defpage [:get "/api/proxy-ctrl"] []
     (resp/json {:ok true :data (not @env/proxy-off)}))
-  
+
   (defpage [:post "/api/proxy-ctrl/:value"] {value :value}
     (let [on (condp = value
                true   true
