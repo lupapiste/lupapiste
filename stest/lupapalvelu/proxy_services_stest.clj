@@ -100,5 +100,5 @@
       (let [request {:query-params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}}
             response (wfs/raster-images request)]
-        (println (get layer "LAYERS"))
+        (println "Checking" (get layer "LAYERS"))
         (:status response) => 200))))
