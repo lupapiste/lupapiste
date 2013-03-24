@@ -100,7 +100,6 @@
     // Called when user clicks on map:
 
     self.click = function(x, y) {
-      console.log("click:", x, y);
       self
         .setXY(x, y)
         .propertyId(null)
