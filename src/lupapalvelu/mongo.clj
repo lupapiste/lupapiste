@@ -6,7 +6,9 @@
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
-            [monger.gridfs :as gfs])
+            [monger.gridfs :as gfs]
+            [monger.command :refer [server-status]]
+            [sade.status :refer [defstatus]])
   (:import [javax.net.ssl SSLSocketFactory]
            [org.bson.types ObjectId]
            [com.mongodb WriteConcern MongoClientOptions MongoClientOptions$Builder]
@@ -216,3 +218,5 @@
   (doseq [coll (db/get-collection-names)]
     (when-not (.startsWith coll "system") (mc/drop coll)))
   (ensure-indexes))
+
+(defstatus :mongo (server-status))
