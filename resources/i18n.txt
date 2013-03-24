@@ -43,6 +43,8 @@ operations.asuinrakennus.desc: Tottahan nyt asuinrakennuksen rakentaminen vaati 
 create.choose-op: Valitse toimenpide:
 integration.getAddressNotWorking: Kolmannenosapuolen osoitehakupalvelu ei ole käytettävissä, ole hyvä ja syötä osoite ja kunta:
 
+municipalityNotSupported: Kunta ei mukana lupapiste.fi palvelussa.
+
 municipality.564: Oulu
  
 municipality.links: Kunnan rakennusvalvonnan suosittelemat linkit:
