@@ -99,11 +99,11 @@
 
 (defn feature-to-address [feature]
   (let [[x y] (s/split (address-part feature :oso:sijainti) #" ")]
-    {:katunimi (address-part feature :oso:katunimi)
-     :katunumero (address-part feature :oso:katunumero)
-     :kuntanimiFin (address-part feature :oso:kuntanimiFin)
-     :kuntanimiSwe (address-part feature :oso:kuntanimiSwe)
-     :kuntatunnus (address-part feature :oso:kuntatunnus)
+    {:street (address-part feature :oso:katunimi)
+     :number (address-part feature :oso:katunumero)
+     :municipality (address-part feature :oso:kuntatunnus)
+     :name {:fi (address-part feature :oso:kuntanimiFin)
+            :sv (address-part feature :oso:kuntanimiSwe)}
      :x x
      :y y}))
 
@@ -114,12 +114,12 @@
 (defn feature-to-address-string [[street number city]]
   (if (s/blank? city)
     (fn [feature]
-      (let [{:keys [katunimi kuntanimiFin]} (feature-to-address feature)]
-        (str katunimi ", " kuntanimiFin)))
+      (let [{street :street {fi :fi} :name} (feature-to-address feature)]
+        (str street ", " fi)))
     (fn [feature]
-      (let [{:keys [katunimi katunumero kuntanimiFin kuntanimiSwe]} (feature-to-address feature)
-            kuntanimi (if (starts-with-i kuntanimiFin city) kuntanimiFin kuntanimiSwe)]
-        (str katunimi " " katunumero ", " kuntanimi)))))
+      (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)
+            municipality-name (if (starts-with-i fi city) fi sv)]
+        (str street " " number ", " municipality-name)))))
 
 (defn feature-to-position [feature]
   (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
@@ -131,10 +131,11 @@
 
 (defn feature-to-address-details [feature]
   (when feature
-    {:katunimi (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
-     :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
-     :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
-     :kuntatunnus (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))}))
+    {:street (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+     :number (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
+     :municipality (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))
+     :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
+            :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}}))
 
 (defn response->features [response]
   (let [input-xml (:body response)

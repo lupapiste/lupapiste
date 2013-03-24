@@ -16,8 +16,8 @@
 
     self.goPhase1 = function() {
       $('.selected-location').hide();
-      $("#create-part-1").show()
-      $("#create-part-2").hide()
+      $("#create-part-1").show();
+      $("#create-part-2").hide();
       $("#create-part-3").hide();
     };
     
@@ -25,13 +25,13 @@
       tree.reset(_.map(self.municipality().operations, operations2tree));
       $("#create-part-1").hide();
       $("#create-part-2").show();
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
     };
 
     self.goPhase3 = function() {
       $("#create-part-2").hide();
       $("#create-part-3").show();
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
     };
 
     self.useManualEntry = ko.observable(false);
@@ -41,17 +41,48 @@
     self.search = ko.observable("");
     self.x = ko.observable(0.0);
     self.y = ko.observable(0.0);
-    self.address = ko.observable("");
-    self.municipalityCode = ko.observable(null);
+    self.addressData = ko.observable(null);
+    self.addressString = ko.observable(null);
+    self.propertyId = ko.observable(null);
     self.municipality = ko.observable(null);
-    self.propertyId = ko.observable("");
+    self.municipalityCode = ko.observable(null);
+    self.municipalityName = ko.observable();
+    self.municipalitySupported = ko.observable(true);
+    
+    self.findMunicipality = function(code) {
+      municipalities.findById(code, function(m) {
+        console.log("FOUND:", m);
+        self
+          .municipality(m)
+          .municipalitySupported(m ? true : false);
+      });
+      return self;
+    }
+    
+    self.addressData.subscribe(function(a) {
+      console.log("address:", a);
+      if (a) {
+        self
+          .addressString(a.street + " " + a.number)
+          .municipalityCode(a.municipality)
+          .municipalityName(a.name[loc.currentLanguage])
+          .findMunicipality(a.municipality);
+      }
+    });
+    
+    self.propertyId.subscribe(function(id) {
+      console.log("prop:", id);
+      if (id) {
+        self.municipalityCode(id.substring(0, 3));
+      }
+    });
 
     self.operation = ko.observable();
     self.message = ko.observable("");
     self.requestType = ko.observable();
-    
+
     self.clear = function() {
-      self.goPhase1();
+      self.goPhase1();  
       if (!self.map) {
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
         self.map.addClickHandler(self.click);
@@ -61,8 +92,10 @@
         .search("")
         .x(0)
         .y(0)
-        .address("")
+        .addressData(null)
+        .addressString("")
         .propertyId(null)
+        .municipalityCode(null)
         .message("")
         .requestType(null)
         .goPhase1();
@@ -71,20 +104,9 @@
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
-    self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero) : self.address(""); };
+        
+    self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
 
-    self.propertyId.subscribe(function(id) {
-      if (id) {
-        var code = id.substring(0, 3);
-        self.municipalityCode(code);
-        municipalities.findById(code, self.municipality);
-      } else {
-        self.municipalityCode(null).municipality(null);
-      }
-    });
-    
-    self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.address()); });
-    
     //
     // Concurrency control:
     //
@@ -101,6 +123,7 @@
     self.click = function(x, y) {
       self
         .setXY(x, y)
+        .addressData(null)
         .propertyId(null)
         .beginUpdateRequest()
         .searchPropertyId(x, y)
@@ -119,7 +142,7 @@
       $('.selected-location').show();
       self
         .resetXY()
-        .setAddress(null)
+        .addressData(null)
         .propertyId(null)
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
@@ -130,12 +153,12 @@
     self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
-      var requestId = self.updateRequestId;
       ajax
         .get("/proxy/get-address")
         .param("query", address)
         .success(self.onResponse(function(result) {
           if (result.data && result.data.length > 0) {
+            console.log("get-address:", result);
             var data = result.data[0],
                 x = data.x,
                 y = data.y;
@@ -143,7 +166,7 @@
               .useManualEntry(false)
               .setXY(x, y)
               .center(x, y, 11)
-              .setAddress(data)
+              .addressData(data)
               .beginUpdateRequest()
               .searchPropertyId(x, y);
           }
@@ -176,10 +199,6 @@
       return self;
     };
 
-    self.searchMunicipality = function(x, y) {
-      return municipalities.findByLocation(x, y, self.municipality, self);
-    };
-
     self.searchPropertyId = function(x, y) {
       ajax
         .get("/proxy/property-id-by-point")
@@ -195,7 +214,7 @@
         .get("/proxy/address-by-point")
         .param("x", x)
         .param("y", y)
-        .success(self.onResponse(self.setAddress))
+        .success(self.onResponse(self.addressData))
         .call();
       return self;
     };
@@ -206,7 +225,7 @@
         operation: self.operation(),
         y: self.y(),
         x: self.x(),
-        address: self.address(),
+        address: self.addressString(),
         propertyId: self.propertyId(),
         messages: isBlank(self.message()) ? [] : [self.message()],
         municipality: self.municipality().id
@@ -231,7 +250,7 @@
 
     $("#create-search")
       .keypress(function(e) {
-        if (e.which == 13) model.searchNow();
+        if (e.which === 13) model.searchNow();
       })
       .autocomplete({
         serviceUrl:      "/proxy/find-address",
