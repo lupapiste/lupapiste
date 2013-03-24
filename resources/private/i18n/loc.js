@@ -54,7 +54,7 @@ var loc;
 
   loc.getErrorMessages = function() {
     var errorKeys = _.filter(_.keys(loc.terms), function(term) {
-      return term.startsWith("error.");
+      return term.indexOf("error.") === 0;
     });
 
     var errorMessages = {};
