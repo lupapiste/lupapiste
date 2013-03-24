@@ -45,7 +45,7 @@
     return false;
   }
 
-  var model = {
+  var plainModel = {
     personId: ko.observable(),
     firstname: ko.observable(),
     lastname: ko.observable(),
@@ -56,6 +56,7 @@
     phone: ko.observable().extend({required: true}),
     email: ko.observable().extend({email: true}),
     password: ko.observable().extend({minLength: 6}),
+    acceptTerms: ko.observable(),
     disabled: ko.observable(true),
     submit: submit,
     reset: reset
@@ -75,10 +76,13 @@
 
   var statusModel = new StatusModel();
 
-  model.confirmPassword = ko.observable().extend({equal: model.password});
-  model = ko.validatedObservable(model);
+  plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
+  var model = ko.validatedObservable(plainModel);
   model.isValid.subscribe(function(valid) {
-    model().disabled(!valid);
+    model().disabled(!valid || !model().acceptTerms());
+  });
+  model().acceptTerms.subscribe(function() {
+    model().disabled(!model.isValid() || !model().acceptTerms());
   });
 
   function subPage() {

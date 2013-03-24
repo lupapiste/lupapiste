@@ -77,5 +77,6 @@ operations.muu-rakentaminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit
 
 person-selector: Valitse henkilö
 
+register.accept-terms.label: Hyväksyn palvelun
+register.accept-terms.link:  käyttöehdot
 attachment.upload.instructions: Suurin sallittu tiedostokoko on 100 Mt. Sallitut tiedostomuodot ovat:
-
