@@ -4,12 +4,12 @@ var loc;
   "use strict";
 
   function not(v) { return !v; }
-  
+
   loc = function() {
     var term, i, len, key = arguments[0];
 
     if (_.some(arguments, not)) return null;
-    
+
     if (arguments.length > 1) {
       len = arguments.length;
       for (i = 1; i < len; i++) {
@@ -23,7 +23,7 @@ var loc;
       debug("Missing localization key", key);
       return "$$NOT_FOUND$$" + key;
     }
-    
+
     return term;
   };
 
@@ -52,8 +52,19 @@ var loc;
     loc.terms = newTerms[loc.currentLanguage];
   };
 
-  // FIXME: This does not work with new localizations.
-  loc.toMap = function() { return loc.terms.error; };
+  loc.getErrorMessages = function() {
+    var errorKeys = _.filter(_.keys(loc.terms), function(term) {
+      return term.startsWith("error.");
+    });
+
+    var errorMessages = {};
+    _.each(errorKeys, function(key) {
+      var errorType = key.substr(6);
+      errorMessages[errorType] = loc(key);
+    });
+
+    return errorMessages;
+  };
 
   loc.getCurrentLanguage = function() { return loc.currentLanguage; };
   loc.getSupportedLanguages = function() { return loc.supported; };

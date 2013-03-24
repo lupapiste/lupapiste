@@ -15,7 +15,7 @@
     registerExtenders: true
   });
 
-  ko.validation.localize(loc.toMap());
+  ko.validation.localize(loc.getErrorMessages());
 
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
@@ -123,5 +123,5 @@
     _.each(this, _.partial(ko.applyBindings, model));
     return this;
   };
-  
+
 })(jQuery);
