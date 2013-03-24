@@ -86,8 +86,6 @@
     self.municipalityCode.subscribe(function(c) { municipalities.findById(c, self.municipality); });
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.address()); });
     
-    self.municipality.subscribe(function(m) { console.log("Municipality:", m); });
-    
     //
     // Concurrency control:
     //
