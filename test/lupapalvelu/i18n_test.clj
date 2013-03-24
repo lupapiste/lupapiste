@@ -5,11 +5,11 @@
             [clojure.tools.logging :as log]))
 
 (facts
-  (fact "in dev mode messy placeholder is returned"
+  (fact "in dev-mode messy placeholder is returned"
     (unknown-term "kikka") => "???kikka???"
     (provided
       (env/dev-mode?) => true))
-  (fact "in dev mode messy placeholder is returned"
+  (fact "in non-dev-mode empty string is returned and stuff is logged"
     (unknown-term "kikka") => ""
     (provided
       (env/dev-mode?) => false
