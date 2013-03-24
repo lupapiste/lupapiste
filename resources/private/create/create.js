@@ -48,8 +48,6 @@
 
     self.operation = ko.observable();
     self.message = ko.observable("");
-    self.links = ko.observableArray();
-    self.operations = ko.observable(null);
     self.requestType = ko.observable();
     
     self.clear = function() {
@@ -87,6 +85,8 @@
     
     self.municipalityCode.subscribe(function(c) { municipalities.findById(c, self.municipality); });
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.address()); });
+    
+    self.municipality.subscribe(function(m) { console.log("Municipality:", m); });
     
     //
     // Concurrency control:
