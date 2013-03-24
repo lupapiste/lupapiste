@@ -1,7 +1,8 @@
 (ns lupapalvelu.proxy-services-stest
   (:use [lupapalvelu.proxy-services]
         [midje.sweet])
-  (:require [cheshire.core :as json]))
+  (:require [lupapalvelu.wfs :as wfs]
+            [cheshire.core :as json]))
 
 (facts "find-addresses-proxy"
   (let [response (find-addresses-proxy {:query-params {"query" "piiriniitynkatu 9, tampere"}})
@@ -79,3 +80,25 @@
       (fact (:katunimi body) => "Luhtaankatu")
       (fact (:katunumero body) => #"\d")
       (fact (:kuntanimiFin body) => "Tampere"))))
+
+(facts "raster-images"
+  (let [base-params {"FORMAT" "image/png"
+                     "SERVICE" "WMS"
+                     "VERSION" "1.1.1"
+                     "REQUEST" "GetMap"
+                     "STYLES"  ""
+                     "SRS"     "EPSG:3067"
+                     "BBOX"   "444416,6666496,444672,6666752"
+                     "WIDTH"   "256"
+                     "HEIGHT" "256"}]
+    (doseq [layer [{"LAYERS" "taustakartta_5k"}
+                   {"LAYERS" "taustakartta_10k"}
+                   {"LAYERS" "taustakartta_20k"}
+                   {"LAYERS" "taustakartta_40k"}
+                   {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
+                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
+      (let [request {:query-params (merge base-params layer)
+                     :headers {"accept-encoding" "gzip, deflate"}}
+            response (wfs/raster-images request)]
+        (println "Checking" (get layer "LAYERS"))
+        (:status response) => 200))))
