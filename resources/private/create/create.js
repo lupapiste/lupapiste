@@ -106,12 +106,15 @@
       self
         .setXY(x, y)
         .propertyId(null)
-        .municipality(null)
         .beginUpdateRequest()
-        // .searchMunicipality(x, y)
         .searchPropertyId(x, y)
         .searchAddress(x, y);
       return false;
+    };
+
+    self.onResponse = function(fn) {
+      var requestId = self.updateRequestId;
+      return function(result) { if (requestId === self.updateRequestId) fn(result); };
     };
 
     // Search activation:
@@ -121,7 +124,6 @@
       self
         .resetXY()
         .setAddress(null)
-        .municipality(null)
         .propertyId(null)
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
@@ -136,8 +138,8 @@
       ajax
         .get("/proxy/get-address")
         .param("query", address)
-        .success(function(result) {
-          if (requestId === self.updateRequestId && result.data && result.data.length > 0) {
+        .success(self.onResponse(function(result) {
+          if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
                 y = data.y;
@@ -147,46 +149,35 @@
               .center(x, y, 11)
               .setAddress(data)
               .beginUpdateRequest()
-              // .searchMunicipality(x, y) // FIXME: don't we have muni here?
               .searchPropertyId(x, y);
           }
-        })
+        }))
         .fail(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
 
     self.searchPointByPropertyId = function(id) {
-      var requestId = self.updateRequestId;
       ajax
         .get("/proxy/point-by-property-id")
         .param("property-id", id)
-        .success(function(result) {
-          if (requestId === self.updateRequestId) {
-            if (result.data && result.data.length > 0) {
-              var data = result.data[0],
-                  x = data.x,
-                  y = data.y;
-              self
-                .useManualEntry(false)
-                .setXY(x, y)
-                .center(x, y, 11)
-                .propertyId(id)
-                .beginUpdateRequest()
-                //.searchMunicipality(x, y) // FIXME: muni, have already?
-                .searchAddress(x, y);
-            } else {
-              console.log("searchPointByPropertyId:FAIL:", result);
-            }
+        .success(self.onResponse(function(result) {
+          if (result.data && result.data.length > 0) {
+            var data = result.data[0],
+                x = data.x,
+                y = data.y;
+            self
+              .useManualEntry(false)
+              .setXY(x, y)
+              .center(x, y, 11)
+              .propertyId(id)
+              .beginUpdateRequest()
+              .searchAddress(x, y);
           }
-        })
+        }))
         .fail(_.partial(self.useManualEntry, true))
         .call();
       return self;
-    };
-
-    self.onResponse = function(requestId, fn) {
-      return function(result) { if (requestId === self.updateRequestId) fn(result); };
     };
 
     self.searchMunicipality = function(x, y) {
@@ -194,23 +185,21 @@
     };
 
     self.searchPropertyId = function(x, y) {
-      var requestId = self.updateRequestId;
       ajax
         .get("/proxy/property-id-by-point")
         .param("x", x)
         .param("y", y)
-        .success(self.onResponse(requestId, self.propertyId))
+        .success(self.onResponse(self.propertyId))
         .call();
       return self;
     };
 
     self.searchAddress = function(x, y) {
-      var requestId = self.updateRequestId;
       ajax
         .get("/proxy/address-by-point")
         .param("x", x)
         .param("y", y)
-        .success(self.onResponse(requestId, self.setAddress))
+        .success(self.onResponse(self.setAddress))
         .call();
       return self;
     };
