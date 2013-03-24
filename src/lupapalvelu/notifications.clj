@@ -4,6 +4,7 @@
         [sade.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [clojure.java.io :as io]
+            [clojure.string :as s]
             [net.cgrand.enlive-html :as enlive]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
@@ -44,8 +45,8 @@
     (str
       "Lupapiste: "
       title
-      #_" - "
-      #_(i18n/loc (str title-key)))))
+      " - "
+      (i18n/loc (s/join "." ["email" "title" title-key])))))
 
 ; new comment
 (defn get-message-for-new-comment [application host]
@@ -65,12 +66,12 @@
   (when (= :authority (keyword (:role user-commenting)))
     (let [recipients (get-email-recipients-for-new-comment application)
           msg        (get-message-for-new-comment application host)
-          title      (get-email-title application "new-comment-email-title")]
+          title      (get-email-title application "new-comment")]
       (send-mail-to-recipients recipients title msg))))
 
 ;; invite
 (defn send-invite [email text application user host]
-  (let [title (get-email-title application "new-comment-email-title")
+  (let [title (get-email-title application "invite")
         msg   (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/invite.html")
                                          (replace-style (get-styles))
                                          (enlive/transform [:#name] (enlive/content (str (:firstName user) " " (:lastName user))))
@@ -96,7 +97,7 @@
   (let [application (mongo/by-id :applications application-id)
         recipients  (get-email-recipients-for-application application)
         msg         (get-message-for-application-state-change application host)
-        title       (get-email-title application "state-change-email-title")]
+        title       (get-email-title application "state-change")]
     (send-mail-to-recipients recipients title msg)))
 
 ; verdict given
@@ -111,5 +112,5 @@
   (let [application (mongo/by-id :applications application-id)
         recipients  (get-email-recipients-for-application application)
         msg         (get-message-for-verdict application host)
-        title       (get-email-title application "verdict-email-title")]
+        title       (get-email-title application "verdict")]
     (send-mail-to-recipients recipients title msg)))
