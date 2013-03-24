@@ -122,7 +122,11 @@
    :mypage  {:depends [:common]
              :js ["mypage.js"]
              :html ["mypage.html"]
-             :css ["mypage.css"]}})
+             :css ["mypage.css"]}
+
+   :about {:depends [:common :buildinfo :debug]
+           :js ["about.js"]
+           :html ["terms.html" "index.html"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components
