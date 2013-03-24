@@ -8,6 +8,8 @@
         [sade.env :only [config]]
         [sade.strings :only [starts-with-i]]))
 
+(def timeout 5000)
+
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
@@ -131,7 +133,8 @@
   (when feature
     {:katunimi (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
      :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
-     :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))}))
+     :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
+     :kuntatunnus (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))}))
 
 (defn response->features [response]
   (let [input-xml (:body response)
@@ -151,7 +154,11 @@
   [url q]
   (deref
     (future
-      (let [response (client/post url {:body q :basic-auth (get auth url) :throw-exceptions false})]
+      (let [response (client/post url {:body q
+                                       :basic-auth (get auth url)
+                                       :socket-timeout timeout
+                                       :conn-timeout timeout
+                                       :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
           [:error response])))
@@ -165,6 +172,8 @@
       (let [response (client/get url
                                  {:query-params q
                                   :basic-auth (get auth url)
+                                  :socket-timeout timeout
+                                  :conn-timeout timeout
                                   :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
