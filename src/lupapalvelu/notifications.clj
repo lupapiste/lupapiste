@@ -39,13 +39,12 @@
                              (info "email was sent successfully")
                              (error "email could not be delivered."))))))
 
-(defn get-email-title [application title-key]
+(defn get-email-title [{:keys [title]} title-key]
   (i18n/with-lang "fi"
     (str
-      #_(i18n/loc (str "email-title-prefix"))
       "Lupapiste: "
-      (:title application)
-      #_(i18n/loc (str "email-title-delimiter"))
+      title
+      #_" - "
       #_(i18n/loc (str title-key)))))
 
 ; new comment
