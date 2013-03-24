@@ -83,3 +83,8 @@ attachment.upload.instructions: Suurin sallittu tiedostokoko on 100 Mt. Sallitut
 
 invite.error.missing-parameters: täytä kaikki kentät.
 invite.already-has-auth: kyseinen henkilö on jo kutsuttuna hakemuksella.
+
+email.title.new-comment: uusi kommentti
+email.title.state-change: hakemuksen tila muuttunut
+email.title.verdict: päätös
+email.title.invite: kutsu
