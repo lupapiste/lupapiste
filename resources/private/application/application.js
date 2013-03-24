@@ -423,6 +423,14 @@
     self.documentId = ko.observable();
     self.error = ko.observable();
 
+    self.reset = function() {
+      self.email(undefined);
+      self.documentName(undefined);
+      self.documentId(undefined);
+      self.text(undefined);
+      self.error(undefined);
+    };
+
     self.submit = function(model) {
       var email = model.email();
       var text = model.text();
@@ -436,21 +444,20 @@
                                title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                                text: text})
         .success(function() {
-          self.email(undefined);
-          self.documentName(undefined);
-          self.documentId(undefined);
-          self.text(undefined);
-          self.error(undefined);
           repository.load(id);
           LUPAPISTE.ModalDialog.close();
         })
         .error(function(d) {
-          self.error(d.text);
+          self.error(loc('invite',d.text));
         })
         .call();
       return false;
     };
   }();
+
+  hub.subscribe({type: "dialog-close", id : "dialog-valtuutus"}, function() {
+    inviteModel.reset();
+  });
 
   // tabs
   var selectedTab;
