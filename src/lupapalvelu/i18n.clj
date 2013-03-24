@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [ontodev.excel :as xls]
+            [clojure.tools.logging :as log]
             [cheshire.core :as json]
             [sade.env :as env]))
 
@@ -35,6 +36,13 @@
   [lang]
   (let [terms (get-localizations)]
     (or (terms lang) (terms "fi"))))
+
+(defn unknown-term [term]
+  (if (env/dev-mode?)
+    (str "???" term "???")
+    (do
+      (log/errorf "unknown localization term '%s'" term)
+      "")))
 
 (defn localize
   "Localize \"term\" using given \"terms\". If \"term\" is unknown, return term surrounded with triple question marks."
