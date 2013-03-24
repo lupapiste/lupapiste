@@ -1,8 +1,6 @@
-if (typeof LUPAPISTE === "undefined") {
-  var LUPAPISTE = {};
-}
-
+var LUPAPISTE = LUPAPISTE || {};
 LUPAPISTE.Upload = {
+    fileExtensions: LUPAPISTE.config.fileExtensions.join(", "),
     applicationId: ko.observable(),
     attachmentId: ko.observable(),
     attachmentType: ko.observable(),
@@ -29,7 +27,10 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
         LUPAPISTE.Upload.attachmentTypeGroups(_.map(d.attachmentTypes, function(v) {
           return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })};
         }));
-        ko.applyBindings(LUPAPISTE.Upload, $("#attachmentUploadForm")[0]);
+        var uploadForm$ = $("#attachmentUploadForm");
+        ko.applyBindings(LUPAPISTE.Upload, uploadForm$[0]);
+        $("#initLoader").hide();
+        uploadForm$.show();
       })
       .call();
   }

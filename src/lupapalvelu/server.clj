@@ -20,6 +20,7 @@
             [lupapalvelu.operations]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n]
+            [lupapalvelu.ua-compatible-header :as uach]
             [sade.security-headers :as headers]))
 
 (def custom-content-type {".eot"   "application/vnd.ms-fontobject"
@@ -53,6 +54,7 @@
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)
+  (server/add-middleware uach/add-ua-compatible-header)
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)

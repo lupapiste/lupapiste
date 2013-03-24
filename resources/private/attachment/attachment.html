@@ -18,7 +18,7 @@
           <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <div id="attachment-type-select-list-container"></div>
           <br>
-          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment" style="margin-left: 0">Poista liite</button>
+          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment" style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
         </div>
       </div>
 
@@ -26,7 +26,7 @@
       <div class="file-preview" data-bind="visible: hasPreview()">
         <div class="file-preview-image" data-bind="if: isImage()">
           <a data-bind="attr: {href: '/api/view-attachment/' + latestVersion().fileId}">
-            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" />
+            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
           </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">

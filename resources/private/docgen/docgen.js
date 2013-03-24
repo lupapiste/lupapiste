@@ -253,7 +253,7 @@ var docgen = (function() {
       select.onchange = function(e) {
         var event = getEvent(e);
         var target = event.target;
-        
+
         var buildingId = target.value;
         ajax
           .command("merge-details-from-krysp", {id: self.appId, buildingId: buildingId})
@@ -492,6 +492,7 @@ var docgen = (function() {
     function loaderImg() {
       var img = document.createElement("img");
       img.src = "/img/ajax-loader-12.gif";
+      img.alt = "...";
       return img;
     }
 

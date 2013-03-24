@@ -236,8 +236,7 @@ Click enabled by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
-  Wait Until  Element should be visible  xpath=//*[@data-test-id="${id}"]
-  Click element  xpath=//*[@data-test-id="${id}"]
+  Click by test id  ${id}
 
 #
 # Helpser for inforequest and application crud operations:
@@ -361,6 +360,8 @@ Add comment
 #
 
 Apply minimal fixture now
+  #Execute Javascript  ajax.query("apply-fixture", {"name":"minimal"}).success(function(){alert('OK')}).call();
+  #Wait Until  Alert Should Be Present
   Show dev-box
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
@@ -385,8 +386,7 @@ Permit type should be
 
 Set integration proxy on
   Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
-   
+
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
-   
-  
+
