@@ -15,6 +15,8 @@
     registerExtenders: true
   });
 
+  // As of 2013-03-25, the following keys are missing:
+  // ["min", "max", "pattern", "step", "date", "dateISO", "digit", "phoneUS", "notEqual", "unique"];
   ko.validation.localize(loc.getErrorMessages());
 
   ko.bindingHandlers.dateString = {
