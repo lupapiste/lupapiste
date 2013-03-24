@@ -17,16 +17,18 @@
         
         <div class="tree-nav">
           <button class="tree-back" data-bind="click: goBack, enable: stack().length > 0">
-            &#x25c0;
+            <span class="icon inline-left drill-left-black"></span>
+            <span data-bind="ltext: 'tree.back'"></span>
           </button>
           <button class="tree-start" data-bind="click: goStart, enable: stack().length > 1">
-            &#x25c0;&#x25c0;
+            <span class="icon inline-left drill-left-all-black"></span>
+            <span data-bind="ltext: 'tree.start'"></span>
           </button>
         </div>
         
         <div class="tree-link">
           <span data-bind="text: text"></span>
-          <span style="position: absolute; right: 10px;">&#x25b6;</span>
+          <span class="icon drill-right-orange inline-right"></span>
         </div>
         
         <div class="tree-last">

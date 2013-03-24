@@ -15,10 +15,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
-(defcommand "create-id" {:authenticated true} [_] (ok :id (mongo/create-id)))
-
 (defquery "invites"
-  {:authenticated true}
+  {:authenticated true
+   :verified true}
   [{{:keys [id]} :user}]
   (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
         projection (assoc filter :_id 0)
@@ -26,22 +25,10 @@
         invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
 
-(defn invite-body [user id host]
-  (format
-    (str
-      "Tervehdys,\n\n%s %s lis\u00E4si teid\u00E4t suunnittelijaksi lupahakemukselleen.\n\n"
-      "Hyv\u00E4ksy\u00E4ksesi rooli ja n\u00E4hd\u00E4ksesi hakemuksen tiedot avaa linkki %s/app/fi/applicant?hashbang=!/application/%s#!/application/%s\n\n"
-      "Yst\u00E4v\u00E4llisin terveisin,\n\n"
-      "Lupapiste.fi")
-    (:firstName user)
-    (:lastName user)
-    host
-    id
-    id))
-
 (defcommand "invite"
   {:parameters [:id :email :title :text :documentName]
-   :roles      [:applicant]}
+   :roles      [:applicant]
+   :verified   true}
   [{created :created
     user    :user
     {:keys [id email title text documentName documentId]} :data {:keys [host]} :web :as command}]
@@ -69,15 +56,12 @@
                 {:_id application-id
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
-              (future
-                (if (email/send-mail? email (:title application) (invite-body user application-id host))
-                      (info "email was sent successfully")
-                  (error "email could not be delivered.")))
-              nil)))))))
+              (notifications/send-invite email text application user host))))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
-   :roles      [:applicant]}
+   :roles      [:applicant]
+   :verified   true}
   [{user :user :as command}]
   (with-application command
     (fn [{application-id :id :as application}]

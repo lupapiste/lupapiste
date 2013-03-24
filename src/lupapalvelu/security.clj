@@ -19,26 +19,26 @@
     (util/sub-map user [:id :username :firstName :lastName :role])))
 
 (defn login
-  "returns non-private information of first enabled user with the username and password"
+  "returns non-private information of enabled user with the username and password"
   [username password]
-  (if-let [user (mongo/select-one :users {:username username})]
+  (when-let [user (mongo/select-one :users {:username username})]
     (and
       (:enabled user)
       (check-password password (-> user :private :password))
       (non-private user))))
 
 (defn login-with-apikey
-  "returns non-private information of first enabled user with the apikey"
+  "returns non-private information of enabled user with the apikey"
   [apikey]
   (when apikey
-    (let [user (non-private (first (mongo/select :users {:private.apikey apikey})))]
+    (when-let [user (non-private (mongo/select-one :users {:private.apikey apikey}))]
       (when (:enabled user) user))))
 
 (defn get-non-private-userinfo [user-id]
   (non-private (mongo/select-one :users {:_id user-id})))
 
 (defn get-user-by-email [email]
-  (and email (non-private (first (mongo/select :users {:email email})))))
+  (and email (non-private (mongo/select-one :users {:email email}))))
 
 (defn- random-password []
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]

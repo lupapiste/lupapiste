@@ -69,7 +69,7 @@
             <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
           </button>
         </div>
-        <div id="create-map" class="map create-application-map" style="width: 75%; height: 500px;"></div>
+        <div id="create-map" class="map create-application-map" style="width: 75%; height: 580px;"></div>
       </div>
     </section>
 
@@ -123,18 +123,9 @@
       </span>
     </div>
     
-    <div class="tree-nav">
-      <button class="tree-back" data-bind="click: goBack, enable: stack().length > 0">
-        <span class="icon inline-left drill-left-black"></span>
-      </button>
-      <button class="tree-start" data-bind="click: goStart, enable: stack().length > 1">
-        <span class="icon inline-left drill-left-all-black"></span>
-      </button>
-    </div>
-    
     <div class="tree-link">
       <span data-bind="text: loc('operations.tree', op)"></span>
-      <span style="position: absolute; right: 10px;">&#x25b6;</span>
+      <span class="icon drill-right-orange inline-right"></span>
     </div>
     
     <div class="tree-last">
@@ -159,8 +150,8 @@
           <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
         </button>
       </div>
-      
     </div>
+    
     
   </section>
   

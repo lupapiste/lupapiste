@@ -64,10 +64,7 @@
         .x(0)
         .y(0)
         .address("")
-        .municipality(null)
-        .municipalityCode(null)
-        .propertyId("")
-        .operation(null)
+        .propertyId(null)
         .message("")
         .requestType(null)
         .goPhase1();
@@ -78,10 +75,19 @@
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
     self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
 
-    self.municipality.subscribe(function(m) { var id = m ? m.id : null; if (self.municipalityCode() != id) self.municipalityCode(id); });
+    self.propertyId.subscribe(function(id) {
+      if (id) {
+        var code = id.substring(0, 3);
+        self.municipalityCode(code);
+        municipalities.findById(code, self.municipality);
+      } else {
+        self.municipalityCode(null).municipality(null);
+      }
+    });
+    
     self.municipalityCode.subscribe(function(c) { municipalities.findById(c, self.municipality); });
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.address()); });
-      
+    
     //
     // Concurrency control:
     //
@@ -96,12 +102,13 @@
     // Called when user clicks on map:
 
     self.click = function(x, y) {
+      console.log("click:", x, y);
       self
         .setXY(x, y)
         .propertyId(null)
         .municipality(null)
         .beginUpdateRequest()
-        .searchMunicipality(x, y)
+        // .searchMunicipality(x, y)
         .searchPropertyId(x, y)
         .searchAddress(x, y);
       return false;
@@ -140,7 +147,7 @@
               .center(x, y, 11)
               .setAddress(data)
               .beginUpdateRequest()
-              .searchMunicipality(x, y) // FIXME: don't we have muni here?
+              // .searchMunicipality(x, y) // FIXME: don't we have muni here?
               .searchPropertyId(x, y);
           }
         })
@@ -149,24 +156,28 @@
       return self;
     };
 
-    self.searchPointByPropertyId = function(propertyId) {
+    self.searchPointByPropertyId = function(id) {
       var requestId = self.updateRequestId;
       ajax
         .get("/proxy/point-by-property-id")
-        .param("property-id", propertyId)
+        .param("property-id", id)
         .success(function(result) {
-          if (requestId === self.updateRequestId && result.data && result.data.length > 0) {
-            var data = result.data[0],
-                x = data.x,
-                y = data.y;
-            self
-              .useManualEntry(false)
-              .setXY(x, y)
-              .center(x, y, 11)
-              .setPropertyId(propertyId)
-              .beginUpdateRequest()
-              .searchMunicipality(x, y) // FIXME: muni, have already?
-              .searchAddress(x, y);
+          if (requestId === self.updateRequestId) {
+            if (result.data && result.data.length > 0) {
+              var data = result.data[0],
+                  x = data.x,
+                  y = data.y;
+              self
+                .useManualEntry(false)
+                .setXY(x, y)
+                .center(x, y, 11)
+                .propertyId(id)
+                .beginUpdateRequest()
+                //.searchMunicipality(x, y) // FIXME: muni, have already?
+                .searchAddress(x, y);
+            } else {
+              console.log("searchPointByPropertyId:FAIL:", result);
+            }
           }
         })
         .fail(_.partial(self.useManualEntry, true))
