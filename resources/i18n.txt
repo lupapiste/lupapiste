@@ -78,3 +78,5 @@ operations.jatevesi.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea l
 operations.muu-rakentaminen.desc: Hankkeesi vaatii todennäköisesti luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
 
 person-selector: Valitse henkilö
+
+attachment.upload.instructions: Suurin sallittu tiedostokoko on 100 Mt. Sallitut tiedostomuodot ovat:

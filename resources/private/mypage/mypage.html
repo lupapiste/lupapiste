@@ -21,7 +21,7 @@
       <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
       <span data-bind="visible: error() == null && saved, ltext: 'mypage.passwordChanged'" style="font-weight: bold; color: green;" data-test-id="change-my-passwor-ok"></span>
-      <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
+      <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..."/>
 
       <br/>
       <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;"></a>
@@ -54,7 +54,7 @@
       <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
       <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
       <span data-bind="visible: error() == null && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
-      <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif"/>
+      <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..."/>
 
     </form>
   </section>
