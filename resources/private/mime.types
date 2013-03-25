@@ -1589,3 +1589,9 @@ video/x-msvideo                                 avi
 video/x-sgi-movie                               movie
 video/x-smv                                     smv
 x-conference/x-cooltalk                         ice
+
+##############################################################################
+# Custom extensions for lupapiste.fi
+
+# Industry Foundation Classes / Building information modeling (BIM)
+application/x-extension-ifc                     ifc
