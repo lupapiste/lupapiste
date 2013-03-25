@@ -285,10 +285,9 @@ Prepare new request
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
-  Select From List by test id  create-municipality-select  ${municipality}
   Input text by test id  create-property-id  ${propertyId}
-  Sleep  1
-  Click by test id  create-continue
+  Select From List by test id  create-municipality-select  ${municipality}
+  Click enabled by test id  create-continue
   # Going too fast causes animation to stop
   Set Selenium Speed  ${SLOW_SPEED}
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
