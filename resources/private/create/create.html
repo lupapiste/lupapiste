@@ -9,7 +9,7 @@
       <h1 data-bind="ltext: 'newRequest.topic'"></h1>
       <div class="create-application-search-box">
         <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-        <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search" autofocus/>
+        <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus"/>
         <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
           <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
         </button>
@@ -20,11 +20,12 @@
           <p data-bind="ltext: 'create.search-check-prompt'"></p>
           
           <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
+          <div data-bind="visible: !municipalitySupported(), ltext: 'municipalityNotSupported'"></div>
           
           <div class="form-entry">
             <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
             <input
-              data-bind="value: address, valueUpdate: 'afterkeydown'"
+              data-bind="value: addressString, valueUpdate: 'afterkeydown'"
               data-test-id="create-address"
               type="text"
               class="form-input text long"></input>
@@ -34,17 +35,16 @@
             <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
             <select
               data-bind="visible: useManualEntry,
-                         options: municipalities,
-                         optionsText: getMunicipalityName,
-                         optionsValue: 'municipalityCode',
+                         options: municipalities.municipalities,
+                         optionsText: function(m) { return loc('municipality', m.id); },
+                         optionsValue: 'id',
                          value: municipalityCode,
                          optionsCaption: loc('choose')"
               data-test-id="create-municipality-select"
               class="form-select form-input combobox long">
             </select>
             <input
-              data-bind="visible: !useManualEntry(),
-                         value: loc('municipality', municipalityCode())"
+              data-bind="visible: !useManualEntry(), value: municipalityName"
               disabled="disabled"
               type="text"
               class="form-input text long">
@@ -130,12 +130,12 @@
     
     <div class="tree-last">
       
-      <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
-      <div data-bind="html: loc('operations', op, 'desc')"></div>
-
-      <div class="municipality-links" data-bind="visible: links">
+      <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', operation())"></div>
+      <div data-bind="html: loc('operations', operation(), 'desc')"></div>
+      
+      <div class="municipality-links" data-bind="visible: municipality().links">
         <div data-bind="ltext: 'municipality.links'"></div>
-        <ul data-bind="foreach: links">
+        <ul data-bind="foreach: municipality().links">
           <li>
             <a data-bind="text: name.fi, attr: {href: url}" href="#" target="_blank"></a>
           </li>
