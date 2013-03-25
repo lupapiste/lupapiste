@@ -8,6 +8,7 @@
         [hiccup.form]
         [clojure.tools.logging])
   (:require [digest]
+            [sade.env :as env]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]
@@ -24,8 +25,8 @@
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
 (def constants
-  {:url       "https://testitunnistus.suomi.fi/VETUMALogin/app"
-   :rcvid     "***REMOVED***1"
+  {:url       (env/value :vetuma :url)
+   :rcvid     (env/value :vetuma :rcvid)
    :appid     "VETUMA-APP2"
    :so        "6"
    :solist    "6,11"
@@ -35,10 +36,14 @@
    :returl    "{host}/api/vetuma"
    :canurl    "{host}/api/vetuma/cancel"
    :errurl    "{host}/api/vetuma/error"
-   :ap        "***REMOVED***"
+   :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
-   :key       "***REMOVED***"})
+   :key       (env/value :vetuma :key)})
+
+;; log error for all missing env keys.
+(doseq [[k v] constants]
+  (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
 
 ;;
 ;; Helpers
