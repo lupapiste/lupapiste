@@ -44,14 +44,10 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
-(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled municipality]
-                         :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
+(defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
-        id                (mongo/create-id)
-        old-user          (get-user-by-email email)
-        new-user-base     {:id           id
-                           :username     email
+        new-user-base     {:username     email
                            :email        email
                            :role         role
                            :firstName    firstname
@@ -62,9 +58,15 @@
                            :zip          zip
                            :municipality municipality
                            :enabled      enabled
-                           :private      {:salt salt
-                                          :password hashed-password}}
-        new-user          (if userid (assoc new-user-base :personId userid) new-user-base)]
+                           :private      {:salt salt :password hashed-password}}]
+    (if userid (assoc new-user-base :personId userid) new-user-base)))
+
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled municipality]
+                         :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
+  (let [id                (mongo/create-id)
+        old-user          (get-user-by-email email)
+        new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled municipality)
+        new-user          (assoc new-user-base :id id)]
     (info "register user:" (dissoc user :password))
     (if (= "dummy" (:role old-user))
       (do
