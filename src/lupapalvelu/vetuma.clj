@@ -38,7 +38,7 @@
    :errurl    "{host}/api/vetuma/error"
    :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
-   :extradata "VTJTT=VTJ-VETUMA-Perus"
+   :extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
 ;; log error for all missing env keys.
@@ -129,6 +129,8 @@
     apply-templates
     with-mac
     (dissoc :key)
+    (dissoc :url)
+    (dissoc :host)
     keys-as-strings))
 
 (defn- parsed [m]
