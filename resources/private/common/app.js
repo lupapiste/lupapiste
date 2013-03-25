@@ -24,6 +24,7 @@ if (typeof LUPAPISTE === "undefined") {
     var href = "#!/" + self.startPage;
     var link$ = $("<a class='brand' href='" + href + "'></a>");
     link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
+    /*
     var naviLinks$ = $("<span>").attr("id", "navi-right");
     _.each(loc.getSupportedLanguages(), function (lang) {
       if (lang !== loc.getCurrentLanguage()) {
@@ -38,6 +39,7 @@ if (typeof LUPAPISTE === "undefined") {
       }
     });
     link$.append(naviLinks$);
+    */
     return link$;
   };
 
@@ -82,7 +84,7 @@ if (typeof LUPAPISTE === "undefined") {
     }
 
     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
-    
+
     var navWrapper = $("<div class='nav-wrapper'></div>");
     navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
     if (!self.allowAnonymous) {
@@ -92,7 +94,7 @@ if (typeof LUPAPISTE === "undefined") {
     $("nav").append(navWrapper);
   };
   $(self.domReady);
-  
+
   hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
 
   /**
