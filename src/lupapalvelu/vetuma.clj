@@ -8,6 +8,7 @@
         [hiccup.form]
         [clojure.tools.logging])
   (:require [digest]
+            [sade.env :as env]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]
@@ -23,9 +24,11 @@
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
+(def ..undefined.. nil)
+
 (def constants
-  {:url       "https://testitunnistus.suomi.fi/VETUMALogin/app"
-   :rcvid     "***REMOVED***1"
+  {:url       ..undefined..
+   :rcvid     ..undefined..
    :appid     "VETUMA-APP2"
    :so        "6"
    :solist    "6,11"
@@ -35,10 +38,11 @@
    :returl    "{host}/api/vetuma"
    :canurl    "{host}/api/vetuma/cancel"
    :errurl    "{host}/api/vetuma/error"
-   :ap        "***REMOVED***"
+   :ap        ..undefined..
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
-   :key       "***REMOVED***"})
+   :key       ..undefined..})
+
 
 ;;
 ;; Helpers
