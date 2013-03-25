@@ -6,8 +6,12 @@
       <h1 data-bind="ltext: 'register.header'"></h1>
       <p data-bind="ltext: 'register.info'" class="register-info"></p>
       <div id="vetuma-register"></div>
-      <h1 class="form-error" data-bind="if: isCancel"><span id="register-cancel" data-bind="ltext: 'register.cancel'"></span></h1>
-      <h1 class="form-error" data-bind="if: isError"><span id="register.error" data-bind="ltext: 'register.error'"></span></h1>
+      <div data-bind="if: isCancel">
+        <div id="register-cancel" data-bind="ltext: 'register.cancel'" class="context-error"></div>
+      </div>
+      <div data-bind="if: isError">
+        <div id="register-error" data-bind="ltext: 'register.error'" class="context-error"></div>
+      </div>
     </div>
   </section>
 </body>

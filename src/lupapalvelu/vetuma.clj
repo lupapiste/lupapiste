@@ -8,6 +8,7 @@
         [hiccup.form]
         [clojure.tools.logging])
   (:require [digest]
+            [sade.env :as env]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]
@@ -24,21 +25,25 @@
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
 (def constants
-  {:url       "https://testitunnistus.suomi.fi/VETUMALogin/app"
-   :rcvid     "***REMOVED***1"
+  {:url       (env/value :vetuma :url)
+   :rcvid     (env/value :vetuma :rcvid)
    :appid     "VETUMA-APP2"
    :so        "6"
    :solist    "6,11"
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "{host}/vetuma"
-   :canurl    "{host}/vetuma/cancel"
-   :errurl    "{host}/vetuma/error"
-   :ap        "***REMOVED***"
+   :returl    "{host}/api/vetuma"
+   :canurl    "{host}/api/vetuma/cancel"
+   :errurl    "{host}/api/vetuma/error"
+   :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
-   :key       "***REMOVED***"})
+   :key       (env/value :vetuma :key)})
+
+;; log error for all missing env keys.
+(doseq [[k v] constants]
+  (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
 
 ;;
 ;; Helpers
@@ -160,7 +165,7 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
+(defpage "/api/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
   (let [paths     {:success success :error error :cancel cancel}
         sessionid (session-id)]
     (if (non-local? paths)
@@ -172,7 +177,7 @@
                    (map field (request-data (host :secure)))
                    (submit-button "submit")))))))
 
-(defpage [:post "/vetuma"] []
+(defpage [:post "/api/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
                logged
                parsed
@@ -182,17 +187,17 @@
         uri  (get-in data [:paths :success])]
     (redirect uri)))
 
-(defpage [:post "/vetuma/:status"] {status :status}
+(defpage [:post "/api/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
         return-uri (get-in data [:paths (keyword status)])]
     (redirect return-uri)))
 
-(defpage "/vetuma/user" []
+(defpage "/api/vetuma/user" []
   (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
         user (-> data :user)]
     (json user)))
 
-(defpage "/vetuma/stamp/:stamp" {:keys [stamp]}
+(defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
   (let [data (mongo/select-one :vetuma {:user.stamp stamp})
         user (-> data :user)
         id   (:id data)]

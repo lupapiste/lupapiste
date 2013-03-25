@@ -94,7 +94,7 @@
 
   hub.onPageChange('register', function() {
     var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-    $.get('/vetuma', {success: urlPrefix + '#!/register2',
+    $.get('/api/vetuma', {success: urlPrefix + '#!/register2',
                       cancel:  urlPrefix + '#!/register/cancel',
                       error:   urlPrefix + '#!/register/error'}, function(d) {
       $('#vetuma-register')
@@ -107,7 +107,7 @@
   });
 
   hub.onPageChange('register2', function() {
-    $.get('/vetuma/user', function(data) {
+    $.get('/api/vetuma/user', function(data) {
       model().personId(data.userid);
       model().firstname(data.firstname);
       model().lastname(data.lastname);

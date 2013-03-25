@@ -17,7 +17,8 @@
 (def ^:private auth
   (let [conf (:nls config)]
     {:raster     [(:username (:raster conf)) (:password (:raster conf))]
-     ktjkii      [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
+     :kiinteisto [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
+     ktjkii      [(:username (:ktjkii conf)) (:password (:ktjkii conf))]
      maasto      [(:username (:maasto conf)) (:password (:maasto conf))]
      nearestfeature [(:username (:maasto conf)) (:password (:maasto conf))]}))
 
@@ -196,8 +197,7 @@
 
 (defn raster-images [request]
   (let [layer (get-in request [:query-params "LAYERS"])
-        basic-auth (if (re-matches #"ktj_kiinteisto.*" layer)
-                     (get auth ktjkii) (:raster auth))]
+        basic-auth (if (re-matches #"ktj_kiinteisto.*" layer) (:kiinteisto auth) (:raster auth))]
     (client/get "https://ws.nls.fi/rasteriaineistot/image"
                 {:query-params (:query-params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
