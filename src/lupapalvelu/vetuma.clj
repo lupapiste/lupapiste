@@ -32,9 +32,9 @@
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "{host}/vetuma"
-   :canurl    "{host}/vetuma/cancel"
-   :errurl    "{host}/vetuma/error"
+   :returl    "{host}/api/vetuma"
+   :canurl    "{host}/api/vetuma/cancel"
+   :errurl    "{host}/api/vetuma/error"
    :ap        "***REMOVED***"
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
@@ -160,7 +160,7 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
+(defpage "/api/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
   (let [paths     {:success success :error error :cancel cancel}
         sessionid (session-id)]
     (if (non-local? paths)
@@ -172,7 +172,7 @@
                    (map field (request-data (host :secure)))
                    (submit-button "submit")))))))
 
-(defpage [:post "/vetuma"] []
+(defpage [:post "/api/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
                logged
                parsed
@@ -182,17 +182,17 @@
         uri  (get-in data [:paths :success])]
     (redirect uri)))
 
-(defpage [:post "/vetuma/:status"] {status :status}
+(defpage [:post "/api/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
         return-uri (get-in data [:paths (keyword status)])]
     (redirect return-uri)))
 
-(defpage "/vetuma/user" []
+(defpage "/api/vetuma/user" []
   (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
         user (-> data :user)]
     (json user)))
 
-(defpage "/vetuma/stamp/:stamp" {:keys [stamp]}
+(defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
   (let [data (mongo/select-one :vetuma {:user.stamp stamp})
         user (-> data :user)
         id   (:id data)]
