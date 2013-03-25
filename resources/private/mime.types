@@ -1443,7 +1443,8 @@ text/html                                       html htm
 # text/javascript
 text/n3                                         n3
 # text/parityfec
-text/plain                                      txt text conf def list log in
+#text/plain                                      txt text conf def list log in
+text/plain                                      txt
 # text/prs.fallenstein.rst
 text/prs.lines.tag                              dsc
 # text/vnd.radisys.msml-basic-layout
