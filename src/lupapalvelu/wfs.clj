@@ -108,8 +108,8 @@
      :y y}))
 
 (defn feature-to-simple-address-string [feature]
-  (let [{:keys [katunimi katunumero kuntanimiFin]} (feature-to-address feature)]
-    (str katunimi " " katunumero ", " kuntanimiFin)))
+  (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
+    (str street " " number ", " fi)))
 
 (defn feature-to-address-string [[street number city]]
   (if (s/blank? city)

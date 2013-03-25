@@ -51,7 +51,6 @@
     
     self.findMunicipality = function(code) {
       municipalities.findById(code, function(m) {
-        console.log("FOUND:", m);
         self
           .municipality(m)
           .municipalitySupported(m ? true : false);
@@ -60,7 +59,6 @@
     }
     
     self.addressData.subscribe(function(a) {
-      console.log("address:", a);
       if (a) {
         self
           .addressString(a.street + " " + a.number)
@@ -71,7 +69,6 @@
     });
     
     self.propertyId.subscribe(function(id) {
-      console.log("prop:", id);
       if (id) {
         self.municipalityCode(id.substring(0, 3));
       }
@@ -158,7 +155,6 @@
         .param("query", address)
         .success(self.onResponse(function(result) {
           if (result.data && result.data.length > 0) {
-            console.log("get-address:", result);
             var data = result.data[0],
                 x = data.x,
                 y = data.y;
