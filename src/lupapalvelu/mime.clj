@@ -21,12 +21,12 @@
           "(image/(gif|jpeg|png|tiff|vnd.dwg|x-pict))"
           "(text/(plain|rtf))"
           (str "(application/("
-               (join "|" [
-                     "pdf" "postscript"
-                     "zip" "x-7z-compressed"
-                     "rtf" "msword" "vnd\\.ms-excel" "vnd\\.ms-powerpoint"
-                     "vnd\\.oasis\\.opendocument\\..+"
-                     "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
+               (join "|"
+                     ["x-extension-ifc"
+                      "pdf" "postscript" "zip" "x-7z-compressed"
+                      "rtf" "msword" "vnd\\.ms-excel" "vnd\\.ms-powerpoint"
+                      "vnd\\.oasis\\.opendocument\\..+"
+                      "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
 
 (def allowed-extensions
   (keys
