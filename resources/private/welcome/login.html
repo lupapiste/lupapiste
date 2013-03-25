@@ -3,19 +3,25 @@
 <body>
   <section class="page welcome_page" id="login">
     <div class="welcome_top">
-        <div class="welcome_top_content">
-          <img src="/img/icon-info.png" class="welcome_info" alt=" ">
-          <div class="welcome_sections">
-            <div class="todo welcome_section">
+      <div class="welcome_top_content">
+        <div class="welcome_sections">
+          <div class="todo welcome_section">
             <h3>Tarvitseeko minun hakea lupaa?</h3>
             <p>
               Joko tiedät, onko suunnittelemasi toiminta luvanvaraista? Entä mitä kaikkea tietoja ja
               suunnitelmia lupahakemukseen tarvitaan? Voit hakea tietoa myös kirjautumatta.
             </p>
             <p><a href="#" class="btn btn-primary">Aloita tiedonhaku tästä</a></p>
-            </div>
+          </div>
 
-            <div id="login-form" class="welcome_section">
+          <div id="login-form" class="welcome_section">
+            <img src="/img/icon-info.png" class="welcome_info" alt=" ">
+            <section class="welcome-register-section">
+              <h3>Ei tunnuksia?</h3>
+              <p>Jos sinulla ei vielä ole tunnuksia, aloita asiointi rekisteröitymällä palveluun.</p>
+              <button id="register-button" class="btn btn-success">Rekisteröidy</button>
+            </section>
+            <section class="welcome-login-section">
               <h3>Haluan kirjautua palveluun</h3>
               <p>
                 Voit tehdä hakemuksia ja ilmoituksia sähköisessä asiointijärjestelmässä.
@@ -27,29 +33,22 @@
               <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
               <button id="login-button" class="btn btn-primary">Kirjaudu</button>
               <span id="login-message" style="display: none; color: red"></span>
-              <div style="margin-top: 30px;">
-              <h3>Ei tunnuksia?</h3>
-              <p>
-                Jos sinulla ei vielä ole tunnuksia, aloita asiointi rekisteröitymällä palveluun.
-              </p>
-              <button id="register-button" class="btn btn-success">Rekisteröidy</button>
-              </div>
-            </div>
-
-            <div class="welcome_section">
-              <h3>Mikä on Lupapiste</h3>
-              <p>
-                  Lupapiste on uudenlainen sähköinen palvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa- ja ilmoitusasiansa
-                  vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa.
-              </p>
-              <p>Palvelu on suunniteltu yhdessä tulevien käyttäjien, eli luvanhakijoiden, suunnittelijoiden, kuntien ja ELY-keskusten kanssa.
-                    Lupapisteen käytöstä hyötyvät kaikki.
-              </p>
-              <p><a href="#" class="btn">Tutustu palveluun vierailijana</a></p>
-            </div>
+            </section>
+          </div>
+          <div class=" todo welcome_section">
+            <h3>Mikä on Lupapiste</h3>
+            <p>
+                Lupapiste on uudenlainen sähköinen palvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa- ja ilmoitusasiansa
+                vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa.
+            </p>
+            <p>Palvelu on suunniteltu yhdessä tulevien käyttäjien, eli luvanhakijoiden, suunnittelijoiden, kuntien ja ELY-keskusten kanssa.
+                  Lupapisteen käytöstä hyötyvät kaikki.
+            </p>
+            <p><a href="#" class="btn">Tutustu palveluun vierailijana</a></p>
+          </div>
 
         </div>
-        </div>
+      </div>
     </div>
   </section>
 </body>
