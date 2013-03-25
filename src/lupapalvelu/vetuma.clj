@@ -21,15 +21,15 @@
 ;; Configuration
 ;;
 
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
 (def constants
   {:url       (env/value :vetuma :url)
    :rcvid     (env/value :vetuma :rcvid)
-   :appid     "VETUMA-APP2"
+   :appid     "Lupapiste"
    :so        "6"
-   :solist    "6,11"
+   :solist    "6" #_"6,11"
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
@@ -38,7 +38,7 @@
    :errurl    "{host}/api/vetuma/error"
    :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
-   :extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
+   ;;:extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
 ;; log error for all missing env keys.
