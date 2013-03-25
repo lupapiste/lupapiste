@@ -39,7 +39,9 @@
    :ap        (get-in env/config [:vetuma :ap])
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
-   :key       (get-in env/config [:vetuma :keyz])})
+   :key       (get-in env/config [:vetuma :key])})
+
+(println constants)
 
 (doseq [[k v] constants] (when (nil? v) (errorf "missing key '%s' value from property file" k)))
 
