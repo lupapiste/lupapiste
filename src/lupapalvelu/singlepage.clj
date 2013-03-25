@@ -89,7 +89,6 @@
 
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
-  (ByteArrayInputStream.
-    (if (= :html kind)
-      (compose-html component)
-      (compose-resource kind component))))
+  (if (= :html kind)
+    (compose-html component)
+    (compose-resource kind component)))
