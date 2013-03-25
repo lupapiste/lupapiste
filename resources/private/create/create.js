@@ -49,6 +49,10 @@
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
     
+    self.municipalityCode.subscribe(function(code) {
+      if (self.useManualEntry()) municipalities.findById(code, self.municipality);
+    });
+    
     self.findMunicipality = function(code) {
       municipalities.findById(code, function(m) {
         self
@@ -101,7 +105,7 @@
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
-        
+    
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
 
     //
