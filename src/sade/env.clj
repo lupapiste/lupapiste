@@ -54,6 +54,9 @@
 (defn dev-mode? []
   (= :dev mode))
 
+(def ^:dynamic *in-dev-macro* false)
+
 (defmacro in-dev [& body]
   `(if (dev-mode?)
-     (do ~@body)))
+     (binding [*in-dev-macro* true]
+       (do ~@body))))
