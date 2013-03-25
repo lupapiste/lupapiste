@@ -136,10 +136,12 @@
                    :authority-admin authority-admin?
                    :admin admin?})
 
-(def headers
-  (if (env/dev-mode?)
+(defn cache-headers [resource-type]
+  (if (= :html resource-type)
     {"Cache-Control" "no-cache"}
-    {"Cache-Control" "public, max-age=86400"}))
+    (if (env/dev-mode?)
+      {"Cache-Control" "no-cache"}
+      {"Cache-Control" "public, max-age=86400"})))
 
 (def default-lang "fi")
 
@@ -148,7 +150,7 @@
     (->>
       (singlepage/compose resource-type app)
       (resp/content-type (resource-type content-type))
-      (resp/set-headers headers))
+      (resp/set-headers (cache-headers [resource-type])))
       failure))
 
 ;; CSS & JS
