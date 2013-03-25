@@ -43,7 +43,7 @@
 
 ;; log error for all missing env keys.
 (doseq [[k v] constants]
-  (when (nil? v) (errorf "missing key '%s' value from property file" k)))
+  (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
 
 ;;
 ;; Helpers
