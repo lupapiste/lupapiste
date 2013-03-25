@@ -37,6 +37,11 @@
   (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
     (read-config (prop-file) password)))
 
+(defn value
+  "returns a value from config directly."
+  [& keys]
+  (get-in config (flatten [keys])))
+
 (defn- get-prop [prop-name default]
   (or
     (get-in config (map keyword (s/split prop-name #"\.")))
@@ -54,6 +59,9 @@
 (defn dev-mode? []
   (= :dev mode))
 
+(def ^:dynamic *in-dev-macro* false)
+
 (defmacro in-dev [& body]
   `(if (dev-mode?)
-     (do ~@body)))
+     (binding [*in-dev-macro* true]
+       (do ~@body))))
