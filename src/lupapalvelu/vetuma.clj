@@ -24,11 +24,9 @@
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
 
-(def ..undefined.. nil)
-
 (def constants
-  {:url       ..undefined..
-   :rcvid     ..undefined..
+  {:url       (get-in env/config [:vetuma :url])
+   :rcvid     (get-in env/config [:vetuma :rcvid])
    :appid     "VETUMA-APP2"
    :so        "6"
    :solist    "6,11"
@@ -38,11 +36,12 @@
    :returl    "{host}/api/vetuma"
    :canurl    "{host}/api/vetuma/cancel"
    :errurl    "{host}/api/vetuma/error"
-   :ap        ..undefined..
+   :ap        (get-in env/config [:vetuma :ap])
    :appname   "Lupapiste"
    :extradata "VTJTT=VTJ-VETUMA-Perus"
-   :key       ..undefined..})
+   :key       (get-in env/config [:vetuma :keyz])})
 
+(doseq [[k v] constants] (when (nil? v) (errorf "missing key '%s' value from property file" k)))
 
 ;;
 ;; Helpers
