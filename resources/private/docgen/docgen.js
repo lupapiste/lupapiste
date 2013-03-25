@@ -560,7 +560,7 @@ var docgen = (function() {
       var elements = document.createElement("article");
 
       section.className = "accordion";
-      icon.className = "icon drill-down-white";
+      icon.className = "icon toggle-icon drill-down-white";
       title.appendChild(icon);
 
       if (op) {

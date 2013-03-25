@@ -32,7 +32,7 @@ var accordion = (function() {
     }
 
     target
-      .children(".icon")
+      .children(".toggle-icon")
       .removeClass(toState === "closed" ? "drill-down-white" : "drill-right-white")
       .addClass(toState === "closed" ? "drill-right-white" : "drill-down-white");
 
