@@ -27,7 +27,8 @@
             [sade.status :as status]
             [cheshire.core :as json]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery]))
+            [ring.middleware.anti-forgery :as anti-forgery])
+  (:import [java.io ByteArrayInputStream]))
 
 ;;
 ;; Helpers
@@ -145,13 +146,18 @@
 
 (def default-lang "fi")
 
+(def ^:private compose
+  (if (env/dev-mode?)
+    singlepage/compose
+    (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
+
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     (->>
-      (singlepage/compose resource-type app)
+      (ByteArrayInputStream. (compose resource-type app))
       (resp/content-type (resource-type content-type))
       (resp/set-headers (cache-headers [resource-type])))
-      failure))
+    failure))
 
 ;; CSS & JS
 (defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
