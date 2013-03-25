@@ -113,7 +113,7 @@
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]}
   [{data :data}]
-  (let [vetuma   (client/json-get (str "/vetuma/stamp/" (:stamp data)))
+  (let [vetuma   (client/json-get (str "/api/vetuma/stamp/" (:stamp data)))
         userdata (merge data vetuma)]
     (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma)
     (if-let [user (security/create-user userdata)]
