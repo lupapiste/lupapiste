@@ -4,52 +4,82 @@
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
   function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
 
+  var tree;
+  
+  function operations2tree(e) {
+    var key = e[0], value = e[1];
+    return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : {op: value}];
+  }
+  
   var model = new function() {
     var self = this;
 
     self.goPhase1 = function() {
       $('.selected-location').hide();
-      $("#create-part-1").show()
-      $("#create-part-2").hide()
+      $("#create-part-1").show();
+      $("#create-part-2").hide();
       $("#create-part-3").hide();
     };
     
     self.goPhase2 = function() {
+      tree.reset(_.map(self.municipality().operations, operations2tree));
       $("#create-part-1").hide();
       $("#create-part-2").show();
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
     };
 
     self.goPhase3 = function() {
       $("#create-part-2").hide();
       $("#create-part-3").show();
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
     };
 
     self.useManualEntry = ko.observable(false);
     
-    self.municipalities = ko.observableArray([]);
     self.map = null;
 
     self.search = ko.observable("");
     self.x = ko.observable(0.0);
     self.y = ko.observable(0.0);
-    self.address = ko.observable("");
-    self.municipality = ko.observable("");
+    self.addressData = ko.observable(null);
+    self.addressString = ko.observable(null);
+    self.propertyId = ko.observable(null);
+    self.municipality = ko.observable(null);
     self.municipalityCode = ko.observable(null);
-    self.propertyId = ko.observable("");
+    self.municipalityName = ko.observable();
+    self.municipalitySupported = ko.observable(true);
+    
+    self.municipalityCode.subscribe(function(code) {
+      if (self.useManualEntry()) municipalities.findById(code, self.municipality);
+    });
+    
+    self.findMunicipality = function(code) {
+      municipalities.findById(code, function(m) {
+        self
+          .municipality(m)
+          .municipalitySupported(m ? true : false);
+      });
+      return self;
+    }
+    
+    self.addressData.subscribe(function(a) {
+      self.addressString(a ? a.street + " " + a.number : "");
+    });
+    
+    self.propertyId.subscribe(function(id) {
+      var code = id ? id.substring(0, 3) : null;
+      self
+        .municipalityCode(code)
+        .municipalityName(code ? loc("municipality", code) : null)
+        .findMunicipality(code, self.municipality);
+    });
 
     self.operation = ko.observable();
     self.message = ko.observable("");
-    self.links = ko.observableArray();
-    self.operations = ko.observable(null);
     self.requestType = ko.observable();
-    
-    self.addressOk = ko.computed(function() { return !isBlank(self.municipalityCode) && !isBlank(self.address); });
 
     self.clear = function() {
-
-      self.goPhase1();
+      self.goPhase1();  
       if (!self.map) {
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
         self.map.addClickHandler(self.click);
@@ -59,11 +89,10 @@
         .search("")
         .x(0)
         .y(0)
-        .address("")
-        .municipality("")
+        .addressData(null)
+        .addressString("")
+        .propertyId(null)
         .municipalityCode(null)
-        .propertyId("")
-        .operation(null)
         .message("")
         .requestType(null)
         .goPhase1();
@@ -72,18 +101,8 @@
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
-    self.setPropertyId = function(value) { return  self.propertyId(value); };
-    self.setMunicipality = function(value) { return isBlank(value) ? self.municipalityCode(null).municipality("") : self.municipalityCode(value).municipality(loc("municipality." + value)); };
-    self.setAddress = function(data) { return data ? self.address(data.katunimi + " " + data.katunumero + ", " + data.kuntanimiFin) : self.address(""); };
-
-    self.municipalityCode.subscribe(function(v) {
-      self.operations(null).links.removeAll();
-      if (!v || v.length === 0) { return; }
-      ajax
-        .query("municipality", {municipality: v})
-        .success(function (data) { if (self.municipalityCode() === v) { self.operations(data.operations).links(data.links); }})
-        .call();
-    });
+    
+    self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
 
     //
     // Concurrency control:
@@ -101,13 +120,17 @@
     self.click = function(x, y) {
       self
         .setXY(x, y)
-        .setPropertyId("")
-        .setMunicipality("")
+        .addressData(null)
+        .propertyId(null)
         .beginUpdateRequest()
-        .searchMunicipality(x, y)
         .searchPropertyId(x, y)
         .searchAddress(x, y);
       return false;
+    };
+
+    self.onResponse = function(fn) {
+      var requestId = self.updateRequestId;
+      return function(result) { if (requestId === self.updateRequestId) fn(result); };
     };
 
     // Search activation:
@@ -116,9 +139,8 @@
       $('.selected-location').show();
       self
         .resetXY()
-        .setAddress(null)
-        .setMunicipality(null)
-        .setPropertyId(null)
+        .addressData(null)
+        .propertyId(null)
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
       self.map.updateSize();
@@ -128,12 +150,11 @@
     self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
-      var requestId = self.updateRequestId;
       ajax
         .get("/proxy/get-address")
         .param("query", address)
-        .success(function(result) {
-          if (requestId === self.updateRequestId && result.data && result.data.length > 0) {
+        .success(self.onResponse(function(result) {
+          if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
                 y = data.y;
@@ -141,24 +162,22 @@
               .useManualEntry(false)
               .setXY(x, y)
               .center(x, y, 11)
-              .setAddress(data)
+              .addressData(data)
               .beginUpdateRequest()
-              .searchMunicipality(x, y)
               .searchPropertyId(x, y);
           }
-        })
+        }))
         .fail(_.partial(self.useManualEntry, true))
         .call();
       return self;
     };
 
-    self.searchPointByPropertyId = function(propertyId) {
-      var requestId = self.updateRequestId;
+    self.searchPointByPropertyId = function(id) {
       ajax
         .get("/proxy/point-by-property-id")
-        .param("property-id", propertyId)
-        .success(function(result) {
-          if (requestId === self.updateRequestId && result.data && result.data.length > 0) {
+        .param("property-id", id)
+        .success(self.onResponse(function(result) {
+          if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
                 y = data.y;
@@ -166,55 +185,34 @@
               .useManualEntry(false)
               .setXY(x, y)
               .center(x, y, 11)
-              .setPropertyId(propertyId)
+              .propertyId(id)
               .beginUpdateRequest()
-              .searchMunicipality(x, y)
               .searchAddress(x, y);
           }
-        })
+        }))
         .fail(_.partial(self.useManualEntry, true))
-        .call();
-      return self;
-    };
-
-    self.onResponse = function(requestId, fn) {
-      return function(result) { if (requestId === self.updateRequestId) fn(result); };
-    };
-
-    self.searchMunicipality = function(x, y) {
-      var requestId = self.updateRequestId;
-      ajax
-        .query("municipality-by-location", {x: x, y: y})
-        .success(self.onResponse(requestId, function(data) { self.setMunicipality(data.result); }))
-        .error(self.onResponse(requestId, function() { self.setMunicipality(null); }))
         .call();
       return self;
     };
 
     self.searchPropertyId = function(x, y) {
-      var requestId = self.updateRequestId;
       ajax
         .get("/proxy/property-id-by-point")
         .param("x", x)
         .param("y", y)
-        .success(self.onResponse(requestId, self.setPropertyId))
+        .success(self.onResponse(self.propertyId))
         .call();
       return self;
     };
 
     self.searchAddress = function(x, y) {
-      var requestId = self.updateRequestId;
       ajax
         .get("/proxy/address-by-point")
         .param("x", x)
         .param("y", y)
-        .success(self.onResponse(requestId, self.setAddress))
+        .success(self.onResponse(self.addressData))
         .call();
       return self;
-    };
-
-    self.getMunicipalityName = function(m) {
-      return m.name[loc.getCurrentLanguage()];
     };
 
     self.create = function(infoRequest) {
@@ -223,13 +221,13 @@
         operation: self.operation(),
         y: self.y(),
         x: self.x(),
-        address: self.address(),
+        address: self.addressString(),
         propertyId: self.propertyId(),
         messages: isBlank(self.message()) ? [] : [self.message()],
-        municipality: self.municipalityCode()
+        municipality: self.municipality().id
       })
       .success(function(data) {
-        self.clear();
+        setTimeout(self.clear, 0);
         window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
@@ -241,19 +239,14 @@
   }();
 
   hub.onPageChange("create", model.clear);
-
-  ajax
-    .query("municipalities-for-new-application")
-    .success(function(data) { model.municipalities(data.municipalities); })
-    .call();
-
+  
   $(function() {
 
     $("#create").applyBindings(model);
 
     $("#create-search")
       .keypress(function(e) {
-        if (e.which == 13) model.searchNow();
+        if (e.which === 13) model.searchNow();
       })
       .autocomplete({
         serviceUrl:      "/proxy/find-address",
@@ -262,19 +255,10 @@
         onSelect:        model.searchNow
       });
 
-    var tree = $("#create .operation-tree").selectTree({
+    tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
       onSelect: function(v) { model.operation(v ? v.op : null); },
       baseModel: model
-    });
-    
-    function operations2tree(e) {
-      var key = e[0], value = e[1];
-      return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : {op: value}];
-    }
-
-    model.operations.subscribe(function(v) {
-      tree.reset(_.map(v, operations2tree));
     });
     
     hub.subscribe({type: "keyup", keyCode: 37}, tree.back);

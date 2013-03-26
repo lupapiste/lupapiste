@@ -74,8 +74,9 @@
   (let [title (get-email-title application "invite")
         msg   (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/invite.html")
                                          (replace-style (get-styles))
-                                         (enlive/transform [:#name] (enlive/content (str (:firstName user) " " (:lastName user))))
+                                         (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
                                          (replace-application-link "#link-" application "fi" "" host)
+                                         (replace-application-link "#link-" application "sv" "" host)
                                          )))]
     (send-mail-to-recipients email title msg)))
 

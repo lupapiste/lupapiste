@@ -25,9 +25,11 @@
             [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
             [sade.status :as status]
+            [sade.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery]))
+            [ring.middleware.anti-forgery :as anti-forgery])
+  (:import [java.io ByteArrayInputStream]))
 
 ;;
 ;; Helpers
@@ -95,7 +97,7 @@
 (status/defstatus :mode  env/mode)
 
 (defjson "/api/buildinfo" []
-  (ok :data (assoc env/buildinfo :server-mode env/mode)))
+  (ok :data (assoc (util/sub-map env/buildinfo [:build-tag :build-id]) :server-mode env/mode)))
 
 ;;
 ;; Commands
@@ -136,20 +138,27 @@
                    :authority-admin authority-admin?
                    :admin admin?})
 
-(def headers
-  (if (env/dev-mode?)
+(defn cache-headers [resource-type]
+  (if (= :html resource-type)
     {"Cache-Control" "no-cache"}
-    {"Cache-Control" "public, max-age=86400"}))
+    (if (env/dev-mode?)
+      {"Cache-Control" "no-cache"}
+      {"Cache-Control" "public, max-age=86400"})))
 
 (def default-lang "fi")
+
+(def ^:private compose
+  (if (env/dev-mode?)
+    singlepage/compose
+    (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
 
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     (->>
-      (singlepage/compose resource-type app)
+      (ByteArrayInputStream. (compose resource-type app))
       (resp/content-type (resource-type content-type))
-      (resp/set-headers headers))
-      failure))
+      (resp/set-headers (cache-headers [resource-type])))
+    failure))
 
 ;; CSS & JS
 (defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}

@@ -14,6 +14,7 @@ Mikko changes his name
   Change name  Mikko  Intonen  Mika  Intola
 
 Name should have changed in Swedish page too
+  [Tags]  fail
   Click link  xpath=//*[@data-test-id='lang-sv']
   User should be logged in  Mika Intola
 
@@ -21,6 +22,7 @@ Mika changes the name back to Mikko Intonen
   Change name  Mika  Intola  Mikko  Intonen
 
 Name should have changed in Finnish page too
+  [Tags]  fail
   Click link  xpath=//*[@data-test-id='lang-fi']
   User should be logged in  Mikko Intonen
 
