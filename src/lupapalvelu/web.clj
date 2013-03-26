@@ -25,6 +25,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
             [sade.status :as status]
+            [sade.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery])
@@ -96,7 +97,7 @@
 (status/defstatus :mode  env/mode)
 
 (defjson "/api/buildinfo" []
-  (ok :data (assoc env/buildinfo :server-mode env/mode)))
+  (ok :data (assoc (util/sub-map env/buildinfo [:build-tag :build-id]) :server-mode env/mode)))
 
 ;;
 ;; Commands
