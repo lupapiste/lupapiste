@@ -122,9 +122,10 @@
                                                 :child [rakennus]}
                                                {:tag :rakennelmatieto}]}]}
                              {:tag :lisatiedot
-                              :child [{:tag :salassapitotietoKytkin}
+                              :child [{:tag :Lisatiedot
+                                       :child [{:tag :salassapitotietoKytkin}
                                       {:tag :asioimiskieli}
-                                      {:tag :suoramarkkinointikieltoKytkin}]}
+                                      {:tag :suoramarkkinointikieltoKytkin}]}]}
                              {:tag :liitetieto
                               :child [{:tag :Liite
                                        :child [{:tag :kuvaus}
