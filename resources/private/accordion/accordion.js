@@ -32,9 +32,9 @@ var accordion = (function() {
     }
 
     target
-      .children(".font-icon")
-      .removeClass(toState === "closed" ? "icon-expanded" : "icon-collapsed")
-      .addClass(toState === "closed" ? "icon-collapsed" : "icon-expanded");
+      .children(".toggle-icon")
+      .removeClass(toState === "closed" ? "drill-down-white" : "drill-right-white")
+      .addClass(toState === "closed" ? "drill-right-white" : "drill-down-white");
 
     content
       .attr("data-accordion-state", state)

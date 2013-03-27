@@ -63,19 +63,15 @@
     }
     
     self.addressData.subscribe(function(a) {
-      if (a) {
-        self
-          .addressString(a.street + " " + a.number)
-          .municipalityCode(a.municipality)
-          .municipalityName(a.name[loc.currentLanguage])
-          .findMunicipality(a.municipality);
-      }
+      self.addressString(a ? a.street + " " + a.number : "");
     });
     
     self.propertyId.subscribe(function(id) {
-      if (id) {
-        self.municipalityCode(id.substring(0, 3));
-      }
+      var code = id ? id.substring(0, 3) : null;
+      self
+        .municipalityCode(code)
+        .municipalityName(code ? loc("municipality", code) : null)
+        .findMunicipality(code, self.municipality);
     });
 
     self.operation = ko.observable();
