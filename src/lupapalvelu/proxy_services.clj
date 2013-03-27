@@ -93,6 +93,14 @@
         (errorf "find-addresses failed: status=%s, response=%s" status response)
         (resp/status 503 "Service temporarily unavailable")))))
 
+(defn find-addresses-proxy [request]
+  (let [term (get (:query-params request) "term")]
+    (println "** FIND:" term)
+    (resp/json [{:text "foo" :desc "Fooo"}
+                {:text "bar" :desc "Baraa"}
+                {:text "boz" :desc "Bozzaa"}])))
+
+
 (defn- point-by-property-id [property-id]
   (wfs/execute wfs/ktjkii
     (wfs/query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}

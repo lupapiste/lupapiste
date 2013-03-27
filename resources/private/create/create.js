@@ -245,15 +245,18 @@
     $("#create").applyBindings(model);
 
     $("#create-search")
-      .keypress(function(e) {
-        if (e.which === 13) model.searchNow();
-      })
+      // .keypress(function(e) { if (e.which === 13) model.searchNow(); })
       .autocomplete({
-        serviceUrl:      "/proxy/find-address",
-        deferRequestBy:  500,
-        noCache:         true,
-        onSelect:        model.searchNow
-      });
+        source:     "/proxy/find-address",
+        delay:      500,
+        minLength:  3,
+        select:     function(e, data) { console.log("SELECT:", data); return false; } // model.searchNow
+      })
+      .data("ui-autocomplete")._renderItem = function(ul, data) {
+        return $("<li>")
+          .append("<a>" + data.text + "<br>" + data.desc + "</a>")
+          .appendTo(ul);
+      };
 
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
