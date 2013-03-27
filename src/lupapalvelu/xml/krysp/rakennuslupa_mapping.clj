@@ -120,7 +120,29 @@
                                                {:tag :kaupunkikuvaToimenpide}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
-                                               {:tag :rakennelmatieto}]}]}]}]}]})
+                                               {:tag :rakennelmatieto}]}]}
+                             {:tag :lisatiedot
+                              :child [{:tag :Lisatiedot
+                                       :child [{:tag :salassapitotietoKytkin}
+                                      {:tag :asioimiskieli}
+                                      {:tag :suoramarkkinointikieltoKytkin}]}]}
+                             {:tag :liitetieto
+                              :child [{:tag :Liite
+                                       :child [{:tag :kuvaus}
+                                               {:tag :linkkiliitteeseen}
+                                               {:tag :muokkausHetki}
+                                               {:tag :versionumero}
+                                               {:tag :tekija
+                                                :child [{:tag :kuntaRooliKoodi}
+                                                        {:tag :VRKrooliKoodi}
+                                                        henkilo
+                                                        yritys]}
+                                               {:tag :tyyppi}]}]}
+                             {:tag :kayttotapaus}
+                             {:tag :asianTiedot
+                              :child [{:tag :Asiantiedot
+                                       :child [{:tag :vahainenPoikkeaminen}
+                                                {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
 (defn get-application-as-krysp [application]
   (let [canonical  (application-to-canonical application)

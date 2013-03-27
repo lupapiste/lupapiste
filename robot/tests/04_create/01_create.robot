@@ -46,7 +46,8 @@ Mikko inspects inforequest and sees his initial comments
 
 Mikko creates new application
   Go to page  applications
-  Create application  create-app-2  753  75341600250023  applications-create-new
+  Wait until  Element should be visible  xpath=//*[@data-test-id='applications-create-new']
+  Create application the fast way  create-app-2  753  75341600250023
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info

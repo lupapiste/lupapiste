@@ -66,7 +66,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
 };
 
-LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized">' +
+LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
   '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
   '<div class="dialog-content"><p></p>' +
   '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>' +

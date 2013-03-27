@@ -21,15 +21,15 @@
 ;; Configuration
 ;;
 
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
-(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
+(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid #_:vtjdata])
 
 (def constants
   {:url       (env/value :vetuma :url)
    :rcvid     (env/value :vetuma :rcvid)
-   :appid     "VETUMA-APP2"
+   :appid     "Lupapiste"
    :so        "6"
-   :solist    "6,11"
+   :solist    "6" #_"6,11"
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
@@ -38,7 +38,7 @@
    :errurl    "{host}/api/vetuma/error"
    :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
-   :extradata "VTJTT=VTJ-VETUMA-Perus"
+   ;;:extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
    :key       (env/value :vetuma :key)})
 
 ;; log error for all missing env keys.
@@ -86,8 +86,14 @@
     (->> (string/join "&"))
     mac))
 
-(defn- with-mac [m] (merge m {:mac (mac-of m request-mac-keys)}))
-(defn- mac-verified [m] (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
+(defn- with-mac [m]
+  (merge m {:mac (mac-of m request-mac-keys)}))
+
+(defn- mac-verified [m]
+  (if (= (:mac m) (mac-of m response-mac-keys))
+    m
+    (do (error "invalid mac:" m)
+      (throw (IllegalArgumentException. "invalid mac.")))))
 
 ;;
 ;; response parsing
@@ -113,7 +119,7 @@
 
 (defn- user-extracted [m]
   (merge (extract-subjectdata m)
-         (extract-vtjdata m)
+         #_(extract-vtjdata m)
          (extract-userid m)
          (extract-request-id m)))
 
@@ -129,6 +135,8 @@
     apply-templates
     with-mac
     (dissoc :key)
+    (dissoc :url)
+    (dissoc :host)
     keys-as-strings))
 
 (defn- parsed [m]
