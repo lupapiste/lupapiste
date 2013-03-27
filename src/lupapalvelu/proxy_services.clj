@@ -94,6 +94,7 @@
         (resp/status 503 "Service temporarily unavailable")))))
 
 (defn find-addresses-proxy [request]
+  (Thread/sleep 2000)
   (let [term (get (:query-params request) "term")]
     (println "** FIND:" term)
     (resp/json [{:text "foo" :desc "Fooo"}

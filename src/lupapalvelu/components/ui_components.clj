@@ -84,7 +84,8 @@
 
    :create       {:depends [:common]
                   :js ["create.js"]
-                  :html ["create.html"]}
+                  :html ["create.html"]
+                  :css ["create.css"]}
 
    :applicant    {:depends [:common :map :applications :application :attachment
                             :buildinfo :docgen :create :mypage :debug]
