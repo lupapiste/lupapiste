@@ -89,10 +89,10 @@
 (defn- with-mac [m]
   (merge m {:mac (mac-of m request-mac-keys)}))
 
-(defn- mac-verified [m]
-  (if (= (:mac m) (mac-of m response-mac-keys))
+(defn- mac-verified [{:keys [mac] :as m}]
+  (if (= mac (mac-of m response-mac-keys))
     m
-    (do (error "invalid mac:" m)
+    (do (error "invalid mac: " (dissoc m :key))
       (throw (IllegalArgumentException. "invalid mac.")))))
 
 ;;
