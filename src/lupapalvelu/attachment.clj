@@ -321,7 +321,7 @@
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :complement-needed :answered]}
   [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text]} :data :as command}]
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
