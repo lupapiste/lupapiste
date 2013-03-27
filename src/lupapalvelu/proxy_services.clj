@@ -4,7 +4,8 @@
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [clojure.string :as s]
-            [lupapalvelu.wfs :as wfs])
+            [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.find-address :as find-address])
   (:use [clojure.data.zip.xml]
         [clojure.tools.logging]
         [sade.util :only [dissoc-in select]]))
@@ -80,27 +81,8 @@
                     (wfs/property-is-like "oso:kuntanimiSwe" (str city "*")))))))))
 
 (defn find-addresses-proxy [request]
-  (let [query (get (:query-params request) "query")
-        address (parse-address query)
-        [status response] (apply find-addresses address)
-        feature->string (wfs/feature-to-address-string address)]
-    (if (= status :ok)
-      (let [features (take 10 response)]
-        (resp/json {:query query
-                    :suggestions (map feature->string features)
-                    :data (map wfs/feature-to-address features)}))
-      (do
-        (errorf "find-addresses failed: status=%s, response=%s" status response)
-        (resp/status 503 "Service temporarily unavailable")))))
-
-(defn find-addresses-proxy [request]
-  (Thread/sleep 2000)
   (let [term (get (:query-params request) "term")]
-    (println "** FIND:" term)
-    (resp/json [{:text "foo" :desc "Fooo"}
-                {:text "bar" :desc "Baraa"}
-                {:text "boz" :desc "Bozzaa"}])))
-
+    (resp/json (find-address/find-addresses term))))
 
 (defn- point-by-property-id [property-id]
   (wfs/execute wfs/ktjkii
