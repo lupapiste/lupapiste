@@ -10,6 +10,10 @@ Mikko creates an application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
   Create application the fast way  ${appname}  753  75341600250030
+  Input Text  kuvaus  Hieno hanke...
+  Input Text  poikkeamat  poikkeuksetta!
+  Focus  kuvaus
+  Wait for jQuery
 
 Mikko can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
