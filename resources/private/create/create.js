@@ -15,7 +15,8 @@
     var self = this;
 
     self.goPhase1 = function() {
-      $('.selected-location').hide();
+      // $('.selected-location').hide();
+      $('.selected-location').show();
       $("#create-part-1").show();
       $("#create-part-2").hide();
       $("#create-part-3").hide();
@@ -118,6 +119,7 @@
     // Called when user clicks on map:
 
     self.click = function(x, y) {
+      console.log("click:", x, y);
       self
         .setXY(x, y)
         .addressData(null)
@@ -136,15 +138,32 @@
     // Search activation:
 
     self.searchNow = function() {
-      $('.selected-location').show();
+      // $('.selected-location').show();
+      // self.map.updateSize();
       self
         .resetXY()
         .addressData(null)
         .propertyId(null)
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
-      self.map.updateSize();
       return false;
+    };
+    
+    self.autocompleteSelect = function(e, data) {
+      console.log("SELECT:", data);
+      var item = data.item,
+          location = item.location,
+          x = location.x,
+          y = location.y;
+      
+      if (item.kind === "poi") self.center(x, y, 9).setXY(x, y);
+      return false;
+    }
+    
+    self.autocompleteRender = function(ul, data) {
+      return $("<li>")
+        .append("<a>" + data.text + "<br>" + loc("poi", data.type) + ", " + loc("municipality", data.municipality) + "</a>")
+        .appendTo(ul);
     };
 
     self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
@@ -245,18 +264,14 @@
     $("#create").applyBindings(model);
 
     $("#create-search")
-      // .keypress(function(e) { if (e.which === 13) model.searchNow(); })
+      .keypress(function(e) { if (e.which === 13) model.searchNow(); })
       .autocomplete({
         source:     "/proxy/find-address",
         delay:      500,
         minLength:  3,
-        select:     function(e, data) { console.log("SELECT:", data); return false; } // model.searchNow
+        select:     model.autocompleteSelect
       })
-      .data("ui-autocomplete")._renderItem = function(ul, data) {
-        return $("<li>")
-          .append("<a>" + data.text + "<br>" + data.desc + "</a>")
-          .appendTo(ul);
-      };
+      .data("ui-autocomplete")._renderItem = model.autocompleteRender;
 
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
