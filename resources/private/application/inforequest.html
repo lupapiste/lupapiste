@@ -10,7 +10,7 @@
 
         <div data-bind="with: application" class="application_summary_info">
           <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span></h1>
-          
+
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
@@ -24,7 +24,7 @@
             <p data-bind="ltext: 'application.state'"></p>
             <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
           </div>
-          
+
           <div data-bind="with: $root.applicationModel.data">
             <p data-bind="ltext: 'inforequest.created'"></p>
             <span data-bind="if: $data.created">
@@ -46,7 +46,7 @@
               </li>
             </ul>
           </div>
-  
+
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
               <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
@@ -119,7 +119,8 @@
 
         <button
           class="btn modal"
-          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
+          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
+          data-test-id="add-inforequest-attachment"
           data-window-id="upload-dialog"></button>
 
         <div data-bind="with: $root.comment">
