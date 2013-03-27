@@ -10,9 +10,8 @@ Mikko creates an application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
   Create application the fast way  ${appname}  753  75341600250030
-  Input Text  kuvaus  Hieno hanke...
-  Input Text  poikkeamat  poikkeuksetta!
-  Focus  kuvaus
+  Execute Javascript  $("textarea[name='kuvaus']").val('Hieno hanke...').change();
+  Execute Javascript  $("textarea[name='poikkeamat']").val('poikkeuksetta!').change();
   Wait for jQuery
 
 Mikko can't approve application
@@ -30,8 +29,7 @@ Mikko remembers that it is his turn to pick the kids from day care
 Sonja logs in and sees that some completion is needed
   Sonja logs in
   Open application  ${appname}  75341600250030
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='request-for-complement']
-  Click by test id  request-for-complement
+  Click enabled by test id  request-for-complement
   Logout
 
 Mikko comes back, fills in missing parts and makes a resubmit
@@ -45,7 +43,7 @@ Sonja logs in for approval
   Open application  ${appname}  75341600250030
 
 Sonja approves application
-  Click by test id  approve-application
+  Click enabled by test id  approve-application
 
 Sonja cant re-approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
