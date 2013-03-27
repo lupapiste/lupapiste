@@ -363,7 +363,6 @@ var docgen = (function() {
           $("#invite-document-name").val(self.schemaName).change();
           $("#invite-document-id").val(self.docId).change();
           LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-          $("#invite-email").focus();
           return false;
         }
       }).appendTo(span);
