@@ -242,7 +242,7 @@
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [{{:keys [id attachmentId attachmentType]} :data :as command}]
   (with-application command
     (fn [application]
@@ -263,7 +263,7 @@
   {:description "Authority can approve attachement, moves to ok"
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open :submitted]}
+   :states      [:draft :open :complement-needed :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
@@ -277,7 +277,7 @@
   {:description "Authority can reject attachement, requires user action."
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open :submitted]}
+   :states      [:draft :open :complement-needed :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
@@ -291,7 +291,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :open]}
+   :states      [:draft :open :complement-needed]}
   [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (create-attachments application-id attachment-types created)]
     (ok :applicationId application-id :attachmentIds attachment-ids)
@@ -300,7 +300,7 @@
 (defcommand "delete-attachment"
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
-   :states      [:draft :open]}
+   :states      [:draft :open :complement-needed]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -310,7 +310,7 @@
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
-   :states      [:draft :open]}
+   :states      [:draft :open :complement-needed]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -321,7 +321,7 @@
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed :answered]}
   [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text]} :data :as command}]
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)

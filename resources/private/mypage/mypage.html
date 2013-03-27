@@ -3,32 +3,8 @@
 <body>
   <section class="page container" id="mypage">
 
-    <form id="pw-form">
-
-      <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
-
-      <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
-      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
-
-      <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
-      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
-      <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
-
-      <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
-      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
-      <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
-
-      <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
-      <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
-      <span data-bind="visible: error() == null && saved, ltext: 'mypage.passwordChanged'" style="font-weight: bold; color: green;" data-test-id="change-my-passwor-ok"></span>
-      <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..."/>
-
-      <br/>
-      <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;"></a>
-    </form>
-
+   <div class="fifty">
     <form id="own-info-form">
-
       <h2 data-bind="ltext: 'mypage.title'"></h2>
       <div class="form-entry">
         <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
@@ -52,11 +28,36 @@
         <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
       </div>
       <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
-      <span data-bind="visible: error() != null, text: loc('mypage.' + error())" style="font-weight: bold; color: red;"></span>
-      <span data-bind="visible: error() == null && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
+      <p class="context-error" data-bind="visible: error() != null, ltext: error"></p>
+      <span data-bind="visible: !error() && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..."/>
+    </form>
+   </div>
+   <div class="fifty">
+    <form id="pw-form">
+      <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
+
+      <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
+      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
+
+      <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
+      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
+      <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
+
+      <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
+      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
+      <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
+
+      <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
+      <p  class="context-error" data-bind="visible: error() != null, ltext: error" class="context-error"></p>
+      <span data-bind="visible: !error() && saved, ltext: 'mypage.passwordChanged'" style="font-weight: bold; color: green;" data-test-id="change-my-passwor-ok"></span>
+      <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..."/>
+
+      <br/><br/>
+      <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;" class="btn">Takaisin</a>
 
     </form>
+   </div>
   </section>
 </body>
 </html>

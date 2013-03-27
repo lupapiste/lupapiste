@@ -40,7 +40,7 @@
         (ok))
       (do
         (warn "Password change: failed: old password does not match, user-id:" user-id)
-        (fail :old-password-does-not-match)))))
+        (fail :mypage.old-password-does-not-match)))))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
