@@ -20,12 +20,15 @@ var util = (function() {
     if (l <= 12) { return "good"; }
     return "excellent";
   }
-
-
+  
+  function isValidEmailAddress(val) {
+    return val.indexOf("@") != -1;
+  }
 
   return {
     fluentify: fluentify,
-    getPwQuality: getPwQuality
+    getPwQuality: getPwQuality,
+    isValidEmailAddress: isValidEmailAddress
   };
   
 })();
