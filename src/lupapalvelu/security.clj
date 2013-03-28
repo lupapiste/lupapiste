@@ -81,7 +81,7 @@
   (create-any-user (merge user {:role :applicant :enabled false})))
 
 (defn create-authority [user]
-  (create-any-user (merge user {:role :authority :enabled false})))
+  (create-any-user (merge user {:role :authority :enabled true})))
 
 (defn update-user [email data]
   (mongo/update :users {:email email} {$set data}))

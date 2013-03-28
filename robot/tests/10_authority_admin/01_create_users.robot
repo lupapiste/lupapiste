@@ -20,26 +20,19 @@ Authority admin creates three users
   User count is  ${userCountAfter}
   Logout
 
-Created user cant login
+Created user can login
   Login  heikki.virtanen@example.com  123456
-  User should not be logged in
+  User should be logged in  Heikki Virtanen
+  Logout
 
-Admin activates Heikki (to simulate activating via email)
-  Solitaadmin logs in
-  Wait until  page should contain link  heikki.virtanen@example.com
-  Click link  heikki.virtanen@example.com
-
-Activating Heikki removes activation link
+Activation link is not visible, because new authority user is actived by default
   Wait until  page should not contain link  heikki.virtanen@example.com
   Logout
 
-Heikki user can now login
-  Authority logs in  heikki.virtanen@example.com  123456  Heikki Virtanen
-  Logout
-
-Hessu can't still login
+Hessu can login, too
   Login  hessu.kesa@example.com  123456
-  User should not be logged in
+  User should be logged in  Hessu Kesa
+  Logout
 
 *** Keywords ***
 
