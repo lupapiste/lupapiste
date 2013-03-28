@@ -80,7 +80,7 @@
     self.requestType = ko.observable();
 
     self.clear = function() {
-      self.goPhase1();  
+      self.goPhase1();
       if (!self.map) {
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
         self.map.addClickHandler(self.click);
@@ -149,14 +149,25 @@
       return false;
     };
     
+    var handlers = [
+      [{kind: "poi", type: "560"}, function(item) { self.center(item.location.x, item.location.y, 9); }],
+      [{kind: "poi", type: "550"}, function(item) { self.center(item.location.x, item.location.y, 7); }],
+      [{kind: "poi", type: "540"}, function(item) { self.center(item.location.x, item.location.y, 6); }],
+      [{kind: "poi", type: "540"}, function(item) {
+        $("#create #create-search")
+          .val(", " + loc("municipality", item.municipality))
+          .caretToStart();
+      }]
+    ];
+    
     self.autocompleteSelect = function(e, data) {
       console.log("SELECT:", data);
-      var item = data.item,
-          location = item.location,
-          x = location.x,
-          y = location.y;
-      
-      if (item.kind === "poi") self.center(x, y, 9).setXY(x, y);
+      var item = data.item;
+      _.each(handlers, function(e) {
+        var selector = e[0],
+            handler = e[1];
+        if (_.every(selector, function(v, k) { return item[k] === v; })) handler(item);
+      });
       return false;
     }
     
@@ -282,7 +293,7 @@
     hub.subscribe({type: "keyup", keyCode: 37}, tree.back);
     hub.subscribe({type: "keyup", keyCode: 33}, tree.start);
     hub.subscribe({type: "keyup", keyCode: 36}, tree.start);
-    
+
   });
 
 })();
