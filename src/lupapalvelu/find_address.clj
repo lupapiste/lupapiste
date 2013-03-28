@@ -22,13 +22,16 @@
 (defn- to-property-id [a b c d]
   (str (pwz 3 a) (pwz 3 b) (pwz 4 c) (pwz 4 d)))
 
+(defn- apply-search [f]
+  (fn [m] (apply f (drop 1 m))))
+
 (defn search [term]
   (condp re-find (s/trim term)
-    #"^(\d{14})$"                                 :>> (fn [[_ property-id]] (search-property-id property-id))
+    #"^(\d{14})$"                                 :>> (apply-search search-property-id)
     #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$"  :>> (fn [[_ a b c d]] (search-property-id (to-property-id a b c d)))
-    #"^(\S+)$"                                    :>> (fn [[_ poi]] (search-poi-or-street poi))
-    #"^(\S+)\s+(\d+)\s*,?$"                       :>> (fn [[_ street number]] (search-street-with-number street number))
-    #"^(\S+)\s+(\d+)?\s*,?\s*(\S+)$"              :>> (fn [[_ street number city]] (search-address street number city))
+    #"^(\S+)$"                                    :>> (apply-search search-poi-or-street)
+    #"^(\S+)\s+(\d+)\s*,?$"                       :>> (apply-search search-street-with-number)
+    #"^(\S+)\s+(\d+)?\s*,?\s*(\S+)$"              :>> (apply-search search-address)
     []))
 
 (defn find-addresses [term]
