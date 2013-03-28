@@ -22,7 +22,7 @@
 
 (def ui-components
   {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui.1.10.2.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
-   :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js"]
+   :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]
                   :css ["jquery-ui.css"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
    :underscore   {:js ["underscore-1.4.4-min.js" "underscore.string.min.js" "underscore.string.init.js"]}
