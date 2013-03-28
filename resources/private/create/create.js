@@ -19,6 +19,7 @@
       $("#create-part-1").show();
       $("#create-part-2").hide();
       $("#create-part-3").hide();
+      $("#create-search").focus();
     };
     
     self.goPhase2 = function() {
