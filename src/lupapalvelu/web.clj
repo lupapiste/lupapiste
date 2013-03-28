@@ -344,8 +344,8 @@
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
-  ;; post ascii here without the right content-type, e.g.
-  ;; http --form POST http://localhost:80/api/vetuma Content-Type:'application/x-www-form-urlencoded' < input.ascii.txt
+  ;; send ascii over the wire with wrong encofing (case: Vetuma)
+  ;; http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
 
