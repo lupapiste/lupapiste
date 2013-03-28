@@ -344,6 +344,11 @@
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
+  ;; post ascii here without the right content-type, e.g.
+  ;; http --form POST http://localhost:80/api/vetuma Content-Type:'application/x-www-form-urlencoded' < input.ascii.txt
+  (defpage [:post "/dev/ascii"] {:keys [a]}
+    (str a))
+
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
 
