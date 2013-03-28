@@ -11,9 +11,21 @@ var util = (function() {
                       return m; },
                     {}); 
   }
+  
+  function getPwQuality(password) {
+    var l = password.length;
+    if (l <= 6)  { return "poor"; }
+    if (l <= 8)  { return "low"; }
+    if (l <= 10) { return "average"; }
+    if (l <= 12) { return "good"; }
+    return "excellent";
+  }
+
+
 
   return {
-    fluentify: fluentify
+    fluentify: fluentify,
+    getPwQuality: getPwQuality
   };
   
 })();
