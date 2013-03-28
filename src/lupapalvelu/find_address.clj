@@ -4,6 +4,33 @@
             [monger.query :as q]
             [lupapalvelu.mongo :as mongo]))
 
+(defn search-property-id [property-id]
+  (println (format "PROPID: <%s>" property-id)))
+
+(defn search-poi-or-street [poi]
+  (println (format "POI: <%s>" poi)))
+
+(defn search-street-with-number [street number]
+  (println (format "STREET: <%s> <%s>" street number)))
+
+(defn search-address [street number city]
+  (println (format "ADDRESS: <%s> <%s> <%s>" street number city)))
+
+(defn- pwz [c v]
+  (apply str (conj (vec (repeat (- c (count v)) \0)) v)))
+
+(defn- to-property-id [a b c d]
+  (str (pwz 3 a) (pwz 3 b) (pwz 4 c) (pwz 4 d)))
+
+(defn search [term]
+  (condp re-find (s/trim term)
+    #"^(\d{14})$"                                 :>> (fn [[_ property-id]] (search-property-id property-id))
+    #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$"  :>> (fn [[_ a b c d]] (search-property-id (to-property-id a b c d)))
+    #"^(\S+)$"                                    :>> (fn [[_ poi]] (search-poi-or-street poi))
+    #"^(\S+)\s+(\d+)\s*,?$"                       :>> (fn [[_ street number]] (search-street-with-number street number))
+    #"^(\S+)\s+(\d+)?\s*,?\s*(\S+)$"              :>> (fn [[_ street number city]] (search-address street number city))
+    []))
+
 (defn find-addresses [term]
   (map #(assoc % :kind :poi)
        (q/with-collection "poi"
