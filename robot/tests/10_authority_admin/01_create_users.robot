@@ -14,14 +14,14 @@ Authority admin goes to admin page
 Authority admin creates three users
   Wait Until  Element Should Be Visible  //tr[@class="user-row"]
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
-  Create user  heikki.virtanen@example.com  Heikki  Virtanen  123456
-  Create user  hessu.kesa@example.com  Hessu  Kesa  123456
+  Create user  heikki.virtanen@example.com  Heikki  Virtanen  12345678
+  Create user  hessu.kesa@example.com  Hessu  Kesa  12345678
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
   Logout
 
 Created user can login
-  Login  heikki.virtanen@example.com  123456
+  Login  heikki.virtanen@example.com  12345678
   User should be logged in  Heikki Virtanen
   Logout
 
@@ -30,7 +30,7 @@ Activation link is not visible, because new authority user is actived by default
   Logout
 
 Hessu can login, too
-  Login  hessu.kesa@example.com  123456
+  Login  hessu.kesa@example.com  12345678
   User should be logged in  Hessu Kesa
   Logout
 
