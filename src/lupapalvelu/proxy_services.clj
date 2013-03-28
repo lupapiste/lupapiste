@@ -46,40 +46,6 @@
                     :data (map wfs/feature-to-address features)}))
       (resp/status 503 "Service temporarily unavailable"))))
 
-(defn find-addresses [street number city]
-  (wfs/execute wfs/maasto
-    (cond
-      (and (s/blank? number) (s/blank? city)) (wfs/query {"typeName" "oso:Osoitenimi"}
-                                                (wfs/sort-by "oso:kuntanimiFin")
-                                                (wfs/filter
-                                                  (wfs/and
-                                                    (wfs/property-is-like "oso:katunimi" (str street "*"))
-                                                    (wfs/property-is-equal "oso:jarjestysnumero" "1"))))
-      (s/blank? city) (wfs/query {"typeName" "oso:Osoitenimi"}
-                        (wfs/sort-by "oso:kuntanimiFin")
-                        (wfs/filter
-                          (wfs/and
-                            (wfs/property-is-like "oso:katunimi"   (str street "*"))
-                            (wfs/property-is-like "oso:katunumero" (str number "*"))
-                            (wfs/property-is-less "oso:jarjestysnumero" "10"))))
-      (s/blank? number) (wfs/query {"typeName" "oso:Osoitenimi"}
-                          (wfs/sort-by "oso:katunumero")
-                          (wfs/filter
-                            (wfs/and
-                              (wfs/property-is-like "oso:katunimi" (str street "*"))
-                              (wfs/or
-                                (wfs/property-is-like "oso:kuntanimiFin" (str city "*"))
-                                (wfs/property-is-like "oso:kuntanimiSwe" (str city "*"))))))
-      :else (wfs/query {"typeName" "oso:Osoitenimi"}
-              (wfs/sort-by "oso:katunumero")
-              (wfs/filter
-                (wfs/and
-                  (wfs/property-is-like "oso:katunimi"     (str street "*"))
-                  (wfs/property-is-like "oso:katunumero"   (str number "*"))
-                  (wfs/or
-                    (wfs/property-is-like "oso:kuntanimiFin" (str city "*"))
-                    (wfs/property-is-like "oso:kuntanimiSwe" (str city "*")))))))))
-
 (defn find-addresses-proxy [request]
   (let [term (get (:query-params request) "term")]
     (resp/json (find-address/find-addresses term))))
