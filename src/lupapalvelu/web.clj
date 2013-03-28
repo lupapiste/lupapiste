@@ -345,7 +345,8 @@
     (dissoc (request/ring-request) :body))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
-  ;; http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
 
