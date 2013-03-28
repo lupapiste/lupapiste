@@ -8,6 +8,7 @@
         [hiccup.form]
         [clojure.tools.logging])
   (:require [digest]
+            [ring.util.codec :as codec]
             [sade.env :as env]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
@@ -20,6 +21,8 @@
 ;;
 ;; Configuration
 ;;
+
+(def encoding "ISO-8859-1")
 
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid #_:vtjdata])
@@ -75,7 +78,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn- mac [data]  (-> data digest/sha-256 .toUpperCase))
+(defn- mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->
@@ -89,10 +92,10 @@
 (defn- with-mac [m]
   (merge m {:mac (mac-of m request-mac-keys)}))
 
-(defn- mac-verified [m]
-  (if (= (:mac m) (mac-of m response-mac-keys))
+(defn- mac-verified [{:keys [mac] :as m}]
+  (if (= mac (mac-of m response-mac-keys))
     m
-    (do (error "invalid mac:" m)
+    (do (error "invalid mac: " (dissoc m :key))
       (throw (IllegalArgumentException. "invalid mac.")))))
 
 ;;
@@ -185,8 +188,23 @@
                    (map field (request-data (host :secure)))
                    (submit-button "submit")))))))
 
+(defn pimped-request
+  "Morbid hack to read the SUBJECTDATA from http-header 'referer',
+   which has url-encoded B02K_CUSTNAME-parameter with the same info
+   in different format. FIXME!"
+  []
+  (let [request  (request/ring-request)
+        referer  (get-in request [:headers "referer"])
+        params   (string/replace referer #".*?\?" "")
+        decoded  (codec/form-decode params encoding)
+        fullname (get decoded "B02K_CUSTNAME")
+        [l f]    (string/split fullname #" ")
+        newname  (str "ETUNIMI=" f ", SUKUNIMI=" l)
+        pimped   (assoc-in request [:form-params "SUBJECTDATA"] newname)]
+    pimped))
+
 (defpage [:post "/api/vetuma"] []
-  (let [user (-> (:form-params (request/ring-request))
+  (let [user (-> (:form-params (pimped-request) #_(request/ring-request))
                logged
                parsed
                user-extracted
