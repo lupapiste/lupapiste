@@ -1,56 +1,7 @@
 poi: Paikka
-poi.100: autotien nimi
-poi.110: kulkuväylän nimi
-poi.120: rautatieliikennepaikan nimi
-poi.130: turvalaitteen nimi
-poi.200: maa-aineksenottoalueen nimi
-poi.205: hautausmaan nimi
-poi.210: kaatopaikan nimi
-poi.215: varastoalueen nimi
-poi.225: liikennealueen nimi
-poi.230: louhoksen nimi
-poi.235: puiston nimi
-poi.240: täytemaan nimi
-poi.245: urheilu- tai virkistysalueen nimi
-poi.300: puun nimi
-poi.305: kiven nimi
-poi.310: vesikiven nimi
-poi.315: merkittävän luontokohteen nimi
-poi.320: pellon tai niityn nimi
-poi.325: metsäalueen nimi
-poi.330: suon nimi
-poi.335: kohouman nimi
-poi.340: painanteen nimi
-poi.345: niemen nimi
-poi.350: saaren nimi
-poi.390: muun maastokohteen nimi
-poi.400: lähteen nimi
-poi.410: vakaveden nimi
-poi.415: vakaveden osan nimi
-poi.420: virtaveden nimi
-poi.425: virtaveden osan nimi
-poi.430: matalikon nimi
-poi.435: kosken nimi
-poi.490: muu vesistönimi
-poi.500: rakennuksen nimi
-poi.510: rakennusryhmän nimi
-poi.520: altaan nimi
-poi.530: muistomerkin nimi
-poi.540: kunnan nimi, kaupunki
-poi.550: kunnan nimi, maaseutu
-poi.560: kylän, kaupunginosan tai kulmakunnan nimi
-poi.570: talon nimi
-poi.575: maakunnan nimi
-poi.580: läänin nimi
-poi.590: muu asutusnimi
-poi.600: luonnonsuojelualueen nimi
-poi.602: luonnonpuiston nimi
-poi.604: kansallispuiston nimi
-poi.610: rauhoitetun kohteen nimi
-poi.612: luonnonmuistomerkin nimi
-poi.614: muinaisjäännöksen nimi
-poi.620: rauhoitetun alueen nimi
-poi.630: erämaa-alueen nimi
-poi.640: retkeilyalueen nimi
-poi.700: valtakunnan rajapyykin nimi
-poi.710: rajapyykin nimi
+poi.540: Kaupunki
+poi.550: Kunta
+poi.560: Kylä tai kaupunginosa
+
+municipality.254: Kiikoinen
+ 
