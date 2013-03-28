@@ -344,6 +344,12 @@
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
+  ;; send ascii over the wire with wrong encofing (case: Vetuma)
+  ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  (defpage [:post "/dev/ascii"] {:keys [a]}
+    (str a))
+
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
 

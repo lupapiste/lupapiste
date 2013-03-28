@@ -8,7 +8,6 @@
         [hiccup.form]
         [clojure.tools.logging])
   (:require [digest]
-            [ring.util.codec :as codec]
             [sade.env :as env]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
@@ -188,23 +187,8 @@
                    (map field (request-data (host :secure)))
                    (submit-button "submit")))))))
 
-(defn pimped-request
-  "Morbid hack to read the SUBJECTDATA from http-header 'referer',
-   which has url-encoded B02K_CUSTNAME-parameter with the same info
-   in different format. FIXME!"
-  []
-  (let [request  (request/ring-request)
-        referer  (get-in request [:headers "referer"])
-        params   (string/replace referer #".*?\?" "")
-        decoded  (codec/form-decode params encoding)
-        fullname (get decoded "B02K_CUSTNAME")
-        [l f]    (string/split fullname #" ")
-        newname  (str "ETUNIMI=" f ", SUKUNIMI=" l)
-        pimped   (assoc-in request [:form-params "SUBJECTDATA"] newname)]
-    pimped))
-
 (defpage [:post "/api/vetuma"] []
-  (let [user (-> (:form-params (pimped-request) #_(request/ring-request))
+  (let [user (-> (:form-params (request/ring-request))
                logged
                parsed
                user-extracted
