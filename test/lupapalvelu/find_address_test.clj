@@ -25,7 +25,8 @@
   (fact
     (prerequisite (search-property-id "00102203334444") => ...result...)
     (search "1-22-333-4444") => ...result...
-    (search "001-022-0333-4444") => ...result...)
+    (search "001-022-0333-4444") => ...result...
+    (search "00102203334444") => ...result...)
   (fact
     (prerequisite (search-poi-or-street "foo") => ...result...)
     (search "foo") => ...result...)
