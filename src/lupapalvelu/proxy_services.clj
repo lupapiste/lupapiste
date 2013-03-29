@@ -48,7 +48,9 @@
 
 (defn find-addresses-proxy [request]
   (let [term (get (:query-params request) "term")]
-    (resp/json (find-address/find-addresses term))))
+    (if (string? term)
+      (resp/json (find-address/search term))
+      (resp/status 400 "Missing query param 'term'"))))
 
 (defn- point-by-property-id [property-id]
   (wfs/execute wfs/ktjkii
