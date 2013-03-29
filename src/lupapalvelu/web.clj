@@ -344,6 +344,9 @@
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
+  (defjson "/dev/user" []
+    (current-user))
+  
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
 
