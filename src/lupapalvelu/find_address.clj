@@ -4,6 +4,11 @@
             [monger.query :as q]
             [lupapalvelu.mongo :as mongo]))
 
+;; All search-... functions return a sequence of items, where each item is a map
+;; of (at least) following keys:
+;;   :kind       One of :poi, :property-id, or :address
+;;   :location   Map with :x and :y
+
 (defn search-property-id [property-id]
   (println (format "PROPID: <%s>" property-id)))
 
@@ -16,14 +21,31 @@
 (defn search-address [street number city]
   (println (format "ADDRESS: <%s> <%s> <%s>" street number city)))
 
-(defn- pwz [c v]
-  (apply str (conj (vec (repeat (- c (count v)) \0)) v)))
+;;
+;; Utils:
+;;
 
-(defn- to-property-id [a b c d]
+(defn- pwz
+  "Pad 's' with zeros so that its at least 'c' characters long"
+  [c s]
+  (apply str (conj (vec (repeat (- c (count s)) \0)) s)))
+
+(defn- to-property-id
+  "Convert property ID elements to 'database' format"
+  [a b c d]
   (str (pwz 3 a) (pwz 3 b) (pwz 4 c) (pwz 4 d)))
 
-(defn- apply-search [f]
+(defn- apply-search
+  "Return a function that can be used as a target function in 'search' function.
+   The returned function accepts the list as returned from clojure.core/re-find.
+   It strips the first element (complete match) and applies rest to provided
+   function."
+  [f]
   (fn [m] (apply f (drop 1 m))))
+
+;;
+;; Public API:
+;;
 
 (defn search [term]
   (condp re-find (s/trim term)
@@ -34,31 +56,16 @@
     #"^(\S+)\s+(\d+)?\s*,?\s*(\S+)$"              :>> (apply-search search-address)
     []))
 
-(defn find-addresses [term]
+;;
+;; Here be dragons
+;;
+
+(comment
+  
   (map #(assoc % :kind :poi)
        (q/with-collection "poi"
          (q/find {:name {$regex (str \^ (s/lower-case term))}})
-         (q/limit 11))))
-
-
-(comment
-  (defn- get-municipalities [name]
-    (seq (let [municipalities (q/with-collection "poi"
-                                (q/find {:name {$regex (str \^ (s/lower-case name))}
-                                         :type {$in ["540" "550"]}})
-                                (q/limit 11))]
-           )))
-  
-  (some get-municipalities ["piiri" "tamm"])
-  (get-municipalities "tammi"))
-
-(comment
-  (clojure.pprint/pprint
-    (q/with-collection "poi"
-      (q/find {:type {$in ["540" "550"]}})
-      (q/limit 10))))
-
-(comment
+         (q/limit 11)))
   
   (defn find-addresses [street number city]
     (wfs/execute wfs/maasto
