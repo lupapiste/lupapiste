@@ -49,7 +49,7 @@
 (defn find-addresses-proxy [request]
   (let [term (get (:query-params request) "term")]
     (if (string? term)
-      (resp/json (find-address/search term))
+      (resp/json (or (find-address/search term) []))
       (resp/status 400 "Missing query param 'term'"))))
 
 (defn- point-by-property-id [property-id]
