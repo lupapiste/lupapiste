@@ -8,10 +8,10 @@
 
 (def buildinfo (read-string (slurp (io/resource "buildinfo.clj"))))
 
+(def target-env (or (re-find #"[PRODEVTS]+" (or (:build-tag buildinfo) "")) "local"))
+
 ; TODO rewrite? Perhaps determine from mode or env parameter?
-(defn prop-file []
-  (let [target-env (or (re-find #"[PRODEVTS]+" (or (buildinfo :build-tag) "")) "local")]
-    (-> target-env (s/lower-case) (str ".properties"))))
+(def ^:private prop-file (-> target-env (s/lower-case) (str ".properties")))
 
 (defn read-value [s]
   (cond
@@ -35,7 +35,7 @@
 
 (def config
   (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
-    (read-config (prop-file) password)))
+    (read-config prop-file password)))
 
 (defn value
   "returns a value from config directly."

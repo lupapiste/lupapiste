@@ -1,5 +1,6 @@
 (ns lupapalvelu.singlepage
   (:use [clojure.tools.logging]
+        [clj-time.coerce :only [from-long to-date]]
         [lupapalvelu.components.ui-components :only [ui-components]])
   (:require [clojure.java.io :as io]
             [net.cgrand.enlive-html :as enlive]
@@ -76,7 +77,12 @@
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (constantly (first footer)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
-                  (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e))))))
+                  (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
+                  (enlive/transform [:#buildinfo] (enlive/content (format "%s #%s %3$tF %3$tR [%4$s]"
+                                                                          env/target-env
+                                                                          (:build-number env/buildinfo)
+                                                                          (to-date (from-long (:time env/buildinfo)))
+                                                                          (name env/mode)))))))
 
 (defn compose-html [component]
   (let [out (ByteArrayOutputStream.)]
