@@ -40,15 +40,14 @@
         </wfs:GetFeature>"))
 
 (defn sort-by
-  ([property-name]
-    (sort-by property-name "desc"))
-  ([property-name order]
-    (str "<ogc:SortBy>
-            <ogc:SortProperty>
-              <ogc:PropertyName>" property-name "</ogc:PropertyName>
-            </ogc:SortProperty>
-            <ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>
-          </ogc:SortBy>")))
+  ([property-names]
+    (sort-by property-names "desc"))
+  ([property-names order]
+    (let [sort-properties (apply str (map #(str "<ogc:SortProperty><ogc:PropertyName>" % "</ogc:PropertyName></ogc:SortProperty>") property-names))]
+      (str "<ogc:SortBy>"
+           sort-properties
+           "<ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>"
+           "</ogc:SortBy>"))))
 
 (defn filter [& e]
   (str "<ogc:Filter>" (apply str e) "</ogc:Filter>"))
@@ -140,12 +139,12 @@
 
 (defn response->features [response]
   (let [input-xml (:body response)
-       features (-> input-xml
-                  (s/replace "UTF-8" "ISO-8859-1")
-                  (.getBytes "ISO-8859-1")
-                  java.io.ByteArrayInputStream.
-                  xml/parse
-                  zip/xml-zip)]
+        features (-> input-xml
+                   (s/replace "UTF-8" "ISO-8859-1")
+                   (.getBytes "ISO-8859-1")
+                   java.io.ByteArrayInputStream.
+                   xml/parse
+                   zip/xml-zip)]
     (xml-> features :gml:featureMember)))
 
 (defn execute
@@ -167,16 +166,16 @@
     timeout
     [:timeout]))
 
+
 (defn http-get
   [url q]
   (deref
     (future
-      (let [response (client/get url
-                                 {:query-params q
-                                  :basic-auth (get auth url)
-                                  :socket-timeout timeout
-                                  :conn-timeout timeout
-                                  :throw-exceptions false})]
+      (let [response (client/get url {:query-params q
+                                      :basic-auth (get auth url)
+                                      :socket-timeout timeout
+                                      :conn-timeout timeout
+                                      :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
           [:error response])))
