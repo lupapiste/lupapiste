@@ -70,7 +70,7 @@
   (str (kind (:cdn env/config)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
 
 (def ^:private buildinfo-summary
-  (format "%s #%s %3$tF %3$tR [%4$s]"
+  (format "%s-%s %3$tF %3$tT [%4$s]"
           env/target-env
           (:build-number env/buildinfo)
           (to-date (from-long (:time env/buildinfo)))
