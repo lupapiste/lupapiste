@@ -6,9 +6,14 @@
             [clojure.zip :as zip])
   (:use [clojure.data.zip.xml :only [xml-> text]]
         [sade.env :only [config]]
-        [sade.strings :only [starts-with-i]]))
+        [sade.strings :only [starts-with-i]]
+        [clojure.tools.logging]))
 
-(def timeout 5000)
+;;
+;; config:
+;;
+
+(def ^:private timeout 10000)
 
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
 (def maasto "https://ws.nls.fi/maasto/wfs")
@@ -22,7 +27,9 @@
      maasto         [(:username (:maasto conf))     (:password (:maasto conf))]
      nearestfeature [(:username (:maasto conf))     (:password (:maasto conf))]}))
 
-(def ^:private timeout 30000)
+;;
+;; DSL to WFS queries:
+;;
 
 (defn query [attrs & e]
   (str "<?xml version='1.0' encoding='UTF-8'?>
@@ -94,6 +101,10 @@
     "  <ogc:UpperBoundary>" property-upper-value "</ogc:UpperBoundary>
      </ogc:PropertyIsBetween>"))
 
+;;
+;; Helpers for result parsing:
+;;
+
 (defn- address-part [feature part]
   (first (xml-> feature :oso:Osoitenimi part text)))
 
@@ -147,49 +158,71 @@
                    zip/xml-zip)]
     (xml-> features :gml:featureMember)))
 
-(defn execute
-  "Takes a query (in XML) and returns a vector. If the first element of that
-   vector is :ok, then the next element is a list of features that match the
-   query. If the first element is :error, the next element is the HTTP response.
-   Finally, in case of time-out, a vector [:timeout] is returned."
-  [url q]
-  (deref
-    (future
-      (let [response (client/post url {:body q
-                                       :basic-auth (get auth url)
-                                       :socket-timeout timeout
-                                       :conn-timeout timeout
-                                       :throw-exceptions false})]
-        (if (= (:status response) 200)
-          [:ok (response->features response)]
-          [:error response])))
-    timeout
-    [:timeout]))
+;;
+;; Executing HTTP calls to Maanmittauslaitos:
+;;
 
+(def ^:private base-request {:socket-timeout timeout
+                             :conn-timeout timeout
+                             :throw-exceptions false})
 
-(defn http-get
-  [url q]
-  (deref
-    (future
-      (let [response (client/get url {:query-params q
-                                      :basic-auth (get auth url)
-                                      :socket-timeout timeout
-                                      :conn-timeout timeout
-                                      :throw-exceptions false})]
-        (if (= (:status response) 200)
-          [:ok (response->features response)]
-          [:error response])))
-    timeout
-    [:timeout]))
+(def ^:private http-method {:post [client/post :body]
+                            :get  [client/get  :query-params]})
 
-(defn nearest-query-params [x y]
-  {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
-   :TYPENAME "oso:Osoitepiste"
-   :COORDS (str x "," y ",EPSG:3067")
-   :SRSNAME "EPSG:3067"
-   :MAXFEATURES "1"
-   :BUFFER "500"})
+(defn- exec-http [http-fn url request]
+  (try
+    (let [{status :status body :body} (http-fn url request)]
+      (if (= status 200)
+        [:ok body]
+        [:error status]))
+    (catch Exception e
+      [:failure e])))
 
+(defn- exec [method url q]
+  (let [[http-fn param-key] (method http-method)
+        request (assoc base-request
+                       :basic-auth (auth url)
+                       param-key q)
+        task (future (exec-http http-fn url request))
+        [status data] (deref task timeout [:timeout])]
+    (condp = status
+      :timeout (do (errorf "wfs timeout: url=%s" url) nil)
+      :error   (do (errorf "wfs status %s: url=%s" data url) nil)
+      :failure (do (errorf data "wfs failure: url=%s" url) nil)
+      :ok      (response->features data))))
+
+(defn post [url q]
+  (exec :post url q))
+
+;;
+;; Public queries:
+;;
+
+(defn address-by-point [x y]
+  (exec :get nearestfeature {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
+                             :TYPENAME "oso:Osoitepiste"
+                             :COORDS (str x "," y ",EPSG:3067")
+                             :SRSNAME "EPSG:3067"
+                             :MAXFEATURES "1"
+                             :BUFFER "500"}))
+
+(defn property-id-by-point [x y]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:sijainti")
+          (point x y))))))
+
+(defn point-by-property-id [property-id]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (filter
+        (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 ;;
 ;; Raster images:
 ;;
