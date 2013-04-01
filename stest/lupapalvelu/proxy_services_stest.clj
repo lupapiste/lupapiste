@@ -5,7 +5,7 @@
             [cheshire.core :as json]))
 
 (facts "find-addresses-proxy"
-  (let [response (find-addresses-proxy {:query-params {"query" "piiriniitynkatu 9, tampere"}})
+  (let [response (find-addresses-proxy {:query-params {"term" "piiriniitynkatu 9, tampere"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu 9, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
@@ -15,7 +15,7 @@
                          :municipality "837"
                          :x "320371.953"
                          :y "6825180.72"}]))
-  (let [response (find-addresses-proxy {:query-params {"query" "piiriniitynkatu"}})
+  (let [response (find-addresses-proxy {:query-params {"term" "piiriniitynkatu"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu")
     (fact (:suggestions r) => ["Piiriniitynkatu, Tampere"])
@@ -25,7 +25,7 @@
                          :municipality "837"
                          :x "320531.265"
                          :y "6825180.25"}]))
-  (let [response (get-addresses-proxy {:query-params {"query" "piiriniitynkatu 9, tampere"}})
+  (let [response (get-addresses-proxy {:query-params {"term" "piiriniitynkatu 9, tampere"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu 9, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
@@ -35,7 +35,7 @@
                          :municipality "837"
                          :x "320371.953"
                          :y "6825180.72"}]))
-  (let [response (get-addresses-proxy {:query-params {"query" "piiriniitynkatu 19, tampere"}})
+  (let [response (get-addresses-proxy {:query-params {"term" "piiriniitynkatu 19, tampere"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu 19, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
