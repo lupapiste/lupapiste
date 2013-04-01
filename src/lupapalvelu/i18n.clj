@@ -52,6 +52,7 @@
 (defn localizer [lang]
   (partial localize (get-terms lang)))
 
+(def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
        :dynamic true}
   loc)
@@ -59,6 +60,13 @@
 (defmacro with-lang [lang & body]
   `(binding [loc (localizer ~lang)]
      ~@body))
+
+(defn lang-middleware [handler]
+  (fn [request]
+    (let [lang (or (-> request :user :lang) "fi")]
+      (binding [*lang* lang
+                loc (localizer lang)]
+        (handler request)))))
 
 (env/in-dev
 
