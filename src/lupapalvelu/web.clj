@@ -5,7 +5,8 @@
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
-        [clojure.string :only [blank?]])
+        [clojure.string :only [blank?]]
+        [lupapalvelu.security :only [current-user]])
   (:require [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
@@ -50,11 +51,6 @@
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
-
-(defn current-user
-  "fetches the current user from 1) http-session 2) apikey from headers"
-  ([] (current-user (request/ring-request)))
-  ([request] (or (session/get :user) (request :user))))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -257,7 +253,6 @@
     (let [apikey (get-apikey request)]
       (handler (assoc request :user (security/login-with-apikey apikey))))))
 
-
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
 
@@ -297,11 +292,11 @@
 (defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
 
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (attachment/output-all-attachments application-id (current-user) lang))
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
+  (attachment/output-all-attachments application-id (current-user)))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (ke6666/export application-id (current-user) lang))
+(defpage "/api/pdf-export/:application-id" {application-id :application-id}
+  (ke6666/export application-id (current-user)))
 
 ;;
 ;; Proxy

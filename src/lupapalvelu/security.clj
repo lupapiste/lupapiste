@@ -2,6 +2,8 @@
   (:use [monger.operators]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
+            [noir.request :as request]
+            [noir.session :as session]
             [sade.util :as util])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
@@ -11,6 +13,11 @@
 (defn dispense-salt ([] (dispense-salt 10)) ([n] (BCrypt/gensalt n)))
 (defn check-password [candidate hashed] (BCrypt/checkpw candidate hashed))
 (defn create-apikey [] (apply str (take 40 (repeatedly #(rand-int 10)))))
+
+(defn current-user
+  "fetches the current user from 1) http-session 2) apikey from headers"
+  ([] (current-user (request/ring-request)))
+  ([request] (or (session/get :user) (:user request))))
 
 (defn summary
   "returns common information about the user or nil"
