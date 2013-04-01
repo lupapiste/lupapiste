@@ -3,14 +3,14 @@
         [lupapalvelu.core]
         [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
+        [lupapalvelu.i18n :only [loc]]
         [clojure.string :only [split join trim]])
   (:require [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [sade.strings :as strings]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.ke6666 :as ke6666]
-            [lupapalvelu.i18n :as i18n])
+            [lupapalvelu.ke6666 :as ke6666])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 

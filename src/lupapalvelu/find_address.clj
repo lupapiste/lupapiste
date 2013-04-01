@@ -45,7 +45,7 @@
 
 (defn search-street-with-number [street number]
   ; FIXME: Fix result to property format
-  (wfs/execute wfs/maasto
+  (wfs/post wfs/maasto
     (wfs/query {"typeName" "oso:Osoitenimi"}
       (wfs/sort-by ["oso:kuntanimiFin"])
       (wfs/filter
@@ -55,7 +55,7 @@
           (wfs/property-is-less "oso:jarjestysnumero" "10"))))))
 
 (defn search-street-with-city [street city]
-  (let [data (wfs/execute wfs/maasto
+  (let [data (wfs/post wfs/maasto
                (wfs/query {"typeName" "oso:Osoitenimi"}
                  (wfs/sort-by ["oso:katunimi" "oso:katunumero"])
                  (wfs/filter
@@ -66,11 +66,11 @@
                        (wfs/property-is-like "oso:kuntanimiSwe" (str city "*")))
                      (wfs/property-is-less "oso:jarjestysnumero" "10")))))]
     (when data
-      (map (comp (set-kind :address) feature-to-address)
+      (map (comp (set-kind :address) wfs/feature-to-address)
            (uniq-by :street data)))))
 
 (defn search-address [street number city]
-  (let [data (wfs/execute wfs/maasto
+  (let [data (wfs/post wfs/maasto
                (wfs/query {"typeName" "oso:Osoitenimi"}
                  (wfs/sort-by ["oso:katunimi" "oso:katunumero"])
                  (wfs/filter
@@ -82,7 +82,7 @@
                        (wfs/property-is-like "oso:kuntanimiSwe" (str city "*")))
                      (wfs/property-is-less "oso:jarjestysnumero" "10")))))]
     (when data
-      (map (comp (set-kind :address) feature-to-address)
+      (map (comp (set-kind :address) wfs/feature-to-address)
            data))))
 
 ;;
@@ -127,7 +127,7 @@
 
 (comment
   
-  (def e (wfs/execute wfs/maasto
+  (def e (wfs/post wfs/maasto
          (wfs/query {"typeName" "oso:Osoitenimi"}
            (wfs/sort-by ["oso:katunimi" "oso:katunumero"])
              (wfs/filter
@@ -143,7 +143,7 @@
          (q/limit 11)))
   
   (defn find-addresses [street number city]
-    (wfs/execute wfs/maasto
+    (wfs/post wfs/maasto
       (cond
         (and (s/blank? number) (s/blank? city)) (wfs/query {"typeName" "oso:Osoitenimi"}
                                                            (wfs/sort-by ["oso:kuntanimiFin"])
