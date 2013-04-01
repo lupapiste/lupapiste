@@ -16,11 +16,11 @@
 
 (def ^:private auth
   (let [conf (:nls config)]
-    {:raster     [(:username (:raster conf)) (:password (:raster conf))]
-     :kiinteisto [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
-     ktjkii      [(:username (:ktjkii conf)) (:password (:ktjkii conf))]
-     maasto      [(:username (:maasto conf)) (:password (:maasto conf))]
-     nearestfeature [(:username (:maasto conf)) (:password (:maasto conf))]}))
+    {:raster        [(:username (:raster conf))     (:password (:raster conf))]
+     :kiinteisto    [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
+     ktjkii         [(:username (:ktjkii conf))     (:password (:ktjkii conf))]
+     maasto         [(:username (:maasto conf))     (:password (:maasto conf))]
+     nearestfeature [(:username (:maasto conf))     (:password (:maasto conf))]}))
 
 (def ^:private timeout 30000)
 
