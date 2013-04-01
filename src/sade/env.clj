@@ -8,7 +8,10 @@
 
 (def buildinfo (read-string (slurp (io/resource "buildinfo.clj"))))
 
-(def target-env (or (re-find #"[PRODEVTS]+" (or (:build-tag buildinfo) "")) "local"))
+(defn- parse-target-env [build-tag]
+  (or (re-find #"[PRODEVTS]+" (or build-tag "")) "local"))
+
+(def target-env (parse-target-env (:build-tag buildinfo)))
 
 ; TODO rewrite? Perhaps determine from mode or env parameter?
 (def ^:private prop-file (-> target-env (s/lower-case) (str ".properties")))
