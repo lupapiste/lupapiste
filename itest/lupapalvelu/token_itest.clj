@@ -4,15 +4,23 @@
         [lupapalvelu.token])
   (:require [lupapalvelu.mongo :as mongo]))
 
+(def get-and-use-token #'lupapalvelu.token/get-and-use-token)
+
 (facts
   
-  (let [id (save-token {:foo "foo"})]
-    (fact (consume-token id) => (contains {:data {:foo "foo"}}))
-    (fact (consume-token id) => nil))
+  (let [id (save-token :fofo {:foo "foo"})]
+    (get-and-use-token id) => (contains {:token-type :fofo :data {:foo "foo"}})
+    (get-and-use-token id) => nil)
   
-  (let [id (save-token {:foo "foo"} :ttl 100)]
-    (fact (consume-token id) => (contains {:data {:foo "foo"}})))
+  (let [id (save-token :fofo {:foo "foo"} :ttl 100)]
+    (get-and-use-token id) => (contains {:token-type :fofo :data {:foo "foo"}}))
   
-  (let [id (save-token {:foo "foo"} :ttl 100)]
+  (let [id (save-token :fofo {:foo "foo"} :ttl 100)]
     (Thread/sleep 150)
-    (fact (consume-token id) => nil)))
+    (get-and-use-token id) => nil))
+
+(defmethod handle-token :fofo [token]
+  {:works true :bar (:foo (:data token))})
+
+(facts
+  (consume-token (save-token :fofo {:foo "bar"})) => {:works true :bar "bar"})
