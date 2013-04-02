@@ -196,7 +196,9 @@
                logged)
         data (mongo/update-one-and-return :vetuma {:sessionid (session-id)} {$set {:user user}})
         uri  (get-in data [:paths :success])]
-    (redirect uri)))
+    (if uri
+      (redirect uri)
+      (redirect (str (host) "/app/fi/welcome#!/register2")))))
 
 (defpage [:any "/api/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
