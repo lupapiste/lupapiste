@@ -2,24 +2,15 @@
   (:use sade.env
         midje.sweet))
 
-(facts
-  (against-background (buildinfo :build-tag) => "lupapiste - PROD - Build")
-  (fact (prop-file) => "prod.properties"))
-(facts
-  (against-background (buildinfo :build-tag) => "lupapiste - TEST - Build")
-  (fact (prop-file) => "test.properties"))
-(facts
-  (against-background (buildinfo :build-tag) => "lupapiste - DEV - Build")
-  (fact (prop-file) => "dev.properties"))
-(facts
-  (against-background (buildinfo :build-tag) => "local")
-  (fact (prop-file) => "local.properties"))
-(facts
-  (against-background (buildinfo :build-tag) => "")
-  (fact (prop-file) => "local.properties"))
-(facts
-  (against-background (buildinfo :build-tag) => nil)
-  (fact (prop-file) => "local.properties"))
+(def parse-target-env #'sade.env/parse-target-env)
+
+(facts "target environment ID is parsed from build tag"
+  (fact (parse-target-env "lupapiste - PROD - Build") => "PROD")
+  (fact (parse-target-env "lupapiste - TEST - Build") => "TEST")
+  (fact (parse-target-env "lupapiste - DEV - Build") => "DEV")
+  (fact (parse-target-env "local") => "local")
+  (fact (parse-target-env "") => "local")
+  (fact (parse-target-env nil) => "local"))
 
 (fact "Password is decrypted and can be found in a sub map"
   (read-config "lupapalvelu/nested.properties" "testpassword")

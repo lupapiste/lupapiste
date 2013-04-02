@@ -92,9 +92,6 @@
 (status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
 (status/defstatus :mode  env/mode)
 
-(defjson "/api/buildinfo" []
-  (ok :data (assoc (util/sub-map env/buildinfo [:build-tag :build-id]) :server-mode env/mode)))
-
 ;;
 ;; Commands
 ;;
@@ -342,6 +339,12 @@
   (defjson "/dev/user" []
     (current-user))
   
+  ;; send ascii over the wire with wrong encofing (case: Vetuma)
+  ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  (defpage [:post "/dev/ascii"] {:keys [a]}
+    (str a))
+
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
 
