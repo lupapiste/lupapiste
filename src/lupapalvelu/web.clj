@@ -348,7 +348,7 @@
 ;;
 
 (env/in-dev
-  (defjson "/dev/spy" []
+  (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
