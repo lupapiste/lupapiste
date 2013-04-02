@@ -1,7 +1,0 @@
-create.placeholder: Kasarmikatu 25, Helsinki
-
-error.create_user: Käyttäjätunnuksen luominen epäonnistui. Ole hyvä ja yritä tunnistautumista uudelleen.
-error.duplicate-person-id:   Henkilötunnuksella on jo rekisteröity. Voit tarvittaessa tilata uuden salasanan etusivun "Oletko unohtanut salasanasi"-linkistä
-error.duplicate-email:       Sähköpostiosoitteella on jo rekisteröity. Voit tarvittaessa tilata uuden salasanan etusivun "Oletko unohtanut salasanasi"-linkistä
-
-register.confirm-cancel:     Haluatko varmasti keskeyttää rekisteröitymisen?
