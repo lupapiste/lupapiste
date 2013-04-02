@@ -1,5 +1,6 @@
 create.placeholder: Kasarmikatu 25, Helsinki
 login.reset-question: Oletko unohtanut salasanasi?
+
 reset.title: Salasanan vaihtaminen
 reset.info: Anna sähköpostiosoitteesi niin lähetämme sinulle salasanan vaihto linkin.
 reset.email: Sähköposti:
@@ -9,3 +10,20 @@ reset.sent.1: Sähköposti lähetetty.
 reset.sent.2: Seuraa ohjeita sähköpostistasi. Voit sulkea tämän ikkunan.
 reset.not-found: Antaamasi sähköpostiosoitetta ei löydy järjestelmästä.
 reset.email.title: Salasanan vaihto
+
+setpw.title: Salasanan vaihtaminen
+setpw.info: Anna uusi salasana kahdesti ja paina OK.
+setpw.password.1: Salasana:
+setpw.password.2: Salasana uudelleen:
+setpw.send: OK
+setpw.success: Salasana vaihdettu. Klikkaa linkkiä ja kirjaudu sisään uudella salasanallasi:
+setpw.fail: Salasanan vaihto ei onnistunut, ole hyvä ja yritä uudelleen.
+setpw.placeholder.1: Uusi salasana
+setpw.placeholder.2: Salasana uudelleen
+setpw.quality: Laatu:
+setpw.quality.poor: Ei riittävä
+setpw.quality.low: Huono 
+setpw.quality.med: Kohtalainen
+setpw.quality.hi: Hyvä
+setpw.quality.excellent: Erinomainen
+setpw.notSame: Salasana ei täsmää
