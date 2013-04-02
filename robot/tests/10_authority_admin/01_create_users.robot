@@ -11,13 +11,24 @@ Authority admin goes to admin page
   Sipoo logs in
   Wait until page contains element  test-authority-admin-users-table
 
-Authority admin creates three users
+Authority admin creates two users
   Wait Until  Element Should Be Visible  //tr[@class="user-row"]
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
   Create user  heikki.virtanen@example.com  Heikki  Virtanen  12345678
   Create user  hessu.kesa@example.com  Hessu  Kesa  12345678
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
+
+Password minimum length is 6
+  Click element  test-create-user
+  Wait until  Element should be visible  user-email
+  Input text       user-email  short.password@example.com
+  Input text       user-firstname  Short
+  Input text       user-lastname  Password
+  Input text       user-password  12345
+  Element Should Be Disabled  test-create-user-save
+  Input text       user-password  12345678
+  Element Should Be Enabled  test-create-user-save
   Logout
 
 Created user can login
