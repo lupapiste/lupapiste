@@ -44,6 +44,9 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
+(defn valid-password? [password]
+  (>= (count password) 6))
+
 (defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
