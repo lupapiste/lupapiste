@@ -80,10 +80,10 @@
       (catch MongoException$DuplicateKey e
         (warn e)
         (let [error-code  (condp re-matches (.getMessage e)
-                            #"personId"  "error.person-id"
-                            #"email"     "error.email"
-                            #"username"  "error.email"
-                            #".*"        "error.unknown")]
+                            #".+personId.+"  "error.duplicate-person-id"
+                            #".+email.+"     "error.duplicate-email"
+                            #".+username.+"  "error.duplicate-email"
+                            #".*"            "error.create_user")]
           (throw (IllegalArgumentException. error-code)))))
     (get-user-by-email email)))
 
