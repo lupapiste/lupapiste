@@ -14,7 +14,7 @@
                  [clj-http "0.6.4" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.0"]
                  [digest "1.4.2"]
-                 [clj-time "0.4.4"]
+                 [clj-time "0.5.0"]
                  [org.apache.commons/commons-lang3 "3.1"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
                  [com.lowagie/itext "2.1.7"]
@@ -27,7 +27,7 @@
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.6"]]
   :plugins [[org.timmc/lein-otf "2.0.1"]]
-  :profiles {:dev {:dependencies [[midje "1.5-alpha9" :exclusions [org.clojure/clojure]]
+  :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.1"]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
