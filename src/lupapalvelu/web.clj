@@ -316,10 +316,15 @@
 ;; Token consuming:
 ;;
 
-(defpage "/api/token/:token-id" {token-id :token-id}
-  (if-let [response (token/consume-token token-id)]
-    response
-    {:status 404}))
+(defpage [:get "/api/token/:token-id"] {token-id :token-id}
+  (let [params (:params (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response {:status 404})))
+
+(defpage [:post "/api/token/:token-id"] {token-id :token-id}
+  (let [params (from-json (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response (resp/status 404 "token not found"))))
 
 ;;
 ;; Cross-site request forgery protection
