@@ -230,7 +230,7 @@
       (session/put! :user user)
       (landing-page))
     (do
-      (warn (format "Invalid user account activation attempt with key '%s', possible hacking attempt?" key))
+      (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
       (landing-page))))
 
 ;;
