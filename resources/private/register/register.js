@@ -38,6 +38,11 @@
     return false;
   }
 
+  function cancel() {
+    reset(model());
+    window.location.hash = "";
+  }
+
   var plainModel = {
     personId: ko.observable(),
     firstname: ko.observable(),
@@ -52,6 +57,7 @@
     acceptTerms: ko.observable(),
     disabled: ko.observable(true),
     submit: submit,
+    cancel: cancel,
     reset: reset
   };
 
