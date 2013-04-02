@@ -42,6 +42,16 @@
         (warn "Password change: failed: old password does not match, user-id:" user-id)
         (fail :mypage.old-password-does-not-match)))))
 
+(defcommand "reset-password"
+  {:parameters [:email]}
+  [{{email :email} :data}]
+  (infof "Password resert request: email=%s" email)
+  (if-let [user (mongo/select-one :users {:email email})]
+    (do
+      (info "RESET!")
+      (ok))
+    (fail :email-not-found)))
+
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
 (defcommand "save-user-info"
