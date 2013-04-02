@@ -44,6 +44,7 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
+; length should match the length in util.js
 (defn valid-password? [password]
   (>= (count password) 6))
 
