@@ -2,9 +2,11 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [sade.strings :only [suffix]]
-        [lupapalvelu.core])
+        [lupapalvelu.core]
+        [lupapalvelu.i18n :only [loc]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
+            [sade.strings :as ss]
             [net.cgrand.enlive-html :as enlive]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
@@ -15,7 +17,8 @@
             [lupapalvelu.client :as client]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.components.core :as c]))
+            [lupapalvelu.components.core :as c]
+            [noir.request :as request]))
 
 (def mail-agent (agent nil))
 
@@ -34,7 +37,7 @@
   (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients [recipients title msg]
-  (doseq [recipient (flatten [recipients])]
+  (doseq [recipient recipients]
     (send-off mail-agent (fn [_]
                            (if (email/send-mail recipient title msg)
                              (info "email was sent successfully")
@@ -47,6 +50,8 @@
       title
       " - "
       (i18n/loc (s/join "." ["email" "title" title-key])))))
+
+
 
 ; new comment
 (defn get-message-for-new-comment [application host]
@@ -78,7 +83,7 @@
                                          (replace-application-link "#link-" application "fi" "" host)
                                          (replace-application-link "#link-" application "sv" "" host)
                                          )))]
-    (send-mail-to-recipients email title msg)))
+    (send-mail-to-recipients [email] title msg)))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
@@ -115,3 +120,19 @@
         msg         (get-message-for-verdict application host)
         title       (get-email-title application "verdict")]
     (send-mail-to-recipients recipients title msg)))
+
+(defn- url-to [to]
+  (let [request (request/ring-request)
+        scheme (get request :scheme)
+        host (get-in request [:headers "host"])]
+    (str (name scheme) "://" host (if-not (ss/starts-with to "/") "/") to)))
+
+(defn send-password-reset-email [to token]
+  (let [link (url-to (str "/api/token/" token))
+        link-fi (str link "?lang=fi")
+        link-sv (str link "?lang=sv")
+        msg (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/password-reset.html")
+                                       (replace-style (get-styles))
+                                       (enlive/transform [:#link-fi] (fn [a] (assoc-in a [:attrs :href] link-fi)))
+                                       (enlive/transform [:#link-sv] (fn [a] (assoc-in a [:attrs :href] link-sv))))))]
+    (send-mail-to-recipients [to] (loc "reset.email.title") msg)))

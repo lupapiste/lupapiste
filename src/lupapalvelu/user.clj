@@ -6,7 +6,9 @@
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [sade.util :as util]
-            [noir.session :as session]))
+            [noir.session :as session]
+            [lupapalvelu.token :as token]
+            [lupapalvelu.notifications :as notifications]))
 
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
@@ -46,11 +48,15 @@
   {:parameters [:email]}
   [{{email :email} :data}]
   (infof "Password resert request: email=%s" email)
-  (if-let [user (mongo/select-one :users {:email email})]
+  (if-let [user (mongo/select-one :users {:email email :enabled true})]
+    (let [token (token/make-token :password-reset {:user-id (:id user)})]
+      (infof "password reset request: email=%s, id=%s, token=%s" email (:id user) token)
+      (if (notifications/send-password-reset-email email token)
+        (ok)
+        (fail :email-send-failed))) 
     (do
-      (info "RESET!")
-      (ok))
-    (fail :email-not-found)))
+      (warnf "password reset request: unknown email: email=%s" email)
+      (fail :email-not-found))))
 
 (defquery "user" {:authenticated true} [{user :user}] (ok :user user))
 
