@@ -1,3 +1,3 @@
 create.placeholder: Kasarmikatu 25, Helsinki
 
-
+error.create_user: Käyttäjätunnuksen luominen epäonnistui
