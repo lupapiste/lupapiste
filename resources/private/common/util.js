@@ -12,6 +12,10 @@ var util = (function() {
                     {}); 
   }
   
+  function passwordIsValid(password) {
+    return getPwQuality(password) !== "poor";
+  }
+  
   function getPwQuality(password) {
     var l = password.length;
     if (l <= 7)  { return "poor"; }
@@ -28,7 +32,8 @@ var util = (function() {
   return {
     fluentify: fluentify,
     getPwQuality: getPwQuality,
-    isValidEmailAddress: isValidEmailAddress
+    isValidEmailAddress: isValidEmailAddress,
+    passwordIsValid: passwordIsValid
   };
   
 })();
