@@ -4,13 +4,11 @@
         [sade.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [clojure.string :as s]
-            [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
             [sade.email :as email]
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.client :as client]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
