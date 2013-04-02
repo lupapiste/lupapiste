@@ -3,7 +3,8 @@
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [sade.util :as util])
-  (:import [org.mindrot.jbcrypt BCrypt]))
+  (:import [org.mindrot.jbcrypt BCrypt]
+           [com.mongodb MongoException MongoException$DuplicateKey]))
 
 (defn non-private [map] (dissoc map :private))
 
@@ -68,13 +69,22 @@
         new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled municipality)
         new-user          (assoc new-user-base :id id)]
     (info "register user:" (dissoc user :password))
-    (if (= "dummy" (:role old-user))
-      (do
-        (info "rewriting over dummy user:" (:id old-user))
-        (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
-      (do
-        (info "creating new user")
-        (mongo/insert :users new-user)))
+    (try
+      (if (= "dummy" (:role old-user))
+        (do
+          (info "rewriting over dummy user:" (:id old-user))
+          (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
+        (do
+          (info "creating new user")
+          (mongo/insert :users new-user)))
+      (catch MongoException$DuplicateKey e
+        (warn e)
+        (let [error-code  (condp re-matches (.getMessage e)
+                            #".+personId.+"  "error.duplicate-person-id"
+                            #".+email.+"     "error.duplicate-email"
+                            #".+username.+"  "error.duplicate-email"
+                            #".*"            "error.create-user")]
+          (throw (IllegalArgumentException. error-code)))))
     (get-user-by-email email)))
 
 (defn create-user [user]

@@ -2,6 +2,7 @@
   "use strict";
 
   var keys = ['stamp', 'personId', 'firstname', 'lastname', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
+  var model;
 
   function json(model) {
     var d = {};
@@ -24,7 +25,12 @@
 
   function submit(m) {
     var error$ = $('#register-email-error');
+    var loader$ = $("#registerLoader");
     error$.text('');
+    loader$.show();
+
+    $("#register-form div").hide();
+
     ajax.command('register-user', json(m))
       .success(function() {
         confirmModel.email = model().email();
@@ -33,10 +39,23 @@
       })
       .error(function(e) {
         error$.text(loc(e.text));
+        loader$.hide();
       })
       .call();
     return false;
   }
+
+  function cancel() {
+    LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel-register");
+  }
+
+  $(function() {
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel-register", loc("areyousure"), loc("register.confirm-cancel"),
+      loc("yes"), function() {
+        reset(model());
+        window.location.hash = "";
+      }, loc("no"));
+  });
 
   var plainModel = {
     personId: ko.observable(),
@@ -48,12 +67,14 @@
     zip: ko.observable().extend({required: true, number: true, maxLength: 5}),
     phone: ko.observable().extend({required: true}),
     email: ko.observable().extend({email: true}),
-    password: ko.observable().extend({minLength: 6}),
+    password: ko.observable().extend({minLength: 8}),
     acceptTerms: ko.observable(),
     disabled: ko.observable(true),
     submit: submit,
+    cancel: cancel,
     reset: reset
   };
+  plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
 
   var confirmModel = {
     email: ""
@@ -62,15 +83,13 @@
   function StatusModel() {
     var self = this;
     self.subPage = ko.observable();
-
     self.isCancel = ko.computed(function() { return self.subPage() === 'cancel'; });
     self.isError = ko.computed(function() { return self.subPage() === 'error'; });
   }
 
   var statusModel = new StatusModel();
 
-  plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
-  var model = ko.validatedObservable(plainModel);
+  model = ko.validatedObservable(plainModel);
   model.isValid.subscribe(function(valid) {
     model().disabled(!valid || !model().acceptTerms());
   });
