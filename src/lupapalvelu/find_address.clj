@@ -39,9 +39,17 @@
 
 (defn search-poi-or-street [poi]
   (map (set-kind :poi)
-       (q/with-collection "poi"
-         (q/find {:name {$regex (str \^ (s/lower-case poi))}})
-         (q/limit 10))))
+       (concat
+         (q/with-collection "poi"
+           (q/find {:name {$regex (str \^ (s/lower-case poi))}
+                    :lang *lang*})
+           (q/sort {:name -1})
+           (q/limit 10))
+         (q/with-collection "poi"
+           (q/find {:name {$regex (str \^ (s/lower-case poi))}
+                    :lang {$ne *lang*}})
+           (q/sort {:name -1})
+           (q/limit 10)))))
 
 (defn search-street-with-number [street number]
   ; FIXME: Fix result to property format
