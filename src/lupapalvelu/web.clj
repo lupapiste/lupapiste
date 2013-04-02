@@ -176,6 +176,14 @@
 (defn redirect-to-frontpage [lang]
   (redirect lang "welcome"))
 
+(defn- landing-page
+  ([]
+    (landing-page default-lang))
+  ([lang]
+    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+      (redirect lang application-page)
+      (redirect-to-frontpage lang))))
+
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
   ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (when (and hashbang (local? hashbang))
@@ -196,19 +204,11 @@
 
 (defpage "/logout" []
   (logout!)
-  (resp/redirect "/"))
+  (landing-page))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
   (redirect-to-frontpage lang))
-
-(defn- landing-page
-  ([]
-    (landing-page default-lang))
-  ([lang]
-    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
-      (redirect lang application-page)
-      (redirect-to-frontpage lang))))
 
 (defpage "/" [] (landing-page))
 (defpage "/app/" [] (landing-page))
@@ -228,10 +228,10 @@
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)
-      (resp/redirect "/"))
+      (landing-page))
     (do
-      (warn (format "Invalid user account activation attempt with key '%s', possible hacking attempt?" key))
-      (resp/redirect "/"))))
+      (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
+      (landing-page))))
 
 ;;
 ;; Apikey-authentication
