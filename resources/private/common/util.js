@@ -12,7 +12,7 @@ var util = (function() {
                     {}); 
   }
   
-  function passwordIsValid(password) {
+  function isValidPassword(password) {
     return getPwQuality(password) !== "poor";
   }
   
@@ -33,7 +33,7 @@ var util = (function() {
     fluentify: fluentify,
     getPwQuality: getPwQuality,
     isValidEmailAddress: isValidEmailAddress,
-    passwordIsValid: passwordIsValid
+    isValidPassword: isValidPassword
   };
   
 })();

@@ -55,7 +55,7 @@
     zip: ko.observable().extend({required: true, number: true, maxLength: 5}),
     phone: ko.observable().extend({required: true}),
     email: ko.observable().extend({email: true}),
-    password: ko.observable().extend({passwordValid: true}),
+    password: ko.observable().extend({validPassword: true}),
     acceptTerms: ko.observable(),
     disabled: ko.observable(true),
     submit: submit,

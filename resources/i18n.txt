@@ -1,2 +1,2 @@
 create.placeholder: Kasarmikatu 25, Helsinki
-error.password.minlength: Salasanan pituuden tulee olla vähintään 8 merkkiä
+error.password.minlength: Pituus vähintään 8 merkkiä

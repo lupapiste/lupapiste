@@ -19,9 +19,9 @@
   // ["min", "max", "pattern", "step", "date", "dateISO", "digit", "phoneUS", "notEqual", "unique"];
   ko.validation.localize(loc.getErrorMessages());
 
-  ko.validation.rules['passwordValid'] = {
+  ko.validation.rules['validPassword'] = {
       validator: function (val) {
-          return val && util.passwordIsValid(val);
+          return val && util.isValidPassword(val);
       },
       message: loc("error.password.minlength")
   };

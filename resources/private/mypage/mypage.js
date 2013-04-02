@@ -72,7 +72,7 @@
         .error(null);
     };
 
-    this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && util.getPwQuality(this.newPassword()) !== "poor" && equals(this.newPassword(), this.newPassword2()); }, this);
+    this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && util.isValidPassword(this.newPassword()) && equals(this.newPassword(), this.newPassword2()); }, this);
     this.noMatch = ko.computed(function() { return isNotBlank(this.newPassword()) && isNotBlank(this.newPassword2()) && !equals(this.newPassword(), this.newPassword2()); }, this);
 
     this.save = makeSaveFn("change-passwd", ["oldPassword", "newPassword"]);
