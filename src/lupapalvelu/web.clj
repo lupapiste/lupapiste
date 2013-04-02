@@ -324,7 +324,7 @@
 (defpage [:post "/api/token/:token-id"] {token-id :token-id}
   (let [params (from-json (request/ring-request))
         response (token/consume-token token-id params)]
-    (or response (resp/status 404 "token not found"))))
+    (or response (resp/status 404 (resp/json {:ok false})))))
 
 ;;
 ;; Cross-site request forgery protection
