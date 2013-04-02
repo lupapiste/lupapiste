@@ -6,11 +6,13 @@
 (testable-privates lupapalvelu.token make-token-id)
 
 (facts
-  (fact (make-token-id) => #"[a-zA-Z0-9]{48}")
-  (fact (make-token-id) => #"[a-zA-Z0-9]{48}")
-  (fact (make-token-id) => #"[a-zA-Z0-9]{48}")
-  (fact (make-token-id) => #"[a-zA-Z0-9]{48}")
-  (fact (= (make-token-id) (make-token-id)) => falsey)
-  (fact (= (make-token-id) (make-token-id)) => falsey)
-  (fact (= (make-token-id) (make-token-id)) => falsey)
-  (fact (= (make-token-id) (make-token-id)) => falsey))
+  (make-token-id) => #"[a-zA-Z0-9]{48}"
+  (make-token-id) => #"[a-zA-Z0-9]{48}"
+  (make-token-id) => #"[a-zA-Z0-9]{48}"
+  (make-token-id) => #"[a-zA-Z0-9]{48}"
+  (make-token-id) => #"[a-zA-Z0-9]{48}"
+  (= (make-token-id) (make-token-id)) => falsey
+  (= (make-token-id) (make-token-id)) => falsey
+  (= (make-token-id) (make-token-id)) => falsey
+  (= (make-token-id) (make-token-id)) => falsey
+  (= (make-token-id) (make-token-id)) => falsey)

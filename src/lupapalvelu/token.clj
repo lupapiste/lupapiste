@@ -19,7 +19,7 @@
 (defn- make-token-id []
   (apply str (repeatedly 48 (comp char (partial rand-nth token-chars)))))
 
-(defn save-token [token-type data & {:keys [ttl] :or {ttl default-ttl}}]
+(defn make-token [token-type data & {:keys [ttl] :or {ttl default-ttl}}]
   (let [id (make-token-id)
         now (core/now)]
     (mongo/insert :token {:_id id
@@ -31,14 +31,18 @@
                           :data data})
     id))
 
-(defn- get-and-use-token [id]
-  (when-let [token (mongo/update-one-and-return :token
-                                                {:_id id
-                                                 :used false
-                                                 :expires {$gt (core/now)}}
-                                                {$set {:used true}})]
-    (assoc token :token-type (keyword (:token-type token)))))
+(defn get-token [id consume]
+  (let [query {:_id id
+               :used false
+               :expires {$gt (core/now)}}]
+    (when-let [token (if consume
+                       (mongo/update-one-and-return :token query {$set {:used true}})
+                       (mongo/select-one :token query))]
+      (assoc token :token-type (keyword (:token-type token))))))
+
+(defn get-and-consume-token [id]
+  (get-token id true))
 
 (defn consume-token [id]
-  (if-let [token (get-and-use-token id)]
+  (when-let [token (get-and-consume-token id)]
     (handle-token token)))
