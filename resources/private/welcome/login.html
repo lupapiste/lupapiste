@@ -64,7 +64,7 @@
       <label data-bind="ltext: 'reset.email'" class="form-label"></label>
       <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('reset.email-placeholder')}" class="form-input" type="email" name="email" autofocus="autofocus">
       
-      <button data-bind="click: send, enable: canSend, ltext: 'reset.send'" class="btn btn-primary"></button>
+      <button data-bind="click: send, enable: ok, ltext: 'reset.send'" class="btn btn-primary"></button>
       
       <div data-bind="ltext: 'reset.sent.1', visible: sent" class="reset-sent-1"></div>
       <div data-bind="ltext: 'reset.sent.2', visible: sent" class="reset-sent-2"></div>
