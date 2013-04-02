@@ -6,4 +6,9 @@ if [ -z $target ] ; then
 	target="tests"
 fi
 
-pybot -d target --exclude integration --exclude fail --RunEmptySuite --variable SELENIUM:http://192.168.7.223:4444/wd/hub --variable SERVER:http://lupadev.solita.fi $target
+hubert='192.168.7.223'
+bianca='192.168.7.253'
+
+remote=$bianca
+
+pybot -d target --exclude fail --exclude integration --RunEmptySuite --variable SELENIUM:http://$remote:4444/wd/hub --variable SERVER:http://lupadev.solita.fi $target

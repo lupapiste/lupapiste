@@ -51,6 +51,12 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
       .css('top',  winHeight/2-$(selector).height()/2)
       .css('left', winWidth/2-$(selector).width()/2)
       .fadeIn(600);
+
+    var inputs = $(selector + ' input:enabled');
+    if(inputs) {
+      inputs[0].focus();
+    }
+    
     return false;
   };
 
@@ -66,7 +72,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
 };
 
-LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized">' +
+LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
   '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
   '<div class="dialog-content"><p></p>' +
   '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>' +

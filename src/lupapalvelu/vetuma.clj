@@ -8,6 +8,7 @@
         [hiccup.form]
         [clojure.tools.logging])
   (:require [digest]
+            [sade.env :as env]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]
@@ -20,25 +21,31 @@
 ;; Configuration
 ;;
 
-(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap :extradata :appname :trid])
-(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid :vtjdata])
+(def encoding "ISO-8859-1")
+
+(def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
+(def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid #_:vtjdata])
 
 (def constants
-  {:url       "https://testitunnistus.suomi.fi/VETUMALogin/app"
-   :rcvid     "***REMOVED***1"
-   :appid     "VETUMA-APP2"
+  {:url       (env/value :vetuma :url)
+   :rcvid     (env/value :vetuma :rcvid)
+   :appid     "Lupapiste"
    :so        "6"
-   :solist    "6,11"
+   :solist    "6" #_"6,11"
    :type      "LOGIN"
    :au        "EXTAUTH"
    :lg        "fi"
-   :returl    "{host}/vetuma"
-   :canurl    "{host}/vetuma/cancel"
-   :errurl    "{host}/vetuma/error"
-   :ap        "***REMOVED***"
+   :returl    "{host}/api/vetuma"
+   :canurl    "{host}/api/vetuma/cancel"
+   :errurl    "{host}/api/vetuma/error"
+   :ap        (env/value :vetuma :ap)
    :appname   "Lupapiste"
-   :extradata "VTJTT=VTJ-VETUMA-Perus"
-   :key       "***REMOVED***"})
+   ;;:extradata "" #_"VTJTT=VTJ-VETUMA-Perus"
+   :key       (env/value :vetuma :key)})
+
+;; log error for all missing env keys.
+(doseq [[k v] constants]
+  (when (nil? v) (errorf "missing key '%s' value from property file" (name k))))
 
 ;;
 ;; Helpers
@@ -70,7 +77,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn- mac [data]  (-> data digest/sha-256 .toUpperCase))
+(defn- mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->
@@ -81,8 +88,14 @@
     (->> (string/join "&"))
     mac))
 
-(defn- with-mac [m] (merge m {:mac (mac-of m request-mac-keys)}))
-(defn- mac-verified [m] (if (= (:mac m) (mac-of m response-mac-keys)) m {}))
+(defn- with-mac [m]
+  (merge m {:mac (mac-of m request-mac-keys)}))
+
+(defn- mac-verified [{:keys [mac] :as m}]
+  (if (= mac (mac-of m response-mac-keys))
+    m
+    (do (error "invalid mac: " (dissoc m :key))
+      (throw (IllegalArgumentException. "invalid mac.")))))
 
 ;;
 ;; response parsing
@@ -108,7 +121,7 @@
 
 (defn- user-extracted [m]
   (merge (extract-subjectdata m)
-         (extract-vtjdata m)
+         #_(extract-vtjdata m)
          (extract-userid m)
          (extract-request-id m)))
 
@@ -124,6 +137,8 @@
     apply-templates
     with-mac
     (dissoc :key)
+    (dissoc :url)
+    (dissoc :host)
     keys-as-strings))
 
 (defn- parsed [m]
@@ -160,7 +175,7 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
+(defpage "/api/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
   (let [paths     {:success success :error error :cancel cancel}
         sessionid (session-id)]
     (if (non-local? paths)
@@ -172,7 +187,7 @@
                    (map field (request-data (host :secure)))
                    (submit-button "submit")))))))
 
-(defpage [:post "/vetuma"] []
+(defpage [:post "/api/vetuma"] []
   (let [user (-> (:form-params (request/ring-request))
                logged
                parsed
@@ -182,17 +197,17 @@
         uri  (get-in data [:paths :success])]
     (redirect uri)))
 
-(defpage [:post "/vetuma/:status"] {status :status}
+(defpage [:post "/api/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
         return-uri (get-in data [:paths (keyword status)])]
     (redirect return-uri)))
 
-(defpage "/vetuma/user" []
+(defpage "/api/vetuma/user" []
   (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
         user (-> data :user)]
     (json user)))
 
-(defpage "/vetuma/stamp/:stamp" {:keys [stamp]}
+(defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
   (let [data (mongo/select-one :vetuma {:user.stamp stamp})
         user (-> data :user)
         id   (:id data)]

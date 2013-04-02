@@ -37,6 +37,11 @@
   (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
     (read-config (prop-file) password)))
 
+(defn value
+  "returns a value from config directly."
+  [& keys]
+  (get-in config (flatten [keys])))
+
 (defn- get-prop [prop-name default]
   (or
     (get-in config (map keyword (s/split prop-name #"\.")))
@@ -49,11 +54,14 @@
 (def log-level (keyword (get-prop "lupapiste.loglevel" (if (= mode :dev) "debug" "info"))))
 (def log-dir (get-prop "lupapiste.logdir" (if (= mode :dev) "target" "")))
 (def perf-mon-on (Boolean/parseBoolean (str (get-prop "lupapiste.perfmon" "false"))))
-(def proxy-off (Boolean/parseBoolean (str (get-prop "lupapiste.proxy-off" "false"))))
+(def proxy-off (atom (Boolean/parseBoolean (str (get-prop "lupapiste.proxy-off" "false")))))
 
 (defn dev-mode? []
   (= :dev mode))
 
+(def ^:dynamic *in-dev-macro* false)
+
 (defmacro in-dev [& body]
   `(if (dev-mode?)
-     (do ~@body)))
+     (binding [*in-dev-macro* true]
+       (do ~@body))))

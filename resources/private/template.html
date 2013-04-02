@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
     <meta name="viewport"     content="width=device-width, initial-scale=1.0" />
     <meta name="description"  content="Lupapiste" />
-    <meta name="author"       content="Solita Oy -- http://www.solita.fi" />
+    <meta name="author"       content="Solita Oy -- http://www.solita.fi/" />
 
     <link href="/img/favicon.png" rel="icon" />
     <link href="/img/favicon.png" rel="shortcut icon" />
@@ -26,8 +24,9 @@
     <script type="text/javascript">if (typeof jQuery === "undefined") document.write("<script src='/app/cdn-fallback.js'></" + "script>")</script>
 
     <script src="inject" type="text/javascript"></script>
+    <!-- Cloak content until css is loaded -->
+    <style type="text/css">.page{display:none}</style>
     <link href="inject" rel="stylesheet"></link>
-
   </head>
   <body>
 
@@ -36,12 +35,9 @@
     <section></section>
     <footer></footer>
 
-  </body>
-
+  <!--[if lt IE 9]><script src="/lib/borderless-iframes.js"></script><![endif]-->
   <script id="error-template" type="text/html">
     <span class="error-message" data-bind="validationMessage: field"></span>
   </script>
-  <!--[if lt IE 9]>
-  <script src="/lib/borderless-iframes.js"></script>
-  <![endif]-->
+  </body>
 </html>

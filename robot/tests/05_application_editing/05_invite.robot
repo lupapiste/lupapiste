@@ -91,7 +91,7 @@ Sonja (the Authority) is not allowed to invite people
 *** Keywords ***
 
 Error message is present on invite form
-  Wait until  Element should be visible  xpath=//div[@id='dialog-valtuutus']//h1[@class='form-error']
+  Wait until  Element should be visible  xpath=//div[@id='dialog-valtuutus']//div[@class='context-error']
   Click Element  xpath=//div[@id='dialog-valtuutus']//p[contains(@class,'close')]
   Wait until  Mask is invisible
 

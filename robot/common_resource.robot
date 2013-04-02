@@ -236,8 +236,7 @@ Click enabled by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
-  Wait Until  Element should be visible  xpath=//*[@data-test-id="${id}"]
-  Click element  xpath=//*[@data-test-id="${id}"]
+  Click by test id  ${id}
 
 #
 # Helpser for inforequest and application crud operations:
@@ -245,17 +244,14 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
-  Reload Page
-  Kill dev-box
-  Open application  ${address}  ${propertyId}
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+  Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(){window.location.hash = "!/applications";}).call();
-  Reload Page
-  Kill dev-box
-  Open inforequest  ${address}  ${propertyId}
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
+  Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
@@ -270,7 +266,7 @@ Create inforequest
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
-  Sleep  1
+  # Sleep  1
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
@@ -286,16 +282,15 @@ Prepare new request
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
-  Select From List by test id  create-municipality-select  ${municipality}
   Input text by test id  create-property-id  ${propertyId}
-  Sleep  1
-  Click by test id  create-continue
-  # Going too fast causes negative margins
+  Select From List by test id  create-municipality-select  ${municipality}
+  Click enabled by test id  create-continue
+  # Going too fast causes animation to stop
   Set Selenium Speed  ${SLOW_SPEED}
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Rakentaminen ja purkaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  xpath=//div[@class="tree-magic"]/a[text()="Asuinrakennuksen rakentaminen"]
-  Wait until  Element should be visible  xpath=//div[@class='tree-result']
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
+  Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
+  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set Selenium Speed  ${DEFAULT_SPEED}
 
 # Closes the application that is currently open by clicking cancel button
@@ -361,6 +356,8 @@ Add comment
 #
 
 Apply minimal fixture now
+  #Execute Javascript  ajax.query("apply-fixture", {"name":"minimal"}).success(function(){alert('OK')}).call();
+  #Wait Until  Alert Should Be Present
   Show dev-box
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
@@ -378,3 +375,14 @@ Application state should be
 Permit type should be
   [Arguments]  ${type}
   Element Text Should Be  xpath=//span[@data-bind='ltext: permitType']  ${type}
+
+#
+# Proxy control:
+#
+
+Set integration proxy on
+  Execute Javascript  ajax.post("/api/proxy-ctrl/on").call();
+
+Set integration proxy off
+  Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
+

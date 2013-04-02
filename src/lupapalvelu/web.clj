@@ -25,9 +25,11 @@
             [lupapalvelu.mongo :as mongo]
             [sade.security :as sadesecurity]
             [sade.status :as status]
+            [sade.util :as util]
             [cheshire.core :as json]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery]))
+            [ring.middleware.anti-forgery :as anti-forgery])
+  (:import [java.io ByteArrayInputStream]))
 
 ;;
 ;; Helpers
@@ -95,7 +97,7 @@
 (status/defstatus :mode  env/mode)
 
 (defjson "/api/buildinfo" []
-  (ok :data (assoc env/buildinfo :server-mode env/mode)))
+  (ok :data (assoc (util/sub-map env/buildinfo [:build-tag :build-id]) :server-mode env/mode)))
 
 ;;
 ;; Commands
@@ -129,26 +131,34 @@
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
                    :welcome anyone
+                   :about anyone
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
                    :authority-admin authority-admin?
                    :admin admin?})
 
-(def headers
-  (if (env/dev-mode?)
+(defn cache-headers [resource-type]
+  (if (= :html resource-type)
     {"Cache-Control" "no-cache"}
-    {"Cache-Control" "public, max-age=86400"}))
+    (if (env/dev-mode?)
+      {"Cache-Control" "no-cache"}
+      {"Cache-Control" "public, max-age=86400"})))
 
 (def default-lang "fi")
+
+(def ^:private compose
+  (if (env/dev-mode?)
+    singlepage/compose
+    (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
 
 (defn- single-resource [resource-type app failure]
   (if ((auth-methods app nobody))
     (->>
-      (singlepage/compose resource-type app)
+      (ByteArrayInputStream. (compose resource-type app))
       (resp/content-type (resource-type content-type))
-      (resp/set-headers headers))
-      failure))
+      (resp/set-headers (cache-headers [resource-type])))
+    failure))
 
 ;; CSS & JS
 (defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
@@ -269,7 +279,7 @@
         result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.0.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
                                            {:applicationId applicationId
                                             :attachmentId attachmentId
                                             :attachmentType (or attachmentType "")
@@ -299,7 +309,7 @@
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
   (if (logged-in?)
-    (if env/proxy-off
+    (if @env/proxy-off
       {:status 503}
       ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
@@ -334,10 +344,27 @@
   (defjson "/dev/spy" []
     (dissoc (request/ring-request) :body))
 
+  ;; send ascii over the wire with wrong encofing (case: Vetuma)
+  ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
+  (defpage [:post "/dev/ascii"] {:keys [a]}
+    (str a))
+
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
 
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
-      (resp/status 404 (resp/json {:ok false :text "not found"})))))
+      (resp/status 404 (resp/json {:ok false :text "not found"}))))
+
+  (defpage [:get "/api/proxy-ctrl"] []
+    (resp/json {:ok true :data (not @env/proxy-off)}))
+
+  (defpage [:post "/api/proxy-ctrl/:value"] {value :value}
+    (let [on (condp = value
+               true   true
+               "true" true
+               "on"   true
+               false)]
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))

@@ -90,10 +90,6 @@
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
 
-(def liiteet {:tag :Liite :child [{:tag :kuvaus}
-                                  {:tag :linkkiliitteeseen}
-                                  {:tag :kuvaus}]})
-
 
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.4/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.4/rakennusvalvonta.xsd"
@@ -125,26 +121,42 @@
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
                                                {:tag :rakennelmatieto}]}]}
+                             {:tag :lisatiedot
+                              :child [{:tag :Lisatiedot
+                                       :child [{:tag :salassapitotietoKytkin}
+                                      {:tag :asioimiskieli}
+                                      {:tag :suoramarkkinointikieltoKytkin}]}]}
                              {:tag :liitetieto
-                              :child [liiteet]}]}]}]})
+                              :child [{:tag :Liite
+                                       :child [{:tag :kuvaus}
+                                               {:tag :linkkiliitteeseen}
+                                               {:tag :muokkausHetki}
+                                               {:tag :versionumero}
+                                               {:tag :tekija
+                                                :child [{:tag :kuntaRooliKoodi}
+                                                        {:tag :VRKrooliKoodi}
+                                                        henkilo
+                                                        yritys]}
+                                               {:tag :tyyppi}]}]}
+                             {:tag :kayttotapaus}
+                             {:tag :asianTiedot
+                              :child [{:tag :Asiantiedot
+                                       :child [{:tag :vahainenPoikkeaminen}
+                                                {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
 (defn get-application-as-krysp [application]
-  (let [canonical (application-to-canonical application)
-        ;hae liitetiedostot
-        ;muodosta liitetiedostos data
-        ;liitä canoonisen malliin
-        xml (element-to-xml canonical rakennuslupa_to_krysp)
-        xml-s (indent-str xml)
+  (let [canonical  (application-to-canonical application)
+        xml        (element-to-xml canonical rakennuslupa_to_krysp)
+        xml-s      (indent-str xml)
         output-dir (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus")
         _          (fs/mkdirs output-dir)
         file-name  (str output-dir "/Lupapiste" (:id application))
-        tempfile (file (str file-name ".tmp"))
-        outfile (file (str file-name ".xml"))]
+        tempfile   (file (str file-name ".tmp"))
+        outfile    (file (str file-name ".xml"))]
     (validate xml-s)
 
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
-    ;tallenna liitetiedostot
+    ;todoo liitetiedostot
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
-

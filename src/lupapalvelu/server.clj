@@ -20,26 +20,8 @@
             [lupapalvelu.operations]
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n]
+            [lupapalvelu.ua-compatible-header :as uach]
             [sade.security-headers :as headers]))
-
-(def custom-content-type {".eot"   "application/vnd.ms-fontobject"
-                          ".ttf"   "font/ttf"
-                          ".otf"   "font/otf"
-                          ".woff"  "application/font-woff"})
-
-(defn apply-custom-content-types
-  "Ring middleware.
-   If response does not have content-type header, and request uri ends to one of the
-   keys in custom-content-type map, set content-type to value from custom-content-type."
-  [handler]
-  (fn [request]
-    (let [resp (handler request)
-          ct (get-in resp [:headers "Content-Type"])
-          ext (re-find #"\.[^.]+$" (:uri request))
-          neue-ct (get custom-content-type ext)]
-      (if (and (nil? ct) (not (nil? neue-ct)))
-        (assoc-in resp [:headers "Content-Type"] neue-ct)
-        resp))))
 
 (defn -main [& _]
   (infof "Server starting in %s mode" env/mode)
@@ -53,10 +35,10 @@
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)
+  (server/add-middleware uach/add-ua-compatible-header)
   (server/add-middleware headers/session-id-to-mdc)
-  (server/add-middleware apply-custom-content-types)
   (server/add-middleware headers/add-security-headers)
-  (env/dev-mode?) (server/add-middleware web/anti-csrf)
+  (server/add-middleware web/anti-csrf)
   (server/add-middleware web/apikey-authentication)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")

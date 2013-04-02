@@ -20,11 +20,10 @@ var hub = (function() {
   }
 
   function subscribe(filter, listener, oneshot) {
+    if (!_.isFunction(listener)) throw "Parameter 'listener' must be a function";
     var id = nextId;
     nextId += 1;
-    if (typeof filter === "string") {
-      filter = { type: filter };
-    }
+    if (_.isString(filter)) filter = { type: filter };
     subscriptions[id] = new Subscription(listener, filter, oneshot);
     return id;
   }
@@ -54,11 +53,6 @@ var hub = (function() {
         count++;
       }
     }
-
-    if (count === 0) {
-      warn("No subscribers for message with type:", type);
-    }
-
     return count;
   }
 

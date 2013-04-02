@@ -8,7 +8,19 @@
         [sade.env :only [config]]
         [sade.strings :only [starts-with-i]]))
 
-(def ^:private auth [(:username (:nls config)) (:password (:nls config))])
+(def timeout 5000)
+
+(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
+(def maasto "https://ws.nls.fi/maasto/wfs")
+(def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
+
+(def ^:private auth
+  (let [conf (:nls config)]
+    {:raster     [(:username (:raster conf)) (:password (:raster conf))]
+     :kiinteisto [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
+     ktjkii      [(:username (:ktjkii conf)) (:password (:ktjkii conf))]
+     maasto      [(:username (:maasto conf)) (:password (:maasto conf))]
+     nearestfeature [(:username (:maasto conf)) (:password (:maasto conf))]}))
 
 (def ^:private timeout 30000)
 
@@ -88,27 +100,27 @@
 
 (defn feature-to-address [feature]
   (let [[x y] (s/split (address-part feature :oso:sijainti) #" ")]
-    {:katunimi (address-part feature :oso:katunimi)
-     :katunumero (address-part feature :oso:katunumero)
-     :kuntanimiFin (address-part feature :oso:kuntanimiFin)
-     :kuntanimiSwe (address-part feature :oso:kuntanimiSwe)
-     :kuntatunnus (address-part feature :oso:kuntatunnus)
+    {:street (address-part feature :oso:katunimi)
+     :number (address-part feature :oso:katunumero)
+     :municipality (address-part feature :oso:kuntatunnus)
+     :name {:fi (address-part feature :oso:kuntanimiFin)
+            :sv (address-part feature :oso:kuntanimiSwe)}
      :x x
      :y y}))
 
 (defn feature-to-simple-address-string [feature]
-  (let [{:keys [katunimi katunumero kuntanimiFin]} (feature-to-address feature)]
-    (str katunimi " " katunumero ", " kuntanimiFin)))
+  (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
+    (str street " " number ", " fi)))
 
 (defn feature-to-address-string [[street number city]]
   (if (s/blank? city)
     (fn [feature]
-      (let [{:keys [katunimi kuntanimiFin]} (feature-to-address feature)]
-        (str katunimi ", " kuntanimiFin)))
+      (let [{street :street {fi :fi} :name} (feature-to-address feature)]
+        (str street ", " fi)))
     (fn [feature]
-      (let [{:keys [katunimi katunumero kuntanimiFin kuntanimiSwe]} (feature-to-address feature)
-            kuntanimi (if (starts-with-i kuntanimiFin city) kuntanimiFin kuntanimiSwe)]
-        (str katunimi " " katunumero ", " kuntanimi)))))
+      (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)
+            municipality-name (if (starts-with-i fi city) fi sv)]
+        (str street " " number ", " municipality-name)))))
 
 (defn feature-to-position [feature]
   (let [[x y] (s/split (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:tunnuspisteSijainti :gml:Point :gml:pos text)) #" ")]
@@ -120,9 +132,11 @@
 
 (defn feature-to-address-details [feature]
   (when feature
-    {:katunimi (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
-     :katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
-     :kuntanimiFin (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))}))
+    {:street (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+     :number (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
+     :municipality (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))
+     :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
+            :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}}))
 
 (defn response->features [response]
   (let [input-xml (:body response)
@@ -134,10 +148,6 @@
                   zip/xml-zip)]
     (xml-> features :gml:featureMember)))
 
-(def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
-(def maasto "https://ws.nls.fi/maasto/wfs")
-(def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
-
 (defn execute
   "Takes a query (in XML) and returns a vector. If the first element of that
    vector is :ok, then the next element is a list of features that match the
@@ -146,7 +156,27 @@
   [url q]
   (deref
     (future
-      (let [response (client/post url {:body q :basic-auth auth :throw-exceptions false})]
+      (let [response (client/post url {:body q
+                                       :basic-auth (get auth url)
+                                       :socket-timeout timeout
+                                       :conn-timeout timeout
+                                       :throw-exceptions false})]
+        (if (= (:status response) 200)
+          [:ok (response->features response)]
+          [:error response])))
+    timeout
+    [:timeout]))
+
+(defn http-get
+  [url q]
+  (deref
+    (future
+      (let [response (client/get url
+                                 {:query-params q
+                                  :basic-auth (get auth url)
+                                  :socket-timeout timeout
+                                  :conn-timeout timeout
+                                  :throw-exceptions false})]
         (if (= (:status response) 200)
           [:ok (response->features response)]
           [:error response])))
@@ -161,27 +191,15 @@
    :MAXFEATURES "1"
    :BUFFER "500"})
 
-(defn http-get
-  [url q]
-  (deref
-    (future
-      (let [response (client/get url
-                                 {:query-params q
-                                  :basic-auth auth
-                                  :throw-exceptions false})]
-        (if (= (:status response) 200)
-          [:ok (response->features response)]
-          [:error response])))
-    timeout
-    [:timeout]))
-
 ;;
 ;; Raster images:
 ;;
 
 (defn raster-images [request]
-  (client/get "https://ws.nls.fi/rasteriaineistot/image"
-    {:query-params (:query-params request)
-     :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-     :basic-auth auth
-     :as :stream}))
+  (let [layer (get-in request [:query-params "LAYERS"])
+        basic-auth (if (re-matches #"ktj_kiinteisto.*" layer) (:kiinteisto auth) (:raster auth))]
+    (client/get "https://ws.nls.fi/rasteriaineistot/image"
+                {:query-params (:query-params request)
+                 :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
+                 :basic-auth basic-auth
+                 :as :stream})))

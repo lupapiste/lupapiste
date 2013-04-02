@@ -24,6 +24,7 @@ if (typeof LUPAPISTE === "undefined") {
     var href = "#!/" + self.startPage;
     var link$ = $("<a class='brand' href='" + href + "'></a>");
     link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
+    /*
     var naviLinks$ = $("<span>").attr("id", "navi-right");
     _.each(loc.getSupportedLanguages(), function (lang) {
       if (lang !== loc.getCurrentLanguage()) {
@@ -38,6 +39,7 @@ if (typeof LUPAPISTE === "undefined") {
       }
     });
     link$.append(naviLinks$);
+    */
     return link$;
   };
 
@@ -70,22 +72,19 @@ if (typeof LUPAPISTE === "undefined") {
   * Complete the App initialization after DOM is loaded.
   */
   self.domReady = function () {
-    $(window).hashchange(self.hashChanged);
-    $(window).hashchange();
-    $(window).unload(self.unload);
+    $(window)
+      .hashchange(self.hashChanged)
+      .hashchange()
+      .unload(self.unload);
 
     self.connectionCheck();
 
     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
       LUPAPISTE.ModalDialog.init();
-
-      $(document.documentElement).keyup(function (event) {
-        var escape = 27;
-        if (event.keyCode === escape) {
-          LUPAPISTE.ModalDialog.close();
-        }
-      });
     }
+
+    $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
+
     var navWrapper = $("<div class='nav-wrapper'></div>");
     navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
     if (!self.allowAnonymous) {
@@ -95,6 +94,8 @@ if (typeof LUPAPISTE === "undefined") {
     $("nav").append(navWrapper);
   };
   $(self.domReady);
+
+  hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
 
   /**
   * Window unload event handler

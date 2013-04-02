@@ -253,7 +253,7 @@ var docgen = (function() {
       select.onchange = function(e) {
         var event = getEvent(e);
         var target = event.target;
-        
+
         var buildingId = target.value;
         ajax
           .command("merge-details-from-krysp", {id: self.appId, buildingId: buildingId})
@@ -347,7 +347,11 @@ var docgen = (function() {
         }
       });
 
-      span.appendChild(makeLabel("select", "", "personSelector", true));
+      var label = document.createElement("label");
+      var locKey = ('person-selector');
+      label.className = "form-label form-label-select";
+      label.innerHTML = loc(locKey);
+      span.appendChild(label);
       span.appendChild(select);
 
       // new invite
@@ -488,6 +492,7 @@ var docgen = (function() {
     function loaderImg() {
       var img = document.createElement("img");
       img.src = "/img/ajax-loader-12.gif";
+      img.alt = "...";
       return img;
     }
 
@@ -554,7 +559,7 @@ var docgen = (function() {
       var elements = document.createElement("article");
 
       section.className = "accordion";
-      icon.className = "font-icon icon-expanded";
+      icon.className = "icon toggle-icon drill-down-white";
       title.appendChild(icon);
 
       if (op) {

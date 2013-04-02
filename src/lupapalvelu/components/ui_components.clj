@@ -1,8 +1,9 @@
 (ns lupapalvelu.components.ui-components
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.components.core :as c]
-            [sade.env :as env]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mime :as mime]
+            [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]))
 
@@ -11,7 +12,8 @@
               :name "common"})
 
 (defn- conf []
-  (let [js-conf (util/sub-map env/config [:maps])
+  (let [js-conf {:maps (:maps env/config)
+                 :fileExtensions mime/allowed-extensions}
         data (json/generate-string js-conf)]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
@@ -25,7 +27,8 @@
    :underscore   {:js ["underscore-1.4.4-min.js" "underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
 
-   :init         {:js [conf "hub.js" "log.js"]}
+   :init         {:js [conf "hub.js" "log.js"]
+                  :depends [:underscore]}
 
    :map          {:depends [:init :jquery]
                   :js ["openlayers.2.12.js" "gis.js"]}
@@ -40,8 +43,8 @@
                   :css  ["selectm.css"]}
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                  :js ["event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "comment.js" "authorization.js" "datepicker.js"]
+                  :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
+                       "ko.init.js" "dialog.js" "comment.js" "authorization.js" "datepicker.js" "municipalities.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
@@ -97,7 +100,9 @@
                      :html ["index.html" "admin.html"]}
 
    :tree    {:depends [:jquery]
-             :js ["tree.js"]}
+             :js ["tree.js"]
+             :html ["tree.html"]
+             :css ["tree.css"]}
 
    :admin   {:depends [:common :map :buildinfo :mypage :debug]
              :js ["admin.js"]
@@ -117,7 +122,11 @@
    :mypage  {:depends [:common]
              :js ["mypage.js"]
              :html ["mypage.html"]
-             :css ["mypage.css"]}})
+             :css ["mypage.css"]}
+
+   :about {:depends [:common :buildinfo :debug]
+           :js ["about.js"]
+           :html ["terms.html" "index.html"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

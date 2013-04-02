@@ -4,6 +4,7 @@
         [sade.strings :only [suffix]]
         [lupapalvelu.core])
   (:require [clojure.java.io :as io]
+            [clojure.string :as s]
             [net.cgrand.enlive-html :as enlive]
             [sade.security :as sadesecurity]
             [sade.client :as sadeclient]
@@ -21,9 +22,10 @@
 (defn get-styles []
   (slurp (io/resource "email-templates/styles.css")))
 
-(defn get-application-link [application lang suffix host]
-  (let [permit-type-path (if (= (:permitType application) "infoRequest") "/inforequest/" "/application/")]
-    (str host "/" lang "/applicant#!" permit-type-path (:id application) suffix)))
+(defn get-application-link [{:keys [infoRequest id]} lang suffix host]
+  (let [permit-type-path (if infoRequest "/inforequest" "/application")
+        full-path        (str permit-type-path "/" id suffix)]
+    (str host "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
 
 (defn replace-style [e style]
   (enlive/transform e [:style] (enlive/content style)))
@@ -32,17 +34,19 @@
   (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients [recipients title msg]
-  (doseq [recipient recipients]
+  (doseq [recipient (flatten [recipients])]
     (send-off mail-agent (fn [_]
                            (if (email/send-mail recipient title msg)
                              (info "email was sent successfully")
                              (error "email could not be delivered."))))))
 
-(defn get-email-title [application title-key]
-  (str (i18n/with-lang "fi" (i18n/loc (str "email-title-prefix")))
-       (:title application)
-       (i18n/with-lang "fi" (i18n/loc (str "email-title-delimiter")))
-       (i18n/with-lang "fi" (i18n/loc (str title-key)))))
+(defn get-email-title [{:keys [title]} title-key]
+  (i18n/with-lang "fi"
+    (str
+      "Lupapiste: "
+      title
+      " - "
+      (i18n/loc (s/join "." ["email" "title" title-key])))))
 
 ; new comment
 (defn get-message-for-new-comment [application host]
@@ -59,35 +63,43 @@
   (get-email-recipients-for-application application))
 
 (defn send-notifications-on-new-comment [application user-commenting comment-text host]
-  (if (= :authority (keyword (:role user-commenting)))
+  (when (= :authority (keyword (:role user-commenting)))
     (let [recipients (get-email-recipients-for-new-comment application)
-          msg (get-message-for-new-comment application host)]
-      (send-mail-to-recipients recipients
-                               (get-email-title application "new-comment-email-title")
-                               msg))))
+          msg        (get-message-for-new-comment application host)
+          title      (get-email-title application "new-comment")]
+      (send-mail-to-recipients recipients title msg))))
+
+;; invite
+(defn send-invite [email text application user host]
+  (let [title (get-email-title application "invite")
+        msg   (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/invite.html")
+                                         (replace-style (get-styles))
+                                         (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
+                                         (replace-application-link "#link-" application "fi" "" host)
+                                         (replace-application-link "#link-" application "sv" "" host)
+                                         )))]
+    (send-mail-to-recipients email title msg)))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
   (let [application-id (:id application)
         e (enlive/html-resource "email-templates/application-state-change.html")]
-
     (apply str (enlive/emit* (-> e
                                (replace-style (get-styles))
                                (replace-application-link "#application-link-" application "fi" "" host)
                                (replace-application-link "#application-link-" application "sv" "" host)
-                               (enlive/transform [(keyword "#state-fi")] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
-                               (enlive/transform [(keyword "#state-sv")] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application)))))))))))
+                               (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
+                               (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application)))))))))))
 
 (defn get-email-recipients-for-application-state-change [application]
   (get-email-recipients-for-application application))
 
 (defn send-notifications-on-application-state-change [application-id host]
   (let [application (mongo/by-id :applications application-id)
-        recipients (get-email-recipients-for-application application)
-        msg (get-message-for-application-state-change application host)]
-    (send-mail-to-recipients recipients
-                             (get-email-title application "state-change-email-title")
-                             msg)))
+        recipients  (get-email-recipients-for-application application)
+        msg         (get-message-for-application-state-change application host)
+        title       (get-email-title application "state-change")]
+    (send-mail-to-recipients recipients title msg)))
 
 ; verdict given
 (defn get-message-for-verdict [application host]
@@ -99,8 +111,7 @@
 
 (defn send-notifications-on-verdict [application-id host]
   (let [application (mongo/by-id :applications application-id)
-        recipients (get-email-recipients-for-application application)
-        msg (get-message-for-verdict application host)]
-    (send-mail-to-recipients recipients
-                             (get-email-title application "verdict-email-title")
-                             msg)))
+        recipients  (get-email-recipients-for-application application)
+        msg         (get-message-for-verdict application host)
+        title       (get-email-title application "verdict")]
+    (send-mail-to-recipients recipients title msg)))
