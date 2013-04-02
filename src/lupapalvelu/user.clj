@@ -1,6 +1,7 @@
 (ns lupapalvelu.user
   (:use [monger.operators]
         [lupapalvelu.core]
+        [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
@@ -8,7 +9,8 @@
             [sade.util :as util]
             [noir.session :as session]
             [lupapalvelu.token :as token]
-            [lupapalvelu.notifications :as notifications]))
+            [lupapalvelu.notifications :as notifications]
+            [noir.response :as resp]))
 
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
@@ -58,7 +60,15 @@
       (warnf "password reset request: unknown email: email=%s" email)
       (fail :email-not-found))))
 
-(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
+(defmethod token/handle-token :password-reset [token-data params]
+  (println "PASSWORD-RESET:" (:password params) (:_id token-data))
+  ; FIXME: change password
+  (resp/status 200 (resp/json {:ok true})))
+
+(defquery "user"
+  {:authenticated true}
+  [{user :user}]
+  (ok :user user))
 
 (defcommand "save-user-info"
   {:parameters [:firstName :lastName :street :city :zip :phone]

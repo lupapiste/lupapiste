@@ -68,7 +68,7 @@
       
       <div data-bind="ltext: 'reset.sent.1', visible: sent" class="reset-sent-1"></div>
       <div data-bind="ltext: 'reset.sent.2', visible: sent" class="reset-sent-2"></div>
-      <div data-bind="ltext: 'reset.not-found', visible: notFound" class="reset-not-found"></div>
+      <div data-bind="text: loc('reset.fail', fail()), visible: fail" class="reset-fail"></div>
       
     </form>
   </section>
@@ -96,7 +96,10 @@
 
       <button data-bind="click: send, enable: ok, ltext: 'setpw.send'" class="btn btn-primary"></button>
 
-      <div data-bind="ltext: 'setpw.success', visible: success"></div>
+      <div data-bind="visible: success">
+        <a data-bind="ltext: 'setpw.success'" href="#!/login"></a>
+      </div>
+      
       <div data-bind="ltext: 'setpw.fail', visible: fail"></div>
       
     </form>
