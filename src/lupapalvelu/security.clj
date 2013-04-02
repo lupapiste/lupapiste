@@ -2,7 +2,8 @@
   (:use [monger.operators]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
-            [sade.util :as util])
+            [sade.util :as util]
+            [sade.env :as env])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
 (defn non-private [map] (dissoc map :private))
@@ -46,7 +47,7 @@
 
 ; length should match the length in util.js
 (defn valid-password? [password]
-  (>= (count password) 8))
+  (>= (count password) (get-in env/config [:password :minlength])))
 
 (defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
   (let [salt              (dispense-salt)

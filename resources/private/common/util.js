@@ -13,12 +13,12 @@ var util = (function() {
   }
   
   function isValidPassword(password) {
-    return getPwQuality(password) !== "poor";
+    return password.length >= LUPAPISTE.config.passwordMinLength;
   }
   
   function getPwQuality(password) {
     var l = password.length;
-    if (l <= 7)  { return "poor"; }
+    if (l < 7)  { return "poor"; }
     if (l <= 8)  { return "low"; }
     if (l <= 10) { return "average"; }
     if (l <= 12) { return "good"; }
