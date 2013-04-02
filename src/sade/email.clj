@@ -11,21 +11,21 @@
     (send-mail to (-> env/config :email :from) subject body))
   ([to from subject body]
     (when-let [domain (s/suffix to "@")]
-    (if (or (s/starts-with domain "example.") (= to domain))
-      (do
-        (warn "Not sending email to" to)
-        (ok))
-      (try
-        (let [status (postal/send-message
-                       (:email env/config)
-                       {:from    from
-                        :to      to
-                        :subject subject
-                        :body    [{:type "text/html; charset=utf-8"
-                                   :content body}]})]
-          (if (= (:error status) :SUCCESS) (ok) (fail :reason (:msg status))))
-        (catch Exception e
-          (error e (.getMessage e))
-          (fail :reason (:msg "exeption"))))))))
+      (if (or (s/starts-with domain "example.") (= to domain))
+        (do
+          (warn "Not sending email to" to)
+          (ok))
+        (try
+          (let [status (postal/send-message
+                         (:email env/config)
+                         {:from    from
+                          :to      to
+                          :subject subject
+                          :body    [{:type "text/html; charset=utf-8"
+                                     :content body}]})]
+            (if (= (:error status) :SUCCESS) (ok) (fail :reason (:msg status))))
+          (catch Exception e
+            (error e (.getMessage e))
+            (fail :reason (:msg "exeption"))))))))
 
 (defn send-mail? [to subject body] (ok? (send-mail to subject body)))
