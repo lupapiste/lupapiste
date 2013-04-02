@@ -6,7 +6,8 @@
         [monger.operators]
         [clj-time.local :only [local-now]]
         [hiccup.form]
-        [clojure.tools.logging])
+        [clojure.tools.logging]
+        [lupapalvelu.core :only [fail]])
   (:require [digest]
             [sade.env :as env]
             [clojure.string :as string]
@@ -207,9 +208,12 @@
         user (-> data :user)]
     (json user)))
 
+(defn user-by-stamp [stamp]
+  (when-let [data (mongo/select-one :vetuma {:user.stamp stamp})]
+    (mongo/remove-many :vetuma {:_id (:id data)})
+    (:user data)))
+
 (defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
-  (let [data (mongo/select-one :vetuma {:user.stamp stamp})
-        user (-> data :user)
-        id   (:id data)]
-    (mongo/remove-many :vetuma {:_id id})
-    (json user)))
+  (if-let [user (user-by-stamp stamp)]
+    (json user)
+    (fail :error.unknown)))
