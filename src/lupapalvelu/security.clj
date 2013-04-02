@@ -46,7 +46,7 @@
 
 ; length should match the length in util.js
 (defn valid-password? [password]
-  (>= (count password) 6))
+  (>= (count password) 8))
 
 (defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
   (let [salt              (dispense-salt)
