@@ -42,7 +42,7 @@
             (ok :id (:_id user)))
           (fail :error.create_user))
         (catch IllegalArgumentException e
-          (fail "error." (.getMessage e)))))
+          (fail (keyword (.getMessage e))))))
     (fail :error.create_user)))
 
 (defcommand "change-passwd"
