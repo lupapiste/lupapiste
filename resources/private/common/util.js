@@ -14,7 +14,7 @@ var util = (function() {
   
   function getPwQuality(password) {
     var l = password.length;
-    if (l <= 6)  { return "poor"; }
+    if (l <= 7)  { return "poor"; }
     if (l <= 8)  { return "low"; }
     if (l <= 10) { return "average"; }
     if (l <= 12) { return "good"; }

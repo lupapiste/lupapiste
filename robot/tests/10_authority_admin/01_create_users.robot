@@ -19,13 +19,13 @@ Authority admin creates two users
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
 
-Password minimum length is 6
+Password minimum length is 8
   Click element  test-create-user
   Wait until  Element should be visible  user-email
   Input text       user-email  short.password@example.com
   Input text       user-firstname  Short
   Input text       user-lastname  Password
-  Input text       user-password  12345
+  Input text       user-password  1234567
   Element Should Be Disabled  test-create-user-save
   Input text       user-password  12345678
   Element Should Be Enabled  test-create-user-save
