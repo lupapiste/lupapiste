@@ -8,3 +8,4 @@ reset.send: Lähetä
 reset.sent.1: Sähköposti lähetetty.
 reset.sent.2: Seuraa ohjeita sähköpostistasi. Voit sulkea tämän ikkunan.
 reset.not-found: Antaamasi sähköpostiosoitetta ei löydy järjestelmästä.
+reset.email.title: Salasanan vaihto
