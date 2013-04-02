@@ -23,6 +23,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.token :as token]
             [sade.security :as sadesecurity]
             [sade.status :as status]
             [sade.util :as util]
@@ -310,6 +311,15 @@
       {:status 503}
       ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
     {:status 401}))
+
+;;
+;; Token consuming:
+;;
+
+(defpage "/api/token/:token-id" {token-id :token-id}
+  (if-let [response (token/consume-token token-id)]
+    response
+    {:status 404}))
 
 ;;
 ;; Cross-site request forgery protection
