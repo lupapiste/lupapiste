@@ -158,7 +158,7 @@
 (defn- field [[k v]]
   (hidden-field k v))
 
-(defn- non-local? [paths] (some #(not= -1 (.indexOf % ":")) (vals paths)))
+(defn- non-local? [paths] (some #(not= -1 (.indexOf (or % "") ":")) (vals paths)))
 
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
@@ -176,7 +176,7 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/api/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
+(defpage "/api/vetuma" {:keys [success, cancel, error] :as data}
   (let [paths     {:success success :error error :cancel cancel}
         sessionid (session-id)]
     (if (non-local? paths)
@@ -196,12 +196,16 @@
                logged)
         data (mongo/update-one-and-return :vetuma {:sessionid (session-id)} {$set {:user user}})
         uri  (get-in data [:paths :success])]
-    (redirect uri)))
+    (if uri
+      (redirect uri)
+      (redirect (str (host) "/app/fi/welcome#!/register2")))))
 
-(defpage [:post "/api/vetuma/:status"] {status :status}
+(defpage [:any "/api/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
         return-uri (get-in data [:paths (keyword status)])]
-    (redirect return-uri)))
+    (if return-uri
+      (redirect return-uri)
+      (redirect (str (host) "/app/fi/welcome#!/register/" status)))))
 
 (defpage "/api/vetuma/user" []
   (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
