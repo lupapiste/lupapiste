@@ -1,5 +1,6 @@
 (ns lupapalvelu.singlepage
   (:use [clojure.tools.logging]
+        [clj-time.coerce :only [from-long to-date]]
         [lupapalvelu.components.ui-components :only [ui-components]])
   (:require [clojure.java.io :as io]
             [net.cgrand.enlive-html :as enlive]
@@ -68,6 +69,13 @@
 (defn- resource-url [component kind]
   (str (kind (:cdn env/config)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
 
+(def ^:private buildinfo-summary
+  (format "%s-%s %3$tF %3$tT [%4$s]"
+          env/target-env
+          (:build-number env/buildinfo)
+          (to-date (from-long (:time env/buildinfo)))
+          (name env/mode)))
+
 (defn inject-content [t {:keys [header nav page footer]} component]
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
@@ -76,7 +84,8 @@
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (constantly (first footer)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
-                  (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e))))))
+                  (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
+                  (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary)))))
 
 (defn compose-html [component]
   (let [out (ByteArrayOutputStream.)]

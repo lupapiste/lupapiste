@@ -48,9 +48,6 @@
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
-   :buildinfo    {:depends [:jquery]
-                  :js ["buildinfo.js"]}
-
    :invites      {:depends [:common]
                   :js ["invites.js"]}
 
@@ -86,16 +83,16 @@
                   :html ["create.html"]}
 
    :applicant    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage :debug]
+                            :docgen :create :mypage :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage :debug]
+                            :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :buildinfo :mypage :debug]
+   :authority-admin {:depends [:common :mypage :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
@@ -104,7 +101,7 @@
              :html ["tree.html"]
              :css ["tree.css"]}
 
-   :admin   {:depends [:common :map :buildinfo :mypage :debug]
+   :admin   {:depends [:common :map :mypage :debug]
              :js ["admin.js"]
              :html ["index.html" "admin.html"]}
 
@@ -115,7 +112,7 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :register :buildinfo :debug]
+   :welcome {:depends [:common :register :debug]
              :js ["welcome.js" "login.js"]
              :html ["login.html" "index.html"]}
 
@@ -124,7 +121,7 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :about {:depends [:common :buildinfo :debug]
+   :about {:depends [:common :debug]
            :js ["about.js"]
            :html ["terms.html" "index.html"]}})
 

@@ -96,9 +96,6 @@
 (status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
 (status/defstatus :mode  env/mode)
 
-(defjson "/api/buildinfo" []
-  (ok :data (assoc (util/sub-map env/buildinfo [:build-tag :build-id]) :server-mode env/mode)))
-
 ;;
 ;; Commands
 ;;
