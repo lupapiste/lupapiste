@@ -83,7 +83,7 @@
                             #".+personId.+"  "error.duplicate-person-id"
                             #".+email.+"     "error.duplicate-email"
                             #".+username.+"  "error.duplicate-email"
-                            #".*"            "error.create_user")]
+                            #".*"            "error.create-user")]
           (throw (IllegalArgumentException. error-code)))))
     (get-user-by-email email)))
 

@@ -40,10 +40,10 @@
           (do
             (future (sadesecurity/send-activation-mail-for user))
             (ok :id (:_id user)))
-          (fail :error.create_user))
+          (fail :error.create-user))
         (catch IllegalArgumentException e
           (fail (keyword (.getMessage e))))))
-    (fail :error.create_user)))
+    (fail :error.create-user)))
 
 (defcommand "change-passwd"
   {:parameters [:oldPassword :newPassword]
