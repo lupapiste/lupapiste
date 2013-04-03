@@ -176,9 +176,11 @@ var attachment = (function() {
            attachmentType:  attachmentType})
         .success(function(e) {
           loader$.hide();
+          repository.load(model.application.id());
         })
         .error(function(e) {
           loader$.hide();
+          repository.load(model.application.id());
           error(e.text);
         })
         .call();
