@@ -227,7 +227,7 @@
     (mongo/remove-many :vetuma {:_id (:id user)})
     (:user user)))
 
-(defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
+#_(defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
   (if-let [user (consume-user stamp)]
     (json user)
     (fail :error.unknown)))
