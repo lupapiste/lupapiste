@@ -4,6 +4,8 @@
         [lupapalvelu.token])
   (:require [lupapalvelu.mongo :as mongo]))
 
+(mongo/connect!)
+
 (facts
   
   (let [id (make-token :fofo {:foo "foo"})]
@@ -17,10 +19,10 @@
     (Thread/sleep 150)
     (get-and-consume-token id) => nil))
 
-(defmethod handle-token :fofo [token]
-  {:works true :bar (:foo (:data token))})
+(defmethod handle-token :fofo [token params]
+  {:works true :foo (get-in token [:data :foo]) :bar (:bar params)})
 
 (facts
-  (consume-token (make-token :fofo {:foo "bar"})) => {:works true :bar "bar"}
-  (consume-token (make-token :no-such-type {:foo "bar"})) => nil 
-  (consume-token "no-such-token") => nil)
+  (consume-token (make-token :fofo {:foo "foo"}) {:bar "bar"}) => {:works true :foo "foo" :bar "bar"}
+  (consume-token (make-token :no-such-type {:foo "bar"}) {}) => nil 
+  (consume-token "no-such-token" {}) => nil)
