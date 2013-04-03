@@ -13,8 +13,10 @@
 
 (defn- conf []
   (let [js-conf {:maps (:maps env/config)
-                 :fileExtensions mime/allowed-extensions}
+                 :fileExtensions mime/allowed-extensions
+                 :passwordMinLength (get-in env/config [:password :minlength]) }
         data (json/generate-string js-conf)]
+    
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
 (defn loc->js []

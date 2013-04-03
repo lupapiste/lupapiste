@@ -55,15 +55,6 @@
 
   }
 
-  function getPwQuality(password) {
-    var l = password.length;
-    if (l <= 6)  { return "poor"; }
-    if (l <= 8)  { return "low"; }
-    if (l <= 10) { return "average"; }
-    if (l <= 12) { return "good"; }
-    return "excellent";
-  }
-
   function Password() {
 
     this.oldPassword = ko.observable("");
@@ -81,12 +72,11 @@
         .error(null);
     };
 
-    this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && getPwQuality(this.newPassword()) !== "poor" && equals(this.newPassword(), this.newPassword2()); }, this);
+    this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && util.isValidPassword(this.newPassword()) && equals(this.newPassword(), this.newPassword2()); }, this);
     this.noMatch = ko.computed(function() { return isNotBlank(this.newPassword()) && isNotBlank(this.newPassword2()) && !equals(this.newPassword(), this.newPassword2()); }, this);
 
     this.save = makeSaveFn("change-passwd", ["oldPassword", "newPassword"]);
-    this.quality = ko.computed(function() { return getPwQuality(this.newPassword()); }, this);
-
+    this.quality = ko.computed(function() { return util.getPwQuality(this.newPassword()); }, this);
   }
 
   var ownInfo = new OwnInfo();
