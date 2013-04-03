@@ -46,12 +46,12 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "comment.js" "authorization.js" "datepicker.js"]
+                       "ko.init.js" "dialog.js" "datepicker.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["municipalities.js"]
+                   :js ["comment.js" "authorization.js" "municipalities.js"]
                    :css ["css/main.css"]
                    :html ["error.html"]}
 
