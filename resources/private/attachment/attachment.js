@@ -166,14 +166,20 @@ var attachment = (function() {
   model.attachmentType.subscribe(function(attachmentType) {
     var type = model.type();
     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
+    var loader$ = $("#attachment-type-select-loader");
     if (prevAttachmentType !== attachmentType) {
+      loader$.show();
       ajax
         .command("set-attachment-type",
           {id:              model.application.id(),
            attachmentId:    model.attachmentId(),
            attachmentType:  attachmentType})
         .success(function(e) {
-          debug("Updated attachmentType:", e);
+          loader$.hide();
+        })
+        .error(function(e) {
+          loader$.hide();
+          error(e.text);
         })
         .call();
     }
