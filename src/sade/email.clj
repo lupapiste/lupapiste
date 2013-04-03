@@ -29,3 +29,16 @@
             (fail :reason (:msg "exeption"))))))))
 
 (defn send-mail? [to subject body] (ok? (send-mail to subject body)))
+
+(when (get-in env/config [:email :dummy-server])
+  (require 'sade.dummy-email-server)
+  ((resolve 'sade.dummy-email-server/start)))
+
+(comment
+  (postal/send-message
+    (:email env/config)
+    {:from    "foo@bar.com"
+     :to      "dorka@dii.daa"
+     :subject "subjectus"
+     :body    [{:type "text/html; charset=utf-8"
+                :content "<h1>heelo</h1>"}]}))

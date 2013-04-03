@@ -14,7 +14,7 @@
                  [clj-http "0.6.4" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.0"]
                  [digest "1.4.2"]
-                 [clj-time "0.5.0"]
+                 [clj-time "0.5.0" :exclusions [org.clojure/clojure]]
                  [org.apache.commons/commons-lang3 "3.1"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
                  [com.lowagie/itext "2.1.7"]
@@ -28,7 +28,9 @@
                  [fi.sito/oskari "0.9.6"]]
   :plugins [[org.timmc/lein-otf "2.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]
-                                  [ring-mock "0.1.1"]]
+                                  [ring-mock "0.1.1"]
+                                  [javax.activation/activation "1.1"]
+                                  [dumbster/dumbster "1.6" :exclusions [[javax.mail/mail] [javax.activation/activation]]]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]]}
