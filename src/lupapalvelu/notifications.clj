@@ -128,9 +128,8 @@
     (str (name scheme) "://" host (if-not (ss/starts-with to "/") "/") to)))
 
 (defn send-password-reset-email [to token]
-  (let [link (url-to (str "/api/token/" token))
-        link-fi (str link "?lang=fi")
-        link-sv (str link "?lang=sv")
+  (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
+        link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
         msg (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/password-reset.html")
                                        (replace-style (get-styles))
                                        (enlive/transform [:#link-fi] (fn [a] (assoc-in a [:attrs :href] link-fi)))
