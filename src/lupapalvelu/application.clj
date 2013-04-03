@@ -247,7 +247,8 @@
 
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
-   :roles      [:applicant :authority]}
+   :roles      [:applicant :authority]
+   :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
     (let [user-summary  (security/summary user)
@@ -423,7 +424,9 @@
 ;
 
 (defquery "applications-count"
-  {:parameters [:kind]}
+  {:parameters [:kind]
+   :authenticated true
+   :verified true}
   [{user :user {kind :kind} :data}]
   (let [base-query (domain/application-query-for user)
         query (condp = kind

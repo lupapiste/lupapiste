@@ -30,7 +30,8 @@
       (fail :error.login))))
 
 (defcommand "register-user"
-  {:parameters [:stamp :email :password :street :zip :city :phone]}
+  {:parameters [:stamp :email :password :street :zip :city :phone]
+   :verified   true}
   [{data :data}]
   (if-let [vetuma-data (vetuma/user-by-stamp (:stamp data))]
     (do
@@ -47,10 +48,10 @@
 
 (defcommand "change-passwd"
   {:parameters [:oldPassword :newPassword]
-   :authenticated true}
-  [{{:keys [oldPassword newPassword]} :data user :user}]
-  (let [user-id (:id user)
-        user-data (mongo/by-id :users user-id)]
+   :authenticated true
+   :verified true}
+  [{{:keys [oldPassword newPassword]} :data {user-id :id :as user} :user}]
+  (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
       (do
         (debug "Password change: user-id:" user-id)
