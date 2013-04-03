@@ -68,22 +68,22 @@
         (fail :mypage.old-password-does-not-match)))))
 
 (defcommand "reset-password"
-  {:parameters [:email]}
+  {:parameters [:email]
+   :authenticated false}
   [{{email :email} :data}]
   (infof "Password resert request: email=%s" email)
-  (if-let [user (mongo/select-one :users {:email email :enabled true})]
-    (let [token (token/make-token :password-reset {:user-id (:id user)})]
-      (infof "password reset request: email=%s, id=%s, token=%s" email (:id user) token)
-      (if (notifications/send-password-reset-email email token)
-        (ok)
-        (fail :email-send-failed))) 
+  (if (mongo/select-one :users {:email email :enabled true})
+    (let [token (token/make-token :password-reset {:email email})]
+      (infof "password reset request: email=%s, token=%s" email token)
+      (notifications/send-password-reset-email email token)
+      (ok)) 
     (do
       (warnf "password reset request: unknown email: email=%s" email)
       (fail :email-not-found))))
 
-(defmethod token/handle-token :password-reset [token-data params]
-  (println "PASSWORD-RESET:" (:password params) (:_id token-data))
-  ; FIXME: change password
+(defmethod token/handle-token :password-reset [{{email :email} :data} {password :password}]
+  (security/change-password email password)
+  (infof "password reset performed: email=%s" email)
   (resp/status 200 (resp/json {:ok true})))
 
 (defquery "user"
