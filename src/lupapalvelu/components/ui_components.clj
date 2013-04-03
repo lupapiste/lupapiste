@@ -119,7 +119,7 @@
 
    :welcome {:depends [:common :register :debug]
              :js ["welcome.js" "login.js"]
-             :html ["login.html" "index.html"]}
+             :html ["index.html" "login.html"]}
 
    :mypage  {:depends [:common]
              :js ["mypage.js"]

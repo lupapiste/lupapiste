@@ -23,6 +23,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.token :as token]
             [sade.security :as sadesecurity]
             [sade.status :as status]
             [sade.util :as util]
@@ -312,6 +313,20 @@
     {:status 401}))
 
 ;;
+;; Token consuming:
+;;
+
+(defpage [:get "/api/token/:token-id"] {token-id :token-id}
+  (let [params (:params (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response {:status 404})))
+
+(defpage [:post "/api/token/:token-id"] {token-id :token-id}
+  (let [params (from-json (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response (resp/status 404 (resp/json {:ok false})))))
+
+;;
 ;; Cross-site request forgery protection
 ;;
 
@@ -338,7 +353,7 @@
 ;;
 
 (env/in-dev
-  (defjson "/dev/spy" []
+  (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
