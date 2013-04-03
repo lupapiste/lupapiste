@@ -255,7 +255,7 @@
           id            (mongo/create-id)
           owner         (role user :owner :type :owner)
           op            (keyword operation)
-          info-request? (not (nil? infoRequest))
+          info-request? (if infoRequest true false)
           state         (if (or info-request? (security/authority? user)) :open :draft)
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
       (mongo/insert :applications {:id            id
