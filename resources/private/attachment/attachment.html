@@ -17,8 +17,9 @@
         <div class="form-entry">
           <label data-bind="ltext: 'attachment.changeType'" class="form-label">Vaihda liitteen tyyppi</label>
           <div id="attachment-type-select-list-container"></div>
+          <input type="text" data-bind="value: attachmentType">
           <br>
-          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" 
+          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
           style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
         </div>
       </div>

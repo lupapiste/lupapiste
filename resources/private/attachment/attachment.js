@@ -191,7 +191,10 @@ var attachment = (function() {
     model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
-    attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'), application.allowedAttachmentTypes, model.attachmentType());
+    attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'),
+        application.allowedAttachmentTypes,
+        model.attachmentType(),
+        function(e) {model.attachmentType($(e.target).val());});
 
     model.application.id(applicationId);
     model.application.title(application.title);
