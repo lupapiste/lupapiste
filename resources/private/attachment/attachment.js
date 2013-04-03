@@ -105,7 +105,6 @@ var attachment = (function() {
     filename:       ko.observable(),
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
-    name:           ko.observable(),
     type:           ko.observable(),
     attachmentType: ko.observable(),
     allowedAttachmentTypes: ko.observableArray(),
@@ -157,6 +156,13 @@ var attachment = (function() {
     }
   };
 
+  model.name = ko.computed(function() {
+    if (model.attachmentType()) {
+      return "attachmentType." + model.attachmentType();
+    }
+    return null;
+  });
+
   model.attachmentType.subscribe(function(attachmentType) {
     var type = model.type();
     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
@@ -167,7 +173,7 @@ var attachment = (function() {
            attachmentId:    model.attachmentId(),
            attachmentType:  attachmentType})
         .success(function(e) {
-          model.name("attachmentType." + attachmentType);
+          debug("Updated attachmentType:", e);
         })
         .call();
     }
@@ -188,7 +194,6 @@ var attachment = (function() {
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
-    model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
     attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'),
