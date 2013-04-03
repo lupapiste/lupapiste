@@ -27,9 +27,6 @@
     var error$ = $('#register-email-error');
     var loader$ = $("#registerLoader");
     error$.text('');
-    loader$.show();
-
-    $("#register-form div").hide();
 
     ajax.command('register-user', json(m))
       .success(function() {
@@ -39,7 +36,6 @@
       })
       .error(function(e) {
         error$.text(loc(e.text));
-        loader$.hide();
       })
       .call();
     return false;
