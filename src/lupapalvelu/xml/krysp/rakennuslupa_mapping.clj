@@ -4,9 +4,14 @@
          [clojure.java.io]
          [lupapalvelu.document.krysp :only [application-to-canonical]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]])
+         [lupapalvelu.xml.krysp.validator :only [validate]]
+         [lupapalvelu.document.krysp :only [to-xml-datetime]]
+         [lupapalvelu.mongo :only [download]]
+         [lupapalvelu.attachment :only [encode-filename]])
   (:require [sade.env :as env]
-            [me.raynes.fs :as fs]))
+            [me.raynes.fs :as fs]
+            [clojure.java.io :as io])
+  )
 
 ;RakVal
 
@@ -128,35 +133,71 @@
                                       {:tag :suoramarkkinointikieltoKytkin}]}]}
                              {:tag :liitetieto
                               :child [{:tag :Liite
-                                       :child [{:tag :kuvaus}
-                                               {:tag :linkkiliitteeseen}
-                                               {:tag :muokkausHetki}
-                                               {:tag :versionumero}
-                                               {:tag :tekija
+                                       :child [{:tag :kuvaus :ns "yht"}
+                                               {:tag :linkkiliitteeseen :ns "yht"}
+                                               {:tag :muokkausHetki :ns "yht"}
+                                               {:tag :versionumero :ns "yht"}
+                                               {:tag :tekija :ns "yht"
                                                 :child [{:tag :kuntaRooliKoodi}
                                                         {:tag :VRKrooliKoodi}
                                                         henkilo
                                                         yritys]}
-                                               {:tag :tyyppi}]}]}
+                                               {:tag :tyyppi :ns "yht"}]}]}
                              {:tag :kayttotapaus}
                              {:tag :asianTiedot
                               :child [{:tag :Asiantiedot
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
+(defn- get-attachments-as-canonical [application dynamic-part-of-outgoing-directory]
+  (let [attachments (:attachments application)
+        fileserver-address (:fileserver-address env/config)
+        fileserver-root-directory (:fileserver-root-directory env/config)
+        begin-of-link (str fileserver-address "/" fileserver-root-directory "/" dynamic-part-of-outgoing-directory "/")
+        canonical-attachments (for [attachment attachments
+                                    :when (:latestVersion attachment)
+                                    :let [type (get-in attachment [:type :type-id] )
+                                          title (str (:title application) " : " type)
+                                          attachment-file-name (get-in [:latestVersion :filename] attachment)
+                                          file-id (get-in attachment [:latestVersion :fileId])
+                                          link (str begin-of-link attachment-file-name)]]
+                                 {:Liite
+                                  {:kuvaus title
+                                   :linkkiliitteeseen link
+                                   :muokkausHetki (to-xml-datetime (:modified attachment))
+                                   :versionumero 1
+                                   :tyyppi type
+                                   :fileId file-id}})]
+    (when (not-empty canonical-attachments)
+      canonical-attachments)))
+
 (defn get-application-as-krysp [application]
-  (let [canonical  (application-to-canonical application)
-        xml        (element-to-xml canonical rakennuslupa_to_krysp)
-        xml-s      (indent-str xml)
-        output-dir (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus")
+  (let [municipality-code (:municipality application)
+        rakennusvalvonta-directory "/rakennus"
+        dynamic-part-of-outgoing-directory (str municipality-code rakennusvalvonta-directory)
+        output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory )
         _          (fs/mkdirs output-dir)
         file-name  (str output-dir "/Lupapiste" (:id application))
         tempfile   (file (str file-name ".tmp"))
-        outfile    (file (str file-name ".xml"))]
-    (validate xml-s)
+        outfile    (file (str file-name ".xml"))
+        canonical-without-attachments  (application-to-canonical application)
+        attachments (get-attachments-as-canonical application dynamic-part-of-outgoing-directory)
+        canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments)
+        xml        (element-to-xml canonical rakennuslupa_to_krysp)
+        ]
+    (println "*************************")
+    (clojure.pprint/pprint canonical)
+    ;(clojure.pprint/pprint canonical-without-attachments)
+
+    (validate (indent-str xml))
 
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
-    ;todoo liitetiedostot
+    (for [attachment attachments
+          :let [file-id (get-in attachment [:liitetieto :Liite :fileId])
+                file (download  file-id)
+                content (:content file)
+                attachment-file-name (str output-dir "/" file-id "_" (:file-name file) )]]
+      (io/copy content attachment-file-name))
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
