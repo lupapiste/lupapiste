@@ -105,7 +105,6 @@ var attachment = (function() {
     filename:       ko.observable(),
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
-    name:           ko.observable(),
     type:           ko.observable(),
     attachmentType: ko.observable(),
     allowedAttachmentTypes: ko.observableArray(),
@@ -157,17 +156,30 @@ var attachment = (function() {
     }
   };
 
+  model.name = ko.computed(function() {
+    if (model.attachmentType()) {
+      return "attachmentType." + model.attachmentType();
+    }
+    return null;
+  });
+
   model.attachmentType.subscribe(function(attachmentType) {
     var type = model.type();
     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
+    var loader$ = $("#attachment-type-select-loader");
     if (prevAttachmentType !== attachmentType) {
+      loader$.show();
       ajax
         .command("set-attachment-type",
           {id:              model.application.id(),
            attachmentId:    model.attachmentId(),
            attachmentType:  attachmentType})
         .success(function(e) {
-          debug("Updated attachmentType:", e);
+          loader$.hide();
+        })
+        .error(function(e) {
+          loader$.hide();
+          error(e.text);
         })
         .call();
     }
@@ -188,10 +200,13 @@ var attachment = (function() {
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
-    model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
-    attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'), application.allowedAttachmentTypes, model.attachmentType());
+    // Knockout works poorly with dynamic options.
+    // To avoid headaches, init the select and update the ko model manually.
+    var selectList$ = $("#attachment-type-select");
+    attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
+    selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
     model.application.id(applicationId);
     model.application.title(application.title);

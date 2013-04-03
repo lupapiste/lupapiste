@@ -93,6 +93,10 @@ Go to page
 Open tab
   [Arguments]  ${name}
   Click by test id  application-open-${name}-tab
+  Tab should be visible  ${name}
+
+Tab should be visible
+  [Arguments]  ${name}
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
