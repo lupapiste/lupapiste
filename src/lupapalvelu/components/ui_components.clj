@@ -51,9 +51,7 @@
                   :html ["error.html"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js"]
-                   :css ["css/main.css"]
-                   :html ["error.html"]}
+                   :js ["comment.js" "authorization.js" "municipalities.js"]}
 
    :invites      {:depends [:common]
                   :js ["invites.js"]}
