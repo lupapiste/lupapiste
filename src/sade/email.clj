@@ -10,22 +10,30 @@
   ([to subject body]
     (send-mail to (-> env/config :email :from) subject body))
   ([to from subject body]
-    (when-let [domain (s/suffix to "@")]
-    (if (or (s/starts-with domain "example.") (= to domain))
-      (do
-        (warn "Not sending email to" to)
-        (ok))
-      (try
-        (let [status (postal/send-message
-                       (:email env/config)
-                       {:from    from
-                        :to      to
-                        :subject subject
-                        :body    [{:type "text/html; charset=utf-8"
-                                   :content body}]})]
-          (if (= (:error status) :SUCCESS) (ok) (fail :reason (:msg status))))
-        (catch Exception e
-          (error e (.getMessage e))
-          (fail :reason (:msg "exeption"))))))))
+    (try
+      (let [status (postal/send-message
+                     (:email env/config)
+                     {:from    from
+                      :to      to
+                      :subject subject
+                      :body    [{:type "text/html; charset=utf-8"
+                                 :content body}]})]
+        (if (= (:error status) :SUCCESS) (ok) (fail :reason (:msg status))))
+      (catch Exception e
+        (error e (.getMessage e))
+        (fail :reason (:msg "exeption"))))))
 
 (defn send-mail? [to subject body] (ok? (send-mail to subject body)))
+
+(when (get-in env/config [:email :dummy-server])
+  (require 'sade.dummy-email-server)
+  ((resolve 'sade.dummy-email-server/start)))
+
+(comment
+  (postal/send-message
+    (:email env/config)
+    {:from    "foo@bar.com"
+     :to      "dorka@dii.daa"
+     :subject "subjectus"
+     :body    [{:type "text/html; charset=utf-8"
+                :content "<h1>heelo</h1>"}]}))

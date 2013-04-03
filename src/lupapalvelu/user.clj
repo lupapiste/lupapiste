@@ -1,6 +1,7 @@
 (ns lupapalvelu.user
   (:use [monger.operators]
         [lupapalvelu.core]
+        [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
@@ -8,7 +9,10 @@
             [lupapalvelu.vetuma :as vetuma]
             [sade.security :as sadesecurity]
             [sade.util :as util]
-            [noir.session :as session]))
+            [noir.session :as session]
+            [lupapalvelu.token :as token]
+            [lupapalvelu.notifications :as notifications]
+            [noir.response :as resp]))
 
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
@@ -63,7 +67,29 @@
         (warn "Password change: failed: old password does not match, user-id:" user-id)
         (fail :mypage.old-password-does-not-match)))))
 
-(defquery "user" {:authenticated true :verified true} [{user :user}] (ok :user user))
+(defcommand "reset-password"
+  {:parameters [:email]
+   :authenticated false}
+  [{{email :email} :data}]
+  (infof "Password resert request: email=%s" email)
+  (if (mongo/select-one :users {:email email :enabled true})
+    (let [token (token/make-token :password-reset {:email email})]
+      (infof "password reset request: email=%s, token=%s" email token)
+      (notifications/send-password-reset-email email token)
+      (ok)) 
+    (do
+      (warnf "password reset request: unknown email: email=%s" email)
+      (fail :email-not-found))))
+
+(defmethod token/handle-token :password-reset [{{email :email} :data} {password :password}]
+  (security/change-password email password)
+  (infof "password reset performed: email=%s" email)
+  (resp/status 200 (resp/json {:ok true})))
+
+(defquery "user"
+  {:authenticated true :verified true}
+  [{user :user}]
+  (ok :user user))
 
 (defcommand "save-user-info"
   {:parameters [:firstName :lastName :street :city :zip :phone]

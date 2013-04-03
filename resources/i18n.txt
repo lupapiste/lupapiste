@@ -1,1 +1,31 @@
+login.reset-question: Oletko unohtanut salasanasi?
+
+reset.title: Salasanan vaihtaminen
+reset.info: Anna sähköpostiosoitteesi niin lähetämme sinulle salasanan vaihto linkin.
+reset.email: Sähköposti:
+reset.email-placeholder: etunimi.sukunimi@osoite.fi
+reset.send: Lähetä
+reset.sent.1: Sähköposti lähetetty.
+reset.sent.2: Seuraa ohjeita sähköpostistasi. Voit sulkea tämän ikkunan.
+reset.fail.email-not-found: Antaamasi sähköpostiosoitetta ei löydy järjestelmästä. 
+reset.fail.email-send-failed: Sähköpostin lähetys epäonnistui, ole hyvä ja yritä uudelleen. 
+reset.email.title: Salasanan vaihto
+
+setpw.title: Salasanan vaihtaminen
+setpw.info: Anna uusi salasana kahdesti ja paina OK.
+setpw.password.1: Salasana:
+setpw.password.2: Salasana uudelleen:
+setpw.send: OK
+setpw.success: Salasana vaihdettu. Klikkaa linkkiä ja kirjaudu sisään uudella salasanallasi:
+setpw.fail: Salasanan vaihto ei onnistunut, ole hyvä ja yritä uudelleen.
+setpw.placeholder.1: Uusi salasana
+setpw.placeholder.2: Salasana uudelleen
+setpw.quality: Laatu:
+setpw.quality.poor: Liian lyhyt
+setpw.quality.low: Heikko
+setpw.quality.med: Kohtalainen
+setpw.quality.hi: Hyvä
+setpw.quality.excellent: Erinomainen
+setpw.notSame: Salasana ei täsmää
+
 error.password.minlength: Pituus vähintään 8 merkkiä
