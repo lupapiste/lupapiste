@@ -2,7 +2,8 @@
   (:use [monger.operators]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
-            [sade.util :as util])
+            [sade.util :as util]
+            [sade.env :as env])
   (:import [org.mindrot.jbcrypt BCrypt]
            [com.mongodb MongoException MongoException$DuplicateKey]))
 
@@ -44,6 +45,10 @@
 (defn- random-password []
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
+
+; length should match the length in util.js
+(defn valid-password? [password]
+  (>= (count password) (get-in env/config [:password :minlength])))
 
 (defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
   (let [salt              (dispense-salt)
