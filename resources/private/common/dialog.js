@@ -53,7 +53,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
       .fadeIn(600);
 
     var inputs = $(selector + ' input:enabled');
-    if(inputs) {
+    if(inputs && inputs[0]) {
       inputs[0].focus();
     }
     
