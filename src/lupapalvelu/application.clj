@@ -54,7 +54,7 @@
 ;; Query application:
 ;;
 
-(defquery "applications" {:authenticated true} [{user :user}]
+(defquery "applications" {:authenticated true :verified true} [{user :user}]
   (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-municipality [app]
@@ -415,7 +415,7 @@
      :sEcho                 echo}))
 
 (defcommand "applications-for-datatables"
-  {:parameters [:params]}
+  {:parameters [:params] :verified true}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
 
