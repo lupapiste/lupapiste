@@ -9,8 +9,7 @@
          [lupapalvelu.mongo :only [download]]
          [lupapalvelu.attachment :only [encode-filename]])
   (:require [sade.env :as env]
-            [me.raynes.fs :as fs]
-            [clojure.java.io :as io])
+            [me.raynes.fs :as fs])
   )
 
 ;RakVal
@@ -149,6 +148,9 @@
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
+(defn- get-file-name-on-server [file-id file-name]
+  (str file-id "_" (encode-filename file-name)))
+
 (defn- get-attachments-as-canonical [application dynamic-part-of-outgoing-directory]
   (let [attachments (:attachments application)
         fileserver-address (:fileserver-address env/config)
@@ -158,8 +160,9 @@
                                     :when (:latestVersion attachment)
                                     :let [type (get-in attachment [:type :type-id] )
                                           title (str (:title application) " : " type)
-                                          attachment-file-name (get-in [:latestVersion :filename] attachment)
                                           file-id (get-in attachment [:latestVersion :fileId])
+                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+
                                           link (str begin-of-link attachment-file-name)]]
                                  {:Liite
                                   {:kuvaus title
@@ -170,6 +173,24 @@
                                    :fileId file-id}})]
     (when (not-empty canonical-attachments)
       canonical-attachments)))
+
+(defn- write-file [content attachment-file-name]
+  (let [outFile (file attachment-file-name)]
+  (with-open [out (output-stream outFile)]
+      (copy (content) out))
+  ))
+
+(defn- write-attachments [attachments output-dir]
+  (println "===========attachments=======================")
+  (clojure.pprint/pprint attachments)
+  (println (count attachments))
+
+  (for [attachment attachments
+          :let [file-id (get-in attachment [:Liite :fileId])
+                file (download file-id)
+                content (:content file)
+                attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name file)))]]
+      (write-file content attachment-file-name)))
 
 (defn get-application-as-krysp [application]
   (let [municipality-code (:municipality application)
@@ -183,21 +204,12 @@
         canonical-without-attachments  (application-to-canonical application)
         attachments (get-attachments-as-canonical application dynamic-part-of-outgoing-directory)
         canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments)
-        xml        (element-to-xml canonical rakennuslupa_to_krysp)
-        ]
-    (println "*************************")
-    (clojure.pprint/pprint canonical)
-    ;(clojure.pprint/pprint canonical-without-attachments)
-
+        xml        (element-to-xml canonical rakennuslupa_to_krysp)]
     (validate (indent-str xml))
-
+    (print (write-attachments attachments output-dir))
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
-    (for [attachment attachments
-          :let [file-id (get-in attachment [:liitetieto :Liite :fileId])
-                file (download  file-id)
-                content (:content file)
-                attachment-file-name (str output-dir "/" file-id "_" (:file-name file) )]]
-      (io/copy content attachment-file-name))
+
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
+
