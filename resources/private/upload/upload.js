@@ -20,10 +20,13 @@ LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
   "use strict";
+
   if (applicationId) {
     ajax
       .query("attachment-types",{id: applicationId})
       .success(function(d) {
+        // fix for IE9 not showing the last option
+        d.attachmentTypes.push(["empty", []]);
         LUPAPISTE.Upload.attachmentTypeGroups(_.map(d.attachmentTypes, function(v) {
           return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })};
         }));

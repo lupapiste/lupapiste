@@ -1,1 +1,2 @@
-error.password.minlength: Pituus vähintään 8 merkkiä
+error.password.minlength: Pituus vï¿½hintï¿½ï¿½n 8 merkkiï¿½
+attachmentType.empty._group_label:
