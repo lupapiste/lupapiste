@@ -2,6 +2,7 @@
   (:use [clojure.tools.logging]
         [clj-logging-config.log4j])
   (:require [sade.env :as env]
+            [sade.util :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io])
   (:import [org.apache.log4j FileAppender EnhancedPatternLayout]))
@@ -23,7 +24,9 @@
     (println event)))
 
 (defn log-event [level event]
-  (let [stripped (dissoc event :application)
+  (let [stripped (-> event
+                   (dissoc :application)
+                   (util/dissoc-in [:data :tempfile])) ; Temporary java.io.File set by ring
         jsoned   (json/generate-string stripped)]
     (try
       (unsecure-log-event level jsoned)
