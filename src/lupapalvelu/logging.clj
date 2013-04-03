@@ -2,6 +2,7 @@
   (:use [clojure.tools.logging]
         [clj-logging-config.log4j])
   (:require [sade.env :as env]
+            [cheshire.core :as json]
             [clojure.java.io :as io])
   (:import [org.apache.log4j FileAppender EnhancedPatternLayout]))
 
@@ -22,7 +23,9 @@
     (println event)))
 
 (defn log-event [level event]
-  (try
-    (unsecure-log-event level event)
-    (catch Exception e
-      (error "can't write to event log:" event))))
+  (let [stripped (dissoc event :application)
+        jsoned   (json/generate-string stripped)]
+    (try
+      (unsecure-log-event level jsoned)
+      (catch Exception e
+        (error "can't write to event log:" stripped)))))
