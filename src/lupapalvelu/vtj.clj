@@ -3,12 +3,13 @@
             [lupapalvelu.xml.krysp.reader :refer [get-text strip-xml-namespaces]]
             [sade.xml :refer :all]))
 
+(def encoding "ISO-8859-1")
+
 (defn parse-vtj [s]
-  (let [encoding "ISO-8859-1"]
-    (-> s
-      (form-decode encoding)
-      (parse :encoding encoding)
-      strip-xml-namespaces)))
+  (-> s
+    (form-decode encoding)
+    (parse :encoding encoding)
+    strip-xml-namespaces))
 
 (defn extract-vtj [s]
   (let [xml (parse-vtj s)]

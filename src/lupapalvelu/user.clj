@@ -5,6 +5,8 @@
   (:require [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
+            [lupapalvelu.vetuma :as vetuma]
+            [sade.security :as sadesecurity]
             [sade.util :as util]
             [noir.session :as session]))
 
@@ -26,6 +28,22 @@
     (do
       (info "login failed, username:" username)
       (fail :error.login))))
+
+(defcommand "register-user"
+  {:parameters [:stamp :email :password :street :zip :city :phone]}
+  [{data :data}]
+  (if-let [vetuma-data (vetuma/user-by-stamp (:stamp data))]
+    (do
+      (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+      (try
+        (if-let [user (security/create-user (merge data vetuma-data))]
+          (do
+            (future (sadesecurity/send-activation-mail-for user))
+            (ok :id (:_id user)))
+          (fail :error.create-user))
+        (catch IllegalArgumentException e
+          (fail (keyword (.getMessage e))))))
+    (fail :error.create-user)))
 
 (defcommand "change-passwd"
   {:parameters [:oldPassword :newPassword]

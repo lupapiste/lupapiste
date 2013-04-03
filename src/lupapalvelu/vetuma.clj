@@ -6,7 +6,8 @@
         [monger.operators]
         [clj-time.local :only [local-now]]
         [hiccup.form]
-        [clojure.tools.logging])
+        [clojure.tools.logging]
+        [lupapalvelu.core :only [fail]])
   (:require [digest]
             [sade.env :as env]
             [clojure.string :as string]
@@ -20,6 +21,8 @@
 ;;
 ;; Configuration
 ;;
+
+(def encoding "ISO-8859-1")
 
 (def request-mac-keys  [:rcvid :appid :timestmp :so :solist :type :au :lg :returl :canurl :errurl :ap #_:extradata :appname :trid])
 (def response-mac-keys [:rcvid :timestmp :so :userid :lg :returl :canurl :errurl :subjectdata :extradata :status :trid #_:vtjdata])
@@ -75,7 +78,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn- mac [data]  (-> data digest/sha-256 .toUpperCase))
+(defn- mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->
@@ -89,10 +92,10 @@
 (defn- with-mac [m]
   (merge m {:mac (mac-of m request-mac-keys)}))
 
-(defn- mac-verified [m]
-  (if (= (:mac m) (mac-of m response-mac-keys))
+(defn- mac-verified [{:keys [mac] :as m}]
+  (if (= mac (mac-of m response-mac-keys))
     m
-    (do (error "invalid mac:" m)
+    (do (error "invalid mac: " (dissoc m :key))
       (throw (IllegalArgumentException. "invalid mac.")))))
 
 ;;
@@ -155,7 +158,7 @@
 (defn- field [[k v]]
   (hidden-field k v))
 
-(defn- non-local? [paths] (some #(not= -1 (.indexOf % ":")) (vals paths)))
+(defn- non-local? [paths] (some #(not= -1 (.indexOf (or % "") ":")) (vals paths)))
 
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
@@ -173,7 +176,7 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/api/vetuma" {:keys [success, cancel, error] :or {success "" cancel "" error ""} :as data}
+(defpage "/api/vetuma" {:keys [success, cancel, error] :as data}
   (let [paths     {:success success :error error :cancel cancel}
         sessionid (session-id)]
     (if (non-local? paths)
@@ -193,21 +196,28 @@
                logged)
         data (mongo/update-one-and-return :vetuma {:sessionid (session-id)} {$set {:user user}})
         uri  (get-in data [:paths :success])]
-    (redirect uri)))
+    (if uri
+      (redirect uri)
+      (redirect (str (host) "/app/fi/welcome#!/register2")))))
 
-(defpage [:post "/api/vetuma/:status"] {status :status}
+(defpage [:any "/api/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
         return-uri (get-in data [:paths (keyword status)])]
-    (redirect return-uri)))
+    (if return-uri
+      (redirect return-uri)
+      (redirect (str (host) "/app/fi/welcome#!/register/" status)))))
 
 (defpage "/api/vetuma/user" []
   (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
         user (-> data :user)]
     (json user)))
 
+(defn user-by-stamp [stamp]
+  (when-let [data (mongo/select-one :vetuma {:user.stamp stamp})]
+    (mongo/remove-many :vetuma {:_id (:id data)})
+    (:user data)))
+
 (defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
-  (let [data (mongo/select-one :vetuma {:user.stamp stamp})
-        user (-> data :user)
-        id   (:id data)]
-    (mongo/remove-many :vetuma {:_id id})
-    (json user)))
+  (if-let [user (user-by-stamp stamp)]
+    (json user)
+    (fail :error.unknown)))
