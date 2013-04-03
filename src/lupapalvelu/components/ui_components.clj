@@ -87,17 +87,17 @@
                   :js ["create.js"]
                   :html ["create.html"]}
 
-   :applicant    {:depends [:common :map :applications :application :attachment
-                            :docgen :create :mypage :debug :authenticated]
+   :applicant    {:depends [:common :authenticated :map :applications :application :attachment
+                            :docgen :create :mypage :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :map :applications :application :attachment
-                            :docgen :create :mypage :debug :authenticated]
+   :authority    {:depends [:common :authenticated :map :applications :application :attachment
+                            :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :mypage :debug :authenticated]
+   :authority-admin {:depends [:common :authenticated :mypage :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
@@ -106,7 +106,7 @@
              :html ["tree.html"]
              :css ["tree.css"]}
 
-   :admin   {:depends [:common :map :mypage :debug :authenticated]
+   :admin   {:depends [:common :authenticated :map :mypage :debug]
              :js ["admin.js"]
              :html ["index.html" "admin.html"]}
 
