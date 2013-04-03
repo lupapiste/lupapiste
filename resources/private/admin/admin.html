@@ -34,7 +34,7 @@
         </thead>
         <tbody data-bind="foreach: actions.data">
           <tr>
-            <td data-bind="attr: {class: $data.verified !== undefined ? 'btn-primary' : 'btn-decline'}">
+            <td data-bind="attr: {class: $data.verified === true ? 'btn-primary' : 'btn-decline'}">
             </td>
             <td data-bind="text: name"></td>
             <td data-bind="text: type"></td>
