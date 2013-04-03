@@ -83,42 +83,42 @@
       </div>
 
       <div class="attachment-file-conversation" data-bind="with: $root.comment">
-          <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
-            <table class="table table-striped">
-              <tbody data-bind="foreach: comments">
-                <tr class="comment" data-bind="attr: {'class': 'comment ' + $parent.category($data)}">
-                  <td class="commentParty">
-                    <span class="date" data-bind="dateTimeString: created"></span><br />
-                    <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
-                    <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-                  </td>
-                  <td class="comment-text">
-                    <span data-bind="if: $parent.category($data) == 'category-new-attachment-version'" class="new-attachment-version-details">
-                       <span data-bind="ltext: 'newAttachmentVersion'"></span> <span data-bind="version: target.version"></span>:
-                         <a data-bind="text: target.filename, attr: {href: '/api/download-attachment/' + target.fileId()}"></a>
-                    </span>
-                    <span data-bind="text: text"></span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <form>
-              <textarea
-                data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-                id="attachment.commentText"
-                class="conversation-input"
-                rows="3">
-              </textarea>
-              <button
-                  data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
-                  id="attachment.addComment"
-                  type="submit"
-                  class="btn btn-primary">
-                Lähetä viesti
-              </button>
-            </form>
-          </div>
+        <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
+        <table class="table table-striped">
+          <tbody data-bind="foreach: comments">
+            <tr class="comment" data-bind="attr: {'class': 'comment ' + $parent.category($data)}">
+              <td class="commentParty">
+                <span class="date" data-bind="dateTimeString: created"></span><br />
+                <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
+                <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
+              </td>
+              <td class="comment-text">
+                <span data-bind="if: $parent.category($data) == 'category-new-attachment-version'" class="new-attachment-version-details">
+                   <span data-bind="ltext: 'newAttachmentVersion'"></span> <span data-bind="version: target.version"></span>:
+                     <a data-bind="text: target.filename, attr: {href: '/api/download-attachment/' + target.fileId()}"></a>
+                </span>
+                <span data-bind="text: text"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <form>
+          <textarea
+            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+            id="attachment.commentText"
+            class="conversation-input"
+            rows="3">
+          </textarea>
+          <button
+              data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
+              id="attachment.addComment"
+              type="submit"
+              class="btn btn-primary">
+            Lähetä viesti
+          </button>
+        </form>
       </div>
+    </div>
 
   </section>
 </body>

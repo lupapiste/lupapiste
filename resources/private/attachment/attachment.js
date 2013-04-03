@@ -222,9 +222,11 @@ var attachment = (function() {
     approveModel.setAttachmentId(attachmentId);
 
     authorizationModel.refresh(application);
+    pageutil.hideAjaxWait();
   }
 
   hub.onPageChange("attachment", function(e) {
+    pageutil.showAjaxWait();
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
     repository.load(applicationId);
