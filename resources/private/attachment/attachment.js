@@ -167,7 +167,7 @@ var attachment = (function() {
            attachmentId:    model.attachmentId(),
            attachmentType:  attachmentType})
         .success(function(e) {
-          debug("Updated attachmentType:", e);
+          model.name("attachmentType." + attachmentType);
         })
         .call();
     }
