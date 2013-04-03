@@ -196,10 +196,11 @@ var attachment = (function() {
     model.attachmentType(type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
-    attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'),
-        application.allowedAttachmentTypes,
-        model.attachmentType(),
-        function(e) {model.attachmentType($(e.target).val());});
+    // Knockout works poorly with dynamic options.
+    // To avoid headaches, init the select and update the ko model manually.
+    var selectList$ = $("#attachment-type-select");
+    attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
+    selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
     model.application.id(applicationId);
     model.application.title(application.title);
