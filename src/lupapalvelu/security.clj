@@ -106,3 +106,9 @@
   (or
     (get-user-by-email email)
     (create-any-user {:email email})))
+
+(defn authority? [{:keys [role]}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{:keys [role]}]
+  (= :applicant (keyword role)))

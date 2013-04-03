@@ -22,6 +22,17 @@
     (fact (summary nil) => nil)
     (fact (summary user) => (just (dissoc user :private)))))
 
+(facts "roles"
+  (fact "authority"
+    (authority? {:role "authority"}) => true
+    (authority? {:role :authority}) => true
+    (authority? {}) => false)
+  (fact "applicant"
+    (applicant? {:role "applicant"}) => true
+    (applicant? {:role :applicant}) => true
+    (applicant? {}) => false))
+
+
 #_(facts
   (against-background
     (session/get :user) => :session-user
