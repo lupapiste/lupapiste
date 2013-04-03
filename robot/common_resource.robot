@@ -189,7 +189,7 @@ As Solitaadmin
   Solitaadmin logs in
 
 Mikko logs in
-  Applicant logs in  mikko@example.com  mikko69  Mikko Intonen
+  Applicant logs in  mikko@example.com  mikko699  Mikko Intonen
 
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
