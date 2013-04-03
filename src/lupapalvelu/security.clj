@@ -18,7 +18,7 @@
   "returns common information about the user or nil"
   [user]
   (when user
-    (util/sub-map user [:id :username :firstName :lastName :role])))
+    (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn login
   "returns non-private information of enabled user with the username and password"
@@ -111,3 +111,9 @@
   (or
     (get-user-by-email email)
     (create-any-user {:email email})))
+
+(defn authority? [{:keys [role]}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{:keys [role]}]
+  (= :applicant (keyword role)))
