@@ -248,14 +248,13 @@
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]}
-  [{:keys [user created data] :as command}]
-  (if (or (security/applicant? user)
-        (and (:municipality user) (= (:municipality data) (:municipality user))))
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+  (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
     (let [user-summary  (security/summary user)
           id            (mongo/create-id)
           owner         (role user :owner :type :owner)
-          op            (keyword (:operation data))
-          info-request? (if (:infoRequest data) true false)
+          op            (keyword operation)
+          info-request? (not (nil? infoRequest))
           state         (if (or info-request? (security/authority? user)) :open :draft)
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
       (mongo/insert :applications {:id            id
@@ -265,18 +264,18 @@
                                    :infoRequest   info-request?
                                    :initialOp     op
                                    :state         state
-                                   :municipality  (:municipality data)
-                                   :location      {:x (->double (:x data)) :y (->double (:y data))}
-                                   :address       (:address data)
-                                   :propertyId    (:propertyId data)
-                                   :title         (:address data)
+                                   :municipality  municipality
+                                   :location      {:x (->double x) :y (->double y)}
+                                   :address       address
+                                   :propertyId    propertyId
+                                   :title         address
                                    :auth          [owner]
                                    :documents     (if info-request? [] (make-documents user created nil op))
                                    :attachments   (if info-request? [] (make-attachments created op))
                                    :allowedAttachmentTypes (if info-request?
                                                              [[:muut [:muu]]]
                                                              (partition 2 attachment/attachment-types))
-                                   :comments      (map make-comment (:messages data))
+                                   :comments      (map make-comment messages)
                                    :permitType    (permit-type-from-operation op)})
       (ok :id id))
     (fail :error.unauthorized)))
