@@ -1,1 +1,1 @@
-error.password.minlength: Pituus v‰hint‰‰n 8 merkki‰
+error.password.minlength: Pituus v√§hint√§√§n 8 merkki√§
