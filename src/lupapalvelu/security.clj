@@ -17,7 +17,7 @@
   "returns common information about the user or nil"
   [user]
   (when user
-    (util/sub-map user [:id :username :firstName :lastName :role])))
+    (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn login
   "returns non-private information of enabled user with the username and password"

@@ -13,8 +13,9 @@
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
 
+;; TODO: count error trys!
 (defcommand "login"
-  {:parameters [:username :password]}
+  {:parameters [:username :password] :verified false}
   [{{:keys [username password]} :data}]
   (if-let [user (security/login username password)]
     (do
@@ -61,16 +62,16 @@
         (warn "Password change: failed: old password does not match, user-id:" user-id)
         (fail :mypage.old-password-does-not-match)))))
 
-(defquery "user" {:authenticated true} [{user :user}] (ok :user user))
+(defquery "user" {:authenticated true :verified true} [{user :user}] (ok :user user))
 
 (defcommand "save-user-info"
   {:parameters [:firstName :lastName :street :city :zip :phone]
-   :authenticated true}
-  [{data :data user :user}]
-  (let [user-id (:id user)]
-    (mongo/update-by-id
-      :users
-      user-id
-      {$set (util/sub-map data [:firstName :lastName :street :city :zip :phone])})
-    (session/put! :user (security/get-non-private-userinfo user-id))
-    (ok)))
+   :authenticated true
+   :verified true}
+  [{data :data {user-id :id} :user}]
+  (mongo/update-by-id
+    :users
+    user-id
+    {$set (select-keys data [:firstName :lastName :street :city :zip :phone])})
+  (session/put! :user (security/get-non-private-userinfo user-id))
+  (ok))
