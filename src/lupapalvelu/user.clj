@@ -33,14 +33,15 @@
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]
    :verified   true}
-  [{data :data}]
-  (if-let [vetuma-data (vetuma/user-by-stamp (:stamp data))]
+  [{{:keys [stamp] :as data} :data}]
+  (if-let [vetuma-data (vetuma/get-user stamp)]
     (do
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (try
         (if-let [user (security/create-user (merge data vetuma-data))]
           (do
             (future (sadesecurity/send-activation-mail-for user))
+            (vetuma/consume-user stamp)
             (ok :id (:_id user)))
           (fail :error.create-user))
         (catch IllegalArgumentException e

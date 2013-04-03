@@ -212,12 +212,22 @@
         user (-> data :user)]
     (json user)))
 
-(defn user-by-stamp [stamp]
-  (when-let [data (mongo/select-one :vetuma {:user.stamp stamp})]
-    (mongo/remove-many :vetuma {:_id (:id data)})
-    (:user data)))
+;;
+;; public api
+;;
+
+(defn- get-data [stamp]
+  (mongo/select-one :vetuma {:user.stamp stamp}))
+
+(defn get-user [stamp]
+  (:user (get-data stamp)))
+
+(defn consume-user [stamp]
+  (when-let [user (get-data stamp)]
+    (mongo/remove-many :vetuma {:_id (:id user)})
+    (:user user)))
 
 (defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
-  (if-let [user (user-by-stamp stamp)]
+  (if-let [user (consume-user stamp)]
     (json user)
     (fail :error.unknown)))
