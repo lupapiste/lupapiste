@@ -19,6 +19,14 @@
   // ["min", "max", "pattern", "step", "date", "dateISO", "digit", "phoneUS", "notEqual", "unique"];
   ko.validation.localize(loc.getErrorMessages());
 
+  ko.validation.rules['validPassword'] = {
+      validator: function (val) {
+          return val && util.isValidPassword(val);
+      },
+      message: loc("error.password.minlength")
+  };
+  ko.validation.registerExtenders();
+  
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());

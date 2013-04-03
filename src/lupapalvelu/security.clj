@@ -2,7 +2,8 @@
   (:use [monger.operators]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
-            [sade.util :as util])
+            [sade.util :as util]
+            [sade.env :as env])
   (:import [org.mindrot.jbcrypt BCrypt]
            [com.mongodb MongoException MongoException$DuplicateKey]))
 
@@ -17,7 +18,7 @@
   "returns common information about the user or nil"
   [user]
   (when user
-    (util/sub-map user [:id :username :firstName :lastName :role])))
+    (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn login
   "returns non-private information of enabled user with the username and password"
@@ -44,6 +45,10 @@
 (defn- random-password []
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
+
+; length should match the length in util.js
+(defn valid-password? [password]
+  (>= (count password) (get-in env/config [:password :minlength])))
 
 (defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
   (let [salt              (dispense-salt)
@@ -106,3 +111,9 @@
   (or
     (get-user-by-email email)
     (create-any-user {:email email})))
+
+(defn authority? [{:keys [role]}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{:keys [role]}]
+  (= :applicant (keyword role)))

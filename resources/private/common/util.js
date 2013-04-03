@@ -11,9 +11,29 @@ var util = (function() {
                       return m; },
                     {}); 
   }
+  
+  function isValidPassword(password) {
+    return password.length >= LUPAPISTE.config.passwordMinLength;
+  }
+  
+  function getPwQuality(password) {
+    var l = password.length;
+    if (l < 7)  { return "poor"; }
+    if (l <= 8)  { return "low"; }
+    if (l <= 10) { return "average"; }
+    if (l <= 12) { return "good"; }
+    return "excellent";
+  }
+  
+  function isValidEmailAddress(val) {
+    return val.indexOf("@") != -1;
+  }
 
   return {
-    fluentify: fluentify
+    fluentify: fluentify,
+    getPwQuality: getPwQuality,
+    isValidEmailAddress: isValidEmailAddress,
+    isValidPassword: isValidPassword
   };
   
 })();
