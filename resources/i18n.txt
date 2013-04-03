@@ -27,3 +27,5 @@ setpw.quality.med: Kohtalainen
 setpw.quality.hi: Hyvä
 setpw.quality.excellent: Erinomainen
 setpw.notSame: Salasana ei täsmää
+
+error.password.minlength: Pituus vähintään 8 merkkiä

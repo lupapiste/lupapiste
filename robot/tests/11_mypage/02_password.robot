@@ -8,11 +8,11 @@ Resource       ../../common_resource.robot
 
 Mikko changes password
   Mikko logs in
-  Change password  mikko69  lamepassword
+  Change password  mikko123  lamepassword
   Logout
 
 Mikko logs in with the old password
-  Login fails  mikko@example.com  mikko69
+  Login fails  mikko@example.com  mikko123
 
 Mikko logs in with the new password
   Login  mikko@example.com  lamepassword
@@ -20,7 +20,7 @@ Mikko logs in with the new password
   Applications page should be open
 
 Mikko changes the password back
-  Change password  lamepassword  mikko69
+  Change password  lamepassword  mikko123
   Logout
   Mikko logs in
 

@@ -17,8 +17,9 @@
 (defn applicationpage-for [role]
   (kebab/->kebab-case role))
 
+;; TODO: count error trys!
 (defcommand "login"
-  {:parameters [:username :password]}
+  {:parameters [:username :password] :verified false}
   [{{:keys [username password]} :data}]
   (if-let [user (security/login username password)]
     (do
@@ -34,15 +35,17 @@
       (fail :error.login))))
 
 (defcommand "register-user"
-  {:parameters [:stamp :email :password :street :zip :city :phone]}
-  [{data :data}]
-  (if-let [vetuma-data (vetuma/user-by-stamp (:stamp data))]
+  {:parameters [:stamp :email :password :street :zip :city :phone]
+   :verified   true}
+  [{{:keys [stamp] :as data} :data}]
+  (if-let [vetuma-data (vetuma/get-user stamp)]
     (do
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (try
         (if-let [user (security/create-user (merge data vetuma-data))]
           (do
             (future (sadesecurity/send-activation-mail-for user))
+            (vetuma/consume-user stamp)
             (ok :id (:_id user)))
           (fail :error.create-user))
         (catch IllegalArgumentException e
@@ -51,10 +54,10 @@
 
 (defcommand "change-passwd"
   {:parameters [:oldPassword :newPassword]
-   :authenticated true}
-  [{{:keys [oldPassword newPassword]} :data user :user}]
-  (let [user-id (:id user)
-        user-data (mongo/by-id :users user-id)]
+   :authenticated true
+   :verified true}
+  [{{:keys [oldPassword newPassword]} :data {user-id :id :as user} :user}]
+  (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
       (do
         (debug "Password change: user-id:" user-id)
@@ -84,18 +87,18 @@
   (resp/status 200 (resp/json {:ok true})))
 
 (defquery "user"
-  {:authenticated true}
+  {:authenticated true :verified true}
   [{user :user}]
   (ok :user user))
 
 (defcommand "save-user-info"
   {:parameters [:firstName :lastName :street :city :zip :phone]
-   :authenticated true}
-  [{data :data user :user}]
-  (let [user-id (:id user)]
-    (mongo/update-by-id
-      :users
-      user-id
-      {$set (util/sub-map data [:firstName :lastName :street :city :zip :phone])})
-    (session/put! :user (security/get-non-private-userinfo user-id))
-    (ok)))
+   :authenticated true
+   :verified true}
+  [{data :data {user-id :id} :user}]
+  (mongo/update-by-id
+    :users
+    user-id
+    {$set (select-keys data [:firstName :lastName :street :city :zip :phone])})
+  (session/put! :user (security/get-non-private-userinfo user-id))
+  (ok))

@@ -93,6 +93,10 @@ Go to page
 Open tab
   [Arguments]  ${name}
   Click by test id  application-open-${name}-tab
+  Tab should be visible  ${name}
+
+Tab should be visible
+  [Arguments]  ${name}
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
@@ -189,7 +193,7 @@ As Solitaadmin
   Solitaadmin logs in
 
 Mikko logs in
-  Applicant logs in  mikko@example.com  mikko69  Mikko Intonen
+  Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen

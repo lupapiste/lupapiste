@@ -27,9 +27,6 @@
     var error$ = $('#register-email-error');
     var loader$ = $("#registerLoader");
     error$.text('');
-    loader$.show();
-
-    $("#register-form div").hide();
 
     ajax.command('register-user', json(m))
       .success(function() {
@@ -39,7 +36,6 @@
       })
       .error(function(e) {
         error$.text(loc(e.text));
-        loader$.hide();
       })
       .call();
     return false;
@@ -67,7 +63,7 @@
     zip: ko.observable().extend({required: true, number: true, maxLength: 5}),
     phone: ko.observable().extend({required: true}),
     email: ko.observable().extend({email: true}),
-    password: ko.observable().extend({minLength: 8}),
+    password: ko.observable().extend({validPassword: true}),
     acceptTerms: ko.observable(),
     disabled: ko.observable(true),
     submit: submit,
