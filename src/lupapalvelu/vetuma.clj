@@ -213,7 +213,7 @@
     (json user)))
 
 ;;
-;; public api
+;; public local api
 ;;
 
 (defn- get-data [stamp]
@@ -226,8 +226,3 @@
   (when-let [user (get-data stamp)]
     (mongo/remove-many :vetuma {:_id (:id user)})
     (:user user)))
-
-#_(defpage "/api/vetuma/stamp/:stamp" {:keys [stamp]}
-  (if-let [user (consume-user stamp)]
-    (json user)
-    (fail :error.unknown)))
