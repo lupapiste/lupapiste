@@ -3,7 +3,7 @@ attachmentType.empty._group_label:
 login.reset-question: Oletko unohtanut salasanasi?
 
 reset.title: Salasanan vaihtaminen
-reset.info: Anna sähköpostiosoitteesi niin lähetämme sinulle salasanan vaihto linkin.
+reset.info: Anna sähköpostiosoitteesi niin lähetämme sinulle salasanan vaihtolinkin.
 reset.email: Sähköposti:
 reset.email-placeholder: etunimi.sukunimi@osoite.fi
 reset.send: Lähetä
