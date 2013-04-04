@@ -224,14 +224,11 @@
                                             :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
         canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
-    (clojure.pprint/pprint canonical)
-    (flush)
     (validate (indent-str xml))
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
     (write-attachments attachments output-dir)
     (write-application-pdf-versions output-dir application lang)
-
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
 

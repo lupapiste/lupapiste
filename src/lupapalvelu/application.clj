@@ -148,9 +148,9 @@
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
         (try (rl-mapping/get-application-as-krysp application (-> command :data :lang))
-         ; (mongo/update
-         ;   :applications {:_id (:id application) :state new-state}
-         ;   {$set {:state :sent}})
+          (mongo/update
+            :applications {:_id (:id application) :state new-state}
+            {$set {:state :sent}})
           (notifications/send-notifications-on-application-state-change application-id host)
           (catch org.xml.sax.SAXParseException e
             (.printStackTrace e)
