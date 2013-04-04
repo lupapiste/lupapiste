@@ -6,10 +6,11 @@
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]]
          [lupapalvelu.document.krysp :only [to-xml-datetime]]
-         [lupapalvelu.mongo :only [download]]
          [lupapalvelu.attachment :only [encode-filename]])
   (:require [sade.env :as env]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.mongo :as mongo])
   )
 
 ;RakVal
@@ -174,16 +175,24 @@
       canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
-  (for [attachment attachments
-        :let [file-id (get-in attachment [:Liite :fileId])
-              file (download file-id)
-              content (:content file)
-              attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name file)))
-              outFile (file attachment-file-name)]]
-    (with-open [out (output-stream outFile)]
-      (copy (content) out))))
+  (doseq [attachment attachments]
+    (let [file-id (get-in attachment [:Liite :fileId])
+          attachment-file (mongo/download file-id)
+          content (:content attachment-file)
+          attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name attachment-file)))
+          attachment-file (file attachment-file-name)]
+      (with-open [out (output-stream attachment-file)
+                  in (content)]
+        (copy in out)))))
 
-(defn get-application-as-krysp [application]
+  (defn- write-application-pdf-versions [output-dir application lang]
+    (let [submitted-file (file (str output-dir "/" (:id application) "_submitted_application.pdf"))
+        current-file (file (str output-dir "/" (:id application) "_current_application.pdf"))
+        submitted-application (mongo/by-id :submitted-applications (:id application))]
+      (ke6666/generate submitted-application lang submitted-file)
+      (ke6666/generate application lang current-file)))
+
+(defn get-application-as-krysp [application lang]
   (let [municipality-code (:municipality application)
         rakennusvalvonta-directory "/rakennus"
         dynamic-part-of-outgoing-directory (str municipality-code rakennusvalvonta-directory)
@@ -200,6 +209,7 @@
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
     (write-attachments attachments output-dir)
+    (write-application-pdf-versions output-dir application lang)
 
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
