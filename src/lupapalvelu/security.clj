@@ -2,8 +2,10 @@
   (:use [monger.operators]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
-            [sade.util :as util])
-  (:import [org.mindrot.jbcrypt BCrypt]))
+            [sade.util :as util]
+            [sade.env :as env])
+  (:import [org.mindrot.jbcrypt BCrypt]
+           [com.mongodb MongoException MongoException$DuplicateKey]))
 
 (defn non-private [map] (dissoc map :private))
 
@@ -16,7 +18,7 @@
   "returns common information about the user or nil"
   [user]
   (when user
-    (util/sub-map user [:id :username :firstName :lastName :role])))
+    (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn login
   "returns non-private information of enabled user with the username and password"
@@ -44,6 +46,10 @@
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
     (apply str (repeatedly 40 #(char (rand-nth ascii-codes))))))
 
+; length should match the length in util.js
+(defn valid-password? [password]
+  (>= (count password) (get-in env/config [:password :minlength])))
+
 (defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
@@ -68,13 +74,22 @@
         new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled municipality)
         new-user          (assoc new-user-base :id id)]
     (info "register user:" (dissoc user :password))
-    (if (= "dummy" (:role old-user))
-      (do
-        (info "rewriting over dummy user:" (:id old-user))
-        (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
-      (do
-        (info "creating new user")
-        (mongo/insert :users new-user)))
+    (try
+      (if (= "dummy" (:role old-user))
+        (do
+          (info "rewriting over dummy user:" (:id old-user))
+          (mongo/update-by-id :users (:id old-user) (assoc new-user :id (:id old-user))))
+        (do
+          (info "creating new user")
+          (mongo/insert :users new-user)))
+      (catch MongoException$DuplicateKey e
+        (warn e)
+        (let [error-code  (condp re-matches (.getMessage e)
+                            #".+personId.+"  "error.duplicate-person-id"
+                            #".+email.+"     "error.duplicate-email"
+                            #".+username.+"  "error.duplicate-email"
+                            #".*"            "error.create-user")]
+          (throw (IllegalArgumentException. error-code)))))
     (get-user-by-email email)))
 
 (defn create-user [user]
@@ -96,3 +111,9 @@
   (or
     (get-user-by-email email)
     (create-any-user {:email email})))
+
+(defn authority? [{:keys [role]}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{:keys [role]}]
+  (= :applicant (keyword role)))

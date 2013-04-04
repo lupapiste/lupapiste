@@ -13,13 +13,6 @@
   (fact (select nil [:a :c]) => [nil nil])
   (fact (select {:a \a :b \b :c \c} nil) => nil))
 
-(facts
-  (fact (sub-map {:a \a :b \b :c \c} [:a :b]) => {:a \a :b \b})
-  (fact (sub-map {:a \a :b \b :c \c} [:a :x]) => {:a \a :x nil})
-  (fact (sub-map {:a \a :b \b :c \c} [:a :x] {:x \x}) => {:a \a :x \x})
-  (fact (sub-map {:a \a :b \b :c \c} []) => {})
-  (fact (sub-map nil [:a :x] {:x \x}) => {:a nil :x \x}))
-
 (facts "deep-merge-with"
   (fact
     (deep-merge-with + {:a {:b {:c 1 :d {:x 1 :y 2}} :e 3} :f 4}

@@ -22,7 +22,7 @@ Mikko adds txt attachment without comment
 
 Mikko opens attachment details
   [Tags]  attachments
-  Open attachment details
+  Open attachment details  muut.muu
 
 Mikko does not see Reject-button
   [Tags]  attachments
@@ -46,17 +46,24 @@ Mikko adds txt attachment with comment
 
 Mikko see that attachment is for authority
   [Tags]  attachments
-  Wait Until  Attachment state should be  requires_authority_action
+  Wait Until  Attachment state should be  muut.muu  requires_authority_action
 
 Mikko adds comment
   [Tags]  attachments
-  Open attachment details
+  Open attachment details  muut.muu
   Input text  attachment.commentText  mahtava liite!
   Click button  attachment.addComment
 
 Comment is added
   [Tags]  attachments
   Wait Until  Comment count is  2
+
+Change attachment type
+  Select From List  attachment-type-select  hakija.valtakirja
+  Wait Until  Element Should Not Be Visible  attachment-type-select-loader
+  Click Link  Palaa hakemukseen
+  Tab should be visible  attachments
+  Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Switch user
   [Tags]  attachments
@@ -70,11 +77,11 @@ Sonja goes to attachment tab
 
 Sonja see that attachment is for authority
   [Tags]  attachments
-  Wait Until  Attachment state should be  requires_authority_action
+  Wait Until  Attachment state should be  hakija.valtakirja  requires_authority_action
 
 Sonja opens attachment details
   [Tags]  attachments
-  Open attachment details
+  Open attachment details  hakija.valtakirja
 
 Sonja sees Reject-button which is enabled
   [Tags]  attachments
@@ -120,20 +127,21 @@ Add attachment
   Wait Until Page Contains  Muu liite
 
 Open attachment details
-  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="muut.muu"]
+  [Arguments]  ${type}
+  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Focus  xpath=//a[@data-test-type="muut.muu"]
-  Click element  xpath=//a[@data-test-type="muut.muu"]
+  Focus  xpath=//a[@data-test-type="${type}"]
+  Click element  xpath=//a[@data-test-type="${type}"]
   Wait Until  Element Should Be Visible  test-attachment-file-name
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
   Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
   Element Text Should Be  test-attachment-version  1.0
 
 Attachment state should be
-  [Arguments]  ${state}
+  [Arguments]  ${type}  ${state}
   ## Fragile: assumes there is only one element that has data-test-state
-  ${STATE_ATTR_VALUE} =  Get Element Attribute  xpath=//*[@data-test-state and @data-test-type="muut.muu"]@data-test-state
+  ${STATE_ATTR_VALUE} =  Get Element Attribute  xpath=//*[@data-test-state and @data-test-type="${type}"]@data-test-state
   Log  ${STATE_ATTR_VALUE}
   Should Be Equal  ${STATE_ATTR_VALUE}  ${state}
 

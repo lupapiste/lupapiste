@@ -2,6 +2,7 @@
   "use strict";
 
   var keys = ['stamp', 'personId', 'firstname', 'lastname', 'email', 'street', 'city', 'zip', 'phone', 'password', 'confirmPassword', 'street', 'zip', 'city'];
+  var model;
 
   function json(model) {
     var d = {};
@@ -23,27 +24,34 @@
   }
 
   function submit(m) {
+    var error$ = $('#register-email-error');
+    var loader$ = $("#registerLoader");
+    error$.text('');
+
     ajax.command('register-user', json(m))
       .success(function() {
-        $('#register-email-error').text('&nbsp;');
         confirmModel.email = model().email();
         reset(model());
         window.location.hash = "!/register3";
       })
       .error(function(e) {
-        // FIXME: DIRTY HACKS
-        if (e.text.indexOf('lupapalvelu.users.$email_1') !== -1) {
-          $('#register-email-error').text('sahkopostiosoite on jo varattu.');
-        }
-        if (e.text.indexOf('duplicate key error index: lupapalvelu.users.$personId_1') !== -1) {
-          $('#register-email-error').text('hetu on jo varattu.');
-        }
-        error(e.text);
-        // TODO: now what?
+        error$.text(loc(e.text));
       })
       .call();
     return false;
   }
+
+  function cancel() {
+    LUPAPISTE.ModalDialog.open("#dialog-confirm-cancel-register");
+  }
+
+  $(function() {
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-cancel-register", loc("areyousure"), loc("register.confirm-cancel"),
+      loc("yes"), function() {
+        reset(model());
+        window.location.hash = "";
+      }, loc("no"));
+  });
 
   var plainModel = {
     personId: ko.observable(),
@@ -55,12 +63,14 @@
     zip: ko.observable().extend({required: true, number: true, maxLength: 5}),
     phone: ko.observable().extend({required: true}),
     email: ko.observable().extend({email: true}),
-    password: ko.observable().extend({minLength: 6}),
+    password: ko.observable().extend({validPassword: true}),
     acceptTerms: ko.observable(),
     disabled: ko.observable(true),
     submit: submit,
+    cancel: cancel,
     reset: reset
   };
+  plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
 
   var confirmModel = {
     email: ""
@@ -69,15 +79,13 @@
   function StatusModel() {
     var self = this;
     self.subPage = ko.observable();
-
     self.isCancel = ko.computed(function() { return self.subPage() === 'cancel'; });
     self.isError = ko.computed(function() { return self.subPage() === 'error'; });
   }
 
   var statusModel = new StatusModel();
 
-  plainModel.confirmPassword = ko.observable().extend({equal: plainModel.password});
-  var model = ko.validatedObservable(plainModel);
+  model = ko.validatedObservable(plainModel);
   model.isValid.subscribe(function(valid) {
     model().disabled(!valid || !model().acceptTerms());
   });
@@ -107,16 +115,24 @@
   });
 
   hub.onPageChange('register2', function() {
-    $.get('/api/vetuma/user', function(data) {
-      model().personId(data.userid);
-      model().firstname(data.firstname);
-      model().lastname(data.lastname);
-      model().stamp(data.stamp);
-      if(data.city) { model().city(data.city); }
-      if(data.zip) { model().zip(data.zip); }
-      if(data.street) { model().street(data.street); }
-      ko.applyBindings(model, $('#register2')[0]);
-    });
+    ajax.get('/api/vetuma/user')
+      .raw(true)
+      .success(function(data) {
+        if (data) {
+          model().personId(data.userid);
+          model().firstname(data.firstname);
+          model().lastname(data.lastname);
+          model().stamp(data.stamp);
+          if(data.city) { model().city(data.city); }
+          if(data.zip) { model().zip(data.zip); }
+          if(data.street) { model().street(data.street); }
+          ko.applyBindings(model, $('#register2')[0]);
+        } else {
+          window.location.hash = "!/register";
+        }
+      })
+      .error(function(e){$('#register-email-error').text(loc(e.text));})
+      .call();
   });
 
   hub.onPageChange('register3', function() {

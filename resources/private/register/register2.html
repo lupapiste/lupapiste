@@ -3,11 +3,12 @@
 <body>
   <section class="page container" id="register2">
     <div class="container">
-      <form>
+      <form id="register-form">
         <h1 data-bind="ltext: 'register.header'"></h1>
         <p data-bind="ltext: 'register.personal-info'"></p>
 
-        <span id="register-email-error" class="error-message">&nbsp;</span>
+        <span id="register-email-error" class="error-message"></span>
+
         <div class="form-group">
           <div class="form-entry">
             <label class="form-label" data-bind="ltext: 'userinfo.firstName'">Etunimi</label>
@@ -42,7 +43,7 @@
         </div>
         <div class="form-group">
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'userinfo.email'">Sähköpostiosoite (samalla <b>käyttäjätunnus</b>)</label>
+            <label class="form-label" data-bind="ltext: 'register.email'">Sähköpostiosoite (samalla käyttäjätunnus)</label>
             <input class="form-input text long" id="test-register-email" data-bind="value: email, valueUpdate: 'afterkeydown'" type="email" required="required" />
           </div>
           <div class="form-entry">
@@ -65,10 +66,11 @@
         </div>
         <div>
           <button id="test-register-submit" data-bind="disable: disabled, click: submit, ltext: 'register.register-action'" type="submit" class="btn btn-primary">Rekisteröidy</button>
-          <button data-bind="click: reset, ltext: 'cancel'" type="button" class="btn">Peruuta</button>
+          <button data-bind="click: cancel, ltext: 'cancel'" type="button" class="btn">Peruuta</button>
         </div>
 
       </form>
+      <div id="registerLoader" style="display:none"><img src="/img/ajax-loader.gif" alt="..."/></div>
     </div>
   </section>
 </body>

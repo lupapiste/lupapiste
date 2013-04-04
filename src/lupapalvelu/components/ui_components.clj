@@ -13,8 +13,10 @@
 
 (defn- conf []
   (let [js-conf {:maps (:maps env/config)
-                 :fileExtensions mime/allowed-extensions}
+                 :fileExtensions mime/allowed-extensions
+                 :passwordMinLength (get-in env/config [:password :minlength]) }
         data (json/generate-string js-conf)]
+
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
 
 (defn loc->js []
@@ -44,12 +46,12 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "comment.js" "authorization.js" "datepicker.js" "municipalities.js"]
+                       "ko.init.js" "dialog.js" "datepicker.js"]
                   :css ["css/main.css"]
                   :html ["error.html"]}
 
-   :buildinfo    {:depends [:jquery]
-                  :js ["buildinfo.js"]}
+   :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
+                   :js ["comment.js" "authorization.js" "municipalities.js"]}
 
    :invites      {:depends [:common]
                   :js ["invites.js"]}
@@ -85,17 +87,17 @@
                   :js ["create.js"]
                   :html ["create.html"]}
 
-   :applicant    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage :debug]
+   :applicant    {:depends [:common :authenticated :map :applications :application :attachment
+                            :docgen :create :mypage :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :map :applications :application :attachment
-                            :buildinfo :docgen :create :mypage :debug]
+   :authority    {:depends [:common :authenticated :map :applications :application :attachment
+                            :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :buildinfo :mypage :debug]
+   :authority-admin {:depends [:common :authenticated :mypage :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
 
@@ -104,7 +106,7 @@
              :html ["tree.html"]
              :css ["tree.css"]}
 
-   :admin   {:depends [:common :map :buildinfo :mypage :debug]
+   :admin   {:depends [:common :authenticated :map :mypage :debug]
              :js ["admin.js"]
              :html ["index.html" "admin.html"]}
 
@@ -115,16 +117,16 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :register :buildinfo :debug]
+   :welcome {:depends [:common :register :debug]
              :js ["welcome.js" "login.js"]
-             :html ["login.html" "index.html"]}
+             :html ["index.html" "login.html"]}
 
    :mypage  {:depends [:common]
              :js ["mypage.js"]
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :about {:depends [:common :buildinfo :debug]
+   :about {:depends [:common :debug]
            :js ["about.js"]
            :html ["terms.html" "index.html"]}})
 
