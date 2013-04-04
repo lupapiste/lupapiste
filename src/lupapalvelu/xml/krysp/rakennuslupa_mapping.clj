@@ -162,35 +162,26 @@
                                           title (str (:title application) " : " type)
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-
                                           link (str begin-of-link attachment-file-name)]]
-                                 {:Liite
-                                  {:kuvaus title
-                                   :linkkiliitteeseen link
-                                   :muokkausHetki (to-xml-datetime (:modified attachment))
-                                   :versionumero 1
-                                   :tyyppi type
-                                   :fileId file-id}})]
+                                {:Liite
+                                 {:kuvaus title
+                                  :linkkiliitteeseen link
+                                  :muokkausHetki (to-xml-datetime (:modified attachment))
+                                  :versionumero 1
+                                  :tyyppi type
+                                  :fileId file-id}})]
     (when (not-empty canonical-attachments)
       canonical-attachments)))
 
-(defn- write-file [content attachment-file-name]
-  (let [outFile (file attachment-file-name)]
-  (with-open [out (output-stream outFile)]
-      (copy (content) out))
-  ))
-
 (defn- write-attachments [attachments output-dir]
-  (println "===========attachments=======================")
-  (clojure.pprint/pprint attachments)
-  (println (count attachments))
-
   (for [attachment attachments
-          :let [file-id (get-in attachment [:Liite :fileId])
-                file (download file-id)
-                content (:content file)
-                attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name file)))]]
-      (write-file content attachment-file-name)))
+        :let [file-id (get-in attachment [:Liite :fileId])
+              file (download file-id)
+              content (:content file)
+              attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name file)))
+              outFile (file attachment-file-name)]]
+    (with-open [out (output-stream outFile)]
+      (copy (content) out))))
 
 (defn get-application-as-krysp [application]
   (let [municipality-code (:municipality application)
@@ -206,9 +197,9 @@
         canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
     (validate (indent-str xml))
-    (print (write-attachments attachments output-dir))
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
+    (write-attachments attachments output-dir)
 
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
