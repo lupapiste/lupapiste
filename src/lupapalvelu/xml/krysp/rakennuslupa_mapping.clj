@@ -152,11 +152,14 @@
 (defn- get-file-name-on-server [file-id file-name]
   (str file-id "_" (encode-filename file-name)))
 
-(defn- get-attachments-as-canonical [application dynamic-part-of-outgoing-directory]
+(defn- get-submitted-filename [application-id]
+  (str application-id "_submitted_application.pdf"))
+
+(defn- get-current-filename [application-id]
+  (str application-id "_current_application.pdf"))
+
+(defn- get-attachments-as-canonical [application begin-of-link ]
   (let [attachments (:attachments application)
-        fileserver-address (:fileserver-address env/config)
-        fileserver-root-directory (:fileserver-root-directory env/config)
-        begin-of-link (str fileserver-address "/" fileserver-root-directory "/" dynamic-part-of-outgoing-directory "/")
         canonical-attachments (for [attachment attachments
                                     :when (:latestVersion attachment)
                                     :let [type (get-in attachment [:type :type-id] )
@@ -185,12 +188,13 @@
                   in (content)]
         (copy in out)))))
 
-  (defn- write-application-pdf-versions [output-dir application lang]
-    (let [submitted-file (file (str output-dir "/" (:id application) "_submitted_application.pdf"))
-        current-file (file (str output-dir "/" (:id application) "_current_application.pdf"))
+(defn- write-application-pdf-versions [output-dir application lang]
+  (let [id (:id application)
+        submitted-file (file (str output-dir "/" (:id application) (get-submitted-filename id)))
+        current-file (file (str output-dir "/"  (get-current-filename id)))
         submitted-application (mongo/by-id :submitted-applications (:id application))]
-      (ke6666/generate submitted-application lang submitted-file)
-      (ke6666/generate application lang current-file)))
+    (ke6666/generate submitted-application lang submitted-file)
+    (ke6666/generate application lang current-file)))
 
 (defn get-application-as-krysp [application lang]
   (let [municipality-code (:municipality application)
@@ -202,9 +206,26 @@
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application)
-        attachments (get-attachments-as-canonical application dynamic-part-of-outgoing-directory)
-        canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments)
+        fileserver-address (:fileserver-address env/config)
+        fileserver-root-directory (:fileserver-root-directory env/config)
+        begin-of-link (str fileserver-address "/" fileserver-root-directory "/" dynamic-part-of-outgoing-directory "/")
+        attachments (get-attachments-as-canonical application begin-of-link)
+        attachments-with-generated-pdfs (conj attachments {:Liite
+                                          {:kuvaus "Application when submitted"
+                                           :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
+                                           :muokkausHetki (to-xml-datetime (:submitted application))
+                                           :versionumero 1
+                                           :tyyppi "Hakemus vireilletullessa"}}
+                                          {:Liite
+                                           {:kuvaus "Application when sent from Lupapiste"
+                                            :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
+                                            :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
+                                            :versionumero 1
+                                            :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
+        canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
+    (clojure.pprint/pprint canonical)
+    (flush)
     (validate (indent-str xml))
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
