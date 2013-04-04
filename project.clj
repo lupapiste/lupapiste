@@ -33,7 +33,8 @@
                                   [dumbster/dumbster "1.6" :exclusions [[javax.mail/mail] [javax.activation/activation]]]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
-                             [lein-nitpicker "0.3.0"]]}
+                             [lein-nitpicker "0.3.0"]
+                             [lein-hgnotes "0.1.0"]]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["itest" "stest"]}
