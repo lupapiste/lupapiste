@@ -362,6 +362,8 @@
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
 
+  (defjson "/dev/hgnotes" [] env/hgnotes)
+
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
 
