@@ -68,7 +68,7 @@
     });
     
     self.propertyId.subscribe(function(id) {
-      var code = id ? id.substring(0, 3) : null;
+      var code = id ? id.split("-")[0].substring(0, 3) : null;
       self
         .municipalityCode(code)
         .municipalityName(code ? loc("municipality", code) : null)
@@ -223,7 +223,7 @@
         y: self.y(),
         x: self.x(),
         address: self.addressString(),
-        propertyId: self.propertyId(),
+        propertyId: util.prop.toDbFormat(self.propertyId()),
         messages: isBlank(self.message()) ? [] : [self.message()],
         municipality: self.municipality().id
       })
@@ -246,7 +246,7 @@
     $("#create").applyBindings(model);
 
     $("#create-search")
-      .keypress(function(e) {
+      .keyup(function(e) {
         if (e.which === 13) model.searchNow();
       })
       .autocomplete({
