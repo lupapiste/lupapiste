@@ -133,9 +133,9 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', operation())"></div>
       <div data-bind="html: loc('operations', operation(), 'desc')"></div>
       
-      <div class="municipality-links" data-bind="visible: municipality().links">
+      <div class="municipality-links" data-bind="visible: municipalityLinks">
         <div data-bind="ltext: 'municipality.links'"></div>
-        <ul data-bind="foreach: municipality().links">
+        <ul data-bind="foreach: municipalityLinks">
           <li>
             <a data-bind="text: name.fi, attr: {href: url}" href="#" target="_blank"></a>
           </li>
