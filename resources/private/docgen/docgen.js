@@ -70,6 +70,7 @@ var docgen = (function() {
 
       input.className = "form-input " + type + " " + (extraClass || "");
       input.onchange = save;
+
       if (type === "checkbox") {
         input.checked = value;
       } else {
@@ -225,7 +226,13 @@ var docgen = (function() {
 
     function buildRadioGroup(subSchema, model, path, save) {
       var myPath = path.join(".");
-      var myModel = model[subSchema.name] || _.first(subSchema.body).name;
+      var myModel;
+      if(model[subSchema.name] && model[subSchema.name].value) {
+        myModel = model[subSchema.name].value;
+      } else {
+        myModel = _.first(subSchema.body).name;
+      }
+
       var partsDiv = document.createElement("div");
       var span = makeEntrySpan();
 
