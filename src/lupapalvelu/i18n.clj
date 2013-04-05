@@ -61,21 +61,15 @@
   `(binding [loc (localizer ~lang)]
      ~@body))
 
-(defn d [handler request]
-  (println "LANG:" request)
-  (clojure.pprint/pprint request)
-  (println "go!")
-  (let [lang (or (get-in request [:params :lang])
-                 (get-in request [:json :lang])
-                 (get-in request [:user :lang])
-                 "fi")]
-    (binding [*lang* lang
-              loc (localizer lang)]
-      (handler request))))
-
 (defn lang-middleware [handler]
   (fn [request]
-    (d handler request)))
+    (let [lang (or (get-in request [:params :lang])
+                   (get-in request [:json :lang])
+                   (get-in request [:user :lang])
+                   "fi")]
+      (binding [*lang* lang
+                loc (localizer lang)]
+        (handler request)))))
 
 (env/in-dev
 
