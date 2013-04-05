@@ -17,7 +17,7 @@ Mikko sees application in list
   Request should be visible  create-app
 
 Mikko creates a new inforequest
-  Create inforequest  create-info  753  75341600250022  Hoblaa  applications-create-new
+  Create inforequest  create-info  753  753-416-25-22  Hoblaa  applications-create-new
   Wait until  Element text should be  //span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
   Wait until  Element text should be  //span[@data-test-id='inforequest-application-operation']  Asuinrakennuksen rakentaminen
 
@@ -41,20 +41,20 @@ Mikko comes back and sees his application and inforequest
   Request should be visible  create-info
 
 Mikko inspects inforequest and sees his initial comments
-  Open inforequest  create-info  75341600250022
+  Open inforequest  create-info  753-416-25-22
   Wait until  Xpath Should Match X Times  //section[@id='inforequest']//table[@data-test-id='comments-table']//td[text()='Hoblaa']  1
 
 Mikko creates new application
   Go to page  applications
   Wait until  Element should be visible  xpath=//*[@data-test-id='applications-create-new']
-  Create application the fast way  create-app-2  753  75341600250023
+  Create application the fast way  create-app-2  753  753-416-25-22
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info
   Request should be visible  create-app-2
 
 Mikko closes application at Latokuja 3
-  Open application  create-app-2  75341600250023
+  Open application  create-app-2  753-416-25-22
   Close current application
   Wait Until  Request should be visible  create-app
   Wait Until  Request should be visible  create-info
