@@ -1,6 +1,7 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail]]
+        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
@@ -379,4 +380,14 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
+  
+  (defquery "qlang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*))
+  
+  (defcommand "clang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*)))
