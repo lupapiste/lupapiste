@@ -70,6 +70,7 @@ var docgen = (function() {
 
       input.className = "form-input " + type + " " + (extraClass || "");
       input.onchange = save;
+
       if (type === "checkbox") {
         input.checked = value;
       } else {
@@ -104,7 +105,7 @@ var docgen = (function() {
       var span =  makeEntrySpan();
       var type = (subSchema.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[subSchema.size] || "";
-      var input = makeInput(type, myPath, model[subSchema.name], save, sizeClass);
+      var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass);
       setMaxLen(input, subSchema);
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
@@ -128,7 +129,7 @@ var docgen = (function() {
     }
 
     function getModelValue(model, name) {
-      return model[name] ? model[name].value : undefined;
+      return model[name] ? model[name].value : "";
     }
 
     function buildText(subSchema, model, path, save) {
@@ -143,7 +144,7 @@ var docgen = (function() {
 
       input.className = "form-input textarea";
       input.onchange = save;
-      input.value = getModelValue(model, subSchema.name) || "";
+      input.value = getModelValue(model, subSchema.name);
 
       span.appendChild(makeLabel("text", myPath));
       span.appendChild(input);
@@ -153,7 +154,7 @@ var docgen = (function() {
     function buildDate(subSchema, model, path, save) {
       var lang = loc.getCurrentLanguage();
       var myPath = path.join(".");
-      var value = model[subSchema.name] || "";
+      var value = getModelValue(model, subSchema.name);
       var span = makeEntrySpan();
 
       span.appendChild(makeLabel("date", myPath));
@@ -174,7 +175,7 @@ var docgen = (function() {
     function buildSelect(subSchema, model, path, save) {
       var myPath = path.join(".");
       var select = document.createElement("select");
-      var selectedOption = model[subSchema.name] || "";
+      var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan();
 
@@ -225,7 +226,13 @@ var docgen = (function() {
 
     function buildRadioGroup(subSchema, model, path, save) {
       var myPath = path.join(".");
-      var myModel = model[subSchema.name] || _.first(subSchema.body).name;
+      var myModel;
+      if(model[subSchema.name] && model[subSchema.name].value) {
+        myModel = model[subSchema.name].value;
+      } else {
+        myModel = _.first(subSchema.body).name;
+      }
+
       var partsDiv = document.createElement("div");
       var span = makeEntrySpan();
 
@@ -248,7 +255,7 @@ var docgen = (function() {
     function buildBuildingSelector(subSchema, model, path, save) {
       var myPath = path.join(".");
       var select = document.createElement("select");
-      var selectedOption = model[subSchema.name] || "";
+      var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan();
 
@@ -313,7 +320,7 @@ var docgen = (function() {
       var myPath = path.join(".");
       var myNs = path.slice(0,path.length-1).join(".");
       var select = document.createElement("select");
-      var selectedOption = model[subSchema.name] || "";
+      var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
 
       select.name = myPath;
@@ -397,7 +404,6 @@ var docgen = (function() {
     };
 
     function build(subSchema, model, path, save, partOfChoice) {
-
       var myName = subSchema.name;
       var myPath = path.concat([myName]);
       var builder = builders[subSchema.type] || buildUnknown;
@@ -481,7 +487,11 @@ var docgen = (function() {
 
       if (selectOneOf.length) {
         // Show current selection or the first of the group
-        var myModel = model[SELECT_ONE_OF_GROUP_KEY] || _.first(selectOneOf);
+        var myModel = _.first(selectOneOf);
+        if (model[SELECT_ONE_OF_GROUP_KEY]) {
+          myModel = model[SELECT_ONE_OF_GROUP_KEY].value;
+        }
+        
         toggleSelectedGroup(myModel);
 
         var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";

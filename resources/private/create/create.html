@@ -135,7 +135,7 @@
       
       <div class="municipality-links" data-bind="visible: municipality() && municipality().links">
         <div data-bind="ltext: 'municipality.links'"></div>
-        <ul data-bind="foreach: municipality().links">
+        <ul data-bind="if: municipality(), foreach: municipality().links">
           <li>
             <a data-bind="text: name.fi, attr: {href: url}" href="#" target="_blank"></a>
           </li>
