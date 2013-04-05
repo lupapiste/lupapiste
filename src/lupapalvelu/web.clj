@@ -51,15 +51,16 @@
 
 (defn parse-json-body-middleware [handler]
   (fn [request]
-    (handler (assoc request :json
-                    (if (s/starts-with (:content-type request) "application/json")
+    (let [json-body (if (s/starts-with (:content-type request) "application/json")
                       (if-let [body (:body request)]
                         (-> body
                           (io/reader :encoding (or (:character-encoding request) "utf-8"))
                           json/parse-stream
                           keywordize-keys)
-                        {})
-                      nil)))))
+                        {}))
+          request (assoc request :json json-body)
+          request (if json-body (assoc request :params json-body) request)]
+      (handler request))))
 
 (defn from-json [request]
   (:json request))
