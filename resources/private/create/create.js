@@ -68,11 +68,16 @@
     });
     
     self.propertyId.subscribe(function(id) {
-      var code = id ? id.split("-")[0].substring(0, 3) : null;
-      self
-        .municipalityCode(code)
-        .municipalityName(code ? loc("municipality", code) : null)
-        .findMunicipality(code, self.municipality);
+      var human = util.prop.toHumanFormat(id);
+      if (human != id) {
+        self.propertyId(human);
+      } else {
+        var code = id ? id.split("-")[0].substring(0, 3) : null;
+        self
+          .municipalityCode(code)
+          .municipalityName(code ? loc("municipality", code) : null)
+          .findMunicipality(code, self.municipality);
+      }
     });
 
     self.operation = ko.observable();
@@ -80,7 +85,6 @@
     self.requestType = ko.observable();
 
     self.clear = function() {
-      self.goPhase1();  
       if (!self.map) {
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
         self.map.addClickHandler(self.click);
