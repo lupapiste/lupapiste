@@ -45,10 +45,12 @@
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
-    ((resolve 'lupapalvelu.perf-mon/init)))
-  (env/in-dev
+    ((resolve 'lupapalvelu.perf-mon/init))
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9000))
+    (nrepl/start-server :port 9000)
+    (when (env/value [:email :dummy-server])
+      (require 'sade.dummy-email-server)
+      ((resolve 'sade.dummy-email-server/start))))
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :ns 'lupapalvelu.web
