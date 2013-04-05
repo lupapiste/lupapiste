@@ -52,8 +52,7 @@ var util = (function() {
     if (propertyIdHumanFormat.test(id)) return id;
     var p = propertyIdDbFormat.exec(id);
     if (!p) throw "Invalid property ID: " + id;
-    // return _.partial(_.join, "-").apply(null, _.map(_.zip([3, 3, 4, 4], p.slice(1)), zp));
-    return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v); }));
+    return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
   }
 
   function propertyIdToDbFormat(id) {
