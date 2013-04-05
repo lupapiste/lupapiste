@@ -22,7 +22,7 @@
         (:text rest)
         application => truthy
         (:username (first (:auth application))) => "mikko@example.com"
-        (get-in hakija [:body :henkilo :henkilotiedot]) => {:etunimi "Mikko" :sukunimi "Intonen"}
+        (get-in hakija [:data :henkilo :henkilotiedot]) => {:etunimi "Mikko" :sukunimi "Intonen"}
 
         (let [listing (query mikko :applications)]
           (success listing) => true
@@ -69,7 +69,7 @@
               userId           (get-in (query mikko :user) [:user :id])]
 
           (fact "there is no paasuunnittelija"
-            (get-in paasuunnittelija [:body :henkilotiedot]) => nil)
+            (get-in paasuunnittelija [:data :henkilotiedot]) => nil)
 
           (success
             (command mikko :set-user-to-document :id id :documentId documentId :userId userId :path ""))
@@ -78,7 +78,7 @@
                 new-paasuunnittelija (domain/get-document-by-name new-application "paasuunnittelija")]
 
             (fact "new paasuunnittelija is set"
-              (get-in new-paasuunnittelija [:body :henkilotiedot]) => {:etunimi "Mikko" :sukunimi "Intonen"})))))))
+              (get-in new-paasuunnittelija [:data :henkilotiedot]) => {:etunimi "Mikko" :sukunimi "Intonen"})))))))
 
 (defn- invite [apikey application-id email]
   (command apikey :invite :id application-id :email email :title email :text email :documentName "suunnittelija"))

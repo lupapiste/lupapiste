@@ -29,7 +29,7 @@
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
-    (when-let [body (:body (domain/get-document-by-name app "hakija"))]
+    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
         (get-in body [:yritys :yritysnimi])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
@@ -332,7 +332,7 @@
       (if-let [legacy (municipality/get-legacy municipality)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
-              old-body     (:body document)
+              old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})]
           (mongo/update
