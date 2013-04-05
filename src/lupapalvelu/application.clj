@@ -223,7 +223,7 @@
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/schemas schema-name)
                                                  :created created
-                                                 :body (if (= schema-name (:schema op-info))
+                                                 :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info))
                                                          {})})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
