@@ -126,7 +126,7 @@ var docgen = (function() {
 
       return span;
     }
-    
+
     function getModelValue(model, name) {
       return model[name] ? model[name].value : undefined;
     }
@@ -166,7 +166,7 @@ var docgen = (function() {
         "class": "form-input text form-date",
         value: value,
         change: save,
-      }).datepicker($.datepicker.regional[lang]).appendTo(säpan);
+      }).datepicker($.datepicker.regional[lang]).appendTo(span);
 
       return span;
     }
