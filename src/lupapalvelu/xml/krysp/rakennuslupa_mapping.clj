@@ -163,7 +163,7 @@
         canonical-attachments (for [attachment attachments
                                     :when (:latestVersion attachment)
                                     :let [type (get-in attachment [:type :type-id] )
-                                          title (str (:title application) " : " type)
+                                          title (str (:title application) ": " type)
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
@@ -188,15 +188,15 @@
                   in (content)]
         (copy in out)))))
 
-(defn- write-application-pdf-versions [output-dir application lang]
+(defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
         submitted-file (file (str output-dir "/" (:id application) (get-submitted-filename id)))
-        current-file (file (str output-dir "/"  (get-current-filename id)))
-        submitted-application (mongo/by-id :submitted-applications (:id application))]
+        current-file (file (str output-dir "/"  (get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
-(defn get-application-as-krysp [application lang]
+(defn get-application-as-krysp [application lang submitted-application]
+  (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [municipality-code (:municipality application)
         rakennusvalvonta-directory "/rakennus"
         dynamic-part-of-outgoing-directory (str municipality-code rakennusvalvonta-directory)
@@ -228,7 +228,7 @@
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
     (write-attachments attachments output-dir)
-    (write-application-pdf-versions output-dir application lang)
+    (write-application-pdf-versions output-dir application submitted-application lang)
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
 

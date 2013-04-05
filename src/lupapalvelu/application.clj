@@ -144,10 +144,11 @@
   (with-application command
     (fn [application]
       (let [new-state :submitted
-            application-id (:id application)]
+            application-id (:id application)
+            submitted-application (mongo/by-id :submitted-applications (:id application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang))
+        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
