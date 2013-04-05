@@ -216,7 +216,12 @@
      :versions []}))
 
 (defn- schema-data-to-body [schema-data]
-  (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
+  (reduce
+    (fn [body [data-path value]]
+      (assert (vector? data-path))
+      (let [path (if (= :value (last data-path)) data-path (conj data-path :value))]
+        (update-in body path (constantly value))))
+    {} schema-data))
 
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
