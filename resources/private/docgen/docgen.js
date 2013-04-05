@@ -126,6 +126,10 @@ var docgen = (function() {
 
       return span;
     }
+    
+    function getModelValue(model, name) {
+      return model[name] ? model[name].value : undefined;
+    }
 
     function buildText(subSchema, model, path, save) {
       var myPath = path.join(".");
@@ -139,7 +143,7 @@ var docgen = (function() {
 
       input.className = "form-input textarea";
       input.onchange = save;
-      input.value = model[subSchema.name] || "";
+      input.value = getModelValue(model, subSchema.name) || "";
 
       span.appendChild(makeLabel("text", myPath));
       span.appendChild(input);
@@ -162,7 +166,7 @@ var docgen = (function() {
         "class": "form-input text form-date",
         value: value,
         change: save,
-      }).datepicker($.datepicker.regional[lang]).appendTo(span);
+      }).datepicker($.datepicker.regional[lang]).appendTo(säpan);
 
       return span;
     }
@@ -618,7 +622,7 @@ var docgen = (function() {
     _.each(sortedDocs, function(doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.body, save, removeDocModel.init, doc.id, application).element);
+      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.data, save, removeDocModel.init, doc.id, application).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
