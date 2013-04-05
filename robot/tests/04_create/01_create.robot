@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   [Tags]  ie8
   Mikko logs in
-  Create application  create-app  753  75341600250021  empty-application-create-new
+  Create application  create-app  753  753-416-17-15  empty-application-create-new
   It is possible to add operation
 
 Mikko sees application in list
@@ -61,7 +61,7 @@ Mikko closes application at Latokuja 3
   Wait Until  Request should not be visible  create-app-2
 
 Mikko decides to submit create-app
-  Open application  create-app  75341600250021
+  Open application  create-app  753-416-17-15
   Wait until  Application state should be  draft
   Submit application
 
@@ -75,7 +75,7 @@ Mikko has worked really hard and now he needs some strong coffee
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application  create-veikko-auth-app  837  75341600250021  empty-application-create-new
+  Create application  create-veikko-auth-app  837  753-416-17-15  empty-application-create-new
   Wait until  Application state should be  open
   It is possible to add operation
 
