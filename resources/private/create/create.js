@@ -2,7 +2,6 @@
   "use strict";
 
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
-  function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
 
   var tree;
   
@@ -149,7 +148,7 @@
       return false;
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
+    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
       ajax
@@ -177,7 +176,7 @@
     self.searchPointByPropertyId = function(id) {
       ajax
         .get("/proxy/point-by-property-id")
-        .param("property-id", id)
+        .param("property-id", util.prop.toDbFormat(id))
         .success(self.onResponse(function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
