@@ -487,7 +487,7 @@ var docgen = (function() {
 
       if (selectOneOf.length) {
         // Show current selection or the first of the group
-        var myModel = model[SELECT_ONE_OF_GROUP_KEY] || _.first(selectOneOf);
+        var myModel = model[SELECT_ONE_OF_GROUP_KEY].value || _.first(selectOneOf);
         toggleSelectedGroup(myModel);
 
         var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
