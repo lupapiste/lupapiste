@@ -52,11 +52,11 @@
               :street    "katu"
               :zip       "123"
               :city      "tampere"}]
-    (fact (user2henkilo user) => {:userId "123"
-                                  :henkilotiedot {:etunimi "kari"
-                                                  :sukunimi "tapio"}
-                                  :yhteystiedot {:email "kari.tapio@example.com"
-                                                 :puhelin "050"}
-                                  :osoite {:katu "katu"
-                                           :postinumero "123"
-                                           :postitoimipaikannimi "tampere"}})))
+    (fact (user2henkilo user) => {:userId {:value "123"}
+                                  :henkilotiedot {:etunimi {:value "kari"}
+                                                  :sukunimi {:value "tapio"}}
+                                  :yhteystiedot {:email {:value "kari.tapio@example.com"}
+                                                 :puhelin {:value "050"}}
+                                  :osoite {:katu {:value "katu"}
+                                           :postinumero {:value "123"}
+                                           :postitoimipaikannimi {:value "tampere"}}})))
