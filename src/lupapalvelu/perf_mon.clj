@@ -123,7 +123,7 @@
 
 (defpage [:post "/perfmon/throttle/:id"] {id :id}
   (if-let [throttle ({"db" db-throttle "web" web-throttle} id)]
-    (let [value (-> (request/ring-request) :body io/reader json/parse-stream (get "value") str Long/parseLong)]
+    (let [value (-> (request/ring-request) :json :value str Long/parseLong)]
       (reset! throttle value)
       (->> {id value} (resp/json) (resp/status 200)))
     (resp/status 404 (str "unknown throttle: '" id "'"))))

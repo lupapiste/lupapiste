@@ -27,8 +27,10 @@
             [lupapalvelu.token :as token]
             [sade.security :as sadesecurity]
             [sade.status :as status]
+            [sade.strings :as s]
             [sade.util :as util]
             [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery])
   (:import [java.io ByteArrayInputStream]))
@@ -47,8 +49,20 @@
 
 (defjson "/system/apis" [] @apis)
 
+(defn parse-json-body-middleware [handler]
+  (fn [request]
+    (handler (assoc request :json
+                    (if (s/starts-with (:content-type request) "application/json")
+                      (if-let [body (:body request)]
+                        (-> body
+                          (io/reader :encoding (or (:character-encoding request) "utf-8"))
+                          json/parse-stream
+                          keywordize-keys)
+                        {})
+                      nil)))))
+
 (defn from-json [request]
-  (json/decode (slurp (:body request)) true))
+  (:json request))
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
@@ -255,7 +269,6 @@
   (fn [request]
     (let [apikey (get-apikey request)]
       (handler (assoc request :user (security/login-with-apikey apikey))))))
-
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
