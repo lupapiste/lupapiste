@@ -63,7 +63,9 @@
 
 (defn lang-middleware [handler]
   (fn [request]
-    (let [lang (or (get-in request [:params :lang]) (get-in request [:user :lang]) "fi")]
+    (let [lang (or (get-in request [:params :lang])
+                   (get-in request [:user :lang])
+                   "fi")]
       (binding [*lang* lang
                 loc (localizer lang)]
         (handler request)))))
