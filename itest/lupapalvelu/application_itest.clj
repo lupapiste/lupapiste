@@ -41,7 +41,7 @@
     (:opened application) => nil
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
-    (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
+    (-> hakija :data :henkilo :henkilotiedot) => (contains {:etunimi {:value "Pena"} :sukunimi {:value "Panaani"}})))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (let [created-resp (create-app pena :municipality sonja-muni)

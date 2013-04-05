@@ -25,10 +25,6 @@
 
 (defn send-mail? [to subject body] (ok? (send-mail to subject body)))
 
-(when (get-in env/config [:email :dummy-server])
-  (require 'sade.dummy-email-server)
-  ((resolve 'sade.dummy-email-server/start)))
-
 (comment
   (postal/send-message
     (:email env/config)

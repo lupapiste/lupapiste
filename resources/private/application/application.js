@@ -219,7 +219,7 @@
 
     approveApplication: function(model) {
       var applicationId = application.id();
-      ajax.command("approve-application", { id: applicationId})
+      ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
           repository.load(applicationId);

@@ -4,7 +4,7 @@
 
 (def schema
   {:info {:name "band"},
-   :body
+   :data
    [{:name "band",
      :type :group,
      :body

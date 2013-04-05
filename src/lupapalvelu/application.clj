@@ -29,7 +29,7 @@
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
-    (when-let [body (:body (domain/get-document-by-name app "hakija"))]
+    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
       (if (= (:_selected body) "yritys")
         (get-in body [:yritys :yritysnimi])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
@@ -136,7 +136,7 @@
         (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
-  {:parameters [:id]
+  {:parameters [:id :lang]
    :roles      [:authority]
    :authority  true
    :states     [:submitted]}
@@ -144,10 +144,11 @@
   (with-application command
     (fn [application]
       (let [new-state :submitted
-            application-id (:id application)]
+            application-id (:id application)
+            submitted-application (mongo/by-id :submitted-applications (:id application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application)
+        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
@@ -216,7 +217,11 @@
      :versions []}))
 
 (defn- schema-data-to-body [schema-data]
-  (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
+  (reduce
+    (fn [body [data-path value]]
+      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))]
+        (update-in body path (constantly value))))
+    {} schema-data))
 
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
@@ -328,7 +333,7 @@
       (if-let [legacy (municipality/get-legacy municipality)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-name application doc-name)
-              old-body     (:body document)
+              old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})]
           (mongo/update
