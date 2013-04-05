@@ -218,8 +218,7 @@
 (defn- schema-data-to-body [schema-data]
   (reduce
     (fn [body [data-path value]]
-      (assert (vector? data-path))
-      (let [path (if (= :value (last data-path)) data-path (conj data-path :value))]
+      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))]
         (update-in body path (constantly value))))
     {} schema-data))
 
