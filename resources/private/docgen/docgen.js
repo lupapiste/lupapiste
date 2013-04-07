@@ -531,7 +531,7 @@ var docgen = (function() {
             setTimeout(function(){
               $(indicator).removeClass("form-input-saved");
               target.parentNode.removeChild(indicator);
-            }, 2000);
+              }, 2000);
           } else if (status !== "ok") {
             error("Unknown status:", status, "path:", path);
           }
