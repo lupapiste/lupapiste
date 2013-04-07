@@ -504,6 +504,7 @@ var docgen = (function() {
           target.removeChild(indicator);
         }
         var indicator = document.createElement("span");
+        $(indicator).addClass("form-indicator");
         target.parentNode.appendChild(indicator);
         var path = target.name;
         var loader = loaderImg();
