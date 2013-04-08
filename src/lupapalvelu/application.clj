@@ -324,6 +324,9 @@
 ;; krysp enrichment
 ;;
 
+(defn add-value-metadata [m meta-data]
+  (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
+
 (defcommand "merge-details-from-krysp"
   {:parameters [:id :buildingId]
    :roles      [:applicant :authority]}
@@ -335,12 +338,13 @@
               document     (domain/get-document-by-name application doc-name)
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})]
+              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})
+              with-value-metadata (add-value-metadata new-body {:source :krysp})]
           (mongo/update
             :applications
             {:_id (:id application)
              :documents {$elemMatch {:schema.info.name doc-name}}}
-            {$set {:documents.$.body new-body
+            {$set {:documents.$.data with-value-metadata
                    :modified (:created command)}})
           (ok))
         (fail :no-legacy-available)))))
