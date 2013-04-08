@@ -40,9 +40,13 @@
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
-            <ul>
-              <li data-bind="if: initialOp">
-                <span data-bind="ltext: 'operations.' + initialOp()" data-test-id="inforequest-application-operation" class="application_summary_text"></span>
+            <ul data-bind="foreach: operationsCount">
+              <li>
+                <span data-bind="visible: count > 1">
+                  <span data-bind="text: count"></span>
+                  <span>&#x00D7;</span>
+                </span>
+                <span data-bind="ltext: 'operations.' + name" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
