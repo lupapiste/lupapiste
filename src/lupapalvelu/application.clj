@@ -211,8 +211,7 @@
                  :modified (:created command)}}))))
 
 (defn- make-attachments [created op municipality]
-  (for [[type-group type-ids] (partition 2 (:attachments (operations/operations (:name op))))
-        type-id type-ids]
+  (for [[type-group type-id] (get (:name op) (mongo/select-one :municipalities {:_id municipality} {:operations-attachments 1}))]
     {:id (mongo/create-id)
      :type {:type-group type-group :type-id type-id}
      :state :requires_user_action
