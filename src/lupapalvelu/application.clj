@@ -288,7 +288,7 @@
                                    :title         address
                                    :auth          [owner]
                                    :documents     (if info-request? [] (make-documents user created nil op))
-                                   :attachments   (if info-request? [] (make-attachments created op))
+                                   :attachments   (if info-request? [] (make-attachments created op municipality))
                                    :allowedAttachmentTypes (if info-request?
                                                              [[:muut [:muu]]]
                                                              (partition 2 attachment/attachment-types))
