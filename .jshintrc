@@ -42,6 +42,7 @@
     "ajax",
     "gis",
     "LUPAPISTE",
+    "util",
     "invites",
     "applicationsConfig",
     "selectionTree",
