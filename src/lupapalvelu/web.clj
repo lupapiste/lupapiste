@@ -1,6 +1,7 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail]]
+        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
@@ -26,8 +27,10 @@
             [lupapalvelu.token :as token]
             [sade.security :as sadesecurity]
             [sade.status :as status]
+            [sade.strings :as s]
             [sade.util :as util]
             [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery])
   (:import [java.io ByteArrayInputStream]))
@@ -46,8 +49,21 @@
 
 (defjson "/system/apis" [] @apis)
 
+(defn parse-json-body-middleware [handler]
+  (fn [request]
+    (let [json-body (if (s/starts-with (:content-type request) "application/json")
+                      (if-let [body (:body request)]
+                        (-> body
+                          (io/reader :encoding (or (:character-encoding request) "utf-8"))
+                          json/parse-stream
+                          keywordize-keys)
+                        {}))
+          request (assoc request :json json-body)
+          request (if json-body (assoc request :params json-body) request)]
+      (handler request))))
+
 (defn from-json [request]
-  (json/decode (slurp (:body request)) true))
+  (:json request))
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
@@ -255,7 +271,6 @@
     (let [apikey (get-apikey request)]
       (handler (assoc request :user (security/login-with-apikey apikey))))))
 
-
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
 
@@ -381,4 +396,14 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
+  
+  (defquery "qlang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*))
+  
+  (defcommand "clang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*)))

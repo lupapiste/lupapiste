@@ -116,7 +116,7 @@
       <div class="tab-content-container content">
 
         <div id="application-info-tab" class="tab-content">
-
+          <p data-bind="ltext: 'application.applicationInfoDesc'" class="tab-info"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="applicationDocgen">
@@ -128,7 +128,7 @@
           </div>
         </div>
         <div id="application-parties-tab" class="tab-content">
-
+          <p data-bind="ltext: 'application.partiesDesc'" class="tab-info"></p>
           <div class="application_section" data-bind="with: application">
             <h2 class="application_section_header " onclick="accordion.click();">
               <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
@@ -202,6 +202,7 @@
                         <i data-bind="ltext: latestVersion.contentType"></i>
                         <i data-bind="size: latestVersion.size"></i>
                       </span>
+                      <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAdd', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                     </td>
                     <td>
                       <span data-bind="if: $data.latestVersion">
@@ -246,6 +247,7 @@
         </div>
 
         <div id="application-verdict-tab" class="tab-content" data-bind="with: application">
+          <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
           <div class="tab-wrapper">
             <div class="row" data-bind="with: verdict">
               <span data-bind="text: text" data-test-id="application-verdict"></span>
