@@ -338,7 +338,7 @@
 
       // Operations:
 
-      application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {op: k, count: v}; }));
+      application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
       
       // Attachments:
 
