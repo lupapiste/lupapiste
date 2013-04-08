@@ -252,9 +252,8 @@
 (defn- make-application-id [municipality]
   (let [year           (str (year (local-now)))
         sequence-name  (str "applications-" municipality "-" year)
-        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))
-        muni-name      (s/lower-case (with-lang "fi" (loc (str "municipality." municipality))))]
-    (str muni-name "-" year "-" counter)))
+        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+    (str "LP-" municipality "-" year "-" counter)))
 
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
