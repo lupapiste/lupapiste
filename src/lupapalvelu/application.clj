@@ -2,7 +2,10 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [clojure.string :only [blank?]])
+        [clojure.string :only [blank?]]
+        [clj-time.core :only [year]]
+        [clj-time.local :only [local-now]]
+        [lupapalvelu.i18n :only [with-lang loc]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
@@ -246,6 +249,12 @@
   ;; TODO operation to permit type mapping???
   "buildingPermit")
 
+(defn- make-application-id [municipality]
+  (let [year           (str (year (local-now)))
+        sequence-name  (str "applications-" municipality "-" year)
+        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+    (str "LP-" municipality "-" year "-" counter)))
+
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
@@ -253,7 +262,7 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
     (let [user-summary  (security/summary user)
-          id            (mongo/create-id)
+          id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (keyword operation)
           info-request? (if infoRequest true false)

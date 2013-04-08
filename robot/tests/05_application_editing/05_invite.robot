@@ -9,8 +9,8 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  invite-app  753  75341600250025
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  75341600250025
+  Create application the fast way  invite-app  753  753-416-25-25
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-416-25-25
 
 Mikko can see invite paasuunnittelija button
   Open tab  parties
@@ -50,7 +50,7 @@ Teppo can see the invite
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
 
 Teppo can edit Mikko's application
-  Open application  invite-app  75341600250025
+  Open application  invite-app  753-416-25-25
   # OnChange event does not seem to get triggered. Do it manually.
   Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
   Wait for jQuery
@@ -59,7 +59,7 @@ Teppo can edit Mikko's application
 
 Mikko comes back and can see Teppos modification
   Mikko logs in
-  Open application  invite-app  75341600250025
+  Open application  invite-app  753-416-25-25
   Wait Until  Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
 
 Mikko can see invite paasuunnittelija button again
@@ -84,7 +84,7 @@ Sonja (the Authority) is not allowed to invite people
   Sonja logs in
   Wait until  Element should be visible  xpath=//section[@id='applications']//td[text()='invite-app']
   Click element  xpath=//section[@id='applications']//td[text()='invite-app']
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  75341600250025
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-416-25-25
   Element should not be visible  xpath=//*[@data-test-id='application-add-invite']
   Logout
 

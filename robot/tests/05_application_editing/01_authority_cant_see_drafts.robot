@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 
 Mikko creates application
   Mikko logs in
-  Create application the fast way  authority-cant-see-drafts  753  75341600250030
+  Create application the fast way  authority-cant-see-drafts  753  753-416-25-30
   Logout
 
 Sonja should not see applications at this stage
@@ -17,7 +17,7 @@ Sonja should not see applications at this stage
 
 Mikko goes to application page
   Mikko logs in
-  Open application  authority-cant-see-drafts  75341600250030
+  Open application  authority-cant-see-drafts  753-416-25-30
 
 Application is in draft state
   Applicantion state is  Luonnos

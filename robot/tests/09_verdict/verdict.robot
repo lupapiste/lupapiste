@@ -7,7 +7,7 @@ Resource        ../../common_resource.robot
 
 Mikko opens creates application
   Mikko logs in
-  Create application the fast way  verdict-app  753  75341600250030
+  Create application the fast way  verdict-app  753  753-416-25-30
 
 Application does not have verdict
   Open tab  verdict
@@ -31,14 +31,14 @@ Solita Admin can log in and gives verdict
 
 Mikko sees that the application has verdict
   Mikko logs in
-  Open application  verdict-app  75341600250030
+  Open application  verdict-app  753-416-25-30
   Open tab  verdict
   Element Text Should Be  xpath=//span[@data-test-id='application-verdict']  onneksi olkoon!
   Logout
 
 Application verdict is visible to authority
   Sonja logs in
-  Open application  verdict-app  75341600250030
+  Open application  verdict-app  753-416-25-30
   Open tab  verdict
   Element should be visible  xpath=//span[@data-test-id='application-verdict']
   Logout

@@ -2,7 +2,6 @@
   "use strict";
 
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
-  function isPropertyId(s) { return /^[0-9\-]+$/.test(s); }
 
   var tree;
   
@@ -69,11 +68,16 @@
     });
     
     self.propertyId.subscribe(function(id) {
-      var code = id ? id.substring(0, 3) : null;
-      self
-        .municipalityCode(code)
-        .municipalityName(code ? loc("municipality", code) : null)
-        .findMunicipality(code, self.municipality);
+      var human = util.prop.toHumanFormat(id);
+      if (human != id) {
+        self.propertyId(human);
+      } else {
+        var code = id ? id.split("-")[0].substring(0, 3) : null;
+        self
+          .municipalityCode(code)
+          .municipalityName(code ? loc("municipality", code) : null)
+          .findMunicipality(code, self.municipality);
+      }
     });
 
     self.operation = ko.observable();
@@ -81,7 +85,6 @@
     self.requestType = ko.observable();
 
     self.clear = function() {
-      self.goPhase1();  
       if (!self.map) {
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
         self.map.addClickHandler(self.click);
@@ -149,7 +152,7 @@
       return false;
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) { return isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
+    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
       ajax
@@ -177,7 +180,7 @@
     self.searchPointByPropertyId = function(id) {
       ajax
         .get("/proxy/point-by-property-id")
-        .param("property-id", id)
+        .param("property-id", util.prop.toDbFormat(id))
         .success(self.onResponse(function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
@@ -224,7 +227,7 @@
         y: self.y(),
         x: self.x(),
         address: self.addressString(),
-        propertyId: self.propertyId(),
+        propertyId: util.prop.toDbFormat(self.propertyId()),
         messages: isBlank(self.message()) ? [] : [self.message()],
         municipality: self.municipality().id
       })
@@ -247,7 +250,7 @@
     $("#create").applyBindings(model);
 
     $("#create-search")
-      .keypress(function(e) {
+      .keyup(function(e) {
         if (e.which === 13) model.searchNow();
       })
       .autocomplete({
