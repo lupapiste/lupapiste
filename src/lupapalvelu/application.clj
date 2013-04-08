@@ -30,10 +30,10 @@
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
     (when-let [body (:data (domain/get-document-by-name app "hakija"))]
-      (if (= (:_selected body) "yritys")
-        (get-in body [:yritys :yritysnimi])
+      (if (= (get-in body [:_selected :value]) "yritys")
+        (get-in body [:yritys :yritysnimi :value])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str first-name \space last-name))))))
+          (str (:value first-name) \space (:value last-name)))))))
 
 (defn get-application-operation [app]
   (if (:infoRequest app)
