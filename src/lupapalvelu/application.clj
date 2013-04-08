@@ -210,7 +210,7 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defn- make-attachments [created op]
+(defn- make-attachments [created op municipality]
   (for [[type-group type-ids] (partition 2 (:attachments (operations/operations (:name op))))
         type-id type-ids]
     {:id (mongo/create-id)
@@ -312,6 +312,7 @@
             new-docs   (make-documents nil created documents op)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs}
+                                              $pushAll {:attachments (make-attachments created op (:municipality application))}
                                               $set {:modified created}})
         (ok)))))
 
@@ -330,7 +331,7 @@
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
-                                              $pushAll {:attachments (make-attachments created op)}})
+                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})
         (ok)))))
 
 ;;
