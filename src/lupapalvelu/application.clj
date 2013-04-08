@@ -224,7 +224,7 @@
   (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
 
 (defn- make-documents [user created existing-documents op]
-  (let [op-info               (operations/operations op)
+  (let [op-info               (operations/operations (:name op))
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/schemas schema-name)
                                                  :created created
