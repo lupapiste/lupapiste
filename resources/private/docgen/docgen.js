@@ -267,7 +267,7 @@ var docgen = (function() {
 
         var buildingId = target.value;
         ajax
-          .command("merge-details-from-krysp", {id: self.appId, buildingId: buildingId})
+          .command("merge-details-from-krysp", {id: self.appId, documentId: docId, buildingId: buildingId})
           .success(function() {
             save(event);
             repository.load(self.appId);
