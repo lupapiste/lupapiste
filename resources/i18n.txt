@@ -1,16 +1,16 @@
-error.password.minlength: Pituus v�hint��n 8 merkki�
+error.password.minlength: Pituus v�hint��n 8 merkki�
 attachmentType.empty._group_label:
 login.reset-question: Oletko unohtanut salasanasi?
 
 reset.title: Salasanan vaihtaminen
-reset.info: Anna sähköpostiosoitteesi niin lähetämme sinulle salasanan vaihtolinkin.
-reset.email: Sähköposti:
+reset.info: Anna s��hk��postiosoitteesi niin l��het��mme sinulle salasanan vaihtolinkin.
+reset.email: S��hk��posti:
 reset.email-placeholder: etunimi.sukunimi@osoite.fi
-reset.send: Lähetä
-reset.sent.1: Sähköposti lähetetty.
-reset.sent.2: Seuraa ohjeita sähköpostistasi. Voit sulkea tämän ikkunan.
-reset.fail.email-not-found: Antaamasi sähköpostiosoitetta ei löydy järjestelmästä. 
-reset.fail.email-send-failed: Sähköpostin lähetys epäonnistui, ole hyvä ja yritä uudelleen. 
+reset.send: L��het��
+reset.sent.1: S��hk��posti l��hetetty.
+reset.sent.2: Seuraa ohjeita s��hk��postistasi. Voit sulkea t��m��n ikkunan.
+reset.fail.email-not-found: Antaamasi s��hk��postiosoitetta ei l��ydy j��rjestelm��st��. 
+reset.fail.email-send-failed: S��hk��postin l��hetys ep��onnistui, ole hyv�� ja yrit�� uudelleen. 
 reset.email.title: Salasanan vaihto
 
 setpw.title: Salasanan vaihtaminen
@@ -18,8 +18,8 @@ setpw.info: Anna uusi salasana kahdesti ja paina OK.
 setpw.password.1: Salasana:
 setpw.password.2: Salasana uudelleen:
 setpw.send: OK
-setpw.success: Salasana vaihdettu. Klikkaa linkkiä ja kirjaudu sisään uudella salasanallasi:
-setpw.fail: Salasanan vaihto ei onnistunut, ole hyvä ja yritä uudelleen.
+setpw.success: Salasana vaihdettu. Klikkaa linkki�� ja kirjaudu sis����n uudella salasanallasi:
+setpw.fail: Salasanan vaihto ei onnistunut, ole hyv�� ja yrit�� uudelleen.
 setpw.placeholder.1: Uusi salasana
 setpw.placeholder.2: Salasana uudelleen
 setpw.quality: Laatu:
@@ -28,7 +28,8 @@ setpw.quality.low: Heikko
 setpw.quality.med: Kohtalainen
 setpw.quality.hi: Hyvä
 setpw.quality.excellent: Erinomainen
-setpw.notSame: Salasana ei täsmää
+setpw.notSame: Salasana ei t��sm����
 
-
-
+auth-admin.operations-attachments: Liitteet toimenpiteisiin
+auth-admin.operations-attachments.operation: Toimenpide
+auth-admin.operations-attachments.attachments: Liitteet
