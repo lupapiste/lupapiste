@@ -9,7 +9,7 @@ Mikko creates an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
-  Create application the fast way  ${appname}  753  75341600250030
+  Create application the fast way  ${appname}  753  753-416-25-30
   Execute Javascript  $("textarea[name='kuvaus']").val('Hieno hanke...').change();
   Execute Javascript  $("textarea[name='poikkeamat']").val('poikkeuksetta!').change();
   Wait for jQuery
@@ -28,19 +28,19 @@ Mikko remembers that it is his turn to pick the kids from day care
 
 Sonja logs in and sees that some completion is needed
   Sonja logs in
-  Open application  ${appname}  75341600250030
+  Open application  ${appname}  753-416-25-30
   Click enabled by test id  request-for-complement
   Logout
 
 Mikko comes back, fills in missing parts and makes a resubmit
   Mikko logs in
-  Open application  ${appname}  75341600250030
+  Open application  ${appname}  753-416-25-30
   Submit application
   Logout
 
 Sonja logs in for approval
   Sonja logs in
-  Open application  ${appname}  75341600250030
+  Open application  ${appname}  753-416-25-30
 
 Sonja approves application
   Click enabled by test id  approve-application

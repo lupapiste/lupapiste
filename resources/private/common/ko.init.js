@@ -129,7 +129,15 @@
     }
   };
 
-  $.fn.applyBindings = function(model) {
+  ko.bindingHandlers.propertyId = {
+    update: function(element, valueAccessor) {
+      var v = ko.utils.unwrapObservable(valueAccessor()),
+          f = util.prop.toHumanFormat(v);
+      $(element).text(f ? f : "");
+    }
+  };
+  
+$.fn.applyBindings = function(model) {
     _.each(this, _.partial(ko.applyBindings, model));
     return this;
   };

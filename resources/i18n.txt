@@ -30,3 +30,5 @@ setpw.quality.hi: Hyvä
 setpw.quality.excellent: Erinomainen
 setpw.notSame: Salasana ei täsmää
 
+
+
