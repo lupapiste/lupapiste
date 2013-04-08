@@ -111,24 +111,6 @@
     });
   }();
 
-  function getOperations(docs) {
-    var ops = {};
-    if (docs) {
-      _.each(docs, function(doc) {
-        var op = doc.schema.info.op;
-        if (op) {
-          var opName = op.name;
-          if (ops[opName]) {
-            ops[opName] += 1;
-          } else {
-            ops[opName] = 1;
-          }
-        }
-      });
-    }
-    return _.map(ops, function(v, k) { return {op: k, count: v}; });
-  }
-
   var application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
@@ -146,6 +128,7 @@
     verdict: ko.observable(),
     initialOp: ko.observable(),
     operations: ko.observable(),
+    operationsCount: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
 
@@ -355,8 +338,8 @@
 
       // Operations:
 
-      application.operations(getOperations(app.documents));
-
+      application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {op: k, count: v}; }));
+      
       // Attachments:
 
       var statuses = {

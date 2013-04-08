@@ -65,12 +65,12 @@
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
-            <ul data-bind="foreach: operations">
+            <ul data-bind="foreach: operationsCount">
               <li>
-                <!-- ko if: count > 1 -->
-                <span data-bind="text: count"></span>
-                <span>&#x00D7;</span>
-                <!-- /ko -->
+                <span data-bind="visible: count > 1">
+                  <span data-bind="text: count"></span>
+                  <span>&#x00D7;</span>
+                </span>
                 <span data-bind="ltext: 'operations.' + op" data-test-id="test-application-operation"></span>
               </li>
             </ul>
