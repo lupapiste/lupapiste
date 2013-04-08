@@ -46,6 +46,7 @@
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
     self.municipality = ko.observable(null);
+    self.municipalityLinks = ko.computed(function() { var m = self.municipality(); return m ? m.links : null; });
     self.municipalityCode = ko.observable(null);
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);

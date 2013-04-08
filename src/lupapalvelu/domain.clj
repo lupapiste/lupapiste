@@ -74,11 +74,11 @@
 ;;
 
 (defn user2henkilo [{:keys [id firstName lastName email phone street zip city]}]
-  {:userId                        id
-   :henkilotiedot {:etunimi       firstName
-                   :sukunimi      lastName}
-   :yhteystiedot {:email          email
-                  :puhelin        phone}
-   :osoite {:katu                 street
-            :postinumero          zip
-            :postitoimipaikannimi city}})
+  {:userId                        {:value id}
+   :henkilotiedot {:etunimi       {:value firstName}
+                   :sukunimi      {:value lastName}}
+   :yhteystiedot {:email          {:value email}
+                  :puhelin        {:value phone}}
+   :osoite {:katu                 {:value street}
+            :postinumero          {:value zip}
+            :postitoimipaikannimi {:value city}}})

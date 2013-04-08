@@ -239,7 +239,7 @@
         new-docs              (cons op-doc required-docs)
         hakija                (make "hakija")]
     (if user
-      (cons #_hakija (assoc-in hakija [:body :henkilo] (domain/user2henkilo user)) new-docs)
+      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/user2henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
