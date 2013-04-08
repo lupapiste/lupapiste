@@ -84,12 +84,12 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc('municipality', municipality())"></p>
           </div>
-          <button data-bind="ltext: 'application.submitApplication',  click: submitApplication,  visible: $root.authorization.ok('submit-application'),  enable: $root.authorization.ok('submit-application')"  data-test-id="application-submit-btn"  class="btn"></button>
-          <button data-bind="ltext: 'application.approveApplication', click: approveApplication, visible: $root.authorization.ok('approve-application'), enable: $root.authorization.ok('approve-application')" data-test-id="approve-application"     class=""></button>
-          <button data-bind="ltext: 'application.requestForComplement', click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement"     class=""></button>
-          <button data-bind="ltext: 'application.addOperation',       click: addOperation,       visible: $root.authorization.ok('add-operation'),       enable: $root.authorization.ok('add-operation')"       data-test-id="add-operation"           class=""></button>
-          <button data-bind="ltext: 'application.pdf',                click: exportPdf"                                                                                                                         data-test-id="application-pdf-btn"     class=""></button>
-          <button data-bind="ltext: 'application.cancelApplication',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application'),  enable: $root.authorization.ok('cancel-application')"  data-test-id="application-cancel-btn"  class="btn"></button>
+          <button data-bind="ltext: 'application.submitApplication',    click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn"></button>
+          <button data-bind="ltext: 'application.approveApplication',   click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: $root.authorization.ok('approve-application')"    data-test-id="approve-application"                ></button>
+          <button data-bind="ltext: 'application.requestForComplement', click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement"             ></button>
+          <button data-bind="ltext: 'application.addOperation',         click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: $root.authorization.ok('add-operation')"          data-test-id="add-operation"                      ></button>
+          <button data-bind="ltext: 'application.pdf',                  click: exportPdf"                                                                                                                                 data-test-id="application-pdf-btn"                ></button>
+          <button data-bind="ltext: 'application.cancelApplication',    click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn"></button>
         </div>
 
         <!-- Tabs: -->
