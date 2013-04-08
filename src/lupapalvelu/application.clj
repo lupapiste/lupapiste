@@ -222,7 +222,7 @@
 (defn- schema-data-to-body [schema-data]
   (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
 
-(defn- make-documents [user created existing-documents op]
+(defn- make-documents [user created existing-documents op op-id]
   (let [op-info               (operations/operations op)
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/schemas schema-name)
@@ -234,7 +234,10 @@
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
-        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op {:id op-id
+                                                                                           :name op
+                                                                                           :created created}
+                                                                                      :removable true})
         new-docs              (cons op-doc required-docs)
         hakija                (make "hakija")]
     (if user
@@ -265,6 +268,7 @@
           id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (keyword operation)
+          op-id         (mongo/create-id)
           info-request? (if infoRequest true false)
           state         (if (or info-request? (security/authority? user)) :open :draft)
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
@@ -281,7 +285,7 @@
                                    :propertyId    propertyId
                                    :title         address
                                    :auth          [owner]
-                                   :documents     (if info-request? [] (make-documents user created nil op))
+                                   :documents     (if info-request? [] (make-documents user created nil op op-id))
                                    :attachments   (if info-request? [] (make-attachments created op))
                                    :allowedAttachmentTypes (if info-request?
                                                              [[:muut [:muu]]]
@@ -301,8 +305,9 @@
       (let [id         (get-in command [:data :id])
             created    (:created command)
             documents  (:documents application)
+            op-id      (mongo/create-id)
             op         (keyword (get-in command [:data :operation]))
-            new-docs   (make-documents nil created documents op)]
+            new-docs   (make-documents nil created documents op op-id)]
         (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
                                               $set {:modified created}})
         (ok)))))
@@ -316,11 +321,12 @@
     (fn [inforequest]
       (let [id       (get-in command [:data :id])
             created  (:created command)
-            op       (keyword (:initialOp inforequest))]
+            op       (keyword (:initialOp inforequest))
+            op-id    (mongo/create-id)]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
-                                                    :documents (make-documents (-> command :user security/summary) created nil op)
+                                                    :documents (make-documents (-> command :user security/summary) created nil op op-id)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op)}})
         (ok)))))

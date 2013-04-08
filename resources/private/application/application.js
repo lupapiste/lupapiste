@@ -117,10 +117,11 @@
       _.each(docs, function(doc) {
         var op = doc.schema.info.op;
         if (op) {
-          if (ops[op]) {
-            ops[op] += 1;
+          var opName = op.name;
+          if (ops[opName]) {
+            ops[opName] += 1;
           } else {
-            ops[op] = 1;
+            ops[opName] = 1;
           }
         }
       });
