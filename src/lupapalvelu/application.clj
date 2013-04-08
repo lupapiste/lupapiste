@@ -311,8 +311,8 @@
             op         (make-op (get-in command [:data :operation]) created)
             new-docs   (make-documents nil created documents op)]
         (mongo/update-by-id :applications id {$push {:operations op}
-                                              $pushAll {:documents new-docs}
-                                              $pushAll {:attachments (make-attachments created op (:municipality application))}
+                                              $pushAll {:documents new-docs
+                                                        :attachments (make-attachments created op (:municipality application))}
                                               $set {:modified created}})
         (ok)))))
 
