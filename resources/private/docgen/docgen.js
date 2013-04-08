@@ -575,7 +575,7 @@ var docgen = (function() {
       title.appendChild(icon);
 
       if (op) {
-        title.appendChild(document.createTextNode(loc(op + "._group_label")));
+        title.appendChild(document.createTextNode(loc(op.name + "._group_label")));
       } else {
         title.appendChild(document.createTextNode(loc(self.schemaName + "._group_label")));
       }
