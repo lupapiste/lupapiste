@@ -34,3 +34,7 @@ auth-admin.operations-attachments: Liitteet toimenpiteisiin
 auth-admin.operations-attachments.operation: Toimenpide
 auth-admin.operations-attachments.attachments: Liitteet
 auth-admin.operations-attachments.add: Lisää liitepohja
+
+selectm.filter: Etsi liitteen nimellä
+
+sending: Lähetetään pyyntöä
