@@ -7,6 +7,7 @@
     
     self.data = [];
     self.visible = [];
+    self.duplicates = true;
   
     this.append(
       (template ? template : $("#selectm-template"))
@@ -29,6 +30,7 @@
     self.$cancel = $(".selectm-cancel", this);
     self.ok = function(f) { self.okCallback = f; return self; };
     self.cancel = function(f) { self.cancelCallback = f; return self; };
+    self.allowDuplicates = function(d) { self.duplicates = d; return self; };
     
     self.filterData = function(filterValue) {
       var f = _.trim(filterValue).toLowerCase();
@@ -52,25 +54,49 @@
           self.$source.append($("<option>").data("id", option.id).data("text", option.text).html("&nbsp;&nbsp;" + option.text));
         });
       });
-      self.checkAdd();
+      self.check();
     };
-      
+    
+    self.getSelected = function() {
+      return $("option:selected", self.$source).data() || {};
+    };
+
+    self.inTarget = function(id) { 
+      return $("option", self.$target).filter(function() { return $(this).data("id") === id; }).length;
+    };
+    
+    self.canAdd = function(id) {
+      return id && (self.duplicates || !self.inTarget(id));
+    };
+    
+    self.addTarget = function(d) {
+      if (d && self.canAdd(d.id)) self.$target.append($("<option>").data("id", d.id).text(d.text));
+      return self;
+    };
+    
     self.add = function() {
-      var d = $("option:selected", self.$source).data();
-      if (d) self.$target.append($("<option>").data("id", d.id).text(d.text));
-      self.checkOk();
+      self.addTarget(self.getSelected());
+      self.check();
     };
   
     self.remove = function() {
       $("option:selected", self.$target).remove();
-      self.checkRemove();
-      self.checkOk();
+      self.check();
     };
   
-    self.checkOk = function() { self.$ok.attr("disabled", $("option", self.$target).length === 0); };
-    self.checkAdd = function() { self.$add.attr("disabled", $("option:selected", self.$source).length === 0); };
-    self.checkRemove = function() { self.$remove.attr("disabled", $("option:selected", self.$target).length === 0); };
-  
+    self.check = function() {
+      window.sss = self.$add;
+      self.$add.prop("disabled", !self.canAdd(self.getSelected().id));
+      self.$remove.prop("disabled", $("option:selected", self.$target).length === 0);
+      console.log("CHECK:", self.getSelected().id, self.canAdd(self.getSelected().id));
+      if (!self.duplicates) {
+        $("option", self.$source).each(function() {
+          var e = $(this);
+          e.prop("disabled", self.inTarget(e.data("id")));
+        });
+      }
+    };
+    
     //
     // Register event handlers:
     //
@@ -80,14 +106,13 @@
     self.$source
       .keydown(function(e) { if (e.keyCode === 13) self.add(); })
       .dblclick(self.add)
-      .on("change focus blur", self.checkAdd);
+      .on("change focus blur", self.check);
     
     self.$target
       .keydown(function(e) { if (e.keyCode === 13) self.remove(); })
       .dblclick(self.remove)
-      .on("change focus blur", self.checkRemove);
-    
-  
+      .on("change focus blur", self.check);
+
     self.$add.click(self.add);
     self.$remove.click(self.remove);
     self.$cancel.click(function() { if (self.cancelCallback) self.cancelCallback(); });
@@ -97,16 +122,15 @@
     // Reset:
     //
     
-    self.reset = function(data) {
+    self.reset = function(sourceData, targetData) {
       self.visible = null;
-      self.data = data;
+      self.data = sourceData;
       self.$source.empty();
       self.$target.empty();
+      _.each(targetData, self.addTarget);
       self.$filter.val("");
       self.updateFilter();
-      self.checkAdd();
-      self.checkRemove();
-      self.checkOk();
+      self.check();
       return self;
     };
   
