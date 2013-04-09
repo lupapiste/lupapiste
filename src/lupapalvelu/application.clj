@@ -426,12 +426,12 @@
 
 (defcommand "applications-for-datatables"
   {:parameters [:params] :verified true}
-  [{user :user {params :params} :data}]
+  [{user :user {:keys [params]} :data}]
   (ok :data (applications-for-user user params)))
 
-;
-; Query that returns number of applications or info-requests user has:
-;
+;;
+;; Query that returns number of applications or info-requests user has:
+;;
 
 (defquery "applications-count"
   {:parameters [:kind]
@@ -444,3 +444,15 @@
                 "applications" (assoc base-query :infoRequest false)
                 "both"         base-query)]
     (ok :data (mongo/count :applications query))))
+
+
+;;
+;; Statements
+;;
+
+(defcommand "request-for-statement"
+  {:parameters [:id :email]
+   :roles      [:authority]}
+  [{user :user {params :params} :data}]
+  (printf "requeste-for-statement for app:%s, email:%s")
+  (ok))
