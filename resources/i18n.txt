@@ -1,4 +1,4 @@
-error.password.minlength: Pituus v�hint��n 8 merkki�
+error.password.minlength: Pituus vähintään 8 merkkiä
 attachmentType.empty._group_label:
 login.reset-question: Oletko unohtanut salasanasi?
 
@@ -9,8 +9,8 @@ reset.email-placeholder: etunimi.sukunimi@osoite.fi
 reset.send: Lähetä
 reset.sent.1: Sähköposti lähetetty.
 reset.sent.2: Seuraa ohjeita sähköpostistasi. Voit sulkea tämän ikkunan.
-reset.fail.email-not-found: Antaamasi sähköpostiosoitetta ei löydy järjestelmästä. 
-reset.fail.email-send-failed: Sähköpostin lähetys epäonnistui, ole hyvä ja yritä uudelleen. 
+reset.fail.email-not-found: Antaamasi sähköpostiosoitetta ei löydy järjestelmästä.
+reset.fail.email-send-failed: Sähköpostin lähetys epäonnistui, ole hyvä ja yritä uudelleen.
 reset.email.title: Salasanan vaihto
 
 setpw.title: Salasanan vaihtaminen
@@ -18,8 +18,8 @@ setpw.info: Anna uusi salasana kahdesti ja paina OK.
 setpw.password.1: Salasana:
 setpw.password.2: Salasana uudelleen:
 setpw.send: OK
-setpw.success: Salasana vaihdettu. Klikkaa linkkiä ja kirjaudu sisään uudella salasanallasi:
-setpw.fail: Salasanan vaihto ei onnistunut, ole hyvä ja yritä uudelleen.
+setpw.success: Salasana vaihdettu. Klikkaa linkkiÃ¤ ja kirjaudu sisÃ¤Ã¤n uudella salasanallasi:
+setpw.fail: Salasanan vaihto ei onnistunut, ole hyvÃ¤ ja yritÃ¤ uudelleen.
 setpw.placeholder.1: Uusi salasana
 setpw.placeholder.2: Salasana uudelleen
 setpw.quality: Laatu:
@@ -30,5 +30,9 @@ setpw.quality.hi: Hyvä
 setpw.quality.excellent: Erinomainen
 setpw.notSame: Salasana ei täsmää
 
+auth-admin.permit-persons: Lausunnon antajat
+auth-admin.permit-person.text: Lausunnon tyyppi
+auth-admin.permit-person.name: Lausunnon antaja
+auth-admin.permitPerson.add: Lisää henkilö
 
 

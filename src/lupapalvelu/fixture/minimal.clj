@@ -267,7 +267,10 @@
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                       ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                      :legacy "http://localhost:8000/krysp/building.xml"}
+                      :legacy "http://localhost:8000/krysp/building.xml"
+                      :permitPersons [{:text "Paloviranomainen",
+                                       :email "sonja.sibbo@sipoo.fi",
+                                       :name "Sonja Sibbo"}]}
                      {:id "837"
                       :name {:fi "Tampere" :sv "Tammerfors"}
                       :municipalityCode "837"
