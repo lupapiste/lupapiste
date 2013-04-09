@@ -62,7 +62,7 @@
     };
 
     self.inTarget = function(id) { 
-      return $("option", self.$target).filter(function() { return $(this).data("id") === id; }).length;
+      return $("option", self.$target).filter(function() { return _.isEqual($(this).data("id"), id); }).length;
     };
     
     self.canAdd = function(id) {
@@ -125,7 +125,7 @@
       self.data = sourceData;
       self.$source.empty();
       self.$target.empty();
-      _.each(targetData, self.addTarget);
+      _(targetData).each(self.addTarget);
       self.$filter.val("");
       self.updateFilter();
       self.check();
