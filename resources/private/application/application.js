@@ -90,10 +90,18 @@
 
   var requestForStatementModel = new function() {
     var self = this;
-    self.data = ko.observable();
+    self.data = ko.observableArray();
+
+    self.load = function() {
+      ajax
+        .query("get-permit-persons", {id: currentId})
+        .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
+        .call();
+    };
 
     self.openDialog = function() {
       LUPAPISTE.ModalDialog.open("#dialog-request-for-statement");
+      self.load();
     };
   }();
 
