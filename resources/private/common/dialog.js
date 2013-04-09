@@ -121,8 +121,6 @@ LUPAPISTE.ModalDialog.init = function() {
     var id = $(this).attr('data-window-id');
     if (id) {
       LUPAPISTE.ModalDialog.open("#" + id);
-    } else {
-      warn("No 'data-window-id' attribute");
     }
     return false;
   });
