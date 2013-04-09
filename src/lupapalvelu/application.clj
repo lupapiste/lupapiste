@@ -210,14 +210,15 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defn- make-attachments [created op municipality]
-  (for [[type-group type-id] (get (:name op) (mongo/select-one :municipalities {:_id municipality} {:operations-attachments 1}))]
-    {:id (mongo/create-id)
-     :type {:type-group type-group :type-id type-id}
-     :state :requires_user_action
-     :modified created
-     :versions []
-     :op op}))
+(defn- make-attachments [created op municipality-id]
+  (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
+    (for [[type-group type-id] (get-in municipality [:operations-attachments (:name op)])]
+      {:id (mongo/create-id)
+       :type {:type-group type-group :type-id type-id}
+       :state :requires_user_action
+       :modified created
+       :versions []
+       :op op})))
 
 (defn- schema-data-to-body [schema-data]
   (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
