@@ -36,3 +36,4 @@ auth-admin.permitPerson.add: Lisää henkilö
 auth-admin.create-permit-person: Lisää lausunnon antaja
 userinfo.permit-type: Lausunnon tyyppi
 error.not-authority: Käyttäjä ei ole viranomainen
+application.tabStatement: Lausunnot

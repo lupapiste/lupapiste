@@ -98,6 +98,7 @@
             <li><a data-bind="ltext: 'application.tabInfo',         click: $root.application.changeTab" href="#" data-target="info"         data-test-id="application-open-info-tab"         ></a></li>
             <li><a data-bind="ltext: 'application.tabParties',      click: $root.application.changeTab" href="#" data-target="parties"      data-test-id="application-open-parties-tab"      ></a></li>
             <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.application.changeTab" href="#" data-target="attachments"  data-test-id="application-open-attachments-tab"  ></a></li>
+            <li><a data-bind="ltext: 'application.tabStatement',    click: $root.application.changeTab" href="#" data-target="statement"    data-test-id="application-open-statement-tab"    ></a></li>
             <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.application.changeTab" href="#" data-target="verdict"      data-test-id="application-open-verdict-tab"      ></a></li>
             <li><a data-bind="ltext: 'application.tabConversation', click: $root.application.changeTab" href="#" data-target="conversation" data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
@@ -253,6 +254,10 @@
               <span data-bind="text: text" data-test-id="application-verdict"></span>
             </div>
           </div>
+        </div>
+
+        <div id="application-statement-tab" class="tab-content" data-bind="with: application">
+          <p data-bind="ltext: 'application.statementDesc'" class="tab-info"></p>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
