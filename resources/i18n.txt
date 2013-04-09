@@ -30,11 +30,12 @@ setpw.quality.hi: Hyvä
 setpw.quality.excellent: Erinomainen
 setpw.notSame: Salasana ei täsmää
 
-auth-admin.permit-persons: Lausunnon antajat
-auth-admin.permit-person.name: Lausunnon antaja
-auth-admin.permitPerson.add: Lisää henkilö
-auth-admin.create-permit-person: Lisää lausunnon antaja
-userinfo.permit-type: Lausunnon tyyppi
+auth-admin.statement-persons: Lausunnon antajat
+auth-admin.statement-person.name: Lausunnon antaja
+auth-admin.statement-person.add: Lisää henkilö
+auth-admin.create-statement-person: Lisää lausunnon antaja
+auth-admin.update-statement-person: Päivitä lausunnon antajaa
+userinfo.statement-type: Lausunnon tyyppi
 error.not-authority: Käyttäjä ei ole viranomainen
 application.tabStatement: Lausunnot
 application.statement.add: Pyydä lausunto

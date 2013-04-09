@@ -96,7 +96,7 @@
 
     self.load = function() {
       ajax
-        .query("get-permit-persons", {id: currentId})
+        .query("get-statement-persons", {id: currentId})
         .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
         .call();
     };
