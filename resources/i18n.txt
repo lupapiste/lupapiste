@@ -31,8 +31,8 @@ setpw.quality.excellent: Erinomainen
 setpw.notSame: Salasana ei täsmää
 
 auth-admin.permit-persons: Lausunnon antajat
-auth-admin.permit-person.text: Lausunnon tyyppi
 auth-admin.permit-person.name: Lausunnon antaja
 auth-admin.permitPerson.add: Lisää henkilö
-
-
+auth-admin.create-permit-person: Lisää lausunnon antaja
+userinfo.permit-type: Lausunnon tyyppi
+error.not-authority: Käyttäjä ei ole viranomainen
