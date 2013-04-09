@@ -88,6 +88,15 @@
     });
   }();
 
+  var requestForStatementModel = new function() {
+    var self = this;
+    self.data = ko.observable();
+
+    self.openDialog = function() {
+      LUPAPISTE.ModalDialog.open("#dialog-request-for-statement");
+    };
+  }();
+
   var submitApplicationModel = new function() {
     var self = this;
 
@@ -276,10 +285,6 @@
       if ($target.is("span")) { $target = $target.parent(); }
       window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
       window.scrollTo(0,0);
-    },
-
-    requestForStatement: function() {
-      LUPAPISTE.ModalDialog.open("#dialog-request-for-statement");
     }
   };
 
@@ -558,7 +563,8 @@
       accordian: accordian,
       removeDocModel: removeDocModel,
       removeApplicationModel: removeApplicationModel,
-      attachmentTemplatesModel: attachmentTemplatesModel
+      attachmentTemplatesModel: attachmentTemplatesModel,
+      requestForStatementModel: requestForStatementModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
