@@ -336,11 +336,11 @@
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
           <div data-bind="foreach: data">
-            <input class="form-input text long" type="checkbox" data-bind="value: email, checked: $root.requestForStatementModel.emails" />
+            <input class="form-input text long" type="checkbox" data-bind="value: email, checked: $root.requestForStatementModel.emails, valueUpdate: 'afterkeydown'" />
             <label  data-bind="text: email" class="form-label"></label>
           </div>
           <button
-              data-bind="click: send, ltext: 'application.statement.send', visible: $root.authorization.ok('request-for-statement')"
+              data-bind="click: send, ltext: 'application.statement.send', disable: disabled"
               class="btn btn-primary modal"
               data-test-id="add-attachment">
           </button>

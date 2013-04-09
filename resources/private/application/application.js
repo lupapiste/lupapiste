@@ -92,6 +92,7 @@
     var self = this;
     self.data = ko.observableArray();
     self.emails = ko.observableArray([]);
+    self.disabled = ko.computed(function() { return _.isEmpty(self.emails()); });
 
     self.load = function() {
       ajax
