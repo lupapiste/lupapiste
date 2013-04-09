@@ -453,6 +453,6 @@
 (defcommand "request-for-statement"
   {:parameters [:id :email]
    :roles      [:authority]}
-  [{user :user {params :params} :data}]
-  (printf "requeste-for-statement for app:%s, email:%s")
+  [{user :user {:keys [id email]} :data}]
+  (printf "requeste-for-statement for app:%s, email:%s" id email)
   (ok))

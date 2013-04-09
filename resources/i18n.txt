@@ -38,3 +38,4 @@ userinfo.permit-type: Lausunnon tyyppi
 error.not-authority: Käyttäjä ei ole viranomainen
 application.tabStatement: Lausunnot
 application.statement.add: Pyydä lausunto
+application.statement.send: Lähetä

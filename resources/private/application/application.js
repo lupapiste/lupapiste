@@ -91,6 +91,7 @@
   var requestForStatementModel = new function() {
     var self = this;
     self.data = ko.observableArray();
+    self.emails = ko.observableArray([]);
 
     self.load = function() {
       ajax
@@ -103,6 +104,16 @@
       LUPAPISTE.ModalDialog.open("#dialog-request-for-statement");
       self.load();
     };
+
+    self.send = function() {
+      ajax.command("request-for-statement", {id: currentId, email: self.emails()})
+        .success(function() {
+          self.emails([]);
+          repository.load(currentId);
+          LUPAPISTE.ModalDialog.close();
+        }).call();
+    };
+
   }();
 
   var submitApplicationModel = new function() {
