@@ -85,10 +85,8 @@
     };
   
     self.check = function() {
-      window.sss = self.$add;
       self.$add.prop("disabled", !self.canAdd(self.getSelected().id));
       self.$remove.prop("disabled", $("option:selected", self.$target).length === 0);
-      console.log("CHECK:", self.getSelected().id, self.canAdd(self.getSelected().id));
       if (!self.duplicates) {
         $("option", self.$source).each(function() {
           var e = $(this);
