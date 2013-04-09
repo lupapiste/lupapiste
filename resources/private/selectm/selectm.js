@@ -2,6 +2,14 @@
   
   "use strict";
   
+  function nop() {}
+  
+  function toCallback(f) {
+    if (!f) return nop;
+    if (!_.isFunction(f)) throw "callback must be a function: " + f;
+    return f;
+  }
+  
   $.fn.selectm = function(template) {
     var self = {};
     
@@ -28,8 +36,10 @@
     self.$remove = $(".selectm-remove", this);
     self.$ok = $(".selectm-ok", this);
     self.$cancel = $(".selectm-cancel", this);
-    self.ok = function(f) { self.okCallback = f; return self; };
-    self.cancel = function(f) { self.cancelCallback = f; return self; };
+    self.okCallback = nop;
+    self.ok = function(f) { self.okCallback = toCallback(f); return self; };
+    self.cancelCallback = nop;
+    self.cancel = function(f) { self.cancelCallback = toCallback(f); return self; };
     self.allowDuplicates = function(d) { self.duplicates = d; return self; };
     
     self.filterData = function(filterValue) {
@@ -113,8 +123,8 @@
 
     self.$add.click(self.add);
     self.$remove.click(self.remove);
-    self.$cancel.click(function() { if (self.cancelCallback) self.cancelCallback(); });
-    self.$ok.click(function() { if (self.okCallback) self.okCallback(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
+    self.$cancel.click(function() { self.cancelCallback(); });
+    self.$ok.click(function() { self.okCallback(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
     
     //
     // Reset:
