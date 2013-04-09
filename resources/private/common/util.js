@@ -62,6 +62,27 @@ var util = (function() {
     return _.partial(_.join, "").apply(null, _.map(_.zip([3, 3, 4, 4], id.split("-")), zp));
   }
 
+  function makeAjaxMask() {
+    return $("<div>")
+      .addClass("ajax-loading-mask")
+      .append($("<div>")
+          .addClass("content")
+          .append($("<img>").attr("src", "/img/ajax-loader.gif"))
+          .append($("<div>").text(loc("sending"))));
+  }
+  
+  $.fn.ajaxMaskOn = function() {
+    this.append(makeAjaxMask());
+    return this;
+  };
+  
+  $.fn.ajaxMaskOff = function() {
+    this.find(".ajax-loading-mask").remove();
+    return this;
+  };
+  
+  $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
+  
   return {
     fluentify: fluentify,
     getPwQuality: getPwQuality,
