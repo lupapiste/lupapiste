@@ -19,4 +19,7 @@ Fill in right email
   Input text  email  teppo@example.com
   Click enabled by test id  reset-send
   Wait Until  Page Should Not Contain  ei löydy
+
+Email was send
   Wait Until  Page Should Contain  Sähköposti lähetetty
+  ## TODO: verify using JSON API?
