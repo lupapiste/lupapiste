@@ -30,6 +30,7 @@
           <th>tyyppi</th>
           <th>roolit</th>
           <th>parametrit</th>
+          <th>l&auml;hdekoodi</th>
           <th>kuvaus</th>
         </thead>
         <tbody data-bind="foreach: actions.data">
@@ -51,6 +52,9 @@
                 <li data-bind="text: $data"></li>
               </ul>
               <!-- /ko -->
+            </td>
+            <td>
+              <span data-bind="text: ns"></span>: <span data-bind="text: line"></span>
             </td>
             <td>
               <!-- ko if: $data.description -->
