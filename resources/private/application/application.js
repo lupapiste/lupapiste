@@ -279,7 +279,7 @@
     },
 
     requestForStatement: function() {
-      //LUPAPISTE.ModalDialog.open("#dialog-dialog-request-for-statement");
+      LUPAPISTE.ModalDialog.open("#dialog-request-for-statement");
     }
   };
 

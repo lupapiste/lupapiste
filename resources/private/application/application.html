@@ -258,8 +258,7 @@
 
         <div id="application-statement-tab" class="tab-content" data-bind="with: application">
           <button
-              data-bind="click: application.requestForStatement, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
-              data-window-id="dialog-request-for-statement"
+              data-bind="click: requestForStatement, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
               class="btn btn-primary modal"
               data-test-id="add-attachment">
           </button>
