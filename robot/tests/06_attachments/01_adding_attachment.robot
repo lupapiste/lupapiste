@@ -12,7 +12,7 @@ Mikko goes to empty attachments tab
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753  75341600250030
+  Create application the fast way  ${appname}  753  753-416-25-30
   Open tab  attachments
 
 Mikko adds txt attachment without comment
@@ -36,7 +36,7 @@ Mikko deletes attachment
   [Tags]  attachments
   Click enabled by test id  delete-attachment
   Confirm  dialog-confirm-delete-attachment
-  Wait Until Page Contains  75341600250030
+  Wait Until Page Contains  753-416-25-30
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Mikko adds txt attachment with comment
@@ -72,7 +72,7 @@ Switch user
 
 Sonja goes to attachment tab
   [Tags]  attachments
-  Open application  ${appname}  75341600250030
+  Open application  ${appname}  753-416-25-30
   Open tab  attachments
 
 Sonja see that attachment is for authority
