@@ -125,8 +125,6 @@
 (def ...notfound... nil)
 (def ...notimplemented... nil)
 
-(defn get-text [xml & selector] (-> xml (select1 (-> selector vector flatten)) text))
-
 (defn- ->rakennuksen-omistaja [omistaja]
   {:_selected "yritys"
    :yritys {:liikeJaYhteisoTunnus                     (get-text omistaja :tunnus)

@@ -54,28 +54,28 @@
       </div>
     </div>
   </section>
-  
+
   <section class="page container" id="reset">
     <form data-bind="submit: send">
-      
+
       <h1 data-bind="ltext: 'reset.title'"></h1>
       <p data-bind="ltext: 'reset.info'"></p>
-      
+
       <label data-bind="ltext: 'reset.email'" class="form-label"></label>
       <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('reset.email-placeholder')}" class="form-input" type="email" name="email" autofocus="autofocus">
-      
-      <button data-bind="click: send, enable: ok, ltext: 'reset.send'" class="btn btn-primary"></button>
-      
+
+      <button data-bind="click: send, enable: ok, ltext: 'reset.send'" data-test-id="reset-send" class="btn btn-primary"></button>
+
       <div data-bind="ltext: 'reset.sent.1', visible: sent" class="reset-sent-1"></div>
       <div data-bind="ltext: 'reset.sent.2', visible: sent" class="reset-sent-2"></div>
       <div data-bind="text: loc('reset.fail', fail()), visible: fail" class="reset-fail"></div>
-      
+
     </form>
   </section>
-  
+
   <section class="page container" id="setpw">
     <form data-bind="submit: send">
-      
+
       <h1 data-bind="ltext: 'setpw.title'"></h1>
       <p data-bind="ltext: 'setpw.info'"></p>
 
@@ -87,7 +87,7 @@
                          attr: {'class': 'setpw-quality-' + passwordQuality()},
                          text: loc('setpw.quality', passwordQuality())"></span>
       </div>
-            
+
       <label data-bind="ltext: 'setpw.password.2'" class="form-label"></label>
       <input data-bind="value: password2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('setpw.placeholder.2')}" class="form-input" type="password">
       <div>
@@ -99,11 +99,11 @@
       <div data-bind="visible: success">
         <a data-bind="ltext: 'setpw.success'" href="#!/login"></a>
       </div>
-      
+
       <div data-bind="ltext: 'setpw.fail', visible: fail"></div>
-      
+
     </form>
   </section>
-  
+
 </body>
 </html>
