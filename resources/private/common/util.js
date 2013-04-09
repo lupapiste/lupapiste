@@ -68,7 +68,8 @@ var util = (function() {
       .append($("<div>")
           .addClass("content")
           .append($("<img>").attr("src", "/img/ajax-loader.gif"))
-          .append($("<div>").text(loc("sending"))));
+          .append($("<div>").text(loc("sending"))))
+      .fadeIn();
   }
   
   $.fn.ajaxMaskOn = function() {
