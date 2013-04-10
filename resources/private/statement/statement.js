@@ -14,7 +14,7 @@ var statement = (function() {
   $(function() {
     ko.applyBindings({
       statementModel: true
-    }, $("#attachment")[0]);
+    }, $("#statement")[0]);
   });
 
 })();
