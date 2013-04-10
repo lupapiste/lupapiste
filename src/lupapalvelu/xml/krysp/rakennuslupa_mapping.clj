@@ -200,14 +200,14 @@
   (let [sftp-user (:rakennus-ftp-user municipality)
         rakennusvalvonta-directory "/rakennus"
         dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
-        output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory )
+        output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory)
         _          (fs/mkdirs output-dir)
         file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application)
         fileserver-address (:fileserver-address env/config)
-        begin-of-link (str fileserver-address "/" dynamic-part-of-outgoing-directory "/")
+        begin-of-link (str fileserver-address "/")
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments {:Liite
                                           {:kuvaus "Application when submitted"
