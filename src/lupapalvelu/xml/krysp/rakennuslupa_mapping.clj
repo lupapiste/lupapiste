@@ -195,11 +195,11 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
-(defn get-application-as-krysp [application lang submitted-application]
+(defn get-application-as-krysp [application lang submitted-application municipality]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
-  (let [municipality-code (:municipality application)
+  (let [sftp-user (:rakennus-ftp-user municipality)
         rakennusvalvonta-directory "/rakennus"
-        dynamic-part-of-outgoing-directory (str municipality-code rakennusvalvonta-directory)
+        dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
         output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory )
         _          (fs/mkdirs output-dir)
         file-name  (str output-dir "/Lupapiste" (:id application))
@@ -207,8 +207,7 @@
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application)
         fileserver-address (:fileserver-address env/config)
-        fileserver-root-directory (:fileserver-root-directory env/config)
-        begin-of-link (str fileserver-address "/" fileserver-root-directory "/" dynamic-part-of-outgoing-directory "/")
+        begin-of-link (str fileserver-address "/" dynamic-part-of-outgoing-directory "/")
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments {:Liite
                                           {:kuvaus "Application when submitted"
