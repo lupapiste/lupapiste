@@ -26,8 +26,17 @@ Mikko still can't approve application
 Mikko remembers that it is his turn to pick the kids from day care
   Logout
 
-Sonja logs in and sees that some completion is needed
+Sonja logs in for approval
   Sonja logs in
+  Open application  ${appname}  753-416-25-30
+
+Sonja approves application
+  Click enabled by test id  approve-application
+
+Sonja cant re-approve application
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
+
+Sonja sees that some completion is needed
   Open application  ${appname}  753-416-25-30
   Click enabled by test id  request-for-complement
   Logout
@@ -38,13 +47,3 @@ Mikko comes back, fills in missing parts and makes a resubmit
   Submit application
   Logout
 
-Sonja logs in for approval
-  Sonja logs in
-  Open application  ${appname}  753-416-25-30
-
-Sonja approves application
-  Click enabled by test id  approve-application
-
-Sonja cant re-approve application
-  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
-  Logout
