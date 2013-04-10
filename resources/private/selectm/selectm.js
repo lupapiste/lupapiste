@@ -67,32 +67,14 @@
       self.check();
     };
     
-    self.getSelected = function() {
-      return $("option:selected", self.$source).data() || {};
-    };
-
-    self.inTarget = function(id) { 
-      return $("option", self.$target).filter(function() { return _.isEqual($(this).data("id"), id); }).length;
-    };
+    self.getSelected = function()   { return $("option:selected", self.$source).data() || {}; };
+    self.inTarget    = function(id) { return $("option", self.$target).filter(function() { return _.isEqual($(this).data("id"), id); }).length; };
+    self.canAdd      = function(id) { return id && (self.duplicates || !self.inTarget(id)); };
+    self.makeTarget  = function(d)  { return $("<option>").data("id", d.id).text(d.text); }
+    self.addTarget   = function(d)  { if (d && self.canAdd(d.id)) self.$target.append(self.makeTarget(d)); return self; };
     
-    self.canAdd = function(id) {
-      return id && (self.duplicates || !self.inTarget(id));
-    };
-    
-    self.addTarget = function(d) {
-      if (d && self.canAdd(d.id)) self.$target.append($("<option>").data("id", d.id).text(d.text));
-      return self;
-    };
-    
-    self.add = function() {
-      self.addTarget(self.getSelected());
-      self.check();
-    };
-  
-    self.remove = function() {
-      $("option:selected", self.$target).remove();
-      self.check();
-    };
+    self.add = function() { self.addTarget(self.getSelected()); self.check(); };
+    self.remove = function() { $("option:selected", self.$target).remove(); self.check(); };
   
     self.check = function() {
       self.$add.prop("disabled", !self.canAdd(self.getSelected().id));
