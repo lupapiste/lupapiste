@@ -161,7 +161,7 @@ var docgen = (function() {
         type:  "text",
         "class": "form-input text form-date",
         value: value,
-        change: save,
+        change: save
       }).datepicker($.datepicker.regional[lang]).appendTo(span);
 
       return span;
