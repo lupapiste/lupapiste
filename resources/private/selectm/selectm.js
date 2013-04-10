@@ -12,8 +12,10 @@
   
   function localize() {
     var e = $(this),
-        t = _.first(e.attr("class").split(/\s+/), function(c) { return _.endsWith(c, "-label"); })[0];
-    e.text(loc("selectm." + t))
+        t = e.attr("data-loc");
+    if (t) {
+      if (e.is("input")) { e.attr("placeholder", loc(t)); } else { e.text(loc(t)); };
+    }
   }
   
   $.fn.selectm = function(template) {
@@ -22,20 +24,13 @@
     self.data = [];
     self.visible = [];
     self.duplicates = true;
-  
-    this.append(
-      (template ? template : $("#selectm-template"))
-        .children()
-        .first()
-        .clone()
-        .find("input").attr("placeholder", loc("selectm.filter-placeholder")).end()
-        .find("label").each(localize).end()
-        .find(".selectm-target-label").text(loc("selectm.target")).end()
-        .find(".selectm-add").text(loc("selectm.add")).end()
-        .find(".selectm-remove").text(loc("selectm.remove")).end()
-        .find(".selectm-ok").text(loc("selectm.ok")).end()
-        .find(".selectm-cancel").text(loc("selectm.cancel")).end());
-     
+
+    this.append((template || $("#selectm-template"))
+      .children()
+      .first()
+      .clone()
+      .find("*").each(localize).end());
+
     self.$filter = $("input", this);
     self.$source = $(".selectm-source", this);
     self.$target = $(".selectm-target", this);
