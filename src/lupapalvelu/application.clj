@@ -128,13 +128,13 @@
   {:parameters [:id]
    :roles      [:authority]
    :authority  true
-   :states     [:submitted]}
+   :states     [:sent]}
   [command]
   (with-application command
     (fn [application]
       (let [application-id (:id application)]
         (mongo/update
-          :applications {:_id (:id application) :state :submitted}
+          :applications {:_id (:id application) :state :sent}
           {$set {:state :complement-needed}})
         (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
 
@@ -148,10 +148,11 @@
     (fn [application]
       (let [new-state :submitted
             application-id (:id application)
-            submitted-application (mongo/by-id :submitted-applications (:id application))]
+            submitted-application (mongo/by-id :submitted-applications (:id application))
+            municipality (mongo/by-id :municipality (:municipality application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application)
+        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application municipality)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
