@@ -207,20 +207,21 @@
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application)
         fileserver-address (:fileserver-address env/config)
-        begin-of-link (str fileserver-address "/")
+        begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
         attachments (get-attachments-as-canonical application begin-of-link)
-        attachments-with-generated-pdfs (conj attachments {:Liite
-                                          {:kuvaus "Application when submitted"
-                                           :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
-                                           :muokkausHetki (to-xml-datetime (:submitted application))
-                                           :versionumero 1
-                                           :tyyppi "Hakemus vireilletullessa"}}
-                                          {:Liite
-                                           {:kuvaus "Application when sent from Lupapiste"
-                                            :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
-                                            :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
-                                            :versionumero 1
-                                            :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
+        attachments-with-generated-pdfs (conj attachments
+                                              {:Liite
+                                               {:kuvaus "Application when submitted"
+                                                :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
+                                                :muokkausHetki (to-xml-datetime (:submitted application))
+                                                :versionumero 1
+                                                :tyyppi "Hakemus vireilletullessa"}}
+                                              {:Liite
+                                               {:kuvaus "Application when sent from Lupapiste"
+                                                :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
+                                                :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
+                                                :versionumero 1
+                                                :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
         canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
     (validate (indent-str xml))
