@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html >
+<body>
+  <section class="page container" id="statement" data-bindz="with: statement">
+    <div>
+      <div class="attachment-info">
+        <h1>
+          <span data-bindz="text: application.title"></span>: <span data-bindz="ltext: name"></span>
+          <span data-bindz="if: latestVersion">
+            <span data-bindz="ltext: 'attachment.version'">versio</span>
+            <span id="test-attachment-version" data-bindz="version: latestVersion().version">0.0</span>,
+            <span data-bindz="ltext: 'attachment.editDate'">muokattu</span>
+            <span data-bindz="dateTimeString: latestVersion().created"></span>
+          </span>
+        </h1>
+        <a class="btn attachment-back" data-bindz ="attr: {href: '#!/application/' + application.id() + '/attachments' }, ltext: 'attachment.return'"></a>
+        <div class="form-entry">
+          <label for="attachment-type-select" class="form-label">
+           <span data-bindz="ltext: 'attachment.changeType'">Vaihda liitteen tyyppi</span>
+           <img src="/img/ajax-loader-12.gif" alt="..."
+                 id="attachment-type-select-loader" style="display: none;">
+          </label>
+          <div><select id="attachment-type-select"></select></div>
+          <br>
+          <button data-bindz="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
+          style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
+        </div>
+      </div>
+
+      <!-- Preview images and pdf files only -->
+      <div class="file-preview" data-bindz="visible: hasPreview()">
+        <div class="file-preview-image" data-bindz="if: isImage()">
+          <a data-bindz="attr: {href: '/api/view-attachment/' + latestVersion().fileId}">
+            <img data-bindz="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
+          </a>
+        </div>
+        <div class="file-preview-pdf" data-bindz="if: isPdf() || isPlainText()">
+          <iframe id="file-preview-iframe" data-bindz="attr: {src: '/api/view-attachment/' + latestVersion().fileId}"></iframe>
+        </div>
+      </div>
+
+      <div id="test-txt-file-preview" class="file-preview" data-bindz="visible: !hasPreview()">
+        <p data-bindz="ltext: 'attachment.noPreview'">Esikatselua ei saatavilla.</p>
+      </div>
+
+      <div class="attachment-file-versions">
+        <div data-bindz="with: $root.approve">
+          <button id="test-attachment-approve" data-bindz="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button id="test-attachment-reject" data-bindz="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+        </div>
+        <h3 data-bindz="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th data-bindz="ltext: 'attachment.file'">Tiedosto</th>
+              <th data-bindz="ltext: 'attachment.version'">Versio</th>
+              <th data-bindz="ltext: 'attachment.editDate'">Muokattu</th>
+              <th data-bindz="ltext: 'attachment.editor'">Muokkaaja</th>
+              <th data-bindz="ltext: 'attachment.actions'">Toiminto</th>
+            </tr>
+          </thead>
+          <tbody data-bindz="foreach: versions()">
+            <tr style="cursor: pointer;">
+              <td id="test-attachment-file-name"><a data-bindz="text: $data.filename, attr: {href: '/api/download-attachment/' + $data.fileId}"></a></td>
+              <td data-bindz="version: version"></td>
+              <td data-bindz="dateString: created">31.10.2012</td>
+              <td>
+                <span data-bindz="fullName: user"></span>
+                (<span data-bindz="ltext: user.role"></span>)
+              </td>
+              <td><a data-bindz="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version'),  enable: $root.authorization.ok('delete-attachment-version')" ></a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button
+            id="add-new-attachment-version"
+            class="btn"
+            data-window-id="upload-dialog"
+            data-bindz="click: newAttachmentVersion, ltext: 'attachment.addVersion', visible: $root.authorization.ok('upload-attachment'),  enable: $root.authorization.ok('upload-attachment')">
+          Lisää uusi versio
+        </button>
+      </div>
+
+      <div class="attachment-file-conversation" data-bindz="with: $root.comment">
+        <h3 data-bindz="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
+        <table class="table table-striped">
+          <tbody data-bindz="foreach: comments">
+            <tr class="comment" data-bindz="attr: {'class': 'comment ' + $parent.category($data)}">
+              <td class="commentParty">
+                <span class="date" data-bindz="dateTimeString: created"></span><br />
+                <span class="author" data-bindz="text: user.firstName()+' '+user.lastName()"></span><br />
+                <b>(<span class="role" data-bindz="ltext: user.role"></span>)</b>
+              </td>
+              <td class="comment-text">
+                <span data-bindz="if: $parent.category($data) == 'category-new-attachment-version'" class="new-attachment-version-details">
+                   <span data-bindz="ltext: 'newAttachmentVersion'"></span> <span data-bindz="version: target.version"></span>:
+                     <a data-bindz="text: target.filename, attr: {href: '/api/download-attachment/' + target.fileId()}"></a>
+                </span>
+                <span data-bindz="text: text"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <form>
+          <textarea
+            data-bindz="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+            id="attachment.commentText"
+            class="conversation-input"
+            rows="3">
+          </textarea>
+          <button
+              data-bindz="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
+              id="attachment.addComment"
+              type="submit"
+              class="btn btn-primary">
+            Lähetä viesti
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </section>
+</body>
+</html>

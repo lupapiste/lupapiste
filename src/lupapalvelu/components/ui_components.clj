@@ -75,6 +75,10 @@
                   :js ["attachment.js" "attachmentTypeSelect.js"]
                   :html ["attachment.html" "upload.html"]}
 
+   :statement    {:depends [:common :repository]
+                  :js ["statement.js"]
+                  :html ["statement.html"]}
+
    :register     {:depends [:common]
                   :css ["register.css"]
                   :js ["register.js"]
@@ -88,12 +92,12 @@
                   :html ["create.html"]}
 
    :applicant    {:depends [:common :authenticated :map :applications :application :attachment
-                            :docgen :create :mypage :debug]
+                            :statement :docgen :create :mypage :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :application :attachment
-                            :docgen :create :mypage :debug]
+                            :statement :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
