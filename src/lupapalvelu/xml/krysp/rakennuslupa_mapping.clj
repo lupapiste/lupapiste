@@ -202,7 +202,7 @@
         dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
         output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory )
         _          (fs/mkdirs output-dir)
-        file-name  (str output-dir "/Lupapiste" (:id application))
+        file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application)
