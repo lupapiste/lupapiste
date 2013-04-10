@@ -3,6 +3,9 @@ auth-admin.operations-attachments.operation: Toimenpide
 auth-admin.operations-attachments.attachments: Liitteet
 auth-admin.operations-attachments.add: Lisää liitepohja
 
-selectm.filter: Etsi liitteen nimellä
+selectm.filter-placeholder: Liitteen nimi
+selectm.filter-label: Etsi liitteen nimellä
+selectm.source-label: Liitepohjat
+selectm.target-label: Valitut
 
 sending: Lähetetään pyyntöä

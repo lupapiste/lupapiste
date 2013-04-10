@@ -10,6 +10,12 @@
     return f;
   }
   
+  function localize() {
+    var e = $(this),
+        t = _.first(e.attr("class").split(/\s+/), function(c) { return _.endsWith(c, "-label"); })[0];
+    e.text(loc("selectm." + t))
+  }
+  
   $.fn.selectm = function(template) {
     var self = {};
     
@@ -22,7 +28,8 @@
         .children()
         .first()
         .clone()
-        .find("input").attr("placeholder", loc("selectm.filter")).end()
+        .find("input").attr("placeholder", loc("selectm.filter-placeholder")).end()
+        .find("label").each(localize).end()
         .find(".selectm-target-label").text(loc("selectm.target")).end()
         .find(".selectm-add").text(loc("selectm.add")).end()
         .find(".selectm-remove").text(loc("selectm.remove")).end()
