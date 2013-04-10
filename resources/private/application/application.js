@@ -374,10 +374,10 @@
 
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
+      application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
       // Comments:
-
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
 

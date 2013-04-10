@@ -40,3 +40,8 @@ error.not-authority: Käyttäjä ei ole viranomainen
 application.tabStatement: Lausunnot
 application.statement.add: Pyydä lausunto
 application.statement.send: Lähetä
+application.statement.desc: Kuvaus
+application.statement.requested: Pyydetty
+application.statement.given: Annettu
+application.statement.status: Lausunto
+

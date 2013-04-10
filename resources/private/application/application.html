@@ -257,6 +257,26 @@
         </div>
 
         <div id="application-statement-tab" class="tab-content">
+          <table class="table table-striped tablesorter" data-bind="with: $root.application.data">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'application.statement.desc'"></th>
+                <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                <th data-bind="ltext: 'application.statement.requested'"></th>
+                <th data-bind="ltext: 'application.statement.given'"></th>
+                <th data-bind="ltext: 'application.statement.status'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: statement">
+              <tr class="link-row">
+                <td data-bind="text: person.text"></td>
+                <td data-bind="text: person.name"></td>
+                <td data-bind="dateString: requested"></td>
+                <td data-bind="text: given"></td>
+                <td data-bind="text: status"></td>
+              </tr>
+            </tbody>
+          </table>
           <button
               data-bind="click: requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
               class="btn btn-primary modal"
