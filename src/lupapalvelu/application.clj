@@ -453,12 +453,12 @@
 (defcommand "request-for-statement"
   {:parameters [:id :email]
    :roles      [:authority]}
-  [{user :user {:keys [id email]} :data}]
-  (with-application id
+  [{user :user {:keys [id email]} :data :as command}]
+  (with-application command
     (fn [{:keys [municipality]}]
       (municipality/with-municipality municipality
         (fn [{:keys [statementPersons]}]
-          (if-let [statementPerson (filter #(-> % :email (= email)))]
+          (if-let [statementPerson (filter #(-> % :email (= email)) statementPersons)]
             (mongo/update :applications {:_id id}
               {$push {:statement {:id (mongo/create-id)
                                   :person statementPerson
