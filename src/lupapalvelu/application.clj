@@ -1,7 +1,7 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
         [clojure.tools.logging]
-        [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
+        [lupapalvelu.core]
         [clojure.string :only [blank?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
@@ -454,5 +454,14 @@
   {:parameters [:id :email]
    :roles      [:authority]}
   [{user :user {:keys [id email]} :data}]
-  (printf "requeste-for-statement for app:%s, email:%s" id email)
-  (ok))
+  (with-application id
+    (fn [{:keys [municipality]}]
+      (municipality/with-municipality municipality
+        (fn [{:keys [statementPersons]}]
+          (if-let [statementPerson (filter #(-> % :email (= email)))]
+            (mongo/update :applications {:_id id}
+              {$push {:statement {:id (mongo/create-id)
+                                  :person statementPerson
+                                  :requested (now)
+                                  :given nil
+                                  :status nil}}})))))))
