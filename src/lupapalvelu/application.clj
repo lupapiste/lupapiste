@@ -458,10 +458,13 @@
     (fn [{:keys [municipality]}]
       (municipality/with-municipality municipality
         (fn [{:keys [statementPersons]}]
-          (if-let [statementPerson (filter #(-> % :email (= email)) statementPersons)]
-            (mongo/update :applications {:_id id}
-              {$push {:statement {:id (mongo/create-id)
-                                  :person statementPerson
-                                  :requested (now)
-                                  :given nil
-                                  :status nil}}})))))))
+          (let [emailset      (set email)
+                persons       (filter #(-> % :email emailset) statementPersons)
+                now           (now)
+                ->statement   (fn [person] {:id        (mongo/create-id)
+                                            :person    person
+                                            :requested now
+                                            :given     nil
+                                            :status    nil})
+                statements    (map ->statement persons)]
+            (mongo/update :applications {:_id id} {$pushAll {:statement statements}})))))))
