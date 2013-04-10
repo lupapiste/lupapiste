@@ -451,20 +451,20 @@
 ;;
 
 (defcommand "request-for-statement"
-  {:parameters [:id :email]
+  {:parameters [:id :personIds]
    :roles      [:authority]}
-  [{user :user {:keys [id email]} :data :as command}]
+  [{user :user {:keys [id personIds]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality]}]
       (municipality/with-municipality municipality
         (fn [{:keys [statementPersons]}]
-          (let [emailset      (set email)
-                persons       (filter #(-> % :email emailset) statementPersons)
-                now           (now)
-                ->statement   (fn [person] {:id        (mongo/create-id)
-                                            :person    person
-                                            :requested now
-                                            :given     nil
-                                            :status    nil})
-                statements    (map ->statement persons)]
-            (mongo/update :applications {:_id id} {$pushAll {:statement statements}})))))))
+          (let [personIdSet (set personIds)
+                persons     (filter #(-> % :id personIdSet) statementPersons)
+                now         (now)
+                ->statement (fn [person] {:id        (mongo/create-id)
+                                          :person    person
+                                          :requested now
+                                          :given     nil
+                                          :status    nil})
+                statements  (map ->statement persons)]
+            (mongo/update :applications {:_id id} {$pushAll {:statements statements}})))))))

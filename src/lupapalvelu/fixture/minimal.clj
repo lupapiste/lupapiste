@@ -268,7 +268,8 @@
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
                       ;;:legacy "http://212.213.116.162/geoserver/wfs"}
                       :legacy "http://localhost:8000/krysp/building.xml"
-                      :statementPersons [{:text "Paloviranomainen",
+                      :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                          :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
                                           :name "Sonja Sibbo"}]}
                      {:id "837"
