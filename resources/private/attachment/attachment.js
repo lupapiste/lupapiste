@@ -31,7 +31,7 @@ var attachment = (function() {
       .success(function() {
         repository.load(applicationId);
       })
-      .error(function(e) {
+      .error(function() {
         repository.load(applicationId);
       })
       .call();
@@ -174,7 +174,7 @@ var attachment = (function() {
           {id:              model.application.id(),
            attachmentId:    model.attachmentId(),
            attachmentType:  attachmentType})
-        .success(function(e) {
+        .success(function() {
           loader$.hide();
           repository.load(model.application.id());
         })
