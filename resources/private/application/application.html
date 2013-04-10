@@ -269,7 +269,7 @@
             </thead>
             <tbody data-bind="foreach: statement">
               <tr class="link-row">
-                <td data-bind="text: person.text"></td>
+                <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
                 <td data-bind="text: person.name"></td>
                 <td data-bind="dateString: requested"></td>
                 <td data-bind="text: given"></td>

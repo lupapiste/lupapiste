@@ -115,6 +115,11 @@
         }).call();
     };
 
+    self.openStatement = function(model) {
+      window.location.hash = "#!/statement/" + currentId + "/" + model.id();
+      return false;
+    };
+
   }();
 
   var submitApplicationModel = new function() {
