@@ -128,13 +128,13 @@
   {:parameters [:id]
    :roles      [:authority]
    :authority  true
-   :states     [:submitted]}
+   :states     [:sent]}
   [command]
   (with-application command
     (fn [application]
       (let [application-id (:id application)]
         (mongo/update
-          :applications {:_id (:id application) :state :submitted}
+          :applications {:_id (:id application) :state :sent}
           {$set {:state :complement-needed}})
         (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
 
