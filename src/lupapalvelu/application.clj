@@ -313,6 +313,14 @@
                                               $set {:modified created}})
         (ok)))))
 
+(defcommand "add-document"
+  {:parameters [:id :documentName]
+   :roles      [:applicant :authority]
+   :states     [:draft :open]}
+  [command]
+  (println "adding document")
+  (ok))
+
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
