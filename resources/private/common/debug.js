@@ -61,7 +61,7 @@ $(function() {
     .append($("<div>").addClass("dev-debug")
       .append($("<h3>")
         .append($("<a>").attr("href", "#").text("Development").click(function() { $("footer .dev-debug div:eq(0)").slideToggle(); return false; })))
-      .append($("<div>")
+      .append($("<div>").addClass("hidden")
         .append($("<input id='debug-tab-flow' type='checkbox'>").click(function() { hub.send("set-debug-tab-flow", { value: !!$(this).attr("checked") }); }))
         .append($("<label>").text("Flowing tabs"))
         .append($("<br>"))
@@ -108,7 +108,7 @@ $(function() {
     .get("/api/proxy-ctrl")
     .success(function(data) { $("footer input[data-id='proxy']").prop("checked", data.data ? "checked" : ""); })
     .call();
-  
+
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
 
