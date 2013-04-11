@@ -46,4 +46,5 @@ application.statement.given: Annettu
 application.statement.status: Lausunto
 
 statement.delete: Poista lausunto
-
+statement.delete.header: Lausunnon poisto
+statement.delete.message: Oletko varma että haluat poistaa lausunnon?

@@ -15,6 +15,22 @@ var statement = (function() {
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       self.data(ko.mapping.fromJS(statement));
     };
+
+    self.openDeleteDialog = function() {
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement");
+    };
+  }
+
+  function deleteStatementFromServer() {
+    ajax
+      .command("delete-statement", {id: applicationId, statementId: statementId})
+      .success(function() {
+        repository.load(applicationId);
+        window.location.hash = "!/application/"+applicationId+"/statement";
+        return false;
+      })
+      .call();
+    return false;
   }
 
   var statementModel = new StatementModel();
@@ -39,6 +55,10 @@ var statement = (function() {
       statementModel: statementModel,
       authorization: authorizationModel
     }, $("#statement")[0]);
+
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement",
+      loc("statement.delete.header"), loc("statement.delete.message"), loc("yes"), deleteStatementFromServer, loc("no"));
+
   });
 
 })();
