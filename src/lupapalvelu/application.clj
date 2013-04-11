@@ -212,7 +212,7 @@
 
 (defn- make-attachments [created op municipality-id]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
-    (for [[type-group type-id] (get-in municipality [:operations-attachments (:name op)])]
+    (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
       {:id (mongo/create-id)
        :type {:type-group type-group :type-id type-id}
        :state :requires_user_action
