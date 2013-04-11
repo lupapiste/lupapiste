@@ -49,3 +49,12 @@
     (walk/postwalk
       (fn [x] (if (or (keyword? x) (coll? x)) x {k x}))
       m)))
+
+(defn un-wrapped
+  "(un-wrapped (wrapped original)) => original"
+  ([m] (un-wrapped m :value))
+  ([m k]
+    (assert (keyword? k))
+    (walk/postwalk
+      (fn [x] (if (contains? x k) (k x) x))
+      m)))
