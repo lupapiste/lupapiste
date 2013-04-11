@@ -149,7 +149,7 @@
       (let [new-state :submitted
             application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
-            municipality (mongo/by-id :municipality (:municipality application))]
+            municipality (mongo/by-id :municipalities (:municipality application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
         (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application municipality)
