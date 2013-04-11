@@ -19,6 +19,14 @@
   // ["min", "max", "pattern", "step", "date", "dateISO", "digit", "phoneUS", "notEqual", "unique"];
   ko.validation.localize(loc.getErrorMessages());
 
+  ko.validation.rules['validPassword'] = {
+      validator: function (val) {
+          return val && util.isValidPassword(val);
+      },
+      message: loc("error.password.minlength")
+  };
+  ko.validation.registerExtenders();
+  
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
@@ -121,7 +129,15 @@
     }
   };
 
-  $.fn.applyBindings = function(model) {
+  ko.bindingHandlers.propertyId = {
+    update: function(element, valueAccessor) {
+      var v = ko.utils.unwrapObservable(valueAccessor()),
+          f = util.prop.toHumanFormat(v);
+      $(element).text(f ? f : "");
+    }
+  };
+  
+$.fn.applyBindings = function(model) {
     _.each(this, _.partial(ko.applyBindings, model));
     return this;
   };

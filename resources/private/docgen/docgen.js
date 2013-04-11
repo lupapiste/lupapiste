@@ -161,7 +161,7 @@ var docgen = (function() {
         type:  "text",
         "class": "form-input text form-date",
         value: value,
-        change: save,
+        change: save
       }).datepicker($.datepicker.regional[lang]).appendTo(span);
 
       return span;
@@ -363,7 +363,6 @@ var docgen = (function() {
           $("#invite-document-name").val(self.schemaName).change();
           $("#invite-document-id").val(self.docId).change();
           LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-          $("#invite-email").focus();
           return false;
         }
       }).appendTo(span);
@@ -501,6 +500,12 @@ var docgen = (function() {
       return function (e, callback) {
         var event = getEvent(e);
         var target = event.target;
+        if (target.parentNode.indicator) {
+          target.removeChild(indicator);
+        }
+        var indicator = document.createElement("span");
+        $(indicator).addClass("form-indicator");
+        target.parentNode.appendChild(indicator);
         var path = target.name;
         var loader = loaderImg();
         var label = document.getElementById(pathStrToLabelID(path));
@@ -516,11 +521,17 @@ var docgen = (function() {
           if (label) {
             label.removeChild(loader);
           }
-          $(target).removeClass("form-input-warn").removeClass("form-input-err");
+          $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
           if (status === "warn") {
-            $(target).addClass("form-input-warn");
+            $(indicator).addClass("form-input-warn").text(loc("form.warn"));
           } else if (status === "err") {
-            $(target).addClass("form-input-err");
+            $(indicator).addClass("form-input-err").text(loc("form.err"));
+          } else if (status === "ok") {
+            $(indicator).addClass("form-input-saved").text(loc("form.saved"));
+            setTimeout(function(){
+              $(indicator).removeClass("form-input-saved");
+              target.parentNode.removeChild(indicator);
+              }, 2000);
           } else if (status !== "ok") {
             error("Unknown status:", status, "path:", path);
           }

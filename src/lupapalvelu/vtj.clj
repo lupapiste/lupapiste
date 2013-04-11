@@ -1,6 +1,6 @@
 (ns lupapalvelu.vtj
   (:require [ring.util.codec :refer [form-decode]]
-            [lupapalvelu.xml.krysp.reader :refer [get-text strip-xml-namespaces]]
+            [lupapalvelu.xml.krysp.reader :refer [strip-xml-namespaces]]
             [sade.xml :refer :all]))
 
 (def encoding "ISO-8859-1")

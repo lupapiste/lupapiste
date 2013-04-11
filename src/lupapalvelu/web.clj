@@ -1,6 +1,7 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail]]
+        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
@@ -23,10 +24,13 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.token :as token]
             [sade.security :as sadesecurity]
             [sade.status :as status]
+            [sade.strings :as s]
             [sade.util :as util]
             [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery])
   (:import [java.io ByteArrayInputStream]))
@@ -45,8 +49,21 @@
 
 (defjson "/system/apis" [] @apis)
 
+(defn parse-json-body-middleware [handler]
+  (fn [request]
+    (let [json-body (if (s/starts-with (:content-type request) "application/json")
+                      (if-let [body (:body request)]
+                        (-> body
+                          (io/reader :encoding (or (:character-encoding request) "utf-8"))
+                          json/parse-stream
+                          keywordize-keys)
+                        {}))
+          request (assoc request :json json-body)
+          request (if json-body (assoc request :params json-body) request)]
+      (handler request))))
+
 (defn from-json [request]
-  (json/decode (slurp (:body request)) true))
+  (:json request))
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
@@ -95,9 +112,6 @@
 (status/defstatus :build (assoc env/buildinfo :server-mode env/mode))
 (status/defstatus :time  (. (new org.joda.time.DateTime) toString "dd.MM.yyyy HH:mm:ss"))
 (status/defstatus :mode  env/mode)
-
-(defjson "/api/buildinfo" []
-  (ok :data (assoc (util/sub-map env/buildinfo [:build-tag :build-id]) :server-mode env/mode)))
 
 ;;
 ;; Commands
@@ -179,6 +193,14 @@
 (defn redirect-to-frontpage [lang]
   (redirect lang "welcome"))
 
+(defn- landing-page
+  ([]
+    (landing-page default-lang))
+  ([lang]
+    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+      (redirect lang application-page)
+      (redirect-to-frontpage lang))))
+
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
   ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (when (and hashbang (local? hashbang))
@@ -199,19 +221,11 @@
 
 (defpage "/logout" []
   (logout!)
-  (resp/redirect "/"))
+  (landing-page))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
   (redirect-to-frontpage lang))
-
-(defn- landing-page
-  ([]
-    (landing-page default-lang))
-  ([lang]
-    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
-      (redirect lang application-page)
-      (redirect-to-frontpage lang))))
 
 (defpage "/" [] (landing-page))
 (defpage "/app/" [] (landing-page))
@@ -231,10 +245,10 @@
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)
-      (resp/redirect "/"))
+      (landing-page))
     (do
-      (warn (format "Invalid user account activation attempt with key '%s', possible hacking attempt?" key))
-      (resp/redirect "/"))))
+      (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
+      (landing-page))))
 
 ;;
 ;; Apikey-authentication
@@ -256,7 +270,6 @@
   (fn [request]
     (let [apikey (get-apikey request)]
       (handler (assoc request :user (security/login-with-apikey apikey))))))
-
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
@@ -280,10 +293,10 @@
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
-                                           {:applicationId applicationId
-                                            :attachmentId attachmentId
+                                           {:applicationId (or applicationId "")
+                                            :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
-                                            :typeSelector typeSelector
+                                            :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
@@ -315,6 +328,20 @@
     {:status 401}))
 
 ;;
+;; Token consuming:
+;;
+
+(defpage [:get "/api/token/:token-id"] {token-id :token-id}
+  (let [params (:params (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response {:status 404})))
+
+(defpage [:post "/api/token/:token-id"] {token-id :token-id}
+  (let [params (from-json (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response (resp/status 404 (resp/json {:ok false})))))
+
+;;
 ;; Cross-site request forgery protection
 ;;
 
@@ -341,7 +368,7 @@
 ;;
 
 (env/in-dev
-  (defjson "/dev/spy" []
+  (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
@@ -349,6 +376,8 @@
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
+
+  (defjson "/dev/hgnotes" [] env/hgnotes)
 
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
@@ -367,4 +396,14 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
+
+  (defquery "qlang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*))
+
+  (defcommand "clang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*)))

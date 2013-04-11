@@ -93,6 +93,10 @@ Go to page
 Open tab
   [Arguments]  ${name}
   Click by test id  application-open-${name}-tab
+  Tab should be visible  ${name}
+
+Tab should be visible
+  [Arguments]  ${name}
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
@@ -189,7 +193,7 @@ As Solitaadmin
   Solitaadmin logs in
 
 Mikko logs in
-  Applicant logs in  mikko@example.com  mikko69  Mikko Intonen
+  Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
@@ -244,13 +248,13 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Create application

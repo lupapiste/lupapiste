@@ -193,8 +193,8 @@
     :zip "55550"
     :city "Sipoo"
     :phone "0505503171"
-    :private {:password "$2a$10$zwb/nvYQu4b1oZGpxz8.QOqHEBx3vXw9brc3NqDexgMbDuU2pwL9q"
-              :salt "$2a$10$zwb/nvYQu4b1oZGpxz8.QO"
+    :private {:password "$2a$10$sVFCAX/MB7wDKA2aNp1greq7QlHCU/r3WykMX/JKMWmg7d1cp7HSq"
+              :salt "$2a$10$sVFCAX/MB7wDKA2aNp1gre"
               :apikey "502cb9e58426c613c8b85abc"}}
    {:id "777777777777777777000020" ;; pena
     :username "pena"
@@ -265,9 +265,11 @@
                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                :url "http://sipoo.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"
+                               }]
                       ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                      :legacy "http://localhost:8000/krysp/building.xml"}
+                      :legacy "http://localhost:8000/krysp/building.xml"
+                      :rakennus-ftp-user "sipoo"}
                      {:id "837"
                       :name {:fi "Tampere" :sv "Tammerfors"}
                       :municipalityCode "837"

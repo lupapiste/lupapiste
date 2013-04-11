@@ -2,7 +2,10 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
-        [clojure.string :only [blank?]])
+        [clojure.string :only [blank?]]
+        [clj-time.core :only [year]]
+        [clj-time.local :only [local-now]]
+        [lupapalvelu.i18n :only [with-lang loc]])
   (:require [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
@@ -54,7 +57,7 @@
 ;; Query application:
 ;;
 
-(defquery "applications" {:authenticated true} [{user :user}]
+(defquery "applications" {:authenticated true :verified true} [{user :user}]
   (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-municipality [app]
@@ -125,18 +128,18 @@
   {:parameters [:id]
    :roles      [:authority]
    :authority  true
-   :states     [:submitted]}
+   :states     [:sent]}
   [command]
   (with-application command
     (fn [application]
       (let [application-id (:id application)]
         (mongo/update
-          :applications {:_id (:id application) :state :submitted}
+          :applications {:_id (:id application) :state :sent}
           {$set {:state :complement-needed}})
         (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
-  {:parameters [:id]
+  {:parameters [:id :lang]
    :roles      [:authority]
    :authority  true
    :states     [:submitted]}
@@ -144,10 +147,12 @@
   (with-application command
     (fn [application]
       (let [new-state :submitted
-            application-id (:id application)]
+            application-id (:id application)
+            submitted-application (mongo/by-id :submitted-applications (:id application))
+            municipality (mongo/by-id :municipalities (:municipality application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application)
+        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application municipality)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
@@ -245,44 +250,47 @@
   ;; TODO operation to permit type mapping???
   "buildingPermit")
 
+(defn- make-application-id [municipality]
+  (let [year           (str (year (local-now)))
+        sequence-name  (str "applications-" municipality "-" year)
+        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+    (str "LP-" municipality "-" year "-" counter)))
+
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
-   :roles      [:applicant :authority]}
-  [command]
-  (let [{:keys [user created data]} command
-        user-role     (keyword (:role user))]
-    (if (or (= :applicant user-role)
-            (and (:municipality user) (= (:municipality data) (:municipality user))))
-      (let [
-            user-summary  (security/summary user)
-            id            (mongo/create-id)
-            owner         (role user :owner :type :owner)
-            op            (keyword (:operation data))
-            info-request? (if (:infoRequest data) true false)
-            state         (if (or info-request? (= :authority user-role)) :open :draft)
-            make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
-        (mongo/insert :applications {:id            id
-                                     :created       created
-                                     :opened        (when (= state :open) created)
-                                     :modified      created
-                                     :infoRequest   info-request?
-                                     :initialOp     op
-                                     :state         state
-                                     :municipality  (:municipality data)
-                                     :location      {:x (->double (:x data)) :y (->double (:y data))}
-                                     :address       (:address data)
-                                     :propertyId    (:propertyId data)
-                                     :title         (:address data)
-                                     :auth          [owner]
-                                     :documents     (if info-request? [] (make-documents user created nil op))
-                                     :attachments   (if info-request? [] (make-attachments created op))
-                                     :allowedAttachmentTypes (if info-request?
-                                                               [[:muut [:muu]]]
-                                                               (partition 2 attachment/attachment-types))
-                                     :comments      (map make-comment (:messages data))
-                                     :permitType    (permit-type-from-operation op)})
-        (ok :id id))
-      (fail :error.unauthorized))))
+   :roles      [:applicant :authority]
+   :verified   true}
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+  (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
+    (let [user-summary  (security/summary user)
+          id            (make-application-id municipality)
+          owner         (role user :owner :type :owner)
+          op            (keyword operation)
+          info-request? (if infoRequest true false)
+          state         (if (or info-request? (security/authority? user)) :open :draft)
+          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
+      (mongo/insert :applications {:id            id
+                                   :created       created
+                                   :opened        (when (= state :open) created)
+                                   :modified      created
+                                   :infoRequest   info-request?
+                                   :initialOp     op
+                                   :state         state
+                                   :municipality  municipality
+                                   :location      {:x (->double x) :y (->double y)}
+                                   :address       address
+                                   :propertyId    propertyId
+                                   :title         address
+                                   :auth          [owner]
+                                   :documents     (if info-request? [] (make-documents user created nil op))
+                                   :attachments   (if info-request? [] (make-attachments created op))
+                                   :allowedAttachmentTypes (if info-request?
+                                                             [[:muut [:muu]]]
+                                                             (partition 2 attachment/attachment-types))
+                                   :comments      (map make-comment messages)
+                                   :permitType    (permit-type-from-operation op)})
+      (ok :id id))
+    (fail :error.unauthorized)))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
@@ -418,7 +426,7 @@
      :sEcho                 echo}))
 
 (defcommand "applications-for-datatables"
-  {:parameters [:params]}
+  {:parameters [:params] :verified true}
   [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
 
@@ -427,7 +435,9 @@
 ;
 
 (defquery "applications-count"
-  {:parameters [:kind]}
+  {:parameters [:kind]
+   :authenticated true
+   :verified true}
   [{user :user {kind :kind} :data}]
   (let [base-query (domain/application-query-for user)
         query (condp = kind

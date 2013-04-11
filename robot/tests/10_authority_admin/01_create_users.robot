@@ -11,35 +11,39 @@ Authority admin goes to admin page
   Sipoo logs in
   Wait until page contains element  test-authority-admin-users-table
 
-Authority admin creates three users
+Authority admin creates two users
   Wait Until  Element Should Be Visible  //tr[@class="user-row"]
   ${userCount} =  Get Matching Xpath Count  //tr[@class="user-row"]
-  Create user  heikki.virtanen@example.com  Heikki  Virtanen  123456
-  Create user  hessu.kesa@example.com  Hessu  Kesa  123456
+  Create user  heikki.virtanen@example.com  Heikki  Virtanen  12345678
+  Create user  hessu.kesa@example.com  Hessu  Kesa  12345678
   ${userCountAfter} =  Evaluate  ${userCount} + 2
   User count is  ${userCountAfter}
+
+Password minimum length is 8
+  Click element  test-create-user
+  Wait until  Element should be visible  user-email
+  Input text       user-email  short.password@example.com
+  Input text       user-firstname  Short
+  Input text       user-lastname  Password
+  Input text       user-password  1234567
+  Element Should Be Disabled  test-create-user-save
+  Input text       user-password  12345678
+  Element Should Be Enabled  test-create-user-save
   Logout
 
-Created user cant login
-  Login  heikki.virtanen@example.com  123456
-  User should not be logged in
+Created user can login
+  Login  heikki.virtanen@example.com  12345678
+  User should be logged in  Heikki Virtanen
+  Logout
 
-Admin activates Heikki (to simulate activating via email)
-  Solitaadmin logs in
-  Wait until  page should contain link  heikki.virtanen@example.com
-  Click link  heikki.virtanen@example.com
-
-Activating Heikki removes activation link
+Activation link is not visible, because new authority user is actived by default
   Wait until  page should not contain link  heikki.virtanen@example.com
   Logout
 
-Heikki user can now login
-  Authority logs in  heikki.virtanen@example.com  123456  Heikki Virtanen
+Hessu can login, too
+  Login  hessu.kesa@example.com  12345678
+  User should be logged in  Hessu Kesa
   Logout
-
-Hessu can't still login
-  Login  hessu.kesa@example.com  123456
-  User should not be logged in
 
 *** Keywords ***
 

@@ -9,7 +9,7 @@
       <h1 data-bind="ltext: 'newRequest.topic'"></h1>
       <div class="create-application-search-box">
         <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-        <input data-bind="value: search, valueUpdate: 'afterkeydown'" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus"/>
+        <input data-bind="value: search, valueUpdate: 'afterkeydown', attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
         <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
           <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
         </button>
@@ -48,9 +48,7 @@
               disabled="disabled"
               type="text"
               class="form-input text long">
-          </div>
-          
-          <div class="form-entry">
+
             <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
             <input
               data-bind="value: propertyId,
@@ -133,9 +131,9 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', operation())"></div>
       <div data-bind="html: loc('operations', operation(), 'desc')"></div>
       
-      <div class="municipality-links" data-bind="visible: municipality().links">
+      <div class="municipality-links" data-bind="visible: municipalityLinks">
         <div data-bind="ltext: 'municipality.links'"></div>
-        <ul data-bind="foreach: municipality().links">
+        <ul data-bind="foreach: municipalityLinks">
           <li>
             <a data-bind="text: name.fi, attr: {href: url}" href="#" target="_blank"></a>
           </li>

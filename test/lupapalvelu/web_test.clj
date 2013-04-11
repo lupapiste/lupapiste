@@ -1,17 +1,19 @@
 (ns lupapalvelu.web-test
-  (:use lupapalvelu.web
-        midje.sweet))
+  (:use [lupapalvelu.web]
+        [midje.sweet]
+        [midje.util :only [testable-privates]]))
 
-(def parse #'lupapalvelu.web/parse)
+(testable-privates lupapalvelu.web parse)
 
 (facts
-  (fact (parse "apikey" "apikey foo") => "foo")
-  (fact (parse "apikey" "apikey  foo ") => "foo")
-  (fact (parse "apikey" "apikey=foo") => "foo")
-  (fact (parse "apikey" "apikey= foo ") => "foo")
-  (fact (parse "apikey" "apikey") => nil)
-  (fact (parse "apikey" "apikeyfoo") => nil)
-  (fact (parse "apikey" "apikey ") => nil)
-  (fact (parse "apikey" "baz boz") => nil)
-  (fact (parse "apikey" "") => nil)
-  (fact (parse "apikey" nil) => nil))
+  (parse "apikey" "apikey foo") => "foo"
+  (parse "apikey" "apikey  foo ") => "foo"
+  (parse "apikey" "apikey=foo") => "foo"
+  (parse "apikey" "apikey= foo ") => "foo"
+  (parse "apikey" "apikey") => nil
+  (parse "apikey" "apikeyfoo") => nil
+  (parse "apikey" "apikey ") => nil
+  (parse "apikey" "baz boz") => nil
+  (parse "apikey" "") => nil
+  (parse "apikey" nil) => nil)
+

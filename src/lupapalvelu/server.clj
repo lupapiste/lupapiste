@@ -19,7 +19,7 @@
             [lupapalvelu.user]
             [lupapalvelu.operations]
             [lupapalvelu.proxy-services]
-            [lupapalvelu.i18n]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [sade.security-headers :as headers]))
 
@@ -31,10 +31,11 @@
     (System/getProperty "java.vm.info")
     (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
     (System/getProperty "javax.net.ssl.trustStore"))
-
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)
+  (server/add-middleware i18n/lang-middleware)
+  (server/add-middleware web/parse-json-body-middleware)
   (server/add-middleware uach/add-ua-compatible-header)
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware headers/add-security-headers)
@@ -43,10 +44,12 @@
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
-    ((resolve 'lupapalvelu.perf-mon/init)))
-  (env/in-dev
+    ((resolve 'lupapalvelu.perf-mon/init))
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9000))
+    (nrepl/start-server :port 9000)
+    (when (env/value [:email :dummy-server])
+      (require 'sade.dummy-email-server)
+      ((resolve 'sade.dummy-email-server/start))))
   (with-logs "lupapalvelu"
     (server/start env/port {:mode env/mode
                             :ns 'lupapalvelu.web
