@@ -10,7 +10,7 @@
   (let [k (get row "key")
         t (get row lang)]
     (if (and k t (not (s/blank? t)))
-      (assoc-in result [lang k] t)
+      (assoc-in result [lang k] (s/trim t))
       result)))
 
 (defn- process-row [languages result row]
@@ -24,7 +24,7 @@
     (let [wb      (xls/load-workbook in)
           langs   (-> wb seq first first xls/read-row rest)
           headers (cons "key" langs)
-          data (->> wb (map (partial read-sheet headers)) (apply concat))]
+          data    (->> wb (map (partial read-sheet headers)) (apply concat))]
       (reduce (partial process-row langs) {} data))))
 
 (def ^:private excel-data (load-excel))

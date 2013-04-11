@@ -18,12 +18,10 @@ Mikko creates new application from inforequest
   Click by test id  inforequest-convert-to-application
   Wait until  Element should be visible  application
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  753-416-25-30
-#  Permit type should be  Rakennuslupahakemus
 
 Proper attachment templates are present
   Open tab  attachments
   Wait until  Element should be visible  xpath=//tr[@class='attachment-group-header']
-  # Element should not be visible  xpath=//*[@data-test-id='application-attachments-no-attachments']
 
 Mikko closes application
   Close current application

@@ -2,7 +2,7 @@
 
 target=$@
 
-if [ -z $target ] ; then
+if [ -z "$target" ] ; then
   target="tests"
 fi
 
