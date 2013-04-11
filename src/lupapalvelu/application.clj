@@ -32,11 +32,11 @@
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
-    (when-let [body (:body (domain/get-document-by-name app "hakija"))]
-      (if (= (:_selected body) "yritys")
-        (get-in body [:yritys :yritysnimi])
+    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
+      (if (= (get-in body [:_selected :value]) "yritys")
+        (get-in body [:yritys :yritysnimi :value])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str first-name \space last-name))))))
+          (str (:value first-name) \space (:value last-name)))))))
 
 (defn get-application-operation [app]
   (if (:infoRequest app)
@@ -221,14 +221,18 @@
      :versions []}))
 
 (defn- schema-data-to-body [schema-data]
-  (reduce (fn [body [data-path value]] (update-in body data-path (constantly value))) {} schema-data))
+  (reduce
+    (fn [body [data-path value]]
+      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))]
+        (update-in body path (constantly value))))
+    {} schema-data))
 
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations op)
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/schemas schema-name)
                                                  :created created
-                                                 :body (if (= schema-name (:schema op-info))
+                                                 :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info))
                                                          {})})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
@@ -239,7 +243,7 @@
         new-docs              (cons op-doc required-docs)
         hakija                (make "hakija")]
     (if user
-      (cons #_hakija (assoc-in hakija [:body :henkilo] (domain/user2henkilo user)) new-docs)
+      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/user2henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
@@ -330,23 +334,27 @@
 ;; krysp enrichment
 ;;
 
+(defn add-value-metadata [m meta-data]
+  (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
+
 (defcommand "merge-details-from-krysp"
-  {:parameters [:id :buildingId]
+  {:parameters [:id :documentId :buildingId]
    :roles      [:applicant :authority]}
-  [{{:keys [id buildingId]} :data :as command}]
+  [{{:keys [id documentId buildingId]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality propertyId] :as application}]
       (if-let [legacy (municipality/get-legacy municipality)]
         (let [doc-name     "rakennuksen-muuttaminen"
-              document     (domain/get-document-by-name application doc-name)
-              old-body     (:body document)
+              document     (domain/get-document-by-id (:documents application) documentId)
+              old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})]
+              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})
+              with-value-metadata (add-value-metadata new-body {:source :krysp})]
           (mongo/update
             :applications
             {:_id (:id application)
-             :documents {$elemMatch {:schema.info.name doc-name}}}
-            {$set {:documents.$.body new-body
+             :documents {$elemMatch {:id documentId}}}
+            {$set {:documents.$.data with-value-metadata
                    :modified (:created command)}})
           (ok))
         (fail :no-legacy-available)))))
