@@ -115,8 +115,11 @@
     var self = this;
     
     self.applicationId = null;
+    self.partyDocumentNames = ko.observableArray();
     
     self.init = function(applicationId) {
+      ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
+
       LUPAPISTE.ModalDialog.open("#dialog-add-party");
       return false;
     };

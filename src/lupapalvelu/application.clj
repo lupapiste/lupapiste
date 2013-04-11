@@ -82,6 +82,12 @@
         authorities (find-authorities-in-applications-municipality app)]
     (ok :authorityInfo authorities)))
 
+(defquery "party-document-names"
+  {:parameters [:id]
+   :authenticated true}
+  [command]
+  (ok :partyDocumentNames [{:documentName "hakija"}, {:documentName "suunnittelija"}]))
+
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
    :roles       [:authority]}
