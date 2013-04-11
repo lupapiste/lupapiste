@@ -377,7 +377,7 @@
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
 
-  (defjson "/dev/hgnotes" [] env/hgnotes)
+  (defjson "/dev/hgnotes" [] (env/hgnotes))
 
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
@@ -397,12 +397,12 @@
                "on"   true
                false)]
       (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
-  
+
   (defquery "qlang"
     {:authenticated false}
     [c]
     (ok :lang *lang*))
-  
+
   (defcommand "clang"
     {:authenticated false}
     [c]
