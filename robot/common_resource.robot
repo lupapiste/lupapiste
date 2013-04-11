@@ -360,8 +360,6 @@ Add comment
 #
 
 Apply minimal fixture now
-  #Execute Javascript  ajax.query("apply-fixture", {"name":"minimal"}).success(function(){alert('OK')}).call();
-  #Wait Until  Alert Should Be Present
   Show dev-box
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
