@@ -468,3 +468,10 @@
                                           :status    nil})
                 statements  (map ->statement persons)]
             (mongo/update :applications {:_id id} {$pushAll {:statements statements}})))))))
+
+(defcommand "delete-statement"
+  {:parameters [:id :statementId]
+   :roles      [:authority]}
+  [{{:keys [id statementId]} :data}]
+  (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
+
