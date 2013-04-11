@@ -140,6 +140,13 @@
         </ul>
       </div>
       
+      <div class="municipality-attachments" data-bind="visible: attachmentsForOp">
+        <div data-bind="ltext: 'municipality.attachments'"></div>
+        <ul data-bind="foreach: attachmentsForOp">
+          <li data-bind="text: loc('attachmentType', group, id)"></li>
+        </ul>
+      </div>
+      
       <div class="create-buttons">
         <button data-bind="click: goPhase3"  data-test-id="create-proceed-to-inforequest" class="btn btn-primary">
           <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>

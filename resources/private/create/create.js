@@ -84,6 +84,13 @@
     self.message = ko.observable("");
     self.requestType = ko.observable();
 
+    self.attachmentsForOp = ko.computed(function() {
+      var m = self.municipality(),
+          op = self.operation();
+      return (m && op) ? _.map(m["operations-attachments"][op], function(a) { return {"group": a[0], "id": a[1]}; }) : null;
+    });
+   
+
     self.clear = function() {
       if (!self.map) {
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
