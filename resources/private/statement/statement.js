@@ -8,7 +8,7 @@ var statement = (function() {
     var self = this;
 
     self.data = ko.observable();
-    self.application = null;
+    self.application = ko.observable();
   }
 
   var statementModel = new StatementModel();
