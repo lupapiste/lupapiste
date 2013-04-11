@@ -1,6 +1,10 @@
 var util = (function() {
   "use strict";
 
+  function zeropad(len, val) {
+    return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
+  }
+
   function fluentify(api, context) {
     return _.reduce(_.pairs(api),
                     function(m, pair) {
@@ -36,17 +40,6 @@ var util = (function() {
     return propertyIdDbFormat.test(s) || propertyIdHumanFormat.test(s);
   }
 
-  function zp(e) {
-    var p = e[0],
-        v = e[1],
-        l = v.length;
-    while (l < p) {
-      v = "0" + v;
-      l += 1;
-    }
-    return v;
-  }
-  
   function propertyIdToHumanFormat(id) {
     if (!id) return null;
     if (propertyIdHumanFormat.test(id)) return id;
@@ -55,6 +48,8 @@ var util = (function() {
     return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
   }
 
+  function zp(e) { return zeropad.apply(null, e); }
+  
   function propertyIdToDbFormat(id) {
     if (!id) return null;
     if (propertyIdDbFormat.test(id)) return id;
@@ -85,6 +80,7 @@ var util = (function() {
   $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
   
   return {
+    zeropad: zeropad,
     fluentify: fluentify,
     getPwQuality: getPwQuality,
     isValidEmailAddress: isValidEmailAddress,
