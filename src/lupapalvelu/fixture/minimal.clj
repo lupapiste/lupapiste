@@ -275,7 +275,8 @@
                                                                           [:muut :vaestonsuojasuunnitelma]
                                                                           [:muut :valaistussuunnitelma]]}
                       ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                      :legacy "http://localhost:8000/krysp/building.xml"}
+                      :legacy "http://localhost:8000/krysp/building.xml"
+                      :rakennus-ftp-user "sipoo"}
                      {:id "837"
                       :name {:fi "Tampere" :sv "Tammerfors"}
                       :municipalityCode "837"
