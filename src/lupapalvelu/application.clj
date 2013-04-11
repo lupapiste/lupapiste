@@ -318,8 +318,12 @@
    :roles      [:applicant :authority]
    :states     [:draft :open]}
   [command]
-  (println "adding document")
-  (ok))
+  (with-application command
+    (fn [application]
+      (let [id             (get-in command [:data :id])
+            document-name  (get-in command [:data :documentName])]
+        (println "adding document" document-name "to application"id) 
+        (ok)))))
 
 (defcommand "convert-to-application"
   {:parameters [:id]

@@ -120,6 +120,7 @@
     self.documentName = ko.observable();
     
     self.init = function(applicationId) {
+      self.applicationId = applicationId;
       ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
 
       LUPAPISTE.ModalDialog.open("#dialog-add-party");
