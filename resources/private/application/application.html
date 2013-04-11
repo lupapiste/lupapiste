@@ -256,29 +256,34 @@
           </div>
         </div>
 
-        <div id="application-statement-tab" class="tab-content">
-          <table class="table table-striped tablesorter" data-bind="with: $root.application.data">
-            <thead>
-              <tr>
-                <th data-bind="ltext: 'application.statement.desc'"></th>
-                <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
-                <th data-bind="ltext: 'application.statement.requested'"></th>
-                <th data-bind="ltext: 'application.statement.given'"></th>
-                <th data-bind="ltext: 'application.statement.status'"></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: $data.statements">
-              <tr class="link-row">
-                <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
-                <td data-bind="text: person.name"></td>
-                <td data-bind="dateString: requested"></td>
-                <td data-bind="text: given"></td>
-                <td data-bind="text: status"></td>
-              </tr>
-            </tbody>
-          </table>
+        <div id="application-statement-tab" class="tab-content" data-bind="with: $root.application.data">
+          <div data-bind="ifnot: statements().length>0">
+            <p data-bind="ltext: 'application.statement.missing'"></p>
+          </div>
+          <div data-bind="if: statements().length>0">
+            <table class="table table-striped tablesorter">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'application.statement.desc'"></th>
+                  <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                  <th data-bind="ltext: 'application.statement.requested'"></th>
+                  <th data-bind="ltext: 'application.statement.given'"></th>
+                  <th data-bind="ltext: 'application.statement.status'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: $data.statements">
+                <tr class="link-row">
+                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
+                  <td data-bind="text: person.name"></td>
+                  <td data-bind="dateString: requested"></td>
+                  <td data-bind="text: given"></td>
+                  <td data-bind="text: status"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <button
-              data-bind="click: requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
+              data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
               class="btn btn-primary modal"
               data-test-id="add-attachment">
           </button>

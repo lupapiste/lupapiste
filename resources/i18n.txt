@@ -44,6 +44,7 @@ application.statement.desc: Kuvaus
 application.statement.requested: Pyydetty
 application.statement.given: Annettu
 application.statement.status: Lausunto
+application.statement.missing: Hakemukseen ei liity lausuntapyyntöjä
 
 statement.delete: Poista lausunto
 statement.delete.header: Lausunnon poisto
