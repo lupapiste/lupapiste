@@ -23,3 +23,12 @@
                           :genre nil
                           :members {:0 {:members {:name nil
                                                   :instrument nil}}}}})
+
+(fact "simple schema with wrapped values"
+  (-> schema
+    (create nil-values)
+    flattened
+    (wrap-values :k)) => {:band {:name {:k nil}
+                          :genre {:k nil}
+                          :members {:0 {:members {:name {:k nil}
+                                                  :instrument {:k nil}}}}}})

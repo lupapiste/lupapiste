@@ -40,3 +40,11 @@
                 v (if (= :group (:type x)) (group x)(f x))]
             {k v})
           x)))))
+
+(defn wrap-values
+  "Wraps leaf values in a map under k key.
+   Assumes that every key in the original map is a keyword."
+  [m k]
+  (walk/postwalk
+    (fn [x] (if (or (keyword? x) (coll? x)) x {k x}))
+    m))
