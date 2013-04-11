@@ -321,7 +321,7 @@
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :answered]
+   :states     [:draft :open :submitted :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text]} :data :as command}]
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)

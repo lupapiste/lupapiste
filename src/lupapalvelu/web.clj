@@ -293,10 +293,10 @@
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
-                                           {:applicationId applicationId
-                                            :attachmentId attachmentId
+                                           {:applicationId (or applicationId "")
+                                            :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
-                                            :typeSelector typeSelector
+                                            :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
@@ -397,12 +397,12 @@
                "on"   true
                false)]
       (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
-  
+
   (defquery "qlang"
     {:authenticated false}
     [c]
     (ok :lang *lang*))
-  
+
   (defcommand "clang"
     {:authenticated false}
     [c]

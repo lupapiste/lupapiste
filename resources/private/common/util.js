@@ -29,11 +29,49 @@ var util = (function() {
     return val.indexOf("@") != -1;
   }
 
+  var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/
+  var propertyIdHumanFormat = /^([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,4})-([0-9]{1,4})$/;
+  
+  function isPropertyId(s) {
+    return propertyIdDbFormat.test(s) || propertyIdHumanFormat.test(s);
+  }
+
+  function zp(e) {
+    var p = e[0],
+        v = e[1],
+        l = v.length;
+    while (l < p) {
+      v = "0" + v;
+      l += 1;
+    }
+    return v;
+  }
+  
+  function propertyIdToHumanFormat(id) {
+    if (!id) return null;
+    if (propertyIdHumanFormat.test(id)) return id;
+    var p = propertyIdDbFormat.exec(id);
+    if (!p) throw "Invalid property ID: " + id;
+    return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
+  }
+
+  function propertyIdToDbFormat(id) {
+    if (!id) return null;
+    if (propertyIdDbFormat.test(id)) return id;
+    if (!propertyIdHumanFormat.test(id)) throw "Invalid property ID: " + id;
+    return _.partial(_.join, "").apply(null, _.map(_.zip([3, 3, 4, 4], id.split("-")), zp));
+  }
+
   return {
     fluentify: fluentify,
     getPwQuality: getPwQuality,
     isValidEmailAddress: isValidEmailAddress,
-    isValidPassword: isValidPassword
+    isValidPassword: isValidPassword,
+    prop: {
+      isPropertyId: isPropertyId,
+      toHumanFormat: propertyIdToHumanFormat,
+      toDbFormat: propertyIdToDbFormat
+    }
   };
   
 })();

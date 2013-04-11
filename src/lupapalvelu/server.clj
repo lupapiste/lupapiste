@@ -31,7 +31,6 @@
     (System/getProperty "java.vm.info")
     (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
     (System/getProperty "javax.net.ssl.trustStore"))
-
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)

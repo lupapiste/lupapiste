@@ -14,6 +14,8 @@
 (defn select [xml & path] (enlive/select xml (-> path vector flatten)))
 (defn select1 [xml & path] (first (apply select xml path)))
 
+(defn get-text [xml & selector] (-> xml (select1 (-> selector vector flatten)) text))
+
 (defn extract [xml m] (into {} (for [[k v] m] [k (->> v butlast (apply select1 xml) ((last v)))])))
 (defn children [xml] (:content xml))
 (defn convert [xml m] (map #(extract % m) (when (-> xml nil? not) (-> xml vector flatten))))
