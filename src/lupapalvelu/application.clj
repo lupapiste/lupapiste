@@ -24,7 +24,6 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 ;;
-;;
 ;; Common helpers:
 ;;
 
