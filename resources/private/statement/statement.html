@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html>
 <body>
-  <section class="page container" id="statement" data-bind="with: statementModel">
+  <section class="page container" id="statement" data-bind="with: $root.statementModel">
     <div>
-      <div class="attachment-info" data-bind="with: application">
+      <div class="attachment-info">
         <h1>
-          <span data-bind="text: title"></span>: <span data-bind="with: $root.statementModel.data"><span data-bind="text: $root.statementModel.data().id"></span></span>
+          <span data-bind="with: application">
+            <span data-bind="text: title"></span>:
+          </span>
+          <span data-bind="with: data">
+            <span data-bind="text: $root.statementModel.data().person.text"></span>
+          </span>
         </h1>
-        <a class="btn attachment-back" data-bind="attr: {href: '#!/application/' + id() + '/statement' }, ltext: 'attachment.return'"></a>
+        <a class="btn attachment-back" data-bindz="attr: {href: '#!/application/' + application().id() + '/statement' }, ltext: 'attachment.return'"></a>
         <div class="form-entry">
-          <!--
+          <button data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" style="margin-left: 0" data-test-id="delete-statement">Poista lausunto</button>
+          <br/><br/>
           <label for="attachment-type-select" class="form-label">
            <span data-bind="ltext: 'application.statement.status'">Lausunto</span>
            <img src="/img/ajax-loader-12.gif" alt="..." id="attachment-type-select-loader" style="display: none;">
           </label>
-          <div><select id="attachment-type-select"></select></div>
-          <br>
-          -->
-          <button data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" style="margin-left: 0" data-test-id="delete-statement">Poista lausunto</button>
+          <div><select id="statement-type-select" data-bind="options: statuses, optionsText: function(item) { return loc(item);}, value: selectedStatus, optionsCaption: loc('choose')"></select></div>
         </div>
       </div>
 

@@ -41,6 +41,16 @@
     }
   };
 
+  ko.bindingHandlers.safeText = {
+    update: function(element, valueAccessor, allBindingsAccessor, model) {
+      var bindings = $(element).attr("data-bind").substring(10).split(".");
+      var value = _.reduce(bindings, function(memo, key) {
+        return memo ? _.isFunction(memo[key]) ? memo[key]() : memo[key] : undefined;
+      }, model);
+      $(element).text(value);
+    }
+  };
+
   ko.bindingHandlers.ltext = {
     update: function(element, valueAccessor) {
       var e$ = $(element);

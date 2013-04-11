@@ -10,6 +10,9 @@ var statement = (function() {
     self.data = ko.observable();
     self.application = ko.observable();
 
+    self.statuses = ['open', 'closed'];
+    self.selectedStatus = ko.observable();
+
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
