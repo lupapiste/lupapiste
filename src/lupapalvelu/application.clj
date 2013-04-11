@@ -445,7 +445,6 @@
                 "both"         base-query)]
     (ok :data (mongo/count :applications query))))
 
-
 ;;
 ;; Statements
 ;;
