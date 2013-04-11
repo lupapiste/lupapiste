@@ -5,16 +5,18 @@
     <div>
       <div class="attachment-info" data-bind="with: application">
         <h1>
-          <span data-bind="text: title"></span>: <span data-bind="text: $root.statementModel.data.name"></span>
+          <span data-bind="text: title"></span>: <span data-bind="with: $root.statementModel.data"><span data-bind="text: $root.statementModel.data().id"></span></span>
         </h1>
         <a class="btn attachment-back" data-bind="attr: {href: '#!/application/' + id() + '/statement' }, ltext: 'attachment.return'"></a>
         <div class="form-entry">
+          <!--
           <label for="attachment-type-select" class="form-label">
            <span data-bind="ltext: 'application.statement.status'">Lausunto</span>
            <img src="/img/ajax-loader-12.gif" alt="..." id="attachment-type-select-loader" style="display: none;">
           </label>
           <div><select id="attachment-type-select"></select></div>
           <br>
+          -->
           <button data-bind="ltext: 'statement.delete', click: $root.statementModel.deleteAttachment, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" style="margin-left: 0" data-test-id="delete-statement">Poista lausunto</button>
         </div>
       </div>

@@ -9,18 +9,23 @@ var statement = (function() {
 
     self.data = ko.observable();
     self.application = ko.observable();
+
+    self.refresh = function(application) {
+      self.application(ko.mapping.fromJS(application));
+      var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
+      self.data(ko.mapping.fromJS(statement));
+    };
   }
 
   var statementModel = new StatementModel();
   var authorizationModel = authorization.create();
 
-  function refresh(application) {
-    statementModel.application(ko.mapping.fromJS(application));
-  }
-
   repository.loaded(function(event) {
     var application = event.applicationDetails.application;
-    if (applicationId === application.id) { refresh(application); }
+    if (applicationId === application.id) {
+      authorizationModel.refresh(application);
+      statementModel.refresh(application);
+    }
   });
 
   hub.onPageChange("statement", function(e) {
