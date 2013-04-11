@@ -4,17 +4,10 @@
   <section class="page container" id="statement" data-bind="with: statementModel">
     <div>
       <div class="attachment-info" data-bind="with: application">
-        <h1 data-bind="text: title"></h1>
         <h1>
-          <span data-bindz="text: application.title"></span>: <span data-bindz="ltext: name"></span>
-          <span data-bindz="if: latestVersion">
-            <span data-bindz="ltext: 'attachment.version'">versio</span>
-            <span id="test-attachment-version" data-bindz="version: latestVersion().version">0.0</span>,
-            <span data-bindz="ltext: 'attachment.editDate'">muokattu</span>
-            <span data-bindz="dateTimeString: latestVersion().created"></span>
-          </span>
+          <span data-bind="text: title"></span>: <span data-bind="text: $root.statementModel.data.name"></span>
         </h1>
-        <a class="btn attachment-back" data-bindz ="attr: {href: '#!/application/' + application.id() + '/attachments' }, ltext: 'attachment.return'"></a>
+        <a class="btn attachment-back" data-bind ="attr: {href: '#!/application/' + application.id() + '/statement' }, ltext: 'attachment.return'"></a>
         <div class="form-entry">
           <label for="attachment-type-select" class="form-label">
            <span data-bindz="ltext: 'attachment.changeType'">Vaihda liitteen tyyppi</span>
@@ -26,22 +19,6 @@
           <button data-bindz="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
           style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
         </div>
-      </div>
-
-      <!-- Preview images and pdf files only -->
-      <div class="file-preview" data-bindz="visible: hasPreview()">
-        <div class="file-preview-image" data-bindz="if: isImage()">
-          <a data-bindz="attr: {href: '/api/view-attachment/' + latestVersion().fileId}">
-            <img data-bindz="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
-          </a>
-        </div>
-        <div class="file-preview-pdf" data-bindz="if: isPdf() || isPlainText()">
-          <iframe id="file-preview-iframe" data-bindz="attr: {src: '/api/view-attachment/' + latestVersion().fileId}"></iframe>
-        </div>
-      </div>
-
-      <div id="test-txt-file-preview" class="file-preview" data-bindz="visible: !hasPreview()">
-        <p data-bindz="ltext: 'attachment.noPreview'">Esikatselua ei saatavilla.</p>
       </div>
 
       <div class="attachment-file-versions">

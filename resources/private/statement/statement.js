@@ -3,18 +3,18 @@ var statement = (function() {
 
   var applicationId = null;
   var statementId = null;
-  var statementModel = new StatementModel();
 
   function StatementModel() {
     var self = this;
 
-    self.application = ko.observable();
+    self.data = ko.observable();
+    self.application = null;
   }
+
+  var statementModel = new StatementModel();
 
   function refresh(application) {
     statementModel.application(ko.mapping.fromJS(application));
-    console.log("refresh: ",application);
-    console.log(statementModel.application().title());
   }
 
   repository.loaded(function(event) {
