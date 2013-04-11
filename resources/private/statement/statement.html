@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html >
+<html>
 <body>
-  <section class="page container" id="statement" data-bindz="with: statement">
+  <section class="page container" id="statement" data-bind="with: statementModel">
     <div>
-      <div class="attachment-info">
+      <div class="attachment-info" data-bind="with: application">
+        <h1 data-bind="text: title"></h1>
         <h1>
           <span data-bindz="text: application.title"></span>: <span data-bindz="ltext: name"></span>
           <span data-bindz="if: latestVersion">
