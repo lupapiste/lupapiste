@@ -140,7 +140,7 @@
         </ul>
       </div>
       
-      <div class="municipality-attachments" data-bind="visible: attachmentsForOp">
+      <div class="municipality-attachments" data-bind="visible: attachmentsForOp().length">
         <div data-bind="ltext: 'municipality.attachments'"></div>
         <div class="attachments-list" data-bind="foreach: attachmentsForOp"><span data-bind="visible: $index">, </span><span data-bind="text: loc('attachmentType', group, id)"></span></div>
       </div>

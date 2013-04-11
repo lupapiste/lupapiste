@@ -72,7 +72,7 @@
       if (human != id) {
         self.propertyId(human);
       } else {
-        var code = id ? id.split("-")[0].substring(0, 3) : null;
+        var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
         self
           .municipalityCode(code)
           .municipalityName(code ? loc("municipality", code) : null)
@@ -86,10 +86,10 @@
 
     self.attachmentsForOp = ko.computed(function() {
       var m = self.municipality(),
+          ops = m && m["operations-attachments"],
           op = self.operation();
-      return (m && op) ? _.map(m["operations-attachments"][op], function(a) { return {"group": a[0], "id": a[1]}; }) : null;
+      return (ops && op) ? _.map(ops[op], function(a) { return {"group": a[0], "id": a[1]}; }) : [];
     });
-   
 
     self.clear = function() {
       if (!self.map) {
