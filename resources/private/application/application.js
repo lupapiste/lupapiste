@@ -110,6 +110,18 @@
       LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
     });
   }();
+  
+  var addPartyModel = new function() {
+    var self = this;
+    
+    self.applicationId = null;
+    
+    self.init = function(applicationId) {
+      LUPAPISTE.ModalDialog.open("#dialog-add-party");
+      return false;
+    };
+    
+  }();
 
   function getOperations(docs) {
     var ops = {};
@@ -257,6 +269,12 @@
 
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
+      return false;
+    },
+    
+    addParty: function() {
+      var id = application.id();
+      addPartyModel.init(id);
       return false;
     },
 
@@ -553,6 +571,7 @@
       authorization: authorizationModel,
       accordian: accordian,
       removeDocModel: removeDocModel,
+      addPartyModel: addPartyModel,
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel
     };

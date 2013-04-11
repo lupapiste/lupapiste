@@ -1,4 +1,4 @@
-error.password.minlength: Pituus v�hint��n 8 merkki�
+error.password.minlength: Pituus vähintään 8 merkkiä
 attachmentType.empty._group_label:
 login.reset-question: Oletko unohtanut salasanasi?
 
@@ -30,5 +30,5 @@ setpw.quality.hi: Hyvä
 setpw.quality.excellent: Erinomainen
 setpw.notSame: Salasana ei täsmää
 
-
-
+application.addParty: Lisää osapuoli
+addParty.heading: Lisää osapuoli
