@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 New applications have Asemapiirros, Pohjapiiros and no Rasitustodistus
   Mikko logs in
   Apply minimal fixture now
-  Create application  Latokuja 1, Sipoo  753  753-416-25-30  empty-application-create-new
+  Create application the fast way  Latokuja 1, Sipoo  753  753-416-25-30
   Open tab  attachments
   Wait until  Element Should Be Visible  xpath=//section[@id='application']//div[@data-test-id='application-attachments-table']
   Attachment template is visible  paapiirustus.asemapiirros
