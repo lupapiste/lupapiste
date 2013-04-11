@@ -46,14 +46,14 @@
                   <span data-bind="text: count"></span>
                   <span>&#x00D7;</span>
                 </span>
-                <span data-bind="ltext: 'operations.' + name" data-test-id="test-application-operation"></span>
+                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
-              <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
+              <p data-bind="ltext: 'application.assignee'">K��sittelij��:</p>
               <span id="test-inforequest-assignee" class="application_summary_text">
 
                 <select id="inforequest-assignee-select"
