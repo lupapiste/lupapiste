@@ -117,6 +117,8 @@
     self.applicationId = null;
     self.partyDocumentNames = ko.observableArray();
     
+    self.documentName = ko.observable();
+    
     self.init = function(applicationId) {
       ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
 
@@ -124,6 +126,16 @@
       return false;
     };
     
+    self.addPartyEnabled = function() {
+      return self.documentName();
+    };
+
+    self.addParty = function () {
+      ajax.command("add-document", {id: self.applicationId, documentName: self.documentName()})
+        .success(function() { repository.load(self.applicationId); })
+        .call();
+      return false;
+    };
   }();
 
   function getOperations(docs) {

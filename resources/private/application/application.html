@@ -364,11 +364,14 @@
           </div>
           <div class="dialog-content">
             <div> 
-              <ul data-bind="foreach: partyDocumentNames">
-                <li>
-                  <span data-bind="text: documentName"></span>
-                </li>
-              </ul>
+              <select
+                data-bind="options: partyDocumentNames(),
+                           optionsText: function(item) { return item.documentName; },
+                           optionsValue: 'documentName',
+                           value: documentName,
+                           optionsCaption: loc('choose')">
+              </select>
+              <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close"></button>
             </div>
           </div>
         </div>
