@@ -12,6 +12,7 @@ var statement = (function() {
   }
 
   var statementModel = new StatementModel();
+  var authorizationModel = authorization.create();
 
   function refresh(application) {
     statementModel.application(ko.mapping.fromJS(application));
@@ -28,6 +29,11 @@ var statement = (function() {
     repository.load(applicationId);
   });
 
-  $(function() { ko.applyBindings({ statementModel: statementModel }, $("#statement")[0]); });
+  $(function() {
+    ko.applyBindings({
+      statementModel: statementModel,
+      authorization: authorizationModel
+    }, $("#statement")[0]);
+  });
 
 })();

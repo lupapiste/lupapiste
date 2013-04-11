@@ -45,3 +45,5 @@ application.statement.requested: Pyydetty
 application.statement.given: Annettu
 application.statement.status: Lausunto
 
+statement.delete: Poista lausunto
+
