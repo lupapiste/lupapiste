@@ -41,10 +41,11 @@
             {k v})
           x)))))
 
-(defn wrap-values
-  "Wraps leaf values in a map under k key.
+(defn wrapped
+  "Wraps leaf values in a map and under k key, key defaults to :value.
    Assumes that every key in the original map is a keyword."
-  [m k]
-  (walk/postwalk
-    (fn [x] (if (or (keyword? x) (coll? x)) x {k x}))
-    m))
+  ([m] (wrapped m :value))
+  ([m k]
+    (walk/postwalk
+      (fn [x] (if (or (keyword? x) (coll? x)) x {k x}))
+      m)))

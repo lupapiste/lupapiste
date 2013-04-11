@@ -28,7 +28,11 @@
   (-> schema
     (create nil-values)
     flattened
-    (wrap-values :k)) => {:band {:name {:k nil}
+    (wrapped :k)) => {:band {:name {:k nil}
                           :genre {:k nil}
                           :members {:0 {:members {:name {:k nil}
                                                   :instrument {:k nil}}}}}})
+
+(fact "wrapped defaults to :value key"
+  (wrapped nil) => {:value nil}
+  (wrapped {:k nil}) => {:k {:value nil}})
