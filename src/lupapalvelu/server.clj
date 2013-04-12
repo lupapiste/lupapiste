@@ -46,7 +46,7 @@
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init))
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9000)
+    (nrepl/start-server :port 9090)
     (when (env/value [:email :dummy-server])
       (require 'sade.dummy-email-server)
       ((resolve 'sade.dummy-email-server/start))))

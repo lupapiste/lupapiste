@@ -59,6 +59,7 @@ Comment is added
   Wait Until  Comment count is  2
 
 Change attachment type
+  [Tags]  attachments
   Select From List  attachment-type-select  hakija.valtakirja
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click Link  Palaa hakemukseen

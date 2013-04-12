@@ -24,7 +24,6 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
 
 ;;
-;;
 ;; Common helpers:
 ;;
 
@@ -211,14 +210,15 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defn- make-attachments [created op]
-  (for [[type-group type-ids] (partition 2 (:attachments (operations/operations op)))
-        type-id type-ids]
-    {:id (mongo/create-id)
-     :type {:type-group type-group :type-id type-id}
-     :state :requires_user_action
-     :modified created
-     :versions []}))
+(defn- make-attachments [created op municipality-id]
+  (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
+    (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
+      {:id (mongo/create-id)
+       :type {:type-group type-group :type-id type-id}
+       :state :requires_user_action
+       :modified created
+       :versions []
+       :op op})))
 
 (defn- schema-data-to-body [schema-data]
   (reduce
@@ -228,7 +228,7 @@
     {} schema-data))
 
 (defn- make-documents [user created existing-documents op]
-  (let [op-info               (operations/operations op)
+  (let [op-info               (operations/operations (:name op))
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/schemas schema-name)
                                                  :created created
@@ -260,6 +260,11 @@
         counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
     (str "LP-" municipality "-" year "-" counter)))
 
+(defn- make-op [op-name created]
+  {:id (mongo/create-id)
+   :name (keyword op-name)
+   :created created})
+
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
@@ -269,7 +274,7 @@
     (let [user-summary  (security/summary user)
           id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
-          op            (keyword operation)
+          op            (make-op operation created)
           info-request? (if infoRequest true false)
           state         (if (or info-request? (security/authority? user)) :open :draft)
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
@@ -278,7 +283,7 @@
                                    :opened        (when (= state :open) created)
                                    :modified      created
                                    :infoRequest   info-request?
-                                   :initialOp     op
+                                   :operations    [op]
                                    :state         state
                                    :municipality  municipality
                                    :location      {:x (->double x) :y (->double y)}
@@ -287,7 +292,7 @@
                                    :title         address
                                    :auth          [owner]
                                    :documents     (if info-request? [] (make-documents user created nil op))
-                                   :attachments   (if info-request? [] (make-attachments created op))
+                                   :attachments   (if info-request? [] (make-attachments created op municipality))
                                    :allowedAttachmentTypes (if info-request?
                                                              [[:muut [:muu]]]
                                                              (partition 2 attachment/attachment-types))
@@ -306,9 +311,12 @@
       (let [id         (get-in command [:data :id])
             created    (:created command)
             documents  (:documents application)
-            op         (keyword (get-in command [:data :operation]))
+            op-id      (mongo/create-id)
+            op         (make-op (get-in command [:data :operation]) created)
             new-docs   (make-documents nil created documents op)]
-        (mongo/update-by-id :applications id {$pushAll {:documents new-docs}
+        (mongo/update-by-id :applications id {$push {:operations op}
+                                              $pushAll {:documents new-docs
+                                                        :attachments (make-attachments created op (:municipality application))}
                                               $set {:modified created}})
         (ok)))))
 
@@ -321,13 +329,13 @@
     (fn [inforequest]
       (let [id       (get-in command [:data :id])
             created  (:created command)
-            op       (keyword (:initialOp inforequest))]
+            op       (first (:operations inforequest))]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
-                                              $pushAll {:attachments (make-attachments created op)}})
+                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})
         (ok)))))
 
 ;;
