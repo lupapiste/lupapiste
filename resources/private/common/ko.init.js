@@ -147,7 +147,7 @@
     }
   };
 
-$.fn.applyBindings = function(model) {
+  $.fn.applyBindings = function(model) {
     _.each(this, _.partial(ko.applyBindings, model));
     return this;
   };
