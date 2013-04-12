@@ -174,8 +174,7 @@
                                   :versionumero 1
                                   :tyyppi type
                                   :fileId file-id}})]
-    (when (not-empty canonical-attachments)
-      canonical-attachments)))
+    (not-empty canonical-attachments))
 
 (defn- write-attachments [attachments output-dir]
   (doseq [attachment attachments]
