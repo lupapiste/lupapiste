@@ -14,9 +14,11 @@
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
-(defn write-header [out n]
+(defn write-header [kind out n]
   (when (env/dev-mode?)
     (.write out (format "\n\n/*\n * %s\n */\n" n)))
+  (when (= kind :js)
+    (.write out "\n;\n\n"))
   out)
 
 (def error-reporter
@@ -51,11 +53,11 @@
     (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components kind component)]
         (if (fn? src)
-          (.write (write-header out (str "fn: " (fn-name src))) (src))
+          (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
             (if (.contains src ".min.")
-              (IOUtils/copy in (write-header out src))
-              (minified kind in (write-header out src)))))))
+              (IOUtils/copy in (write-header kind out src))
+              (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
 
 (defn parse-html-resource [c resource]

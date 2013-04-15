@@ -1,8 +1,8 @@
 var accordion = (function() {
   "use strict";
 
-  var animationTime = 200;
-  var animationEasing = "easeInOutCubic";
+  var animationTime = 200,
+      animationEasing = "easeInOutCubic";
 
   function set(t, toState, done) {
     var target = t;
