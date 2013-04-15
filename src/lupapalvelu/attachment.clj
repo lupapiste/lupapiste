@@ -7,7 +7,7 @@
   (:require [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [sade.strings :as strings]
+            [sade.strings :as ss]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
@@ -327,7 +327,7 @@
   [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text]} :data :as command}]
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
-        sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
+        sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
     (if (mime/allowed-file? sanitazed-filename)
       (if-let [application (mongo/by-id :applications id)]
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
@@ -366,9 +366,9 @@
   "Replaces all non-ascii chars and other that the allowed punctuation with dash.
    UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
   [unencoded-filename]
-  (when-let [de-accented (strings/de-accent unencoded-filename)]
+  (when-let [de-accented (ss/de-accent unencoded-filename)]
       (clojure.string/replace
-        (strings/last-n windows-filename-max-length de-accented)
+        (ss/last-n windows-filename-max-length de-accented)
         #"[^a-zA-Z0-9\.\-_ ]" "-")))
 
 (defn output-attachment [attachment-id user download?]
@@ -440,20 +440,51 @@
 ;; Stamping:
 ;;
 
+(defn- stampable? [attachment]
+  (let [content-type (-> attachment :versions last :contentType)]
+    (or (= "application/pdf" content-type) (ss/starts-with content-type "image/"))))
+
+(defn- ->stamp-job [attachment]
+  (assoc (select-keys (-> attachment :versions last) [:contentType :fileId :filename :size])
+         :id (:id attachment)
+         :status :waiting))
+
+(defn- stamp-job-status [stamp-job]
+  (if (every? (partial = :done) (map :status (vals stamp-job))) :done :runnig))
+
+(defn- stamp-attachments [stamp-jobs job-id]
+  (doseq [attachment (vals stamp-jobs)]
+    (println "STAMP: Working:" (:filename attachment))
+    (job/update job-id assoc-in [(:id attachment) :status] :working)
+    (Thread/sleep 1000)
+    (println "STAMP: Done:" (:filename attachment))
+    (job/update job-id assoc-in [(:id attachment) :status] :done)))
+
+(defn- key-by [f coll]
+  (into {} (for [e coll] [(f e) e])))
+
 (defcommand "stamp-attachments"
   {:parameters [:id]
    :roles      [:authority]
    :states     [:draft :open :submitted :complement-needed]
    :description "Stamps all attachments of given application"}
-  [{:keys [created user] {id :id} :data}]
-  (debugf "Create stamp job: id=%s user=%s created=%s" id user created)
-  (ok))
+  [command]
+  (with-application command
+    (fn [application]
+      (debugf "Create stamp job: id=%s" (:id application))
+      (let [stamp-jobs (key-by :id (map ->stamp-job (filter stampable? (:attachments application))))
+            job (job/start stamp-jobs stamp-job-status)]
+        (future
+          (stamp-attachments stamp-jobs (:id job)))
+        (ok :job job)))))
+
+(defn ->long [v]
+  (if (string? v) (Long/parseLong v) v))
 
 (defquery "stamp-attachments-job"
-  {:parameters [:job]
+  {:parameters [:job-id :version]
    :roles      [:authority]
    :description "Returns state of stamping job"}
-  [{user :user {job-id :job} :data}]
-  (debugf "Stamp attachments job state: job-id=%s user=%s" job-id user)
-  (ok))
-
+  [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
+  (debugf "Stamp attachments job state: job-id=%s version=%d timeout=%d" job-id (->long version) (->long timeout))
+  (assoc (job/status job-id (->long version) (->long timeout)) :ok true))

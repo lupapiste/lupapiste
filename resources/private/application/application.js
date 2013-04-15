@@ -8,6 +8,57 @@
   var applicationMap;
   var inforequestMap;
 
+  var stampModel = new function() {
+    var self = this;
+    
+    self.statusInit      = 0;
+    self.statusStarting  = 1;
+    self.statusRunning   = 2;
+    self.statusDone      = 3;
+    
+    self.id = null;
+    self.jobs = null;
+    self.status = ko.observable();
+    self.jobsTable = ko.observable();
+    
+    self.init = function(id) {
+      self.id = id;
+      self.jobs = {};
+      self.status(self.statusInit).jobsTable([]);
+      LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
+      return self;
+    };
+
+    self.start = function() {
+      console.log("start");
+      self.status(self.statusStarting);
+      // ajax.command("stamp-attachments", {id: self.id})
+      //  .success(self.started)
+      //  .call();
+      setTimeout(self.started, 1000);
+      return false;
+    };
+
+    self.started = function(data) {
+      console.log("started");
+      self.status(self.statusRunning);
+      self.jobs = {"123": {filename: "foo", size: 12345, status: ko.observable("waiting")},
+                   "345": {filename: "bar", size: 1234, status: ko.observable("waiting")},
+                   "678": {filename: "baz", size: 123, status: ko.observable("waiting")}};
+      self.jobsTable(_.values(self.jobs));
+      setTimeout(self.update, 2000);
+      return false;
+    };
+    
+    self.update = function(data) {
+      console.log("update");
+      _(self.jobs).values().each(function(job) { job.status("done"); });
+      self.status(self.statusDone);
+      return false;
+    };
+    
+  }();
+  
   var removeDocModel = new function() {
     var self = this;
 
@@ -255,6 +306,11 @@
       return false;
     },
 
+    stampAttachments: function() {
+      stampModel.init();
+      return false;
+    },
+    
     changeTab: function(model,event) {
       var $target = $(event.target);
       if ($target.is("span")) { $target = $target.parent(); }
@@ -538,7 +594,8 @@
       accordian: accordian,
       removeDocModel: removeDocModel,
       removeApplicationModel: removeApplicationModel,
-      attachmentTemplatesModel: attachmentTemplatesModel
+      attachmentTemplatesModel: attachmentTemplatesModel,
+      stampModel: stampModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
