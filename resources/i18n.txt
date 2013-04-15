@@ -10,3 +10,6 @@ stamp.filename: Tiedosto
 stamp.size: Koko
 stamp.status: Tila
 stamp.ok: Ok
+stamp.file.status.waiting: Odottaa
+stamp.file.status.working: Käsitellään
+stamp.file.status.done: Valmis

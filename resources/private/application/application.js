@@ -45,7 +45,7 @@
 
     function withObservableStatus(job, key) {
       var s = job.status;
-      job.status = ko.observable(s);
+      job.status = ko.observable(loc("stamp.file.status", s));
       return [key, job];
     }
     
@@ -77,7 +77,7 @@
       
       var job = data.job;
       self.version = job.version;
-      _.each(job.value, function(v, k) { self.files[k].status(v.status); });
+      _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
       
       return (job.status != "done") ? self.queryUpdate() : self.status(self.statusDone);
     };

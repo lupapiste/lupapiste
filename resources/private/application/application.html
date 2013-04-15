@@ -361,7 +361,7 @@
             <div data-bind="visible: status() < statusRunning">
               <div>
                 <span data-bind="ltext: 'stamp.sure', visible: status() === statusInit"></span>
-                <span data-bind="ltext: 'stamp.starting', visible: status() === statusStarting"></span>
+                <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
               </div>
               <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit" class="btn btn-primary btn-dialog"></button>
               <button data-bind="ltext: 'stamp.cancel', enabled: status() === statusInit" class="btn btn-dialog close"></button>
