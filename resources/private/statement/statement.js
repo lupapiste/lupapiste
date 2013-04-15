@@ -18,6 +18,8 @@ var statement = (function() {
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       self.data(ko.mapping.fromJS(statement));
+      self.selectedStatus(statement.status);
+      self.text(statement.text);
     };
 
     self.openDeleteDialog = function() {
