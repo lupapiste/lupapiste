@@ -152,26 +152,4 @@
     return this;
   };
 
-  ko.bindingProvider.instance.parseBindingsString = function(bindingsString, bindingContext, node) {
-
-    var bindingCache = {};
-
-    function createBindingsStringEvaluatorViaCache(bindingsString, cache) {
-      return cache[bindingsString] || (cache[bindingsString] = createBindingsStringEvaluator(bindingsString));
-    }
-
-    function createBindingsStringEvaluator(bindingsString) {
-      var rewrittenBindings = ko.expressionRewriting.preProcessBindings(bindingsString);
-      var functionBody = "with($context){with($data||{}){return{" + rewrittenBindings + "}}}";
-      return new Function("$context", "$element", functionBody);
-    }
-
-    try {
-      var bindingFunction = createBindingsStringEvaluatorViaCache(bindingsString, bindingCache);
-      return bindingFunction(bindingContext, node);
-    } catch (ex) {
-      return "";
-    }
-  };
-
 })(jQuery);
