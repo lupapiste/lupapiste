@@ -9,7 +9,7 @@
             <span data-bind="text: title"></span>:
           </span>
           <span data-bind="with: data">
-            <span data-bind="text: $root.statementModel.data().person.text"></span>
+            <span data-bind="text: person.text"></span>
           </span>
         </h1>
         <a class="btn attachment-back" data-bindz="attr: {href: '#!/application/' + application().id() + '/statement' }, ltext: 'attachment.return'"></a>
