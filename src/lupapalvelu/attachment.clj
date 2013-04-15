@@ -3,7 +3,8 @@
         [lupapalvelu.core]
         [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
-        [clojure.string :only [split join trim]])
+        [clojure.string :only [split join trim]]
+        [sade.security :only [random-password]])
   (:require [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
@@ -434,3 +435,35 @@
       {:body "404"
        :status 404
        :headers {"Content-Type" "text/plain"}})))
+
+;;
+;; Stamping:
+;;
+
+(def stamp-attachments-jobs (atom {}))
+
+(defcommand "stamp-attachments"
+  {:parameters [:id]
+   :roles      [:authority]
+   :states     [:draft :open :submitted :complement-needed]
+   :description "Stamps all attachments of given application"}
+  [{:keys [created user] {id :id} :data}]
+  (debugf "Create stamp job: id=%s user=%s created=%s" id user created)
+  (let [job (random-password)]
+    (swap! stamp-attachments-jobs assoc job {:created created
+                                             :user-id (:id user)
+                                             :application-id id
+                                             :tasks (atom {:foo "foo"
+                                                           :bar "bar"})})
+    (ok :job job)))
+
+(defquery "stamp-attachments-job"
+  {:parameters [:job]
+   :roles      [:authority]
+   :description "Returns state of stamping job"}
+  [{user :user {job-id :job} :data}]
+  (debugf "Stamp attachments job state: job-id=%s user=%s" job-id user)
+  (let [job (get @stamp-attachments-jobs job-id)]
+    (ok :status (deref (:tasks job)))))
+
+
