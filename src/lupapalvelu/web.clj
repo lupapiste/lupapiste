@@ -174,7 +174,7 @@
     (->>
       (ByteArrayInputStream. (compose resource-type app))
       (resp/content-type (resource-type content-type))
-      (resp/set-headers (cache-headers [resource-type])))
+      (resp/set-headers (cache-headers resource-type)))
     failure))
 
 ;; CSS & JS
