@@ -5,12 +5,8 @@
     <div>
       <div class="attachment-info">
         <h1>
-          <span data-bind="with: application">
-            <span data-bind="text: title"></span>:
-          </span>
-          <span data-bind="with: data">
-            <span data-bind="text: $root.statementModel.data().person.text"></span>
-          </span>
+          <span data-bind="text: application().title"></span>:
+          <span data-bind="text: data().person.text"></span>
         </h1>
         <a class="btn attachment-back" data-bindz="attr: {href: '#!/application/' + application().id() + '/statement' }, ltext: 'attachment.return'"></a>
         <div class="form-entry">
