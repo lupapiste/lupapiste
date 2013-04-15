@@ -128,8 +128,11 @@
      :userId        (get-in action [:user :id] "")}
     (core/execute action)))
 
-(defjson [:post "/api/command/:name"] {name :name}
+(defn- execute-command [name]
   (execute (enriched (core/command name (from-json (request/ring-request))))))
+
+(defjson [:post "/api/command/:name"] {name :name}
+  (execute-command name))
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
@@ -227,6 +230,10 @@
   (logout!)
   (redirect-to-frontpage lang))
 
+;; Saparate URL outside anti-csrf
+(defjson [:post "/api/login"] []
+  (execute-command "login"))
+
 (defpage "/" [] (landing-page))
 (defpage "/app/" [] (landing-page))
 (defpage [:get ["/app/:lang"  :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
@@ -289,7 +296,7 @@
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
+        result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
