@@ -483,4 +483,4 @@
     {:_id id :statements {$elemMatch {:id statementId}}}
     {$set {:statements.$.status status
            :statements.$.given (now)
-           :statemetns.$.text text}}))
+           :statements.$.text text}}))
