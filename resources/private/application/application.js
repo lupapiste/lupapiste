@@ -15,16 +15,20 @@
     self.statusStarting  = 1;
     self.statusRunning   = 2;
     self.statusDone      = 3;
+
+    self.applicationId = null;
+    self.jobId = null;
+    self.version = null;
+    self.files = null;
     
-    self.id = null;
-    self.jobs = null;
     self.status = ko.observable();
-    self.jobsTable = ko.observable();
+    self.filesTable = ko.observable();
     
-    self.init = function(id) {
-      self.id = id;
-      self.jobs = {};
-      self.status(self.statusInit).jobsTable([]);
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      self.jobId = null;
+      self.files = {};
+      self.status(self.statusInit).filesTable([]);
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
@@ -32,29 +36,50 @@
     self.start = function() {
       console.log("start");
       self.status(self.statusStarting);
-      // ajax.command("stamp-attachments", {id: self.id})
-      //  .success(self.started)
-      //  .call();
-      setTimeout(self.started, 1000);
+      ajax
+        .command("stamp-attachments", {id: self.applicationId})
+        .success(self.started)
+        .call();
       return false;
     };
 
+    function withObservableStatus(job, key) {
+      var s = job.status;
+      job.status = ko.observable(s);
+      return [key, job];
+    }
+    
     self.started = function(data) {
-      console.log("started");
+      console.log("started:", data);
+      self.jobId = data.job.id;
       self.status(self.statusRunning);
-      self.jobs = {"123": {filename: "foo", size: 12345, status: ko.observable("waiting")},
-                   "345": {filename: "bar", size: 1234, status: ko.observable("waiting")},
-                   "678": {filename: "baz", size: 123, status: ko.observable("waiting")}};
-      self.jobsTable(_.values(self.jobs));
-      setTimeout(self.update, 2000);
+      self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
+      self.filesTable(_.values(self.files));
+      self.version = 0;
+      self.queryUpdate();
       return false;
     };
     
+    self.queryUpdate = function() {
+      ajax
+        .query("stamp-attachments-job")
+        .param("job-id", self.jobId)
+        .param("version", self.version)
+        .success(self.update)
+        .call();
+      return self;
+    }
+
     self.update = function(data) {
-      console.log("update");
-      _(self.jobs).values().each(function(job) { job.status("done"); });
-      self.status(self.statusDone);
-      return false;
+      console.log("update", data);
+      
+      if (data.result === "timeout") return self.queryUpdate();
+      
+      var job = data.job;
+      self.version = job.version;
+      _.each(job.value, function(v, k) { self.files[k].status(v.status); });
+      
+      return (job.status != "done") ? self.queryUpdate() : self.status(self.statusDone);
     };
     
   }();
@@ -307,7 +332,7 @@
     },
 
     stampAttachments: function() {
-      stampModel.init();
+      stampModel.init(application.id());
       return false;
     },
     

@@ -454,9 +454,10 @@
 
 (defn- stamp-attachments [stamp-jobs job-id]
   (doseq [attachment (vals stamp-jobs)]
+    (Thread/sleep 2000)
     (println "STAMP: Working:" (:filename attachment))
     (job/update job-id assoc-in [(:id attachment) :status] :working)
-    (Thread/sleep 1000)
+    (Thread/sleep 2000)
     (println "STAMP: Done:" (:filename attachment))
     (job/update job-id assoc-in [(:id attachment) :status] :done)))
 

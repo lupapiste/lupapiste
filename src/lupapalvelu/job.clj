@@ -60,4 +60,4 @@
     (if (= v :timeout)
       {:result :timeout}
       {:result :update
-       :data (trim v)})))
+       :job (trim v)})))

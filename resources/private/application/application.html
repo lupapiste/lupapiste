@@ -363,13 +363,13 @@
                 <span data-bind="ltext: 'stamp.sure', visible: status() === statusInit"></span>
                 <span data-bind="ltext: 'stamp.starting', visible: status() === statusStarting"></span>
               </div>
-              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === self.statusInit" class="btn btn-primary btn-dialog"></button>
-              <button data-bind="ltext: 'stamp.cancel', enabled: status() === self.statusInit" class="btn btn-dialog close"></button>
+              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit" class="btn btn-primary btn-dialog"></button>
+              <button data-bind="ltext: 'stamp.cancel', enabled: status() === statusInit" class="btn btn-dialog close"></button>
             </div>
             <div data-bind="visible: status() >= statusRunning">
               <div>
-                <span data-bind="ltext: 'stamp.status.running', visible: status() === self.statusRunning"></span>
-                <span data-bind="ltext: 'stamp.status.done', visible: status() === self.statusDone"></span>
+                <span data-bind="ltext: 'stamp.status.running', visible: status() === statusRunning"></span>
+                <span data-bind="ltext: 'stamp.status.done', visible: status() === statusDone"></span>
               </div>
               <table>
                 <thead>
@@ -379,7 +379,7 @@
                     <td data-bind="ltext: 'stamp.status'"></td>
                   </tr>
                 </thead>
-                <tbody data-bind="foreach: jobsTable">
+                <tbody data-bind="foreach: filesTable">
                   <tr>
                     <td data-bind="text: filename"></td>
                     <td data-bind="size: size"></td>
@@ -387,7 +387,7 @@
                   </tr>              
                 </tbody>
               </table>
-              <button data-bind="ltext: 'stamp.ok', enabled: status() === self.statusDone" class="btn btn-primary btn-dialog close"></button>
+              <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
             </div>
           </div>
         </div>
