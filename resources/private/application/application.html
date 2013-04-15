@@ -276,8 +276,8 @@
                   <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
                   <td data-bind="text: person.name"></td>
                   <td data-bind="dateString: requested"></td>
-                  <td data-bind="text: given"></td>
-                  <td data-bind="text: loc('statement.'+status())"></td>
+                  <td data-bind="dateString: given"></td>
+                  <td data-bind="text: status() && loc('statement.'+status())"></td>
                 </tr>
               </tbody>
             </table>
