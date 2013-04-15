@@ -13,13 +13,13 @@ var util = (function() {
                       if (!_.isFunction(f)) throw "The value of key '" + k + "' is not a function: " + f;
                       m[k] = function() { f.apply(context || m, arguments); return m; };
                       return m; },
-                    {}); 
+                    {});
   }
-  
+
   function isValidPassword(password) {
     return password.length >= LUPAPISTE.config.passwordMinLength;
   }
-  
+
   function getPwQuality(password) {
     var l = password.length;
     if (l < 7)  { return "poor"; }
@@ -28,14 +28,14 @@ var util = (function() {
     if (l <= 12) { return "good"; }
     return "excellent";
   }
-  
+
   function isValidEmailAddress(val) {
     return val.indexOf("@") != -1;
   }
 
-  var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/
+  var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/;
   var propertyIdHumanFormat = /^([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,4})-([0-9]{1,4})$/;
-  
+
   function isPropertyId(s) {
     return propertyIdDbFormat.test(s) || propertyIdHumanFormat.test(s);
   }
@@ -44,12 +44,12 @@ var util = (function() {
     if (!id) return null;
     if (propertyIdHumanFormat.test(id)) return id;
     var p = propertyIdDbFormat.exec(id);
-    if (!p) throw "Invalid property ID: " + id;
+    if (!p) return id;
     return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
   }
 
   function zp(e) { return zeropad.apply(null, e); }
-  
+
   function propertyIdToDbFormat(id) {
     if (!id) return null;
     if (propertyIdDbFormat.test(id)) return id;
@@ -66,19 +66,19 @@ var util = (function() {
           .append($("<div>").text(loc("sending"))))
       .fadeIn();
   }
-  
+
   $.fn.ajaxMaskOn = function() {
     this.append(makeAjaxMask());
     return this;
   };
-  
+
   $.fn.ajaxMaskOff = function() {
     this.find(".ajax-loading-mask").remove();
     return this;
   };
-  
+
   $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
-  
+
   return {
     zeropad: zeropad,
     fluentify: fluentify,
@@ -91,5 +91,5 @@ var util = (function() {
       toDbFormat: propertyIdToDbFormat
     }
   };
-  
+
 })();
