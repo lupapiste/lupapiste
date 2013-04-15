@@ -26,7 +26,7 @@ var statement = (function() {
 
     self.submit = function() {
       ajax
-        .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus, text: self.text})
+        .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text()})
         .success(function() {
           repository.load(applicationId);
           window.location.hash = "!/application/"+applicationId+"/statement";
