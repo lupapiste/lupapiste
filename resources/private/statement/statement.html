@@ -23,9 +23,9 @@
            <img src="/img/ajax-loader-12.gif" alt="..." id="attachment-type-select-loader" style="display: none;">
           </label>
           <form data-bind="with: $root.statementModel">
-            <select id="statement-type-select" data-bind="options: statuses, optionsText: function(item) { return loc('statement.'+item);}, value: selectedStatus, optionsCaption: loc('choose')"></select>
+            <select id="statement-type-select" data-bind="options: statuses, optionsText: function(item) { return loc('statement.'+item);}, value: selectedStatus, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-statement')"></select>
             <textarea
-              data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+              data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-statement')"
               id="attachment.commentText"
               class="conversation-input"
               rows="10"></textarea>
