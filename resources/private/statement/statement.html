@@ -22,8 +22,21 @@
            <span data-bind="ltext: 'application.statement.status'">Lausunto</span>
            <img src="/img/ajax-loader-12.gif" alt="..." id="attachment-type-select-loader" style="display: none;">
           </label>
-          <div><select id="statement-type-select" data-bind="options: statuses, optionsText: function(item) { return loc(item);}, value: selectedStatus, optionsCaption: loc('choose')"></select></div>
-        </div>
+          <form data-bind="with: $root.statementModel">
+            <select id="statement-type-select" data-bind="options: statuses, optionsText: function(item) { return loc(item);}, value: selectedStatus, optionsCaption: loc('choose')"></select>
+            <textarea
+              data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+              id="attachment.commentText"
+              class="conversation-input"
+              rows="10"></textarea>
+            <button
+                data-bind="disable: disabled, click: submit, ltext: 'statement.submit', visible: $root.authorization.ok('add-comment')"
+                id="attachment.addComment"
+                type="submit"
+                class="btn btn-primary">
+              Jätä lausunto
+            </button>
+          </form>
       </div>
 
 <!--

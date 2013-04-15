@@ -10,8 +10,9 @@ var statement = (function() {
     self.data = ko.observable();
     self.application = ko.observable();
 
-    self.statuses = ['open', 'closed'];
+    self.statuses = ['openz', 'closedz'];
     self.selectedStatus = ko.observable();
+    self.text = ko.observable();
 
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
@@ -22,6 +23,14 @@ var statement = (function() {
     self.openDeleteDialog = function() {
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement");
     };
+
+    self.submit = function() {
+      console.log("submitted");
+    };
+
+    self.disabled = ko.computed(function() {
+      return !self.selectedStatus() || !self.text();
+    });
   }
 
   function deleteStatementFromServer() {

@@ -49,3 +49,4 @@ application.statement.missing: Hakemukseen ei liity lausuntapyyntöjä
 statement.delete: Poista lausunto
 statement.delete.header: Lausunnon poisto
 statement.delete.message: Oletko varma että haluat poistaa lausunnon?
+statement.submit: Lähetä lausunto
