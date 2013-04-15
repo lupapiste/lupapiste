@@ -10,7 +10,7 @@ var statement = (function() {
     self.data = ko.observable();
     self.application = ko.observable();
 
-    self.statuses = ['openz', 'closedz'];
+    self.statuses = ['yes', 'no', 'condition'];
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
 

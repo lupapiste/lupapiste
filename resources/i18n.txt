@@ -50,3 +50,7 @@ statement.delete: Poista lausunto
 statement.delete.header: Lausunnon poisto
 statement.delete.message: Oletko varma että haluat poistaa lausunnon?
 statement.submit: Lähetä lausunto
+statement.title: Puoltotieto
+statement.yes: Puoltaa
+statement.no: Ei puolla
+statement.condition: Puoltaa ehdoilla
