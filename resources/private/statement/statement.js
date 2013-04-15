@@ -25,7 +25,15 @@ var statement = (function() {
     };
 
     self.submit = function() {
-      console.log("submitted");
+      ajax
+        .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus, text: self.text})
+        .success(function() {
+          repository.load(applicationId);
+          window.location.hash = "!/application/"+applicationId+"/statement";
+          return false;
+        })
+        .call();
+      return false;
     };
 
     self.disabled = ko.computed(function() {
