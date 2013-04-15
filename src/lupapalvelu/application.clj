@@ -474,3 +474,11 @@
   [{{:keys [id statementId]} :data}]
   (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
 
+(defcommand "give-statement"
+  {:parameters [:id :statementId :status :text]
+   :roles      [:authority]}
+  [{{:keys [id statementId status text]} :data}]
+  (mongo/update
+    :applications
+    {:_id id :statements {$elemMatch {:id statementId}}} {$set {:statements.$ {:status status :text text}}}))
+
