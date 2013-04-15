@@ -60,7 +60,7 @@ Comment is added
 
 Change attachment type
   [Tags]  attachments
-  Select From List  attachment-type-select  hakija.valtakirja
+  Select From List  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click Link  Palaa hakemukseen
   Tab should be visible  attachments
@@ -78,11 +78,11 @@ Sonja goes to attachment tab
 
 Sonja see that attachment is for authority
   [Tags]  attachments
-  Wait Until  Attachment state should be  hakija.valtakirja  requires_authority_action
+  Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  requires_authority_action
 
 Sonja opens attachment details
   [Tags]  attachments
-  Open attachment details  hakija.valtakirja
+  Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
 
 Sonja sees Reject-button which is enabled
   [Tags]  attachments
