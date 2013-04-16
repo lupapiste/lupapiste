@@ -43,6 +43,46 @@ var statement = (function() {
     });
   }
 
+  // attachment gory details
+
+  var uploadingApplicationId = null;
+
+  function AttachmentModel() {
+    var self = this;
+
+    self.data = ko.observable();
+    self.application = ko.observable();
+
+    self.attachmentId = ko.observable();
+    self.filename = ko.observable();
+    self.versions = ko.observable();
+    self.attachmentType = ko.observable();
+
+    self.newAttachmentVersion = function() {
+      initFileUpload(applicationId, self.attachmentId(), self.attachmentType(), false);
+      LUPAPISTE.ModalDialog.open("#upload-dialog");
+    };
+  }
+
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
+    uploadingApplicationId = applicationId;
+    var iframeId = 'uploadFrame';
+    var iframe = document.getElementById(iframeId);
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
+  }
+
+  function uploadDone() {
+    if (uploadingApplicationId) {
+      repository.load(uploadingApplicationId);
+      LUPAPISTE.ModalDialog.close();
+      uploadingApplicationId = null;
+    }
+  }
+
+  hub.subscribe("upload-done", uploadDone);
+
+  // end
+
   function deleteStatementFromServer() {
     ajax
       .command("delete-statement", {id: applicationId, statementId: statementId})

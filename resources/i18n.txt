@@ -55,3 +55,6 @@ statement.yes: Puoltaa
 statement.no: Ei puolla
 statement.condition: Puoltaa ehdoilla
 statement.conversation: Keskustele päätöksestä
+statement.attachment.title: Liiteet
+statement.attachment.created: Pvm
+statement.attachment.owner: Tekijä
