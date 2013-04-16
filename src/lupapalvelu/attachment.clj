@@ -136,9 +136,9 @@
     latest))
 
 (defn- set-attachment-version
-  ([application-id attachment-id file-id filename content-type size now user]
-    (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
-  ([application-id attachment-id file-id filename content-type size now user retry-limit]
+  ([application-id attachment-id file-id filename content-type size now user stamped]
+    (set-attachment-version application-id attachment-id file-id filename content-type size now user stamped 5))
+  ([application-id attachment-id file-id filename content-type size now user stamped retry-limit]
     (if (pos? retry-limit)
       (when-let [application (mongo/by-id :applications application-id)]
         (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
@@ -152,7 +152,8 @@
                              ; Conversion could be done here as well, but we don't want to lose information.
                              :filename filename
                              :contentType content-type
-                             :size size}
+                             :size size
+                             :stamped stamped}
               result-count (mongo/update-by-query
                              :applications
                              {:_id application-id
@@ -171,7 +172,7 @@
               (warn
                 "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
                 attachment-id retry-limit)
-              (set-attachment-version application-id attachment-id file-id filename content-type size now user (dec retry-limit))))))
+              (set-attachment-version application-id attachment-id file-id filename content-type size now user stamped (dec retry-limit))))))
       (do
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
@@ -180,7 +181,7 @@
   (let [attachment-id (if (empty? attachment-id)
                         (create-attachment id attachement-type created)
                         attachment-id)]
-    (set-attachment-version id attachment-id file-id filename content-type size created user)))
+    (set-attachment-version id attachment-id file-id filename content-type size created user false)))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
@@ -442,8 +443,10 @@
 ;;
 
 (defn- stampable? [attachment]
-  (let [content-type (-> attachment :versions last :contentType)]
-    (or (= "application/pdf" content-type) (ss/starts-with content-type "image/"))))
+  (let [latest       (-> attachment :versions last)
+        content-type (:contentType latest)
+        stamped      (:stamped latest)]
+    (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
 
 (defn- ->file-info [attachment]
   (assoc (select-keys (-> attachment :versions last) [:contentType :fileId :filename :size])
@@ -465,7 +468,7 @@
                   out (io/output-stream temp-file)]
         (stamper/stamp stamp contentType in out))
       (mongo/upload application-id new-file-id filename contentType temp-file created)
-      (let [new-version (set-attachment-version application-id id new-file-id filename contentType (.length temp-file) created user)]
+      (let [new-version (set-attachment-version application-id id new-file-id filename contentType (.length temp-file) created user true)]
         ; mea culpa, but what the fuck was I supposed to do
         (mongo/update-by-id :applications
                             application-id
