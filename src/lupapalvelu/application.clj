@@ -474,9 +474,10 @@
   [{{:keys [id statementId]} :data}]
   (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
 
-(defn statement-owner [{{:keys [id statementId status text]} :data :as c} {:keys [statements]}]
-  (if-let [statement (first (filter #(= statementId (:id %)) statements))]
-    (comment "statement found, so what?")
+(defn statement-owner [{{:keys [id statementId status text]} :data {user-email :email} :user} {:keys [statements]}]
+  (if-let [{{statement-email :email} :person} (first (filter #(= statementId (:id %)) statements))]
+    (when-not (= statement-email user-email)
+      (fail :error.not-statement-owner))
     (fail :error.no-statement)))
 
 (defcommand "give-statement"
