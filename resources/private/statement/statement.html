@@ -40,10 +40,10 @@
       </div>
 
       <div class="attachment-file-conversation" data-bind="with: $root.comments">
-        <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
+        <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
         <table class="table table-striped">
           <tbody data-bind="foreach: comments">
-            <tr class="comment" data-bind="attr: {'class': 'comment ' + $parent.category($data)}">
+            <tr class="comment">
               <td class="commentParty">
                 <span class="date" data-bind="dateTimeString: created"></span><br/>
                 <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br/>
@@ -58,9 +58,10 @@
         <form>
           <textarea
             data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-            id="attachment.commentText"
+            id="statement.commentText"
             class="conversation-input"
-            rows="3"></textarea>
+            rows="3">
+          </textarea>
           <button
               data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
               id="attachment.addComment"

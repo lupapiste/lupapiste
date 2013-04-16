@@ -54,3 +54,4 @@ statement.title: Puoltotieto
 statement.yes: Puoltaa
 statement.no: Ei puolla
 statement.condition: Puoltaa ehdoilla
+statement.conversation: Keskustele päätöksestä
