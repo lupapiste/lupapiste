@@ -39,41 +39,6 @@
           </form>
       </div>
 
-      <div class="attachment-file-versions">
-        <h3 data-bindz="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th data-bindz="ltext: 'attachment.file'">Tiedosto</th>
-              <th data-bindz="ltext: 'attachment.version'">Versio</th>
-              <th data-bindz="ltext: 'attachment.editDate'">Muokattu</th>
-              <th data-bindz="ltext: 'attachment.editor'">Muokkaaja</th>
-              <th data-bindz="ltext: 'attachment.actions'">Toiminto</th>
-            </tr>
-          </thead>
-          <tbody data-bindz="foreach: versions()">
-            <tr style="cursor: pointer;">
-              <td id="test-attachment-file-name"><a data-bindz="text: $data.filename, attr: {href: '/api/download-attachment/' + $data.fileId}"></a></td>
-              <td data-bindz="version: version"></td>
-              <td data-bindz="dateString: created">31.10.2012</td>
-              <td>
-                <span data-bindz="fullName: user"></span>
-                (<span data-bindz="ltext: user.role"></span>)
-              </td>
-              <td><a data-bindz="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version'),  enable: $root.authorization.ok('delete-attachment-version')" ></a></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <button
-            id="add-new-attachment-version"
-            class="btn"
-            data-window-id="upload-dialog"
-            data-bindz="click: newAttachmentVersion, ltext: 'attachment.addVersion', visible: $root.authorization.ok('upload-attachment'),  enable: $root.authorization.ok('upload-attachment')">
-          Lisää uusi versio
-        </button>
-      </div>
-
       <div class="attachment-file-conversation" data-bind="with: $root.commentsModel">
         <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
         <table class="table table-striped">
