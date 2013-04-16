@@ -57,12 +57,18 @@ var statement = (function() {
 
   var statementModel = new StatementModel();
   var authorizationModel = authorization.create();
+  var commentsModel = new comments.create();
 
   repository.loaded(function(event) {
     var application = event.applicationDetails.application;
     if (pageutil.getPage() === "statement" && applicationId === application.id) {
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
+
+      commentsModel.setApplicationId(application.id);
+      commentsModel.setTarget({type: "statement", id: statementId});
+      commentsModel.setComments(application.comments);
+
     }
   });
 
@@ -75,7 +81,8 @@ var statement = (function() {
   $(function() {
     ko.applyBindings({
       statementModel: statementModel,
-      authorization: authorizationModel
+      authorization: authorizationModel,
+      comments: commentsModel
     }, $("#statement")[0]);
 
     LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement",

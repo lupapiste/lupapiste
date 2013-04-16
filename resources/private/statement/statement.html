@@ -39,6 +39,38 @@
           </form>
       </div>
 
+      <div class="attachment-file-conversation" data-bindz="with: $root.comments">
+        <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
+        <table class="table table-striped">
+          <tbody data-bind="foreach: comments">
+            <tr class="comment" data-bind="attr: {'class': 'comment ' + $parent.category($data)}">
+              <td class="commentParty">
+                <span class="date" data-bind="dateTimeString: created"></span><br/>
+                <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br/>
+                <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
+              </td>
+              <td class="comment-text">
+                <span data-bind="text: text"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <form>
+          <textarea
+            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+            id="attachment.commentText"
+            class="conversation-input"
+            rows="3"></textarea>
+          <button
+              data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
+              id="attachment.addComment"
+              type="submit"
+              class="btn btn-primary">
+            Lähetä viesti
+          </button>
+        </form>
+      </div>
+
 <!--
       <div class="attachment-file-versions">
         <div data-bindz="with: $root.approve">
