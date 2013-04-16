@@ -39,45 +39,7 @@
           </form>
       </div>
 
-      <div class="attachment-file-conversation" data-bind="with: $root.comments">
-        <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
-        <table class="table table-striped">
-          <tbody data-bind="foreach: comments">
-            <tr class="comment">
-              <td class="commentParty">
-                <span class="date" data-bind="dateTimeString: created"></span><br/>
-                <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br/>
-                <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-              </td>
-              <td class="comment-text">
-                <span data-bind="text: text"></span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <form>
-          <textarea
-            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-            id="statement.commentText"
-            class="conversation-input"
-            rows="3">
-          </textarea>
-          <button
-              data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
-              id="attachment.addComment"
-              type="submit"
-              class="btn btn-primary">
-            Lähetä viesti
-          </button>
-        </form>
-      </div>
-
-<!--
       <div class="attachment-file-versions">
-        <div data-bindz="with: $root.approve">
-          <button id="test-attachment-approve" data-bindz="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
-          <button id="test-attachment-reject" data-bindz="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
-        </div>
         <h3 data-bindz="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
         <table class="table table-striped">
           <thead>
@@ -112,35 +74,31 @@
         </button>
       </div>
 
-      <div class="attachment-file-conversation" data-bindz="with: $root.comment">
-        <h3 data-bindz="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
+      <div class="attachment-file-conversation" data-bind="with: $root.comments">
+        <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
         <table class="table table-striped">
-          <tbody data-bindz="foreach: comments">
-            <tr class="comment" data-bindz="attr: {'class': 'comment ' + $parent.category($data)}">
+          <tbody data-bind="foreach: comments">
+            <tr class="comment">
               <td class="commentParty">
-                <span class="date" data-bindz="dateTimeString: created"></span><br />
-                <span class="author" data-bindz="text: user.firstName()+' '+user.lastName()"></span><br />
-                <b>(<span class="role" data-bindz="ltext: user.role"></span>)</b>
+                <span class="date" data-bind="dateTimeString: created"></span><br/>
+                <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br/>
+                <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
               </td>
               <td class="comment-text">
-                <span data-bindz="if: $parent.category($data) == 'category-new-attachment-version'" class="new-attachment-version-details">
-                   <span data-bindz="ltext: 'newAttachmentVersion'"></span> <span data-bindz="version: target.version"></span>:
-                     <a data-bindz="text: target.filename, attr: {href: '/api/download-attachment/' + target.fileId()}"></a>
-                </span>
-                <span data-bindz="text: text"></span>
+                <span data-bind="text: text"></span>
               </td>
             </tr>
           </tbody>
         </table>
         <form>
           <textarea
-            data-bindz="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-            id="attachment.commentText"
+            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+            id="statement.commentText"
             class="conversation-input"
             rows="3">
           </textarea>
           <button
-              data-bindz="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
+              data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
               id="attachment.addComment"
               type="submit"
               class="btn btn-primary">
@@ -148,7 +106,6 @@
           </button>
         </form>
       </div>
-    -->
     </div>
 
   </section>
