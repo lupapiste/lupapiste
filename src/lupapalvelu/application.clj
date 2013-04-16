@@ -474,17 +474,23 @@
   [{{:keys [id statementId]} :data}]
   (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
 
-(defn statement-owner [{{:keys [id statementId status text]} :data {user-email :email} :user} {:keys [statements]}]
+(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} {:keys [statements]}]
   (if-let [{{statement-email :email} :person} (first (filter #(= statementId (:id %)) statements))]
     (when-not (= statement-email user-email)
       (fail :error.not-statement-owner))
-    (fail :error.no-statement :statenentId statementId)))
+    (fail :error.no-statement :statementId statementId)))
+
+(defn statement-not-given [{{:keys [statementId]} :data {user-email :email} :user} {:keys [statements]}]
+  (if-let [{:keys [given]} (first (filter #(= statementId (:id %)) statements))]
+    (when given
+      (fail :error.statement-already-given))
+    (fail :error.no-statement :statementId statementId)))
 
 (defcommand "give-statement"
   {:parameters  [:id :statementId :status :text]
-   :validators  [statement-owner]
+   :validators  [statement-owner statement-not-given]
    :roles       [:authority]
-   :description "authrotity-roled statement owners can give statements"}
+   :description "authrority-roled statement owners can give statements that are not given already"}
   [{{:keys [id statementId status text]} :data}]
   (mongo/update
     :applications
