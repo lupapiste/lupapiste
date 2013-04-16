@@ -11,6 +11,7 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.job :as job]
+            [lupapalvelu.stamper :as stamper]
             [lupapalvelu.i18n :as i18n])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
@@ -444,25 +445,40 @@
   (let [content-type (-> attachment :versions last :contentType)]
     (or (= "application/pdf" content-type) (ss/starts-with content-type "image/"))))
 
-(defn- ->stamp-job [attachment]
+(defn- ->file-info [attachment]
   (assoc (select-keys (-> attachment :versions last) [:contentType :fileId :filename :size])
          :id (:id attachment)
          :status :waiting))
 
 (defn- stamp-job-status [stamp-job]
-  (if (every? (partial = :done) (map :status (vals stamp-job))) :done :runnig))
+  (if (every? #{:done :error} (map :status (vals stamp-job))) :done :runnig))
 
-(defn- stamp-attachments [stamp-jobs job-id]
-  (doseq [attachment (vals stamp-jobs)]
-    (Thread/sleep 2000)
-    (println "STAMP: Working:" (:filename attachment))
-    (job/update job-id assoc-in [(:id attachment) :status] :working)
-    (Thread/sleep 2000)
-    (println "STAMP: Done:" (:filename attachment))
-    (job/update job-id assoc-in [(:id attachment) :status] :done)))
+(defn- stamp-attachments [file-infos application-id job-id]
+  (let [stamp (stamper/make-stamp)
+        temp-file (File/createTempFile (str "lupapiste.stamp." job-id ".") ".tmp")
+        created (now)]
+    (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
+    (doseq [{:keys [id contentType fileId filename]} (vals file-infos)]
+      (job/update job-id assoc-in [id :status] :working)
+      (with-open [in ((:content (mongo/download fileId)))
+                  out (io/output-stream temp-file)]
+        (try
+          (stamper/stamp stamp contentType in out)
+          (mongo/upload application-id fileId filename contentType temp-file created)
+          (job/update job-id assoc-in [id :status] :done)
+        (catch Exception e
+          (error e "failed to stamp attachment: application=%s, file=%s" application-id fileId)
+          (job/update job-id assoc-in [id :status] :error)))))
+    #_(.delete temp-file)))
 
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
+
+(defn- make-stamp-job [file-infos application-id]
+  (let [job (job/start file-infos stamp-job-status)
+        job-id (:id job)]
+    (future (stamp-attachments file-infos application-id job-id))
+    job))
 
 (defcommand "stamp-attachments"
   {:parameters [:id]
@@ -472,12 +488,11 @@
   [command]
   (with-application command
     (fn [application]
-      (debugf "Create stamp job: id=%s" (:id application))
-      (let [stamp-jobs (key-by :id (map ->stamp-job (filter stampable? (:attachments application))))
-            job (job/start stamp-jobs stamp-job-status)]
-        (future
-          (stamp-attachments stamp-jobs (:id job)))
-        (ok :job job)))))
+      (let [file-infos (key-by :id (map ->file-info (filter stampable? (:attachments application))))
+            file-count (count file-infos)]
+        (ok :count file-count
+            :job (when-not (zero? file-count)
+                   (make-stamp-job file-infos (:id application))))))))
 
 (defn ->long [v]
   (if (string? v) (Long/parseLong v) v))
