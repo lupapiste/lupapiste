@@ -364,7 +364,7 @@
                 <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
                 <span data-bind="ltext: 'stamp.status.no-files', visible: status() === statusNoFiles"></span>
               </div>
-              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit" class="btn btn-primary btn-dialog"></button>
+              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
               <button data-bind="ltext: 'stamp.cancel', enabled: status() === statusInit" class="btn btn-dialog close"></button>
             </div>
             <div data-bind="visible: status() >= statusRunning">
