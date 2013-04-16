@@ -13,8 +13,9 @@
     
     self.statusInit      = 0;
     self.statusStarting  = 1;
-    self.statusRunning   = 2;
-    self.statusDone      = 3;
+    self.statusNoFiles   = 2;
+    self.statusRunning   = 3;
+    self.statusDone      = 4;
 
     self.applicationId = null;
     self.jobId = null;
@@ -34,7 +35,6 @@
     };
 
     self.start = function() {
-      console.log("start");
       self.status(self.statusStarting);
       ajax
         .command("stamp-attachments", {id: self.applicationId})
@@ -50,13 +50,16 @@
     }
     
     self.started = function(data) {
-      console.log("started:", data);
-      self.jobId = data.job.id;
-      self.status(self.statusRunning);
-      self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
-      self.filesTable(_.values(self.files));
-      self.version = 0;
-      self.queryUpdate();
+      if (data.count === 0) {
+        self.status(self.statusNoFiles);
+      } else {
+        self.status(self.statusRunning);
+        self.jobId = data.job.id;
+        self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
+        self.filesTable(_.values(self.files));
+        self.version = 0;
+        self.queryUpdate();
+      }
       return false;
     };
     
@@ -71,15 +74,11 @@
     }
 
     self.update = function(data) {
-      console.log("update", data);
-      
       if (data.result === "timeout") return self.queryUpdate();
-      
       var job = data.job;
       self.version = job.version;
       _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
-      
-      return (job.status != "done") ? self.queryUpdate() : self.status(self.statusDone);
+      return (job.status === "done") ? self.status(self.statusDone) : self.queryUpdate();
     };
     
   }();
