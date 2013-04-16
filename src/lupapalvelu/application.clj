@@ -478,16 +478,18 @@
   (if-let [{{statement-email :email} :person} (first (filter #(= statementId (:id %)) statements))]
     (when-not (= statement-email user-email)
       (fail :error.not-statement-owner))
-    (fail :error.no-statement)))
+    (fail :error.no-statement :statenentId statementId)))
 
 (defcommand "give-statement"
-  {:parameters [:id :statementId :status :text]
-   :validators [statement-owner]
-   :roles      [:authority]}
+  {:parameters  [:id :statementId :status :text]
+   :validators  [statement-owner]
+   :roles       [:authority]
+   :description "authrotity-roled statement owners can give statements"}
   [{{:keys [id statementId status text]} :data}]
   (mongo/update
     :applications
-    {:_id id :statements {$elemMatch {:id statementId}}}
+    {:_id id
+     :statements {$elemMatch {:id statementId}}}
     {$set {:statements.$.status status
            :statements.$.given (now)
            :statements.$.text text}}))
