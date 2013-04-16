@@ -443,12 +443,6 @@
     });
   }
 
-  repository.loaded(function(e) {
-    if (!currentId || (currentId === e.applicationDetails.application.id)) {
-      showApplication(e.applicationDetails);
-    }
-  });
-
   var inviteModel = new function() {
     var self = this;
 
@@ -572,6 +566,13 @@
 
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
+
+  repository.loaded(function(e) {
+    if (pageutil.getPage() === "application" && !currentId || (currentId === e.applicationDetails.application.id)) {
+      console.log("loaded - re-rendering app-page");
+      showApplication(e.applicationDetails);
+    }
+  });
 
   $(function() {
     applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);

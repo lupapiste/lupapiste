@@ -234,7 +234,9 @@ var attachment = (function() {
 
   repository.loaded(function(e) {
     var app = e.applicationDetails.application;
-    if (applicationId === app.id) { showAttachment(app); }
+    if (pageutil.getPage() === "attachment" && applicationId === app.id) {
+      showAttachment(app);
+    }
   });
 
   function resetUploadIframe() {

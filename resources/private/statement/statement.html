@@ -13,7 +13,7 @@
           </span>
         </h1>
         <span data-bind="with: application">
-          <a class="btn attachment-back" data-bind="attr: {href: '#!/application/' + id + '/statement' }, ltext: 'attachment.return'"></a>
+          <a class="btn attachment-back" data-bind="attr: {href: '#!/application/' + id() + '/statement' }, ltext: 'attachment.return'"></a>
         </span>
         <div class="form-entry">
           <button data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" style="margin-left: 0" data-test-id="delete-statement">Poista lausunto</button>
