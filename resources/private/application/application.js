@@ -375,7 +375,7 @@
   function showApplication(applicationDetails) {
     isInitializing = true;
 
-    authorizationModel.refresh(applicationDetails.application, function() {
+    authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       // new data mapping
 
       var app = applicationDetails.application;
