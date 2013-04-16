@@ -82,7 +82,7 @@ var statement = (function() {
     ko.applyBindings({
       statementModel: statementModel,
       authorization: authorizationModel,
-      comments: commentsModel
+      commentsModel: commentsModel
     }, $("#statement")[0]);
 
     LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement",

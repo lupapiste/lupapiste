@@ -6,7 +6,7 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
 
-  var commentModel = new comments.create();
+  var commentsModel = new comments.create();
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
 
@@ -214,9 +214,9 @@ var attachment = (function() {
     model.application.title(application.title);
     model.attachmentId(attachmentId);
 
-    commentModel.setApplicationId(application.id);
-    commentModel.setTarget({type: "attachment", id: attachmentId});
-    commentModel.setComments(application.comments);
+    commentsModel.setApplicationId(application.id);
+    commentsModel.setTarget({type: "attachment", id: attachmentId});
+    commentsModel.setComments(application.comments);
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
@@ -262,7 +262,7 @@ var attachment = (function() {
       attachment: model,
       approve: approveModel,
       authorization: authorizationModel,
-      comment: commentModel
+      commentsModel: commentsModel
     }, $("#attachment")[0]);
 
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
