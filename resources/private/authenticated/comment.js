@@ -43,7 +43,7 @@ var comments = (function() {
     self.category = function(model) {
       return model.target && model.target.version ? "category-new-attachment-version" : "category-default";
     };
-}
+  }
 
   return {
     create: function() { return new CommentModel(); }
