@@ -329,9 +329,9 @@
     this.lastName = lastName;
   };
 
+    //FIXME: why is this?
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
-    //FIXME: why is this?
     if (isInitializing) { return; }
 
     // The right is validated in the back-end. This check is just to prevent error.
@@ -340,7 +340,7 @@
     var assigneeId = value ? value : null;
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {authorizationModel.refresh(currentId);}) //FIXME: why just the id?
+      .success(function() {authorizationModel.refresh(currentId);})
       .call();
   }
 
