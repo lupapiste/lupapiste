@@ -19,15 +19,16 @@
 ;; Generate stamp:
 ;;
 
+
 (defn make-stamp []
   (with-open [in (io/input-stream (io/resource "public/img/logo.png"))]
     (ImageIO/read in)))
 
-(declare stamp-pdf stamp-image)
-
 ;;
 ;; Stamp with provided image:
 ;;
+
+(declare stamp-pdf stamp-image)
 
 (defn stamp [stamp content-type in out]
   (cond
