@@ -39,19 +39,22 @@
           </form>
       </div>
 
-      <div class="attachment-file-versions" data-bind:"with: $root.attachmentModel">
-        <h3 data-bind="ltext: 'statement.attachment.title'">Liitteet:</h3>
+      <div class="attachment-file-versions">
+        <h3 data-bindz="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
         <table class="table table-striped">
           <thead>
             <tr>
               <th data-bindz="ltext: 'attachment.file'">Tiedosto</th>
-              <th data-bindz="ltext: 'statement.attachment.created'">Muokattu</th>
-              <th data-bindz="ltext: 'statement.attachment.owner'">Tekijä</th>
+              <th data-bindz="ltext: 'attachment.version'">Versio</th>
+              <th data-bindz="ltext: 'attachment.editDate'">Muokattu</th>
+              <th data-bindz="ltext: 'attachment.editor'">Muokkaaja</th>
+              <th data-bindz="ltext: 'attachment.actions'">Toiminto</th>
             </tr>
           </thead>
           <tbody data-bindz="foreach: versions()">
             <tr style="cursor: pointer;">
               <td id="test-attachment-file-name"><a data-bindz="text: $data.filename, attr: {href: '/api/download-attachment/' + $data.fileId}"></a></td>
+              <td data-bindz="version: version"></td>
               <td data-bindz="dateString: created">31.10.2012</td>
               <td>
                 <span data-bindz="fullName: user"></span>
