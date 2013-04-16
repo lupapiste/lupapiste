@@ -61,7 +61,6 @@ var statement = (function() {
   repository.loaded(function(event) {
     var application = event.applicationDetails.application;
     if (pageutil.getPage() === "statement" && applicationId === application.id) {
-      console.log("here");
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
     }
