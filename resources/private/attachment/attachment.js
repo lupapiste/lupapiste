@@ -270,7 +270,6 @@ var attachment = (function() {
     resetUploadIframe();
   });
 
-
   function uploadDone() {
     if (uploadingApplicationId) {
       repository.load(uploadingApplicationId);
