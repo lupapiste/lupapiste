@@ -568,7 +568,7 @@
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
   repository.loaded(function(e) {
-    if (pageutil.getPage() === "application" && !currentId || (currentId === e.applicationDetails.application.id)) {
+    if (pageutil.getPage() === "application" && (!currentId || (currentId === e.applicationDetails.application.id))) {
       console.log("loaded - re-rendering app-page");
       showApplication(e.applicationDetails);
     }
