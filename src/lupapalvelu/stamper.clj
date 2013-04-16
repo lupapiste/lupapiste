@@ -29,10 +29,10 @@
 ;; Stamp with provided image:
 ;;
 
-(defn stamp [stamp-image content-type in out]
+(defn stamp [stamp content-type in out]
   (cond
-    (= content-type "application/pdf")      (do (stamp-pdf stamp-image in out) nil)
-    (ss/starts-with content-type "image/")  (do (stamp-image stamp-image content-type in out) nil)
+    (= content-type "application/pdf")      (do (stamp-pdf stamp in out) nil)
+    (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out) nil)
     :else                                   nil))
 
 ;;
