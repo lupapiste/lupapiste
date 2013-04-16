@@ -40,3 +40,21 @@
                 v (if (= :group (:type x)) (group x)(f x))]
             {k v})
           x)))))
+
+(defn wrapped
+  "Wraps leaf values in a map and under k key, key defaults to :value.
+   Assumes that every key in the original map is a keyword."
+  ([m] (wrapped m :value))
+  ([m k]
+    (walk/postwalk
+      (fn [x] (if (or (keyword? x) (coll? x)) x {k x}))
+      m)))
+
+(defn un-wrapped
+  "(un-wrapped (wrapped original)) => original"
+  ([m] (un-wrapped m :value))
+  ([m k]
+    (assert (keyword? k))
+    (walk/postwalk
+      (fn [x] (if (contains? x k) (k x) x))
+      m)))
