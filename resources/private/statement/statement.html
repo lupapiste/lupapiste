@@ -43,18 +43,19 @@
         <h3 class="tab-info" data-bind="ltext: 'inforequest.attachments'"></h3>
         <div data-bind="if: attachments().length">
           <table class="table" data-test-id="inforequest-attachments-table">
-            <tbody>
+            <thead>
               <tr>
                 <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                 <th></th>
               </tr>
-              <!-- ko foreach: attachments -->
+            </thead>
+            <tbody data-bind="foreach: attachments">
               <tr data-bind="with: $data.latestVersion">
                 <td>
-                    <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
-                    <i data-bind="ltext: contentType"></i>
-                    <i data-bind="size: size"></i>
+                  <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                  <i data-bind="ltext: contentType"></i>
+                  <i data-bind="size: size"></i>
                 </td>
                 <td>
                   <span data-bind="dateString: $parent.modified"></span>
@@ -63,7 +64,6 @@
                 <td>
                 </td>
               </tr>
-              <!-- /ko -->
             </tbody>
           </table>
         </div>
