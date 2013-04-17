@@ -25,7 +25,6 @@ var comments = (function() {
     };
 
     self.setTarget = function(target) {
-      console.log(target);
       self.target(target);
     };
 
@@ -39,7 +38,6 @@ var comments = (function() {
 
     self.submit = function(model) {
       var id = self.applicationId;
-      console.log(self.target());
       ajax.command("add-comment", { id: id, text: model.text(), target: self.target()})
         .success(function() {
           model.text("");
