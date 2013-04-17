@@ -58,7 +58,7 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       pageutil.getURLParameter("attachmentType"),
       pageutil.getURLParameter("typeSelector"),
       pageutil.getURLParameter("errorMessage"),
-      pageutil.getURLParameter("target"));
+      {type: pageutil.getURLParameter("target.type"), id: pageutil.getURLParameter("target.id")});
     LUPAPISTE.Upload.loadTypes(applicationId);
   }
 };
