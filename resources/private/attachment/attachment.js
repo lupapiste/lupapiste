@@ -287,11 +287,11 @@ var attachment = (function() {
     initFileUpload(m.application.id(), null, type, selector);
   }
 
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target);
   }
 
   function regroupAttachmentTypeList(types) {
@@ -300,6 +300,7 @@ var attachment = (function() {
 
   return {
     newAttachment: newAttachment,
+    initFileUpload: initFileUpload,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 

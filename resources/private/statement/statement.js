@@ -55,20 +55,40 @@ var statement = (function() {
     return false;
   }
 
+  function AttachmentsModel() {
+    var self = this;
+
+    self.attachments = ko.observableArray([]);
+
+    self.refresh = function(application) {
+      var attachments = _.map(application.attachments || [], function(a) {
+        a.latestVersion = _.last(a.versions);
+        return a;
+      });
+      self.attachments(attachments);
+    };
+
+    self.newAttachment = function() {
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId});
+    };
+  }
+
+
   var statementModel = new StatementModel();
   var authorizationModel = authorization.create();
   var commentsModel = new comments.create();
+  var attachmentsModel = new AttachmentsModel();
 
   repository.loaded(function(event) {
     var application = event.applicationDetails.application;
     if (pageutil.getPage() === "statement" && applicationId === application.id) {
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
+      attachmentsModel.refresh(application);
 
       commentsModel.setApplicationId(application.id);
       commentsModel.setTarget({type: "statement", id: statementId});
       commentsModel.setComments(application.comments);
-
     }
   });
 
@@ -82,7 +102,8 @@ var statement = (function() {
     ko.applyBindings({
       statementModel: statementModel,
       authorization: authorizationModel,
-      commentsModel: commentsModel
+      commentsModel: commentsModel,
+      attachmentsModel: attachmentsModel
     }, $("#statement")[0]);
 
     LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement",

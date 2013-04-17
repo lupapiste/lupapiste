@@ -1,21 +1,23 @@
 var LUPAPISTE = LUPAPISTE || {};
 LUPAPISTE.Upload = {
-    fileExtensions: LUPAPISTE.config.fileExtensions.join(", "),
-    applicationId: ko.observable(),
-    attachmentId: ko.observable(),
-    attachmentType: ko.observable(),
-    attachmentTypeGroups: ko.observableArray(),
-    typeSelector: ko.observable(false),
-    errorMessage: ko.observable()
+  fileExtensions: LUPAPISTE.config.fileExtensions.join(", "),
+  applicationId: ko.observable(),
+  attachmentId: ko.observable(),
+  attachmentType: ko.observable(),
+  attachmentTypeGroups: ko.observableArray(),
+  typeSelector: ko.observable(false),
+  errorMessage: ko.observable(),
+  target: ko.observable()
 };
 
-LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage) {
+LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage, target) {
   "use strict";
   LUPAPISTE.Upload.applicationId(applicationId);
   LUPAPISTE.Upload.attachmentId(attachmentId);
   LUPAPISTE.Upload.attachmentType(attachmentType);
   LUPAPISTE.Upload.typeSelector(typeSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(errorMessage);
+  LUPAPISTE.Upload.target(target);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
@@ -41,9 +43,9 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
   }
 };
 
-LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector) {
+LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector, target) {
   "use strict";
-  LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null);
+  LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null, target);
   LUPAPISTE.Upload.loadTypes(applicationId);
 };
 
@@ -55,7 +57,8 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       pageutil.getURLParameter("attachmentId"),
       pageutil.getURLParameter("attachmentType"),
       pageutil.getURLParameter("typeSelector"),
-      pageutil.getURLParameter("errorMessage"));
+      pageutil.getURLParameter("errorMessage"),
+      pageutil.getURLParameter("target"));
     LUPAPISTE.Upload.loadTypes(applicationId);
   }
 };

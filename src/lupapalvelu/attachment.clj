@@ -85,18 +85,19 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-(defn make-attachment [now attachement-type]
+(defn make-attachment [now attachement-type target]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
    :state :requires_user_action
+   :target target
    :versions []})
 
 (defn make-attachments [now attachement-types]
   (map (partial make-attachment now) attachement-types))
 
-(defn create-attachment [application-id attachement-type now]
-  (let [attachment (make-attachment now attachement-type)]
+(defn create-attachment [application-id attachement-type now target]
+  (let [attachment (make-attachment now attachement-type target)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -174,9 +175,9 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user]
+(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target]
   (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created)
+                        (create-attachment id attachement-type created target)
                         attachment-id)]
     (set-attachment-version id attachment-id file-id filename content-type size created user)))
 
@@ -323,7 +324,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text]} :data :as command}]
+  [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text target]} :data :as command}]
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (let [file-id (mongo/create-id)
         sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
@@ -333,7 +334,7 @@
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target)]
               (executed "add-comment"
                 (-> command
                   (assoc :data {:id id
