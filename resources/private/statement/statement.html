@@ -50,23 +50,19 @@
                 <th></th>
               </tr>
               <!-- ko foreach: attachments -->
-              <!-- ko if: $data.latestVersion && $data.latestVersion.filename -->
-              <tr>
+              <tr data-bind="with: $data.latestVersion">
                 <td>
-                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
-                    <i data-bind="ltext: latestVersion.contentType"></i>
-                    <i data-bind="size: latestVersion.size"></i>
+                    <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                    <i data-bind="ltext: contentType"></i>
+                    <i data-bind="size: size"></i>
                 </td>
                 <td>
-                  <span data-bind="dateString: modified"></span>
-                  <span data-bind="if: $data.latestVersion">
-                    <span data-bind="fullName: latestVersion.user"></span>
-                  </span>
+                  <span data-bind="dateString: $parent.modified"></span>
+                  <span data-bind="fullName: user"></span>
                 </td>
                 <td>
                 </td>
               </tr>
-              <!-- /ko -->
               <!-- /ko -->
             </tbody>
           </table>
