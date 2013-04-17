@@ -210,12 +210,13 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defn- make-attachments [created op municipality-id]
+(defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
       {:id (mongo/create-id)
        :type {:type-group type-group :type-id type-id}
        :state :requires_user_action
+       :target target
        :modified created
        :versions []
        :op op})))
