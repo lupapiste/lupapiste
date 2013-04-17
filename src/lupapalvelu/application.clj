@@ -474,21 +474,26 @@
   [{{:keys [id statementId]} :data}]
   (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
 
-(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} {:keys [statements]}]
-  (if-let [{{statement-email :email} :person} (first (filter #(= statementId (:id %)) statements))]
-    (when-not (= statement-email user-email)
-      (fail :error.not-statement-owner))
+(defn get-statement [{:keys [statements]} id]
+  (first (filter #(= id (:id %)) statements)))
+
+(defn statement-exists [{:keys [statementId]} application]
+  (when-not (get-statement application statementId)
     (fail :error.no-statement :statementId statementId)))
 
-(defn statement-not-given [{{:keys [statementId]} :data {user-email :email} :user} {:keys [statements]}]
-  (if-let [{:keys [given]} (first (filter #(= statementId (:id %)) statements))]
+(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
+  (let [{{statement-email :email} :person} (get-statement application statementId)]
+    (when-not (= statement-email user-email)
+      (fail :error.not-statement-owner))))
+
+(defn statement-not-given [{{:keys [statementId]} :data {user-email :email} :user} application]
+  (let [{:keys [given]} (get-statement application statementId)]
     (when given
-      (fail :error.statement-already-given))
-    (fail :error.no-statement :statementId statementId)))
+      (fail :error.statement-already-given))))
 
 (defcommand "give-statement"
   {:parameters  [:id :statementId :status :text]
-   :validators  [statement-owner statement-not-given]
+   :validators  [statement-exists statement-owner statement-not-given]
    :roles       [:authority]
    :description "authrority-roled statement owners can give statements that are not given already"}
   [{{:keys [id statementId status text]} :data}]
