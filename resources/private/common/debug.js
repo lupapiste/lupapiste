@@ -61,7 +61,7 @@ $(function() {
     .append($("<div>").addClass("dev-debug")
       .append($("<h3>")
         .append($("<a>").attr("href", "#").text("Development").click(function() { $("footer .dev-debug div:eq(0)").slideToggle(); return false; })))
-      .append($("<div>").addClass("hidden")
+      .append($("<div>")
         .append($("<input id='debug-tab-flow' type='checkbox'>").click(function() { hub.send("set-debug-tab-flow", { value: !!$(this).attr("checked") }); }))
         .append($("<label>").text("Flowing tabs"))
         .append($("<br>"))
