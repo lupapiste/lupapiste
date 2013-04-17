@@ -85,7 +85,7 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-(defn make-attachment [now attachement-type target]
+(defn make-attachment [now target attachement-type]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
@@ -93,11 +93,13 @@
    :target target
    :versions []})
 
-(defn make-attachments [now attachement-types]
-  (map (partial make-attachment now) attachement-types))
+(defn make-attachments
+  "creates attachments with nil target"
+  [now attachement-types]
+  (map (partial make-attachment nil now) attachement-types))
 
 (defn create-attachment [application-id attachement-type now target]
-  (let [attachment (make-attachment now attachement-type target)]
+  (let [attachment (make-attachment now target attachement-type)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
