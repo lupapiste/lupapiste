@@ -163,7 +163,7 @@
         canonical-attachments (for [attachment attachments
                                     :when (:latestVersion attachment)
                                     :let [type (get-in attachment [:type :type-id] )
-                                          title (str (:title application) ": " type)
+                                          title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
