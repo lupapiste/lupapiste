@@ -32,3 +32,8 @@ setpw.notSame: Salasana ei täsmää
 
 application.addParty: Lisää osapuoli
 addParty.heading: Lisää osapuoli
+
+schemas.hakija: Hakija
+schemas.paasuunnittelija: Pääsuunnittelija
+schemas.suunnittelija: Suunnittelija
+schemas.maksaja: Maksaja
