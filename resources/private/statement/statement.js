@@ -62,7 +62,7 @@ var statement = (function() {
 
     self.refresh = function(application) {
       self.attachments(_.filter(application.attachments,function(attachment) {
-        return attachment.target && attachment.target.type === "statement";
+        return _.isEqual(attachment.target, {type: "statement", id: statementId});
       }));
     };
 
