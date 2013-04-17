@@ -51,5 +51,6 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
+  :aot [lupapalvelu.conversion.convert]
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

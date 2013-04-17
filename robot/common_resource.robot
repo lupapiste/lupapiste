@@ -88,7 +88,6 @@ Go to page
   [Arguments]  ${page}
   Execute Javascript  window.location.hash = "!/${page}";
   Wait until  Element should be visible  ${page}
-  Sleep  1
 
 Open tab
   [Arguments]  ${name}
@@ -259,7 +258,6 @@ Create inforequest the fast way
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
-  Go to page  applications
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-application
   Wait Until  Element should be visible  application
@@ -280,7 +278,7 @@ Create inforequest
 
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
-  Execute Javascript  window.location.hash = "!/applications";
+  Go to page  applications
   Click by test id  ${button}
   Wait and click  xpath=//button[@data-test-id="create-search-button"]
   # for IE8

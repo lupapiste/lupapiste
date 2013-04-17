@@ -189,7 +189,7 @@
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
-        submitted-file (file (str output-dir "/" (:id application) (get-submitted-filename id)))
+        submitted-file (file (str output-dir "/" (get-submitted-filename id)))
         current-file (file (str output-dir "/"  (get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))

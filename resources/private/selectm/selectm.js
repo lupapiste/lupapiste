@@ -1,15 +1,15 @@
 ;(function($) {
-  
+
   "use strict";
-  
+
   function nop() {}
-  
+
   function toCallback(f) {
     if (!f) return nop;
     if (!_.isFunction(f)) throw "callback must be a function: " + f;
     return f;
   }
-  
+
   function localize() {
     var e = $(this),
         t = e.attr("data-loc");
@@ -17,10 +17,10 @@
       if (e.is("input")) { e.attr("placeholder", loc(t)); } else { e.text(loc(t)); };
     }
   }
-  
+
   $.fn.selectm = function(template) {
     var self = {};
-    
+
     self.data = [];
     self.visible = [];
     self.duplicates = true;
@@ -43,7 +43,7 @@
     self.cancelCallback = nop;
     self.cancel = function(f) { self.cancelCallback = toCallback(f); return self; };
     self.allowDuplicates = function(d) { self.duplicates = d; return self; };
-    
+
     self.filterData = function(filterValue) {
       var f = _.trim(filterValue).toLowerCase();
       if (_.isBlank(f)) return self.data;
@@ -54,7 +54,7 @@
       });
       return newData;
     };
-    
+
     self.updateFilter = function() {
       var newVisible = self.filterData(self.$filter.val());
       if (_.isEqual(self.visible, newVisible)) return;
@@ -68,16 +68,16 @@
       });
       self.check();
     };
-    
+
     self.getSelected = function()   { return $("option:selected", self.$source).data() || {}; };
     self.inTarget    = function(id) { return $("option", self.$target).filter(function() { return _.isEqual($(this).data("id"), id); }).length; };
     self.canAdd      = function(id) { return id && (self.duplicates || !self.inTarget(id)); };
-    self.makeTarget  = function(d)  { return $("<option>").data("id", d.id).text(d.text); }
+    self.makeTarget  = function(d)  { return $("<option>").data("id", d.id).text(d.text); };
     self.addTarget   = function(d)  { if (d && self.canAdd(d.id)) self.$target.append(self.makeTarget(d)); return self; };
-    
+
     self.add = function() { self.addTarget(self.getSelected()); self.check(); };
     self.remove = function() { $("option:selected", self.$target).remove(); self.check(); };
-  
+
     self.check = function() {
       self.$add.prop("disabled", !self.canAdd(self.getSelected().id));
       self.$remove.prop("disabled", $("option:selected", self.$target).length === 0);
@@ -88,18 +88,18 @@
         });
       }
     };
-    
+
     //
     // Register event handlers:
     //
-    
+
     self.$filter.keyup(self.updateFilter);
-  
+
     self.$source
       .keydown(function(e) { if (e.keyCode === 13) self.add(); })
       .dblclick(self.add)
       .on("change focus blur", self.check);
-    
+
     self.$target
       .keydown(function(e) { if (e.keyCode === 13) self.remove(); })
       .dblclick(self.remove)
@@ -109,11 +109,11 @@
     self.$remove.click(self.remove);
     self.$cancel.click(function() { self.cancelCallback(); });
     self.$ok.click(function() { self.okCallback(_.map($("option", self.$target), function(e) { return $(e).data("id"); })); });
-    
+
     //
     // Reset:
     //
-    
+
     self.reset = function(sourceData, targetData) {
       self.visible = null;
       self.data = sourceData;
@@ -125,10 +125,10 @@
       self.check();
       return self;
     };
-  
+
     self.reset([]);
-     
+
     return self;
   };
-  
+
 })(jQuery);
