@@ -1,7 +1,8 @@
 *** Settings ***
 
 Documentation  Mikko adds an attachment
-Suite teardown  Logout
+Suite setup      Open browser to login page
+#Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
