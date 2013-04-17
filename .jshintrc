@@ -34,6 +34,7 @@
     "docgen",
     "authorization",
     "comments",
+    "attachment",
     "trace",
     "error",
     "warn",
