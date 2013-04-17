@@ -367,8 +367,8 @@
             <div> 
               <select
                 data-bind="options: partyDocumentNames(),
-                           optionsText: function(item) { return item.documentName; },
-                           optionsValue: 'documentName',
+                           optionsText: function(item) { return item; },
+                           optionsValue: function(item) { return item; },
                            value: documentName,
                            optionsCaption: loc('choose')">
               </select>

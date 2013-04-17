@@ -17,6 +17,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
             [sade.util :as util]
@@ -82,11 +83,20 @@
         authorities (find-authorities-in-applications-municipality app)]
     (ok :authorityInfo authorities)))
 
+(defn filter-party-docs [names]
+  (filter (fn [name] (= :party (get-in schemas/schemas [name :info :type]))) names))
+  
 (defquery "party-document-names"
   {:parameters [:id]
    :authenticated true}
   [command]
-  (ok :partyDocumentNames [{:documentName "hakija"}, {:documentName "suunnittelija"}]))
+  (with-application command
+    (fn [application]
+      (let [documents (:documents application)
+            initialOp (:initialOp application)
+            original-schema-names (:required ((keyword initialOp) operations/operations))
+            original-party-documents (filter-party-docs original-schema-names)]
+        (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
@@ -328,7 +338,6 @@
                                               :created created
                                               :body {}})
             doc            (make document-name)]
-        (println "adding document" document-name "to application" id ", doc" doc)
         (mongo/update-by-id :applications id {$push {:documents doc}
                                               $set {:modified created}})
         (ok)))))
