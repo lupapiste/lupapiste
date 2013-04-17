@@ -11,7 +11,7 @@
                  [org.jasypt/jasypt "1.9.0"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.1.0" :exclusions [commons-codec]]
-                 [clj-http "0.6.4" :exclusions [commons-codec]]
+                 [clj-http "0.7.0" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.0"]
                  [digest "1.4.2"]
                  [clj-time "0.5.0" :exclusions [org.clojure/clojure]]
@@ -30,7 +30,8 @@
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.1"]
                                   [javax.activation/activation "1.1"]
-                                  [dumbster/dumbster "1.6" :exclusions [[javax.mail/mail] [javax.activation/activation]]]]
+                                  [dumbster/dumbster "1.6" :exclusions [[javax.mail/mail] [javax.activation/activation]]]
+                                  [clj-ssh "0.5.4"]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
@@ -42,7 +43,7 @@
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"[\/\\]jquery" #"[\/\\]theme[\/\\]default"
-                         #"[\/\\]public[\/\\]lib" #"openlayers" #"underscore" #"highcharts\.js"]}
+                         #"[\/\\]public[\/\\]lib" #"openlayers" #"underscore" #"highcharts\.js" #"lodash"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
@@ -50,5 +51,6 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
+  :aot [lupapalvelu.conversion.convert]
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

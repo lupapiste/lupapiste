@@ -18,9 +18,9 @@ Mikko sees application in list
 
 Mikko creates a new inforequest
   Create inforequest  create-info  753  753-416-25-22  Hoblaa  applications-create-new
-  Wait until  Element text should be  //span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
-  Wait until  Element text should be  //span[@data-test-id='inforequest-application-operation']  Asuinrakennuksen rakentaminen
-
+  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
+  Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-operation-id='asuinrakennus']
+  
 Mikko sees one application and one inforequest
   Go to page  applications
   Request should be visible  create-app

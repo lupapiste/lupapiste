@@ -163,7 +163,7 @@
         canonical-attachments (for [attachment attachments
                                     :when (:latestVersion attachment)
                                     :let [type (get-in attachment [:type :type-id] )
-                                          title (str (:title application) ": " type)
+                                          title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
@@ -190,38 +190,38 @@
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
-        submitted-file (file (str output-dir "/" (:id application) (get-submitted-filename id)))
+        submitted-file (file (str output-dir "/" (get-submitted-filename id)))
         current-file (file (str output-dir "/"  (get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
-(defn get-application-as-krysp [application lang submitted-application]
+(defn get-application-as-krysp [application lang submitted-application municipality]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
-  (let [municipality-code (:municipality application)
+  (let [sftp-user (:rakennus-ftp-user municipality)
         rakennusvalvonta-directory "/rakennus"
-        dynamic-part-of-outgoing-directory (str municipality-code rakennusvalvonta-directory)
-        output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory )
+        dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
+        output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory)
         _          (fs/mkdirs output-dir)
-        file-name  (str output-dir "/Lupapiste" (:id application))
+        file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application)
         fileserver-address (:fileserver-address env/config)
-        fileserver-root-directory (:fileserver-root-directory env/config)
-        begin-of-link (str fileserver-address "/" fileserver-root-directory "/" dynamic-part-of-outgoing-directory "/")
+        begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
         attachments (get-attachments-as-canonical application begin-of-link)
-        attachments-with-generated-pdfs (conj attachments {:Liite
-                                          {:kuvaus "Application when submitted"
-                                           :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
-                                           :muokkausHetki (to-xml-datetime (:submitted application))
-                                           :versionumero 1
-                                           :tyyppi "Hakemus vireilletullessa"}}
-                                          {:Liite
-                                           {:kuvaus "Application when sent from Lupapiste"
-                                            :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
-                                            :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
-                                            :versionumero 1
-                                            :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
+        attachments-with-generated-pdfs (conj attachments
+                                              {:Liite
+                                               {:kuvaus "Application when submitted"
+                                                :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
+                                                :muokkausHetki (to-xml-datetime (:submitted application))
+                                                :versionumero 1
+                                                :tyyppi "Hakemus vireilletullessa"}}
+                                              {:Liite
+                                               {:kuvaus "Application when sent from Lupapiste"
+                                                :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
+                                                :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
+                                                :versionumero 1
+                                                :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
         canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
     (validate (indent-str xml))

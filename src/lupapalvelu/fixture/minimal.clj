@@ -266,8 +266,17 @@
                                :url "http://sipoo.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                      :operations-attachments {:asuinrakennus [[:paapiirustus :asemapiirros]
+                                                               [:paapiirustus :pohjapiirros]
+                                                               [:hakija :valtakirja]
+                                                               [:muut :vaestonsuojasuunnitelma]]
+                                               :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
+                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
+                                                                          [:muut :vaestonsuojasuunnitelma]
+                                                                          [:muut :valaistussuunnitelma]]}
                       ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                      :legacy "http://localhost:8000/krysp/building.xml"}
+                      :legacy "http://localhost:8000/krysp/building.xml"
+                      :rakennus-ftp-user "sipoo"}
                      {:id "837"
                       :name {:fi "Tampere" :sv "Tammerfors"}
                       :municipalityCode "837"

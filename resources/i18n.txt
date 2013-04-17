@@ -1,4 +1,4 @@
-error.password.minlength: Pituus v√§hint√§√§n 8 merkki√§
+error.password.minlength: Pituus v‰hint‰‰n 8 merkki‰
 attachmentType.empty._group_label:
 login.reset-question: Oletko unohtanut salasanasi?
 
@@ -37,3 +37,4 @@ schemas.hakija: Hakija
 schemas.paasuunnittelija: P√§√§suunnittelija
 schemas.suunnittelija: Suunnittelija
 schemas.maksaja: Maksaja
+
