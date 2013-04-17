@@ -27,7 +27,8 @@
             [lupapalvelu.token :as token]
             [sade.security :as sadesecurity]
             [sade.status :as status]
-            [sade.strings :as s]
+            [sade.strings :as ss]
+            [clojure.string :as s]
             [sade.util :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
@@ -51,7 +52,7 @@
 
 (defn parse-json-body-middleware [handler]
   (fn [request]
-    (let [json-body (if (s/starts-with (:content-type request) "application/json")
+    (let [json-body (if (ss/starts-with (:content-type request) "application/json")
                       (if-let [body (:body request)]
                         (-> body
                           (io/reader :encoding (or (:character-encoding request) "utf-8"))
@@ -288,11 +289,11 @@
 (defpage [:post "/api/upload"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
   (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
-  (println "***" targetType "****" targetId)
-  (let [upload-data (assoc upload
+  (let [target (if (every? s/blank? [targetId targetType]) nil {:type targetType :id targetId})
+        upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
-                           :target {:type targetType :id targetId}
+                           :target target
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
