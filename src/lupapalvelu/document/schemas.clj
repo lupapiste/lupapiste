@@ -30,6 +30,8 @@
 ;; schema sniplets
 ;;
 
+(def kuvaus {:name "kuvaus" :type :text :max-len 4000 :layout :full-width})
+
 (def henkilo-valitsin [{:name :userId :type :personSelector }
                         {:name "turvakieltoKytkin" :type :checkbox}])
 
@@ -349,8 +351,8 @@
                           :body huoneisto}])
 
 
-(def rakennelma (body {:name "kuvaus" :type :text :max-len 4000}))
-(def maisematyo (body {:name "kuvaus" :type :text :max-len 4000}))
+(def rakennelma (body kuvaus))
+(def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group :repeating true
@@ -435,8 +437,8 @@
   (to-map-by-name
     [{:info {:name "hankkeen-kuvaus"
              :order 1}
-      :body [{:name "kuvaus" :type :text :max-len 4000}
-             {:name "poikkeamat" :type :text :max-len 4000}]}
+      :body [kuvaus
+             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
      {:info {:name "uusiRakennus"}
       :body (body rakennuksen-omistajat rakennuksen-tiedot)}
@@ -500,4 +502,8 @@
 
        {:info {:name "lisatiedot"
                :order 100}
-        :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
+        :body [{:name "suoramarkkinointikielto"
+                :type :checkbox
+                :layout :full-width}]}]))
+
+
