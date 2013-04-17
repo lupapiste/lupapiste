@@ -61,11 +61,7 @@ var statement = (function() {
     self.attachments = ko.observableArray([]);
 
     self.refresh = function(application) {
-      var attachments = _.map(application.attachments || [], function(a) {
-        a.latestVersion = _.last(a.versions);
-        return a;
-      });
-      self.attachments(attachments);
+      self.attachments(application.attachments);
     };
 
     self.newAttachment = function() {

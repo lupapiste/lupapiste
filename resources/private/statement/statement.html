@@ -50,7 +50,7 @@
                 <th></th>
               </tr>
               <!-- ko foreach: attachments -->
-              <!-- ko if: latestVersion && latestVersion.filename -->
+              <!-- ko if: $data.latestVersion && $data.latestVersion.filename -->
               <tr>
                 <td>
                     <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
