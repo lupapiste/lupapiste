@@ -7,7 +7,8 @@ LUPAPISTE.Upload = {
   attachmentTypeGroups: ko.observableArray(),
   typeSelector: ko.observable(false),
   errorMessage: ko.observable(),
-  target: ko.observable()
+  targetType: ko.observable(),
+  targetId: ko.observable()
 };
 
 LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage, target) {
@@ -17,7 +18,8 @@ LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType
   LUPAPISTE.Upload.attachmentType(attachmentType);
   LUPAPISTE.Upload.typeSelector(typeSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(errorMessage);
-  LUPAPISTE.Upload.target(target);
+  LUPAPISTE.Upload.targetType(target ? target.type : null);
+  LUPAPISTE.Upload.targetId(target ? target.id : null);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
@@ -58,7 +60,7 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       pageutil.getURLParameter("attachmentType"),
       pageutil.getURLParameter("typeSelector"),
       pageutil.getURLParameter("errorMessage"),
-      {type: pageutil.getURLParameter("target.type"), id: pageutil.getURLParameter("target.id")});
+      {type: pageutil.getURLParameter("targetType"), id: pageutil.getURLParameter("targetId")});
     LUPAPISTE.Upload.loadTypes(applicationId);
   }
 };

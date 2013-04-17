@@ -279,12 +279,12 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector target] :as data}
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
   (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
   (let [upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
-                           :target target
+                           :target {:type targetType :id targetId}
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
