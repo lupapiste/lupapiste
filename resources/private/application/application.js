@@ -410,6 +410,7 @@
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 
+      // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
 
       // Update map:
@@ -568,7 +569,7 @@
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
   repository.loaded(function(e) {
-    if (pageutil.getPage() === "application" && (!currentId || (currentId === e.applicationDetails.application.id))) {
+    if ((pageutil.getPage() === "application" || pageutil.getPage() === "inforequest") && (!currentId || (currentId === e.applicationDetails.application.id))) {
       showApplication(e.applicationDetails);
     }
   });
