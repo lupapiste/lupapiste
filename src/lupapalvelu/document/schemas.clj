@@ -268,7 +268,7 @@
                                          {:name "ter\u00e4s"}
                                          {:name "puu"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "muuRakennusaine" :type :string :size "s"}
+                                 {:name "muuRakennusaine" :type :string}
                                  {:name "julkisivu" :type :select
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
@@ -277,7 +277,7 @@
                                          {:name "puu"}
                                          {:name "lasi"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "muuMateriaali" :type :string :size "s"}]}
+                                 {:name "muuMateriaali" :type :string}]}
                          {:name "lammitys"
                           :type :group
                           :body [{:name "lammitystapa" :type :select
@@ -299,7 +299,7 @@
                                          {:name "puu"}
                                          {:name "muu" :type :string :size "s"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "muu-lammonlahde" :type :text :size "s"}]}
+                                 {:name "muu-lammonlahde" :type :string}]}
                          {:name "verkostoliittymat" :type :group
                           :body [{:name "viemariKytkin" :type :checkbox}
                                  {:name "vesijohtoKytkin" :type :checkbox}
