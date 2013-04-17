@@ -2,7 +2,7 @@
 
 Documentation  Mikko adds an attachment
 Suite setup      Open browser to login page
-#Suite teardown  Logout
+Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
