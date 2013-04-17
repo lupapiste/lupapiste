@@ -79,9 +79,9 @@ var docgen = (function() {
       return input;
     }
 
-    function makeEntrySpan() {
+    function makeEntrySpan(subSchema) {
       var span = document.createElement("span");
-      span.className = "form-entry";
+      span.className = (subSchema.layout) ? "form-entry form-" + subSchema.layout : "form-entry";
       return span;
     }
 
@@ -89,7 +89,7 @@ var docgen = (function() {
 
     function buildCheckbox(subSchema, model, path, save) {
       var myPath = path.join(".");
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema);
       span.appendChild(makeInput("checkbox", myPath, model[subSchema.name], save));
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
@@ -102,7 +102,7 @@ var docgen = (function() {
 
     function buildString(subSchema, model, path, save, partOfChoice) {
       var myPath = path.join(".");
-      var span =  makeEntrySpan();
+      var span =  makeEntrySpan(subSchema);
       var type = (subSchema.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass);
@@ -135,7 +135,7 @@ var docgen = (function() {
     function buildText(subSchema, model, path, save) {
       var myPath = path.join(".");
       var input = document.createElement("textarea");
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema);
 
       input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
@@ -155,7 +155,7 @@ var docgen = (function() {
       var lang = loc.getCurrentLanguage();
       var myPath = path.join(".");
       var value = getModelValue(model, subSchema.name);
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema);
 
       span.appendChild(makeLabel("date", myPath));
 
@@ -177,7 +177,7 @@ var docgen = (function() {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema);
 
       select.name = myPath;
       select.className = "form-input combobox";
@@ -234,7 +234,7 @@ var docgen = (function() {
       }
 
       var partsDiv = document.createElement("div");
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema);
 
       partsDiv.id = pathStrToID(myPath);
 
@@ -257,7 +257,7 @@ var docgen = (function() {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema);
 
       select.name = myPath;
       select.className = "form-input combobox really-long";
@@ -316,7 +316,7 @@ var docgen = (function() {
     }
 
     function buildPersonSelector(subSchema, model, path, save) {
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema);
       var myPath = path.join(".");
       var myNs = path.slice(0,path.length-1).join(".");
       var select = document.createElement("select");
@@ -491,7 +491,7 @@ var docgen = (function() {
         if (model[SELECT_ONE_OF_GROUP_KEY]) {
           myModel = model[SELECT_ONE_OF_GROUP_KEY].value;
         }
-        
+
         toggleSelectedGroup(myModel);
 
         var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
