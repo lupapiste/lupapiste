@@ -163,7 +163,7 @@
         canonical-attachments (for [attachment attachments
                                     :when (:latestVersion attachment)
                                     :let [type (get-in attachment [:type :type-id] )
-                                          title (str (:title application) ": " type)
+                                          title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
@@ -190,7 +190,7 @@
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
-        submitted-file (file (str output-dir "/" (:id application) (get-submitted-filename id)))
+        submitted-file (file (str output-dir "/" (get-submitted-filename id)))
         current-file (file (str output-dir "/"  (get-current-filename id)))]
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
