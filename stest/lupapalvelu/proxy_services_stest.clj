@@ -94,7 +94,6 @@
                    {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
                    {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
       (let [request {:query-params (merge base-params layer)
-                     :headers {"accept-encoding" "gzip, deflate"}}
-            response (wfs/raster-images request)]
+                     :headers {"accept-encoding" "gzip, deflate"}}]
         (println "Checking" (get layer "LAYERS"))
-        (:status response) => 200))))
+        (:status (wfs/raster-images request)) => 200))))

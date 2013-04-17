@@ -147,7 +147,7 @@
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
             henkilo      (domain/user2henkilo subject)
-            full-path    (str "documents.$.body" (when-not (s/blank? path) (str "." path)))]
+            full-path    (str "documents.$.data" (when-not (s/blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
           (do
