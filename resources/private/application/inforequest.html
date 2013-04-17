@@ -131,7 +131,7 @@
           <h3 class="tab-info" data-bind="ltext: 'inforequest.comments'"></h3>
           <div>
             <table data-test-id="comments-table" class="table table-striped conversation">
-              <tbody data-bind="foreach: comments">
+              <tbody data-bind="foreach: comments()">
                 <tr class="comment inforequest-comment">
                   <td class="comment-party commenttd">
                     <span data-bind="dateTimeString: created" class="date"></span>

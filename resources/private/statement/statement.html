@@ -83,7 +83,7 @@
       <div class="attachment-file-conversation" data-bind="with: $root.commentsModel">
         <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
         <table class="table table-striped">
-          <tbody data-bind="foreach: comments">
+          <tbody data-bind="foreach: comments()">
             <tr class="comment">
               <td class="commentParty">
                 <span class="date" data-bind="dateTimeString: created"></span><br/>
