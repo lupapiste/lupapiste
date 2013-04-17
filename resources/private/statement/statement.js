@@ -61,7 +61,9 @@ var statement = (function() {
     self.attachments = ko.observableArray([]);
 
     self.refresh = function(application) {
-      self.attachments(application.attachments);
+      self.attachments(_.filter(application.attachments,function(attachment) {
+        return attachment.target && attachment.target.type === "statement";
+      }));
     };
 
     self.newAttachment = function() {
