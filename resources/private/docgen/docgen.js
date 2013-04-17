@@ -586,6 +586,7 @@ var docgen = (function() {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
+            .attr("data-test-class", "delete-schemas." + self.schemaName)
             .click(removeDoc));
       }
 

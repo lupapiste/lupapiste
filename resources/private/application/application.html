@@ -341,7 +341,7 @@
             <div>
               <span data-bind="ltext: 'removeDoc.message2'"></span>
             </div>
-            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close"></button>
+            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close" data-test-id="remove-ok"></button>
             <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
           </div>
         </div>
@@ -370,9 +370,10 @@
                            optionsText: function(item) { return loc('schemas.'  + item); },
                            optionsValue: function(item) { return item; },
                            value: documentName,
-                           optionsCaption: loc('choose')">
+                           optionsCaption: loc('choose')"
+                data-test-id="select-party-document">
               </select>
-              <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close"></button>
+              <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close" data-test-id="add-party-button"></button>
             </div>
           </div>
         </div>
