@@ -7,6 +7,6 @@ if [ -z $target ] ; then
 fi
 
 # download lastest chromedriver from https://code.google.com/p/chromedriver/downloads/list
-# put it to your path and maek it executable
+# put it to your path and maek it executablez
 
 pybot --exclude integration --exclude fail --RunEmptySuite --variable BROWSER:chrome -d target $target
