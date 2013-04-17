@@ -12,14 +12,14 @@ Mikko goes to parties tab of an application
 
 Mikko decides to delete maksaja
   Wait and click  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
-  Wait and click  xpath=//button[@data-test-id="remove-ok"]
+  Click enabled by test id   remove-ok
   Wait Until  Element Should Not Be Visible  dialog-remove-doc
 
 Mikko adds party maksaja
-  Wait and click  xpath=//button[@data-test-id="add-party"]
+  Click enabled by test id  add-party
   Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
   Select From List  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  Click element  xpath=//button[@data-test-id="add-party-button"]
+  Click enabled by test id  add-party-button
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
   
