@@ -124,7 +124,6 @@
 (defn get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
 
-
 ;;
 ;; Bootstrappin'
 ;;

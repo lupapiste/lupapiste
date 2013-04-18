@@ -6,7 +6,7 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
 
-  var commentModel = new comments.create();
+  var commentsModel = new comments.create();
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
 
@@ -31,7 +31,7 @@ var attachment = (function() {
       .success(function() {
         repository.load(applicationId);
       })
-      .error(function(e) {
+      .error(function() {
         repository.load(applicationId);
       })
       .call();
@@ -174,7 +174,7 @@ var attachment = (function() {
           {id:              model.application.id(),
            attachmentId:    model.attachmentId(),
            attachmentType:  attachmentType})
-        .success(function(e) {
+        .success(function() {
           loader$.hide();
           repository.load(model.application.id());
         })
@@ -214,9 +214,9 @@ var attachment = (function() {
     model.application.title(application.title);
     model.attachmentId(attachmentId);
 
-    commentModel.setApplicationId(application.id);
-    commentModel.setTarget({type: "attachment", id: attachmentId});
-    commentModel.setComments(application.comments);
+    commentsModel.setApplicationId(application.id);
+    commentsModel.setTarget({type: "attachment", id: attachmentId});
+    commentsModel.setComments(application.comments);
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
@@ -234,7 +234,9 @@ var attachment = (function() {
 
   repository.loaded(function(e) {
     var app = e.applicationDetails.application;
-    if (applicationId === app.id) { showAttachment(app); }
+    if (pageutil.getPage() === "attachment" && applicationId === app.id) {
+      showAttachment(app);
+    }
   });
 
   function resetUploadIframe() {
@@ -260,14 +262,13 @@ var attachment = (function() {
       attachment: model,
       approve: approveModel,
       authorization: authorizationModel,
-      comment: commentModel
+      commentsModel: commentsModel
     }, $("#attachment")[0]);
 
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using
     resetUploadIframe();
   });
-
 
   function uploadDone() {
     if (uploadingApplicationId) {
@@ -286,11 +287,11 @@ var attachment = (function() {
     initFileUpload(m.application.id(), null, type, selector);
   }
 
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target);
   }
 
   function regroupAttachmentTypeList(types) {
@@ -299,6 +300,7 @@ var attachment = (function() {
 
   return {
     newAttachment: newAttachment,
+    initFileUpload: initFileUpload,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 

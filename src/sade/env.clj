@@ -8,7 +8,7 @@
 
 (def buildinfo (read-string (slurp (io/resource "buildinfo.clj"))))
 
-(def hgnotes (read-string (slurp (io/resource "hgnotes.clj"))))
+(defn hgnotes [] (read-string (slurp (io/resource "hgnotes.clj"))))
 
 (defn- parse-target-env [build-tag]
   (or (re-find #"[PRODEVTS]+" (or build-tag "")) "local"))
