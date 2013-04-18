@@ -466,7 +466,7 @@
 
      {:info {:name "paasuunnittelija"
              :order 4
-             :removable true
+             :removable false
              :type :party}
       :body paasuunnittelija}
 

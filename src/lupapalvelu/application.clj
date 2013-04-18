@@ -82,8 +82,8 @@
         authorities (find-authorities-in-applications-municipality app)]
     (ok :authorityInfo authorities)))
 
-(defn filter-party-docs [names]
-  (filter (fn [name] (= :party (get-in schemas/schemas [name :info :type]))) names))
+(defn filter-repeating-party-docs [names]
+  (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
   
 (defquery "party-document-names"
   {:parameters [:id]
@@ -94,7 +94,7 @@
       (let [documents (:documents application)
             initialOp (:name (first (:operations application)))
             original-schema-names (:required ((keyword initialOp) operations/operations))
-            original-party-documents (filter-party-docs original-schema-names)]
+            original-party-documents (filter-repeating-party-docs original-schema-names)]
         (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
 
 (defcommand "assign-application"
