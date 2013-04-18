@@ -132,7 +132,7 @@
     };
 
     self.addParty = function () {
-      ajax.command("create-doc", {id: self.applicationId, documentName: self.documentName()})
+      ajax.command("create-doc", {id: self.applicationId, schema: self.documentName()})
         .success(function() { repository.load(self.applicationId); })
         .call();
       return false;

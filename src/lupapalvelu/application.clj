@@ -92,7 +92,7 @@
   (with-application command
     (fn [application]
       (let [documents (:documents application)
-            initialOp (:initialOp application)
+            initialOp (:name (first (:operations application)))
             original-schema-names (:required ((keyword initialOp) operations/operations))
             original-party-documents (filter-party-docs original-schema-names)]
         (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
