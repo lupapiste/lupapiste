@@ -158,6 +158,13 @@
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
+
+          <button
+              data-bind="click: application.addParty, ltext: 'application.addParty'"
+              class="btn btn-primary modal"
+              data-test-id="add-party">
+          </button>
+
           <div class="process-nav">
             <a class="btn process-next" data-bind="click: $root.application.changeTab" href="#" data-target="attachments"><span data-bind="ltext: 'application.next-tab'"></span></span><span class="icon drill-right-orange inline-right"></span></a>
             <a class="btn process-previous" data-bind="click: $root.application.changeTab" href="#" data-target="info"><span data-bind="ltext: 'application.previous-tab'"></span></span><span class="icon drill-left-black-bigger inline-left"></span></a>
@@ -386,7 +393,7 @@
             <div>
               <span data-bind="ltext: 'removeDoc.message2'"></span>
             </div>
-            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close"></button>
+            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close" data-test-id="remove-ok"></button>
             <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
           </div>
         </div>
@@ -401,7 +408,28 @@
           <div class="attachment-templates"></div>
         </div>
       </div>
-
+      
+      <div id="dialog-add-party" class="window autosized">
+        <div data-bind="with: $root.addPartyModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'addParty.heading'"></p>
+            <p class="dialog-close close">X</p>
+          </div>
+          <div class="dialog-content">
+            <div> 
+              <select
+                data-bind="options: partyDocumentNames(),
+                           optionsText: function(item) { return loc('schemas.'  + item); },
+                           optionsValue: function(item) { return item; },
+                           value: documentName,
+                           optionsCaption: loc('choose')"
+                data-test-id="select-party-document">
+              </select>
+              <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close" data-test-id="add-party-button"></button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </body>

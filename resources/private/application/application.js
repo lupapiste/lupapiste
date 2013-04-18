@@ -144,6 +144,34 @@
       LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
     });
   }();
+  
+  var addPartyModel = new function() {
+    var self = this;
+    
+    self.applicationId = null;
+    self.partyDocumentNames = ko.observableArray();
+    
+    self.documentName = ko.observable();
+    
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
+
+      LUPAPISTE.ModalDialog.open("#dialog-add-party");
+      return false;
+    };
+    
+    self.addPartyEnabled = function() {
+      return self.documentName();
+    };
+
+    self.addParty = function () {
+      ajax.command("create-doc", {id: self.applicationId, schemaName: self.documentName()})
+        .success(function() { repository.load(self.applicationId); })
+        .call();
+      return false;
+    };
+  }();
 
   var application = {
     id: ko.observable(),
@@ -275,6 +303,12 @@
 
     addOperation: function() {
       window.location.hash = "#!/add-operation/" + application.id();
+      return false;
+    },
+    
+    addParty: function() {
+      var id = application.id();
+      addPartyModel.init(id);
       return false;
     },
 
@@ -573,6 +607,7 @@
       authorization: authorizationModel,
       accordian: accordian,
       removeDocModel: removeDocModel,
+      addPartyModel: addPartyModel,
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel

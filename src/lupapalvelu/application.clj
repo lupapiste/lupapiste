@@ -17,6 +17,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
             [sade.util :as util]
@@ -80,6 +81,21 @@
         app (mongo/select-one :applications {:_id id} {:municipality 1})
         authorities (find-authorities-in-applications-municipality app)]
     (ok :authorityInfo authorities)))
+
+(defn filter-repeating-party-docs [names]
+  (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
+  
+(defquery "party-document-names"
+  {:parameters [:id]
+   :authenticated true}
+  [command]
+  (with-application command
+    (fn [application]
+      (let [documents (:documents application)
+            initialOp (:name (first (:operations application)))
+            original-schema-names (:required ((keyword initialOp) operations/operations))
+            original-party-documents (filter-repeating-party-docs original-schema-names)]
+        (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
