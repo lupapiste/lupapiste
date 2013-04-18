@@ -112,8 +112,8 @@
     (get-user-by-email email)
     (create-any-user {:email email})))
 
-(defn authority? [{:keys [role]}]
+(defn authority? [{role :role}]
   (= :authority (keyword role)))
 
-(defn applicant? [{:keys [role]}]
+(defn applicant? [{role :role}]
   (= :applicant (keyword role)))

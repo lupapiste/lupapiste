@@ -18,8 +18,8 @@ setpw.info: Anna uusi salasana kahdesti ja paina OK.
 setpw.password.1: Salasana:
 setpw.password.2: Salasana uudelleen:
 setpw.send: OK
-setpw.success: Salasana vaihdettu. Klikkaa linkkiÃ¤ ja kirjaudu sisÃ¤Ã¤n uudella salasanallasi:
-setpw.fail: Salasanan vaihto ei onnistunut, ole hyvÃ¤ ja yritÃ¤ uudelleen.
+setpw.success: Salasana vaihdettu. Klikkaa linkkiä ja kirjaudu sisään uudella salasanallasi:
+setpw.fail: Salasanan vaihto ei onnistunut, ole hyvä ja yritä uudelleen.
 setpw.placeholder.1: Uusi salasana
 setpw.placeholder.2: Salasana uudelleen
 setpw.quality: Laatu:
@@ -55,3 +55,22 @@ statement.yes: Puoltaa
 statement.no: Ei puolla
 statement.condition: Puoltaa ehdoilla
 statement.conversation: Keskustele päätöksestä
+
+application.stampAttachments: Leimaa liitteet
+stamp.title: Leimaa liitteet
+stamp.sure: Oletko varma että haluat leimata liitteet?
+stamp.start: Aloita leimaus
+stamp.cancel: Peruuta
+stamp.status.starting: Odota, leimaus käynnistyy...
+stamp.status.no-files: Hakemuksella ei ole leimattavia liitteitä
+stamp.status.running: Leimaus käynnissä, ole hyvä ja odota...
+stamp.status.done: Leimaus valmis
+stamp.filename: Tiedosto
+stamp.size: Koko
+stamp.status: Tila
+stamp.ok: Ok
+stamp.file.status.waiting: Odottaa
+stamp.file.status.working: Käsitellään
+stamp.file.status.done: Valmis
+stamp.file.status.error: Epäonnistui
+stamp.verdict: hyväksytty
