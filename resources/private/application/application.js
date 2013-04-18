@@ -78,7 +78,12 @@
       var job = data.job;
       self.version = job.version;
       _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
-      return (job.status === "done") ? self.status(self.statusDone) : self.queryUpdate();
+      if (job.status === "done") {
+        repository.load(self.applicationId);
+        self.status(self.statusDone);
+      } else {
+        self.queryUpdate();
+      }
     };
     
   }();
