@@ -6,8 +6,9 @@
             [sade.strings :as ss]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
-           [java.awt Color Image BasicStroke Font]
+           [java.awt Graphics2D Color Image BasicStroke Font AlphaComposite RenderingHints]
            [java.awt.geom RoundRectangle2D$Float]
+           [java.awt.font FontRenderContext TextLayout]
            [java.awt.image BufferedImage RenderedImage]
            [javax.imageio ImageIO]
            [com.lowagie.text.pdf PdfGState PdfStamper PdfReader]))
@@ -18,38 +19,40 @@
 ;; Generate stamp:
 ;;
 
-(defn- calculate-text-widths [texts font]
-  (let [i (BufferedImage. 1 1 BufferedImage/TYPE_INT_ARGB)
-        g (.createGraphics i)
-        _ (.setFont g font)
-        fm (.getFontMetrics g)
-        widths (map (fn [text] (.stringWidth fm text)) texts)]
-    (.dispose g)
-    widths))
+(defn draw-text [g text x y]
+  (.setColor g (Color. 0 0 0 255))
+  (.draw text g (inc x) (inc y))
+  (.setColor g (Color. 192 0 0 255))
+  (.draw text g x y))
 
 (defn make-stamp [verdict created username municipality]
-  (let [font (Font. "Courier" Font/BOLD 25)
-        texts [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
-               username
-               municipality
-               "LUPAPISTE.fi"]
-        text-widths (calculate-text-widths texts font)
-        width (+ (reduce max text-widths) 80)
-        i (BufferedImage. width 190 BufferedImage/TYPE_INT_ARGB)]
+  (let [font (Font. "Courier" Font/BOLD 12)
+        frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
+        texts (map (fn [text] (TextLayout. text font frc))
+                   [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
+                    username
+                    municipality
+                    "LUPAPISTE.fi"])
+        text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
+        width (+ (reduce max text-widths) 52)
+        height 110
+        i (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)]
     (doto (.createGraphics i)
       (.setColor (Color. 0 0 0 0))
-      (.fillRect 0 0 width 300)
-      (.setStroke (BasicStroke. 16.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
-      (.setColor (Color. 255 255 255 160))
-      (.fill (RoundRectangle2D$Float. 20 20 (- width 40) 150 30 30))
-      (.setColor (Color. 128 16 16 160))
-      (.draw (RoundRectangle2D$Float. 20 20 (- width 40) 150 30 30))
-      (.setColor (Color. 128 16 16 192))
+      (.fillRect 0 0 width height)
+      (.setStroke (BasicStroke. 10.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
+      (.setPaint (Color. 92 16 16 60))
+      (.fillRoundRect 10 10 (- width 20) 90 30 30)
+      (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC))
+      (.setColor (Color. 255 0 0 128))
+      (.drawRoundRect 10 10 (- width 20) 90 30 30)
+      (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER))
       (.setFont font)
-      (.drawString (nth texts 0) 40 55)
-      (.drawString (nth texts 1) 40 90)
-      (.drawString (nth texts 2) 40 115)
-      (.drawString (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 150)
+      (.setColor (Color. 192 0 0 255))
+      (draw-text (nth texts 0) 22 30)
+      (draw-text (nth texts 1) 22 50)
+      (draw-text (nth texts 2) 22 65)
+      (draw-text (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 85)
       (.dispose))
     i))
 
@@ -111,27 +114,28 @@
 ;; Swing frame for testing stamp:
 ;;
 
-(defn- lorem-line [c]
-  (let [sb (StringBuilder.)]
-    (while (< (.length sb) c)
-      (.append sb (rand-nth ["lorem" "ipsum" "dolor" "sit" "amet" "consectetur" "adipisicing" "elit" "sed" "do" "eiusmod" "tempor" "incididunt" "ut" "labore" "et" "dolore" "magna" "aliqua"]))
-      (.append sb \space))
-    (str sb)))
-
-(defn lorem-ipsum [g w h]
-  (.setFont g (Font. Font/SERIF Font/PLAIN 18))
-  (let [fm (.getFontMetrics g)
-        cw (.stringWidth fm "l")
-        ch (+ (.getAscent fm) (.getDescent fm))]
-    (doseq [[y text] (map vector (range ch h ch) (repeatedly (partial lorem-line (int (/ w cw)))))]
-      (.drawString g text cw y))))
-
-(defn- paint-component [g w h]
-  (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "Veikko Viranomainen" "SIPOO")
-        iw (.getWidth i)
-        ih (.getHeight i)]
-    (if false
-      (doto g
+(comment
+  
+  (defn- lorem-line [c]
+    (let [sb (StringBuilder.)]
+      (while (< (.length sb) c)
+        (.append sb (rand-nth ["lorem" "ipsum" "dolor" "sit" "amet" "consectetur" "adipisicing" "elit" "sed" "do" "eiusmod" "tempor" "incididunt" "ut" "labore" "et" "dolore" "magna" "aliqua"]))
+        (.append sb \space))
+      (str sb)))
+  
+  (defn lorem-ipsum [g w h]
+    (.setFont g (Font. Font/SERIF Font/PLAIN 18))
+    (let [fm (.getFontMetrics g)
+          cw (.stringWidth fm "l")
+          ch (+ (.getAscent fm) (.getDescent fm))]
+      (doseq [[y text] (map vector (range ch h ch) (repeatedly (partial lorem-line (int (/ w cw)))))]
+        (.drawString g text cw y))))
+  
+  (defn- paint-component [g w h]
+    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "Veikko Viranomainen" "SIPOO")
+          iw (.getWidth i)
+          ih (.getHeight i)]
+      #_(doto g
         (.setColor Color/GRAY)
         (.fillRect 0 0 (int (/ w 2)) (int (/ h 2)))
         (.setColor Color/WHITE)
@@ -139,25 +143,24 @@
         (.setColor Color/RED)
         (.fillRect 0 (int (/ h 2)) (int (/ w 2)) h)
         (.setColor Color/BLACK)
-        (.fillRect (int (/ w 2)) (int (/ h 2)) w h)))
-    (if true
-      (lorem-ipsum g w h))
-    (.drawImage g i (int (/ (- w iw) 2)) (int (/ (- h ih) 2)) nil)))
-
-(defn make-frame []
-  (let [f (doto (javax.swing.JFrame. "heelo")
-            (.setContentPane
-              (doto (proxy [javax.swing.JComponent] []
-                      (paint [g]
-                        (paint-component g (.getWidth this) (.getHeight this))))))
-            (.setMinimumSize (java.awt.Dimension. 100 100))
-            (.setDefaultCloseOperation javax.swing.JFrame/DISPOSE_ON_CLOSE)
-            (.setAlwaysOnTop true)
-            (.setLocationByPlatform true)
-            (.pack)
-            (.setVisible true))
-        repaint (fn [_ _ _ _]
-                  (javax.swing.SwingUtilities/invokeLater (fn [] (.repaint f))))]
-    (doseq [v [#'make-stamp #'paint-component #'lorem-line #'lorem-ipsum]]
-      (add-watch v :repaint repaint))
-    f))
+        (.fillRect (int (/ w 2)) (int (/ h 2)) w h))
+      #_(lorem-ipsum g w h)
+      (.drawImage g i (int (/ (- w iw) 2)) (int (/ (- h ih) 2)) nil)))
+  
+  (defn make-frame []
+    (let [f (doto (javax.swing.JFrame. "heelo")
+              (.setContentPane
+                (doto (proxy [javax.swing.JComponent] []
+                        (paint [g]
+                          (paint-component g (.getWidth this) (.getHeight this))))))
+              (.setMinimumSize (java.awt.Dimension. 100 100))
+              (.setDefaultCloseOperation javax.swing.JFrame/DISPOSE_ON_CLOSE)
+              (.setAlwaysOnTop true)
+              (.setLocationByPlatform true)
+              (.pack)
+              (.setVisible true))
+          repaint (fn [_ _ _ _]
+                    (javax.swing.SwingUtilities/invokeLater (fn [] (.repaint f))))]
+      (doseq [v [#'make-stamp #'paint-component #'lorem-line #'lorem-ipsum]]
+        (add-watch v :repaint repaint))
+      f)))
