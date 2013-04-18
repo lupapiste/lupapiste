@@ -336,25 +336,6 @@
                                               $set {:modified created}})
         (ok)))))
 
-(defcommand "add-document"
-  {:parameters [:id :documentName]
-   :roles      [:applicant :authority]
-   :states     [:draft :open]}
-  [command]
-  (with-application command
-    (fn [application]
-      (let [id             (get-in command [:data :id])
-            document-name  (get-in command [:data :documentName])
-            created        (:created command)
-            make           (fn [schema-name] {:id (mongo/create-id)
-                                              :schema (schemas/schemas document-name)
-                                              :created created
-                                              :body {}})
-            doc            (make document-name)]
-        (mongo/update-by-id :applications id {$push {:documents doc}
-                                              $set {:modified created}})
-        (ok)))))
-
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
