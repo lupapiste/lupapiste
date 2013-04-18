@@ -5,6 +5,7 @@
         [lupapalvelu.domain :only [get-application-as application-query-for]]
         [clojure.string :only [split join trim]])
   (:require [clojure.java.io :as io]
+            [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [sade.strings :as ss]
@@ -456,9 +457,8 @@
 (defn- stamp-job-status [stamp-job]
   (if (every? #{:done :error} (map :status (vals stamp-job))) :done :runnig))
 
-(defn- stamp-attachment [stamp file-info application-id job-id user]
+(defn- stamp-attachment [stamp file-info application-id job-id user created]
   (let [temp-file (File/createTempFile (str "lupapiste.stamp." job-id ".") ".tmp")
-        created (now)
         new-file-id (mongo/create-id)
         {:keys [id contentType fileId filename]} file-info]
     (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
@@ -487,12 +487,16 @@
       (errorf e "failed to stamp attachment: application=%s, file=%s" application-id fileId)
       (job/update job-id assoc-in [id :status] :error)))))
 
-(defn- stamp-attachments [file-infos application-id job-id user]
-  (let [stamp (stamper/make-stamp)]
+(defn- stamp-attachments [file-infos application-id job-id user created]
+  (let [stamp (stamper/make-stamp
+                (i18n/loc "stamp.verdict")
+                created
+                (str (:firstName user) \space (:lastName user))
+                (->> user (:municipality) (str "municipality.") (i18n/loc) (s/upper-case)))]
     (doseq [file-info (vals file-infos)]
       (job/update job-id assoc-in [(:id file-info) :status] :working)
       (try
-        (stamp-attachment stamp file-info application-id job-id user)
+        (stamp-attachment stamp file-info application-id job-id user created)
         (job/update job-id assoc-in [(:id file-info) :status] :done)
         (catch Exception e
           (errorf e "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
@@ -501,10 +505,11 @@
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
 
-(defn- make-stamp-job [file-infos application-id user]
+(defn- make-stamp-job [file-infos application-id user created]
   (let [job (job/start file-infos stamp-job-status)
         job-id (:id job)]
-    (future (stamp-attachments file-infos application-id job-id user))
+    (future
+      (stamp-attachments file-infos application-id job-id user created))
     job))
 
 (defcommand "stamp-attachments"
@@ -519,7 +524,7 @@
             file-count (count file-infos)]
         (ok :count file-count
             :job (when-not (zero? file-count)
-                   (make-stamp-job file-infos (:id application) (security/summary (:user command)))))))))
+                   (make-stamp-job file-infos (:id application) (:user command) (:created command))))))))
 
 (defn ->long [v]
   (if (string? v) (Long/parseLong v) v))
