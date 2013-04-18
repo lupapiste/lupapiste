@@ -20,5 +20,5 @@ var repository = (function() {
     load: load,
     loaded: loaded
   };
-  
+
 })();

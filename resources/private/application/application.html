@@ -90,6 +90,7 @@
           <button data-bind="ltext: 'application.addOperation',         click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: $root.authorization.ok('add-operation')"          data-test-id="add-operation"                      ></button>
           <button data-bind="ltext: 'application.pdf',                  click: exportPdf"                                                                                                                                 data-test-id="application-pdf-btn"                ></button>
           <button data-bind="ltext: 'application.cancelApplication',    click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn"></button>
+          <button data-bind="ltext: 'application.stampAttachments',     click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-cancel-btn"  class="btn"></button>
         </div>
 
         <!-- Tabs: -->
@@ -98,6 +99,7 @@
             <li><a data-bind="ltext: 'application.tabInfo',         click: $root.application.changeTab" href="#" data-target="info"         data-test-id="application-open-info-tab"         ></a></li>
             <li><a data-bind="ltext: 'application.tabParties',      click: $root.application.changeTab" href="#" data-target="parties"      data-test-id="application-open-parties-tab"      ></a></li>
             <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.application.changeTab" href="#" data-target="attachments"  data-test-id="application-open-attachments-tab"  ></a></li>
+            <li><a data-bind="ltext: 'application.tabStatement',    click: $root.application.changeTab" href="#" data-target="statement"    data-test-id="application-open-statement-tab"    ></a></li>
             <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.application.changeTab" href="#" data-target="verdict"      data-test-id="application-open-verdict-tab"      ></a></li>
             <li><a data-bind="ltext: 'application.tabConversation', click: $root.application.changeTab" href="#" data-target="conversation" data-test-id="application-open-conversation-tab" ></a></li>
           </ul>
@@ -157,6 +159,13 @@
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
+
+          <button
+              data-bind="click: application.addParty, ltext: 'application.addParty'"
+              class="btn btn-primary modal"
+              data-test-id="add-party">
+          </button>
+
           <div class="process-nav">
             <a class="btn process-next" data-bind="click: $root.application.changeTab" href="#" data-target="attachments"><span data-bind="ltext: 'application.next-tab'"></span></span><span class="icon drill-right-orange inline-right"></span></a>
             <a class="btn process-previous" data-bind="click: $root.application.changeTab" href="#" data-target="info"><span data-bind="ltext: 'application.previous-tab'"></span></span><span class="icon drill-left-black-bigger inline-left"></span></a>
@@ -255,11 +264,44 @@
           </div>
         </div>
 
+        <div id="application-statement-tab" class="tab-content" data-bind="with: $root.application.data">
+          <div data-bind="ifnot: $data.statements && statements().length>0">
+            <p data-bind="ltext: 'application.statement.missing'"></p>
+          </div>
+          <div data-bind="if: $data.statements && statements().length>0">
+            <table class="table table-striped tablesorter">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'application.statement.desc'"></th>
+                  <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                  <th data-bind="ltext: 'application.statement.requested'"></th>
+                  <th data-bind="ltext: 'application.statement.given'"></th>
+                  <th data-bind="ltext: 'application.statement.status'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: $data.statements">
+                <tr class="link-row">
+                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
+                  <td data-bind="text: person.name"></td>
+                  <td data-bind="dateString: requested"></td>
+                  <td data-bind="dateString: given"></td>
+                  <td data-bind="text: status() && loc('statement.'+status())"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button
+              data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
+              class="btn btn-primary modal"
+              data-test-id="add-attachment">
+          </button>
+        </div>
+
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
           <div>
             <table class="table table-striped conversation" data-test-id="application-comments-table">
-              <tbody data-bind="foreach: comments">
+              <tbody data-bind="foreach: comments()">
                 <tr class="comment">
                   <td class="comment-party commenttd">
                     <span class="date" data-bind="dateTimeString: created"></span>
@@ -320,6 +362,24 @@
         </div>
       </div>
 
+      <div id="dialog-request-for-statement" class="window autosized">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'application.statement.add'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+        <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
+          <div data-bind="foreach: data">
+            <input class="form-input text long" type="checkbox" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown'" />
+            <label data-bind="text: text()+' '+name() + ' (' + email() + ')'" class="form-label"></label>
+          </div>
+          <button
+              data-bind="click: send, ltext: 'application.statement.send', disable: disabled"
+              class="btn btn-primary modal"
+              data-test-id="add-attachment">
+          </button>
+        </div>
+      </div>
+
       <div id="dialog-remove-doc" class="window autosized">
         <div data-bind="with: $root.removeDocModel">
           <div class="dialog-header">
@@ -334,7 +394,7 @@
             <div>
               <span data-bind="ltext: 'removeDoc.message2'"></span>
             </div>
-            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close"></button>
+            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close" data-test-id="remove-ok"></button>
             <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
           </div>
         </div>
@@ -347,6 +407,71 @@
         </div>
         <div class="dialog-content">
           <div class="attachment-templates"></div>
+        </div>
+      </div>
+
+      <div id="dialog-stamp-attachments" class="window autosized">
+        <div data-bind="with: $root.stampModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'stamp.title'"></p>
+            <p class="dialog-close close">X</p>
+          </div>
+          <div class="dialog-content">
+            <div data-bind="visible: status() < statusRunning">
+              <div>
+                <span data-bind="ltext: 'stamp.sure', visible: status() === statusInit"></span>
+                <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
+                <span data-bind="ltext: 'stamp.status.no-files', visible: status() === statusNoFiles"></span>
+              </div>
+              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
+              <button data-bind="ltext: 'stamp.cancel', enabled: status() === statusInit" class="btn btn-dialog close"></button>
+            </div>
+            <div data-bind="visible: status() >= statusRunning">
+              <div>
+                <span data-bind="ltext: 'stamp.status.running', visible: status() === statusRunning"></span>
+                <span data-bind="ltext: 'stamp.status.done', visible: status() === statusDone"></span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.filename'"></td>
+                    <td data-bind="ltext: 'stamp.size'"></td>
+                    <td data-bind="ltext: 'stamp.status'"></td>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: filesTable">
+                  <tr>
+                    <td data-bind="text: filename"></td>
+                    <td data-bind="size: size"></td>
+                    <td data-bind="text: status"></td>
+                  </tr>              
+                </tbody>
+              </table>
+              <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="dialog-add-party" class="window autosized">
+        <div data-bind="with: $root.addPartyModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'addParty.heading'"></p>
+            <p class="dialog-close close">X</p>
+          </div>
+          <div class="dialog-content">
+            <div> 
+              <select
+                data-bind="options: partyDocumentNames(),
+                           optionsText: function(item) { return loc('schemas.'  + item); },
+                           optionsValue: function(item) { return item; },
+                           value: documentName,
+                           optionsCaption: loc('choose')"
+                data-test-id="select-party-document">
+              </select>
+              <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close" data-test-id="add-party-button"></button>
+            </div>
+          </div>
         </div>
       </div>
 

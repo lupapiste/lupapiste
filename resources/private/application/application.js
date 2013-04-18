@@ -8,6 +8,86 @@
   var applicationMap;
   var inforequestMap;
 
+  var stampModel = new function() {
+    var self = this;
+    
+    self.statusInit      = 0;
+    self.statusStarting  = 1;
+    self.statusNoFiles   = 2;
+    self.statusRunning   = 3;
+    self.statusDone      = 4;
+
+    self.applicationId = null;
+    self.jobId = null;
+    self.version = null;
+    self.files = null;
+    
+    self.status = ko.observable();
+    self.filesTable = ko.observable();
+    
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      self.jobId = null;
+      self.files = {};
+      self.status(self.statusInit).filesTable([]);
+      LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
+      return self;
+    };
+
+    self.start = function() {
+      self.status(self.statusStarting);
+      ajax
+        .command("stamp-attachments", {id: self.applicationId})
+        .success(self.started)
+        .call();
+      return false;
+    };
+
+    function withObservableStatus(job, key) {
+      var s = job.status;
+      job.status = ko.observable(loc("stamp.file.status", s));
+      return [key, job];
+    }
+    
+    self.started = function(data) {
+      if (data.count === 0) {
+        self.status(self.statusNoFiles);
+      } else {
+        self.status(self.statusRunning);
+        self.jobId = data.job.id;
+        self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
+        self.filesTable(_.values(self.files));
+        self.version = 0;
+        self.queryUpdate();
+      }
+      return false;
+    };
+    
+    self.queryUpdate = function() {
+      ajax
+        .query("stamp-attachments-job")
+        .param("job-id", self.jobId)
+        .param("version", self.version)
+        .success(self.update)
+        .call();
+      return self;
+    }
+
+    self.update = function(data) {
+      if (data.result === "timeout") return self.queryUpdate();
+      var job = data.job;
+      self.version = job.version;
+      _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
+      if (job.status === "done") {
+        repository.load(self.applicationId);
+        self.status(self.statusDone);
+      } else {
+        self.queryUpdate();
+      }
+    };
+    
+  }();
+  
   var removeDocModel = new function() {
     var self = this;
 
@@ -88,6 +168,40 @@
     });
   }();
 
+  var requestForStatementModel = new function() {
+    var self = this;
+    self.data = ko.observableArray();
+    self.personIds = ko.observableArray([]);
+    self.disabled = ko.computed(function() { return _.isEmpty(self.personIds()); });
+
+    self.load = function() {
+      ajax
+        .query("get-statement-persons", {id: currentId})
+        .success(function(result) { self.data(ko.mapping.fromJS(result.data)); })
+        .call();
+    };
+
+    self.openDialog = function() {
+      self.load();
+      LUPAPISTE.ModalDialog.open("#dialog-request-for-statement");
+    };
+
+    self.send = function() {
+      ajax.command("request-for-statement", {id: currentId, personIds: self.personIds()})
+        .success(function() {
+          self.personIds([]);
+          repository.load(currentId);
+          LUPAPISTE.ModalDialog.close();
+        }).call();
+    };
+
+    self.openStatement = function(model) {
+      window.location.hash = "#!/statement/" + currentId + "/" + model.id();
+      return false;
+    };
+
+  }();
+
   var submitApplicationModel = new function() {
     var self = this;
 
@@ -109,6 +223,34 @@
     $(function() {
       LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
     });
+  }();
+  
+  var addPartyModel = new function() {
+    var self = this;
+    
+    self.applicationId = null;
+    self.partyDocumentNames = ko.observableArray();
+    
+    self.documentName = ko.observable();
+    
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
+
+      LUPAPISTE.ModalDialog.open("#dialog-add-party");
+      return false;
+    };
+    
+    self.addPartyEnabled = function() {
+      return self.documentName();
+    };
+
+    self.addParty = function () {
+      ajax.command("create-doc", {id: self.applicationId, schemaName: self.documentName()})
+        .success(function() { repository.load(self.applicationId); })
+        .call();
+      return false;
+    };
   }();
 
   var application = {
@@ -243,6 +385,12 @@
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     },
+    
+    addParty: function() {
+      var id = application.id();
+      addPartyModel.init(id);
+      return false;
+    },
 
     cancelApplication: function() {
       var id = application.id();
@@ -255,6 +403,11 @@
       return false;
     },
 
+    stampAttachments: function() {
+      stampModel.init(application.id());
+      return false;
+    },
+    
     changeTab: function(model,event) {
       var $target = $(event.target);
       if ($target.is("span")) { $target = $target.parent(); }
@@ -279,6 +432,7 @@
     this.lastName = lastName;
   };
 
+    //FIXME: why is this?
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
     if (isInitializing) { return; }
@@ -324,15 +478,15 @@
   function showApplication(applicationDetails) {
     isInitializing = true;
 
-    authorizationModel.refresh(applicationDetails.application, function() {
+    authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
       // new data mapping
 
       var app = applicationDetails.application;
       applicationModel.data(ko.mapping.fromJS(app));
+      application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
       // Comments:
-
       commentModel.setApplicationId(app.id);
       commentModel.setComments(app.comments);
 
@@ -359,6 +513,7 @@
 
       attachmentsByGroup(getAttachmentsByGroup(app.attachments));
 
+      // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
 
       // Update map:
@@ -391,12 +546,6 @@
       pageutil.hideAjaxWait();
     });
   }
-
-  repository.loaded(function(e) {
-    if (!currentId || (currentId === e.applicationDetails.application.id)) {
-      showApplication(e.applicationDetails);
-    }
-  });
 
   var inviteModel = new function() {
     var self = this;
@@ -522,6 +671,12 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
+  repository.loaded(function(e) {
+    if ((pageutil.getPage() === "application" || pageutil.getPage() === "inforequest") && (!currentId || (currentId === e.applicationDetails.application.id))) {
+      showApplication(e.applicationDetails);
+    }
+  });
+
   $(function() {
     applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
     inforequestMap = gis.makeMap("inforequest-map", false).center([{x: 404168, y: 6693765}], 12);
@@ -537,8 +692,11 @@
       authorization: authorizationModel,
       accordian: accordian,
       removeDocModel: removeDocModel,
+      addPartyModel: addPartyModel,
       removeApplicationModel: removeApplicationModel,
-      attachmentTemplatesModel: attachmentTemplatesModel
+      attachmentTemplatesModel: attachmentTemplatesModel,
+      requestForStatementModel: requestForStatementModel,
+      stampModel: stampModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);

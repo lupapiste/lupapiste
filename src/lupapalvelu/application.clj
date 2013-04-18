@@ -1,7 +1,7 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
         [clojure.tools.logging]
-        [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
+        [lupapalvelu.core]
         [clojure.string :only [blank?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
@@ -17,6 +17,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
             [sade.util :as util]
@@ -80,6 +81,21 @@
         app (mongo/select-one :applications {:_id id} {:municipality 1})
         authorities (find-authorities-in-applications-municipality app)]
     (ok :authorityInfo authorities)))
+
+(defn filter-repeating-party-docs [names]
+  (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
+  
+(defquery "party-document-names"
+  {:parameters [:id]
+   :authenticated true}
+  [command]
+  (with-application command
+    (fn [application]
+      (let [documents (:documents application)
+            initialOp (:name (first (:operations application)))
+            original-schema-names (:required ((keyword initialOp) operations/operations))
+            original-party-documents (filter-repeating-party-docs original-schema-names)]
+        (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
@@ -210,12 +226,13 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defn- make-attachments [created op municipality-id]
+(defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
       {:id (mongo/create-id)
        :type {:type-group type-group :type-id type-id}
        :state :requires_user_action
+       :target target
        :modified created
        :versions []
        :op op})))
@@ -443,12 +460,12 @@
 
 (defcommand "applications-for-datatables"
   {:parameters [:params] :verified true}
-  [{user :user {params :params} :data}]
+  [{user :user {:keys [params]} :data}]
   (ok :data (applications-for-user user params)))
 
-;
-; Query that returns number of applications or info-requests user has:
-;
+;;
+;; Query that returns number of applications or info-requests user has:
+;;
 
 (defquery "applications-count"
   {:parameters [:kind]
@@ -461,3 +478,63 @@
                 "applications" (assoc base-query :infoRequest false)
                 "both"         base-query)]
     (ok :data (mongo/count :applications query))))
+
+;;
+;; Statements
+;;
+
+(defcommand "request-for-statement"
+  {:parameters [:id :personIds]
+   :roles      [:authority]}
+  [{user :user {:keys [id personIds]} :data :as command}]
+  (with-application command
+    (fn [{:keys [municipality]}]
+      (municipality/with-municipality municipality
+        (fn [{:keys [statementPersons]}]
+          (let [personIdSet (set personIds)
+                persons     (filter #(-> % :id personIdSet) statementPersons)
+                now         (now)
+                ->statement (fn [person] {:id        (mongo/create-id)
+                                          :person    person
+                                          :requested now
+                                          :given     nil
+                                          :status    nil})
+                statements  (map ->statement persons)]
+            (mongo/update :applications {:_id id} {$pushAll {:statements statements}})))))))
+
+(defcommand "delete-statement"
+  {:parameters [:id :statementId]
+   :roles      [:authority]}
+  [{{:keys [id statementId]} :data}]
+  (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
+
+(defn get-statement [{:keys [statements]} id]
+  (first (filter #(= id (:id %)) statements)))
+
+(defn statement-exists [{:keys [statementId]} application]
+  (when-not (get-statement application statementId)
+    (fail :error.no-statement :statementId statementId)))
+
+(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
+  (let [{{statement-email :email} :person} (get-statement application statementId)]
+    (when-not (= statement-email user-email)
+      (fail :error.not-statement-owner))))
+
+(defn statement-not-given [{{:keys [statementId]} :data {user-email :email} :user} application]
+  (let [{:keys [given]} (get-statement application statementId)]
+    (when given
+      (fail :error.statement-already-given))))
+
+(defcommand "give-statement"
+  {:parameters  [:id :statementId :status :text]
+   :validators  [statement-exists statement-owner statement-not-given]
+   :roles       [:authority]
+   :description "authrority-roled statement owners can give statements that are not given already"}
+  [{{:keys [id statementId status text]} :data}]
+  (mongo/update
+    :applications
+    {:_id id
+     :statements {$elemMatch {:id statementId}}}
+    {$set {:statements.$.status status
+           :statements.$.given (now)
+           :statements.$.text text}}))
