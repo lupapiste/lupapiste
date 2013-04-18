@@ -600,6 +600,7 @@ var docgen = (function() {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
+            .attr("data-test-class", "delete-schemas." + self.schemaName)
             .click(removeDoc));
       }
 
@@ -652,7 +653,7 @@ var docgen = (function() {
         $(btn).click(function() {
           var self = this;
           ajax
-            .command("create-doc", {schema: schema.info.name, id: application.id})
+            .command("create-doc", {schemaName: schema.info.name, id: application.id})
             .success(function(data) {
               var newDocId = data.doc;
               var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application).element;
