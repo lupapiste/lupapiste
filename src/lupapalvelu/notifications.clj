@@ -45,6 +45,11 @@
   (enlive/transform e [(keyword (str selector lang))]
     (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
+(defn replace-application-links [e selector application suffix host]
+  (-> e
+    (replace-application-link (str selector "-") application "fi" suffix host)
+    (replace-application-link (str selector "-") application "en" suffix host))
+
 (defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
     (send-off mail-agent (fn [_]
@@ -80,8 +85,7 @@
 (defn get-message-for-new-comment [application host]
   (message
     (template "application-new-comment.html")
-    (replace-application-link "#conversation-link-" application "fi" "/conversation" host)
-    (replace-application-link "#conversation-link-" application "sv" "/conversation" host)))
+    (replace-application-links "#conversation-link" application "/conversation" host)))
 
 (defn send-notifications-on-new-comment! [application user-commenting comment-text host]
   (when (security/authority? user-commenting)
@@ -95,9 +99,7 @@
         msg   (message
                 (template "invite.html")
                 (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
-                (replace-application-link "#link-" application "fi" "" host)
-                (replace-application-link "#link-" application "sv" "" host)
-                )]
+                (replace-application-links "#link" application "" host))]
     (send-mail-to-recipients! [email] title msg)))
 
 (defn send-create-statement-person! [email text municipality]
@@ -109,11 +111,22 @@
                 (enlive/transform [:#municipality-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "municipality." municipality))))))]
     (send-mail-to-recipients! [email] title msg)))
 
+(defn send-on-request-for-statement! [persons application user host]
+  (doseq [person persons]
+    (let [title (get-email-title application "statement-request")
+          msg   (message
+                  (template "add-statement-request.html")
+                  (enlive/transform [:.text] (enlive/content text))
+                  (enlive/transform [:#municipality-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str "municipality." municipality)))))
+                  (enlive/transform [:#municipality-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "municipality." municipality))))))]
+      (send-mail-to-recipients! [email] title msg)))
+
+    (println "NOT sending mail to " persons " for: " (:title application)))
+
 (defn get-message-for-application-state-change [application host]
   (message
     (template "application-state-change.html")
-    (replace-application-link "#application-link-" application "fi" "" host)
-    (replace-application-link "#application-link-" application "sv" "" host)
+    (replace-application-links "#application-link" application "" host)
     (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
     (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application))))))))
 
@@ -127,8 +140,7 @@
 (defn get-message-for-verdict [application host]
   (message
     (template "application-verdict.html")
-    (replace-application-link "#verdict-link-" application "fi" "/verdict" host)
-    (replace-application-link "#verdict-link-" application "sv" "/verdict" host)))
+    (replace-application-links "#verdict-link" application "/verdict" host)))
 
 (defn send-notifications-on-verdict! [application-id host]
   (let [application (mongo/by-id :applications application-id)
