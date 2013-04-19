@@ -27,6 +27,7 @@ stamp.file.status.done: Valmis
 stamp.file.status.error: Epäonnistui
 stamp.verdict: hyväksytty
 
+applications.filter.own: Vain omat
 applications.filter.not-canceled: Ei peruttu
 applications.filter.canceled-in-power: Peruttu voimassa
 applications.filter.canceled: Peruttu
