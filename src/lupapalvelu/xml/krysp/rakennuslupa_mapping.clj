@@ -115,13 +115,14 @@
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
                                        :child [{:tag :uusi
-                                                :child [{:tag :huoneistoala}
-                                                        {:tag :kuvaus}]}
+                                                :child [{:tag :kuvaus}]}
                                                {:tag :laajennus}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
                                                {:tag :purkaminen}
-                                               {:tag :muuMuutosTyo}
+                                               {:tag :muuMuutosTyo :child [{:tag :muutostyonLaji}
+                                                                           {:tag :kuvaus}
+                                                                           {:tag :perusparannusKytkin}]}
                                                {:tag :kaupunkikuvaToimenpide}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
