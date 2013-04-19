@@ -100,14 +100,15 @@
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
    :roles       [:authority]}
-  [{{:keys [assigneeId]} :data user :user :as command}]
+  [{{assigneeId :assigneeId} :data user :user :as command}]
   (with-application command
     (fn [application]
-      (mongo/update-by-id
-        :applications (:id application)
-        (if assigneeId
-          {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-          {$unset {:authority ""}})))))
+      (let [assignee (when assigneeId (security/summary (mongo/select-one :users {:_id assigneeId})))
+            auth (:auth application)
+            auth (filter (comp (partial (complement =) "authority") :role) auth)
+            auth (if assignee (cons (role assignee :authority) auth) auth)]
+        (mongo/update-by-id :applications (:id application) {$set {:authority assignee
+                                                                   :auth auth}})))))
 
 (defcommand "open-application"
   {:parameters [:id]
@@ -429,6 +430,12 @@
       (condp = kind
         "applications" {:infoRequest false}
         "inforequests" {:infoRequest true}
+        nil)
+      (condp = (:filter-state params)
+        "not-canceled"      {:state {$ne "canceled"}}
+        "canceled-in-power" {:state "canceled"}  ; FIXME: in-power?
+        "canceled"          {:state "canceled"}
+        "pre-verdict"       {:state {$in ["draft" "open" "submitted" "sent"]}}
         nil)
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
