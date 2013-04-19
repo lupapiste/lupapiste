@@ -472,19 +472,25 @@
    :roles      [:authority]}
   [{user :user {:keys [id personIds]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality]}]
+    (fn [{:keys [municipality] :as application}]
       (municipality/with-municipality municipality
         (fn [{:keys [statementPersons]}]
-          (let [personIdSet (set personIds)
-                persons     (filter #(-> % :id personIdSet) statementPersons)
-                now         (now)
-                ->statement (fn [person] {:id        (mongo/create-id)
-                                          :person    person
-                                          :requested now
-                                          :given     nil
-                                          :status    nil})
-                statements  (map ->statement persons)]
-            (mongo/update :applications {:_id id} {$pushAll {:statements statements}})))))))
+          (let [personIdSet    (set personIds)
+                persons        (filter #(-> % :id personIdSet) statementPersons)
+                users          (map #(security/get-or-create-user-by-email (:email %)) persons)
+                writers        (map #(role % :writer) users)
+                new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
+                new-userids    (set (map :id new-writers))
+                unique-writers (distinct new-writers)
+                now            (now)
+                ->statement    (fn [person] {:id        (mongo/create-id)
+                                             :person    person
+                                             :requested now
+                                             :given     nil
+                                             :status    nil})
+                statements    (map ->statement persons)]
+            (mongo/update :applications {:_id id} {$pushAll {:statements statements
+                                                             :auth unique-writers}})))))))
 
 (defcommand "delete-statement"
   {:parameters [:id :statementId]
