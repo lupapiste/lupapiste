@@ -42,7 +42,8 @@
   (enlive/transform e [:style] (enlive/content style)))
 
 (defn replace-application-link [e selector application lang suffix host]
-  (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
+  (enlive/transform e [(keyword (str selector lang))]
+    (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
@@ -53,11 +54,8 @@
 
 (defn get-email-title [{:keys [title]} title-key]
   (i18n/with-lang "fi"
-    (str
-      "Lupapiste: "
-      title
-      " - "
-      (i18n/loc (s/join "." ["email" "title" title-key])))))
+    (let [title-postfix (i18n/loc (s/join "." ["email" "title" title-key]))]
+      (str "Lupapiste: " title " - " title-postfix))))
 
 (defn- url-to [to]
   (let [request (request/ring-request)
