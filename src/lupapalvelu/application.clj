@@ -414,7 +414,7 @@
 (def col-map (zipmap col-sources (map str (range))))
 
 (defn add-field [application data [app-field data-field]]
-  (assoc data data-field (if (keyword? app-field) (get application app-field) (app-field application))))
+  (assoc data data-field (app-field application)))
 
 (defn make-row [application]
   (let [base {"id" (:_id application)
@@ -439,6 +439,7 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
+  (println "\n**P:" (:beer params) (:cider params))
   (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params)
@@ -452,15 +453,15 @@
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
         echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
-
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
 (defcommand "applications-for-datatables"
-  {:parameters [:params] :verified true}
-  [{user :user {:keys [params]} :data}]
+  {:parameters [:params]
+   :verified true}
+  [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
 
 ;;
