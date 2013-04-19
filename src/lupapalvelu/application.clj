@@ -84,7 +84,7 @@
 
 (defn filter-repeating-party-docs [names]
   (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
-  
+
 (defquery "party-document-names"
   {:parameters [:id]
    :authenticated true}
@@ -484,21 +484,22 @@
 ;;
 
 (defcommand "request-for-statement"
-  {:parameters [:id :personIds]
-   :roles      [:authority]}
+  {:parameters  [:id :personIds]
+   :roles       [:authority]
+   :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
   [{user :user {:keys [id personIds]} :data :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
       (municipality/with-municipality municipality
         (fn [{:keys [statementPersons]}]
-          (let [personIdSet    (set personIds)
+          (let [now            (now)
+                personIdSet    (set personIds)
                 persons        (filter #(-> % :id personIdSet) statementPersons)
                 users          (map #(security/get-or-create-user-by-email (:email %)) persons)
                 writers        (map #(role % :writer) users)
                 new-writers    (filter #(not (domain/has-auth? application (:id %))) writers)
                 new-userids    (set (map :id new-writers))
                 unique-writers (distinct new-writers)
-                now            (now)
                 ->statement    (fn [person] {:id        (mongo/create-id)
                                              :person    person
                                              :requested now
