@@ -422,7 +422,7 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query params]
+(defn make-query [query params user]
   (let [search (params :sSearch)
         kind (params :kind)]
     (merge
@@ -437,8 +437,12 @@
         "canceled"          {:state "canceled"}
         "pre-verdict"       {:state {$in ["draft" "open" "submitted" "sent"]}}
         nil)
+      (if (:filter-own params)
+        {"auth.id" (:id user)})
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
+
+(count (mongo/select :applications {"auth.id" "777777777777777777000023"} {:auth 1}))
 
 (defn make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
@@ -451,7 +455,7 @@
     (println "   " k "=" v))
   (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params)
+        query       (make-query user-query params user)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)
