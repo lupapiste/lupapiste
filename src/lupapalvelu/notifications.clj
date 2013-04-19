@@ -46,7 +46,6 @@
     (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients! [recipients title msg]
-  (println "****" recipients title msg)
   (doseq [recipient recipients]
     (send-off mail-agent (fn [_]
                            (if (email/send-mail recipient title msg)
