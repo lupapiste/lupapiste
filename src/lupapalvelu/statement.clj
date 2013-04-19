@@ -7,7 +7,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.municipality :as municipality]))
+            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.notifications :as notifications]))
 
 ;;
 ;; Common
@@ -50,13 +51,15 @@
     (fn [{:keys [firstName lastName] :as user}]
       (if-not (security/authority? user)
         (fail :error.not-authority)
-        (mongo/update
-          :municipalities
-          {:_id municipality}
-          {$push {:statementPersons {:id (mongo/create-id)
-                                     :text text
-                                     :email email
-                                     :name (str firstName " " lastName)}}})))))
+        (do
+          (mongo/update
+            :municipalities
+            {:_id municipality}
+            {$push {:statementPersons {:id (mongo/create-id)
+                                       :text text
+                                       :email email
+                                       :name (str firstName " " lastName)}}})
+          (notifications/send-create-statement-person! email text municipality))))))
 
 (defcommand "delete-statement-person"
   {:parameters [:personId]

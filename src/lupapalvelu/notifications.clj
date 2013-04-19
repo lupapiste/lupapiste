@@ -52,10 +52,10 @@
                              (info "email was sent successfully")
                              (error "email could not be delivered."))))))
 
-(defn get-email-title [{:keys [title]} title-key]
+(defn get-email-title [{:keys [title]} & [title-key]]
   (i18n/with-lang "fi"
-    (let [title-postfix (i18n/loc (s/join "." ["email" "title" title-key]))]
-      (str "Lupapiste: " title " - " title-postfix))))
+    (let [title-postfix (if title-key (str " - " (i18n/loc (s/join "." ["email" "title" title-key])) ""))]
+      (str "Lupapiste: " title title-postfix))))
 
 (defn- url-to [to]
   (let [request (request/ring-request)
@@ -102,15 +102,13 @@
     (send-mail-to-recipients! [email] title msg)))
 
 ;; create-statement-person
-(comment
-  (defn send-on-create-statement-person! [email text application host]
-    (let [title (get-email-title application "create-statement-person")
-          msg   (message
-                  (template "add-statement-person.html")
-                  (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
-                  (replace-application-link "#link-" application "fi" "" host)
-                  (replace-application-link "#link-" application "sv" "" host))]
-      (send-mail-to-recipients! [email] title msg))))
+(defn send-create-statement-person! [email text municipality]
+  (let [title (get-email-title {:title "application"} "create-statement-person")
+        msg   (message
+                (template "add-statement-person.html")
+                (enlive/transform [:.text] (enlive/content text))
+                (enlive/transform [:.municipality] (enlive/content municipality)))]
+    (send-mail-to-recipients! [email] title msg)))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
