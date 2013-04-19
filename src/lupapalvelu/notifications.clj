@@ -91,7 +91,6 @@
           title      (get-email-title application "new-comment")]
       (send-mail-to-recipients! recipients title msg))))
 
-;; invite
 (defn send-invite! [email text application user host]
   (let [title (get-email-title application "invite")
         msg   (message
@@ -102,16 +101,15 @@
                 )]
     (send-mail-to-recipients! [email] title msg)))
 
-;; create-statement-person
 (defn send-create-statement-person! [email text municipality]
   (let [title (get-email-title {:title "Lausunnot"})
         msg   (message
                 (template "add-statement-person.html")
                 (enlive/transform [:.text] (enlive/content text))
-                (enlive/transform [:.municipality] (enlive/content municipality)))]
+                (enlive/transform [:#municipality-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str "municipality." municipality)))))
+                (enlive/transform [:#municipality-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "municipality." municipality))))))]
     (send-mail-to-recipients! [email] title msg)))
 
-; application opened
 (defn get-message-for-application-state-change [application host]
   (message
     (template "application-state-change.html")
@@ -127,7 +125,6 @@
         title       (get-email-title application "state-change")]
     (send-mail-to-recipients! recipients title msg)))
 
-; verdict given
 (defn get-message-for-verdict [application host]
   (message
     (template "application-verdict.html")
