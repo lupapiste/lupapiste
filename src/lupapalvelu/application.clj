@@ -84,7 +84,7 @@
 
 (defn filter-repeating-party-docs [names]
   (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
-  
+
 (defquery "party-document-names"
   {:parameters [:id]
    :authenticated true}
@@ -122,7 +122,7 @@
         {$set {:modified (:created command)
                :state new-state
                :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change id host)))))
+      (notifications/send-notifications-on-application-state-change! id host)))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
@@ -136,7 +136,7 @@
         (mongo/update-by-id :applications (-> command :data :id)
                             {$set {:modified (:created command)
                                    :state new-state}})
-        (notifications/send-notifications-on-application-state-change id host)
+        (notifications/send-notifications-on-application-state-change! id host)
         (ok)))))
 
 (defcommand "request-for-complement"
@@ -151,7 +151,7 @@
         (mongo/update
           :applications {:_id (:id application) :state :sent}
           {$set {:state :complement-needed}})
-        (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
+        (notifications/send-notifications-on-application-state-change! application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
   {:parameters [:id :lang]
@@ -171,7 +171,7 @@
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
-          (notifications/send-notifications-on-application-state-change application-id host)
+          (notifications/send-notifications-on-application-state-change! application-id host)
           (catch org.xml.sax.SAXParseException e
             (.printStackTrace e)
             (fail (.getMessage e))))))))
@@ -200,7 +200,7 @@
           (catch com.mongodb.MongoException$DuplicateKey e
             ; This is ok. Only the first submit is saved.
             ))
-        (notifications/send-notifications-on-application-state-change application-id host)))))
+        (notifications/send-notifications-on-application-state-change! application-id host)))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
@@ -478,63 +478,3 @@
                 "applications" (assoc base-query :infoRequest false)
                 "both"         base-query)]
     (ok :data (mongo/count :applications query))))
-
-;;
-;; Statements
-;;
-
-(defcommand "request-for-statement"
-  {:parameters [:id :personIds]
-   :roles      [:authority]}
-  [{user :user {:keys [id personIds]} :data :as command}]
-  (with-application command
-    (fn [{:keys [municipality]}]
-      (municipality/with-municipality municipality
-        (fn [{:keys [statementPersons]}]
-          (let [personIdSet (set personIds)
-                persons     (filter #(-> % :id personIdSet) statementPersons)
-                now         (now)
-                ->statement (fn [person] {:id        (mongo/create-id)
-                                          :person    person
-                                          :requested now
-                                          :given     nil
-                                          :status    nil})
-                statements  (map ->statement persons)]
-            (mongo/update :applications {:_id id} {$pushAll {:statements statements}})))))))
-
-(defcommand "delete-statement"
-  {:parameters [:id :statementId]
-   :roles      [:authority]}
-  [{{:keys [id statementId]} :data}]
-  (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
-
-(defn get-statement [{:keys [statements]} id]
-  (first (filter #(= id (:id %)) statements)))
-
-(defn statement-exists [{:keys [statementId]} application]
-  (when-not (get-statement application statementId)
-    (fail :error.no-statement :statementId statementId)))
-
-(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
-  (let [{{statement-email :email} :person} (get-statement application statementId)]
-    (when-not (= statement-email user-email)
-      (fail :error.not-statement-owner))))
-
-(defn statement-not-given [{{:keys [statementId]} :data {user-email :email} :user} application]
-  (let [{:keys [given]} (get-statement application statementId)]
-    (when given
-      (fail :error.statement-already-given))))
-
-(defcommand "give-statement"
-  {:parameters  [:id :statementId :status :text]
-   :validators  [statement-exists statement-owner statement-not-given]
-   :roles       [:authority]
-   :description "authrority-roled statement owners can give statements that are not given already"}
-  [{{:keys [id statementId status text]} :data}]
-  (mongo/update
-    :applications
-    {:_id id
-     :statements {$elemMatch {:id statementId}}}
-    {$set {:statements.$.status status
-           :statements.$.given (now)
-           :statements.$.text text}}))
