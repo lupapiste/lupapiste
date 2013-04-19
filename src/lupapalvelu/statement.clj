@@ -16,7 +16,7 @@
 (defn get-statement [{:keys [statements]} id]
   (first (filter #(= id (:id %)) statements)))
 
-(defn statement-exists [{:keys [statementId]} application]
+(defn statement-exists [{{:keys [statementId]} :data} application]
   (when-not (get-statement application statementId)
     (fail :error.no-statement :statementId statementId)))
 
