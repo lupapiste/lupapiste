@@ -14,8 +14,6 @@ application.statement.given: Annettu
 application.statement.status: Lausunto
 application.statement.missing: Hakemukseen ei liity lausuntapyyntöjä
 
-email.title.create-statement-person: lisäys lausujaksi
-
 statement.delete: Poista lausunto
 statement.delete.header: Lausunnon poisto
 statement.delete.message: Oletko varma että haluat poistaa lausunnon?

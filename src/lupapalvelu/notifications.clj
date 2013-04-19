@@ -46,6 +46,7 @@
     (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
 (defn send-mail-to-recipients! [recipients title msg]
+  (println "****" recipients title msg)
   (doseq [recipient recipients]
     (send-off mail-agent (fn [_]
                            (if (email/send-mail recipient title msg)
@@ -103,7 +104,7 @@
 
 ;; create-statement-person
 (defn send-create-statement-person! [email text municipality]
-  (let [title (get-email-title {:title "application"} "create-statement-person")
+  (let [title (get-email-title {:title "Lausunnot"})
         msg   (message
                 (template "add-statement-person.html")
                 (enlive/transform [:.text] (enlive/content text))
