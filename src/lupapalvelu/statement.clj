@@ -7,7 +7,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.municipality :as municipality]))
+            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.notifications :as notifications]))
 
 ;;
 ;; Common
@@ -50,13 +51,15 @@
     (fn [{:keys [firstName lastName] :as user}]
       (if-not (security/authority? user)
         (fail :error.not-authority)
-        (mongo/update
-          :municipalities
-          {:_id municipality}
-          {$push {:statementPersons {:id (mongo/create-id)
-                                     :text text
-                                     :email email
-                                     :name (str firstName " " lastName)}}})))))
+        (do
+          (mongo/update
+            :municipalities
+            {:_id municipality}
+            {$push {:statementPersons {:id (mongo/create-id)
+                                       :text text
+                                       :email email
+                                       :name (str firstName " " lastName)}}})
+          (notifications/send-create-statement-person! email text municipality))))))
 
 (defcommand "delete-statement-person"
   {:parameters [:personId]
@@ -75,7 +78,7 @@
   {:parameters  [:id :personIds]
    :roles       [:authority]
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
-  [{user :user {:keys [id personIds]} :data :as command}]
+  [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
       (municipality/with-municipality municipality
@@ -95,7 +98,8 @@
                                              :status    nil})
                 statements    (map ->statement persons)]
             (mongo/update :applications {:_id id} {$pushAll {:statements statements
-                                                             :auth unique-writers}})))))))
+                                                             :auth unique-writers}})
+            (notifications/send-on-request-for-statement! persons application user host)))))))
 
 (defcommand "delete-statement"
   {:parameters [:id :statementId]

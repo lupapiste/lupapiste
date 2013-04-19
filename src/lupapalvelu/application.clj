@@ -122,7 +122,7 @@
         {$set {:modified (:created command)
                :state new-state
                :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change id host)))))
+      (notifications/send-notifications-on-application-state-change! id host)))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
@@ -136,7 +136,7 @@
         (mongo/update-by-id :applications (-> command :data :id)
                             {$set {:modified (:created command)
                                    :state new-state}})
-        (notifications/send-notifications-on-application-state-change id host)
+        (notifications/send-notifications-on-application-state-change! id host)
         (ok)))))
 
 (defcommand "request-for-complement"
@@ -151,7 +151,7 @@
         (mongo/update
           :applications {:_id (:id application) :state :sent}
           {$set {:state :complement-needed}})
-        (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
+        (notifications/send-notifications-on-application-state-change! application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
   {:parameters [:id :lang]
@@ -171,7 +171,7 @@
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
-          (notifications/send-notifications-on-application-state-change application-id host)
+          (notifications/send-notifications-on-application-state-change! application-id host)
           (catch org.xml.sax.SAXParseException e
             (.printStackTrace e)
             (fail (.getMessage e))))))))
@@ -200,7 +200,7 @@
           (catch com.mongodb.MongoException$DuplicateKey e
             ; This is ok. Only the first submit is saved.
             ))
-        (notifications/send-notifications-on-application-state-change application-id host)))))
+        (notifications/send-notifications-on-application-state-change! application-id host)))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
