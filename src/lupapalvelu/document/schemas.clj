@@ -355,7 +355,8 @@
 (def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
-                             :type :group :repeating true
+                             :type :group 
+                             :repeating true
                              :body (body party [{:name "omistajalaji" :type :select
                                            :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                                   {:name "muu yksityinen henkil\u00f6 tai perikunta"}
@@ -467,18 +468,21 @@
 
      {:info {:name "paasuunnittelija"
              :order 4
+             :removable false
              :type :party}
       :body paasuunnittelija}
 
      {:info {:name "suunnittelija"
              :repeating true
              :order 5
+             :removable true
              :type :party}
       :body suunnittelija}
 
      {:info {:name "maksaja"
              :repeating true
              :order 6
+             :removable true
              :type :party}
       :body party}
 

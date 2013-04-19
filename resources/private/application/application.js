@@ -8,6 +8,86 @@
   var applicationMap;
   var inforequestMap;
 
+  var stampModel = new function() {
+    var self = this;
+    
+    self.statusInit      = 0;
+    self.statusStarting  = 1;
+    self.statusNoFiles   = 2;
+    self.statusRunning   = 3;
+    self.statusDone      = 4;
+
+    self.applicationId = null;
+    self.jobId = null;
+    self.version = null;
+    self.files = null;
+    
+    self.status = ko.observable();
+    self.filesTable = ko.observable();
+    
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      self.jobId = null;
+      self.files = {};
+      self.status(self.statusInit).filesTable([]);
+      LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
+      return self;
+    };
+
+    self.start = function() {
+      self.status(self.statusStarting);
+      ajax
+        .command("stamp-attachments", {id: self.applicationId})
+        .success(self.started)
+        .call();
+      return false;
+    };
+
+    function withObservableStatus(job, key) {
+      var s = job.status;
+      job.status = ko.observable(loc("stamp.file.status", s));
+      return [key, job];
+    }
+    
+    self.started = function(data) {
+      if (data.count === 0) {
+        self.status(self.statusNoFiles);
+      } else {
+        self.status(self.statusRunning);
+        self.jobId = data.job.id;
+        self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
+        self.filesTable(_.values(self.files));
+        self.version = 0;
+        self.queryUpdate();
+      }
+      return false;
+    };
+    
+    self.queryUpdate = function() {
+      ajax
+        .query("stamp-attachments-job")
+        .param("job-id", self.jobId)
+        .param("version", self.version)
+        .success(self.update)
+        .call();
+      return self;
+    }
+
+    self.update = function(data) {
+      if (data.result === "timeout") return self.queryUpdate();
+      var job = data.job;
+      self.version = job.version;
+      _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
+      if (job.status === "done") {
+        repository.load(self.applicationId);
+        self.status(self.statusDone);
+      } else {
+        self.queryUpdate();
+      }
+    };
+    
+  }();
+  
   var removeDocModel = new function() {
     var self = this;
 
@@ -144,6 +224,34 @@
       LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
     });
   }();
+  
+  var addPartyModel = new function() {
+    var self = this;
+    
+    self.applicationId = null;
+    self.partyDocumentNames = ko.observableArray();
+    
+    self.documentName = ko.observable();
+    
+    self.init = function(applicationId) {
+      self.applicationId = applicationId;
+      ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
+
+      LUPAPISTE.ModalDialog.open("#dialog-add-party");
+      return false;
+    };
+    
+    self.addPartyEnabled = function() {
+      return self.documentName();
+    };
+
+    self.addParty = function () {
+      ajax.command("create-doc", {id: self.applicationId, schemaName: self.documentName()})
+        .success(function() { repository.load(self.applicationId); })
+        .call();
+      return false;
+    };
+  }();
 
   var application = {
     id: ko.observable(),
@@ -277,6 +385,12 @@
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     },
+    
+    addParty: function() {
+      var id = application.id();
+      addPartyModel.init(id);
+      return false;
+    },
 
     cancelApplication: function() {
       var id = application.id();
@@ -289,6 +403,11 @@
       return false;
     },
 
+    stampAttachments: function() {
+      stampModel.init(application.id());
+      return false;
+    },
+    
     changeTab: function(model,event) {
       var $target = $(event.target);
       if ($target.is("span")) { $target = $target.parent(); }
@@ -573,9 +692,11 @@
       authorization: authorizationModel,
       accordian: accordian,
       removeDocModel: removeDocModel,
+      addPartyModel: addPartyModel,
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
-      requestForStatementModel: requestForStatementModel
+      requestForStatementModel: requestForStatementModel,
+      stampModel: stampModel
     };
 
     ko.applyBindings(bindings, $("#application")[0]);
