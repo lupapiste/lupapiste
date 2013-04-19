@@ -36,7 +36,7 @@
 (defn replace-application-link [e selector application lang suffix host]
   (enlive/transform e [(keyword (str selector lang))] (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
 
-(defn send-mail-to-recipients [recipients title msg]
+(defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
     (send-off mail-agent (fn [_]
                            (if (email/send-mail recipient title msg)
@@ -67,15 +67,15 @@
 (defn get-email-recipients-for-new-comment [application]
   (get-email-recipients-for-application application))
 
-(defn send-notifications-on-new-comment [application user-commenting comment-text host]
+(defn send-notifications-on-new-comment! [application user-commenting comment-text host]
   (when (= :authority (keyword (:role user-commenting)))
     (let [recipients (get-email-recipients-for-new-comment application)
           msg        (get-message-for-new-comment application host)
           title      (get-email-title application "new-comment")]
-      (send-mail-to-recipients recipients title msg))))
+      (send-mail-to-recipients! recipients title msg))))
 
 ;; invite
-(defn send-invite [email text application user host]
+(defn send-invite! [email text application user host]
   (let [title (get-email-title application "invite")
         msg   (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/invite.html")
                                          (replace-style (get-styles))
@@ -83,7 +83,18 @@
                                          (replace-application-link "#link-" application "fi" "" host)
                                          (replace-application-link "#link-" application "sv" "" host)
                                          )))]
-    (send-mail-to-recipients [email] title msg)))
+    (send-mail-to-recipients! [email] title msg)))
+
+;; create-statement-person
+(defn send-on-create-statement-person! [email text application host]
+  (let [title (get-email-title application "create-statement-person")
+        msg   (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/invite.html")
+                                         (replace-style (get-styles))
+                                         (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
+                                         (replace-application-link "#link-" application "fi" "" host)
+                                         (replace-application-link "#link-" application "sv" "" host)
+                                         )))]
+    (send-mail-to-recipients! [email] title msg)))
 
 ; application opened
 (defn get-message-for-application-state-change [application host]
@@ -99,12 +110,12 @@
 (defn get-email-recipients-for-application-state-change [application]
   (get-email-recipients-for-application application))
 
-(defn send-notifications-on-application-state-change [application-id host]
+(defn send-notifications-on-application-state-change! [application-id host]
   (let [application (mongo/by-id :applications application-id)
         recipients  (get-email-recipients-for-application application)
         msg         (get-message-for-application-state-change application host)
         title       (get-email-title application "state-change")]
-    (send-mail-to-recipients recipients title msg)))
+    (send-mail-to-recipients! recipients title msg)))
 
 ; verdict given
 (defn get-message-for-verdict [application host]
@@ -114,12 +125,12 @@
                                (replace-application-link "#verdict-link-" application "fi" "/verdict" host)
                                (replace-application-link "#verdict-link-" application "sv" "/verdict" host))))))
 
-(defn send-notifications-on-verdict [application-id host]
+(defn send-notifications-on-verdict! [application-id host]
   (let [application (mongo/by-id :applications application-id)
         recipients  (get-email-recipients-for-application application)
         msg         (get-message-for-verdict application host)
         title       (get-email-title application "verdict")]
-    (send-mail-to-recipients recipients title msg)))
+    (send-mail-to-recipients! recipients title msg)))
 
 (defn- url-to [to]
   (let [request (request/ring-request)
@@ -127,11 +138,11 @@
         host (get-in request [:headers "host"])]
     (str (name scheme) "://" host (if-not (ss/starts-with to "/") "/") to)))
 
-(defn send-password-reset-email [to token]
+(defn send-password-reset-email! [to token]
   (let [link-fi (url-to (str "/app/fi/welcome#!/setpw/" token))
         link-sv (url-to (str "/app/sv/welcome#!/setpw/" token))
         msg (apply str (enlive/emit* (-> (enlive/html-resource "email-templates/password-reset.html")
                                        (replace-style (get-styles))
                                        (enlive/transform [:#link-fi] (fn [a] (assoc-in a [:attrs :href] link-fi)))
                                        (enlive/transform [:#link-sv] (fn [a] (assoc-in a [:attrs :href] link-sv))))))]
-    (send-mail-to-recipients [to] (loc "reset.email.title") msg)))
+    (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
