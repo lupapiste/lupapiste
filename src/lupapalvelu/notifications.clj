@@ -48,7 +48,7 @@
 (defn replace-application-links [e selector application suffix host]
   (-> e
     (replace-application-link (str selector "-") application "fi" suffix host)
-    (replace-application-link (str selector "-") application "en" suffix host))
+    (replace-application-link (str selector "-") application "en" suffix host)))
 
 (defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
@@ -112,16 +112,14 @@
     (send-mail-to-recipients! [email] title msg)))
 
 (defn send-on-request-for-statement! [persons application user host]
-  (doseq [person persons]
+  (doseq [{:keys [email text]} persons]
     (let [title (get-email-title application "statement-request")
           msg   (message
                   (template "add-statement-request.html")
-                  (enlive/transform [:.text] (enlive/content text))
-                  (enlive/transform [:#municipality-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str "municipality." municipality)))))
-                  (enlive/transform [:#municipality-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "municipality." municipality))))))]
-      (send-mail-to-recipients! [email] title msg)))
-
-    (println "NOT sending mail to " persons " for: " (:title application)))
+                  (replace-application-links "#link" application "" host)
+                  (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
+                  (enlive/transform [:.text] (enlive/content text)))]
+      (send-mail-to-recipients! [email] title msg))))
 
 (defn get-message-for-application-state-change [application host]
   (message
