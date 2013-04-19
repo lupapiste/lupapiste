@@ -24,6 +24,7 @@ statement.no: Ei puolla
 statement.condition: Puoltaa ehdoilla
 statement.conversation: Keskustele lausunnosta
 statement.text: Lausuntoteksti
+statement.attachments: Halutessasi voit liittää lausuntoon tiedostoja, kuten kuvia, piirroksia ja dokumentteja
 
 application.stampAttachments: Leimaa liitteet
 stamp.title: Leimaa liitteet

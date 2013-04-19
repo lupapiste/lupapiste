@@ -16,7 +16,7 @@
       </span>
     </div>
     <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
-      <div>
+      <div class="statement-attachments">
         <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
         <div data-bind="if: attachments().length">
           <table class="table" data-test-id="inforequest-attachments-table">
@@ -46,7 +46,7 @@
         </div>
 
         <div data-bind="ifnot: attachments().length">
-          <i data-bind="ltext: 'inforequest.attachmentsEmpty'" data-test-id="inforequest-attachments-no-attachments"></i>
+          <i data-bind="ltext: 'statement.attachments'" data-test-id="inforequest-attachments-no-attachments"></i>
         </div>
 
         <button
@@ -104,7 +104,6 @@
         <textarea
           data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-statement')"
           id="attachment.commentText"
-          class="conversation-input"
           rows="20"></textarea>
         <button
           data-bind="disable: disabled, click: submit, ltext: 'statement.submit', visible: $root.authorization.ok('give-statement')"
