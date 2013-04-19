@@ -54,7 +54,7 @@
                 {:_id application-id
                  :auth {$not {$elemMatch {:invite.user.username email}}}}
                 {$push {:auth auth}})
-              (notifications/send-invite email text application user host))))))))
+              (notifications/send-invite! email text application user host))))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -124,7 +124,7 @@
                            :target  target
                            :created (:created command)
                            :user    (security/summary user)}}})
-      (notifications/send-notifications-on-new-comment application user text host))))
+      (notifications/send-notifications-on-new-comment! application user text host))))
 
 (defcommand "assign-to-me"
   {:parameters [:id]
