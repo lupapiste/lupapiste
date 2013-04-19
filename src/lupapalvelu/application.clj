@@ -448,9 +448,6 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
-  (println "*** P:")
-  (doseq [[k v] (filter (fn [[k v]] (.startsWith (name k) "filter-")) (seq params))]
-    (println "   " k "=" v (type v)))
   (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
