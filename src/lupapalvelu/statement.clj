@@ -78,7 +78,7 @@
   {:parameters  [:id :personIds]
    :roles       [:authority]
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
-  [{user :user {:keys [id personIds]} :data :as command}]
+  [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{:keys [municipality] :as application}]
       (municipality/with-municipality municipality
@@ -98,7 +98,8 @@
                                              :status    nil})
                 statements    (map ->statement persons)]
             (mongo/update :applications {:_id id} {$pushAll {:statements statements
-                                                             :auth unique-writers}})))))))
+                                                             :auth unique-writers}})
+            (notifications/send-on-request-for-statement! persons application user host)))))))
 
 (defcommand "delete-statement"
   {:parameters [:id :statementId]
