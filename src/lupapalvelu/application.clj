@@ -105,7 +105,7 @@
     (fn [application]
       (let [assignee (when assigneeId (security/summary (mongo/select-one :users {:_id assigneeId})))
             auth (:auth application)
-            auth (filter (comp (partial (complement =) "authority") :role) auth)
+            auth (filter (comp (partial not= "authority") :role) auth)
             auth (if assignee (cons (role assignee :authority) auth) auth)]
         (mongo/update-by-id :applications (:id application) {$set {:authority assignee
                                                                    :auth auth}})))))
@@ -437,12 +437,10 @@
         "canceled"          {:state "canceled"}
         "pre-verdict"       {:state {$in ["draft" "open" "submitted" "sent"]}}
         nil)
-      (if (:filter-own params)
-        {"auth.id" (:id user)})
+      (if (and (:filter-user params) (not= (:filter-user params) "0"))
+        {"auth.id" (:filter-user params)})
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
-
-(count (mongo/select :applications {"auth.id" "777777777777777777000023"} {:auth 1}))
 
 (defn make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
@@ -452,7 +450,7 @@
 (defn applications-for-user [user params]
   (println "*** P:")
   (doseq [[k v] (filter (fn [[k v]] (.startsWith (name k) "filter-")) (seq params))]
-    (println "   " k "=" v))
+    (println "   " k "=" v (type v)))
   (let [user-query  (domain/application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
