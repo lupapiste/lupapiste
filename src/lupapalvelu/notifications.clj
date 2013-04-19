@@ -48,7 +48,7 @@
 (defn replace-application-links [e selector application suffix host]
   (-> e
     (replace-application-link (str selector "-") application "fi" suffix host)
-    (replace-application-link (str selector "-") application "en" suffix host)))
+    (replace-application-link (str selector "-") application "sv" suffix host)))
 
 (defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
