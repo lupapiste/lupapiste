@@ -21,17 +21,11 @@
     #_  (provided
           (send-mail-to-recipients! ..email.. anything msg) => msg)
 
-(fact "Each user in auth-array gets email from authority comment."
-  (get-email-recipients-for-new-comment { :auth [{:id "a" :role "owner"} {:id "b" :role "writer"} {:id "c" :role "unknown"}] :title "title" }) => [ "a@foo.com" "b@foo.com" "c@foo.com"]
-  (provided (mongo/by-id :users "a") => {:email "a@foo.com"}
-    (mongo/by-id :users "b") => {:email "b@foo.com"}
-    (mongo/by-id :users "c") => {:email "c@foo.com"}))
-
 (fact "Email for new comment contains link to application"
   (get-message-for-new-comment { :id 123 :permitType "application"} "http://localhost:8000") => (contains "http://localhost:8000/app/fi/applicant?hashbang=!/application/123/conversation#!/application/123/conversation"))
 
-(fact "When application is opened, each use in auth-array gets email."
-  (get-email-recipients-for-application-state-change { :auth [{:id "a" :role "owner"} {:id "b" :role "writer"} {:id "c" :role "unknown"}] :title "title" }) => [ "a@foo.com" "b@foo.com" "c@foo.com"]
+(fact "All application users get emails"
+  (get-email-recipients-for-application { :auth [{:id "a" :role "owner"} {:id "b" :role "writer"} {:id "c" :role "unknown"}] :title "title" }) => [ "a@foo.com" "b@foo.com" "c@foo.com"]
   (provided (mongo/by-id :users "a") => {:email "a@foo.com"}
     (mongo/by-id :users "b") => {:email "b@foo.com"}
     (mongo/by-id :users "c") => {:email "c@foo.com"}))
