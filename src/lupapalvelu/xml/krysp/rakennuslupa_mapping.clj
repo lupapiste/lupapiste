@@ -2,10 +2,9 @@
   (:use  [lupapalvelu.xml.krysp.yhteiset]
          [clojure.data.xml]
          [clojure.java.io]
-         [lupapalvelu.document.krysp :only [application-to-canonical]]
+         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical to-xml-datetime]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]]
-         [lupapalvelu.document.krysp :only [to-xml-datetime]]
          [lupapalvelu.attachment :only [encode-filename]])
   (:require [sade.env :as env]
             [me.raynes.fs :as fs]
