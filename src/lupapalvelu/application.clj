@@ -446,7 +446,7 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
-  (println "\n**P:")
+  (println "*** P:")
   (doseq [[k v] (filter (fn [[k v]] (.startsWith (name k) "filter-")) (seq params))]
     (println "   " k "=" v))
   (let [user-query  (domain/application-query-for user)
