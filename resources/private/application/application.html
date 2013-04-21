@@ -266,7 +266,7 @@
 
         <div id="application-statement-tab" class="tab-content" data-bind="with: $root.application.data">
           <div data-bind="ifnot: $data.statements && statements().length>0">
-            <p data-bind="ltext: 'application.statement.missing'"></p>
+            <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
           </div>
           <div data-bind="if: $data.statements && statements().length>0">
             <table class="table table-striped tablesorter">
@@ -444,7 +444,7 @@
                     <td data-bind="text: filename"></td>
                     <td data-bind="size: size"></td>
                     <td data-bind="text: status"></td>
-                  </tr>              
+                  </tr>
                 </tbody>
               </table>
               <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
@@ -460,7 +460,7 @@
             <p class="dialog-close close">X</p>
           </div>
           <div class="dialog-content">
-            <div> 
+            <div>
               <select
                 data-bind="options: partyDocumentNames(),
                            optionsText: function(item) { return loc('schemas.'  + item); },
