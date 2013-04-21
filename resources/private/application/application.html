@@ -280,7 +280,7 @@
                 </tr>
               </thead>
               <tbody data-bind="foreach: $data.statements()">
-                <tr class="link-row">
+                <tr class="statement-row">
                   <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
                   <td data-bind="text: person.name"></td>
                   <td data-bind="dateString: requested"></td>
@@ -375,7 +375,7 @@
           <button
               data-bind="click: send, ltext: 'application.statement.send', disable: disabled"
               class="btn btn-primary modal"
-              data-test-id="add-attachment">
+              data-test-id="add-statement-person">
           </button>
         </div>
       </div>
