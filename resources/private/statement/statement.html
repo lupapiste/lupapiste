@@ -12,7 +12,7 @@
         </span>
       </h1>
       <span data-bind="with: application" class="attachment-back ">
-        <a class="btn" data-bind="attr: {href: '#!/application/' + id() + '/statement' }, ltext: 'attachment.return'"></a>
+        <a class="btn" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/statement' }, ltext: 'attachment.return'"></a>
       </span>
     </div>
     <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
@@ -60,7 +60,7 @@
         <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
         <table class="table table-striped">
           <tbody data-bind="foreach: comments()">
-            <tr class="comment">
+            <tr class="comment-row">
               <td class="commentParty">
                 <span class="date" data-bind="dateTimeString: created"></span><br/>
                 <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br/>
@@ -81,7 +81,7 @@
           </textarea>
           <button
               data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
-              id="attachment.addComment"
+              id="statement.addComment"
               type="submit"
               class="btn btn-primary">
             Lähetä viesti
@@ -91,7 +91,7 @@
     </div>
 
     <div class="statement-info">
-      <button data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" class="" data-test-id="delete-statement">Poista lausunto</button>
+      <button data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" data-test-id="delete-statement">Poista lausunto</button>
       <form data-bind="with: $root.statementModel">
         <div class="form-entry">
           <label for="attachment-type-select" class="form-label">
@@ -103,11 +103,11 @@
         <label class="form-label" for="attachment.commentText" data-bind="ltext: 'statement.text'"></label>
         <textarea
           data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-statement')"
-          id="attachment.commentText"
+          id="statement-text"
           rows="20"></textarea>
         <button
           data-bind="disable: disabled, click: submit, ltext: 'statement.submit', visible: $root.authorization.ok('give-statement')"
-          id="attachment.addComment"
+          id="statement-submit"
           type="submit"
           class="btn btn-primary">
           Jätä lausunto

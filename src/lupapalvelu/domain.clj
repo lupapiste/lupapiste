@@ -12,7 +12,7 @@
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)
                 :state {$ne "canceled"}}
-    :authority {:municipality (:municipality user)
+    :authority {$or [{:municipality (:municipality user)} {:auth.id (:id user)}]
                 $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
     :admin     {:state {$ne "canceled"}}
     (do

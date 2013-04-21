@@ -22,4 +22,5 @@ Fill in right email
 
 Email was send
   Wait Until  Page Should Contain  Sähköposti lähetetty
+  Go to login page
   ## TODO: verify using JSON API?
