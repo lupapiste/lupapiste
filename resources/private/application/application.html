@@ -293,7 +293,7 @@
           <button
               data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
               class="btn btn-primary modal"
-              data-test-id="add-attachment">
+              data-test-id="add-statement">
           </button>
         </div>
 
@@ -369,7 +369,7 @@
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
           <div data-bind="foreach: data()">
-            <input class="form-input" type="checkbox" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown', attr: {'id': id}" />
+            <input class="form-input" type="checkbox" data-test-id="check-statement-person" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown', attr: {'id': id, 'data-test-id' : 'check-statement-person-' + $index()}" />
             <label data-bind="text: text()+' '+name() + ' (' + email() + ')', attr: {'for': id}" class="form-label"></label><br/>
           </div>
           <button
