@@ -103,11 +103,11 @@
         <label class="form-label" for="attachment.commentText" data-bind="ltext: 'statement.text'"></label>
         <textarea
           data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-statement')"
-          id="attachment.commentText"
+          id="statement-text"
           rows="20"></textarea>
         <button
           data-bind="disable: disabled, click: submit, ltext: 'statement.submit', visible: $root.authorization.ok('give-statement')"
-          id="attachment.addComment"
+          id="statement-submit"
           type="submit"
           class="btn btn-primary">
           Jätä lausunto
