@@ -281,7 +281,7 @@
               </thead>
               <tbody data-bind="foreach: $data.statements()">
                 <tr class="statement-row">
-                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
+                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement, attr: {'data-test-id' : 'open-statement-' + $index()}"></a></td>
                   <td data-bind="text: person.name"></td>
                   <td data-bind="dateString: requested"></td>
                   <td data-bind="dateString: given"></td>
