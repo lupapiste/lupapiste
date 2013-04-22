@@ -86,7 +86,7 @@
         <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
         <table class="table table-striped">
           <tbody data-bind="foreach: comments()">
-            <tr class="comment" data-bind="attr: {'class': $parent.isForNewAttachment($data) ? 'comment attachment-comment' : ''}">
+            <tr data-bind="attr: {'class': $parent.isForNewAttachment($data) ? 'comment attachment-comment' : 'comment'}">
               <td class="commentParty">
                 <span class="date" data-bind="dateTimeString: created"></span><br />
                 <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
