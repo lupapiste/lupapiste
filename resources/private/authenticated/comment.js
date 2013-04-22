@@ -8,24 +8,15 @@ var comments = (function() {
     self.text = ko.observable();
     self.comments = ko.observableArray();
 
-    //TODO: hide all other mutators
     self.refresh = function(application, target) {
       self.setApplicationId(application.id);
-      self.setTarget(target || {type: "application"});
-      self.setComments(application.comments);
-    };
-
-    self.setComments = function(comments) {
+      self.target(target || {type: "application"});
       var filteredComments =
-        _.filter(comments,
+        _.filter(application.comments,
             function(comment) {
               return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
             });
       self.comments(ko.mapping.fromJS(filteredComments));
-    };
-
-    self.setTarget = function(target) {
-      self.target(target);
     };
 
     self.setApplicationId = function(applicationId) {

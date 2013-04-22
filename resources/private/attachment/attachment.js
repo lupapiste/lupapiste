@@ -214,9 +214,7 @@ var attachment = (function() {
     model.application.title(application.title);
     model.attachmentId(attachmentId);
 
-    commentsModel.setApplicationId(application.id);
-    commentsModel.setTarget({type: "attachment", id: attachmentId});
-    commentsModel.setComments(application.comments);
+    commentsModel.refresh(application, {type: "attachment", id: attachmentId});
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
