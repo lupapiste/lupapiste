@@ -408,6 +408,11 @@
       return false;
     },
 
+    newAttachment: function() {
+      attachment.initFileUpload(currentId, null, null, true);
+    },
+
+
     changeTab: function(model,event) {
       var $target = $(event.target);
       if ($target.is("span")) { $target = $target.parent(); }
@@ -488,7 +493,7 @@
 
       // Comments:
       commentModel.setApplicationId(app.id);
-      commentModel.setComments(app.comments,true);
+      commentModel.refresh(app);
 
       // Operations:
 
