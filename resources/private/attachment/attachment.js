@@ -214,9 +214,7 @@ var attachment = (function() {
     model.application.title(application.title);
     model.attachmentId(attachmentId);
 
-    commentsModel.setApplicationId(application.id);
-    commentsModel.setTarget({type: "attachment", id: attachmentId});
-    commentsModel.setComments(application.comments);
+    commentsModel.refresh(application, {type: "attachment", id: attachmentId});
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
@@ -280,13 +278,6 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function newAttachment(m) {
-    var infoRequest = this.application.infoRequest(); //FIXME: MIHIN THIS:iin VIITATAAN???
-    var type = infoRequest ? "muut.muu" : null;
-    var selector = infoRequest ? false : true;
-    initFileUpload(m.application.id(), null, type, selector);
-  }
-
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
@@ -299,7 +290,6 @@ var attachment = (function() {
   }
 
   return {
-    newAttachment: newAttachment,
     initFileUpload: initFileUpload,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
