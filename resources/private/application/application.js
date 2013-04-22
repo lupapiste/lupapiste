@@ -4,7 +4,7 @@
   var isInitializing = true;
   var currentId;
   var authorizationModel = authorization.create();
-  var commentModel = comments.create();
+  var commentModel = comments.create(true);
   var applicationMap;
   var inforequestMap;
 

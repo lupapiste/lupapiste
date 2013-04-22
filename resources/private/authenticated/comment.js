@@ -1,7 +1,7 @@
 var comments = (function() {
   "use strict";
 
-  function CommentModel() {
+  function CommentModel(takeAll) {
     var self = this;
 
     self.target = ko.observable({type: "application"});
@@ -15,7 +15,7 @@ var comments = (function() {
       self.setComments(application.comments);
     };
 
-    self.setComments = function(comments, takeAll) {
+    self.setComments = function(comments) {
       var filteredComments =
         _.filter(comments,
             function(comment) {
@@ -48,12 +48,12 @@ var comments = (function() {
     };
 
     self.isForNewAttachment = function(model) {
-      return model && model.target && model.target.version ? true : false;
+      return model && model.target && model.target.version && true;
     };
   }
 
   return {
-    create: function() { return new CommentModel(); }
+    create: function(takeAll) { return new CommentModel(takeAll); }
   };
 
 })();
