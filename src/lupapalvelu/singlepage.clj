@@ -100,7 +100,6 @@
     (let [c (doto (HtmlCompressor.)
               (.setRemoveComments true)            ; if false keeps HTML comments (default is true)
               (.setRemoveIntertagSpaces true)      ; removes iter-tag whitespace characters
-              (.setRemoveQuotes true)              ; removes unnecessary tag attribute quotes
               (.setRemoveScriptAttributes true)    ; remove optional attributes from script tags
               (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
               (.setRemoveLinkAttributes true)      ; remove optional attributes from link tags
