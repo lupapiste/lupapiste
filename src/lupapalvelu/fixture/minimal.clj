@@ -253,9 +253,9 @@
                               {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
                                :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
                      {:id "638"
-                      :name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
+                      :name {:fi "Porvoo", :sv "Borg\u00e5"}
                       :municipalityCode "638"
-                      :links [{:name {:fi "Porvoo", :sv "Porv\u00E5\u00E5"}
+                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
                                :url "http://www.porvoo.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}

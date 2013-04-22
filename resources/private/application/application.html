@@ -266,7 +266,7 @@
 
         <div id="application-statement-tab" class="tab-content" data-bind="with: $root.application.data">
           <div data-bind="ifnot: $data.statements && statements().length>0">
-            <p data-bind="ltext: 'application.statement.missing'"></p>
+            <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
           </div>
           <div data-bind="if: $data.statements && statements().length>0">
             <table class="table table-striped tablesorter">
@@ -279,9 +279,9 @@
                   <th data-bind="ltext: 'application.statement.status'"></th>
                 </tr>
               </thead>
-              <tbody data-bind="foreach: $data.statements">
-                <tr class="link-row">
-                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
+              <tbody data-bind="foreach: $data.statements()">
+                <tr class="statement-row">
+                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement, attr: {'data-test-id' : 'open-statement-' + $index()}"></a></td>
                   <td data-bind="text: person.name"></td>
                   <td data-bind="dateString: requested"></td>
                   <td data-bind="dateString: given"></td>
@@ -293,7 +293,7 @@
           <button
               data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
               class="btn btn-primary modal"
-              data-test-id="add-attachment">
+              data-test-id="add-statement">
           </button>
         </div>
 
@@ -368,14 +368,14 @@
           <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
-          <div data-bind="foreach: data">
-            <input class="form-input text long" type="checkbox" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown'" />
-            <label data-bind="text: text()+' '+name() + ' (' + email() + ')'" class="form-label"></label>
+          <div data-bind="foreach: data()">
+            <input class="form-input" type="checkbox" data-test-id="check-statement-person" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown', attr: {'id': id, 'data-test-id' : 'check-statement-person-' + $index()}" />
+            <label data-bind="text: text()+' '+name() + ' (' + email() + ')', attr: {'for': id}" class="form-label"></label><br/>
           </div>
           <button
               data-bind="click: send, ltext: 'application.statement.send', disable: disabled"
               class="btn btn-primary modal"
-              data-test-id="add-attachment">
+              data-test-id="add-statement-person">
           </button>
         </div>
       </div>
@@ -444,7 +444,7 @@
                     <td data-bind="text: filename"></td>
                     <td data-bind="size: size"></td>
                     <td data-bind="text: status"></td>
-                  </tr>              
+                  </tr>
                 </tbody>
               </table>
               <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
@@ -460,7 +460,7 @@
             <p class="dialog-close close">X</p>
           </div>
           <div class="dialog-content">
-            <div> 
+            <div>
               <select
                 data-bind="options: partyDocumentNames(),
                            optionsText: function(item) { return loc('schemas.'  + item); },

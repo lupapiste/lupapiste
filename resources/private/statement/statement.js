@@ -17,9 +17,13 @@ var statement = (function() {
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
-      self.data(ko.mapping.fromJS(statement));
-      self.selectedStatus(statement.status);
-      self.text(statement.text);
+      if(statement) {
+        self.data(ko.mapping.fromJS(statement));
+        self.selectedStatus(statement.status);
+        self.text(statement.text);
+      } else {
+        window.location.hash = "!/404";
+      }
     };
 
     self.openDeleteDialog = function() {
