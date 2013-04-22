@@ -488,7 +488,7 @@
 
       // Comments:
       commentModel.setApplicationId(app.id);
-      commentModel.setComments(app.comments);
+      commentModel.setComments(app.comments,true);
 
       // Operations:
 

@@ -15,11 +15,11 @@ var comments = (function() {
       self.setComments(application.comments);
     };
 
-    self.setComments = function(comments) {
+    self.setComments = function(comments, takeAll) {
       var filteredComments =
         _.filter(comments,
             function(comment) {
-              return self.target().type === comment.target.type && self.target().id === comment.target.id;
+              return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
             });
       self.comments(ko.mapping.fromJS(filteredComments));
     };
