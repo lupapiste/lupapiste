@@ -38,9 +38,7 @@
           (str (:value first-name) \space (:value last-name)))))))
 
 (defn get-application-operation [app]
-  (if (:infoRequest app)
-    (:initialOp app)
-    (some (comp :op :info :schema) (:documents app))))
+  (first (:operations app)))
 
 ;; Meta-fields:
 ;;
@@ -277,27 +275,29 @@
           op            (make-op operation created)
           info-request? (if infoRequest true false)
           state         (if (or info-request? (security/authority? user)) :open :draft)
-          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
-      (mongo/insert :applications {:id            id
-                                   :created       created
-                                   :opened        (when (= state :open) created)
-                                   :modified      created
-                                   :infoRequest   info-request?
-                                   :operations    [op]
-                                   :state         state
-                                   :municipality  municipality
-                                   :location      {:x (->double x) :y (->double y)}
-                                   :address       address
-                                   :propertyId    propertyId
-                                   :title         address
-                                   :auth          [owner]
-                                   :documents     (if info-request? [] (make-documents user created nil op))
-                                   :attachments   (if info-request? [] (make-attachments created op municipality))
-                                   :allowedAttachmentTypes (if info-request?
-                                                             [[:muut [:muu]]]
-                                                             (partition 2 attachment/attachment-types))
-                                   :comments      (map make-comment messages)
-                                   :permitType    (permit-type-from-operation op)})
+          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+          application   {:id            id
+                         :created       created
+                         :opened        (when (= state :open) created)
+                         :modified      created
+                         :infoRequest   info-request?
+                         :operations    [op]
+                         :state         state
+                         :municipality  municipality
+                         :location      {:x (->double x) :y (->double y)}
+                         :address       address
+                         :propertyId    propertyId
+                         :title         address
+                         :auth          [owner]
+                         :documents     (if info-request? [] (make-documents user created nil op))
+                         :attachments   (if info-request? [] (make-attachments created op municipality))
+                         :allowedAttachmentTypes (if info-request?
+                                                   [[:muut [:muu]]]
+                                                   (partition 2 attachment/attachment-types))
+                         :comments      (map make-comment messages)
+                         :permitType    (permit-type-from-operation op)}
+          app-with-ver  (domain/set-software-version application)]
+      (mongo/insert :applications app-with-ver)
       (ok :id id))
     (fail :error.unauthorized)))
 
