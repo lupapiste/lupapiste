@@ -9,6 +9,7 @@
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
            [org.apache.commons.io IOUtils]
+           [com.googlecode.htmlcompressor.compressor HtmlCompressor]
            [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
            [org.mozilla.javascript ErrorReporter EvaluatorException]))
 
