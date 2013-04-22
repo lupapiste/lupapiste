@@ -97,7 +97,26 @@
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
                       component)]
       (.write out (.getBytes element utf8)))
-    (.toByteArray out)))
+    (let [c (doto (HtmlCompressor.)
+              (.setRemoveComments true)            ; if false keeps HTML comments (default is true)
+              (.setRemoveIntertagSpaces true)      ; removes iter-tag whitespace characters
+              (.setRemoveQuotes true)              ; removes unnecessary tag attribute quotes
+              (.setRemoveScriptAttributes true)    ; remove optional attributes from script tags
+              (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
+              (.setRemoveLinkAttributes true)      ; remove optional attributes from link tags
+              (.setRemoveFormAttributes true)      ; remove optional attributes from form tags
+              (.setRemoveInputAttributes true)     ; remove optional attributes from input tags
+              (.setSimpleBooleanAttributes true)   ; remove values from boolean tag attributes
+              (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
+              (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
+              (.setRemoveHttpsProtocol true)       ; replace "https://" with "//" inside tag attributes
+              (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX))  ; remove spaces around provided tags
+          html (.toString out (.name utf8))
+          compressed-html (.compress c html)
+          saved (- (.length html) (.length compressed-html))]
+      (debugf "Original HTML: %d - Compressed HTML: %d - Saving %d chars = %s%%"
+              (.length html) (.length compressed-html) saved (/ (int (/ (* 10000 saved) (.length html))) 100.0))
+      (.getBytes compressed-html utf8))))
 
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
