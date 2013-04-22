@@ -82,3 +82,11 @@
    :osoite {:katu                 {:value street}
             :postinumero          {:value zip}
             :postitoimipaikannimi {:value city}}})
+
+;;
+;; Software version metadata
+;;
+
+(defn set-software-version [m] 
+  (assoc m :_software_version "1.0.5"))
+
