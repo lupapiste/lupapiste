@@ -50,10 +50,6 @@ var comments = (function() {
     self.isForNewAttachment = function(model) {
       return model && model.target && model.target.version ? true : false;
     };
-
-    self.category = function(model) {
-      return model.target && model.target.version ? "category-new-attachment-version" : "category-default";
-    };
   }
 
   return {
