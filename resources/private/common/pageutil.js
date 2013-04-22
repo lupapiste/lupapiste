@@ -30,7 +30,7 @@ var pageutil = (function() {
   }
 
   function getPage() {
-    var pageMatch = window.location.hash.match(/\/(\w*)/);
+    var pageMatch = window.location.hash.match(/\/([\-\w]*)/);
     return pageMatch ? pageMatch[1] : null;
   }
 

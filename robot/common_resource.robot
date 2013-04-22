@@ -10,6 +10,7 @@ ${SERVER}                       http://localhost:8000
 ${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
+${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
@@ -288,12 +289,12 @@ Prepare new request
   Select From List by test id  create-municipality-select  ${municipality}
   Click enabled by test id  create-continue
   # Going too fast causes animation to stop
-  Set Selenium Speed  ${SLOW_SPEED}
+  Set Selenium Speed  ${OP_TREE_SPEED}
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
-  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set Selenium Speed  ${DEFAULT_SPEED}
+  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
