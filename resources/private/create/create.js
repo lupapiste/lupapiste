@@ -4,12 +4,12 @@
   function isBlank(s) { var v = _.isFunction(s) ? s() : s; return !v || /^\s*$/.test(v); }
 
   var tree;
-  
+
   function operations2tree(e) {
     var key = e[0], value = e[1];
     return [{op: key}, _.isArray(value) ? _.map(value, operations2tree) : {op: value}];
   }
-  
+
   var model = new function() {
     var self = this;
 
@@ -20,7 +20,7 @@
       $("#create-part-3").hide();
       $("#create-search").focus();
     };
-    
+
     self.goPhase2 = function() {
       tree.reset(_.map(self.municipality().operations, operations2tree));
       $("#create-part-1").hide();
@@ -35,7 +35,7 @@
     };
 
     self.useManualEntry = ko.observable(false);
-    
+
     self.map = null;
 
     self.search = ko.observable("");
@@ -49,11 +49,11 @@
     self.municipalityCode = ko.observable(null);
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
-    
+
     self.municipalityCode.subscribe(function(code) {
       if (self.useManualEntry()) municipalities.findById(code, self.municipality);
     });
-    
+
     self.findMunicipality = function(code) {
       municipalities.findById(code, function(m) {
         self
@@ -61,18 +61,18 @@
           .municipalitySupported(m ? true : false);
       });
       return self;
-    }
-    
+    };
+
     self.addressData.subscribe(function(a) {
       self.addressString(a ? a.street + " " + a.number : "");
     });
-    
+
     self.propertyId.subscribe(function(id) {
       var human = util.prop.toHumanFormat(id);
       if (human != id) {
         self.propertyId(human);
       } else {
-        var code = id ? id.split("-")[0].substring(0, 3) : null;
+        var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
         self
           .municipalityCode(code)
           .municipalityName(code ? loc("municipality", code) : null)
@@ -83,6 +83,13 @@
     self.operation = ko.observable();
     self.message = ko.observable("");
     self.requestType = ko.observable();
+
+    self.attachmentsForOp = ko.computed(function() {
+      var m = self.municipality(),
+          ops = m && m["operations-attachments"],
+          op = self.operation();
+      return (ops && op) ? _.map(ops[op], function(a) { return {"group": a[0], "id": a[1]}; }) : [];
+    });
 
     self.clear = function() {
       if (!self.map) {
@@ -106,7 +113,7 @@
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
-    
+
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
 
     //
@@ -244,7 +251,7 @@
   }();
 
   hub.onPageChange("create", model.clear);
-  
+
   $(function() {
 
     $("#create").applyBindings(model);
@@ -265,11 +272,11 @@
       onSelect: function(v) { model.operation(v ? v.op : null); },
       baseModel: model
     });
-    
+
     hub.subscribe({type: "keyup", keyCode: 37}, tree.back);
     hub.subscribe({type: "keyup", keyCode: 33}, tree.start);
     hub.subscribe({type: "keyup", keyCode: 36}, tree.start);
-    
+
   });
 
 })();

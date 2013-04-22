@@ -43,7 +43,7 @@
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"[\/\\]jquery" #"[\/\\]theme[\/\\]default"
-                         #"[\/\\]public[\/\\]lib" #"openlayers" #"underscore" #"highcharts\.js"]}
+                         #"[\/\\]public[\/\\]lib" #"openlayers" #"underscore" #"highcharts\.js" #"lodash"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
@@ -51,5 +51,6 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
+  :aot [lupapalvelu.conversion.convert]
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

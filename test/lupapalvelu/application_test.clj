@@ -29,17 +29,17 @@
   (facts
     (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
       (operations/operations :bar) => {:schema "bar" :required ["b" "c"] :attachments []}
-      (schemas/schemas "hakija")   => {:info {:name "hakija"}, :body []}
-      (schemas/schemas "foo")      => {:info {:name "foo"}, :body []}
-      (schemas/schemas "a")        => {:info {:name "a"}, :body []}
-      (schemas/schemas "b")        => {:info {:name "b"}, :body []}
-      (schemas/schemas "bar")      => {:info {:name "bar"}, :body []}
-      (schemas/schemas "c")        => {:info {:name "c"}, :body []})
+      (schemas/schemas "hakija")   => {:info {:name "hakija"}, :data []}
+      (schemas/schemas "foo")      => {:info {:name "foo"}, :data []}
+      (schemas/schemas "a")        => {:info {:name "a"}, :data []}
+      (schemas/schemas "b")        => {:info {:name "b"}, :data []}
+      (schemas/schemas "bar")      => {:info {:name "bar"}, :data []}
+      (schemas/schemas "c")        => {:info {:name "c"}, :data []})
     (let [user {:name "foo"}
           created 12345]
       (let [docs (make-documents user created nil :foo)]
         (count docs) => 4
-        (find-by-schema? docs "hakija") => (contains {:body {:henkilo {:henkilotiedot user}}})
+        (find-by-schema? docs "hakija") => (contains {:data {:henkilo {:henkilotiedot user}}})
         docs => (has-schema? "foo")
         docs => (has-schema? "a")
         docs => (has-schema? "b"))
