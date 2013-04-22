@@ -110,7 +110,9 @@
               (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
               (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
               (.setRemoveHttpsProtocol true)       ; replace "https://" with "//" inside tag attributes
-              (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX))  ; remove spaces around provided tags
+              (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX)  ; remove spaces around provided tags
+              (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]) ; preserve KnockoutJS comments
+          )
           html (.toString out (.name utf8))
           compressed-html (.compress c html)
           saved (- (.length html) (.length compressed-html))]
