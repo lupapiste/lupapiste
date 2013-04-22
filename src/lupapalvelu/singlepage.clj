@@ -104,7 +104,6 @@
               (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
               (.setRemoveLinkAttributes true)      ; remove optional attributes from link tags
               (.setRemoveFormAttributes true)      ; remove optional attributes from form tags
-              (.setRemoveInputAttributes true)     ; remove optional attributes from input tags
               (.setSimpleBooleanAttributes true)   ; remove values from boolean tag attributes
               (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
               (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
