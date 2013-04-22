@@ -2,10 +2,9 @@
   (:use  [lupapalvelu.xml.krysp.yhteiset]
          [clojure.data.xml]
          [clojure.java.io]
-         [lupapalvelu.document.krysp :only [application-to-canonical]]
+         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical to-xml-datetime]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]]
-         [lupapalvelu.document.krysp :only [to-xml-datetime]]
          [lupapalvelu.attachment :only [encode-filename]])
   (:require [sade.env :as env]
             [me.raynes.fs :as fs]
@@ -115,13 +114,14 @@
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
                                        :child [{:tag :uusi
-                                                :child [{:tag :huoneistoala}
-                                                        {:tag :kuvaus}]}
+                                                :child [{:tag :kuvaus}]}
                                                {:tag :laajennus}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
                                                {:tag :purkaminen}
-                                               {:tag :muuMuutosTyo}
+                                               {:tag :muuMuutosTyo :child [{:tag :muutostyonLaji}
+                                                                           {:tag :kuvaus}
+                                                                           {:tag :perusparannusKytkin}]}
                                                {:tag :kaupunkikuvaToimenpide}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
@@ -174,8 +174,7 @@
                                   :versionumero 1
                                   :tyyppi type
                                   :fileId file-id}})]
-    (when (not-empty canonical-attachments)
-      canonical-attachments)))
+    (not-empty canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
   (doseq [attachment attachments]
