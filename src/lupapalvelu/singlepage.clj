@@ -92,7 +92,6 @@
 
 (defn- compress-html [^String html]
   (let [c (doto (HtmlCompressor.)
-            (.setRemoveComments true)            ; if false keeps HTML comments (default is true)
             (.setRemoveIntertagSpaces true)      ; removes iter-tag whitespace characters
             (.setRemoveScriptAttributes true)    ; remove optional attributes from script tags
             (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
