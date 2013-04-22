@@ -90,6 +90,22 @@
                   (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
                   (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary)))))
 
+(defn- compress-html [^String html]
+  (let [c (doto (HtmlCompressor.)
+            (.setRemoveComments true)            ; if false keeps HTML comments (default is true)
+            (.setRemoveIntertagSpaces true)      ; removes iter-tag whitespace characters
+            (.setRemoveScriptAttributes true)    ; remove optional attributes from script tags
+            (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
+            (.setRemoveLinkAttributes true)      ; remove optional attributes from link tags
+            (.setRemoveFormAttributes true)      ; remove optional attributes from form tags
+            (.setSimpleBooleanAttributes true)   ; remove values from boolean tag attributes
+            (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
+            (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
+            (.setRemoveHttpsProtocol true)       ; replace "https://" with "//" inside tag attributes
+            (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX)  ; remove spaces around provided tags
+            (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]))] ; preserve KnockoutJS comments
+    (.compress c html)))
+
 (defn compose-html [component]
   (let [out (ByteArrayOutputStream.)]
     (doseq [element (inject-content
@@ -97,26 +113,7 @@
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
                       component)]
       (.write out (.getBytes element utf8)))
-    (let [c (doto (HtmlCompressor.)
-              (.setRemoveComments true)            ; if false keeps HTML comments (default is true)
-              (.setRemoveIntertagSpaces true)      ; removes iter-tag whitespace characters
-              (.setRemoveScriptAttributes true)    ; remove optional attributes from script tags
-              (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
-              (.setRemoveLinkAttributes true)      ; remove optional attributes from link tags
-              (.setRemoveFormAttributes true)      ; remove optional attributes from form tags
-              (.setSimpleBooleanAttributes true)   ; remove values from boolean tag attributes
-              (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
-              (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
-              (.setRemoveHttpsProtocol true)       ; replace "https://" with "//" inside tag attributes
-              (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX)  ; remove spaces around provided tags
-              (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]) ; preserve KnockoutJS comments
-          )
-          html (.toString out (.name utf8))
-          compressed-html (.compress c html)
-          saved (- (.length html) (.length compressed-html))]
-      (debugf "Original HTML: %d - Compressed HTML: %d - Saving %d chars = %s%%"
-              (.length html) (.length compressed-html) saved (/ (int (/ (* 10000 saved) (.length html))) 100.0))
-      (.getBytes compressed-html utf8))))
+    (-> out (.toString (.name utf8)) (compress-html) (.getBytes utf8))))
 
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
