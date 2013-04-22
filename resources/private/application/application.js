@@ -71,10 +71,10 @@
         .success(self.update)
         .call();
       return self;
-    }
+    };
 
     self.update = function(data) {
-      if (data.result === "timeout") return self.queryUpdate();
+      if (data.result === "timeout") { return self.queryUpdate(); }
       var job = data.job;
       self.version = job.version;
       _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
