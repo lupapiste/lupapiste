@@ -38,9 +38,7 @@
           (str (:value first-name) \space (:value last-name)))))))
 
 (defn get-application-operation [app]
-  (if (:infoRequest app)
-    (:initialOp app)
-    (some (comp :op :info :schema) (:documents app))))
+  (first (:operations app)))
 
 ;; Meta-fields:
 ;;
