@@ -412,6 +412,10 @@
       attachment.initFileUpload(currentId, null, null, true);
     },
 
+    newOtherAttachment: function() {
+      attachment.initFileUpload(currentId, null, 'muut.muu', false);
+    },
+
 
     changeTab: function(model,event) {
       var $target = $(event.target);
