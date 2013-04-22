@@ -291,11 +291,28 @@
     {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
                                       {:perusparannusKytkin (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value)}
                                       {:muutostyonLaji (-> rakennuksen-muuttaminen-doc :data :muutostyolaji :value)})
-                  :rakennustieto (get-rakennus-data toimenpide rakennuksen-muuttaminen-doc)}}))
+                  :rakennustieto (get-rakennus-data toimenpide rakennuksen-muuttaminen-doc)}
+     :created (:created rakennuksen-muuttaminen-doc)}))
+
+(defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc]
+  (let [toimenpide (:data laajentaminen-doc)
+        mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
+    {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
+                                   {:perusparannusKytkin (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value)}
+                                   {:laajennuksentiedot {:tilavuus (:tilavuus mitat)
+                                                         :kerrosala (:tilavuus mitat)
+                                                         :kokonaisala (:tilavuus mitat)
+                                                         :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
+                                                                         {:pintaAla (:pintaAla huoneistoala)
+                                                                          :kayttotarkoitusKoodi (:kayttotarkoitusKoodi huoneistoala)})}})
+                  :rakennustieto (get-rakennus-data toimenpide laajentaminen-doc)}
+     :created (:created laajentaminen-doc)}))
+
 
 (defn- get-operations [documents]
   (let [toimenpiteet (filter not-empty (concat (map get-uusi-toimenpide (:uusiRakennus documents))
-                                             (map get-rakennuksen-muuttaminen-toimenpide (:rakennuksen-muuttaminen documents))))]
+                                               (map get-rakennuksen-muuttaminen-toimenpide (:rakennuksen-muuttaminen documents))
+                                               (map get-rakennuksen-laajentaminen-toimenpide (:rakennuksen-laajentaminen documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
 (defn- get-lisatiedot [documents]

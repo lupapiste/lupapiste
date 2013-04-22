@@ -355,7 +355,7 @@
 (def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
-                             :type :group 
+                             :type :group
                              :repeating true
                              :body (body party [{:name "omistajalaji" :type :select
                                            :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
@@ -398,26 +398,24 @@
 (def rakennuksen-laajentaminen (body [{:name "laajennuksen-tiedot"
                                        :type :group
                                        :body [{:name "perusparannuskytkin" :type :checkbox}
-                                                     {:name "mitat"
-                                                      :type :group
-                                                      :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
-                                                             {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
-                                                             {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
-                                                             {:name "huoneistoala"
-                                                              :type :group
-                                                              :repeating true
-                                                              :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
-                                                                     {:name "kayttotarkoitusKoodi" :type :select
-                                                                      :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
-                                                                             {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
-                                                                             {:name "hoitotilaa"}
-                                                                             {:name "toimisto- ja hallintotilaa"}
-                                                                             {:name "kokoontumistilaa"}
-                                                                             {:name "opetustilaa"}
-                                                                             {:name "tuotantotilaa(teollisuus)"}
-                                                                             {:name "varastotilaa"}
-                                                                             {:name "muuta huoneistoalaan kuuluvaa tilaa"}
-                                                                             {:name "ei tiedossa"}]}]}]}]}]
+                                              {:name "mitat"
+                                               :type :group
+                                               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
+                                                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
+                                                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
+                                                      {:name "huoneistoala" :type :group :repeating true :removable true
+                                                       :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
+                                                              {:name "kayttotarkoitusKoodi" :type :select
+                                                               :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
+                                                                      {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
+                                                                      {:name "hoitotilaa"}
+                                                                      {:name "toimisto- ja hallintotilaa"}
+                                                                      {:name "kokoontumistilaa"}
+                                                                      {:name "opetustilaa"}
+                                                                      {:name "tuotantotilaa(teollisuus)"}
+                                                                      {:name "varastotilaa"}
+                                                                      {:name "muuta huoneistoalaan kuuluvaa tilaa"}
+                                                                      {:name "ei tiedossa"}]}]}]}]}]
                                      olemassaoleva-rakennus))
 
 (def purku (body
