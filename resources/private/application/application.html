@@ -302,7 +302,7 @@
           <div>
             <table class="table table-striped conversation" data-test-id="application-comments-table">
               <tbody data-bind="foreach: comments()">
-                <tr class="comment" data-bind="attr: {'class': $parent.isForNewAttachment($data) ? 'comment attachment-comment' : ''}">
+                <tr data-bind="attr: {'class': $parent.isForNewAttachment($data) ? 'comment attachment-comment' : 'comment'}">
                   <td class="comment-party commenttd">
                     <span class="date" data-bind="dateTimeString: created"></span>
                     <br />
