@@ -51,8 +51,7 @@ Mikko see that attachment is for authority
 Mikko adds comment
   [Tags]  attachments
   Open attachment details  muut.muu
-  Input text  attachment.commentText  mahtava liite!
-  Click button  attachment.addComment
+  Input comment  attachment  mahtava liite!
 
 Comment is added
   [Tags]  attachments
