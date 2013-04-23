@@ -352,7 +352,7 @@ Add comment
   Open tab  conversation
   Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
-  Wait until  Element should be visible  xpath=//table[@data-test-id='application-comments-table']//td[text()='${message}']
+  Wait until  Element should be visible  xpath=//table[@data-test-id='application-comments-table']//span[text()='${message}']
 
 #
 # Quick, jettison the db...

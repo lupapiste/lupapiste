@@ -87,10 +87,7 @@ var statement = (function() {
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
       attachmentsModel.refresh(application);
-
-      commentsModel.setApplicationId(application.id);
-      commentsModel.setTarget({type: "statement", id: statementId});
-      commentsModel.setComments(application.comments);
+      commentsModel.refresh(application, {type: "statement", id: statementId});
     }
   });
 
