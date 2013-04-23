@@ -307,11 +307,20 @@
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
+(defn- get-purku-toimenpide [purku-doc application]
+  (let [toimenpide (:data purku-doc)]
+    {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
+                                   {:purkamisenSyy (-> toimenpide :poistumanSyy :value)}
+                                   {:poistumaPvm (-> toimenpide :poistumanAjankohta :value)})
+                  :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
+     :created (:created purku-doc)}))
+
 
 (defn- get-operations [documents application]
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
-                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))))]
+                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
+                                               (map #(get-purku-toimenpide % application) (:purku documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
 (defn- get-lisatiedot [documents]
