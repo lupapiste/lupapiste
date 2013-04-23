@@ -39,6 +39,7 @@
         hakija (domain/get-document-by-name application "hakija")]
     (:state application) => "draft"
     (:opened application) => nil
+    (:organization application) => "51767595a2890e1b11390753"
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
     (-> hakija :data :henkilo :henkilotiedot) => (contains {:etunimi {:value "Pena"} :sukunimi {:value "Panaani"}})))
