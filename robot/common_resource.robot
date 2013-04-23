@@ -361,6 +361,10 @@ Input comment
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
 
+Comment count is
+  [Arguments]  ${section}  ${amount}
+  Wait until  Xpath Should Match X Times  //section[@id='${section}']//td[contains(@class,'comment-text')]  ${amount}
+
 #
 # Quick, jettison the db...
 #
