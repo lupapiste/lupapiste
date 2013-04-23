@@ -30,6 +30,10 @@
   (let [d (from-long timestamp)]
     (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d)))
 
+(defn to-xml-datetime-from-string [date-as-string]
+  (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+    (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
+
 (defn by-type [documents]
   (group-by #(keyword (get-in % [:schema :info :name])) documents))
 
@@ -311,7 +315,7 @@
   (let [toimenpide (:data purku-doc)]
     {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
                                    {:purkamisenSyy (-> toimenpide :poistumanSyy :value)}
-                                   {:poistumaPvm (-> toimenpide :poistumanAjankohta :value)})
+                                   {:poistumaPvm (to-xml-datetime-from-string (-> toimenpide :poistumanAjankohta :value))})
                   :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
      :created (:created purku-doc)}))
 

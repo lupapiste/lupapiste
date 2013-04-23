@@ -173,7 +173,7 @@
                             :op {:name "purkaminen"}}}
             :data (conj {:rakennusnro {:value "001"}
                          :poistumanAjankohta { :value "17.04.2013" },
-                         :poistumanSyy {:value :tuhoutunut}} common-rakennus)})
+                         :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
 
 (def hankkeen-kuvaus {:id "Hankeen kuvaus" :schema {:info {:name "hankkeen-kuvaus" :order 1}}
                       :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
@@ -521,7 +521,7 @@
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
     (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
-    (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "17.04.2013")
+    (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
 
     ;(clojure.pprint/pprint canonical)
     ))
