@@ -438,6 +438,7 @@
         toimenpiteet(:toimenpidetieto rakennusvalvontaasia)
         toimenpide (:Toimenpide (nth toimenpiteet 1))
         muu-muutostyo (:Toimenpide (nth toimenpiteet 0))
+        laajennus-t (:Toimenpide (nth toimenpiteet 2))
         rakennustieto (:rakennustieto toimenpide)
         rakennus (:Rakennus rakennustieto)
         rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus)))
@@ -501,5 +502,10 @@
     (fact "Toimenpiteen kuvaus" (-> muu-muutostyo :muuMuutosTyo :kuvaus) => "Muu rakennuksen muutosty\u00f6")
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
+    (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
+    (fact "muu muutostyon rakennuksen tunnus" false)
+    (fact "Laajennuksen rakennuksen tunnus" false)
+    (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
+
     (clojure.pprint/pprint canonical)
     ))

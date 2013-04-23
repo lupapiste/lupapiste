@@ -214,13 +214,13 @@
                                                 :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
                                                 :muokkausHetki (to-xml-datetime (:submitted application))
                                                 :versionumero 1
-                                                :tyyppi "Hakemus vireilletullessa"}}
+                                                :tyyppi "hakemus_vireilletullessa"}}
                                               {:Liite
                                                {:kuvaus "Application when sent from Lupapiste"
                                                 :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
                                                 :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
                                                 :versionumero 1
-                                                :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
+                                                :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
         canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
     (validate (indent-str xml))
