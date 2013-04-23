@@ -518,6 +518,8 @@ var docgen = (function() {
       var img = document.createElement("img");
       img.src = "/img/ajax-loader-12.gif";
       img.alt = "...";
+      img.width = 12;
+      img.height = 12;
       return img;
     }
 
