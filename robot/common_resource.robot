@@ -359,7 +359,7 @@ Input comment
   Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
 
 #
 # Quick, jettison the db...
