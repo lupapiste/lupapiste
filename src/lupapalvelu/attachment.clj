@@ -240,6 +240,7 @@
 (defn- to-key-types-vec [r [k v]]
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
+;; TODO: why are we going to the server with this?
 (defquery "attachment-types"
   {:parameters [:id]
    :roles      [:applicant :authority]}
