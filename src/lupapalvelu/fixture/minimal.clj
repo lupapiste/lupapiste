@@ -235,6 +235,16 @@
     :role  "applicant"}
    ])
 
+(def organizations[{:id "51767595a2890e1b11390186"
+                      :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
+                      :municipalities ["186"]}
+                     {:id "51767595a2890e1b11390753"
+                      :name {:fi "Sipoon rakennusvalvonta"}
+                      :municipalities ["753"]}
+                     {:id "51767595a2890e1b11390837"
+                      :name {:fi "Tampereen rakennusvalvonta"}
+                      :municipalities ["837"]}])
+
 (def municipalities [{:id "186"
                       :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                       :municipalityCode "186"
@@ -351,4 +361,5 @@
 (deffixture "minimal" {}
   (mongo/clear!)
   (dorun (map (partial mongo/insert :users) users))
-  (dorun (map (partial mongo/insert :municipalities) municipalities)))
+  (dorun (map (partial mongo/insert :municipalities) municipalities))
+  (dorun (map (partial mongo/insert :organizations) organizations)))
