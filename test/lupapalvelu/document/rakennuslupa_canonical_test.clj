@@ -144,7 +144,8 @@
    :created 1
    :schema {:info {:name "rakennuksen-muuttaminen"
                                        :op {:name "muu-laajentaminen"}}}
-   :data (conj {:perusparannuskytkin {:value true}
+   :data (conj {:rakennusnro {:value "001"}
+                :perusparannuskytkin {:value true}
                 :muutostyolaji {:value "muut muutosty\u00f6t"}
                 } common-rakennus)})
 
@@ -153,7 +154,8 @@
    :created 3
    :schema {:info {:name "rakennuksen-laajentaminen"
                                        :op {:name "laajentaminen"}}}
-   :data (conj {:laajennuksen-tiedot {:perusparannuskytkin {:value true}
+   :data (conj {:rakennusnro {:value "001"}
+                :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                       :mitat {:tilavuus {:value "1500"}
                                               :kerrosala {:value "180"}
                                               :kokonaisala {:value "150"}
@@ -365,7 +367,7 @@
 
 (facts "Toimenpiteet"
   (let [documents (by-type (:documents application))
-        actions (get-actions documents)]
+        actions (get-actions documents application)]
     ;(clojure.pprint/pprint actions)
     (fact "actions" (seq actions) => truthy)
     ))
@@ -407,14 +409,14 @@
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "turve"}
                                            :muu-lammonlahde {:value nil}} }
-                               {:id "123" :created nil} )]
+                               {:id "123" :created nil} application)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (facts "When muu-lammonlahde is specified, it is used"
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "muu"}
                                            :muu-lammonlahde {:value "fuusioenergialla"}} }
-                               {:id "123" :created nil} )]
+                               {:id "123" :created nil} application)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (facts "Canonical model is correct"
@@ -503,9 +505,10 @@
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
     (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
-    (fact "muu muutostyon rakennuksen tunnus" false)
-    (fact "Laajennuksen rakennuksen tunnus" false)
+    (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => "001")
+    (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => "001")
+    (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
     (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
 
-    (clojure.pprint/pprint canonical)
+    ;(clojure.pprint/pprint canonical)
     ))

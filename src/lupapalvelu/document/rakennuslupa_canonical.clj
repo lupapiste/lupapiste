@@ -209,7 +209,7 @@
 (defn- get-rakennuksen-omistaja [omistaja]
   {:Omistaja (merge (get-osapuoli-data omistaja :rakennuksenomistaja))})
 
-(defn- get-rakennus [toimenpide {id :id created :created}]
+(defn- get-rakennus [toimenpide application {id :id created :created}]
   (let [{kuvaus   :toimenpiteenKuvaus
          kaytto   :kaytto
          mitat    :mitat
@@ -232,11 +232,10 @@
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
       :rakentajaTyyppi (-> kaytto :rakentajaTyyppi :value)
       :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
-      :rakennuksenTiedot (merge {;:rakennustunnus {:valtakunnallinenNumero empty-tag Ei saa tulla uudelle rakennuselle, mutta muutoin pitaa tulla
-                          ;                 :jarjestysnumero empty-tag
-                          ;                 :kiinttun empty-tag
-                          ;                 :rakennusnro empty-tag
-                          ;                 :aanestysalue empty-tag}
+      :rakennuksenTiedot (merge {:rakennustunnus (if (-> toimenpide :rakennusnro :value) {
+                                                         :jarjestysnumero (-> toimenpide :rakennusnro :value)
+                                                         :kiinttun (:propertyId application)}
+                                                   {})
                           :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
                           :tilavuus (-> mitat :tilavuus :value)
                           :kokonaisala (-> mitat :kokonaisala :value)
@@ -270,8 +269,8 @@
                                 (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                 (when julkisivu-map {:julkisivu julkisivu-map}))}))
 
-(defn- get-rakennus-data [toimenpide doc]
-  {:Rakennus (get-rakennus toimenpide doc)})
+(defn- get-rakennus-data [toimenpide application doc]
+  {:Rakennus (get-rakennus toimenpide application doc)})
 
 (defn- get-rakenelma-data [application action]
   nil)
@@ -280,21 +279,21 @@
   ;Uses fi as default since krysp uses finnish in enumeration values
   {:kuvaus (with-lang "fi" (loc (str "operations." (-> doc :schema :info :op :name))))})
 
-(defn get-uusi-toimenpide [doc]
+(defn get-uusi-toimenpide [doc application]
   (let [toimenpide (:data doc)]
     {:Toimenpide {:uusi (get-toimenpiteen-kuvaus doc)
-                  :rakennustieto (get-rakennus-data toimenpide doc)}
+                  :rakennustieto (get-rakennus-data toimenpide application doc)}
      :created (:created doc)}))
 
-(defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc]
+(defn- get-rakennuksen-muuttaminen-toimenpide [rakennuksen-muuttaminen-doc application]
   (let [toimenpide (:data rakennuksen-muuttaminen-doc)]
     {:Toimenpide {:muuMuutosTyo (conj (get-toimenpiteen-kuvaus rakennuksen-muuttaminen-doc)
                                       {:perusparannusKytkin (-> rakennuksen-muuttaminen-doc :data :perusparannuskytkin :value)}
                                       {:muutostyonLaji (-> rakennuksen-muuttaminen-doc :data :muutostyolaji :value)})
-                  :rakennustieto (get-rakennus-data toimenpide rakennuksen-muuttaminen-doc)}
+                  :rakennustieto (get-rakennus-data toimenpide application rakennuksen-muuttaminen-doc)}
      :created (:created rakennuksen-muuttaminen-doc)}))
 
-(defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc]
+(defn- get-rakennuksen-laajentaminen-toimenpide [laajentaminen-doc application]
   (let [toimenpide (:data laajentaminen-doc)
         mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
@@ -305,14 +304,14 @@
                                                          :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
                                                                          {:pintaAla (:pintaAla huoneistoala)
                                                                           :kayttotarkoitusKoodi (:kayttotarkoitusKoodi huoneistoala)})}})
-                  :rakennustieto (get-rakennus-data toimenpide laajentaminen-doc)}
+                  :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
 
-(defn- get-operations [documents]
-  (let [toimenpiteet (filter not-empty (concat (map get-uusi-toimenpide (:uusiRakennus documents))
-                                               (map get-rakennuksen-muuttaminen-toimenpide (:rakennuksen-muuttaminen documents))
-                                               (map get-rakennuksen-laajentaminen-toimenpide (:rakennuksen-laajentaminen documents))))]
+(defn- get-operations [documents application]
+  (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
+                                               (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
+                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
 (defn- get-lisatiedot [documents]
@@ -369,4 +368,4 @@
                       :kayttotapaus "Uusi hakemus"
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents))}
                      }}}]
-    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto ] (get-operations documents))))
+    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto ] (get-operations documents application))))

@@ -35,7 +35,7 @@
 (def henkilo-valitsin [{:name :userId :type :personSelector }
                         {:name "turvakieltoKytkin" :type :checkbox}])
 
-(def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
+(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
