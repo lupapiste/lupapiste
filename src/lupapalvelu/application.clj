@@ -282,6 +282,9 @@
    :name (keyword op-name)
    :created created})
 
+(defn get-organization-id [municipalityId]
+  "51767595a2890e1b11390753")
+
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
@@ -294,7 +297,8 @@
           op            (make-op operation created)
           info-request? (if infoRequest true false)
           state         (if (or info-request? (security/authority? user)) :open :draft)
-          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)]
+          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+          organization  (get-organization-id municipality)]
       (mongo/insert :applications {:id            id
                                    :created       created
                                    :opened        (when (= state :open) created)
@@ -302,6 +306,7 @@
                                    :infoRequest   info-request?
                                    :operations    [op]
                                    :state         state
+                                   :organization  organization
                                    :municipality  municipality
                                    :location      {:x (->double x) :y (->double y)}
                                    :address       address
