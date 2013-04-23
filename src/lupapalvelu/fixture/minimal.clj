@@ -243,7 +243,10 @@
                       :municipalities ["753"]}
                      {:id "51767595a2890e1b11390837"
                       :name {:fi "Tampereen rakennusvalvonta"}
-                      :municipalities ["837"]}])
+                      :municipalities ["837"]}
+                     {:id "51767595a2890e1b11390069"
+                      :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne "}
+                      :municipalities ["069","317","626","691"]}])
 
 (def municipalities [{:id "186"
                       :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}

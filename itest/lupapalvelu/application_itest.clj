@@ -39,10 +39,33 @@
         hakija (domain/get-document-by-name application "hakija")]
     (:state application) => "draft"
     (:opened application) => nil
-    (:organization application) => "51767595a2890e1b11390753"
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
     (-> hakija :data :henkilo :henkilotiedot) => (contains {:etunimi {:value "Pena"} :sukunimi {:value "Panaani"}})))
+
+(fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
+  (let [resp            (create-app pena :municipality "753")
+        application-id  (:id resp)
+        resp            (query pena :application :id application-id)
+        application     (:application resp)
+        hakija (domain/get-document-by-name application "hakija")]
+    (:organization application) => "51767595a2890e1b11390753"))
+
+(fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
+  (let [resp            (create-app pena :municipality "837")
+        application-id  (:id resp)
+        resp            (query pena :application :id application-id)
+        application     (:application resp)
+        hakija (domain/get-document-by-name application "hakija")]
+    (:organization application) => "51767595a2890e1b11390837"))
+
+(fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
+  (let [resp            (create-app pena :municipality "626")
+        application-id  (:id resp)
+        resp            (query pena :application :id application-id)
+        application     (:application resp)
+        hakija (domain/get-document-by-name application "hakija")]
+    (:organization application) => "51767595a2890e1b11390069"))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (let [created-resp (create-app pena :municipality sonja-muni)
