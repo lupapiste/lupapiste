@@ -230,10 +230,9 @@ var attachment = (function() {
     repository.load(applicationId);
   });
 
-  repository.loaded(function(e) {
-    var app = e.applicationDetails.application;
-    if (pageutil.getPage() === "attachment" && applicationId === app.id) {
-      showAttachment(app);
+  repository.loaded(["attachment"], function(application) {
+    if (applicationId === application.id) {
+      showAttachment(application);
     }
   });
 
