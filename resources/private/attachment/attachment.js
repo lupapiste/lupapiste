@@ -214,9 +214,7 @@ var attachment = (function() {
     model.application.title(application.title);
     model.attachmentId(attachmentId);
 
-    commentsModel.setApplicationId(application.id);
-    commentsModel.setTarget({type: "attachment", id: attachmentId});
-    commentsModel.setComments(application.comments);
+    commentsModel.refresh(application, {type: "attachment", id: attachmentId});
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
@@ -232,10 +230,9 @@ var attachment = (function() {
     repository.load(applicationId);
   });
 
-  repository.loaded(function(e) {
-    var app = e.applicationDetails.application;
-    if (pageutil.getPage() === "attachment" && applicationId === app.id) {
-      showAttachment(app);
+  repository.loaded(["attachment"], function(application) {
+    if (applicationId === application.id) {
+      showAttachment(application);
     }
   });
 
@@ -280,13 +277,6 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function newAttachment(m) {
-    var infoRequest = this.application.infoRequest(); //FIXME: MIHIN THIS:iin VIITATAAN???
-    var type = infoRequest ? "muut.muu" : null;
-    var selector = infoRequest ? false : true;
-    initFileUpload(m.application.id(), null, type, selector);
-  }
-
   function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
@@ -299,7 +289,6 @@ var attachment = (function() {
   }
 
   return {
-    newAttachment: newAttachment,
     initFileUpload: initFileUpload,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };

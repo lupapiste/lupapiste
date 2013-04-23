@@ -63,9 +63,8 @@
     }
   });
 
-  repository.loaded(function(e) {
-    var application = e.applicationDetails.application;
-    if (pageutil.getPage() === "add-operation" && currentId === application.id) {
+  repository.loaded(["add-operation"], function(application) {
+    if (currentId === application.id) {
       model.init(application);
     }
   });

@@ -81,7 +81,18 @@ var docgen = (function() {
 
     function makeEntrySpan(subSchema) {
       var span = document.createElement("span");
-      span.className = (subSchema.layout) ? "form-entry form-" + subSchema.layout : "form-entry";
+      span.className = "form-entry";
+
+      // Display text areas in a wide container
+      if (subSchema.type === "text") {
+        span.className = "form-entry form-full-width";
+      }
+
+      // Override style with layout option
+      if (subSchema.layout) {
+        span.className = "form-entry form-" + subSchema.layout;
+      }
+
       return span;
     }
 
