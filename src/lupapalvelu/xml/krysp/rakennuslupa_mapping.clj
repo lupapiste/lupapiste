@@ -120,9 +120,9 @@
                                                                                                         {:tag :kerrosala}
                                                                                                         {:tag :kokonaisala}
                                                                                                         {:tag :huoneistoala :child [{:tag :pintaAla :ns "yht"}
-                                                                                                                                    {:tag :kayttotarkoitusKoodi :ns "yht"}]}]
+                                                                                                                                    {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
                                                                          {:tag :kuvaus}
-                                                                         {:tag :perusparannusKytkin}}]}
+                                                                         {:tag :perusparannusKytkin}]}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
                                                {:tag :purkaminen}
