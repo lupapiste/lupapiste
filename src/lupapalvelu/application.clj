@@ -282,8 +282,9 @@
    :name (keyword op-name)
    :created created})
 
-(defn get-organization-id [municipalityId]
-  "51767595a2890e1b11390753")
+;TODO Could this be implemented as a Mongo query?
+(defn resolve-organization-id [municipalityId]
+  (:id (first (filter (fn [x] (some #(= municipalityId %) (:municipalities x))) (mongo/select :organizations)))))
 
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
@@ -298,7 +299,7 @@
           info-request? (if infoRequest true false)
           state         (if (or info-request? (security/authority? user)) :open :draft)
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
-          organization  (get-organization-id municipality)]
+          organization  (resolve-organization-id municipality)]
       (mongo/insert :applications {:id            id
                                    :created       created
                                    :opened        (when (= state :open) created)
