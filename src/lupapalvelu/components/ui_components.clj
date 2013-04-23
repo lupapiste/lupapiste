@@ -23,7 +23,7 @@
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (def ui-components
-  {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.1.custom.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
+  {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.1.custom.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
    :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js" "jquery.cookie.js"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
    :lo-dash      {:js ["lodash-1.1.1.min.js"]}
@@ -54,7 +54,7 @@
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                    :js ["comment.js" "authorization.js" "municipalities.js" "user.js" "users.js"]
-                   :html ["user-modification-dialogs.html"]}
+                   :html ["comments.html" "user-modification-dialogs.html"]}
 
    :invites      {:depends [:common]
                   :js ["invites.js"]}

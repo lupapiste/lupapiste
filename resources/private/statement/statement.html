@@ -56,38 +56,12 @@
           data-window-id="upload-dialog">
         </button>
       </div>
-      <div  data-bind="with: $root.commentsModel">
+
+      <div>
         <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
-        <table class="table table-striped">
-          <tbody data-bind="foreach: comments()">
-            <tr class="comment-row">
-              <td class="commentParty">
-                <span class="date" data-bind="dateTimeString: created"></span><br/>
-                <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br/>
-                <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-              </td>
-              <td class="comment-text">
-                <span data-bind="text: text"></span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <form>
-          <textarea
-            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-            id="statement.commentText"
-            class="conversation-input"
-            rows="3">
-          </textarea>
-          <button
-              data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
-              id="statement.addComment"
-              type="submit"
-              class="btn btn-primary">
-            Lähetä viesti
-          </button>
-        </form>
+        <div data-bind="template: {name: 'comment-template', data: $root.commentsModel}"></div>
       </div>
+
     </div>
 
     <div class="statement-info">
