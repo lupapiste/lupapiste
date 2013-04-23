@@ -40,7 +40,8 @@
                    {:tag :alkuHetki :ns "yht"}
                    sijantitieto
                    {:tag :rakennuksenTiedot
-                    :child [{:tag :rakennustunnus :child tunnus-children}
+                    :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
+                                                          {:tag :kiinttun}]}
                             {:tag :kayttotarkoitus}
                             {:tag :tilavuus}
                             {:tag :kokonaisala}
@@ -115,7 +116,13 @@
                               :child [{:tag :Toimenpide
                                        :child [{:tag :uusi
                                                 :child [{:tag :kuvaus}]}
-                                               {:tag :laajennus}
+                                               {:tag :laajennus :child [{:tag :laajennuksentiedot :child[{:tag :tilavuus}
+                                                                                                        {:tag :kerrosala}
+                                                                                                        {:tag :kokonaisala}
+                                                                                                        {:tag :huoneistoala :child [{:tag :pintaAla :ns "yht"}
+                                                                                                                                    {:tag :kayttotarkoitusKoodi :ns "yht"}]}]
+                                                                         {:tag :kuvaus}
+                                                                         {:tag :perusparannusKytkin}}]}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
                                                {:tag :purkaminen}

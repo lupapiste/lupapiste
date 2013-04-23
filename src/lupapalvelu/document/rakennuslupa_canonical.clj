@@ -230,44 +230,44 @@
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-      :rakentajaTyyppi (-> kaytto :rakentajaTyyppi :value)
-      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
-      :rakennuksenTiedot (merge {:rakennustunnus (if (-> toimenpide :rakennusnro :value) {
-                                                         :jarjestysnumero (-> toimenpide :rakennusnro :value)
-                                                         :kiinttun (:propertyId application)}
-                                                   {})
-                          :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
-                          :tilavuus (-> mitat :tilavuus :value)
-                          :kokonaisala (-> mitat :kokonaisala :value)
-                          :kellarinpinta-ala (-> mitat :kellarinpinta-ala :value)
-                          ;:BIM empty-tag
-                          :kerrosluku (-> mitat :kerrosluku :value)
-                          :kerrosala (-> mitat :kerrosala :value)
-                          :rakentamistapa (-> rakenne :rakentamistapa :value)
-                          :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin :value))
-                                              :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin :value))
-                                              :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin :value))
-                                              :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin :value))
-                                              :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin :value))}
-                          :energialuokka (-> luokitus :energialuokka :value)
-                          :energiatehokkuusluku (-> luokitus :energiatehokkuusluku :value)
-                          :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko :value)
-                          :paloluokka (-> luokitus :paloluokka :value)
-                          :lammitystapa (-> lammitys :lammitystapa :value)
-                          :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
-                                      :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin :value))
-                                      :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
-                                      :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin :value))
-                                      :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin :value))
-                                      :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin :value))
-                                      :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin :value))
-                                      :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
-                                      :saunoja (-> toimenpide :varusteet :saunoja :value)
-                                      :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}
-                          :asuinhuoneisto {:huoneisto (get-huoneisto-data huoneistot)}}
-                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
-                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
-                                (when julkisivu-map {:julkisivu julkisivu-map}))}))
+     :rakentajaTyyppi (-> kaytto :rakentajaTyyppi :value)
+     :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
+     :rakennuksenTiedot (merge {
+                                :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
+                                :tilavuus (-> mitat :tilavuus :value)
+                                :kokonaisala (-> mitat :kokonaisala :value)
+                                :kellarinpinta-ala (-> mitat :kellarinpinta-ala :value)
+                                ;:BIM empty-tag
+                                :kerrosluku (-> mitat :kerrosluku :value)
+                                :kerrosala (-> mitat :kerrosala :value)
+                                :rakentamistapa (-> rakenne :rakentamistapa :value)
+                                :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin :value))
+                                                    :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin :value))
+                                                    :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin :value))
+                                                    :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin :value))
+                                                    :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin :value))}
+                                :energialuokka (-> luokitus :energialuokka :value)
+                                :energiatehokkuusluku (-> luokitus :energiatehokkuusluku :value)
+                                :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko :value)
+                                :paloluokka (-> luokitus :paloluokka :value)
+                                :lammitystapa (-> lammitys :lammitystapa :value)
+                                :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
+                                            :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin :value))
+                                            :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
+                                            :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin :value))
+                                            :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin :value))
+                                            :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin :value))
+                                            :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin :value))
+                                            :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
+                                            :saunoja (-> toimenpide :varusteet :saunoja :value)
+                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}
+                                :asuinhuoneisto {:huoneisto (get-huoneisto-data huoneistot)}}
+                               (when (-> toimenpide :rakennusnro :value)
+                                   {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value)
+                                                    :kiinttun (:propertyId application)}})
+                               (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
+                               (when lammonlahde-map {:lammonlahde lammonlahde-map})
+                               (when julkisivu-map {:julkisivu julkisivu-map}))}))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
@@ -298,12 +298,12 @@
         mitat (-> toimenpide :laajennuksen-tiedot :mitat )]
     {:Toimenpide {:laajennus (conj (get-toimenpiteen-kuvaus laajentaminen-doc)
                                    {:perusparannusKytkin (-> laajentaminen-doc :data :laajennuksen-tiedot :perusparannuskytkin :value)}
-                                   {:laajennuksentiedot {:tilavuus (:tilavuus mitat)
-                                                         :kerrosala (:tilavuus mitat)
-                                                         :kokonaisala (:tilavuus mitat)
+                                   {:laajennuksentiedot {:tilavuus (-> mitat :tilavuus :value)
+                                                         :kerrosala (-> mitat :tilavuus :value)
+                                                         :kokonaisala (-> mitat :tilavuus :value)
                                                          :huoneistoala (for [huoneistoala (vals (:huoneistoala mitat))]
-                                                                         {:pintaAla (:pintaAla huoneistoala)
-                                                                          :kayttotarkoitusKoodi (:kayttotarkoitusKoodi huoneistoala)})}})
+                                                                         {:pintaAla (-> huoneistoala :pintaAla :value)
+                                                                          :kayttotarkoitusKoodi (-> huoneistoala :kayttotarkoitusKoodi :value)})}})
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
