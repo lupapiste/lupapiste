@@ -140,7 +140,7 @@
    :data common-rakennus})
 
 (def rakennuksen-muuttaminen
-  {:id "uusi-rakennus"
+  {:id "muuutaminen"
    :created 1
    :schema {:info {:name "rakennuksen-muuttaminen"
                                        :op {:name "muu-laajentaminen"}}}
@@ -150,7 +150,7 @@
                 } common-rakennus)})
 
 (def laajentaminen
-  {:id "uusi-rakennus"
+  {:id "laajennus"
    :created 3
    :schema {:info {:name "rakennuksen-laajentaminen"
                                        :op {:name "laajentaminen"}}}
@@ -166,9 +166,18 @@
 
                                       }} common-rakennus)})
 
+
+(def purku {:id "purku"
+            :created 4
+            :schema {:info {:name "purku"
+                            :op {:name "purkaminen"}}}
+            :data (conj {:rakennusnro {:value "001"}
+                         :poistumanAjankohta { :value "17.04.2013" },
+                         :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
+
 (def hankkeen-kuvaus {:id "Hankeen kuvaus" :schema {:info {:name "hankkeen-kuvaus" :order 1}}
-                                                    :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
-                                                           :poikkeamat {:value "Ei poikkeamisia"}}})
+                      :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
+                             :poikkeamat {:value "Ei poikkeamisia"}}})
 
 (def lisatieto {:id "lisatiedot" :schema {:info {:name "lisatiedot"}}
                 :data {:suoramarkkinointikielto {:value false}}})
@@ -189,6 +198,7 @@
    rakennuksen-muuttaminen
    uusi-rakennus
    laajentaminen
+   purku
    lisatieto
    hankkeen-kuvaus])
 
@@ -441,6 +451,7 @@
         toimenpide (:Toimenpide (nth toimenpiteet 1))
         muu-muutostyo (:Toimenpide (nth toimenpiteet 0))
         laajennus-t (:Toimenpide (nth toimenpiteet 2))
+        purku-t (:Toimenpide (nth toimenpiteet 3))
         rakennustieto (:rakennustieto toimenpide)
         rakennus (:Rakennus rakennustieto)
         rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus)))
@@ -481,7 +492,7 @@
     (fact "kokotilakytkin" (:kokotilaKytkin RakennuspaikanKiinteistotieto) => truthy)
     (fact "hallintaperuste" (:hallintaperuste RakennuspaikanKiinteistotieto) => "oma")
 
-    (fact "Toimenpidetieto"  (count toimenpiteet) => 3)
+    (fact "Toimenpidetieto"  (count toimenpiteet) => 4)
     (fact "Rakennus" rakennus => truthy)
     (fact "rakentajaTyyppi" (:rakentajaTyyppi rakennus) => "muu")
     (fact "rakennuksentiedot" rakennuksentiedot => truthy)
@@ -509,6 +520,8 @@
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => "001")
     (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
     (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
+    (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
+    (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
 
     ;(clojure.pprint/pprint canonical)
     ))

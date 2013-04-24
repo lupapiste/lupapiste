@@ -30,6 +30,10 @@
   (let [d (from-long timestamp)]
     (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d)))
 
+(defn to-xml-datetime-from-string [date-as-string]
+  (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+    (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
+
 (defn by-type [documents]
   (group-by #(keyword (get-in % [:schema :info :name])) documents))
 
@@ -307,11 +311,20 @@
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
+(defn- get-purku-toimenpide [purku-doc application]
+  (let [toimenpide (:data purku-doc)]
+    {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
+                                   {:purkamisenSyy (-> toimenpide :poistumanSyy :value)}
+                                   {:poistumaPvm (to-xml-datetime-from-string (-> toimenpide :poistumanAjankohta :value))})
+                  :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
+     :created (:created purku-doc)}))
+
 
 (defn- get-operations [documents application]
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
-                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))))]
+                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
+                                               (map #(get-purku-toimenpide % application) (:purku documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
 (defn- get-lisatiedot [documents]
