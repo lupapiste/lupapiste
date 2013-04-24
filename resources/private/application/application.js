@@ -202,6 +202,16 @@
 
   }();
 
+  var verdictModel = new function() {
+    var self = this;
+
+    self.openVerdict = function() {
+      window.location.hash = "#!/verdict/" + currentId;
+      return false;
+    };
+
+  }();
+
   var submitApplicationModel = new function() {
     var self = this;
 
@@ -705,6 +715,7 @@
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
+      verdictModel: verdictModel,
       stampModel: stampModel
     };
 

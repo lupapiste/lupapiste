@@ -46,3 +46,4 @@ stamp.file.status.done: Valmis
 stamp.file.status.error: Epäonnistui
 stamp.verdict: hyväksytty
 
+application.verdict.add: Anna päätös

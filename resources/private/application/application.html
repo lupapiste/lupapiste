@@ -261,6 +261,12 @@
             <div class="row" data-bind="with: verdict">
               <span data-bind="text: text" data-test-id="application-verdict"></span>
             </div>
+            <button
+              data-bind="click: $root.verdictModel.openVerdict, ltext: 'application.verdict.add', visible: $root.authorization.ok('give-verdict')"
+              class="btn btn-primary modal"
+              data-test-id="give-verdict">
+            </button>
+
           </div>
         </div>
 

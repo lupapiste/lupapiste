@@ -356,6 +356,17 @@
         (ok)))))
 
 ;;
+;; Verdicts
+;;
+
+(defcommand "give-verdict"
+  {:parameters [:id]
+   :states     [:submitted]
+   :roles      [:authority]}
+  [{{:keys [id]} :data {:keys [host]} :web :as command}]
+  (println "give-verdict:" id))
+
+;;
 ;; krysp enrichment
 ;;
 
