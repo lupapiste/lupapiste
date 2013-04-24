@@ -92,7 +92,6 @@
 
 (defn- compress-html [^String html]
   (let [c (doto (HtmlCompressor.)
-            (.setRemoveIntertagSpaces true)      ; removes iter-tag whitespace characters
             (.setRemoveScriptAttributes true)    ; remove optional attributes from script tags
             (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
             (.setRemoveLinkAttributes true)      ; remove optional attributes from link tags
@@ -101,7 +100,7 @@
             (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
             (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
             (.setRemoveHttpsProtocol true)       ; replace "https://" with "//" inside tag attributes
-            (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MIN)  ; remove spaces around provided tags
+            (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX)  ; remove spaces around provided tags
             (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]))] ; preserve KnockoutJS comments
     (.compress c html)))
 
