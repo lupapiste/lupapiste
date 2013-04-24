@@ -8,9 +8,10 @@
 
     self.application = ko.observable();
 
+    self.statuses = ['yes', 'no', 'condition'];
+
     self.id = ko.observable();
     self.status = ko.observable();
-    self.statuses = ['yes', 'no', 'condition'];
     self.name = ko.observable();
     self.given = ko.observable();
     self.official = ko.observable();
@@ -40,7 +41,7 @@
     };
 
     self.disabled = ko.computed(function() {
-      return false;
+      return !(self.id() && self.status() && self.name() && self.given() && self.official());
     });
   }
 

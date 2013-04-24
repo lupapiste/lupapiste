@@ -146,7 +146,6 @@
       //handle the field changing
       ko.utils.registerEventHandler(element, "change", function () {
         var observable = valueAccessor();
-        console.log("changed");
         observable($(element).datepicker("getDate"));
       });
 
