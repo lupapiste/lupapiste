@@ -158,14 +158,14 @@
                    :admin admin?})
 
 (defn cache-headers [resource-type]
-  (if (not (env/dev-mode?))
+  (if (env/dev-mode?)
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
-      {;"Cache-Control" "no-cache"
-       "ETag" etag/etag}
-      {;"Cache-Control" "public, max-age=864000"
-       ;"Vary"          "Accept-Encoding"
-       "ETag" etag/etag})))
+      {"Cache-Control" "no-cache"
+       "ETag"          etag/etag}
+      {"Cache-Control" "public, max-age=864000"
+       "Vary"          "Accept-Encoding"
+       "ETag"          etag/etag})))
 
 (def default-lang "fi")
 
