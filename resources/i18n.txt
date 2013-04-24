@@ -54,3 +54,4 @@ verdict.status: Päätös
 verdict.name: Päätöksen antaja
 verdict.given: Antopäivämäärä
 verdict.official: Lainvoimaisuuspäivämäärä
+verdict.submit: Lähetä

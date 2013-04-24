@@ -77,7 +77,7 @@
         <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('give-verdict')" id="verdict-official"></input>
 
         <button
-          data-bind="disable: disabled, click: submit, ltext: 'statement.submit', visible: $root.authorization.ok('give-verdict')"
+          data-bind="disable: disabled, click: submit, ltext: 'verdict.submit', visible: $root.authorization.ok('give-verdict')"
           id="statement-submit"
           type="submit"
           class="btn btn-primary">
