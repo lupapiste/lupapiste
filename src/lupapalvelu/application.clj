@@ -364,15 +364,17 @@
   {:parameters [:id :verdictId :status :name :given :official]
    :states     [:submitted]
    :roles      [:authority]}
-  [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web :as command}]
+  [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
   (mongo/update
     :applications
     {:_id id}
-    {$set {:verdict {:id verdictId
-                     :name name
-                     :given given
-                     :status status
-                     :official official}}}))
+    {$set {:modified created
+           :state    :verdictGiven
+           :verdict  {:id verdictId
+                      :name name
+                      :given given
+                      :status status
+                      :official official}}}))
 
 ;;
 ;; krysp enrichment
