@@ -125,7 +125,9 @@
                                                                          {:tag :perusparannusKytkin}]}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
-                                               {:tag :purkaminen}
+                                               {:tag :purkaminen :child [{:tag :kuvaus}
+                                                                        {:tag :purkamisenSyy}
+                                                                        {:tag :poistumaPvm }]}
                                                {:tag :muuMuutosTyo :child [{:tag :muutostyonLaji}
                                                                            {:tag :kuvaus}
                                                                            {:tag :perusparannusKytkin}]}
