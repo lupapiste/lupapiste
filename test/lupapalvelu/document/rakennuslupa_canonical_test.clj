@@ -522,7 +522,7 @@
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => false)
     (fact "asianTiedot" asianTiedot => truthy)
     (fact "Asiantiedot" Asiantiedot => truthy)
-    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.")
+    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
     (fact kayttotapaus => "Uusi hakemus")
 
     (fact "Luvan tunnistetiedot" luvanTunnisteTiedot => truthy)
@@ -545,5 +545,5 @@
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus) => "Aidan rakentaminen rajalle")
 
-    (clojure.pprint/pprint kaupunkikuva-t)
+    ;(clojure.pprint/pprint kaupunkikuva-t)
     ))

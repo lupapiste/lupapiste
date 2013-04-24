@@ -338,10 +338,12 @@
   (let [lisatiedot (:data (first documents))]
     {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}))
 
-(defn- get-asian-tiedot [documents]
-  (let [asian-tiedot (:data (first documents))]
+(defn- get-asian-tiedot [documents maisematyo_documents]
+  (let [asian-tiedot (:data (first documents))
+        maisematyo_kuvaukset (for [maismatyo_doc maisematyo_documents]
+                               (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maismatyo_doc)) ":" (-> maismatyo_doc :data :kuvaus :value )))]
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
-                   :rakennusvalvontaasianKuvaus (or (-> asian-tiedot :kuvaus :value) empty-tag)}}))
+                   :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
 
 (defn- get-bulding-places [documents application]
   (for [doc (:rakennuspaikka documents)
@@ -386,6 +388,6 @@
                       :rakennuspaikkatieto (get-bulding-places documents application)
                       :lisatiedot (get-lisatiedot (:lisatiedot documents))
                       :kayttotapaus "Uusi hakemus"
-                      :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents))}
+                      :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto ] (get-operations documents application))))
