@@ -290,7 +290,7 @@
 (defpage [:post "/api/upload"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
   (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
-  (let [target (if (every? s/blank? [targetId targetType]) nil {:type targetType :id targetId})
+  (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
