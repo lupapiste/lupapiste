@@ -161,7 +161,8 @@
     {"Cache-Control" "no-cache"}
     (if (env/dev-mode?)
       {"Cache-Control" "no-cache"}
-      {"Cache-Control" "public, max-age=86400"})))
+      {"Cache-Control" "public, max-age=864000"
+       "Vary"          "Accept-Encoding"})))
 
 (def default-lang "fi")
 

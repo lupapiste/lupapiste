@@ -62,7 +62,7 @@ var util = (function() {
       .addClass("ajax-loading-mask")
       .append($("<div>")
           .addClass("content")
-          .append($("<img>").attr("src", "/img/ajax-loader.gif"))
+          .append($('<img src="/img/ajax-loader.gif" class="ajax-loader" width="66" height="66">'))
           .append($("<div>").text(loc("sending"))))
       .fadeIn();
   }
