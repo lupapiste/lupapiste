@@ -6,12 +6,24 @@
   function VerdictModel() {
     var self = this;
 
-    self.data = ko.observable();
     self.application = ko.observable();
+
+    self.id = ko.observable();
+    self.status = ko.observable();
+    self.statuses = ['yes', 'no', 'condition'];
+    self.name = ko.observable();
+    self.given = ko.observable();
+    self.official = ko.observable();
 
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
-      console.log(self.application());
+      if (application.verdict) {
+        self.id(application.verdict.id);
+        self.status(application.verdict.status);
+        self.name(application.verdict.name);
+        self.given(application.verdict.given);
+        self.official(application.verdict.official);
+      }
     };
 
     self.submit = function() {
@@ -32,7 +44,7 @@
     });
   }
 
-  function AttachmentsModel() {
+  function AttachmentsModel(attachmentTarget) {
     var self = this;
 
     self.attachments = ko.observableArray([]);
@@ -40,19 +52,19 @@
     self.refresh = function(application) {
       self.attachments(_.filter(application.attachments,function(attachment) {
         console.log(attachment.target);
-        return _.isEqual(attachment.target, {type: "verdict"});
+        return _.isEqual(attachment.target, attachmentTarget);
       }));
     };
 
     self.newAttachment = function() {
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "verdict"});
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, attachmentTarget);
     };
   }
 
 
   var verdictModel = new VerdictModel();
   var authorizationModel = authorization.create();
-  var attachmentsModel = new AttachmentsModel();
+  var attachmentsModel = new AttachmentsModel({type: "verdict"});
 
   repository.loaded(["verdict"], function(application) {
     if (applicationId === application.id) {

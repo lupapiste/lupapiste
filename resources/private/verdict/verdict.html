@@ -57,21 +57,22 @@
     </div>
 
     <div class="statement-info">
-      <form data-bind="with: $root.statementModels">
-        <div class="form-entry">
-          <label for="attachment-type-select" class="form-label">
-            <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
-            <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
-          </label>
-          <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('statement.'+item);}, value: selectedStatus, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-statement')"></select>
-        </div>
-        <label class="form-label" for="attachment.commentText" data-bind="ltext: 'statement.text'"></label>
-        <textarea
-          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-statement')"
-          id="statement-text"
-          rows="20"></textarea>
+      <form data-bind="with: $root.verdictModel">
+
+        <hr/>
+
+        <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>
+        <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: id, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="statement-text"></input>
+
+        <label for="attachment-type-select" class="form-label" data-bind="ltext: 'verdict.status'"></label><br/>
+        <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-verdict')"></select>
+
+        <label class="form-label" data-bind="ltext: 'verdict.name'"></label><br/>
+        <input type="text" class="form-input long" data-bind="value: name, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="statement-text"></input>
+
+
         <button
-          data-bind="disable: disabled, click: submit, ltext: 'statement.submit', visible: $root.authorization.ok('give-statement')"
+          data-bind="disable: disabled, click: submit, ltext: 'statement.submit', visible: $root.authorization.ok('give-verdict')"
           id="statement-submit"
           type="submit"
           class="btn btn-primary">

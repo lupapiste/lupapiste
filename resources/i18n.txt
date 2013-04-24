@@ -48,3 +48,7 @@ stamp.verdict: hyväksytty
 
 application.verdict.add: Anna päätös
 application.verdict.title: Lausunto
+verdict.id: Lupatunnus
+verdict.id.hint: Taustajärjestelmän tunniste
+verdict.status: Päätös
+verdict.name: Päätöksen antaja
