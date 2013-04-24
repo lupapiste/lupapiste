@@ -28,9 +28,10 @@
     };
 
     self.submit = function() {
-      console.log("submit:", self.given(), (typeof self.given()));
+      var givenMillis = new Date(self.given()).getTime();
+      var officialMillis = new Date(self.official()).getTime();
       ajax
-        .command("give-verdict", {id: applicationId, verdictId: self.verdictId(), status: self.status(), name: self.name(), given: self.given(), official: self.official()})
+        .command("give-verdict", {id: applicationId, verdictId: self.verdictId(), status: self.status(), name: self.name(), given: givenMillis, official: officialMillis})
         .success(function() {
           repository.load(applicationId);
           window.location.hash = "!/application/"+applicationId+"/verdict";

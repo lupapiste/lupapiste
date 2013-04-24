@@ -360,9 +360,6 @@
 ;; Verdicts
 ;;
 
-(defn parse-datetime [s]
-  (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss.fff'Z'") s))
-
 (defcommand "give-verdict"
   {:parameters [:id :verdictId :status :name :given :official]
    :states     [:submitted]
