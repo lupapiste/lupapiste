@@ -22,6 +22,7 @@
             [lupapalvelu.proxy-services]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
+            [lupapalvelu.etag :as etag]
             [sade.security-headers :as headers]))
 
 (defn -main [& _]
@@ -42,6 +43,7 @@
   (server/add-middleware headers/add-security-headers)
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/apikey-authentication)
+  (server/add-middleware etag/if-none-match-build-number)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
