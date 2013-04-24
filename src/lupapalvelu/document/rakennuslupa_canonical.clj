@@ -319,12 +319,19 @@
                   :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
      :created (:created purku-doc)}))
 
+(defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
+  (let [toimenpide (:data kaupunkikuvatoimenpide-doc)]
+    {:Toimenpide {:kaupunkikuvaToimenpide (get-toimenpiteen-kuvaus kaupunkikuvatoimenpide-doc)
+                  :rakennelmatieto {:Rakennelma {:kuvaus (-> toimenpide :kuvaus :value)}}}
+     :created (:created kaupunkikuvatoimenpide-doc)}))
+
 
 (defn- get-operations [documents application]
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
-                                               (map #(get-purku-toimenpide % application) (:purku documents))))]
+                                               (map #(get-purku-toimenpide % application) (:purku documents))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
 (defn- get-lisatiedot [documents]
