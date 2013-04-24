@@ -34,6 +34,7 @@
     :enabled true
     :role :authority
     :municipality "753"
+    :organizations ["51767595a2890e1b11390753"]
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
