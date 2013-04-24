@@ -719,8 +719,8 @@
       stampModel: stampModel
     };
 
-    ko.applyBindings(bindings, $("#application")[0]);
-    ko.applyBindings(bindings, $("#inforequest")[0]);
+    $("#application").applyBindings(bindings);
+    $("#inforequest").applyBindings(bindings);
 
     attachmentTemplatesModel.init();
   });
