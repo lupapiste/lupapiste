@@ -20,6 +20,7 @@
     :enabled true
     :role :authority
     :municipality "837"
+    :organizations ["51767595a2890e1b11390837"]
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
@@ -49,6 +50,7 @@
     :enabled true
     :role :authority
     :municipality "753"
+    :organizations ["51767595a2890e1b11390753"]
     :firstName "Ronja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -61,6 +63,7 @@
     :enabled true
     :role :authority
     :municipality "638"
+    :organizations ["51767595a2890e1b11390638"]
     :firstName "Pekka"
     :lastName "Borga"
     :phone "121212"
@@ -73,6 +76,7 @@
     :enabled true
     :role :authority
     :municipality "564"
+    :organizations ["51767595a2890e1b11390564"]
     :personId "kunta564"
     :firstName "Olli"
     :lastName "Ule\u00E5borg"
@@ -87,6 +91,7 @@
     :enabled true
     :role :authorityAdmin
     :municipality "753"
+    :organizations ["51767595a2890e1b11390753"]
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
@@ -98,6 +103,7 @@
     :enabled true
     :role :authorityAdmin
     :municipality "529"
+    :organizations ["51767595a2890e1b11390529"]
     :firstName "Admin"
     :lastName "Naantali"
     :username "admin@naantali.fi"
@@ -109,6 +115,7 @@
     :enabled true
     :role :authority
     :municipality "529"
+    :organizations ["51767595a2890e1b11390529"]
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
     :username "rakennustarkastaja@naantali.fi"
@@ -120,6 +127,7 @@
     :enabled true
     :role :authority
     :municipality "529"
+    :organizations ["51767595a2890e1b11390529"]
     :firstName "Lupasihteeri"
     :lastName "Naantali"
     :username "lupasihteeri@naantali.fi"
@@ -131,6 +139,7 @@
     :enabled true
     :role :authorityAdmin
     :municipality "186"
+    :organizations ["51767595a2890e1b11390186"]
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "admin@jarvenpaa.fi"
@@ -142,6 +151,7 @@
     :enabled true
     :role :authority
     :municipality "186"
+    :organizations ["51767595a2890e1b11390186"]
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "rakennustarkastaja@jarvenpaa.fi"
@@ -153,6 +163,7 @@
     :enabled true
     :role :authority
     :municipality "186"
+    :organizations ["51767595a2890e1b11390186"]
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "lupasihteeri@jarvenpaa.fi"
@@ -245,6 +256,15 @@
                      {:id "51767595a2890e1b11390837"
                       :name {:fi "Tampereen rakennusvalvonta"}
                       :municipalities ["837"]}
+                     {:id "51767595a2890e1b11390638"
+                      :name {:fi "Porvoon rakennusvalvonta"}
+                      :municipalities ["638"]}
+                     {:id "51767595a2890e1b11390564"
+                      :name {:fi "Oulun rakennusvalvonta"}
+                      :municipalities ["564"]}
+                     {:id "51767595a2890e1b11390529"
+                      :name {:fi "Naantalin rakennusvalvonta"}
+                      :municipalities ["529"]}
                      {:id "51767595a2890e1b11390069"
                       :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne "}
                       :municipalities ["069","317","626","691"]}])
