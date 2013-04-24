@@ -19,7 +19,6 @@
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role :authority
-    :municipality "837"
     :organizations ["51767595a2890e1b11390837"]
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -34,7 +33,6 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :municipality "753"
     :organizations ["51767595a2890e1b11390753"]
     :firstName "Sonja"
     :lastName "Sibbo"
@@ -49,7 +47,6 @@
     :email "ronja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :municipality "753"
     :organizations ["51767595a2890e1b11390753"]
     :firstName "Ronja"
     :lastName "Sibbo"
@@ -62,7 +59,6 @@
     :email "pekka.borga@porvoo.fi"
     :enabled true
     :role :authority
-    :municipality "638"
     :organizations ["51767595a2890e1b11390638"]
     :firstName "Pekka"
     :lastName "Borga"
@@ -75,7 +71,6 @@
     :email "olli.uleaborg@ouka.fi"
     :enabled true
     :role :authority
-    :municipality "564"
     :organizations ["51767595a2890e1b11390564"]
     :personId "kunta564"
     :firstName "Olli"
@@ -90,7 +85,6 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role :authorityAdmin
-    :municipality "753"
     :organizations ["51767595a2890e1b11390753"]
     :firstName "Simo"
     :lastName "Suurvisiiri"
@@ -102,7 +96,6 @@
     :email "admin@naantali.fi"
     :enabled true
     :role :authorityAdmin
-    :municipality "529"
     :organizations ["51767595a2890e1b11390529"]
     :firstName "Admin"
     :lastName "Naantali"
@@ -114,7 +107,6 @@
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
     :role :authority
-    :municipality "529"
     :organizations ["51767595a2890e1b11390529"]
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
@@ -126,7 +118,6 @@
     :email "lupasihteeri@naantali.fi"
     :enabled true
     :role :authority
-    :municipality "529"
     :organizations ["51767595a2890e1b11390529"]
     :firstName "Lupasihteeri"
     :lastName "Naantali"
@@ -138,7 +129,6 @@
     :email "admin@jarvenpaa.fi"
     :enabled true
     :role :authorityAdmin
-    :municipality "186"
     :organizations ["51767595a2890e1b11390186"]
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -150,7 +140,6 @@
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
     :role :authority
-    :municipality "186"
     :organizations ["51767595a2890e1b11390186"]
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -162,7 +151,6 @@
     :email "lupasihteeri@jarvenpaa.fi"
     :enabled true
     :role :authority
-    :municipality "186"
     :organizations ["51767595a2890e1b11390186"]
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
