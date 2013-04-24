@@ -322,7 +322,10 @@
 (defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
   (let [toimenpide (:data kaupunkikuvatoimenpide-doc)]
     {:Toimenpide {:kaupunkikuvaToimenpide (get-toimenpiteen-kuvaus kaupunkikuvatoimenpide-doc)
-                  :rakennelmatieto {:Rakennelma {:kuvaus (-> toimenpide :kuvaus :value)}}}
+                  :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
+                                                 :alkuHetki (to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
+                                                 :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}}}}
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
 
