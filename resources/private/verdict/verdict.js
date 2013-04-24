@@ -33,7 +33,7 @@
         .command("give-verdict", {id: applicationId})
         .success(function() {
           repository.load(applicationId);
-          window.location.hash = "!/application/"+applicationId+"/statement";
+          window.location.hash = "!/application/"+applicationId+"/verdict";
           return false;
         })
         .call();
