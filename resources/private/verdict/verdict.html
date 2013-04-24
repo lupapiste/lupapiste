@@ -2,6 +2,7 @@
 <html>
 <body>
   <section class="page container" id="verdict" data-bind="with: $root.verdictModel">
+
     <div class="headerarea">
       <h1>
         <span data-bind="with: application">
@@ -13,6 +14,7 @@
         <a class="btn" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/verdict' }, ltext: 'attachment.return'"></a>
       </span>
     </div>
+
     <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
       <div class="statement-attachments">
         <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
@@ -81,7 +83,7 @@
           id="statement-submit"
           type="submit"
           class="btn btn-primary">
-          Jätä lausunto
+          Lähetä
         </button>
       </form>
     </div>
