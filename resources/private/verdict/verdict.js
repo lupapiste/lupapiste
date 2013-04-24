@@ -62,7 +62,6 @@
     };
   }
 
-
   var verdictModel = new VerdictModel();
   var authorizationModel = authorization.create();
   var attachmentsModel = new AttachmentsModel({type: "verdict"});
