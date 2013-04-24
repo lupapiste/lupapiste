@@ -10,7 +10,7 @@
 
     self.statuses = ['yes', 'no', 'condition'];
 
-    self.id = ko.observable();
+    self.verdictId = ko.observable();
     self.status = ko.observable();
     self.name = ko.observable();
     self.given = ko.observable();
@@ -19,7 +19,7 @@
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       if (application.verdict) {
-        self.id(application.verdict.id);
+        self.verdictId(application.verdict.id);
         self.status(application.verdict.status);
         self.name(application.verdict.name);
         self.given(application.verdict.given);
@@ -28,9 +28,9 @@
     };
 
     self.submit = function() {
-      console.log("submit");
+      console.log("submit:", self.given(), (typeof self.given()));
       ajax
-        .command("give-verdict", {id: applicationId})
+        .command("give-verdict", {id: applicationId, verdictId: self.verdictId(), status: self.status(), name: self.name(), given: self.given(), official: self.official()})
         .success(function() {
           repository.load(applicationId);
           window.location.hash = "!/application/"+applicationId+"/verdict";
@@ -41,7 +41,7 @@
     };
 
     self.disabled = ko.computed(function() {
-      return !(self.id() && self.status() && self.name() && self.given() && self.official());
+      return !(self.verdictId() && self.status() && self.name() && self.given() && self.official());
     });
   }
 

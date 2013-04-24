@@ -259,7 +259,26 @@
           <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
           <div class="tab-wrapper">
             <div class="row" data-bind="with: verdict">
-              <span data-bind="text: text" data-test-id="application-verdict"></span>
+              <table class="table table-striped tablesorter">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.statement.desc'"></th>
+                    <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                    <th data-bind="ltext: 'application.statement.requested'"></th>
+                    <th data-bind="ltext: 'application.statement.given'"></th>
+                    <th data-bind="ltext: 'application.statement.status'"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="statement-row">
+                    <td data-bind="text: id"></td>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="dateString: given"></td>
+                    <td data-bind="dateString: official"></td>
+                    <td data-bind="text: status"></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
             <button
               data-bind="click: $root.verdictModel.openVerdict, ltext: 'application.verdict.add', visible: $root.authorization.ok('give-verdict')"

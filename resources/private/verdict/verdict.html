@@ -62,7 +62,7 @@
         <hr/>
 
         <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>
-        <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: id, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-id"></input>
+        <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: verdictId, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-id"></input>
 
         <label for="attachment-type-select" class="form-label" data-bind="ltext: 'verdict.status'"></label><br/>
         <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-verdict')"></select>

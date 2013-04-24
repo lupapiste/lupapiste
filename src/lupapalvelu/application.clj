@@ -7,6 +7,7 @@
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
   (:require [clojure.string :as s]
+            [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -359,12 +360,22 @@
 ;; Verdicts
 ;;
 
+(defn parse-datetime [s]
+  (timeformat/parse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss.fff'Z'") s))
+
 (defcommand "give-verdict"
-  {:parameters [:id]
+  {:parameters [:id :verdictId :status :name :given :official]
    :states     [:submitted]
    :roles      [:authority]}
-  [{{:keys [id]} :data {:keys [host]} :web :as command}]
-  (println "give-verdict:" id))
+  [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web :as command}]
+  (mongo/update
+    :applications
+    {:_id id}
+    {$set {:verdict {:id verdictId
+                     :name name
+                     :given given
+                     :status status
+                     :official official}}}))
 
 ;;
 ;; krysp enrichment
