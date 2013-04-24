@@ -47,3 +47,4 @@ stamp.file.status.error: Epäonnistui
 stamp.verdict: hyväksytty
 
 application.verdict.add: Anna päätös
+application.verdict.title: Lausunto
