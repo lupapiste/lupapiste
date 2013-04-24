@@ -46,3 +46,5 @@ stamp.file.status.done: Valmis
 stamp.file.status.error: Epäonnistui
 stamp.verdict: hyväksytty
 
+attachment.upload.instructions.size: Suurin sallittu tiedostokoko on 100 Mt.
+attachment.upload.instructions.extensions: Sallitut tiedostomuotoja ovat PDF-, kuva-, Microsoft Office-, OpenOffice- ja zip-tiedostot.
