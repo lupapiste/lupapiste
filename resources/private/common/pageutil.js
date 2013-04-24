@@ -35,7 +35,7 @@ var pageutil = (function() {
   }
 
   $(function() {
-    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader">');
+    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader" width="66" height="66">');
     ajaxLoaderContainer = $('<div class="ajax-loader-container">').append(ajaxImg);
     $('body').append(ajaxLoaderContainer);
   });
