@@ -60,26 +60,26 @@
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
   (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
 
-(defn find-authorities-in-applications-municipality [app]
-  (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
+(defn find-authorities-in-applications-organization [app]
+  (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application"
   {:authenticated true
    :parameters [:id]}
   [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
-    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
+    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
 ;; application id and the authorities in that municipality.
-(defquery "authorities-in-applications-municipality"
+(defquery "authorities-in-applications-organization"
   {:parameters [:id]
    :authenticated true}
   [command]
   (let [id (-> command :data :id)
         app (mongo/select-one :applications {:_id id} {:municipality 1})
-        authorities (find-authorities-in-applications-municipality app)]
+        authorities (find-authorities-in-applications-organization app)]
     (ok :authorityInfo authorities)))
 
 (defn filter-repeating-party-docs [names]
