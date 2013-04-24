@@ -52,6 +52,7 @@ verdict.id: Lupatunnus
 verdict.id.hint: Taustajärjestelmän tunniste
 verdict.status: Päätös
 verdict.name: Päätöksen antaja
-verdict.given: Antopäivämäärä
-verdict.official: Lainvoimaisuuspäivämäärä
+verdict.given: Annettu
+verdict.official: Lainvoimainen
 verdict.submit: Lähetä
+verdict.attachments: Liiteet

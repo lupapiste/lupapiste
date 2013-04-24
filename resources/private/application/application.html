@@ -262,20 +262,22 @@
               <table class="table table-striped tablesorter">
                 <thead>
                   <tr>
-                    <th data-bind="ltext: 'application.statement.desc'"></th>
-                    <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
-                    <th data-bind="ltext: 'application.statement.requested'"></th>
-                    <th data-bind="ltext: 'application.statement.given'"></th>
-                    <th data-bind="ltext: 'application.statement.status'"></th>
+                    <th data-bind="ltext: 'verdict.id'"></th>
+                    <th data-bind="ltext: 'verdict.status'"></th>
+                    <th data-bind="ltext: 'verdict.name'"></th>
+                    <th data-bind="ltext: 'verdict.given'"></th>
+                    <th data-bind="ltext: 'verdict.official'"></th>
+                    <th data-bind="ltext: 'verdict.attachments'"></th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr class="statement-row">
                     <td data-bind="text: id"></td>
+                    <td data-bind="text: status"></td>
                     <td data-bind="text: name"></td>
                     <td data-bind="dateString: given"></td>
                     <td data-bind="dateString: official"></td>
-                    <td data-bind="text: status"></td>
+                    <td>...</td>
                   </tr>
                 </tbody>
               </table>
