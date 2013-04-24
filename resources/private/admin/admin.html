@@ -33,7 +33,7 @@
             </tr>
           </tbody>
         </table>
-        <a href="#" data-bind="click: $root.users.openCreateModal, ltext: 'auth-admin.addAdminUser'" class="modal btn btn-primary btn-narrow" id="test-create-user"></a>
+        <a href="#" data-bind="click: $root.users.openCreateAdminModal, ltext: 'auth-admin.addAdminUser'" class="modal btn btn-primary btn-narrow" id="test-create-admin-user"></a>
       </section>
       
       <h3>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h3>
@@ -95,7 +95,7 @@
       </table>
     </div>
 
-    <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserTitle: 'auth-admin.addAdminUser', modifyUserTitle: 'auth-admin.editAdminUser'}}"></div>
+    <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserDialogId: 'dialog-add-admin-user', addUserTitle: 'auth-admin.addAdminUser', modifyUserDialogId: 'dialog-modify-admin-user', modifyUserTitle: 'auth-admin.editAdminUser', resetPasswordDialogId: 'dialog-reset-admin-password'}}"></div>
 
   </section>
 </body>

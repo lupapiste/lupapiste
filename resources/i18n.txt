@@ -6,7 +6,7 @@ auth-admin.update-statement-person: Päivitä lausunnon antajaa
 auth-admin.title: Pääkäyttäjän osio
 auth-admin.admin-users: Kuntien pääkäyttäjät
 auth-admin.addAdminUser: Lisää pääkäyttäjä
-auth-admin.editAdminUser: muokkaa pääkäyttäjää
+auth-admin.editAdminUser: Muokkaa pääkäyttäjää
 
 userinfo.statement-type: Lausunnon tyyppi
 error.not-authority: Käyttäjä ei ole viranomainen
