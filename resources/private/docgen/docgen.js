@@ -124,12 +124,7 @@ var docgen = (function () {
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass);
 
-      input.onfocus = function () {
-        $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
-      };
-      input.onblur = function () {
-        $(this).siblings('.form-help').fadeOut("slow").css("display","none");
-      };
+      
 
       setMaxLen(input, subSchema);
 
@@ -145,9 +140,26 @@ var docgen = (function () {
         unit.className = "form-string-unit";
         unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
         inputAndUnit.appendChild(unit);
+        
+        inputAndUnit.input.onfocus = function () {
+          $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
+        };
+        inputAndUnit.input.onblur = function () {
+          $(this).siblings('.form-help').fadeOut("slow").css("display","none");
+        };
+
         span.appendChild(inputAndUnit);
+
       } else {
+        input.onfocus = function () {
+          $(this).parent().siblings('.form-help').fadeIn("slow").css("display","block");;
+        };
+        input.onblur = function () {
+          $(this).parent().siblings('.form-help').fadeOut("slow").css("display","none");
+        };
+
         span.appendChild(input);
+
       }
 
       return span;
@@ -161,6 +173,13 @@ var docgen = (function () {
       var myPath = path.join(".");
       var input = document.createElement("textarea");
       var span = makeEntrySpan(subSchema);
+
+      input.onfocus = function () {
+        $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
+      };
+      input.onblur = function () {
+        $(this).siblings('.form-help').fadeOut("slow").css("display","none");
+      };
 
       input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
@@ -203,6 +222,13 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema);
+
+      option.onfocus = function () {
+        $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
+      };
+      option.onblur = function () {
+        $(this).siblings('.form-help').fadeOut("slow").css("display","none");
+      };
 
       select.name = myPath;
       select.className = "form-input combobox";
