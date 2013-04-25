@@ -105,7 +105,7 @@
                   :html ["index.html"]}
 
    :admins   {:js ["user.js" "users.js"]
-              :html ["user-modification-dialogs.html"]}
+              :html ["admin-user-list.html" "user-modification-dialogs.html"]}
 
    :authority-admin {:depends [:common :authenticated :admins :mypage :debug]
                      :js ["admin.js"]

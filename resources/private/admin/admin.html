@@ -8,34 +8,8 @@
       </div>
       <h1 id="admin-header" data-bind="ltext: 'admin.adminpage-title'"></h1>
 
-      <section>
-        <h2 data-bind="ltext: 'admin.admin-users'"></h2>
-        <table class="table table-striped tablesorter" id="test-authority-admin-users-table">
-          <thead>
-            <tr>
-              <th data-bind="ltext: 'auth-admin.user'"></th>
-              <th data-bind="ltext: 'userinfo.email'"></th>
-              <th data-bind="ltext: 'auth-admin.role'"></th>
-              <th data-bind="ltext: 'auth-admin.actions'"></th>
-              <th data-bind="ltext: 'auth-admin.active'"></th>
-            </tr>
-          </thead>
-          <tbody data-bind="foreach: users.data()">
-            <tr class="user-row">
-              <td class="user-full-name"><a data-bind="text: firstName()+' '+lastName(), attr: { 'data-test-full-name-by-email': email }"></a></td>
-              <td data-bind="text: email"></td>
-              <td data-bind="ltext: role()"></td>
-              <td>
-                [<a class="edit-user" href="#" data-bind="ltext: 'edit', click: $root.users.openAdminModifyModal, attr: { 'data-test-edit-email': email }" class="modal"></a>]
-                [<a class="change-user-password" href="#" data-bind="ltext: 'userinfo.changePassword', click: $root.users.openAdminPasswordModal, attr: { 'data-test-password-email': email }" class="modal"></a>]
-              </td>
-              <td data-bind="text: enabled() ? loc('auth-admin.user-active') : ''"></td>
-            </tr>
-          </tbody>
-        </table>
-        <a href="#" data-bind="click: $root.users.openCreateAdminModal, ltext: 'admin.addAdminUser'" class="modal btn btn-primary btn-narrow" id="test-create-admin-user"></a>
-      </section>
-      
+      <div data-bind="template: {name: 'admin-user-list-template', data: {users: $root.users, usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateAdminModal, openCommandEditModal: $root.users.openAdminModifyModal, openCommandResetPwModal: $root.users.openAdminPasswordModal}}"></div>
+
       <h3>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h3>
       <ul data-bind="foreach: fixtures.data()">
         <li>
