@@ -277,7 +277,14 @@
                     <td data-bind="text: name"></td>
                     <td data-bind="dateString: given"></td>
                     <td data-bind="dateString: official"></td>
-                    <td>...</td>
+                    <td data-bind="foreach: $root.verdictModel.attachments()">
+                      <span data-bind="with: $data.latestVersion">
+                        <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                          <i data-bind="ltext: contentType"></i>
+                          <i data-bind="size: size"></i><br/>
+                        </a>
+                      </span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
