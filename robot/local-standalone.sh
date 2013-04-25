@@ -6,4 +6,4 @@ if [ -z "$target" ] ; then
   target="tests"
 fi
 
-pybot --exclude integration --exclude fail --RunEmptySuite -d target local/setup $target local/teardown
+pybot --exclude integration --exclude fail --RunEmptySuite -d target common/setup $target common/teardown
