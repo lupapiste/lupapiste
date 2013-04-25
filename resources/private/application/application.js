@@ -215,7 +215,7 @@
       }));
     };
 
-    self.openVerdict = function() {
+    self.openVerdict = function() {
       window.location.hash = "#!/verdict/" + currentId;
       return false;
     };
