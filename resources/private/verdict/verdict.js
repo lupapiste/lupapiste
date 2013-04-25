@@ -8,7 +8,7 @@
 
     self.application = ko.observable();
 
-    self.statuses = ['yes', 'no', 'condition'];
+    self.statuses = _.range(1,43); // 42 different values in verdict in krysp (verdict.clj)
 
     self.verdictId = ko.observable();
     self.status = ko.observable();
