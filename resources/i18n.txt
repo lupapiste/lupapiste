@@ -7,7 +7,7 @@ auth-admin.title: Pääkäyttäjän osio
 admin.admin-users: Kuntien pääkäyttäjät
 admin.addAdminUser: Lisää pääkäyttäjä
 admin.editAdminUser: Muokkaa pääkäyttäjää
-admin.selectAdminMunicipality: Valitse pääkäyttäjän sijaintikunta:
+admin.selectAdminMunicipality: Pääkäyttäjän sijaintikunta:
 
 userinfo.statement-type: Lausunnon tyyppi
 error.not-authority: Käyttäjä ei ole viranomainen
