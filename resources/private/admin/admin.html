@@ -135,17 +135,16 @@
       </div>
       <div class="dialog-content">
         <div data-bind="with: $root.editUser">
-          <h3 data-bind="ltext: 'admin.selectAdminMunicipality'">Valitse pääkäyttäjän sijaintikunta:</h3>
-          <select
+          <label class="form-label" for="user-edit-municipality" data-bind="ltext: 'admin.selectAdminMunicipality'"></label><br />
+          <select id="user-edit-municipality"
             data-bind="options: $root.municipalities.municipalities,
                        optionsText: function(m) { return loc('municipality', m.id); },
                        optionsValue: 'id',
                        value: municipality,
                        optionsCaption: loc('choose')"
-            data-test-id="add-admin-municipality-select">
-<!--            class="form-select form-input combobox long">   TODO: Set proper classes here!  -->
+            data-test-id="add-admin-municipality-select"
+           class="form-select form-input combobox long"> 
           </select>
-          <br /><br />
           <label class="form-label" for="user-edit-email" data-bind="ltext: 'userinfo.email'"></label>
           <input class="form-input text long" disabled="disabled" id="user-edit-email" type="text" data-bind="value: email" />
           <label class="form-label" for="user-edit-firstname" data-bind="ltext: 'userinfo.firstName'"></label>
@@ -154,6 +153,7 @@
           <input class="form-input text long" id="user-edit-lastname" type="text" data-bind="value: lastname, valueUpdate: 'afterkeydown'" />
           <label data-bind="ltext: 'auth-admin.active'" class="form-label" for="user-active"></label>
           <input class="form-input text long" id="user-active" type="checkbox" data-bind="checked: enabled, valueUpdate: 'afterkeydown'" />
+          <br /><br />
           <button class="btn btn-primary btn-dialog close" id="test-edit-user-save" data-bind="click: save, enable: municipalityOk() && editFieldsOk(),ltext: 'save'"></button>
         </div>
       </div>
