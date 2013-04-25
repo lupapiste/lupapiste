@@ -3,7 +3,7 @@
 
   var applicationId = null;
 
-  function VerdictModel() {
+  function VerdictEditModel() {
     var self = this;
 
     self.application = ko.observable();
@@ -63,7 +63,7 @@
     };
   }
 
-  var verdictModel = new VerdictModel();
+  var verdictModel = new VerdictEditModel();
   var authorizationModel = authorization.create();
   var attachmentsModel = new AttachmentsModel({type: "verdict"});
 
