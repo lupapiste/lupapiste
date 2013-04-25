@@ -362,19 +362,19 @@
 
 (defcommand "give-verdict"
   {:parameters [:id :verdictId :status :name :given :official]
-   :states     [:submitted]
+   :states     [:submitted #_:verdictGiven]
    :roles      [:authority]}
   [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
   (mongo/update
     :applications
     {:_id id}
     {$set {:modified created
-           :state    :verdictGiven
-           :verdict  {:id verdictId
-                      :name name
-                      :given given
-                      :status status
-                      :official official}}}))
+           :state    :verdictGiven}
+     $push {:verdict  {:id verdictId
+                       :name name
+                       :given given
+                       :status status
+                       :official official}}}))
 
 ;;
 ;; krysp enrichment

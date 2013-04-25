@@ -48,7 +48,7 @@ Open verdict
 
 Verdict is given
   Wait until  Element should be visible  application-verdict-details
-  Wait until  Element text should be  //td[@data-test-id='given-verdict-id']  123567890
+  Wait until  Element text should be  //td[@data-test-id='given-verdict-id-0']  123567890
 
 
 Verdict is not given

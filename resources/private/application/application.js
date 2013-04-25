@@ -205,11 +205,11 @@
   var verdictModel = new function() {
     var self = this;
 
-    self.verdict = ko.observable();
+    self.verdicts = ko.observable();
     self.attachments = ko.observable();
 
     self.refresh = function(application) {
-      self.verdict(application.verdict);
+      self.verdicts(application.verdict);
       self.attachments(_.filter(application.attachments,function(attachment) {
         return _.isEqual(attachment.target, {type: "verdict"});
       }));
@@ -287,7 +287,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    verdict: ko.observable(),
     initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
