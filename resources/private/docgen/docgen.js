@@ -124,7 +124,7 @@ var docgen = (function () {
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass);
 
-      
+
 
       setMaxLen(input, subSchema);
 
@@ -139,23 +139,23 @@ var docgen = (function () {
 
         unit.className = "form-string-unit";
         unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
-        
-        
+
+
         input.onfocus = function () {
-          $(this).parent().siblings('.form-help').fadeIn("slow").css("display","block");;
+          $(this).parent().siblings('.form-help').fadeIn("slow").css("display", "block"); ;
         };
         input.onblur = function () {
-          $(this).parent().siblings('.form-help').fadeOut("slow").css("display","none");
+          $(this).parent().siblings('.form-help').fadeOut("slow").css("display", "none");
         };
         inputAndUnit.appendChild(unit);
         span.appendChild(inputAndUnit);
 
       } else {
         input.onfocus = function () {
-          $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
+          $(this).siblings('.form-help').fadeIn("slow").css("display", "block"); ;
         };
         input.onblur = function () {
-          $(this).siblings('.form-help').fadeOut("slow").css("display","none");
+          $(this).siblings('.form-help').fadeOut("slow").css("display", "none");
         };
 
         span.appendChild(input);
@@ -175,10 +175,10 @@ var docgen = (function () {
       var span = makeEntrySpan(subSchema);
 
       input.onfocus = function () {
-        $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
+        $(this).siblings('.form-help').fadeIn("slow").css("display", "block"); ;
       };
       input.onblur = function () {
-        $(this).siblings('.form-help').fadeOut("slow").css("display","none");
+        $(this).siblings('.form-help').fadeOut("slow").css("display", "none");
       };
 
       input.name = myPath;
@@ -224,10 +224,10 @@ var docgen = (function () {
       var span = makeEntrySpan(subSchema);
 
       select.onfocus = function () {
-        $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
+        $(this).siblings('.form-help').fadeIn("slow").css("display", "block"); ;
       };
       select.onblur = function () {
-        $(this).siblings('.form-help').fadeOut("slow").css("display","none");
+        $(this).siblings('.form-help').fadeOut("slow").css("display", "none");
       };
 
       select.name = myPath;
@@ -568,7 +568,7 @@ var docgen = (function () {
         var event = getEvent(e);
         var target = event.target;
         if (target.parentNode.indicator) {
-          target.removeChild(indicator);
+          $(target.parentNode.indicator).fadeOut(200, function(){target.removeChild(indicator);});
         }
         var indicator = document.createElement("span");
         $(indicator).addClass("form-indicator");
@@ -591,13 +591,16 @@ var docgen = (function () {
           $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
           if (status === "warn") {
             $(indicator).addClass("form-input-warn").text(loc("form.warn"));
+            $(indicator).fadeIn(200);
           } else if (status === "err") {
             $(indicator).addClass("form-input-err").text(loc("form.err"));
+            $(indicator).fadeIn(200);
           } else if (status === "ok") {
             $(indicator).addClass("form-input-saved").text(loc("form.saved"));
+            $(indicator).fadeIn(300);
             setTimeout(function () {
               $(indicator).removeClass("form-input-saved");
-              target.parentNode.removeChild(indicator);
+              $(indicator).fadeOut(200, function(){target.parentNode.removeChild(indicator);})
             }, 2000);
           } else if (status !== "ok") {
             error("Unknown status:", status, "path:", path);
