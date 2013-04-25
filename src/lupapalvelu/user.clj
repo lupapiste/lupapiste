@@ -40,17 +40,19 @@
    :verified   true}
   [{{:keys [stamp] :as data} :data}]
   (if-let [vetuma-data (vetuma/get-user stamp)]
-    (do
-      (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (try
-        (if-let [user (security/create-user (merge data vetuma-data {:email (trim (:email data))}))]
-          (do
-            (future (sadesecurity/send-activation-mail-for user))
-            (vetuma/consume-user stamp)
-            (ok :id (:_id user)))
-          (fail :error.create-user))
-        (catch IllegalArgumentException e
-          (fail (keyword (.getMessage e))))))
+    (let [email (trim (:email data))]
+      (if (.contains email "@")
+        (try
+          (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+          (if-let [user (security/create-user (merge data vetuma-data {:email email}))]
+            (do
+              (future (sadesecurity/send-activation-mail-for user))
+              (vetuma/consume-user stamp)
+              (ok :id (:_id user)))
+            (fail :error.create-user))
+          (catch IllegalArgumentException e
+            (fail (keyword (.getMessage e)))))
+        (fail :error.email)))
     (fail :error.create-user)))
 
 (defcommand "change-passwd"
