@@ -287,8 +287,8 @@
   (:id (first (filter (fn [x] (some #(= municipality %) (:municipalities x))) (mongo/select :organizations)))))
 
 (defn user-is-authority-in-municipality [user municipality]
-  (let [org (resolve-organization-id municipality)])
-  (= (some #(= org %) (:organizations user ))))
+  (let [org (resolve-organization-id municipality)]
+    (some #(= org %) (:organizations user ))))
 
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
