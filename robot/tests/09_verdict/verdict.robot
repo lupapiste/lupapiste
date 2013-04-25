@@ -25,10 +25,10 @@ Sonja logs in and throws in a verdict
   Open tab  verdict
   Open verdict
   Input text  verdict-id  123567890
-  Select From List  verdict-type-select  condition
+  Select From List  verdict-type-select  6
   Input text  verdict-given  01.05.2018
   Input text  verdict-official  01.06.2018
-  Input text  verdict-name  Kaarina Krysp IIII
+  Input text  verdict-name  Kaarina Krysp III
   Click button  verdict-submit
   Verdict is given
   Can't regive verdict
