@@ -53,7 +53,7 @@
                   :html ["error.html"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js" "user.js" "users.js"]
+                   :js ["comment.js" "authorization.js" "municipalities.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]
@@ -104,18 +104,20 @@
                   :js ["authority.js"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :authenticated :mypage :debug]
+   :admins   {:js ["user.js" "users.js"]}
+
+   :authority-admin {:depends [:common :authenticated :admins :mypage :debug]
                      :js ["admin.js"]
                      :html ["index.html" "admin.html"]}
+
+   :admin   {:depends [:common :authenticated :admins :map :mypage :debug]
+             :js ["admin.js"]
+             :html ["index.html" "admin.html"]}
 
    :tree    {:depends [:jquery]
              :js ["tree.js"]
              :html ["tree.html"]
              :css ["tree.css"]}
-
-   :admin   {:depends [:common :authenticated :map :mypage :debug]
-             :js ["admin.js"]
-             :html ["index.html" "admin.html"]}
 
    :iframe  {:depends [:common]
              :css ["iframe.css"]}
