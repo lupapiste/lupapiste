@@ -2,6 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [lupapalvelu.i18n :only [*lang*]]
+        [clojure.string :only [trim]]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
@@ -42,7 +43,7 @@
     (do
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (try
-        (if-let [user (security/create-user (merge data vetuma-data))]
+        (if-let [user (security/create-user (merge data vetuma-data {:email (trim (:email data))}))]
           (do
             (future (sadesecurity/send-activation-mail-for user))
             (vetuma/consume-user stamp)
@@ -76,7 +77,7 @@
     (let [token (token/make-token :password-reset {:email email})]
       (infof "password reset request: email=%s, token=%s" email token)
       (notifications/send-password-reset-email! email token)
-      (ok)) 
+      (ok))
     (do
       (warnf "password reset request: unknown email: email=%s" email)
       (fail :email-not-found))))
