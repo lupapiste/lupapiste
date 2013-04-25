@@ -43,9 +43,10 @@
                             :41 "ilmoitus merkitty tiedoksi"
                             :42 "ei tiedossa"})
 
-(defn verdict-id [name]
-  (some (fn [[k v]] (when (= v name) (name k))) verdict-map))
+(defn verdict-id [verdict-name]
+  (some (fn [[k v]] (when (= v verdict-name) (name k))) verdict-map))
 
 (defn verdict-name [id]
-  (verdict-map (-> id str keyword)))
+  (let [key (keyword (if (number? id) (str id) id))]
+    (verdict-map key)))
 
