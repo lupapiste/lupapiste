@@ -202,6 +202,26 @@
 
   }();
 
+  var verdictModel = new function() {
+    var self = this;
+
+    self.verdicts = ko.observable();
+    self.attachments = ko.observable();
+
+    self.refresh = function(application) {
+      self.verdicts(application.verdict);
+      self.attachments(_.filter(application.attachments,function(attachment) {
+        return _.isEqual(attachment.target, {type: "verdict"});
+      }));
+    };
+
+    self.openVerdict = function() {
+      window.location.hash = "#!/verdict/" + currentId;
+      return false;
+    };
+
+  }();
+
   var submitApplicationModel = new function() {
     var self = this;
 
@@ -267,7 +287,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    verdict: ko.observable(),
     initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
@@ -499,6 +518,9 @@
       commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
 
+      // Verdict details
+      verdictModel.refresh(app);
+
       // Operations:
 
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
@@ -705,11 +727,12 @@
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
+      verdictModel: verdictModel,
       stampModel: stampModel
     };
 
-    ko.applyBindings(bindings, $("#application")[0]);
-    ko.applyBindings(bindings, $("#inforequest")[0]);
+    $("#application").applyBindings(bindings);
+    $("#inforequest").applyBindings(bindings);
 
     attachmentTemplatesModel.init();
   });

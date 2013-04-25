@@ -7,6 +7,7 @@
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
   (:require [clojure.string :as s]
+            [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -353,6 +354,26 @@
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})))))
+
+;;
+;; Verdicts
+;;
+
+(defcommand "give-verdict"
+  {:parameters [:id :verdictId :status :name :given :official]
+   :states     [:submitted #_:verdictGiven]
+   :roles      [:authority]}
+  [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
+  (mongo/update
+    :applications
+    {:_id id}
+    {$set {:modified created
+           :state    :verdictGiven}
+     $push {:verdict  {:id verdictId
+                       :name name
+                       :given given
+                       :status status
+                       :official official}}}))
 
 ;;
 ;; krysp enrichment
