@@ -53,7 +53,6 @@
 
     self.refresh = function(application) {
       self.attachments(_.filter(application.attachments,function(attachment) {
-        console.log(attachment.target);
         return _.isEqual(attachment.target, attachmentTarget);
       }));
     };

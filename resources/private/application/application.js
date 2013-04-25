@@ -205,6 +205,16 @@
   var verdictModel = new function() {
     var self = this;
 
+    self.verdict = ko.observable();
+    self.attachments = ko.observable();
+
+    self.refresh = function(application) {
+      self.verdict(application.verdict);
+      self.attachments(_.filter(application.attachments,function(attachment) {
+        return _.isEqual(attachment.target, {type: "verdict"});
+      }));
+    };
+
     self.openVerdict = function() {
       window.location.hash = "#!/verdict/" + currentId;
       return false;
@@ -508,6 +518,9 @@
       // Comments:
       commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
+
+      // Verdict details
+      verdictModel.refresh(app);
 
       // Operations:
 
