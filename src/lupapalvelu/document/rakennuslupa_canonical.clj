@@ -30,6 +30,10 @@
   (let [d (from-long timestamp)]
     (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d)))
 
+(defn to-xml-datetime-from-string [date-as-string]
+  (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
+    (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
+
 (defn by-type [documents]
   (group-by #(keyword (get-in % [:schema :info :name])) documents))
 
@@ -307,21 +311,42 @@
                   :rakennustieto (get-rakennus-data toimenpide application laajentaminen-doc)}
      :created (:created laajentaminen-doc)}))
 
+(defn- get-purku-toimenpide [purku-doc application]
+  (let [toimenpide (:data purku-doc)]
+    {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
+                                   {:purkamisenSyy (-> toimenpide :poistumanSyy :value)}
+                                   {:poistumaPvm (to-xml-datetime-from-string (-> toimenpide :poistumanAjankohta :value))})
+                  :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
+     :created (:created purku-doc)}))
+
+(defn get-kaupunkikuvatoimenpide [kaupunkikuvatoimenpide-doc application]
+  (let [toimenpide (:data kaupunkikuvatoimenpide-doc)]
+    {:Toimenpide {:kaupunkikuvaToimenpide (get-toimenpiteen-kuvaus kaupunkikuvatoimenpide-doc)
+                  :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
+                                                 :alkuHetki (to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
+                                                 :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}}}}
+     :created (:created kaupunkikuvatoimenpide-doc)}))
+
 
 (defn- get-operations [documents application]
   (let [toimenpiteet (filter not-empty (concat (map #(get-uusi-toimenpide % application) (:uusiRakennus documents))
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen documents))
-                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))))]
+                                               (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
+                                               (map #(get-purku-toimenpide % application) (:purku documents))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
 (defn- get-lisatiedot [documents]
   (let [lisatiedot (:data (first documents))]
     {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}))
 
-(defn- get-asian-tiedot [documents]
-  (let [asian-tiedot (:data (first documents))]
+(defn- get-asian-tiedot [documents maisematyo_documents]
+  (let [asian-tiedot (:data (first documents))
+        maisematyo_kuvaukset (for [maismatyo_doc maisematyo_documents]
+                               (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maismatyo_doc)) ":" (-> maismatyo_doc :data :kuvaus :value )))]
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
-                   :rakennusvalvontaasianKuvaus (or (-> asian-tiedot :kuvaus :value) empty-tag)}}))
+                   :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
 
 (defn- get-bulding-places [documents application]
   (for [doc (:rakennuspaikka documents)
@@ -339,6 +364,12 @@
                                        :kiinteistotieto {:Kiinteisto {:tilannimi (-> kiinteisto :tilanNimi :value)
                                                                                     :kiinteistotunnus (:propertyId application)
                                                                                     :maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)}}}}}}))
+
+(defn- get-kayttotapaus [documents]
+  (let [maisematyo-docs (:maisematyo documents)]
+    (if (= (count maisematyo-docs) (count documents))
+      "Uusi maisematy\u00f6hakemus"
+      "Uusi hakemus")))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -365,7 +396,7 @@
                         :suunnittelijatieto (get-designers documents)}}
                       :rakennuspaikkatieto (get-bulding-places documents application)
                       :lisatiedot (get-lisatiedot (:lisatiedot documents))
-                      :kayttotapaus "Uusi hakemus"
-                      :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents))}
+                      :kayttotapaus (get-kayttotapaus documents)
+                      :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto ] (get-operations documents application))))
