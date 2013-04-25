@@ -53,6 +53,7 @@
           <thead>
             <tr>
               <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
+              <th></th>
               <th data-bind="ltext: 'attachment.version'">Versio</th>
               <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
               <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
@@ -62,8 +63,9 @@
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
               <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/download-attachment/' + $data.fileId}"></a></td>
+              <td data-bind="size: size"></td>
               <td data-bind="version: version"></td>
-              <td data-bind="dateString: created">31.10.2012</td>
+              <td data-bind="dateTimeString: created">31.10.2012</td>
               <td>
                 <span data-bind="fullName: user"></span>
                 (<span data-bind="ltext: user.role"></span>)

@@ -298,7 +298,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :open :complement-needed]}
+   :states      [:draft :open :complement-needed :submitted]}
   [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (create-attachments application-id attachment-types created)]
     (ok :applicationId application-id :attachmentIds attachment-ids)
