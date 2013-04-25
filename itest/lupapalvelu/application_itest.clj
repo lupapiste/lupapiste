@@ -22,7 +22,7 @@
     app => (contains {:id id
                       :state "draft"
                       :location {:x 444444.0 :y 6666666.0}
-                      :municipality "753"})
+                      :organization "51767595a2890e1b11390753"})
     (count (:comments app)) => 0
     (first (:auth app)) => (contains
                              {:firstName "Pena"
@@ -82,7 +82,7 @@
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
         authority-before-assignation (:authority application)
-        authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+        authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         assigned-app (:application (query sonja :application :id application-id))
@@ -104,7 +104,7 @@
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
         authority-before-assignation (:authority application)
-        authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+        authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         resp (command sonja :assign-application :id application-id :assigneeId nil)
@@ -120,7 +120,6 @@
         resp (query pena :application :id application-id)
         app   (:application resp)]
     (first (:shapes app)) => shape))
-
 
 (fact "Authority is able to create an application to own municipality"
       (let [command-resp    (create-app sonja :municipality sonja-muni)

@@ -283,15 +283,19 @@
    :created created})
 
 ;TODO Could this be implemented as a Mongo query?
-(defn resolve-organization-id [municipalityId]
-  (:id (first (filter (fn [x] (some #(= municipalityId %) (:municipalities x))) (mongo/select :organizations)))))
+(defn resolve-organization-id [municipality]
+  (:id (first (filter (fn [x] (some #(= municipality %) (:municipalities x))) (mongo/select :organizations)))))
+
+(defn user-is-authority-in-municipality [user municipality]
+  (let [org (resolve-organization-id municipality)])
+  (= (some #(= org %) (:organizations user ))))
 
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
+  (if (or (security/applicant? user) (user-is-authority-in-municipality user municipality))
     (let [user-summary  (security/summary user)
           id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
