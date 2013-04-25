@@ -330,12 +330,12 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text target]} :data :as command}]
+  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target]} :data :as command}]
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
-  (let [file-id (mongo/create-id)
+  (if (> size 0)
+    (let [file-id (mongo/create-id)
         sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
-    (if (mime/allowed-file? sanitazed-filename)
-      (if-let [application (mongo/by-id :applications id)]
+      (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
@@ -352,8 +352,8 @@
                                          :fileId (:fileId attachment-version)}})))
               (fail :error.unknown)))
           (fail :error.illegal-attachment-type))
-        (fail :error.no-such-application))
-      (fail :error.illegal-file-type))))
+      (fail :error.illegal-file-type)))
+    (fail :error.select-file)))
 
 ;;
 ;; Download
