@@ -24,7 +24,7 @@ Sonja logs in and throws in a verdict
   Open application  Olutteltta  753-416-25-30
   Open tab  verdict
   Open verdict
-  Unselect Frame
+  Sleep  1
   Input text  verdict-id  123567890
   Select From List  verdict-type-select  6
   Input text  verdict-given  01.05.2018
