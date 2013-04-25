@@ -239,7 +239,7 @@
               <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
             </div>
             <button
-                data-bind="click: attachment.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
+                data-bind="click: application.newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment')"
                 data-window-id="upload-dialog"
                 class="btn btn-primary modal"
                 data-test-id="add-attachment">
@@ -266,7 +266,7 @@
 
         <div id="application-statement-tab" class="tab-content" data-bind="with: $root.application.data">
           <div data-bind="ifnot: $data.statements && statements().length>0">
-            <p data-bind="ltext: 'application.statement.missing'"></p>
+            <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
           </div>
           <div data-bind="if: $data.statements && statements().length>0">
             <table class="table table-striped tablesorter">
@@ -280,8 +280,8 @@
                 </tr>
               </thead>
               <tbody data-bind="foreach: $data.statements()">
-                <tr class="link-row">
-                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement"></a></td>
+                <tr class="statement-row">
+                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement, attr: {'data-test-id' : 'open-statement-' + $index()}"></a></td>
                   <td data-bind="text: person.name"></td>
                   <td data-bind="dateString: requested"></td>
                   <td data-bind="dateString: given"></td>
@@ -293,47 +293,14 @@
           <button
               data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
               class="btn btn-primary modal"
-              data-test-id="add-attachment">
+              data-test-id="add-statement">
           </button>
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
-          <div>
-            <table class="table table-striped conversation" data-test-id="application-comments-table">
-              <tbody data-bind="foreach: comments()">
-                <tr class="comment">
-                  <td class="comment-party commenttd">
-                    <span class="date" data-bind="dateTimeString: created"></span>
-                    <br />
-                    <span class="author" data-bind="fullName: user">
-                    </span>
-                    <br />
-                    <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-                  </td>
-                  <td class="commenttd" data-bind="text: text"></td>
-                </tr>
-              </tbody>
-            </table>
-            <form>
-              <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
-              <textarea
-                data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-                data-test-id="application-new-comment-text"
-                class="form-input textarea"
-                rows="3"
-                maxlength="4000">
-              </textarea>
-              <button
-                data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
-                data-test-id="application-new-comment-btn"
-                type="submit"
-                class="btn btn-primary"></button>
-            </form>
-          </div>
-          <div class="process-nav">
-          </div>
-
+          <div data-bind="template: {name: 'comment-template'}"></div>
+          <div class="process-nav"></div>
         </div>
 
       </div>
@@ -369,13 +336,13 @@
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
           <div data-bind="foreach: data()">
-            <input class="form-input" type="checkbox" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown', attr: {'id': id}" />
+            <input class="form-input" type="checkbox" data-test-id="check-statement-person" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown', attr: {'id': id, 'data-test-id' : 'check-statement-person-' + $index()}" />
             <label data-bind="text: text()+' '+name() + ' (' + email() + ')', attr: {'for': id}" class="form-label"></label><br/>
           </div>
           <button
               data-bind="click: send, ltext: 'application.statement.send', disable: disabled"
               class="btn btn-primary modal"
-              data-test-id="add-attachment">
+              data-test-id="add-statement-person">
           </button>
         </div>
       </div>
@@ -444,7 +411,7 @@
                     <td data-bind="text: filename"></td>
                     <td data-bind="size: size"></td>
                     <td data-bind="text: status"></td>
-                  </tr>              
+                  </tr>
                 </tbody>
               </table>
               <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
@@ -460,7 +427,7 @@
             <p class="dialog-close close">X</p>
           </div>
           <div class="dialog-content">
-            <div> 
+            <div>
               <select
                 data-bind="options: partyDocumentNames(),
                            optionsText: function(item) { return loc('schemas.'  + item); },

@@ -12,7 +12,7 @@
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)
                 :state {$ne "canceled"}}
-    :authority {:municipality (:municipality user)
+    :authority {$or [{:municipality (:municipality user)} {:auth.id (:id user)}]
                 $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
     :admin     {:state {$ne "canceled"}}
     (do
@@ -82,3 +82,11 @@
    :osoite {:katu                 {:value street}
             :postinumero          {:value zip}
             :postitoimipaikannimi {:value city}}})
+
+;;
+;; Software version metadata
+;;
+
+(defn set-software-version [m] 
+  (assoc m :_software_version "1.0.5"))
+

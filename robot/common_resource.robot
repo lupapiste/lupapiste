@@ -10,6 +10,7 @@ ${SERVER}                       http://localhost:8000
 ${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
+${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
@@ -288,12 +289,12 @@ Prepare new request
   Select From List by test id  create-municipality-select  ${municipality}
   Click enabled by test id  create-continue
   # Going too fast causes animation to stop
-  Set Selenium Speed  ${SLOW_SPEED}
+  Set Selenium Speed  ${OP_TREE_SPEED}
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
-  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set Selenium Speed  ${DEFAULT_SPEED}
+  Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
@@ -351,7 +352,18 @@ Add comment
   Open tab  conversation
   Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
-  Wait until  Element should be visible  xpath=//table[@data-test-id='application-comments-table']//td[text()='${message}']
+  Wait until  Element should be visible  xpath=//table[@data-test-id='comments-table']//span[text()='${message}']
+
+Input comment
+  [Arguments]  ${section}  ${message}
+  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
+  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
+
+Comment count is
+  [Arguments]  ${section}  ${amount}
+  Wait until  Xpath Should Match X Times  //section[@id='${section}']//td[contains(@class,'comment-text')]  ${amount}
 
 #
 # Quick, jettison the db...
