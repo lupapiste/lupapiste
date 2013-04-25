@@ -18,7 +18,8 @@ Mikko creates new application from inforequest
   Click by test id  inforequest-convert-to-application
   Wait until  Element should be visible  application
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  753-416-25-30
-
+  Wait until  Element should be visible  xpath=//*[contains(text(),'Hankkeen kuvaus')]
+  
 Proper attachment templates are present
   Open tab  attachments
   Wait until  Element should be visible  xpath=//tr[@class='attachment-group-header']

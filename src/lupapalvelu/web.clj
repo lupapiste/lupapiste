@@ -293,7 +293,7 @@
 (defpage [:post "/api/upload"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
   (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
-  (let [target (if (every? s/blank? [targetId targetType]) nil {:type targetType :id targetId})
+  (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
@@ -306,7 +306,7 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.2.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")

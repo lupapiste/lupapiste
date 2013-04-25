@@ -365,6 +365,12 @@
                                                                                     :kiinteistotunnus (:propertyId application)
                                                                                     :maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)}}}}}}))
 
+(defn- get-kayttotapaus [documents]
+  (let [maisematyo-docs (:maisematyo documents)]
+    (if (= (count maisematyo-docs) (count documents))
+      "Uusi maisematy\u00f6hakemus"
+      "Uusi hakemus")))
+
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application]
@@ -390,7 +396,7 @@
                         :suunnittelijatieto (get-designers documents)}}
                       :rakennuspaikkatieto (get-bulding-places documents application)
                       :lisatiedot (get-lisatiedot (:lisatiedot documents))
-                      :kayttotapaus "Uusi hakemus"
+                      :kayttotapaus (get-kayttotapaus documents)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto ] (get-operations documents application))))
