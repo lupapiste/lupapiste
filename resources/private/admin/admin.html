@@ -9,7 +9,7 @@
       <h1 id="admin-header" data-bind="ltext: 'auth-admin.title'"></h1>
 
       <section>
-        <h2 data-bind="ltext: 'auth-admin.admin-users'"></h2>
+        <h2 data-bind="ltext: 'admin.admin-users'"></h2>
         <table class="table table-striped tablesorter" id="test-authority-admin-users-table">
           <thead>
             <tr>
@@ -33,7 +33,7 @@
             </tr>
           </tbody>
         </table>
-        <a href="#" data-bind="click: $root.users.openCreateAdminModal, ltext: 'auth-admin.addAdminUser'" class="modal btn btn-primary btn-narrow" id="test-create-admin-user"></a>
+        <a href="#" data-bind="click: $root.users.openCreateAdminModal, ltext: 'admin.addAdminUser'" class="modal btn btn-primary btn-narrow" id="test-create-admin-user"></a>
       </section>
       
       <h3>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h3>
@@ -95,7 +95,85 @@
       </table>
     </div>
 
-    <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserDialogId: 'dialog-add-admin-user', addUserTitle: 'auth-admin.addAdminUser', modifyUserDialogId: 'dialog-modify-admin-user', modifyUserTitle: 'auth-admin.editAdminUser', resetPasswordDialogId: 'dialog-reset-admin-password'}}"></div>
+    <div id="dialog-add-user" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'admin.addAdminUser'"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+
+      <div class="dialog-content">
+        <div data-bind="with: $root.editUser">
+          <label class="form-label" for="user-municipality" data-bind="ltext: 'admin.selectAdminMunicipality'"></label><br />
+          <select id="user-municipality"
+            data-bind="options: $root.municipalities.municipalities,
+                       optionsText: function(m) { return loc('municipality', m.id); },
+                       optionsValue: 'id',
+                       value: municipality,
+                       optionsCaption: loc('choose')"
+            data-test-id="add-admin-municipality-select">
+<!--            class="form-select form-input combobox long"> -->
+          </select>
+          <br />
+          <label class="form-label" for="user-email" data-bind="ltext: 'userinfo.email'"></label>
+          <input class="form-input text long" id="user-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
+          <label class="form-label" for="user-firstname" data-bind="ltext: 'userinfo.firstName'"></label>
+          <input class="form-input text long" id="user-firstname" type="text" data-bind="value: firstname, valueUpdate: 'afterkeydown'" />
+          <label class="form-label" for="user-lastname" data-bind="ltext: 'userinfo.lastName'"></label>
+          <input class="form-input text long" id="user-lastname" type="text" data-bind="value: lastname, valueUpdate: 'afterkeydown'" />
+          <label class="form-label" for="user-password" data-bind="ltext: 'userinfo.password'"></label>
+          <input class="form-input text long" id="user-password" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" />
+          <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: password() && password().length > 0"></span>
+          <button id="test-create-user-save" class="btn btn-primary btn-dialog close" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="dialog-modify-user" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'admin.editAdminUser'"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+        <div data-bind="with: $root.editUser">
+          <h3 data-bind="ltext: 'admin.selectAdminMunicipality'">Valitse pääkäyttäjän sijaintikunta:</h3>
+          <select
+            data-bind="options: $root.municipalities.municipalities,
+                       optionsText: function(m) { return loc('municipality', m.id); },
+                       optionsValue: 'id',
+                       value: municipality,
+                       optionsCaption: loc('choose')"
+            data-test-id="add-admin-municipality-select">
+<!--            class="form-select form-input combobox long">   TODO: Set proper classes here!  -->
+          </select>
+          <br /><br />
+          <label class="form-label" for="user-edit-email" data-bind="ltext: 'userinfo.email'"></label>
+          <input class="form-input text long" disabled="disabled" id="user-edit-email" type="text" data-bind="value: email" />
+          <label class="form-label" for="user-edit-firstname" data-bind="ltext: 'userinfo.firstName'"></label>
+          <input class="form-input text long" id="user-edit-firstname" type="text" data-bind="value: firstname, valueUpdate: 'afterkeydown'" />
+          <label class="form-label" for="user-edit-lastname" data-bind="ltext: 'userinfo.lastName'"></label>
+          <input class="form-input text long" id="user-edit-lastname" type="text" data-bind="value: lastname, valueUpdate: 'afterkeydown'" />
+          <label  data-bind="ltext: 'auth-admin.active'"class="form-label" for="user-active"></label>
+          <input class="form-input text long" id="user-active" type="checkbox" data-bind="checked: enabled, valueUpdate: 'afterkeydown'" />
+          <button class="btn btn-primary btn-dialog close" id="test-edit-user-save" data-bind="click: save, enable: municipalityOk() && editFieldsOk(),ltext: 'save'"></button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="dialog-reset-password" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'userinfo.changePassword'"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+        <div data-bind="with: $root.editUser">
+          <label class="form-label" for="user-reset-email" data-bind="ltext: 'userinfo.email'"></label>
+          <input class="form-input text long" disabled="disabled" id="user-reset-email" type="text" data-bind="value: email" />
+          <label class="form-label" for="user-password" data-bind="ltext: 'userinfo.newPassword'"></label>
+          <input class="form-input text long" id="change-user-password" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" />
+          <button class="btn btn-primary btn-dialog close" data-bind="click: save, enable: editFieldsOk(), ltext: 'save'" id="test-change-password-save"></button>
+        </div>
+      </div>
+    </div>
 
   </section>
 </body>

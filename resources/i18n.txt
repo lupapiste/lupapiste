@@ -4,9 +4,10 @@ auth-admin.statement-person.add: Lisää henkilö
 auth-admin.create-statement-person: Lisää lausunnon antaja
 auth-admin.update-statement-person: Päivitä lausunnon antajaa
 auth-admin.title: Pääkäyttäjän osio
-auth-admin.admin-users: Kuntien pääkäyttäjät
-auth-admin.addAdminUser: Lisää pääkäyttäjä
-auth-admin.editAdminUser: Muokkaa pääkäyttäjää
+admin.admin-users: Kuntien pääkäyttäjät
+admin.addAdminUser: Lisää pääkäyttäjä
+admin.editAdminUser: Muokkaa pääkäyttäjää
+admin.selectAdminMunicipality: Valitse pääkäyttäjän sijaintikunta:
 
 userinfo.statement-type: Lausunnon tyyppi
 error.not-authority: Käyttäjä ei ole viranomainen
