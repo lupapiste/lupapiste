@@ -83,121 +83,118 @@
           :hallintaperuste {:value "oma"}
           :kaavanaste {:value "yleis"}}})
 
+(def common-rakennus {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
+                                     :henkilo henkilo
+                                     :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
+          :kaytto {:rakentajaTyyppi {:value "muu"}
+                   :kayttotarkoitus {:value "011 yhden asunnon talot"}}
+          :mitat {:tilavuus {:value "1000"}
+                  :kokonaisala {:value "1000"}
+                  :kellarinpinta-ala {:value "100"}
+                  :kerrosluku {:value "2"}
+                  :kerrosala {:value "180"}}
+          :rakenne {:rakentamistapa {:value "elementti"}
+                    :kantavaRakennusaine {:value "puu"}
+                    :muuRakennusaine {:value ""}
+                    :julkisivu {:value "puu"}}
+          :lammitys {:lammitystapa {:value "vesikeskus"}
+                     :lammonlahde {:value "muu"}
+                     :muu-lammonlahde {:value "polttopuillahan tuo"}}
+          :varusteet {:hissiKytkin {:value true},
+                      :kaasuKytkin {:value true},
+                      :koneellinenilmastointiKytkin {:value true},
+                      :sahkoKytkin {:value true},
+                      :saunoja {:value "1"},
+                      :vaestonsuoja {:value "1"},
+                      :vesijohtoKytkin {:value true},
+                      :viemariKytkin {:value true}
+                      :lamminvesiKytkin {:value true}
+                      :aurinkopaneeliKytkin {:value true}}
+          :verkostoliittymat {:kaapeliKytkin {:value true},
+                              :maakaasuKytkin {:value true},
+                              :sahkoKytkin {:value true},
+                              :vesijohtoKytkin {:value true},
+                              :viemariKytkin {:value true}},
+          :luokitus {:paloluokka {:value "P1"}
+                     :energialuokka {:value "C"}
+                     :energiatehokkuusluku {:value "124"}
+                     :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
+          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "a"} :huoneistonumero {:value "1"} :jakokirjain {:value "A"}}
+                           :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
+                                              :huoneistoala {:value "56"}
+                                              :huoneluku {:value "2H+K"}}
+                           :keittionTyyppi {:value "keittio"}
+                           :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
+                       :1 {:huoneistoTunnus {},
+                           :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
+                                              :huoneistoala {:value "02"}
+                                              :huoneluku {:value "Huoneiston tiedot liikehuoneistolle"}}
+                           :keittionTyyppi {:value "keittokomero"},
+                           :varusteet {:ammeTaiSuihkuKytkin {:value true}, :saunaKytkin {:value true}, :lamminvesiKytkin {:value true}}}}})
+
 (def uusi-rakennus
   {:id "uusi-rakennus"
    :created 2
    :schema {:info {:name "uusiRakennus"
                    :op {:name "asuinrakennus"}}}
-   :data {
-          :rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
-                                     :henkilo henkilo
-                                     :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
-          :kaytto {:rakentajaTyyppi {:value "muu"}
-                   :kayttotarkoitus {:value "011 yhden asunnon talot"}}
-          :mitat {:tilavuus {:value "1000"}
-                  :kokonaisala {:value "1000"}
-                  :kellarinpinta-ala {:value "100"}
-                  :kerrosluku {:value "2"}
-                  :kerrosala {:value "180"}}
-          :rakenne {:rakentamistapa {:value "elementti"}
-                    :kantavaRakennusaine {:value "puu"}
-                    :muuRakennusaine {:value ""}
-                    :julkisivu {:value "puu"}}
-          :lammitys {:lammitystapa {:value "vesikeskus"}
-                     :lammonlahde {:value "muu"}
-                     :muu-lammonlahde {:value "polttopuillahan tuo"}}
-          :varusteet {:hissiKytkin {:value true},
-                      :kaasuKytkin {:value true},
-                      :koneellinenilmastointiKytkin {:value true},
-                      :sahkoKytkin {:value true},
-                      :saunoja {:value "1"},
-                      :vaestonsuoja {:value "1"},
-                      :vesijohtoKytkin {:value true},
-                      :viemariKytkin {:value true}
-                      :lamminvesiKytkin {:value true}
-                      :aurinkopaneeliKytkin {:value true}}
-          :verkostoliittymat {:kaapeliKytkin {:value true},
-                              :maakaasuKytkin {:value true},
-                              :sahkoKytkin {:value true},
-                              :vesijohtoKytkin {:value true},
-                              :viemariKytkin {:value true}},
-          :luokitus {:paloluokka {:value "P1"}
-                     :energialuokka {:value "C"}
-                     :energiatehokkuusluku {:value "124"}
-                     :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
-          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "a"} :huoneistonumero {:value "1"} :jakokirjain {:value "A"}}
-                           :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
-                                              :huoneistoala {:value "56"}
-                                              :huoneluku {:value "2H+K"}}
-                           :keittionTyyppi {:value "keittio"}
-                           :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
-                       :1 {:huoneistoTunnus {},
-                           :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
-                                              :huoneistoala {:value "02"}
-                                              :huoneluku {:value "Huoneiston tiedot liikehuoneistolle"}}
-                           :keittionTyyppi {:value "keittokomero"},
-                           :varusteet {:ammeTaiSuihkuKytkin {:value true}, :saunaKytkin {:value true}, :lamminvesiKytkin {:value true}}}}}})
+   :data common-rakennus})
 
-(def muu-laajentaminen;
-  {:id "uusi-rakennus"
+(def rakennuksen-muuttaminen
+  {:id "muuutaminen"
    :created 1
    :schema {:info {:name "rakennuksen-muuttaminen"
                                        :op {:name "muu-laajentaminen"}}}
-   :data {
-          :perusparannuskytkin {:value true}
-          :muutostyolaji {:value "muut muutosty\u00f6t"}
-          :rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
-                                     :henkilo henkilo
-                                     :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
-          :kaytto {:rakentajaTyyppi {:value "muu"}
-                   :kayttotarkoitus {:value "011 yhden asunnon talot"}}
-          :mitat {:tilavuus {:value "1000"}
-                  :kokonaisala {:value "1000"}
-                  :kellarinpinta-ala {:value "100"}
-                  :kerrosluku {:value "2"}
-                  :kerrosala {:value "180"}}
-          :rakenne {:rakentamistapa {:value "elementti"}
-                    :kantavaRakennusaine {:value "puu"}
-                    :muuRakennusaine {:value ""}
-                    :julkisivu {:value "puu"}}
-          :lammitys {:lammitystapa {:value "vesikeskus"}
-                     :lammonlahde {:value "muu"}
-                     :muu-lammonlahde {:value "polttopuillahan tuo"}}
-          :varusteet {:hissiKytkin {:value true},
-                      :kaasuKytkin {:value true},
-                      :koneellinenilmastointiKytkin {:value true},
-                      :sahkoKytkin {:value true},
-                      :saunoja {:value "1"},
-                      :vaestonsuoja {:value "1"},
-                      :vesijohtoKytkin {:value true},
-                      :viemariKytkin {:value true}
-                      :lamminvesiKytkin {:value true}
-                      :aurinkopaneeliKytkin {:value true}}
-          :verkostoliittymat {:kaapeliKytkin {:value true},
-                              :maakaasuKytkin {:value true},
-                              :sahkoKytkin {:value true},
-                              :vesijohtoKytkin {:value true},
-                              :viemariKytkin {:value true}},
-          :luokitus {:paloluokka {:value "P1"}
-                     :energialuokka {:value "C"}
-                     :energiatehokkuusluku {:value "124"}
-                     :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
-          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "a"} :huoneistonumero {:value "1"} :jakokirjain {:value "A"}}
-                           :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
-                                              :huoneistoala {:value "56"}
-                                              :huoneluku {:value "2H+K"}}
-                           :keittionTyyppi {:value "keittio"}
-                           :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
-                       :1 {:huoneistoTunnus {},
-                           :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
-                                              :huoneistoala {:value "02"}
-                                              :huoneluku {:value "Huoneiston tiedot liikehuoneistolle"}}
-                           :keittionTyyppi {:value "keittokomero"},
-                           :varusteet {:ammeTaiSuihkuKytkin {:value true}, :saunaKytkin {:value true}, :lamminvesiKytkin {:value true}}}}}})
+   :data (conj {:rakennusnro {:value "001"}
+                :perusparannuskytkin {:value true}
+                :muutostyolaji {:value "muut muutosty\u00f6t"}
+                } common-rakennus)})
+
+(def laajentaminen
+  {:id "laajennus"
+   :created 3
+   :schema {:info {:name "rakennuksen-laajentaminen"
+                                       :op {:name "laajentaminen"}}}
+   :data (conj {:rakennusnro {:value "001"}
+                :laajennuksen-tiedot {:perusparannuskytkin {:value true}
+                                      :mitat {:tilavuus {:value "1500"}
+                                              :kerrosala {:value "180"}
+                                              :kokonaisala {:value "150"}
+                                              :huoneistoala {:0 {:pintaAla {:value "150"}
+                                                                 :kayttotarkoitusKoodi {:value "asuntotilaa(ei vapaa-ajan asunnoista)"}}
+                                                             :1 {:pintaAla {:value "10"}
+                                                                 :kayttotarkoitusKoodi {:value "varastotilaa"}}}}
+
+                                      }} common-rakennus)})
+
+
+(def purku {:id "purku"
+            :created 4
+            :schema {:info {:name "purku"
+                            :op {:name "purkaminen"}}}
+            :data (conj {:rakennusnro {:value "001"}
+                         :poistumanAjankohta { :value "17.04.2013" },
+                         :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
+
+(def aidan-rakentaminen { :data { :kuvaus { :value "Aidan rakentaminen rajalle"}}
+                         :id "aidan-rakentaminen"
+                         :created 5
+                         :schema {:info { :removable true
+                                         :op { :id  "5177ac76da060e8cd8348e07"
+                                              :name "aita"}
+                                         :name "kaupunkikuvatoimenpide"}}})
+
+(def puun-kaataminen {:created 6
+                      :data { :kuvaus {:value "Puun kaataminen" }}
+                      :id "puun kaataminen"
+                      :schema { :info {:removable true
+                                       :op { :id "5177ad63da060e8cd8348e32"
+                                               :name "puun-kaataminen"
+                                               :created  1366797667137}
+                                       :name "maisematyo" }}})
 
 (def hankkeen-kuvaus {:id "Hankeen kuvaus" :schema {:info {:name "hankkeen-kuvaus" :order 1}}
-                                                    :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
-                                                           :poikkeamat {:value "Ei poikkeamisia"}}})
+                      :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
+                             :poikkeamat {:value "Ei poikkeamisia"}}})
 
 (def lisatieto {:id "lisatiedot" :schema {:info {:name "lisatiedot"}}
                 :data {:suoramarkkinointikielto {:value false}}})
@@ -215,8 +212,12 @@
    maksaja1
    maksaja2
    rakennuspaikka
-   muu-laajentaminen
+   rakennuksen-muuttaminen
    uusi-rakennus
+   laajentaminen
+   aidan-rakentaminen
+   puun-kaataminen
+   purku
    lisatieto
    hankkeen-kuvaus])
 
@@ -395,7 +396,7 @@
 
 (facts "Toimenpiteet"
   (let [documents (by-type (:documents application))
-        actions (get-actions documents)]
+        actions (get-actions documents application)]
     ;(clojure.pprint/pprint actions)
     (fact "actions" (seq actions) => truthy)
     ))
@@ -437,14 +438,14 @@
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "turve"}
                                            :muu-lammonlahde {:value nil}} }
-                               {:id "123" :created nil} )]
+                               {:id "123" :created nil} application)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
 (facts "When muu-lammonlahde is specified, it is used"
   (let [rakennus (get-rakennus {:lammitys {:lammitystapa {:value nil}
                                            :lammonlahde  {:value "muu"}
                                            :muu-lammonlahde {:value "fuusioenergialla"}} }
-                               {:id "123" :created nil} )]
+                               {:id "123" :created nil} application)]
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (facts "Canonical model is correct"
@@ -468,6 +469,9 @@
         toimenpiteet(:toimenpidetieto rakennusvalvontaasia)
         toimenpide (:Toimenpide (nth toimenpiteet 1))
         muu-muutostyo (:Toimenpide (nth toimenpiteet 0))
+        laajennus-t (:Toimenpide (nth toimenpiteet 2))
+        purku-t (:Toimenpide (nth toimenpiteet 3))
+        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 4))
         rakennustieto (:rakennustieto toimenpide)
         rakennus (:Rakennus rakennustieto)
         rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus)))
@@ -485,7 +489,6 @@
         MuuTunnus (:MuuTunnus muuTunnustieto)
         ]
     (fact "canonical" canonical => truthy)
-    ;(clojure.pprint/pprint canonical)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
     (fact "rakennusvalvonta" rakennusvalvonta => truthy)
     (fact "rakennusvalvontaasiatieto" rakennusvalvontaasiatieto  => truthy)
@@ -509,7 +512,7 @@
     (fact "kokotilakytkin" (:kokotilaKytkin RakennuspaikanKiinteistotieto) => truthy)
     (fact "hallintaperuste" (:hallintaperuste RakennuspaikanKiinteistotieto) => "oma")
 
-    (fact "Toimenpidetieto"  (count toimenpiteet) => 2)
+    (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
     (fact "Rakennus" rakennus => truthy)
     (fact "rakentajaTyyppi" (:rakentajaTyyppi rakennus) => "muu")
     (fact "rakennuksentiedot" rakennuksentiedot => truthy)
@@ -519,7 +522,7 @@
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => false)
     (fact "asianTiedot" asianTiedot => truthy)
     (fact "Asiantiedot" Asiantiedot => truthy)
-    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.")
+    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
     (fact kayttotapaus => "Uusi hakemus")
 
     (fact "Luvan tunnistetiedot" luvanTunnisteTiedot => truthy)
@@ -532,4 +535,15 @@
     (fact "Toimenpiteen kuvaus" (-> muu-muutostyo :muuMuutosTyo :kuvaus) => "Muu rakennuksen muutosty\u00f6")
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
+    (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
+    (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => "001")
+    (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => "001")
+    (fact "Laajennuksen rakennuksen kiintun" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun) => "21111111111111")
+    (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
+    (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
+    (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
+    (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
+    (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
+
+    ;(clojure.pprint/pprint kaupunkikuva-t)
     ))

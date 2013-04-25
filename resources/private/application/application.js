@@ -680,9 +680,9 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(function(e) {
-    if ((pageutil.getPage() === "application" || pageutil.getPage() === "inforequest") && (!currentId || (currentId === e.applicationDetails.application.id))) {
-      showApplication(e.applicationDetails);
+  repository.loaded(["application","inforequest"], function(application, applicationDetails) {
+    if (!currentId || (currentId === application.id)) {
+      showApplication(applicationDetails);
     }
   });
 

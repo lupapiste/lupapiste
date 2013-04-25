@@ -81,9 +81,8 @@ var statement = (function() {
   var commentsModel = new comments.create();
   var attachmentsModel = new AttachmentsModel();
 
-  repository.loaded(function(event) {
-    var application = event.applicationDetails.application;
-    if (pageutil.getPage() === "statement" && applicationId === application.id) {
+  repository.loaded(["statement"], function(application) {
+    if (applicationId === application.id) {
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
       attachmentsModel.refresh(application);

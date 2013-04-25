@@ -299,48 +299,8 @@
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
-          <div>
-            <table class="table table-striped conversation" data-test-id="application-comments-table">
-              <tbody data-bind="foreach: comments()">
-                <tr data-bind="attr: {'class': $parent.isForNewAttachment($data) ? 'comment attachment-comment' : 'comment'}">
-                  <td class="comment-party commenttd">
-                    <span class="date" data-bind="dateTimeString: created"></span>
-                    <br />
-                    <span class="author" data-bind="fullName: user">
-                    </span>
-                    <br />
-                    <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-                  </td>
-                  <td class="comment comment-text">
-                    <span data-bind="if: $parent.isForNewAttachment($data)" class="new-attachment-version-details">
-                      <span data-bind="ltext: 'newAttachmentVersion'"></span>
-                      <span data-bind="version: target.version"></span>:
-                      <a data-bind="text: target.filename, attr: {href: '/api/download-attachment/' + target.fileId()}"></a>
-                    </span>
-                    <span data-bind="text: text"></span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <form>
-              <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
-              <textarea
-                data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-                data-test-id="application-new-comment-text"
-                class="form-input textarea"
-                rows="3"
-                maxlength="4000">
-              </textarea>
-              <button
-                data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
-                data-test-id="application-new-comment-btn"
-                type="submit"
-                class="btn btn-primary"></button>
-            </form>
-          </div>
-          <div class="process-nav">
-          </div>
-
+          <div data-bind="template: {name: 'comment-template'}"></div>
+          <div class="process-nav"></div>
         </div>
 
       </div>

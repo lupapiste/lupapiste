@@ -17,7 +17,7 @@
         <div class="form-entry">
           <label for="attachment-type-select" class="form-label">
            <span data-bind="ltext: 'attachment.changeType'">Vaihda liitteen tyyppi</span>
-           <img src="/img/ajax-loader-12.gif" alt="..."
+           <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"
                  id="attachment-type-select-loader" style="display: none;">
           </label>
           <div><select id="attachment-type-select"></select></div>
@@ -31,7 +31,7 @@
       <div class="file-preview" data-bind="visible: hasPreview()">
         <div class="file-preview-image" data-bind="if: isImage()">
           <a data-bind="attr: {href: '/api/view-attachment/' + latestVersion().fileId}">
-            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
+            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt="" width="66" height="66"/>
           </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
@@ -53,6 +53,7 @@
           <thead>
             <tr>
               <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
+              <th></th>
               <th data-bind="ltext: 'attachment.version'">Versio</th>
               <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
               <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
@@ -62,8 +63,9 @@
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
               <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/download-attachment/' + $data.fileId}"></a></td>
+              <td data-bind="size: size"></td>
               <td data-bind="version: version"></td>
-              <td data-bind="dateString: created">31.10.2012</td>
+              <td data-bind="dateTimeString: created">31.10.2012</td>
               <td>
                 <span data-bind="fullName: user"></span>
                 (<span data-bind="ltext: user.role"></span>)
@@ -82,43 +84,11 @@
         </button>
       </div>
 
-      <div class="attachment-file-conversation" data-bind="with: $root.commentsModel">
+      <div class="attachment-file-conversation">
         <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
-        <table class="table table-striped">
-          <tbody data-bind="foreach: comments()">
-            <tr data-bind="attr: {'class': $parent.isForNewAttachment($data) ? 'comment attachment-comment' : 'comment'}">
-              <td class="commentParty">
-                <span class="date" data-bind="dateTimeString: created"></span><br />
-                <span class="author" data-bind="text: user.firstName()+' '+user.lastName()"></span><br />
-                <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-              </td>
-              <td class="comment-text">
-                <span data-bind="if: $parent.isForNewAttachment($data)" class="new-attachment-version-details">
-                  <span data-bind="ltext: 'newAttachmentVersion'"></span>
-                  <span data-bind="version: target.version"></span>:
-                  <a data-bind="text: target.filename, attr: {href: '/api/download-attachment/' + target.fileId()}"></a>
-                </span>
-                <span data-bind="text: text"></span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <form>
-          <textarea
-            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-            id="attachment.commentText"
-            class="conversation-input"
-            rows="3">
-          </textarea>
-          <button
-              data-bind="disable: disabled, click: submit, ltext: 'attachment.send', visible: $root.authorization.ok('add-comment')"
-              id="attachment.addComment"
-              type="submit"
-              class="btn btn-primary">
-            Lähetä viesti
-          </button>
-        </form>
+        <div data-bind="template: {name: 'comment-template', data: $root.commentsModel}"></div>
       </div>
+
     </div>
 
   </section>
