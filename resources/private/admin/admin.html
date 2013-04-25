@@ -110,10 +110,9 @@
                        optionsValue: 'id',
                        value: municipality,
                        optionsCaption: loc('choose')"
-            data-test-id="add-admin-municipality-select">
-<!--            class="form-select form-input combobox long"> -->
+            data-test-id="add-admin-municipality-select"
+            class="form-select form-input combobox long">
           </select>
-          <br />
           <label class="form-label" for="user-email" data-bind="ltext: 'userinfo.email'"></label>
           <input class="form-input text long" id="user-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
           <label class="form-label" for="user-firstname" data-bind="ltext: 'userinfo.firstName'"></label>
@@ -123,6 +122,7 @@
           <label class="form-label" for="user-password" data-bind="ltext: 'userinfo.password'"></label>
           <input class="form-input text long" id="user-password" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" />
           <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: password() && password().length > 0"></span>
+          <br /><br />
           <button id="test-create-user-save" class="btn btn-primary btn-dialog close" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
         </div>
       </div>
@@ -143,7 +143,7 @@
                        value: municipality,
                        optionsCaption: loc('choose')"
             data-test-id="add-admin-municipality-select"
-           class="form-select form-input combobox long"> 
+            class="form-select form-input combobox long"> 
           </select>
           <label class="form-label" for="user-edit-email" data-bind="ltext: 'userinfo.email'"></label>
           <input class="form-input text long" disabled="disabled" id="user-edit-email" type="text" data-bind="value: email" />
