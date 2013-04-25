@@ -244,7 +244,7 @@
     {} schema-data))
 
 (defn- make-documents [user created existing-documents op]
-  (let [op-info               (operations/operations (:name op))
+  (let [op-info               (operations/operations (keyword (:name op)))
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/schemas schema-name)
                                                  :created created
@@ -353,8 +353,7 @@
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})
-        (ok)))))
+                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})))))
 
 ;;
 ;; Verdicts

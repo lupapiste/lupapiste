@@ -25,6 +25,7 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
+            [lupapalvelu.etag :as etag]
             [sade.security :as sadesecurity]
             [sade.status :as status]
             [sade.strings :as ss]
@@ -157,12 +158,14 @@
                    :admin admin?})
 
 (defn cache-headers [resource-type]
-  (if (= :html resource-type)
+  (if (env/dev-mode?)
     {"Cache-Control" "no-cache"}
-    (if (env/dev-mode?)
-      {"Cache-Control" "no-cache"}
+    (if (= :html resource-type)
+      {"Cache-Control" "no-cache"
+       "ETag"          etag/etag}
       {"Cache-Control" "public, max-age=864000"
-       "Vary"          "Accept-Encoding"})))
+       "Vary"          "Accept-Encoding"
+       "ETag"          etag/etag})))
 
 (def default-lang "fi")
 

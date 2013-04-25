@@ -109,7 +109,7 @@
         value = value.toFixed(1);
       }
 
-      $(element).text(value + " " + unit);
+      $(element).text(value + "\u00a0" + unit);
     }
   };
 
