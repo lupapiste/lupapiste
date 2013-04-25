@@ -170,7 +170,8 @@
           <input class="form-input text long" disabled="disabled" id="user-reset-email" type="text" data-bind="value: email" />
           <label class="form-label" for="user-password" data-bind="ltext: 'userinfo.newPassword'"></label>
           <input class="form-input text long" id="change-user-password" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" />
-          <button class="btn btn-primary btn-dialog close" data-bind="click: save, enable: editFieldsOk(), ltext: 'save'" id="test-change-password-save"></button>
+          <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: password() && password().length > 0"></span>
+          <button class="btn btn-primary btn-dialog close" data-bind="click: save, enable: passwordOk(), ltext: 'save'" id="test-change-password-save"></button>
         </div>
       </div>
     </div>
