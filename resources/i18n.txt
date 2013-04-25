@@ -3,7 +3,7 @@ auth-admin.statement-person.name: Lausunnon antaja
 auth-admin.statement-person.add: Lisää henkilö
 auth-admin.create-statement-person: Lisää lausunnon antaja
 auth-admin.update-statement-person: Päivitä lausunnon antajaa
-auth-admin.title: Pääkäyttäjän osio
+admin.adminpage-title: Pääkäyttäjän osio
 admin.admin-users: Kuntien pääkäyttäjät
 admin.addAdminUser: Lisää pääkäyttäjä
 admin.editAdminUser: Muokkaa pääkäyttäjää
