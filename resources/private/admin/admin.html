@@ -26,8 +26,8 @@
               <td data-bind="text: email"></td>
               <td data-bind="ltext: role()"></td>
               <td>
-                [<a class="edit-user" href="#" data-bind="ltext: 'edit', click: $root.users.openModifyModal, attr: { 'data-test-edit-email': email }" class="modal"></a>]
-                [<a class="change-user-password" href="#" data-bind="ltext: 'userinfo.changePassword', click: $root.users.openPasswordModal, attr: { 'data-test-password-email': email }" class="modal"></a>]
+                [<a class="edit-user" href="#" data-bind="ltext: 'edit', click: $root.users.openAdminModifyModal, attr: { 'data-test-edit-email': email }" class="modal"></a>]
+                [<a class="change-user-password" href="#" data-bind="ltext: 'userinfo.changePassword', click: $root.users.openAdminPasswordModal, attr: { 'data-test-password-email': email }" class="modal"></a>]
               </td>
               <td data-bind="text: enabled() ? loc('auth-admin.user-active') : ''"></td>
             </tr>
