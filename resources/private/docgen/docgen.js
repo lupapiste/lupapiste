@@ -139,23 +139,23 @@ var docgen = (function () {
 
         unit.className = "form-string-unit";
         unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
-        inputAndUnit.appendChild(unit);
         
-        inputAndUnit.input.onfocus = function () {
-          $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
-        };
-        inputAndUnit.input.onblur = function () {
-          $(this).siblings('.form-help').fadeOut("slow").css("display","none");
-        };
-
-        span.appendChild(inputAndUnit);
-
-      } else {
+        
         input.onfocus = function () {
           $(this).parent().siblings('.form-help').fadeIn("slow").css("display","block");;
         };
         input.onblur = function () {
           $(this).parent().siblings('.form-help').fadeOut("slow").css("display","none");
+        };
+        inputAndUnit.appendChild(unit);
+        span.appendChild(inputAndUnit);
+
+      } else {
+        input.onfocus = function () {
+          $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
+        };
+        input.onblur = function () {
+          $(this).siblings('.form-help').fadeOut("slow").css("display","none");
         };
 
         span.appendChild(input);
@@ -223,10 +223,10 @@ var docgen = (function () {
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema);
 
-      option.onfocus = function () {
+      select.onfocus = function () {
         $(this).siblings('.form-help').fadeIn("slow").css("display","block");;
       };
-      option.onblur = function () {
+      select.onblur = function () {
         $(this).siblings('.form-help').fadeOut("slow").css("display","none");
       };
 
