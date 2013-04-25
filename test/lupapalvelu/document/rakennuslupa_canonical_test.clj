@@ -175,6 +175,23 @@
                          :poistumanAjankohta { :value "17.04.2013" },
                          :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
 
+(def aidan-rakentaminen { :data { :kuvaus { :value "Aidan rakentaminen rajalle"}}
+                         :id "aidan-rakentaminen"
+                         :created 5
+                         :schema {:info { :removable true
+                                         :op { :id  "5177ac76da060e8cd8348e07"
+                                              :name "aita"}
+                                         :name "kaupunkikuvatoimenpide"}}})
+
+(def puun-kaataminen {:created 6
+                      :data { :kuvaus {:value "Puun kaataminen" }}
+                      :id "puun kaataminen"
+                      :schema { :info {:removable true
+                                       :op { :id "5177ad63da060e8cd8348e32"
+                                               :name "puun-kaataminen"
+                                               :created  1366797667137}
+                                       :name "maisematyo" }}})
+
 (def hankkeen-kuvaus {:id "Hankeen kuvaus" :schema {:info {:name "hankkeen-kuvaus" :order 1}}
                       :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
                              :poikkeamat {:value "Ei poikkeamisia"}}})
@@ -198,6 +215,8 @@
    rakennuksen-muuttaminen
    uusi-rakennus
    laajentaminen
+   aidan-rakentaminen
+   puun-kaataminen
    purku
    lisatieto
    hankkeen-kuvaus])
@@ -452,6 +471,7 @@
         muu-muutostyo (:Toimenpide (nth toimenpiteet 0))
         laajennus-t (:Toimenpide (nth toimenpiteet 2))
         purku-t (:Toimenpide (nth toimenpiteet 3))
+        kaupunkikuva-t (:Toimenpide (nth toimenpiteet 4))
         rakennustieto (:rakennustieto toimenpide)
         rakennus (:Rakennus rakennustieto)
         rakennuksen-omistajatieto (:Omistaja(first (:omistajatieto rakennus)))
@@ -492,7 +512,7 @@
     (fact "kokotilakytkin" (:kokotilaKytkin RakennuspaikanKiinteistotieto) => truthy)
     (fact "hallintaperuste" (:hallintaperuste RakennuspaikanKiinteistotieto) => "oma")
 
-    (fact "Toimenpidetieto"  (count toimenpiteet) => 4)
+    (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
     (fact "Rakennus" rakennus => truthy)
     (fact "rakentajaTyyppi" (:rakentajaTyyppi rakennus) => "muu")
     (fact "rakennuksentiedot" rakennuksentiedot => truthy)
@@ -502,7 +522,7 @@
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => false)
     (fact "asianTiedot" asianTiedot => truthy)
     (fact "Asiantiedot" Asiantiedot => truthy)
-    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.")
+    (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
     (fact kayttotapaus => "Uusi hakemus")
 
     (fact "Luvan tunnistetiedot" luvanTunnisteTiedot => truthy)
@@ -522,6 +542,8 @@
     (fact "Laajennuksen pintaalat" (count (-> laajennus-t :laajennus :laajennuksentiedot :huoneistoala )) => 2)
     (fact "Purkamisen kuvaus" (-> purku-t :purkaminen :kuvaus) => "Rakennuksen purkaminen")
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
+    (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
+    (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
 
-    ;(clojure.pprint/pprint canonical)
+    ;(clojure.pprint/pprint kaupunkikuva-t)
     ))

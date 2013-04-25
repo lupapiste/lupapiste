@@ -114,8 +114,7 @@
                               :child [rakennuspaikka]}
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
-                                       :child [{:tag :uusi
-                                                :child [{:tag :kuvaus}]}
+                                       :child [{:tag :uusi :child [{:tag :kuvaus}]}
                                                {:tag :laajennus :child [{:tag :laajennuksentiedot :child[{:tag :tilavuus}
                                                                                                         {:tag :kerrosala}
                                                                                                         {:tag :kokonaisala}
@@ -131,10 +130,14 @@
                                                {:tag :muuMuutosTyo :child [{:tag :muutostyonLaji}
                                                                            {:tag :kuvaus}
                                                                            {:tag :perusparannusKytkin}]}
-                                               {:tag :kaupunkikuvaToimenpide}
+                                               {:tag :kaupunkikuvaToimenpide :child [{:tag :kuvaus}]}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
-                                               {:tag :rakennelmatieto}]}]}
+                                               {:tag :rakennelmatieto :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
+                                                                                                        {:tag :alkuHetki :ns "yht"}
+                                                                                                        sijantitieto
+                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}]}]}
+                                               ]}]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
