@@ -71,7 +71,7 @@ verdict.status.11: annettu lausunto (rlk)
 verdict.status.12: valituks.luovuttu (oik.vaatimus/lupa pysyy puoll.)
 verdict.status.13: muutti myönnetyksi (luvat/vak/rak.v/rasite/mak/ym)
 verdict.status.14: pysytti määräyksen/päätöksen (määr/kats.p/loppuk)
-verdict.status.15: pysytti myönnettynä (luvat/vak/rak.v/rasite/mak/ym
+verdict.status.15: pysytti myönnettynä (luvat/vak/rak.v/rasite/mak/ym)
 verdict.status.16: puollettu
 verdict.status.17: annettu lausunto (ent. selitys)
 verdict.status.18: siirretty maaoikeudelle
