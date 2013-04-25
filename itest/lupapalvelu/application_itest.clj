@@ -72,7 +72,7 @@
         id (:id created-resp)]
     (success created-resp) => true
     (comment-application id pena)
-    (let [query-resp   (query sonja :authorities-in-applications-municipality :id id)]
+    (let [query-resp   (query sonja :authorities-in-applications-organization :id id)]
       (success query-resp) => true
       (count (:authorityInfo query-resp)) => 2)))
 

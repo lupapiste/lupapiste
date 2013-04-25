@@ -78,7 +78,7 @@
    :authenticated true}
   [command]
   (let [id (-> command :data :id)
-        app (mongo/select-one :applications {:_id id} {:municipality 1})
+        app (mongo/select-one :applications {:_id id} {:organization 1})
         authorities (find-authorities-in-applications-organization app)]
     (ok :authorityInfo authorities)))
 
@@ -308,7 +308,6 @@
                                    :operations    [op]
                                    :state         state
                                    :organization  organization
-                                   :municipality  municipality
                                    :location      {:x (->double x) :y (->double y)}
                                    :address       address
                                    :propertyId    propertyId
