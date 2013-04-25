@@ -276,12 +276,46 @@
           </div>
         </div>
 
-        <div id="application-verdict-tab" class="tab-content" data-bind="with: application">
+        <div id="application-verdict-tab" class="tab-content">
           <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
-          <div class="tab-wrapper">
-            <div class="row" data-bind="with: verdict">
-              <span data-bind="text: text" data-test-id="application-verdict"></span>
+          <div class="tab-wrapper" >
+            <div class="row" data-bind="if: $root.verdictModel.verdicts()">
+              <table class="table table-striped tablesorter" id="application-verdict-details">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'verdict.id'"></th>
+                    <th data-bind="ltext: 'verdict.status'"></th>
+                    <th data-bind="ltext: 'verdict.name'"></th>
+                    <th data-bind="ltext: 'verdict.given'"></th>
+                    <th data-bind="ltext: 'verdict.official'"></th>
+                    <th data-bind="ltext: 'verdict.attachments'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: $root.verdictModel.verdicts">
+                  <tr class="statement-row">
+                    <td data-bind="text: id, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></td>
+                    <td data-bind="ltext: 'verdict.status.'+status"></td>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="dateString: given"></td>
+                    <td data-bind="dateString: official"></td>
+                    <td data-bind="foreach: $root.verdictModel.attachments()">
+                      <span data-bind="with: $data.latestVersion">
+                        <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                          <i data-bind="ltext: contentType"></i>
+                          <i data-bind="size: size"></i><br/>
+                        </a>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+            <button
+              data-bind="click: $root.verdictModel.openVerdict, ltext: 'application.verdict.add', visible: $root.authorization.ok('give-verdict')"
+              class="btn btn-primary modal"
+              data-test-id="give-verdict">
+            </button>
+
           </div>
         </div>
 
