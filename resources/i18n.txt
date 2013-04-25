@@ -49,3 +49,56 @@ stamp.verdict: hyväksytty
 attachment.upload.instructions.size: Suurin sallittu tiedostokoko on 100 Mt.
 attachment.upload.instructions.extensions: Sallittuja tiedostomuotoja ovat PDF-, kuva-, Microsoft Office-, OpenOffice- ja zip-tiedostot.
 error.select-file: Valitse tiedosto
+application.verdict.add: Anna päätös
+application.verdict.title: Lausunto
+verdict.id: Kuntalupatunnus
+verdict.id.hint: Taustajärjestelmän tunniste
+verdict.status: Päätös
+verdict.name: Päätöksen antaja
+verdict.given: Annettu
+verdict.official: Lainvoimainen
+verdict.submit: Lähetä
+verdict.attachments: Liiteet
+
+verdict.status.1: myönnetty
+verdict.status.2: hyväksytty
+verdict.status.3: osittain myönnetty
+verdict.status.4: pysytti osittain myönnettynä (luvat)
+verdict.status.5: Myönnetty aloitusoikeudella
+verdict.status.6: ehdollinen
+verdict.status.7: ei tutkittu (oik.vaatimus/lupa pysyy puollettuna)
+verdict.status.8: työhön liittyy ehto
+verdict.status.9: tehty hallintopakkopäätös (asetettu velvoite)
+verdict.status.10: pysytti määräyksen
+verdict.status.11: annettu lausunto (rlk)
+verdict.status.12: valituks.luovuttu (oik.vaatimus/lupa pysyy puoll.)
+verdict.status.13: muutti myönnetyksi (luvat/vak/rak.v/rasite/mak/ym)
+verdict.status.14: pysytti määräyksen/päätöksen (määr/kats.p/loppuk)
+verdict.status.15: pysytti myönnettynä (luvat/vak/rak.v/rasite/mak/ym)
+verdict.status.16: puollettu
+verdict.status.17: annettu lausunto (ent. selitys)
+verdict.status.18: siirretty maaoikeudelle
+verdict.status.19: tehty uhkasakkopäätös
+verdict.status.20: suunnitelmat tarkastettu
+verdict.status.21: evätty
+verdict.status.22: ei tutkittu (oik.vaatimus/lupa pysyy evättynä)
+verdict.status.23: tehty hallintopakkopäätös (ei velvoitetta)
+verdict.status.24: määräys peruutettu (määräys/kats.p/loppukats.p.)
+verdict.status.25: valituks.luovuttu (oik.vaatimus/lupa pysyy evätt.)
+verdict.status.26: muutti evätyksi (luvat/vak/rak.v/rasite/mak/ym)
+verdict.status.27: muutti määräystä/päätöstä (määr/kats.p/loppuk)
+verdict.status.28: pysytti evättynä (luvat/vak/rak.v/rasite/mak/ym)
+verdict.status.29: ei puollettu
+verdict.status.30: muutettu toimenpideluvaksi (konverssio)
+verdict.status.31: ei lausuntoa
+verdict.status.32: ei tutkittu
+verdict.status.33: lausunto
+verdict.status.34: lausunto/päätös (muu kuin rlk)
+verdict.status.35: Hallintopakko/uhkasakkoasian käsittely lopetettu.
+verdict.status.36: Ltk palauttanut asian uudelleen valmisteltavaksi.
+verdict.status.37: Peruutettu
+verdict.status.38: asiakirjat palautettu korjauskehotuksin
+verdict.status.39: Ltk poistanut asian esityslistalta.
+verdict.status.40: Ltk:n kokouksessa pöydälle pantu asia.
+verdict.status.41: ilmoitus merkitty tiedoksi
+verdict.status.42: ei tiedossa

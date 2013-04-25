@@ -1,4 +1,4 @@
-var statement = (function() {
+(function() {
   "use strict";
 
   var applicationId = null;
