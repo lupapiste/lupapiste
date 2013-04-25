@@ -54,7 +54,7 @@
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                    :js ["comment.js" "authorization.js" "municipalities.js" "user.js" "users.js"]
-                   :html ["comments.html" "user-modification-dialogs.html"]}
+                   :html ["comments.html"]}
 
    :invites      {:depends [:common]
                   :js ["invites.js"]}
