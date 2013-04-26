@@ -116,9 +116,7 @@
     (let [title (get-email-title application "statement-request")
           msg   (message
                   (template "add-statement-request.html")
-                  (replace-application-links "#link" application "" host)
-                  (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
-                  (enlive/transform [:.text] (enlive/content text)))]
+                  (replace-application-links "#link" application "" host))]
       (send-mail-to-recipients! [email] title msg))))
 
 (defn get-message-for-application-state-change [application host]
