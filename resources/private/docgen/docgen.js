@@ -30,6 +30,24 @@ var docgen = (function () {
 
     self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
 
+    // Context help
+    self.findHelpElement = function(e) {
+      var event = getEvent(e);
+      var input$ = $(event.target);
+      var help$ = input$.siblings('.form-help');
+      if (!help$.length) {
+        help$ = input$.parent().siblings('.form-help');
+      }
+      return help$;
+    };
+
+    self.showHelp = function(e) {
+      self.findHelpElement(e).fadeIn("slow").css("display", "block");
+    };
+    self.hideHelp = function(e) {
+      self.findHelpElement(e).fadeOut("slow").css("display", "none");
+    };
+
     // ID utilities
 
     function pathStrToID(pathStr) {
@@ -96,7 +114,7 @@ var docgen = (function () {
       // Add span for help text
       var help = document.createElement("span");
       help.className = "form-help";
-      help.innerHtml = "ohjeteksti";
+      help.innerHTML = "<span style='color:#fff'>ohjeteksti</span>";
       span.appendChild(help);
 
       return span;
@@ -124,8 +142,6 @@ var docgen = (function () {
       var sizeClass = self.sizeClasses[subSchema.size] || "";
       var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass);
 
-
-
       setMaxLen(input, subSchema);
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
@@ -140,26 +156,16 @@ var docgen = (function () {
         unit.className = "form-string-unit";
         unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
 
+        input.onfocus = self.showHelp;
+        input.onblur = self.hideHelp;
 
-        input.onfocus = function () {
-          $(this).parent().siblings('.form-help').fadeIn("slow").css("display", "block"); ;
-        };
-        input.onblur = function () {
-          $(this).parent().siblings('.form-help').fadeOut("slow").css("display", "none");
-        };
         inputAndUnit.appendChild(unit);
         span.appendChild(inputAndUnit);
 
       } else {
-        input.onfocus = function () {
-          $(this).siblings('.form-help').fadeIn("slow").css("display", "block"); ;
-        };
-        input.onblur = function () {
-          $(this).siblings('.form-help').fadeOut("slow").css("display", "none");
-        };
-
+        input.onfocus = self.showHelp;
+        input.onblur = self.hideHelp;
         span.appendChild(input);
-
       }
 
       return span;
@@ -174,12 +180,8 @@ var docgen = (function () {
       var input = document.createElement("textarea");
       var span = makeEntrySpan(subSchema);
 
-      input.onfocus = function () {
-        $(this).siblings('.form-help').fadeIn("slow").css("display", "block"); ;
-      };
-      input.onblur = function () {
-        $(this).siblings('.form-help').fadeOut("slow").css("display", "none");
-      };
+      input.onfocus = self.showHelp;
+      input.onblur = self.hideHelp;
 
       input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
@@ -223,12 +225,8 @@ var docgen = (function () {
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema);
 
-      select.onfocus = function () {
-        $(this).siblings('.form-help').fadeIn("slow").css("display", "block"); ;
-      };
-      select.onblur = function () {
-        $(this).siblings('.form-help').fadeOut("slow").css("display", "none");
-      };
+      select.onfocus = self.showHelp;
+      select.onblur = self.hideHelp;
 
       select.name = myPath;
       select.className = "form-input combobox";
@@ -600,7 +598,7 @@ var docgen = (function () {
             $(indicator).fadeIn(300);
             setTimeout(function () {
               $(indicator).removeClass("form-input-saved");
-              $(indicator).fadeOut(200, function(){target.parentNode.removeChild(indicator);})
+              $(indicator).fadeOut(200, function(){target.parentNode.removeChild(indicator);});
             }, 2000);
           } else if (status !== "ok") {
             error("Unknown status:", status, "path:", path);
