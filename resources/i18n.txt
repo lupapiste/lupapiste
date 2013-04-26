@@ -1,0 +1,2 @@
+hankkeen-kuvaus.kuvaus.help:Syötä tähän hankkeen kuvaus.
+rakennuspaikka.kiinteisto.maaraalaTunnus.help:Jos kyseessä on määräala, syötä tähän sen tunnus.
