@@ -30,6 +30,7 @@ Sonja logs in and throws in a verdict
   Input text  verdict-given  01.05.2018
   Input text  verdict-official  01.06.2018
   Input text  verdict-name  Kaarina Krysp III
+  Wait Until  Element Should Be Enabled  verdict-submit
   Click button  verdict-submit
   Verdict is given
   Can't regive verdict
