@@ -16,7 +16,7 @@
     (fact "inforequest was created with message"
           (let [resp        (query pena :application :id id)
                 application (:application resp)]
-            (:state application) => "open"
+            (:state application) => "info"
             (:opened application) => truthy
             (count (:comments application)) => 1
             (-> (:comments application) first :text) => "hello"))

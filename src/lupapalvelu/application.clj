@@ -126,7 +126,7 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open :submitted]}
+   :states     [:draft :info :open :submitted]}
   [{{:keys [host]} :web :as command}]
   [command]
   (with-application command
@@ -178,7 +178,7 @@
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]
+   :states     [:draft :info :open :complement-needed]
    :validators [(fn [command application]
                   (when-not (domain/is-owner-or-writer? application (-> command :user :id))
                     (fail :error.unauthorized)))]}
@@ -216,7 +216,7 @@
 (defcommand "mark-inforequest-answered"
   {:parameters [:id]
    :roles      [:authority]
-   :states     [:draft :open]}
+   :states     [:info]}
   [command]
   (with-application command
     (fn [application]
@@ -292,11 +292,11 @@
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
           info-request? (if infoRequest true false)
-          state         (if (or info-request? (security/authority? user)) :open :draft)
+          state         (if info-request? :info (if (security/authority? user) :open :draft))
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
           application   {:id            id
                          :created       created
-                         :opened        (when (= state :open) created)
+                         :opened        (when (#{:open :info} state) created)
                          :modified      created
                          :infoRequest   info-request?
                          :operations    [op]
@@ -341,7 +341,7 @@
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open :answered]}
+   :states     [:draft :info :answered]}
   [command]
   (with-application command
     (fn [inforequest]
