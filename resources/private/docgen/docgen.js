@@ -102,6 +102,8 @@ var docgen = (function () {
     }
 
     function makeEntrySpan(subSchema, pathStr) {
+      var help = null;
+      var helpLocKey = locKeyFromPath(pathStr  + ".help");
       var span = document.createElement("span");
       span.className = "form-entry";
 
@@ -116,11 +118,12 @@ var docgen = (function () {
       }
 
       // Add span for help text
-      var help = document.createElement("span");
-      var helpLocKey = locKeyFromPath(pathStr  + ".help");
-      help.className = "form-help";
-      help.innerHTML = loc(helpLocKey);
-      span.appendChild(help);
+      if (loc.hasTerm(helpLocKey)) {
+        help = document.createElement("span");
+        help.className = "form-help";
+        help.innerHTML = loc(helpLocKey);
+        span.appendChild(help);
+      }
 
       return span;
     }
