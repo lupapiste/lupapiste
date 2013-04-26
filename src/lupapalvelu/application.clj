@@ -281,6 +281,7 @@
    :name (keyword op-name)
    :created created})
 
+;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]

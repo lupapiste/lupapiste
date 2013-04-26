@@ -119,7 +119,7 @@
       (mongo/update-by-id
         :applications
         (:id application)
-        {$set {:modified (:created command)}
+        {$set {:modified (:created  command)}
          $push {:comments {:text    text
                            :target  target
                            :created (:created command)
