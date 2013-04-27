@@ -35,21 +35,21 @@
         (unauthorized (query teppo :application :id id)) => true)
 
       (fact "Mikko must be able to comment!"
-        (success (command mikko :add-comment :id id :text "mikko@example.com" :target "application")) => true)
+        (command mikko :add-comment :id id :text "mikko@example.com" :target "application") => ok?)
 
       (fact "Teppo must not be able to comment!"
-        (unauthorized (command teppo :add-comment :id id :text "teppo@example.com" :target "application")) => true)
+        (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => unauthorized?)
 
       (fact "Veikko must not be able to comment!"
-        (unauthorized (command veikko :add-comment :id id :text "sonja" :target "application")) => true)
+        (command veikko :add-comment :id id :text "sonja" :target "application") => unauthorized?)
 
       (fact "Sonja must be able to see the application!"
         (let [listing (query sonja :applications)]
-          (success listing) => true
-          (:id (first (:applications listing))) => id))
+          listing => ok?
+          (-> listing :applications first :id) => id))
 
       (fact "Sonja must be able to comment!"
-        (success (command sonja :add-comment :id id :text "sonja" :target "application")) => true)
+        (command sonja :add-comment :id id :text "sonja" :target "application") => ok?)
 
       (fact "Mikko must not be able to assign to himself!"
         (unauthorized (command mikko :assign-to-me :id id)) => true)
