@@ -108,6 +108,10 @@
       (ok :apikey apikey))
       (fail :error.unauthorized))))
 
+(defn authority-answers-to-open-info-request? [user {:keys [state]}]
+  (println state)
+  (and (security/authority? user) (= state :info)))
+
 (defcommand "add-comment"
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
@@ -119,7 +123,9 @@
       (mongo/update-by-id
         :applications
         (:id application)
-        {$set {:modified (:created command)}
+        {$set {:modified  (:created command)
+               :state     (if (authority-answers-to-open-info-request? user application)
+                            :answered (:state application))}
          $push {:comments {:text    text
                            :target  target
                            :created (:created command)
