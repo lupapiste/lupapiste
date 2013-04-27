@@ -116,12 +116,11 @@
   [command]
   (with-application command
     (fn [{id :id}]
-      (let [new-state :open]
       (mongo/update-by-id :applications id
         {$set {:modified (:created command)
-               :state new-state
-               :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change! id host)))))
+               :state    :open
+               :opened   (:created command)}})
+      (notifications/send-notifications-on-application-state-change! id host))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
