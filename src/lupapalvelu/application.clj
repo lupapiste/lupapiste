@@ -222,8 +222,8 @@
     (fn [application]
       (mongo/update
         :applications {:_id (:id application)}
-          {$set {:state :answered
-                 :modified (:created command)}}))))
+        {$set {:state :answered
+               :modified (:created command)}}))))
 
 (defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
