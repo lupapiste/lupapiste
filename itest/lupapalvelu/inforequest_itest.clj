@@ -20,18 +20,15 @@
         (-> (:comments application) first :text) => "hello"))
 
     (fact "Veikko can not assign inforequest to himself"
-      (let [resp (command veikko :assign-application :id id :assigneeId veikko-id)]
-        (unauthorized resp) => true))
+      (command veikko :assign-application :id id :assigneeId veikko-id) => unauthorized?)
 
     (fact "Sonja can assign inforequest to herself"
-      (let [resp (command sonja :assign-application :id id :assigneeId sonja-id)]
-        (success resp) => true))
+      (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)
 
-    (fact "Commenting on inforequest marks it answered"
-      (query-application pena id) => (in-state? :info)
+    (fact "WHen Commenting on inforequest marks it answered"
+      (query-application pena id)    => (in-state? :info)
       (comment-application id sonja) => ok?
-      (query-application pena id) => (in-state? :answered))
+      (query-application pena id)    => (in-state? :answered))
 
     (fact "Pena can convert-to-application"
-      (let [resp (command pena :convert-to-application :id id)]
-        (success resp) => true))))
+      (command pena :convert-to-application :id id) => ok?)))
