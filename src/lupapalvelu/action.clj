@@ -110,7 +110,7 @@
 
 (defn authority-answers-to-open-info-request? [user {:keys [state]}]
   (println state)
-  (and (security/authority? user) (= state :info)))
+  (and (security/authority? user) (= state "info")))
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
