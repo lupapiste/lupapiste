@@ -123,7 +123,7 @@
                            :created created
                            :user    (security/summary user)}}})
       ;; LUPA-XYZ
-      (when (and (= "draft" state) (not (s/blank? text)))
+      (when (and (= state "draft") (not (s/blank? text)))
         (executed "open-application" command))
       ;; LUPA-371
       (when (and (= state "info") (security/authority? user))
