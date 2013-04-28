@@ -27,7 +27,7 @@
 
     (fact "WHen Commenting on inforequest marks it answered"
       (query-application pena id)    => (in-state? :info)
-      (comment-application id sonja) => ok?
+      (comment-application id sonja)
       (query-application pena id)    => (in-state? :answered))
 
     (fact "Pena can convert-to-application"
