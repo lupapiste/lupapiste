@@ -108,26 +108,25 @@
       (ok :apikey apikey))
       (fail :error.unauthorized))))
 
-(defn authority-answers-to-open-info-request? [user {:keys [state]}]
-  (and (security/authority? user) (= state "info")))
-
 (defcommand "add-comment"
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
-  [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
+  [{{:keys [text target]} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
-    (fn [application]
-      (mongo/update-by-id
+    (fn [{:keys [id state] :as application}]
+      (mongo/update
         :applications
-        (:id application)
-        {$set {:modified  (:created command)
-               :state     (if (authority-answers-to-open-info-request? user application)
-                            :answered (:state application))}
+        {:_id id}
+        {$set {:modified  created}
          $push {:comments {:text    text
                            :target  target
-                           :created (:created command)
+                           :created created
                            :user    (security/summary user)}}})
-      (when (and (= "draft" (:state application)) (not (s/blank? text)))
+      ;; LUPA-XYZ
+      (when (and (= "draft" state) (not (s/blank? text)))
+        (executed "open-application" command))
+      ;; LUPA-371
+      (when (and (= state "info") (security/authority? user))
         (executed "open-application" command))
       (notifications/send-notifications-on-new-comment! application user text host))))
 

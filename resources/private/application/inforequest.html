@@ -70,7 +70,6 @@
         <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
-          <button data-bind="ltext: 'inforequest.markInforequestAnswered', visible: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" data-test-id="inforequest-mark-answered" type="submit" class="btn btn-primary"></button>
           <button data-bind="ltext: 'inforequest.convertToApplication', visible: $root.authorization.ok('convert-to-application'), click: convertToApplication" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary"></button>
           <button data-bind="ltext: 'inforequest.cancelInforequest',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn"></button>
         </div>
