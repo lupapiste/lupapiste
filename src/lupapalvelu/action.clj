@@ -9,6 +9,7 @@
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
+            [lupapalvelu.application :as application]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
@@ -114,20 +115,27 @@
   [{{:keys [text target]} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
-      (mongo/update
-        :applications
-        {:_id id}
+      (application/update-application command
         {$set {:modified  created}
          $push {:comments {:text    text
                            :target  target
                            :created created
                            :user    (security/summary user)}}})
+
       ;; LUPA-XYZ
       (when (and (= state "draft") (not (s/blank? text)))
         (executed "open-application" command))
+
       ;; LUPA-371
       (when (and (= state "info") (security/authority? user))
-        (executed "open-application" command))
+        (application/update-application command
+          {$set {:state    :answered
+                 :modified created}}))
+      ;; LUPA-371
+      (when (and (= state "answered") (security/applicant? user))
+        (application/update-application command
+          {$set {:state :info}}))
+
       (notifications/send-notifications-on-new-comment! application user text host))))
 
 (defcommand "assign-to-me"

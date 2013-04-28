@@ -222,18 +222,6 @@
         :applications {:_id (:id application)}
           {$set {:shapes [shape]}})))))
 
-(defcommand "mark-inforequest-answered"
-  {:parameters [:id]
-   :roles      [:authority]
-   :states     [:info]}
-  [command]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        :applications {:_id (:id application)}
-    {$set {:state    :answered
-           :modified (:created command)}}))))
-
 (defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
