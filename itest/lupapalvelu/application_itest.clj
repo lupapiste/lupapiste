@@ -9,10 +9,10 @@
 (apply-remote-minimal)
 
 (fact "can't inject js in 'x' or 'y' params"
-  (create-app pena :x ";alert(\"foo\");" :y "what ever") => (contains {:ok false})
-  (create-app pena :x "0.1x" :y "1.0") => (contains {:ok false})
-  (create-app pena :x "1x2" :y "1.0") => (contains {:ok false})
-  (create-app pena :x "2" :y "1.0") => (contains {:ok true}))
+  (create-app pena :x ";alert(\"foo\");" :y "what ever") => not-ok?
+  (create-app pena :x "0.1x" :y "1.0")                   => not-ok?
+  (create-app pena :x "1x2" :y "1.0")                    => not-ok?
+  (create-app pena :x "2" :y "1.0")                      => ok?)
 
 (fact "creating application without message"
   (let [resp  (create-app pena)
