@@ -22,7 +22,7 @@
           </div>
           <div data-bind="if: state">
             <p data-bind="ltext: 'application.state'"></p>
-            <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
+            <span id="test-inforequest-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
 
           <div data-bind="with: $root.applicationModel.data">
