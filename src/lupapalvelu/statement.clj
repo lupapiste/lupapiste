@@ -40,7 +40,6 @@
   [{{:keys [municipality]} :user}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality})
         permitPersons (or (:statementPersons municipality) [])]
-    (println municipality)
     (ok :data permitPersons)))
 
 (defcommand "create-statement-person"

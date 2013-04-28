@@ -108,22 +108,27 @@
       (ok :apikey apikey))
       (fail :error.unauthorized))))
 
+(defn authority-answers-to-open-info-request? [user {:keys [state]}]
+  (and (security/authority? user) (= state "info")))
+
 (defcommand "add-comment"
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]}
   [{{:keys [text target]} :data {:keys [host]} :web user :user :as command}]
   (with-application command
     (fn [application]
-      (when (and (= "draft" (:state application)) (not (s/blank? text)))
-        (executed "open-application" command))
       (mongo/update-by-id
         :applications
         (:id application)
-        {$set {:modified (:created  command)}
+        {$set {:modified  (:created command)
+               :state     (if (authority-answers-to-open-info-request? user application)
+                            :answered (:state application))}
          $push {:comments {:text    text
                            :target  target
                            :created (:created command)
                            :user    (security/summary user)}}})
+      (when (and (= "draft" (:state application)) (not (s/blank? text)))
+        (executed "open-application" command))
       (notifications/send-notifications-on-new-comment! application user text host))))
 
 (defcommand "assign-to-me"
