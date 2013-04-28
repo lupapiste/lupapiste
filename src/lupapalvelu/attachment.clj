@@ -518,7 +518,7 @@
 (defcommand "stamp-attachments"
   {:parameters [:id]
    :roles      [:authority]
-   :states     [:draft :open :submitted :complement-needed]
+   :states     [:verdictGiven]
    :description "Stamps all attachments of given application"}
   [command]
   (with-application command
