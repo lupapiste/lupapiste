@@ -27,9 +27,9 @@ Sonja logs in and throws in a verdict
   Wait Until  Element Should Be Enabled  verdict-id
   Input text  verdict-id  123567890
   Select From List  verdict-type-select  6
-  Input text  verdict-name  Kaarina Krysp III
   Input text  verdict-given  01.05.2018\t
   Input text  verdict-official  01.06.2018\t
+  Input text  verdict-name  Kaarina Krysp III
   Wait Until  Element Should Be Enabled  verdict-submit
   Click button  verdict-submit
   Verdict is given
