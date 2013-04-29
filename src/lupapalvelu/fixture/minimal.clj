@@ -237,53 +237,14 @@
 
 (def organizations[{:id "51767595a2890e1b11390186"
                       :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
-                      :municipalities ["186"]}
-                     {:id "51767595a2890e1b11390753"
-                      :name {:fi "Sipoon rakennusvalvonta"}
-                      :municipalities ["753"]}
-                     {:id "51767595a2890e1b11390837"
-                      :name {:fi "Tampereen rakennusvalvonta"}
-                      :municipalities ["837"]}
-                     {:id "51767595a2890e1b11390638"
-                      :name {:fi "Porvoon rakennusvalvonta"}
-                      :municipalities ["638"]}
-                     {:id "51767595a2890e1b11390564"
-                      :name {:fi "Oulun rakennusvalvonta"}
-                      :municipalities ["564"]}
-                     {:id "51767595a2890e1b11390529"
-                      :name {:fi "Naantalin rakennusvalvonta"}
-                      :municipalities ["529"]}
-                     {:id "51767595a2890e1b11390069"
-                      :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne "}
-                      :municipalities ["069","317","626","691"]}])
-
-(def municipalities [{:id "186"
-                      :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
-                      :municipalityCode "186"
+                      :municipalities ["186"]
                       :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                                :url "http://www.jarvenpaa.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
-                     {:id "529"
-                      :name {:fi "Naantali", :sv "N\u00E5dendahl"}
-                      :municipalityCode "529"}
-                     {:id "564"
-                      :name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                      :municipalityCode "564"
-                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                               :url "http://www.ouka.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
-                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
-                     {:id "638"
-                      :name {:fi "Porvoo", :sv "Borg\u00e5"}
-                      :municipalityCode "638"
-                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
-                               :url "http://www.porvoo.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
-                     {:id "753"
-                      :municipalityCode "753"
-                      :name {:fi "Sipoo" :sv "Sibbo"}
+                     {:id "51767595a2890e1b11390753"
+                      :name {:fi "Sipoon rakennusvalvonta"}
+                      :municipalities ["753"]
                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                :url "http://sipoo.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -303,15 +264,54 @@
                                           :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
                                           :name "Sonja Sibbo"}]}
-                     {:id "837"
-                      :name {:fi "Tampere" :sv "Tammerfors"}
-                      :municipalityCode "837"
+                     {:id "51767595a2890e1b11390837"
+                      :name {:fi "Tampereen rakennusvalvonta"}
+                      :municipalities ["837"]
                       :links [{:name {:fi "Tampere" :sv "Tammerfors"}
                                :url "http://tampere.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
                               {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
+                     {:id "51767595a2890e1b11390638"
+                      :name {:fi "Porvoon rakennusvalvonta"}
+                      :municipalities ["638"]
+                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
+                               :url "http://www.porvoo.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                     {:id "51767595a2890e1b11390564"
+                      :name {:fi "Oulun rakennusvalvonta"}
+                      :municipalities ["564"]
+                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                               :url "http://www.ouka.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
+                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
+                     {:id "51767595a2890e1b11390529"
+                      :name {:fi "Naantalin rakennusvalvonta"}
+                      :municipalities ["529"]}
+                     {:id "51767595a2890e1b11390069"
+                      :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne "}
+                      :municipalities ["069","317","626","691"]}])
+
+(def municipalities [{:id "186"
+                      :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
+                      :municipalityCode "186"}
+                     {:id "529"
+                      :name {:fi "Naantali", :sv "N\u00E5dendahl"}
+                      :municipalityCode "529"}
+                     {:id "564"
+                      :name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                      :municipalityCode "564"}
+                     {:id "638"
+                      :name {:fi "Porvoo", :sv "Borg\u00e5"}
+                      :municipalityCode "638"}
+                     {:id "753"
+                      :municipalityCode "753"
+                      :name {:fi "Sipoo" :sv "Sibbo"}}
+                     {:id "837"
+                      :name {:fi "Tampere" :sv "Tammerfors"}
+                      :municipalityCode "837"}
                      {:id "047"
                       :name {:fi "Enonteki\u00F6", :sv "Enontekis"}
                       :municipalityCode "047"}
