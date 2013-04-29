@@ -128,14 +128,14 @@
   (let [command-resp (create-app mikko :municipality veikko-muni)
         application-id  (:id command-resp)]
     (success command-resp) => true
-    (success (command mikko  :open-application   :id application-id)) => true
-    (success (command veikko :assign-application :id application-id :assigneeId veikko-id)) => true
+    (command mikko  :open-application   :id application-id) => ok?
+    (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"
-          (success (command mikko :add-operation :id application-id :operation "varasto-tms")) => true)
+      (success (command mikko :add-operation :id application-id :operation "varasto-tms")) => true)
 
     (fact "Authority is able to add operation"
-          (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
+      (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
 (comment
   (apply-remote-minimal)
