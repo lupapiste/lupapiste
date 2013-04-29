@@ -122,25 +122,30 @@
                            :created created
                            :user    (security/summary user)}}})
 
-      ;; LUPA-XYZ (was: open-application)
-      (when (and (= state "draft") (not (s/blank? text)))
-        (application/update-application command
-          {$set {:modified created
-                 :state    :open
-                 :opened   created}}))
+      (condp = (keyword state)
 
-      ;; LUPA-371
-      (when (and (= state "info") (security/authority? user))
-        (application/update-application command
-          {$set {:state    :answered
-                 :modified created}}))
+        ;; LUPA-XYZ (was: open-application)
+        :draft  (when (not (s/blank? text))
+                  (application/update-application command
+                    {$set {:modified created
+                           :state    :open
+                           :opened   created}}))
 
-      ;; LUPA-371 (was: mark-inforequest-answered)
-      (when (and (= state "answered") (security/applicant? user))
-        (application/update-application command
-          {$set {:state :info
-                 :modified created}}))
+        ;; LUPA-371
+        :info (when (security/authority? user)
+                (application/update-application command
+                  {$set {:state    :answered
+                         :modified created}}))
 
+        ;; LUPA-371 (was: mark-inforequest-answered)
+        :answered (when (security/applicant? user)
+                    (application/update-application command
+                      {$set {:state :info
+                             :modified created}}))
+
+        nil)
+
+      ;; TODO: details should come from updated state!
       (notifications/send-notifications-on-new-comment! application user text host))))
 
 (defcommand "assign-to-me"
