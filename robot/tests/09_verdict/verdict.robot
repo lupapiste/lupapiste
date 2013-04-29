@@ -24,16 +24,17 @@ Sonja logs in and throws in a verdict
   Open application  Olutteltta  753-416-25-30
   Open tab  verdict
   Open verdict
-  Sleep  1
+  Wait Until  Element Should Be Enabled  verdict-id
   Input text  verdict-id  123567890
   Select From List  verdict-type-select  6
-  Input text  verdict-given  01.05.2018
-  Input text  verdict-official  01.06.2018
+  Input text  verdict-given  01.05.2018\t
+  Input text  verdict-official  01.06.2018\t
   Input text  verdict-name  Kaarina Krysp III
+  Wait Until  Element Should Be Enabled  verdict-submit
   Click button  verdict-submit
   Verdict is given
   Can't regive verdict
-  Logout
+  [Teardown]  Logout
 
 Mikko sees that the application has verdict
   Mikko logs in

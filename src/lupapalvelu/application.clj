@@ -42,6 +42,16 @@
 (defn get-application-operation [app]
   (first (:operations app)))
 
+(defn update-application
+  "get current application from command (or fail) and run changes into it."
+  [command changes]
+  (with-application command
+    (fn [{:keys [id]}]
+      (mongo/update
+        :applications
+        {:_id id}
+        changes))))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -108,6 +118,8 @@
           {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
           {$unset {:authority ""}})))))
 
+
+;; FIXME: sending double notifications, only called from add-comment
 (defcommand "open-application"
   {:parameters [:id]
    :roles      [:applicant]
@@ -116,17 +128,16 @@
   [command]
   (with-application command
     (fn [{id :id}]
-      (let [new-state :open]
       (mongo/update-by-id :applications id
         {$set {:modified (:created command)
-               :state new-state
-               :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change! id host)))))
+               :state    :open
+               :opened   (:created command)}})
+      (notifications/send-notifications-on-application-state-change! id host))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open :submitted]}
+   :states     [:draft :info :open :submitted]}
   [{{:keys [host]} :web :as command}]
   [command]
   (with-application command
@@ -149,7 +160,7 @@
       (let [application-id (:id application)]
         (mongo/update
           :applications {:_id (:id application) :state :sent}
-          {$set {:state :complement-needed}})
+    {$set {:state :complement-needed}})
         (notifications/send-notifications-on-application-state-change! application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
@@ -178,7 +189,7 @@
 (defcommand "submit-application"
   {:parameters [:id]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]
+   :states     [:draft :info :open :complement-needed]
    :validators [(fn [command application]
                   (when-not (domain/is-owner-or-writer? application (-> command :user :id))
                     (fail :error.unauthorized)))]}
@@ -212,18 +223,6 @@
       (mongo/update
         :applications {:_id (:id application)}
           {$set {:shapes [shape]}})))))
-
-(defcommand "mark-inforequest-answered"
-  {:parameters [:id]
-   :roles      [:authority]
-   :states     [:draft :open]}
-  [command]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        :applications {:_id (:id application)}
-          {$set {:state :answered
-                 :modified (:created command)}}))))
 
 (defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
@@ -281,6 +280,7 @@
    :name (keyword op-name)
    :created created})
 
+;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
@@ -292,11 +292,11 @@
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
           info-request? (if infoRequest true false)
-          state         (if (or info-request? (security/authority? user)) :open :draft)
+          state         (if info-request? :info (if (security/authority? user) :open :draft))
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
           application   {:id            id
                          :created       created
-                         :opened        (when (= state :open) created)
+                         :opened        (when (#{:open :info} state) created)
                          :modified      created
                          :infoRequest   info-request?
                          :operations    [op]
@@ -341,7 +341,7 @@
 (defcommand "convert-to-application"
   {:parameters [:id]
    :roles      [:applicant]
-   :states     [:draft :open :answered]}
+   :states     [:draft :info :answered]}
   [command]
   (with-application command
     (fn [inforequest]
