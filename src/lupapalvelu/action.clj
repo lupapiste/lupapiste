@@ -122,9 +122,12 @@
                            :created created
                            :user    (security/summary user)}}})
 
-      ;; LUPA-XYZ
+      ;; LUPA-XYZ (was: open-application)
       (when (and (= state "draft") (not (s/blank? text)))
-        (executed "open-application" command))
+        (application/update-application command
+          {$set {:modified created
+                 :state    :open
+                 :opened   created}}))
 
       ;; LUPA-371
       (when (and (= state "info") (security/authority? user))
@@ -132,10 +135,11 @@
           {$set {:state    :answered
                  :modified created}}))
 
-      ;; LUPA-371
+      ;; LUPA-371 (was: mark-inforequest-answered)
       (when (and (= state "answered") (security/applicant? user))
         (application/update-application command
-          {$set {:state :info}}))
+          {$set {:state :info
+                 :modified created}}))
 
       (notifications/send-notifications-on-new-comment! application user text host))))
 

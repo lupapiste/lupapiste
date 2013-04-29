@@ -118,22 +118,6 @@
           {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
           {$unset {:authority ""}})))))
 
-
-;; FIXME: sending double notifications, only called from add-comment
-(defcommand "open-application"
-  {:parameters [:id]
-   :roles      [:applicant]
-   :states     [:draft]}
-  [{{:keys [host]} :web :as command}]
-  [command]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update-by-id :applications id
-        {$set {:modified (:created command)
-               :state    :open
-               :opened   (:created command)}})
-      (notifications/send-notifications-on-application-state-change! id host))))
-
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
