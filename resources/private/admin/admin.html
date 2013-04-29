@@ -24,6 +24,7 @@
           <th>toiminto</th>
           <th>tyyppi</th>
           <th>roolit</th>
+          <th>tilat</th>
           <th>parametrit</th>
           <th>l&auml;hdekoodi</th>
           <th>kuvaus</th>
@@ -37,6 +38,13 @@
             <td>
               <!-- ko if: $data.roles -->
               <ul data-bind="foreach: roles">
+                <li data-bind="text: $data"></li>
+              </ul>
+              <!-- /ko -->
+            </td>
+            <td>
+              <!-- ko if: $data.states -->
+              <ul data-bind="foreach: states">
                 <li data-bind="text: $data"></li>
               </ul>
               <!-- /ko -->
