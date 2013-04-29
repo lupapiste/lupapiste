@@ -14,7 +14,6 @@
             [noir.cookies :as cookies]
             [sade.env :as env]
             [lupapalvelu.core :as core]
-            [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
             [lupapalvelu.user :as user]

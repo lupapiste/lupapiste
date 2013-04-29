@@ -127,8 +127,8 @@
 (facts "Add operations"
   (let [command-resp (create-app mikko :municipality veikko-muni)
         application-id  (:id command-resp)]
-    (success command-resp) => true
-    (command mikko  :open-application   :id application-id) => ok?
+    command-resp => ok?
+    (comment-application application-id mikko)
     (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"
