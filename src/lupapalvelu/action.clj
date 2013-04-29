@@ -131,6 +131,7 @@
         (application/update-application command
           {$set {:state    :answered
                  :modified created}}))
+
       ;; LUPA-371
       (when (and (= state "answered") (security/applicant? user))
         (application/update-application command
