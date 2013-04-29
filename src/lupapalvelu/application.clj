@@ -185,12 +185,10 @@
 (defcommand "remove-auth"
   {:parameters [:id :email]
    :roles      [:applicant]}
-  [{{:keys [id email]} :data :as command}]
-  (with-application command
-    (fn [{application-id :id}]
-      (mongo/update-by-id :applications application-id
-        {$pull {:auth {$and [{:username email}
-                             {:type {$ne :owner}}]}}}))))
+  [{{:keys [email]} :data :as command}]
+  (update-application command
+    {$pull {:auth {$and [{:username email}
+                         {:type {$ne :owner}}]}}}))
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
@@ -357,13 +355,9 @@
   {:parameters [:id :shape]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [command]
-  (let [shape (:shape (:data command))]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        :applications {:_id (:id application)}
-          {$set {:shapes [shape]}})))))
+  [{{:keys [shape]} :data :as command}]
+  (update-application command
+    {$set {:shapes [shape]}}))
 
 (defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
