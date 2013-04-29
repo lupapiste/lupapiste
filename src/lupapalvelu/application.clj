@@ -308,7 +308,6 @@
 (defcommand "approve-application"
   {:parameters [:id :lang]
    :roles      [:authority]
-   :authority  true
    :states     [:submitted]}
   [{{:keys [host]} :web :as command}]
   (with-application command
