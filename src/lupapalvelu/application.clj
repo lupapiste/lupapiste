@@ -303,7 +303,6 @@
 (defcommand "request-for-complement"
   {:parameters [:id]
    :roles      [:authority]
-   :authority  true
    :states     [:sent]}
   [command]
   (with-application command
