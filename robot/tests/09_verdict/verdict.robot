@@ -1,44 +1,61 @@
 *** Settings ***
 
 Documentation   Application gets verdict
+Suite setup     Apply minimal fixture now
+Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko opens creates application
+Mikko want to build Olutteltta
   Mikko logs in
-  Create application the fast way  verdict-app  753  753-416-25-30
+  Create application the fast way  Olutteltta  753  753-416-25-30
 
 Application does not have verdict
   Open tab  verdict
-  Element should not be visible  application-verdict
-  ${ID} =  Get Element Attribute  xpath=//*[@data-test-id='application-id']@data-test-value
-  Set suite variable  ${APPLICATION ID}  ${ID}
+  Verdict is not given
 
-Mikko submits application
+Mikko submits application & goes for lunch
   Submit application
-
-Mikko goes for lunch
   Logout
 
-Solita Admin can log in and gives verdict
-  SolitaAdmin logs in
-  Wait until  Element should be visible  admin-header
-  Wait until  Element should be visible  xpath=//a[@data-test-id='${APPLICATION ID}']
-  Click element  xpath=//a[@data-test-id='${APPLICATION ID}']
-  Wait until  Element Text Should Be  xpath=//*[@data-test-id='admin-verdict-result']  OK
-  Logout
+Sonja logs in and throws in a verdict
+  Sonja logs in
+  Open application  Olutteltta  753-416-25-30
+  Open tab  verdict
+  Open verdict
+  Sleep  1
+  Wait Until  Element Should Be Enabled  verdict-id
+  Input text  verdict-id  123567890
+  Select From List  verdict-type-select  6
+  Input text  verdict-given  01.05.2018
+  Input text  verdict-official  01.06.2018
+  Input text  verdict-name  Kaarina Krysp III
+  Wait Until  Element Should Be Enabled  verdict-submit
+  Click button  verdict-submit
+  Verdict is given
+  Can't regive verdict
+  [Teardown]  Logout
 
 Mikko sees that the application has verdict
   Mikko logs in
-  Open application  verdict-app  753-416-25-30
+  Open application  Olutteltta  753-416-25-30
   Open tab  verdict
-  Element Text Should Be  xpath=//span[@data-test-id='application-verdict']  onneksi olkoon!
-  Logout
+  Verdict is given
 
-Application verdict is visible to authority
-  Sonja logs in
-  Open application  verdict-app  753-416-25-30
-  Open tab  verdict
-  Element should be visible  xpath=//span[@data-test-id='application-verdict']
-  Logout
+*** Keywords ***
+
+Open verdict
+  Wait and click  xpath=//*[@data-test-id='give-verdict']
+  Wait until  element should be visible  verdict-id
+
+Verdict is given
+  Wait until  Element should be visible  application-verdict-details
+  Wait until  Element text should be  //td[@data-test-id='given-verdict-id-0']  123567890
+
+
+Verdict is not given
+  Wait until  Element should not be visible  application-verdict-details
+
+Can't regive verdict
+  Wait until  Element should not be visible  xpath=//*[@data-test-id='give-verdict']

@@ -1,12 +1,13 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
         [clojure.tools.logging]
-        [lupapalvelu.core :only [defquery defcommand ok fail with-application executed now role]]
+        [lupapalvelu.core]
         [clojure.string :only [blank?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
   (:require [clojure.string :as s]
+            [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -17,6 +18,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
             [lupapalvelu.municipality :as municipality]
             [sade.util :as util]
@@ -79,6 +81,21 @@
         authorities (find-authorities-in-applications-municipality app)]
     (ok :authorityInfo authorities)))
 
+(defn filter-repeating-party-docs [names]
+  (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
+
+(defquery "party-document-names"
+  {:parameters [:id]
+   :authenticated true}
+  [command]
+  (with-application command
+    (fn [application]
+      (let [documents (:documents application)
+            initialOp (:name (first (:operations application)))
+            original-schema-names (:required ((keyword initialOp) operations/operations))
+            original-party-documents (filter-repeating-party-docs original-schema-names)]
+        (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
+
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
    :roles       [:authority]}
@@ -104,7 +121,7 @@
         {$set {:modified (:created command)
                :state new-state
                :opened (:created command)}})
-      (notifications/send-notifications-on-application-state-change id host)))))
+      (notifications/send-notifications-on-application-state-change! id host)))))
 
 (defcommand "cancel-application"
   {:parameters [:id]
@@ -118,7 +135,7 @@
         (mongo/update-by-id :applications (-> command :data :id)
                             {$set {:modified (:created command)
                                    :state new-state}})
-        (notifications/send-notifications-on-application-state-change id host)
+        (notifications/send-notifications-on-application-state-change! id host)
         (ok)))))
 
 (defcommand "request-for-complement"
@@ -133,7 +150,7 @@
         (mongo/update
           :applications {:_id (:id application) :state :sent}
           {$set {:state :complement-needed}})
-        (notifications/send-notifications-on-application-state-change application-id (get-in command [:web :host]))))))
+        (notifications/send-notifications-on-application-state-change! application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
   {:parameters [:id :lang]
@@ -153,7 +170,7 @@
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
-          (notifications/send-notifications-on-application-state-change application-id host)
+          (notifications/send-notifications-on-application-state-change! application-id host)
           (catch org.xml.sax.SAXParseException e
             (.printStackTrace e)
             (fail (.getMessage e))))))))
@@ -182,7 +199,7 @@
           (catch com.mongodb.MongoException$DuplicateKey e
             ; This is ok. Only the first submit is saved.
             ))
-        (notifications/send-notifications-on-application-state-change application-id host)))))
+        (notifications/send-notifications-on-application-state-change! application-id host)))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
@@ -208,12 +225,13 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defn- make-attachments [created op municipality-id]
+(defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
       {:id (mongo/create-id)
        :type {:type-group type-group :type-id type-id}
        :state :requires_user_action
+       :target target
        :modified created
        :versions []
        :op op})))
@@ -226,7 +244,7 @@
     {} schema-data))
 
 (defn- make-documents [user created existing-documents op]
-  (let [op-info               (operations/operations (:name op))
+  (let [op-info               (operations/operations (keyword (:name op)))
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/schemas schema-name)
                                                  :created created
@@ -335,8 +353,27 @@
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})
-        (ok)))))
+                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})))))
+
+;;
+;; Verdicts
+;;
+
+(defcommand "give-verdict"
+  {:parameters [:id :verdictId :status :name :given :official]
+   :states     [:submitted #_:verdictGiven]
+   :roles      [:authority]}
+  [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
+  (mongo/update
+    :applications
+    {:_id id}
+    {$set {:modified created
+           :state    :verdictGiven}
+     $push {:verdict  {:id verdictId
+                       :name name
+                       :given given
+                       :status status
+                       :official official}}}))
 
 ;;
 ;; krysp enrichment
@@ -443,12 +480,12 @@
 
 (defcommand "applications-for-datatables"
   {:parameters [:params] :verified true}
-  [{user :user {params :params} :data}]
+  [{user :user {:keys [params]} :data}]
   (ok :data (applications-for-user user params)))
 
-;
-; Query that returns number of applications or info-requests user has:
-;
+;;
+;; Query that returns number of applications or info-requests user has:
+;;
 
 (defquery "applications-count"
   {:parameters [:kind]

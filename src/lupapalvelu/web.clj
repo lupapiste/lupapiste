@@ -25,9 +25,11 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
+            [lupapalvelu.etag :as etag]
             [sade.security :as sadesecurity]
             [sade.status :as status]
-            [sade.strings :as s]
+            [sade.strings :as ss]
+            [clojure.string :as s]
             [sade.util :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
@@ -51,7 +53,7 @@
 
 (defn parse-json-body-middleware [handler]
   (fn [request]
-    (let [json-body (if (s/starts-with (:content-type request) "application/json")
+    (let [json-body (if (ss/starts-with (:content-type request) "application/json")
                       (if-let [body (:body request)]
                         (-> body
                           (io/reader :encoding (or (:character-encoding request) "utf-8"))
@@ -156,11 +158,14 @@
                    :admin admin?})
 
 (defn cache-headers [resource-type]
-  (if (= :html resource-type)
+  (if (env/dev-mode?)
     {"Cache-Control" "no-cache"}
-    (if (env/dev-mode?)
-      {"Cache-Control" "no-cache"}
-      {"Cache-Control" "public, max-age=86400"})))
+    (if (= :html resource-type)
+      {"Cache-Control" "no-cache"
+       "ETag"          etag/etag}
+      {"Cache-Control" "public, max-age=864000"
+       "Vary"          "Accept-Encoding"
+       "ETag"          etag/etag})))
 
 (def default-lang "fi")
 
@@ -286,11 +291,13 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector] :as data}
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
   (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
-  (let [upload-data (assoc upload
+  (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
+        upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
+                           :target target
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
@@ -299,7 +306,7 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.2.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
@@ -384,7 +391,7 @@
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
 
-  (defjson "/dev/hgnotes" [] env/hgnotes)
+  (defjson "/dev/hgnotes" [] (env/hgnotes))
 
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))

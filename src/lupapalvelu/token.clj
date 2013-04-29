@@ -1,6 +1,7 @@
 (ns lupapalvelu.token
   (:use [monger.operators]
-        [clojure.tools.logging])
+        [clojure.tools.logging]
+        [sade.security :only [random-password]])
   (:require [lupapalvelu.core :as core]
             [lupapalvelu.mongo :as mongo]
             [noir.request :as request]))
@@ -11,13 +12,8 @@
   (errorf "consumed token: token-type %s does not have handler: id=%s" (:token-type token-data) (:_id token-data)))
 
 (def ^:private default-ttl (* 24 60 60 1000))
-
-(def ^:private token-chars (concat (range (int \0) (inc (int \9)))
-                                   (range (int \A) (inc (int \Z)))
-                                   (range (int \a) (inc (int \z)))))
     
-(defn- make-token-id []
-  (apply str (repeatedly 48 (comp char (partial rand-nth token-chars)))))
+(def ^:private make-token-id (partial random-password 48))
 
 (defn make-token [token-type data & {:keys [ttl] :or {ttl default-ttl}}]
   (let [id (make-token-id)

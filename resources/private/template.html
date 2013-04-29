@@ -7,6 +7,10 @@
     <meta name="description"  content="Lupapiste" />
     <meta name="author"       content="Solita Oy -- http://www.solita.fi/" />
 
+    <!-- Cloak content until css is loaded -->
+    <style type="text/css">.page{display:none}</style>
+    <link href="inject" rel="stylesheet"></link>
+
     <link href="/img/favicon.png" rel="icon" />
     <link href="/img/favicon.png" rel="shortcut icon" />
 
@@ -16,17 +20,14 @@
 
     <title>Lupapiste</title>
 
-    <script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.0.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-1.8.0.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.9.0/jquery-ui.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
-    <script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-2.1.0.debug.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
 
-    <script type="text/javascript">if (typeof jQuery === "undefined") document.write("<script src='/app/cdn-fallback.js?v=1.0.3'></" + "script>")</script>
+    <script type="text/javascript">if (typeof jQuery === "undefined") document.write("<script src='/app/cdn-fallback.js?v=1.0.6'></" + "script>")</script>
 
     <script src="inject" type="text/javascript"></script>
-    <!-- Cloak content until css is loaded -->
-    <style type="text/css">.page{display:none}</style>
-    <link href="inject" rel="stylesheet"></link>
   </head>
   <body>
 

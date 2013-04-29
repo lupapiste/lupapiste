@@ -23,7 +23,7 @@
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (def ui-components
-  {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.1.custom.min.js" "jquery.dataTables.min.js" "knockout-2.1.0.js"]}
+  {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.1.custom.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
    :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js" "jquery.cookie.js"]}
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
    :lo-dash      {:js ["lodash-1.1.1.min.js"]}
@@ -35,7 +35,7 @@
                   :depends [:underscore]}
 
    :map          {:depends [:init :jquery]
-                  :js ["openlayers.2.12.js" "gis.js"]}
+                  :js ["openlayers.2.12.min.lupapiste.js" "gis.js"]}
 
    :debug        (if (env/dev-mode?) debugjs {})
 
@@ -53,7 +53,8 @@
                   :html ["error.html"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js"]}
+                   :js ["comment.js" "authorization.js" "municipalities.js"]
+                   :html ["comments.html"]}
 
    :invites      {:depends [:common]
                   :js ["invites.js"]}
@@ -77,6 +78,14 @@
                   :js ["attachment.js" "attachmentTypeSelect.js"]
                   :html ["attachment.html" "upload.html"]}
 
+   :statement    {:depends [:common :repository]
+                  :js ["statement.js"]
+                  :html ["statement.html"]}
+
+   :verdict      {:depends [:common :repository]
+                  :js ["verdict.js"]
+                  :html ["verdict.html"]}
+
    :register     {:depends [:common]
                   :css ["register.css"]
                   :js ["register.js"]
@@ -90,12 +99,12 @@
                   :html ["create.html"]}
 
    :applicant    {:depends [:common :authenticated :map :applications :application :attachment
-                            :docgen :create :mypage :debug]
+                            :statement :docgen :create :mypage :debug]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :application :attachment
-                            :docgen :create :mypage :debug]
+                            :statement :verdict :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 

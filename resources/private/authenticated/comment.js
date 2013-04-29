@@ -1,24 +1,22 @@
 var comments = (function() {
   "use strict";
 
-  function CommentModel() {
+  function CommentModel(takeAll) {
     var self = this;
 
-    self.target = {type: "application"};
+    self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
 
-    self.setComments = function(comments) {
+    self.refresh = function(application, target) {
+      self.setApplicationId(application.id);
+      self.target(target || {type: "application"});
       var filteredComments =
-        _.filter(comments,
+        _.filter(application.comments,
             function(comment) {
-              return self.target.type === comment.target.type && self.target.id === comment.target.id;
+              return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
             });
       self.comments(ko.mapping.fromJS(filteredComments));
-    };
-
-    self.setTarget = function(target) {
-      self.target = target;
     };
 
     self.setApplicationId = function(applicationId) {
@@ -31,7 +29,7 @@ var comments = (function() {
 
     self.submit = function(model) {
       var id = self.applicationId;
-      ajax.command("add-comment", { id: id, text: model.text(), target: self.target})
+      ajax.command("add-comment", { id: id, text: model.text(), target: self.target()})
         .success(function() {
           model.text("");
           repository.load(id);
@@ -40,13 +38,13 @@ var comments = (function() {
       return false;
     };
 
-    self.category = function(model) {
-      return model.target && model.target.version ? "category-new-attachment-version" : "category-default";
+    self.isForNewAttachment = function(model) {
+      return model && model.target && model.target.version && true;
     };
-}
+  }
 
   return {
-    create: function() { return new CommentModel(); }
+    create: function(takeAll) { return new CommentModel(takeAll); }
   };
 
 })();

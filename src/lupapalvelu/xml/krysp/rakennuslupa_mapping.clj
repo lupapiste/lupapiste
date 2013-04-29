@@ -2,10 +2,9 @@
   (:use  [lupapalvelu.xml.krysp.yhteiset]
          [clojure.data.xml]
          [clojure.java.io]
-         [lupapalvelu.document.krysp :only [application-to-canonical]]
+         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical to-xml-datetime]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]]
-         [lupapalvelu.document.krysp :only [to-xml-datetime]]
          [lupapalvelu.attachment :only [encode-filename]])
   (:require [sade.env :as env]
             [me.raynes.fs :as fs]
@@ -41,7 +40,8 @@
                    {:tag :alkuHetki :ns "yht"}
                    sijantitieto
                    {:tag :rakennuksenTiedot
-                    :child [{:tag :rakennustunnus :child tunnus-children}
+                    :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
+                                                          {:tag :kiinttun}]}
                             {:tag :kayttotarkoitus}
                             {:tag :tilavuus}
                             {:tag :kokonaisala}
@@ -114,18 +114,30 @@
                               :child [rakennuspaikka]}
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
-                                       :child [{:tag :uusi
-                                                :child [{:tag :huoneistoala}
-                                                        {:tag :kuvaus}]}
-                                               {:tag :laajennus}
+                                       :child [{:tag :uusi :child [{:tag :kuvaus}]}
+                                               {:tag :laajennus :child [{:tag :laajennuksentiedot :child[{:tag :tilavuus}
+                                                                                                        {:tag :kerrosala}
+                                                                                                        {:tag :kokonaisala}
+                                                                                                        {:tag :huoneistoala :child [{:tag :pintaAla :ns "yht"}
+                                                                                                                                    {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
+                                                                         {:tag :kuvaus}
+                                                                         {:tag :perusparannusKytkin}]}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
-                                               {:tag :purkaminen}
-                                               {:tag :muuMuutosTyo}
-                                               {:tag :kaupunkikuvaToimenpide}
+                                               {:tag :purkaminen :child [{:tag :kuvaus}
+                                                                        {:tag :purkamisenSyy}
+                                                                        {:tag :poistumaPvm }]}
+                                               {:tag :muuMuutosTyo :child [{:tag :muutostyonLaji}
+                                                                           {:tag :kuvaus}
+                                                                           {:tag :perusparannusKytkin}]}
+                                               {:tag :kaupunkikuvaToimenpide :child [{:tag :kuvaus}]}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
-                                               {:tag :rakennelmatieto}]}]}
+                                               {:tag :rakennelmatieto :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
+                                                                                                        {:tag :alkuHetki :ns "yht"}
+                                                                                                        sijantitieto
+                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}]}]}
+                                               ]}]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
@@ -174,8 +186,7 @@
                                   :versionumero 1
                                   :tyyppi type
                                   :fileId file-id}})]
-    (when (not-empty canonical-attachments)
-      canonical-attachments)))
+    (not-empty canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
   (doseq [attachment attachments]
@@ -215,13 +226,13 @@
                                                 :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
                                                 :muokkausHetki (to-xml-datetime (:submitted application))
                                                 :versionumero 1
-                                                :tyyppi "Hakemus vireilletullessa"}}
+                                                :tyyppi "hakemus_vireilletullessa"}}
                                               {:Liite
                                                {:kuvaus "Application when sent from Lupapiste"
                                                 :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
                                                 :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
                                                 :versionumero 1
-                                                :tyyppi "Hakemus taustaj\u00e4rjestelm\u00e4\u00e4n siirett\u00e4ess\u00e4"}})
+                                                :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
         canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
     (validate (indent-str xml))

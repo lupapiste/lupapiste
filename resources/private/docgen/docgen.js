@@ -81,7 +81,18 @@ var docgen = (function() {
 
     function makeEntrySpan(subSchema) {
       var span = document.createElement("span");
-      span.className = (subSchema.layout) ? "form-entry form-" + subSchema.layout : "form-entry";
+      span.className = "form-entry";
+
+      // Display text areas in a wide container
+      if (subSchema.type === "text") {
+        span.className = "form-entry form-full-width";
+      }
+
+      // Override style with layout option
+      if (subSchema.layout) {
+        span.className = "form-entry form-" + subSchema.layout;
+      }
+
       return span;
     }
 
@@ -507,6 +518,8 @@ var docgen = (function() {
       var img = document.createElement("img");
       img.src = "/img/ajax-loader-12.gif";
       img.alt = "...";
+      img.width = 12;
+      img.height = 12;
       return img;
     }
 
@@ -600,6 +613,7 @@ var docgen = (function() {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
+            .attr("data-test-class", "delete-schemas." + self.schemaName)
             .click(removeDoc));
       }
 
@@ -652,7 +666,7 @@ var docgen = (function() {
         $(btn).click(function() {
           var self = this;
           ajax
-            .command("create-doc", {schema: schema.info.name, id: application.id})
+            .command("create-doc", {schemaName: schema.info.name, id: application.id})
             .success(function(data) {
               var newDocId = data.doc;
               var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application).element;
