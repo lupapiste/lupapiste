@@ -260,24 +260,18 @@
 (defcommand "assign-to-me"
   {:parameters [:id]
    :roles      [:authority]}
-  [{{id :id} :data user :user :as command}]
-  (with-application command
-    (fn [application]
-      (mongo/update-by-id
-        :applications (:id application)
-        {$set {:authority (security/summary user)}}))))
+  [{user :user :as command}]
+  (update-application command
+    {$set {:authority (security/summary user)}}))
 
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
    :roles       [:authority]}
   [{{:keys [assigneeId]} :data user :user :as command}]
-  (with-application command
-    (fn [application]
-      (mongo/update-by-id
-        :applications (:id application)
-        (if assigneeId
-          {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
-          {$unset {:authority ""}})))))
+  (update-application command
+    (if assigneeId
+      {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
+      {$unset {:authority ""}})))
 
 ;;
 ;;
