@@ -106,6 +106,169 @@
             original-party-documents (filter-repeating-party-docs original-schema-names)]
         (ok :partyDocumentNames (conj original-party-documents "hakija"))))))
 
+;;
+;; Invites
+;;
+
+(defquery "invites"
+  {:authenticated true
+   :verified true}
+  [{{:keys [id]} :user}]
+  (let [filter     {:auth {$elemMatch {:invite.user.id id}}}
+        projection (assoc filter :_id 0)
+        data       (mongo/select :applications filter projection)
+        invites    (map :invite (mapcat :auth data))]
+    (ok :invites invites)))
+
+(defcommand "invite"
+  {:parameters [:id :email :title :text :documentName]
+   :roles      [:applicant]
+   :verified   true}
+  [{created :created
+    user    :user
+    {:keys [id email title text documentName documentId]} :data {:keys [host]} :web :as command}]
+  (with-application command
+    (fn [{application-id :id :as application}]
+      (if (domain/invited? application email)
+        (fail :already-invited)
+        (let [invited (security/get-or-create-user-by-email email)
+              invite  {:title        title
+                       :application  application-id
+                       :text         text
+                       :documentName documentName
+                       :documentId   documentId
+                       :created      created
+                       :email        email
+                       :user         (security/summary invited)
+                       :inviter      (security/summary user)}
+              writer  (role invited :writer)
+              auth    (assoc writer :invite invite)]
+          (if (domain/has-auth? application (:id invited))
+            (fail :already-has-auth)
+            (do
+              (mongo/update
+                :applications
+                {:_id application-id
+                 :auth {$not {$elemMatch {:invite.user.username email}}}}
+                {$push {:auth auth}})
+              (notifications/send-invite! email text application user host))))))))
+
+(defcommand "approve-invite"
+  {:parameters [:id]
+   :roles      [:applicant]
+   :verified   true}
+  [{user :user :as command}]
+  (with-application command
+    (fn [{application-id :id :as application}]
+      (when-let [my-invite (domain/invite application (:email user))]
+        (executed "set-user-to-document"
+          (-> command
+            (assoc-in [:data :documentId] (:documentId my-invite))
+            (assoc-in [:data :userId]     (:id user))))
+        (mongo/update :applications
+          {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
+          {$set  {:auth.$ (role user :writer)}})))))
+
+(defcommand "remove-invite"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (with-user email
+        (fn [_]
+          (mongo/update-by-id :applications application-id
+            {$pull {:auth {$and [{:username email}
+                                 {:type {$ne :owner}}]}}}))))))
+
+;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
+(defcommand "remove-auth"
+  {:parameters [:id :email]
+   :roles      [:applicant]}
+  [{{:keys [id email]} :data :as command}]
+  (with-application command
+    (fn [{application-id :id}]
+      (mongo/update-by-id :applications application-id
+        {$pull {:auth {$and [{:username email}
+                             {:type {$ne :owner}}]}}}))))
+
+(defcommand "add-comment"
+  {:parameters [:id :text :target]
+   :roles      [:applicant :authority]}
+  [{{:keys [text target]} :data {:keys [host]} :web :keys [user created] :as command}]
+  (with-application command
+    (fn [{:keys [id state] :as application}]
+      (update-application command
+        {$set {:modified  created}
+         $push {:comments {:text    text
+                           :target  target
+                           :created created
+                           :user    (security/summary user)}}})
+
+      (condp = (keyword state)
+
+        ;; LUPA-XYZ (was: open-application)
+        :draft  (when (not (s/blank? text))
+                  (update-application command
+                    {$set {:modified created
+                           :state    :open
+                           :opened   created}}))
+
+        ;; LUPA-371
+        :info (when (security/authority? user)
+                (update-application command
+                  {$set {:state    :answered
+                         :modified created}}))
+
+        ;; LUPA-371 (was: mark-inforequest-answered)
+        :answered (when (security/applicant? user)
+                    (update-application command
+                      {$set {:state :info
+                             :modified created}}))
+
+        nil)
+
+      ;; TODO: details should come from updated state!
+      (notifications/send-notifications-on-new-comment! application user text host))))
+
+(defcommand "set-user-to-document"
+  {:parameters [:id :documentId :userId :path]
+   :authenticated true}
+  [{{:keys [documentId userId path]} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (let [document     (domain/get-document-by-id application documentId)
+            schema-name  (get-in document [:schema :info :name])
+            schema       (get schemas/schemas schema-name)
+            subject      (security/get-non-private-userinfo userId)
+            henkilo      (domain/user2henkilo subject)
+            full-path    (str "documents.$.data" (when-not (s/blank? path) (str "." path)))]
+        (if (nil? document)
+          (fail :error.document-not-found)
+          (do
+            (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
+            (mongo/update
+              :applications
+              {:_id (:id application)
+               :documents {$elemMatch {:id documentId}}}
+              {$set {full-path henkilo
+                     :modified (:created command)}})))))))
+
+
+;;
+;; Assign
+;;
+
+(defcommand "assign-to-me"
+  {:parameters [:id]
+   :roles      [:authority]}
+  [{{id :id} :data user :user :as command}]
+  (with-application command
+    (fn [application]
+      (mongo/update-by-id
+        :applications (:id application)
+        {$set {:authority (security/summary user)}}))))
+
 (defcommand "assign-application"
   {:parameters  [:id :assigneeId]
    :roles       [:authority]}
@@ -117,6 +280,10 @@
         (if assigneeId
           {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
           {$unset {:authority ""}})))))
+
+;;
+;;
+;;
 
 (defcommand "cancel-application"
   {:parameters [:id]
