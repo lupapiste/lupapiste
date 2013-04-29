@@ -42,6 +42,16 @@
 (defn get-application-operation [app]
   (first (:operations app)))
 
+(defn update-application
+  "get current application from command (or fail) and run changes into it."
+  [command changes]
+  (with-application command
+    (fn [{:keys [id]}]
+      (mongo/update
+        :applications
+        {:_id id}
+        changes))))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -108,6 +118,8 @@
           {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
           {$unset {:authority ""}})))))
 
+
+;; FIXME: sending double notifications, only called from add-comment
 (defcommand "open-application"
   {:parameters [:id]
    :roles      [:applicant]
@@ -148,7 +160,7 @@
       (let [application-id (:id application)]
         (mongo/update
           :applications {:_id (:id application) :state :sent}
-          {$set {:state :complement-needed}})
+    {$set {:state :complement-needed}})
         (notifications/send-notifications-on-application-state-change! application-id (get-in command [:web :host]))))))
 
 (defcommand "approve-application"
@@ -211,18 +223,6 @@
       (mongo/update
         :applications {:_id (:id application)}
           {$set {:shapes [shape]}})))))
-
-(defcommand "mark-inforequest-answered"
-  {:parameters [:id]
-   :roles      [:authority]
-   :states     [:info]}
-  [command]
-  (with-application command
-    (fn [application]
-      (mongo/update
-        :applications {:_id (:id application)}
-        {$set {:state :answered
-               :modified (:created command)}}))))
 
 (defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]

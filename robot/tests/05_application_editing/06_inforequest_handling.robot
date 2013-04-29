@@ -64,8 +64,8 @@ Authority can not cancel the inforequest
 Authority can not convert the inforequest to application
   Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
-Authority marks inforequest answered
-  Click by test id  inforequest-mark-answered
+Authority adds a comment marking inforequest answered
+  Add comment   oletko miettinyt tuulivoimaa?
   Wait until  Inforequest state is  Vastattu
   Logout
 
@@ -76,6 +76,10 @@ Mikko sees the inforequest answered
 
 Mikko should still be able to add attachment
   Element should be visible  //*[@data-test-id='add-inforequest-attachment']
+
+When Mikko adds a comment inforequest goes back to Avoin
+  Add comment   tuulivoima on ok.
+  Wait until  Inforequest state is  Avoin
 
 *** Keywords ***
 
@@ -94,3 +98,7 @@ Inforequest is not assigned
 Inforequest is assigned to
   [Arguments]  ${address}  ${name}
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${name}
+
+Add Comment
+  [Arguments]  ${message}
+  Input comment  inforequest  ${message}
