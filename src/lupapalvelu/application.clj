@@ -72,7 +72,7 @@
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
-;; application id and the authorities in that municipality.
+;; application id and the authorities in that organization.
 (defquery "authorities-in-applications-organization"
   {:parameters [:id]
    :authenticated true}
@@ -226,9 +226,9 @@
           {$set {:state :answered
                  :modified (:created command)}}))))
 
-(defn- make-attachments [created op municipality-id & {:keys [target]}]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
-    (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
+(defn- make-attachments [created op organization-id & {:keys [target]}]
+  (let [organization (mongo/select-one :organizations {:_id organization-id} {:operations-attachments 1})]
+    (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
       {:id (mongo/create-id)
        :type {:type-group type-group :type-id type-id}
        :state :requires_user_action
@@ -319,7 +319,7 @@
                                    :title         address
                                    :auth          [owner]
                                    :documents     (if info-request? [] (make-documents user created nil op))
-                                   :attachments   (if info-request? [] (make-attachments created op municipality))
+                                   :attachments   (if info-request? [] (make-attachments created op organization))
                                    :allowedAttachmentTypes (if info-request?
                                                              [[:muut [:muu]]]
                                                              (partition 2 attachment/attachment-types))
@@ -343,7 +343,7 @@
             new-docs   (make-documents nil created documents op)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
-                                                        :attachments (make-attachments created op (:municipality application))}
+                                                        :attachments (make-attachments created op (:organization application))}
                                               $set {:modified created}})
         (ok)))))
 
@@ -362,7 +362,7 @@
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})
+                                              $pushAll {:attachments (make-attachments created op (:organization inforequest))}})
         (ok)))))
 
 ;;
@@ -377,8 +377,8 @@
    :roles      [:applicant :authority]}
   [{{:keys [id documentId buildingId]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality propertyId] :as application}]
-      (if-let [legacy (municipality/get-legacy municipality)]
+    (fn [{:keys [organization propertyId] :as application}]
+      (if-let [legacy (municipality/get-legacy organization)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-id (:documents application) documentId)
               old-body     (:data document)
@@ -399,8 +399,8 @@
    :roles      [:applicant :authority]}
   [{{:keys [id]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality propertyId] :as application}]
-      (if-let [legacy   (municipality/get-legacy municipality)]
+    (fn [{:keys [organization propertyId] :as application}]
+      (if-let [legacy   (municipality/get-legacy organization)]
         (let [kryspxml  (krysp/building-xml legacy propertyId)
               buildings (krysp/->buildings kryspxml)]
           (ok :data buildings))
