@@ -289,29 +289,21 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft :info :open :submitted]}
-  [{{:keys [host]} :web :as command}]
-  [command]
-  (with-application command
-    (fn [{id :id}]
-      (let [new-state :canceled]
-        (mongo/update-by-id :applications (-> command :data :id)
-                            {$set {:modified (:created command)
-                                   :state new-state}})
-        (notifications/send-notifications-on-application-state-change! id host)
-        (ok)))))
+  [{{id :id} :data {:keys [host]} :web created :created :as command}]
+  (update-application command
+    {$set {:modified  created
+           :state     :canceled}})
+  (notifications/send-notifications-on-application-state-change! id host))
 
 (defcommand "request-for-complement"
   {:parameters [:id]
    :roles      [:authority]
    :states     [:sent]}
-  [command]
-  (with-application command
-    (fn [application]
-      (let [application-id (:id application)]
-        (mongo/update
-          :applications {:_id (:id application) :state :sent}
-    {$set {:state :complement-needed}})
-        (notifications/send-notifications-on-application-state-change! application-id (get-in command [:web :host]))))))
+  [{{id :id} :data {host :host} :web created :created :as command}]
+  (update-application command
+    {$set {:modified  created
+           :state :complement-needed}})
+  (notifications/send-notifications-on-application-state-change! id host))
 
 (defcommand "approve-application"
   {:parameters [:id :lang]
