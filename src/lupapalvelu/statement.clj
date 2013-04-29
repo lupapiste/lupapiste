@@ -37,10 +37,10 @@
 
 (defquery "get-statement-persons"
   {:roles [:authority :authorityAdmin]}
-  [{{:keys [municipality]} :user}]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality})
-        permitPersons (or (:statementPersons municipality) [])]
-    (println municipality)
+  [{{:keys [organizations]} :user}]
+  (let [organization (mongo/select-one :organizations {:_id (first organizations)})
+        permitPersons (or (:statementPersons organization) [])]
+    (println organization)
     (ok :data permitPersons)))
 
 (defcommand "create-statement-person"
