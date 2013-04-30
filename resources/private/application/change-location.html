@@ -15,7 +15,7 @@
             <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
             <input data-bind="value: application.title, valueUpdate: 'afterkeydown'" data-test-id="application-new-title" type="text" class="form-input text long"></input>
            </div>
-           <button data-bind="ltext: 'ok', visible: true" class="btn btn-primary btn-dialog close"></button>
+           <button data-bind="ltext: 'save', click: application.saveNewLocation" class="btn btn-primary btn-dialog"></button>
           </div>
         </div>
       </div>

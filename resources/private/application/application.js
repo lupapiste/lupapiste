@@ -330,9 +330,14 @@
     },
 
     changeLocation: function() {
-      // TODO WIP
       var dialogSelector = "#dialog-change-location-" + (application.infoRequest() ? "inforequest" : "application");
       LUPAPISTE.ModalDialog.open(dialogSelector);
+    },
+
+    saveNewLocation: function() {
+      // TODO WIP
+      LUPAPISTE.ModalDialog.close();
+      alert("OK");
     },
 
     requestForComplement: function(model) {
