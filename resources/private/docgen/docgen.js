@@ -69,11 +69,13 @@ var docgen = (function() {
       }
 
       input.className = "form-input " + type + " " + (extraClass || "");
-      input.onchange = save;
 
-      if (readonly){
+      if (readonly) {
         input.readOnly = true;
+      } else {
+        input.onchange = save;
       }
+
 
       if (type === "checkbox") {
         input.checked = value;
@@ -157,8 +159,13 @@ var docgen = (function() {
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
 
+      if (subSchema.readonly){
+        input.readOnly = true;
+      } else {
+        input.onchange = save;
+      }
+
       input.className = "form-input textarea";
-      input.onchange = save;
       input.value = getModelValue(model, subSchema.name);
 
       span.appendChild(makeLabel("text", myPath));
@@ -196,7 +203,13 @@ var docgen = (function() {
 
       select.name = myPath;
       select.className = "form-input combobox";
-      select.onchange = save;
+
+
+      if (subSchema.readonly) {
+        select.readOnly = true;
+      } else {
+        select.onchange = save;
+      }
 
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));

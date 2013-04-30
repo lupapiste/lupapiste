@@ -418,6 +418,7 @@
         updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
                   ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
                   ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]]]
+    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
     (mongo/update
       :applications
       {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
