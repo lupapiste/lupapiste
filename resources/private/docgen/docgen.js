@@ -178,6 +178,7 @@ var docgen = (function() {
       var myPath = path.join(".");
       var value = getModelValue(model, subSchema.name);
       var span = makeEntrySpan(subSchema);
+      // TODO: readonly support
 
       span.appendChild(makeLabel("date", myPath));
 
@@ -286,7 +287,7 @@ var docgen = (function() {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema);
-
+      //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
       select.onchange = function(e) {
@@ -350,7 +351,7 @@ var docgen = (function() {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-
+    //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox long";
       select.onchange = function(e) {
