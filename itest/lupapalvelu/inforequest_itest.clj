@@ -25,7 +25,7 @@
     (fact "Sonja can assign inforequest to herself"
       (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)
 
-    (fact "WHen Commenting on inforequest marks it answered"
+    (fact "When Commenting on inforequest marks it answered"
       (query-application pena id)    => (in-state? :info)
       (comment-application id sonja)
       (query-application pena id)    => (in-state? :answered))
