@@ -353,6 +353,7 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
+;; TODO: wrong place
 (defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
@@ -360,6 +361,7 @@
        :type {:type-group type-group :type-id type-id}
        :state :requires_user_action
        :target target
+       :locked false
        :modified created
        :versions []
        :op op})))
