@@ -46,21 +46,23 @@
 (defcommand "create-statement-person"
   {:parameters [:email :text]
    :roles      [:authorityAdmin]}
-  [{{:keys [email text]} :data {:keys [municipality] :as user} :user}]
-  (with-user email
-    (fn [{:keys [firstName lastName] :as user}]
-      (if-not (security/authority? user)
-        (fail :error.not-authority)
-        (do
-          (mongo/update
-            :municipalities
-            {:_id municipality}
-            {$push {:statementPersons {:id (mongo/create-id)
-                                       :text text
-                                       :email email
-                                       :name (str firstName " " lastName)}}})
-          (notifications/send-create-statement-person! email text municipality))))))
-
+  [{{:keys [email text]} :data {:keys [organizations] :as user} :user}]
+  (let [organization-id (first organizations)
+        organization (mongo/select-one :organizations {:_id organization-id})]
+    (with-user email
+      (fn [{:keys [firstName lastName] :as user}]
+        (if-not (security/authority? user)
+          (fail :error.not-authority)
+          (do
+            (mongo/update
+              :organizations
+              {:_id organization-id}
+              {$push {:statementPersons {:id (mongo/create-id)
+                                         :text text
+                                         :email email
+                                         :name (str firstName " " lastName)}}})
+            (notifications/send-create-statement-person! email text organization)))))))
+  
 (defcommand "delete-statement-person"
   {:parameters [:personId]
    :roles      [:authorityAdmin]}
