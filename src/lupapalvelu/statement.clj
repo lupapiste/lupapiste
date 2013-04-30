@@ -66,11 +66,12 @@
 (defcommand "delete-statement-person"
   {:parameters [:personId]
    :roles      [:authorityAdmin]}
-  [{{:keys [personId]} :data {:keys [municipality] :as user} :user}]
+  [{{:keys [personId]} :data {:keys [organizations] :as user} :user}]
+  (let [organization-id (first organizations)]
   (mongo/update
-    :municipalities
-    {:_id municipality}
-    {$pull {:statementPersons {:id personId}}}))
+    :organizations
+    {:_id organization-id}
+    {$pull {:statementPersons {:id personId}}})))
 
 ;;
 ;; Authority operations
