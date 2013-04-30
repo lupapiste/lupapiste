@@ -1,3 +1,4 @@
 info: Avoin
-rakennuspaikka.kiinteisto.maapintaala Maapinta-ala
-rakennuspaikka.kiinteisto.vesipintaala Vesipinta-ala
+rakennuspaikka.kiinteisto.maapintaala: Maapinta-ala
+rakennuspaikka.kiinteisto.vesipintaala: Vesipinta-ala
+unit.hehtaaria: ha

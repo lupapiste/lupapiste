@@ -490,8 +490,8 @@
               :type :group
               :body [{:name "maaraalaTunnus" :type :string}
                      {:name "tilanNimi" :type :string :readonly true}
-                     {:name "maapintaala" :type :string :readonly true}
-                     {:name "vesipintaala" :type :string :readonly true}]}
+                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                     {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
 
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
