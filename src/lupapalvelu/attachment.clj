@@ -95,6 +95,7 @@
    :locked locked
    :state :requires_user_action
    :target target
+   :op op
    :versions []})
 
 (defn make-attachments
@@ -329,11 +330,8 @@
         (fail :file_not_linked_to_the_document)))))
 
 (defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (println "kosh?" attachmentId (:data command))
-  (if (-> (get-attachment-info application attachmentId) :locked (= true))
-    (do
-      (println "kosh")
-      (fail :error.attachment-is-locked))))
+  (when (-> (get-attachment-info application attachmentId) :locked (= true))
+    (fail :error.attachment-is-locked)))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
