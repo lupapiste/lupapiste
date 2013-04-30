@@ -53,7 +53,7 @@
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
-              <p data-bind="ltext: 'application.assignee'">K��sittelij��:</p>
+              <p data-bind="ltext: 'application.assignee'"></p>
               <span id="test-inforequest-assignee" class="application_summary_text">
 
                 <select id="inforequest-assignee-select"
@@ -130,6 +130,8 @@
           <h3 class="tab-info" data-bind="ltext: 'inforequest.comments'"></h3>
           <div data-bind="template: {name: 'comment-template', data: $root.comment}"></div>
         </div>
+
+      </div>
 
     </div>
   </section>
