@@ -2,11 +2,11 @@
   "use strict";
 
   var isInitializing = true;
-  var currentId;
+  var currentId = null;
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
-  var applicationMap;
-  var inforequestMap;
+  var applicationMap = null;
+  var inforequestMap = null;
 
   var stampModel = new function() {
     var self = this;
@@ -624,7 +624,7 @@
   });
 
   // tabs
-  var selectedTab;
+  var selectedTab = "";
   var tabFlow = false;
   hub.subscribe("set-debug-tab-flow", function(e) {
     tabFlow = e.value;
