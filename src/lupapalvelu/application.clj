@@ -197,7 +197,7 @@
   (with-application command
     (fn [{:keys [id state] :as application}]
       (update-application command
-        {$set {:modified  created}
+        {$set  {:modified created}
          $push {:comments {:text    text
                            :target  target
                            :created created
