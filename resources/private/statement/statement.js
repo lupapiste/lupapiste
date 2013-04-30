@@ -71,7 +71,7 @@
     };
 
     self.newAttachment = function() {
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId});
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true);
     };
   }
 

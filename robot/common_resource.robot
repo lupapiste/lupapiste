@@ -243,7 +243,7 @@ Click enabled by test id
   Click by test id  ${id}
 
 #
-# Helpser for inforequest and application crud operations:
+# Helper for inforequest and application crud operations:
 #
 
 Create application the fast way
