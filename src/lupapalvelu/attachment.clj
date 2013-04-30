@@ -88,10 +88,11 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-(defn make-attachment [now target attachement-type]
+(defn make-attachment [now target locked attachement-type]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
+   :locked locked
    :state :requires_user_action
    :target target
    :versions []})
@@ -99,10 +100,10 @@
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment nil now) attachement-types))
+  (map (partial make-attachment nil false now) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target]
-  (let [attachment (make-attachment now target attachement-type)]
+(defn create-attachment [application-id attachement-type now target locked]
+  (let [attachment (make-attachment now target locked attachement-type)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -181,9 +182,9 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target]
+(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
   (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created target)
+                        (create-attachment id attachement-type created target locked)
                         attachment-id)]
     (set-attachment-version id attachment-id file-id filename content-type size created user false)))
 
@@ -196,13 +197,15 @@
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
+(defn get-attachment-info
+  "gets an attachment from application or nil"
+  [{:keys [attachments]} attachmentId]
+  (first (filter #(= (:id %) attachmentId) attachments)))
+
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
-  [{:keys [attachments]} attachmentId]
-  (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
-        versions   (:versions attachment)
-        file-ids   (map :fileId versions)]
-    file-ids))
+  [application attachmentId]
+  (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
@@ -330,7 +333,10 @@
    :roles      [:applicant :authority]
    :states     [:draft :info :open :submitted :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target]} :data :as command}]
+  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
+  (if (-> (get-attachment-info application attachmentId) :locked (= true))
+    (println "IS LOCKED!"))
+  (println "****" (-> (get-attachment-info application attachmentId) :locked (= true)))
   (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
   (if (> size 0)
     (let [file-id (mongo/create-id)
@@ -340,7 +346,7 @@
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target)]
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
               (executed "add-comment"
                 (-> command
                   (assoc :data {:id id
