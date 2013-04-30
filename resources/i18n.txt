@@ -46,3 +46,4 @@ stamp.file.status.done: Valmis
 stamp.file.status.error: Epäonnistui
 stamp.verdict: hyväksytty
 
+organization.links: Kunnan rakennusvalvonnan suosittelemat linkit

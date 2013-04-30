@@ -282,12 +282,8 @@
    :name (keyword op-name)
    :created created})
 
-;TODO Could this be implemented as a Mongo query?
-(defn resolve-organization-id [municipality]
-  (:id (first (filter (fn [x] (some #(= municipality %) (:municipalities x))) (mongo/select :organizations)))))
-
 (defn user-is-authority-in-municipality [user municipality]
-  (let [org (resolve-organization-id municipality)]
+  (let [org (municipality/resolve-organization-id municipality)]
     (some #(= org %) (:organizations user ))))
 
 (defcommand "create-application"
@@ -303,7 +299,7 @@
           info-request? (if infoRequest true false)
           state         (if (or info-request? (security/authority? user)) :open :draft)
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
-          organization  (resolve-organization-id municipality)]
+          organization  (municipality/resolve-organization-id municipality)]
       (mongo/insert :applications {:id            id
                                    :created       created
                                    :opened        (when (= state :open) created)
