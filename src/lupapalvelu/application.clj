@@ -300,7 +300,7 @@
 (defcommand "approve-application"
   {:parameters [:id :lang]
    :roles      [:authority]
-   :states     [:submitted]}
+   :states     [:submitted :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
