@@ -82,8 +82,8 @@
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
   [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
   (with-application command
-    (fn [{:keys [municipality] :as application}]
-      (municipality/with-municipality municipality
+    (fn [{:keys [organization] :as application}]
+      (municipality/with-organization organization
         (fn [{:keys [statementPersons]}]
           (let [now            (now)
                 personIdSet    (set personIds)
