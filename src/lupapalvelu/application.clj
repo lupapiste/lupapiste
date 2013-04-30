@@ -24,7 +24,8 @@
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
-            [lupapalvelu.ktj :as ktj]))
+            [lupapalvelu.ktj :as ktj]
+            [lupapalvelu.document.commands :as commands]))
 
 ;;
 ;; Common helpers:
@@ -414,17 +415,15 @@
   (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
         kiinteistotunnus (:propertyId application)
         ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
-        updates [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
-                 ["kiinteisto.maapintaala" (:maapintaala ktj-tiedot)]
-                 ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]]]
-    (clojure.pprint/pprint ktj-tiedot)
-    (clojure.pprint/pprint updates)
-    (flush)
-    (command :update-doc [:id (:id application) :doc (:id rakennuspaikka) :updates updates])
-
-    ; pöivitä ktj tiedoilla rakennuspaikka ja documentti generaatori tukemaan read only kenttiä + tests
-
-    ))
+        updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
+                  ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
+                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]]]
+    (mongo/update
+      :applications
+      {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
+      {$set (assoc
+              (commands/->update "documents.$.data" updates)
+              :modified (:created (now)))})))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
