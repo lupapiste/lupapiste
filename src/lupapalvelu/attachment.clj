@@ -88,21 +88,23 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-(defn make-attachment [now target attachement-type]
+(defn make-attachment [now target locked op attachement-type]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
+   :locked locked
    :state :requires_user_action
    :target target
+   :op op
    :versions []})
 
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment nil now) attachement-types))
+  (map (partial make-attachment nil false nil now) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target]
-  (let [attachment (make-attachment now target attachement-type)]
+(defn create-attachment [application-id attachement-type now target locked]
+  (let [attachment (make-attachment now target locked nil attachement-type)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -181,9 +183,9 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target]
+(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
   (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created target)
+                        (create-attachment id attachement-type created target locked)
                         attachment-id)]
     (set-attachment-version id attachment-id file-id filename content-type size created user false)))
 
@@ -196,13 +198,15 @@
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
+(defn get-attachment-info
+  "gets an attachment from application or nil"
+  [{:keys [attachments]} attachmentId]
+  (first (filter #(= (:id %) attachmentId) attachments)))
+
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
-  [{:keys [attachments]} attachmentId]
-  (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
-        versions   (:versions attachment)
-        file-ids   (map :fileId versions)]
-    file-ids))
+  [application attachmentId]
+  (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
@@ -325,22 +329,27 @@
         (delete-attachment-version application attachmentId fileId)
         (fail :file_not_linked_to_the_document)))))
 
+(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
+  (when (-> (get-attachment-info application attachmentId) :locked (= true))
+    (fail :error.attachment-is-locked)))
+
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
+   :validators [attachment-is-not-locked]
    :states     [:draft :info :open :submitted :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target]} :data :as command}]
-  (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
+  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
   (if (> size 0)
     (let [file-id (mongo/create-id)
-        sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+          sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+      (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
       (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target)]
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
               (executed "add-comment"
                 (-> command
                   (assoc :data {:id id
@@ -352,7 +361,7 @@
                                          :fileId (:fileId attachment-version)}})))
               (fail :error.unknown)))
           (fail :error.illegal-attachment-type))
-      (fail :error.illegal-file-type)))
+        (fail :error.illegal-file-type)))
     (fail :error.select-file)))
 
 ;;

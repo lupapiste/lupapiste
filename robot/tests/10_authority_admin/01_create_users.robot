@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-Authority admin goes to admin page
+Authority admin goes to the authority admin page
   Sipoo logs in
   Wait until page contains element  test-authority-admin-users-table
 

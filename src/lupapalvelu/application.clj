@@ -199,7 +199,7 @@
   (with-application command
     (fn [{:keys [id state] :as application}]
       (update-application command
-        {$set {:modified  created}
+        {$set  {:modified created}
          $push {:comments {:text    text
                            :target  target
                            :created created
@@ -358,13 +358,7 @@
 (defn- make-attachments [created op municipality-id & {:keys [target]}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
-      {:id (mongo/create-id)
-       :type {:type-group type-group :type-id type-id}
-       :state :requires_user_action
-       :target target
-       :modified created
-       :versions []
-       :op op})))
+      (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data]
   (reduce
