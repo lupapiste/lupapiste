@@ -1,6 +1,0 @@
-admin.adminpage-title: Pääkäyttäjän osio
-admin.admin-users: Kuntien pääkäyttäjät
-admin.addAdminUser: Lisää pääkäyttäjä
-admin.editAdminUser: Muokkaa pääkäyttäjää
-admin.selectAdminMunicipality: Pääkäyttäjän sijaintikunta:
-admin.municipality: Kunta
