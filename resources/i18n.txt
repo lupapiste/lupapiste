@@ -1,2 +1,0 @@
-info: Avoin
-error.attachment-is-locked: Liitetiedosto on lukossa
