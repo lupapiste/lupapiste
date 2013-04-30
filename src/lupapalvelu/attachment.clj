@@ -334,32 +334,31 @@
    :states     [:draft :info :open :submitted :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
-  (if (-> (get-attachment-info application attachmentId) :locked (= true))
-    (println "IS LOCKED!"))
-  (println "****" (-> (get-attachment-info application attachmentId) :locked (= true)))
-  (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
-  (if (> size 0)
-    (let [file-id (mongo/create-id)
-        sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
-      (if (mime/allowed-file? sanitazed-filename)
-        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
-          (let [content-type (mime/mime-type sanitazed-filename)]
-            (mongo/upload id file-id sanitazed-filename content-type tempfile created)
-            (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
-              (executed "add-comment"
-                (-> command
-                  (assoc :data {:id id
-                                :text text,
-                                :target {:type :attachment
-                                         :id (:id attachment-version)
-                                         :version (:version attachment-version)
-                                         :filename (:filename attachment-version)
-                                         :fileId (:fileId attachment-version)}})))
-              (fail :error.unknown)))
-          (fail :error.illegal-attachment-type))
-      (fail :error.illegal-file-type)))
-    (fail :error.select-file)))
+  (if (-> (get-attachment-info application attachmentId) :locked (not= true))
+    (if (> size 0)
+      (let [file-id (mongo/create-id)
+            sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+        (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
+        (if (mime/allowed-file? sanitazed-filename)
+          (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
+            (let [content-type (mime/mime-type sanitazed-filename)]
+              (mongo/upload id file-id sanitazed-filename content-type tempfile created)
+              (.delete (io/file tempfile))
+              (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
+                (executed "add-comment"
+                  (-> command
+                    (assoc :data {:id id
+                                  :text text,
+                                  :target {:type :attachment
+                                           :id (:id attachment-version)
+                                           :version (:version attachment-version)
+                                           :filename (:filename attachment-version)
+                                           :fileId (:fileId attachment-version)}})))
+                (fail :error.unknown)))
+            (fail :error.illegal-attachment-type))
+          (fail :error.illegal-file-type)))
+      (fail :error.select-file))
+    (fail :error.attachment-is-locked)))
 
 ;;
 ;; Download
