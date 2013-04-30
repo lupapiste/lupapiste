@@ -336,8 +336,17 @@
 
     saveNewLocation: function() {
       // TODO WIP
-      LUPAPISTE.ModalDialog.close();
-      alert("OK");
+      ajax.command("change-location", {id: application.id(),
+                                       x: application.location().x(),
+                                       y: application.location().y(),
+                                       address: application.title(),
+                                       propertyId: application.propertyId()})
+      .success(function() {
+        repository.load(application.id());
+        LUPAPISTE.ModalDialog.close();
+        })
+      .call();
+      return false;
     },
 
     requestForComplement: function(model) {

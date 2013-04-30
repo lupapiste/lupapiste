@@ -350,7 +350,7 @@
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [{{:keys [shape]} :data :as command}]
   (update-application command
     {$set {:shapes [shape]}}))
@@ -463,7 +463,7 @@
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [command]
   (with-application command
     (fn [application]
@@ -478,6 +478,14 @@
                                                         :attachments (make-attachments created op (:municipality application))}
                                               $set {:modified created}})
         (ok)))))
+
+(defcommand "change-location"
+  {:parameters [:id :x :y :address :propertyId]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :answered :open :complement-needed]}
+  [command]
+  (ok)
+  )
 
 (defcommand "convert-to-application"
   {:parameters [:id]
