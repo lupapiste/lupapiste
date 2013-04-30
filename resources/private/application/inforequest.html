@@ -70,8 +70,14 @@
         <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
-          <button data-bind="ltext: 'inforequest.convertToApplication', visible: $root.authorization.ok('convert-to-application'), click: convertToApplication" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary"></button>
-          <button data-bind="ltext: 'inforequest.cancelInforequest',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn"></button>
+          <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">
+            <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
+            <span class="icon send left-align"></span>
+          </button>
+          <button data-bind="click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn">
+            <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
+            <span class="icon remove-grey left-align"></span>
+          </button>
         </div>
       </div>
     </div>
