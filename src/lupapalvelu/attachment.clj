@@ -88,7 +88,7 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-(defn make-attachment [now target locked attachement-type]
+(defn make-attachment [now target locked op attachement-type]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
@@ -100,10 +100,10 @@
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment nil false now) attachement-types))
+  (map (partial make-attachment nil false nil now) attachement-types))
 
 (defn create-attachment [application-id attachement-type now target locked]
-  (let [attachment (make-attachment now target locked attachement-type)]
+  (let [attachment (make-attachment now target locked nil attachement-type)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
