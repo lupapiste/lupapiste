@@ -23,7 +23,8 @@
             [lupapalvelu.municipality :as municipality]
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.ktj :as ktj]))
 
 ;;
 ;; Common helpers:
@@ -409,6 +410,22 @@
    :name (keyword op-name)
    :created created})
 
+(defn- autofill-rakennuspaikka [application]
+  (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
+        kiinteistotunnus (:propertyId application)
+        ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
+        updates [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
+                 ["kiinteisto.maapintaala" (:maapintaala ktj-tiedot)]
+                 ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]]]
+    (clojure.pprint/pprint ktj-tiedot)
+    (clojure.pprint/pprint updates)
+    (flush)
+    (command :update-doc [:id (:id application) :doc (:id rakennuspaikka) :updates updates])
+
+    ; pöivitä ktj tiedoilla rakennuspaikka ja documentti generaatori tukemaan read only kenttiä + tests
+
+    ))
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
@@ -445,6 +462,7 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
+      (autofill-rakennuspaikka app-with-ver)
       (ok :id id))
     (fail :error.unauthorized)))
 
