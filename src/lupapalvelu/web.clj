@@ -290,13 +290,14 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
-  (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
                            :target target
+                           :locked (java.lang.Boolean/parseBoolean locked)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
