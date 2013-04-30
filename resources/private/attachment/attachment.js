@@ -219,7 +219,7 @@ var attachment = (function() {
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
 
-    authorizationModel.refresh(application);
+    authorizationModel.refresh(application, {attachmentId: attachmentId});
     pageutil.hideAjaxWait();
   }
 
