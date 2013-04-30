@@ -2,7 +2,7 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=15  run_on_failure=Log Source
+Library        Selenium2Library   timeout=10  run_on_failure=Log Source
 
 *** Variables ***
 
@@ -243,7 +243,7 @@ Click enabled by test id
   Click by test id  ${id}
 
 #
-# Helpser for inforequest and application crud operations:
+# Helper for inforequest and application crud operations:
 #
 
 Create application the fast way

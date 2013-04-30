@@ -4,9 +4,12 @@
   <section class="page" id="admin">
     <div class="container">
       <div class="breadcrumb">
-        <a href="#!/applications">Pääkäyttäjän osio</a>
+        <a href="#!/admin" data-bind="ltext: 'admin.adminpage-title'"></a>
       </div>
-      <h1 id="admin-header">Pääkäyttäjän osio</h1>
+      <h1 id="admin-header" data-bind="ltext: 'admin.adminpage-title'"></h1>
+
+      <div data-bind="template: {name: 'admin-user-list-template', data: {users: $root.users, usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateAdminModal, openCommandEditModal: $root.users.openAdminModifyModal, openCommandResetPwModal: $root.users.openAdminPasswordModal}}"></div>
+
       <h3>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h3>
       <ul data-bind="foreach: fixtures.data()">
         <li>
@@ -24,6 +27,7 @@
           <th>toiminto</th>
           <th>tyyppi</th>
           <th>roolit</th>
+          <th>tilat</th>
           <th>parametrit</th>
           <th>l&auml;hdekoodi</th>
           <th>kuvaus</th>
@@ -37,6 +41,13 @@
             <td>
               <!-- ko if: $data.roles -->
               <ul data-bind="foreach: roles">
+                <li data-bind="text: $data"></li>
+              </ul>
+              <!-- /ko -->
+            </td>
+            <td>
+              <!-- ko if: $data.states -->
+              <ul data-bind="foreach: states">
                 <li data-bind="text: $data"></li>
               </ul>
               <!-- /ko -->
@@ -60,6 +71,9 @@
         </tbody>
       </table>
     </div>
+
+    <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserTitle: 'admin.addAdminUser', modifyUserTitle: 'admin.editAdminUser'}}"></div>
+
   </section>
 </body>
 </html>

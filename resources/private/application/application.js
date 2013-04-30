@@ -340,17 +340,6 @@
       return false;
     },
 
-    markInforequestAnswered: function(model) {
-      var applicationId = application.id();
-      ajax.command("mark-inforequest-answered", {id: applicationId})
-        .success(function() {
-          notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
-          repository.load(applicationId);
-        })
-        .call();
-      return false;
-    },
-
     convertToApplication: function() {
       var id = application.id();
       ajax.command("convert-to-application", {id: id})

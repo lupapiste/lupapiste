@@ -20,6 +20,7 @@ Mikko submits application & goes for lunch
   Logout
 
 Sonja logs in and throws in a verdict
+  [Tags]  fail
   Sonja logs in
   Open application  Olutteltta  753-416-25-30
   Open tab  verdict
@@ -37,6 +38,7 @@ Sonja logs in and throws in a verdict
   [Teardown]  Logout
 
 Mikko sees that the application has verdict
+  [Tags]  fail
   Mikko logs in
   Open application  Olutteltta  753-416-25-30
   Open tab  verdict

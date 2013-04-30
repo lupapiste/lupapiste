@@ -133,7 +133,7 @@ var docgen = (function () {
     function buildCheckbox(subSchema, model, path, save) {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
-      span.appendChild(makeInput("checkbox", myPath, model[subSchema.name], save));
+      span.appendChild(makeInput("checkbox", myPath, getModelValue(model, subSchema.name), save));
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }

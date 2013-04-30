@@ -10,6 +10,7 @@
             [lupapalvelu.vetuma :as vetuma]
             [sade.security :as sadesecurity]
             [sade.util :as util]
+            [sade.env :as env]
             [noir.session :as session]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
@@ -105,3 +106,17 @@
     {$set (select-keys data [:firstName :lastName :street :city :zip :phone])})
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
+
+
+(env/in-dev
+  (defcommand "create-apikey"
+  {:parameters [:username :password]}
+  [command]
+  (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
+    (let [apikey (security/create-apikey)]
+      (mongo/update
+        :users
+        {:username (:username user)}
+        {$set {"private.apikey" apikey}})
+      (ok :apikey apikey))
+      (fail :error.unauthorized))))
