@@ -1,1 +1,3 @@
 info: Avoin
+rakennuspaikka.kiinteisto.maapintaala Maapinta-ala
+rakennuspaikka.kiinteisto.vesipintaala Vesipinta-ala
