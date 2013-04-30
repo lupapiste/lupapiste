@@ -277,11 +277,11 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target) {
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target);
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked);
   }
 
   function regroupAttachmentTypeList(types) {
