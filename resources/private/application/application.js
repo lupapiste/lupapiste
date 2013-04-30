@@ -273,7 +273,8 @@
     };
   }();
 
-  var application = {
+  var application = {};
+  application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
     state: ko.observable(),
@@ -287,7 +288,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
     applicant: ko.observable(),
@@ -327,6 +327,12 @@
     submitApplication: function() {
       submitApplicationModel.init(application.id());
       return false;
+    },
+
+    changeLocation: function() {
+      // TODO WIP
+      var dialogSelector = "#dialog-change-location-" + (application.infoRequest() ? "inforequest" : "application");
+      LUPAPISTE.ModalDialog.open(dialogSelector);
     },
 
     requestForComplement: function(model) {
