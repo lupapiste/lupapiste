@@ -38,3 +38,10 @@
            (hash-map :##text (first content)))))
 
 (defn xml->edn [xml] (hash-map (:tag xml) (-> xml parts lift-text-nodes)))
+
+;;
+;; get attribute value
+;;
+
+(defn select1-attribute-value [xml selector attribute-name]
+  (-> (first (enlive/select xml selector)) :attrs attribute-name))
