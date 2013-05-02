@@ -487,8 +487,7 @@
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:municipality application))}
-                                              $set {:modified created}})
-        (ok)))))
+                                              $set {:modified created}})))))
 
 (defcommand "change-location"
   {:parameters [:id :x :y :address :propertyId]
@@ -500,8 +499,7 @@
                                               :address       (s/trim address)
                                               ;:propertyId    propertyId
                                               :title         (s/trim address)
-                                              :modified      created}})
-  (ok))
+                                              :modified      created}}))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
