@@ -411,7 +411,8 @@
         ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
         updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
                   ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
-                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]]]
+                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]
+                  ["kiinteisto.rekisterointipvm" (:rekisterointipvm ktj-tiedot)]]]
     ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
     (mongo/update
       :applications
