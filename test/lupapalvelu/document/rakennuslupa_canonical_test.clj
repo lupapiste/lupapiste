@@ -515,7 +515,7 @@
 
     (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
     (fact "Rakennus" rakennus => truthy)
-    (fact "rakentajaTyyppi" (:rakentajaTyyppi rakennus) => "muu")
+    (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
     (fact "rakennuksentiedot" rakennuksentiedot => truthy)
     (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "011 yhden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
