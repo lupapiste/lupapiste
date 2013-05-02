@@ -390,6 +390,9 @@
   (let [v (str v)]
     (if (s/blank? v) 0.0 (Double/parseDouble v))))
 
+(defn- ->location [x y]
+  {:x (->double x) :y (->double y)})
+
 (defn- permit-type-from-operation [operation]
   ;; TODO operation to permit type mapping???
   "buildingPermit")
@@ -442,7 +445,7 @@
                          :operations    [op]
                          :state         state
                          :municipality  municipality
-                         :location      {:x (->double x) :y (->double y)}
+                         :location      (->location x y)
                          :address       address
                          :propertyId    propertyId
                          :title         address
@@ -483,7 +486,13 @@
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]}
-  [command]
+  [{{:keys [id x y address propertyId]} :data created :created}]
+  (debug id x y address propertyId)
+  (mongo/update-by-id :applications id {$set {:location      (->location x y)
+                                              :address       address
+                                              :propertyId    propertyId
+                                              :title         address
+                                              :modified      created}})
   (ok)
   )
 
