@@ -18,11 +18,11 @@
 (defmethod validate :group [_ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
-(defmethod validate :string [elem v]
+(defmethod validate :string [{:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
-    (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
-    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]
+    (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
+    (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
 
 (defmethod validate :text [elem v]
