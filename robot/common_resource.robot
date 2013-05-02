@@ -287,14 +287,13 @@ Prepare new request
   Input text by test id  create-address  ${address}
   Input text by test id  create-property-id  ${propertyId}
   Select From List by test id  create-municipality-select  ${municipality}
+  Set animations off
   Click enabled by test id  create-continue
-  # Going too fast causes animation to stop
-  Set Selenium Speed  ${OP_TREE_SPEED}
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
-  Set Selenium Speed  ${DEFAULT_SPEED}
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Set animations on
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
@@ -397,4 +396,14 @@ Set integration proxy on
 
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
+
+#
+# Animations control:
+#
+
+Set animations on
+  Execute Javascript  tree.animation(true);
+
+Set animations off
+  Execute Javascript  tree.animation(false);
 
