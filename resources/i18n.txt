@@ -1,1 +1,0 @@
-rakennuspaikka.kiinteisto.rekisterointipvm: Rekisteröintipäivä
