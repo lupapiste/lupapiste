@@ -21,7 +21,7 @@
    :open "vireill\u00e4"
    :sent "vireill\u00e4"
    :submitted "vireill\u00e4"
-   ::complement-needed "vireill\u00e4"})
+   :complement-needed "vireill\u00e4"})
 
 (defn to-xml-date [timestamp]
   (let [d (from-long timestamp)]
