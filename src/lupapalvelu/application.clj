@@ -164,10 +164,10 @@
       (let [new-state :submitted
             application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
-            municipality (mongo/by-id :municipalities (:municipality application))]
+            organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application municipality)
+        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application organization)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})

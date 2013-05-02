@@ -194,9 +194,9 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
-(defn get-application-as-krysp [application lang submitted-application municipality]
+(defn get-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
-  (let [sftp-user (:rakennus-ftp-user municipality)
+  (let [sftp-user (:rakennus-ftp-user organization)
         rakennusvalvonta-directory "/rakennus"
         dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
         output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory)
