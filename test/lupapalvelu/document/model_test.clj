@@ -43,21 +43,29 @@
 
 (facts "with real schemas - important field for paasuunnittelija"
   (let [schema (schemas "paasuunnittelija")]
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"]])   => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimiz" "Tauno"]])  => [["henkilotiedot.etunimiz" :err "illegal-key"]])
-    (fact (validate-updates schema [["henkilotiedot.sukunimi" "Palo"]])   => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimi"  "Palo"]])  => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimiz" "Palo"]])  => [["henkilotiedot.sukunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"]])          => [])
+    (fact (validate-updates schema [["henkilotiedot.etunimiz" "Tauno"]])         => [["henkilotiedot.etunimiz" :err "illegal-key"]])
+    (fact (validate-updates schema [["henkilotiedot.sukunimi" "Palo"]])          => [])
+    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"]
+                                    ["henkilotiedot.sukunimi"  "Palo"]])         => [])
+    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"]
+                                    ["henkilotiedot.sukunimiz" "Palo"]])         => [["henkilotiedot.sukunimiz" :err "illegal-key"]])
     (fact (validate-updates schema [["yhteystiedot.email" "tauno@example.com"]]) => [])
-    (fact (validate-updates schema [["yhteystiedot.puhelin" "050"]]) =>        [])))
+    (fact (validate-updates schema [["yhteystiedot.puhelin" "050"]])             => [])))
 
 (facts "Repeating section"
-  (fact "Single value contains no nested sections" (validate-updates schema-with-repetition [["single.1.single2"]]) => [["single.1.single2" :err "illegal-key"]])
-  (fact "Repeating section happy case" (validate-updates schema-with-repetition [["repeats.1.single2" "foo"]]) => [])
-  (fact "Invalid key under nested section" (validate-updates schema-with-repetition [["repeats.1.single3" "foo"]]) => [["repeats.1.single3" :err "illegal-key"]])
-  (fact "Unindexed repeating section" (validate-updates schema-with-repetition [["repeats.single2" "foo"]]) => [["repeats.single2" :err "illegal-key"]])
-  (fact "Repeating string, 0" (validate-updates schema-with-repetition [["repeats.1.repeats2.0" "1"]]) => [])
-  (fact "Repeating string, 1" (validate-updates schema-with-repetition [["repeats.1.repeats2.1" "foo"]]) => [["repeats.1.repeats2.1" :warn "illegal-number"]]))
+  (fact "Single value contains no nested sections"
+    (validate-updates schema-with-repetition [["single.1.single2"]])           => [["single.1.single2" :err "illegal-key"]])
+  (fact "Repeating section happy case"
+    (validate-updates schema-with-repetition [["repeats.1.single2" "foo"]])    => [])
+  (fact "Invalid key under nested section"
+    (validate-updates schema-with-repetition [["repeats.1.single3" "foo"]])    => [["repeats.1.single3" :err "illegal-key"]])
+  (fact "Unindexed repeating section"
+    (validate-updates schema-with-repetition [["repeats.single2" "foo"]])      => [["repeats.single2" :err "illegal-key"]])
+  (fact "Repeating string, 0"
+    (validate-updates schema-with-repetition [["repeats.1.repeats2.0" "1"]])   => [])
+  (fact "Repeating string, 1"
+    (validate-updates schema-with-repetition [["repeats.1.repeats2.1" "foo"]]) => [["repeats.1.repeats2.1" :warn "illegal-number"]]))
 
 (facts "Facts about validation-status"
  (fact (validation-status []) => :ok)
