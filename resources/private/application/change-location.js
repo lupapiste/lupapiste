@@ -1,7 +1,7 @@
 LUPAPISTE.ChangeLocationModel = function() {
   var self = this;
   self.id = 0;
-  self.dialogSelector = "";
+  self.dialogSelector = "#dialog-change-location";
   self.x = ko.observable(0);
   self.y = ko.observable(0);
   self.address = ko.observable("");
@@ -10,7 +10,6 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.reset = function(app) {
     self.id = app.id();
-    self.dialogSelector = "#dialog-change-location-" + (app.infoRequest() ? "inforequest" : "application");
     self.x(app.location().x());
     self.y(app.location().y());
     self.address(app.address());

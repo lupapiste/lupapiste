@@ -724,7 +724,7 @@
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-
+    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
     attachmentTemplatesModel.init();
   });
 
