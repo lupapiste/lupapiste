@@ -488,13 +488,12 @@
    :states     [:draft :info :answered :open :complement-needed]}
   [{{:keys [id x y address propertyId]} :data created :created}]
   (debug id x y address propertyId)
-  (mongo/update-by-id :applications id {$set {:location      (->location x y)
+  (mongo/update-by-id :applications id {$set {;:location      (->location x y)
                                               :address       address
-                                              :propertyId    propertyId
+                                              ;:propertyId    propertyId
                                               :title         address
                                               :modified      created}})
-  (ok)
-  )
+  (ok))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
