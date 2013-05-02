@@ -1,31 +1,22 @@
 var comments = (function() {
   "use strict";
 
-  function CommentModel() {
+  function CommentModel(takeAll) {
     var self = this;
 
     self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
 
-    //TODO: hide all other mutators
     self.refresh = function(application, target) {
       self.setApplicationId(application.id);
-      self.setTarget(target || {type: "application"});
-      self.setComments(application.comments);
-    };
-
-    self.setComments = function(comments) {
+      self.target(target || {type: "application"});
       var filteredComments =
-        _.filter(comments,
+        _.filter(application.comments,
             function(comment) {
-              return self.target().type === comment.target.type && self.target().id === comment.target.id;
+              return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
             });
       self.comments(ko.mapping.fromJS(filteredComments));
-    };
-
-    self.setTarget = function(target) {
-      self.target(target);
     };
 
     self.setApplicationId = function(applicationId) {
@@ -47,13 +38,13 @@ var comments = (function() {
       return false;
     };
 
-    self.category = function(model) {
-      return model.target && model.target.version ? "category-new-attachment-version" : "category-default";
+    self.isForNewAttachment = function(model) {
+      return model && model.target && model.target.version && true;
     };
   }
 
   return {
-    create: function() { return new CommentModel(); }
+    create: function(takeAll) { return new CommentModel(takeAll); }
   };
 
 })();

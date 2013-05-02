@@ -14,7 +14,6 @@
             [noir.cookies :as cookies]
             [sade.env :as env]
             [lupapalvelu.core :as core]
-            [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
             [lupapalvelu.user :as user]
@@ -25,6 +24,7 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
+            [lupapalvelu.etag :as etag]
             [sade.security :as sadesecurity]
             [sade.status :as status]
             [sade.strings :as ss]
@@ -157,11 +157,14 @@
                    :admin admin?})
 
 (defn cache-headers [resource-type]
-  (if (= :html resource-type)
+  (if (env/dev-mode?)
     {"Cache-Control" "no-cache"}
-    (if (env/dev-mode?)
-      {"Cache-Control" "no-cache"}
-      {"Cache-Control" "public, max-age=86400"})))
+    (if (= :html resource-type)
+      {"Cache-Control" "no-cache"
+       "ETag"          etag/etag}
+      {"Cache-Control" "public, max-age=864000"
+       "Vary"          "Accept-Encoding"
+       "ETag"          etag/etag})))
 
 (def default-lang "fi")
 
@@ -287,13 +290,14 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
-  (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
-  (let [target (if (every? s/blank? [targetId targetType]) nil {:type targetType :id targetId})
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
+  (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
                            :target target
+                           :locked (java.lang.Boolean/parseBoolean locked)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
@@ -302,10 +306,11 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.3.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
+                                            :locked (or locked "false")
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 

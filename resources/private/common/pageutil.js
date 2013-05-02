@@ -30,12 +30,12 @@ var pageutil = (function() {
   }
 
   function getPage() {
-    var pageMatch = window.location.hash.match(/\/(\w*)/);
+    var pageMatch = window.location.hash.match(/\/([\-\w]*)/);
     return pageMatch ? pageMatch[1] : null;
   }
 
   $(function() {
-    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader">');
+    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader" width="66" height="66">');
     ajaxLoaderContainer = $('<div class="ajax-loader-container">').append(ajaxImg);
     $('body').append(ajaxLoaderContainer);
   });
