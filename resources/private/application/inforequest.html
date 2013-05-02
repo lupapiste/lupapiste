@@ -10,7 +10,7 @@
 
         <div data-bind="with: application" class="application_summary_info">
           <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span>
-          <a class="icon" data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation"></a>
+          <a class="icon" data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"></a>
           </h1>
 
           <!-- Property ID: -->
