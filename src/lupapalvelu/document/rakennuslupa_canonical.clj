@@ -20,7 +20,8 @@
   {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
    :open "vireill\u00e4"
    :sent "vireill\u00e4"
-   :submitted "vireill\u00e4"})
+   :submitted "vireill\u00e4"
+   :complement-needed "vireill\u00e4"})
 
 (defn to-xml-date [timestamp]
   (let [d (from-long timestamp)]
@@ -176,7 +177,8 @@
   {:draft :created
    :open :opened
    ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened})
+   :submitted :opened
+   :complement-needed :opened})
 
 (defn- get-state [application]
   (let [state (keyword (:state application))]
