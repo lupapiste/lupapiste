@@ -56,7 +56,7 @@ var docgen = (function() {
       return label;
     }
 
-    function makeInput(type, path, value, save, extraClass) {
+    function makeInput(type, path, value, save, extraClass, readonly) {
       var input = document.createElement("input");
       input.id = pathStrToID(path);
       input.name = docId + "." + path;
@@ -69,7 +69,13 @@ var docgen = (function() {
       }
 
       input.className = "form-input " + type + " " + (extraClass || "");
-      input.onchange = save;
+
+      if (readonly) {
+        input.readOnly = true;
+      } else {
+        input.onchange = save;
+      }
+
 
       if (type === "checkbox") {
         input.checked = value;
@@ -101,7 +107,7 @@ var docgen = (function() {
     function buildCheckbox(subSchema, model, path, save) {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema);
-      span.appendChild(makeInput("checkbox", myPath, getModelValue(model, subSchema.name), save));
+      span.appendChild(makeInput("checkbox", myPath, getModelValue(model, subSchema.name), save, subSchema.readonly));
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
@@ -116,7 +122,7 @@ var docgen = (function() {
       var span =  makeEntrySpan(subSchema);
       var type = (subSchema.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[subSchema.size] || "";
-      var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass);
+      var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass, subSchema.readonly);
       setMaxLen(input, subSchema);
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
@@ -153,8 +159,13 @@ var docgen = (function() {
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
 
+      if (subSchema.readonly){
+        input.readOnly = true;
+      } else {
+        input.onchange = save;
+      }
+
       input.className = "form-input textarea";
-      input.onchange = save;
       input.value = getModelValue(model, subSchema.name);
 
       span.appendChild(makeLabel("text", myPath));
@@ -167,6 +178,7 @@ var docgen = (function() {
       var myPath = path.join(".");
       var value = getModelValue(model, subSchema.name);
       var span = makeEntrySpan(subSchema);
+      // TODO: readonly support
 
       span.appendChild(makeLabel("date", myPath));
 
@@ -192,7 +204,13 @@ var docgen = (function() {
 
       select.name = myPath;
       select.className = "form-input combobox";
-      select.onchange = save;
+
+
+      if (subSchema.readonly) {
+        select.readOnly = true;
+      } else {
+        select.onchange = save;
+      }
 
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
@@ -251,7 +269,7 @@ var docgen = (function() {
 
       $.each(subSchema.body, function (i, o) {
         var pathForId = myPath + "." + o.name;
-        var input = makeInput("radio", myPath, o.name, save);
+        var input = makeInput("radio", myPath, o.name, save, subSchema.readonly);
         input.id = pathStrToID(pathForId);
         input.checked = o.name === myModel;
 
@@ -269,7 +287,7 @@ var docgen = (function() {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema);
-
+      //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
       select.onchange = function(e) {
@@ -333,7 +351,7 @@ var docgen = (function() {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-
+    //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox long";
       select.onchange = function(e) {

@@ -485,11 +485,14 @@
       :body party}
 
      {:info {:name "rakennuspaikka"
-             :order 2} ; TODO sijainti(kios?/ jo kartalta osoitettu)
+             :order 2}
       :body [{:name "kiinteisto"
               :type :group
               :body [{:name "maaraalaTunnus" :type :string}
-                     {:name "tilanNimi" :type :string}]}
+                     {:name "tilanNimi" :type :string :readonly true}
+                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                     {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
+
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}

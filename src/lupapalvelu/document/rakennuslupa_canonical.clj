@@ -158,10 +158,10 @@
       base-data)))
 
 (defn- get-parties-by-type [documents tag-name party-type doc-transformer]
-  (into [] (for [doc (documents party-type)
-                 :let [osapuoli (:data doc)]
-                 :when (seq osapuoli)]
-             {tag-name (doc-transformer osapuoli party-type)})))
+  (for [doc (documents party-type)
+        :let [osapuoli (:data doc)]
+        :when (seq osapuoli)]
+    {tag-name (doc-transformer osapuoli party-type)}))
 
 (defn get-parties [documents]
   (into
