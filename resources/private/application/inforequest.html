@@ -10,7 +10,7 @@
 
         <div data-bind="with: application" class="application_summary_info">
           <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span>
-          <a class="icon" data-bind="ltext: 'edit', click: changeLocation"></a>
+          <a class="icon" data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation"></a>
           </h1>
 
           <!-- Property ID: -->
@@ -145,7 +145,7 @@
 
     <div data-bind="template: {name: 'change-location-template',
                                data: {dialogId: 'dialog-change-location-inforequest',
-                                      application: $root.application}}"></div>
+                                      model: $root.changeLocationModel}}"></div>
 
   </section>
 </body>

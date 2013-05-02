@@ -5,7 +5,7 @@
       <script type="text/html" id="change-location-template">
 
       <div data-bind="attr: {id: dialogId}" class="window autosized">
-        <div >
+        <div data-bind="with: model">
           <div class="dialog-header">
             <p data-bind="ltext: 'edit'"></p>
             <p class="dialog-close close">X</p>
@@ -13,9 +13,9 @@
           <div class="dialog-content">
            <div class="form-entry">
             <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-            <input data-bind="value: application.title, valueUpdate: 'afterkeydown'" data-test-id="application-new-title" type="text" class="form-input text long"></input>
+            <input data-bind="value: address, valueUpdate: 'afterkeydown'" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
            </div>
-           <button data-bind="ltext: 'save', click: application.saveNewLocation" class="btn btn-primary btn-dialog"></button>
+           <button data-bind="ltext: 'save', click: saveNewLocation" class="btn btn-primary btn-dialog"></button>
           </div>
         </div>
       </div>

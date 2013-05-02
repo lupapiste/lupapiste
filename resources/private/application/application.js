@@ -7,6 +7,7 @@
   var commentModel = comments.create(true);
   var applicationMap = null;
   var inforequestMap = null;
+  var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
 
   var stampModel = new function() {
     var self = this;
@@ -329,26 +330,6 @@
       return false;
     },
 
-    changeLocation: function() {
-      var dialogSelector = "#dialog-change-location-" + (application.infoRequest() ? "inforequest" : "application");
-      LUPAPISTE.ModalDialog.open(dialogSelector);
-    },
-
-    saveNewLocation: function() {
-      // TODO WIP
-      ajax.command("change-location", {id: application.id(),
-                                       x: application.location().x(),
-                                       y: application.location().y(),
-                                       address: application.title(),
-                                       propertyId: application.propertyId()})
-      .success(function() {
-        repository.load(application.id());
-        LUPAPISTE.ModalDialog.close();
-        })
-      .call();
-      return false;
-    },
-
     requestForComplement: function(model) {
       var applicationId = application.id();
       ajax.command("request-for-complement", { id: applicationId})
@@ -582,6 +563,8 @@
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
 
+      changeLocationModel.reset(application);
+
       isInitializing = false;
       pageutil.hideAjaxWait();
     });
@@ -737,7 +720,8 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
-      stampModel: stampModel
+      stampModel: stampModel,
+      changeLocationModel: changeLocationModel
     };
 
     $("#application").applyBindings(bindings);
