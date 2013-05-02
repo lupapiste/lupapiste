@@ -25,7 +25,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.document.commands :as commands]))
+            [lupapalvelu.document.commands :as commands]
+            [clj-time.format :as tf]))
 
 ;;
 ;; Common helpers:
@@ -405,6 +406,9 @@
    :name (keyword op-name)
    :created created})
 
+(def ktj-format (tf/formatter "yyyyMMdd"))
+(def output-format (tf/formatter "dd.MM.yyyy"))
+
 (defn- autofill-rakennuspaikka [application]
   (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
         kiinteistotunnus (:propertyId application)
@@ -412,7 +416,10 @@
         updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
                   ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
                   ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]
-                  ["kiinteisto.rekisterointipvm" (:rekisterointipvm ktj-tiedot)]]]
+                  ["kiinteisto.rekisterointipvm" (try
+                                                   (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                   (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+
     ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
     (mongo/update
       :applications
