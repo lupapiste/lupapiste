@@ -34,7 +34,8 @@ LUPAPISTE.ChangeLocationModel = function() {
     return false;
   };
 
-  self.changeLocation = function() {
+  self.changeLocation = function(app) {
+    self.reset(app);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 };

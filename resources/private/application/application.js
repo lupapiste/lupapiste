@@ -563,8 +563,6 @@
       var assigneeId = assignee ? assignee.id : null;
       application.assignee(assigneeId);
 
-      changeLocationModel.reset(application);
-
       isInitializing = false;
       pageutil.hideAjaxWait();
     });
