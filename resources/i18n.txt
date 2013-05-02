@@ -1,6 +1,0 @@
-info: Avoin
-rakennuspaikka.kiinteisto.maapintaala: Maapinta-ala
-rakennuspaikka.kiinteisto.vesipintaala: Vesipinta-ala
-unit.hehtaaria: ha
-application.verdict.title: Päätös
-application.verdict.no-attachments: Halutessasi voit liittää päätökseen tiedostoja, kuten kuvia, piirroksia ja dokumentteja
