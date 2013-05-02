@@ -485,13 +485,13 @@
 (defcommand "change-location"
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed]}
+   :states     [:draft :info :answered :open :complement-needed]
+   :validators [(partial non-blank-parameters [:address])]}
   [{{:keys [id x y address propertyId]} :data created :created}]
-  (debug id x y address propertyId)
   (mongo/update-by-id :applications id {$set {;:location      (->location x y)
-                                              :address       address
+                                              :address       (s/trim address)
                                               ;:propertyId    propertyId
-                                              :title         address
+                                              :title         (s/trim address)
                                               :modified      created}})
   (ok))
 
