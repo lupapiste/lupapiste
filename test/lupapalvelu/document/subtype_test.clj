@@ -36,7 +36,8 @@
   (subtype-validation {:subtype :letter} "\u00e4") => nil?
   (subtype-validation {:subtype :letter} "1") => [:warn "illegal-letter"]
   (subtype-validation {:subtype :letter} "@") => [:warn "illegal-letter"]
-  (subtype-validation {:subtype :letter :case :upper} "A") => nil?
-  (subtype-validation {:subtype :letter :case :upper} "a") => [:warn "illegal-letter"]
-  (subtype-validation {:subtype :letter :case :lower} "a") => nil?
-  (subtype-validation {:subtype :letter :case :lower} "A") => [:warn "illegal-letter"])
+  (fact "with upper & lower case definitions"
+    (subtype-validation {:subtype :letter :case :upper} "A") => nil?
+    (subtype-validation {:subtype :letter :case :upper} "a") => [:warn "illegal-letter"]
+    (subtype-validation {:subtype :letter :case :lower} "a") => nil?
+    (subtype-validation {:subtype :letter :case :lower} "A") => [:warn "illegal-letter"]))
