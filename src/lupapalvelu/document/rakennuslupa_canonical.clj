@@ -20,7 +20,8 @@
   {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
    :open "vireill\u00e4"
    :sent "vireill\u00e4"
-   :submitted "vireill\u00e4"})
+   :submitted "vireill\u00e4"
+   :complement-needed "vireill\u00e4"})
 
 (defn to-xml-date [timestamp]
   (let [d (from-long timestamp)]
