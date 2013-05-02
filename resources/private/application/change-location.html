@@ -14,7 +14,7 @@
             <input data-bind="value: address, valueUpdate: 'afterkeydown'" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
            </div>
            <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
-           <button data-bind="ltext: 'save', click: saveNewLocation" class="btn btn-primary btn-dialog"></button>
+           <button data-bind="ltext: 'save', click: saveNewLocation" class="btn btn-primary btn-dialog" data-test-id="change-location-save"></button>
            <button data-bind="ltext: 'cancel'" class="btn btn-dialog close"></button>
           </div>
         </div>
