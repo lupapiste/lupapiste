@@ -24,3 +24,14 @@
   (fact (subtype-validation {:subtype :number} "123") => nil?)
   (fact (subtype-validation {:subtype :number} "abc") => [:warn "illegal-number"])
   (fact (subtype-validation {:subtype :number} " 123 ") => [:warn "illegal-number"]))
+
+(facts "Facts about letter validation"
+  (subtype-validation {:subtype :letter} "a") => nil?
+  (subtype-validation {:subtype :letter} "A") => nil?
+  (subtype-validation {:subtype :letter} "\u00e4") => nil?
+  (subtype-validation {:subtype :letter} "1") => [:warn "illegal-letter"]
+  (subtype-validation {:subtype :letter} "@") => [:warn "illegal-letter"]
+  (subtype-validation {:subtype :letter :case :upper} "A") => nil?
+  (subtype-validation {:subtype :letter :case :upper} "a") => [:warn "illegal-letter"]
+  (subtype-validation {:subtype :letter :case :lower} "a") => nil?
+  (subtype-validation {:subtype :letter :case :lower} "A") => [:warn "illegal-letter"])

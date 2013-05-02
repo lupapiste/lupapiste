@@ -28,11 +28,15 @@
     (re-matches #"^\d$" v) nil
     :else [:warn "illegal-number"]))
 
-(defmethod subtype-validation :letter [_ v]
+(defmethod subtype-validation :letter [{letter-case :case} v]
+  (let [regexp (condp = letter-case
+                 :lower #"^\p{Ll}$"
+                 :upper #"^\p{Lu}$"
+                 #"^\p{L}$")]
   (cond
     (blank? v) nil
-    (re-matches #"^\p{L}$" v) nil
-    :else [:warn "illegal-letter"]))
+    (re-matches regexp v) nil
+    :else [:warn "illegal-letter"])))
 
 (defmethod subtype-validation :kiinteistotunnus [_ v]
   (cond
