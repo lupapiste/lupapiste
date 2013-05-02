@@ -44,14 +44,8 @@
     (catch Exception e [:warn "invalid-date-format"])))
 
 
-;; FIXME
-(defmethod validate :select [elem v]
-  nil)
-
-;; FIXME
-(defmethod validate :radioGroup [elem v]
-  nil)
-
+(defmethod validate :select [elem v] nil)
+(defmethod validate :radioGroup [elem v] nil)
 (defmethod validate :buildingSelector [elem v] nil)
 (defmethod validate :personSelector [elem v] nil)
 

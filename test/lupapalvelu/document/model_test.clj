@@ -28,8 +28,8 @@
 (def find-by-name #'lupapalvelu.document.model/find-by-name)
 
 (facts "Facts about internals"
-  (fact (find-by-name (:body schema) ["a"]) => (-> schema :body first))
-  (fact (find-by-name (:body schema) ["a" "aa"]) => {:name "aa" :type :string})
+  (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
+  (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
   (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
 
