@@ -178,8 +178,7 @@
    :open :opened
    :complement-needed :opened
    ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened
-   :complement-needed :opened})
+   :submitted :opened})
 
 (defn- get-state [application]
   (let [state (keyword (:state application))]
