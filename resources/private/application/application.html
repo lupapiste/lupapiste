@@ -13,7 +13,9 @@
           </div>
         </div>
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: permitType"></span><span data-bind="text: address" data-test-id="application-title"></span></h1>
+          <h1><span data-bind="ltext: permitType"></span><span data-bind="text: address" data-test-id="application-title"></span>
+          <a class="icon" data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation"></a>
+          </h1>
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
@@ -497,6 +499,9 @@
         </div>
       </div>
 
+      <div data-bind="template: {name: 'change-location-template',
+                                 data: {dialogId: 'dialog-change-location-application',
+                                        model: $root.changeLocationModel}}"></div>
     </div>
   </section>
 </body>
