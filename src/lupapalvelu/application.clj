@@ -486,7 +486,7 @@
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
-   :validators [(partial non-blank-parameters [:address])]}
+   :input-validators [(partial non-blank-parameters [:address])]}
   [{{:keys [id x y address propertyId]} :data created :created}]
   (mongo/update-by-id :applications id {$set {;:location      (->location x y)
                                               :address       (s/trim address)
