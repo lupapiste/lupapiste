@@ -40,7 +40,6 @@
   [{{:keys [municipality]} :user}]
   (let [municipality (mongo/select-one :municipalities {:_id municipality})
         permitPersons (or (:statementPersons municipality) [])]
-    (println municipality)
     (ok :data permitPersons)))
 
 (defcommand "create-statement-person"
@@ -77,6 +76,7 @@
 (defcommand "request-for-statement"
   {:parameters  [:id :personIds]
    :roles       [:authority]
+   :states      [:draft :info :open :submitted :complement-needed]
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
   [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
   (with-application command
@@ -103,6 +103,7 @@
 
 (defcommand "delete-statement"
   {:parameters [:id :statementId]
+   :states      [:draft :info :open :submitted :complement-needed]
    :roles      [:authority]}
   [{{:keys [id statementId]} :data}]
   (mongo/update :applications {:_id id} {$pull {:statements {:id statementId}}}))
@@ -110,6 +111,7 @@
 (defcommand "give-statement"
   {:parameters  [:id :statementId :status :text]
    :validators  [statement-exists statement-owner statement-not-given]
+   :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
    :description "authrority-roled statement owners can give statements that are not given already"}
   [{{:keys [id statementId status text]} :data}]

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="verdict" data-bind="with: $root.verdictModel">
+
+    <div class="headerarea">
+      <h1>
+        <span data-bind="with: application">
+          <span data-bind="text: title"></span>:
+        </span>
+        <span data-bind="ltext: 'application.verdict.title'"></span>
+      </h1>
+      <span data-bind="with: application" class="attachment-back ">
+        <a class="btn" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/verdict' }, ltext: 'attachment.return'"></a>
+      </span>
+    </div>
+
+    <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
+      <div class="statement-attachments">
+        <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
+        <div data-bind="if: attachments().length">
+          <table class="table" data-test-id="inforequest-attachments-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: attachments">
+              <tr data-bind="with: $data.latestVersion">
+                <td>
+                  <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                  <i data-bind="ltext: contentType"></i>
+                  <i data-bind="size: size"></i>
+                </td>
+                <td>
+                  <span data-bind="dateString: $parent.modified"></span>
+                  <span data-bind="fullName: user"></span>
+                </td>
+                <td>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div data-bind="ifnot: attachments().length">
+          <i data-bind="ltext: 'statement.attachments'" data-test-id="inforequest-attachments-no-attachments"></i>
+        </div>
+
+        <button
+          class="btn modal"
+          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: newAttachment"
+          data-test-id="add-inforequest-attachment"
+          data-window-id="upload-dialog">
+        </button>
+      </div>
+    </div>
+
+    <div class="statement-info">
+      <form data-bind="with: $root.verdictModel">
+
+        <hr/>
+
+        <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>
+        <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: verdictId, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-id"></input>
+
+        <label for="verdict-type-select" class="form-label" data-bind="ltext: 'verdict.status'"></label><br/>
+        <select id="verdict-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.status.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-verdict')"></select>
+
+        <label class="form-label" data-bind="ltext: 'verdict.name'"></label><br/>
+        <input type="text" class="form-input long" data-bind="value: name, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-name"></input>
+
+        <label class="form-label" data-bind="ltext: 'verdict.given'"></label><br/>
+        <input type="text" class="form-input long" data-bind="datepicker: given, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-given"></input>
+
+        <label class="form-label" data-bind="ltext: 'verdict.official'"></label><br/>
+        <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('give-verdict')" id="verdict-official"></input>
+
+        <button
+          data-bind="disable: disabled, click: submit, ltext: 'verdict.submit', visible: $root.authorization.ok('give-verdict')"
+          id="verdict-submit"
+          type="submit"
+          class="btn btn-primary">
+          Lähetä
+        </button>
+      </form>
+    </div>
+  </section>
+</body>
+</html>

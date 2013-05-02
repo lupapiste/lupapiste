@@ -4,13 +4,13 @@
   var isInitializing = true;
   var currentId;
   var authorizationModel = authorization.create();
-  var commentModel = comments.create();
+  var commentModel = comments.create(true);
   var applicationMap;
   var inforequestMap;
 
   var stampModel = new function() {
     var self = this;
-    
+
     self.statusInit      = 0;
     self.statusStarting  = 1;
     self.statusNoFiles   = 2;
@@ -21,10 +21,10 @@
     self.jobId = null;
     self.version = null;
     self.files = null;
-    
+
     self.status = ko.observable();
     self.filesTable = ko.observable();
-    
+
     self.init = function(applicationId) {
       self.applicationId = applicationId;
       self.jobId = null;
@@ -48,7 +48,7 @@
       job.status = ko.observable(loc("stamp.file.status", s));
       return [key, job];
     }
-    
+
     self.started = function(data) {
       if (data.count === 0) {
         self.status(self.statusNoFiles);
@@ -62,7 +62,7 @@
       }
       return false;
     };
-    
+
     self.queryUpdate = function() {
       ajax
         .query("stamp-attachments-job")
@@ -71,10 +71,10 @@
         .success(self.update)
         .call();
       return self;
-    }
+    };
 
     self.update = function(data) {
-      if (data.result === "timeout") return self.queryUpdate();
+      if (data.result === "timeout") { return self.queryUpdate(); }
       var job = data.job;
       self.version = job.version;
       _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
@@ -85,9 +85,9 @@
         self.queryUpdate();
       }
     };
-    
+
   }();
-  
+
   var removeDocModel = new function() {
     var self = this;
 
@@ -202,6 +202,26 @@
 
   }();
 
+  var verdictModel = new function() {
+    var self = this;
+
+    self.verdicts = ko.observable();
+    self.attachments = ko.observable();
+
+    self.refresh = function(application) {
+      self.verdicts(application.verdict);
+      self.attachments(_.filter(application.attachments,function(attachment) {
+        return _.isEqual(attachment.target, {type: "verdict"});
+      }));
+    };
+
+    self.openVerdict = function() {
+      window.location.hash = "#!/verdict/" + currentId;
+      return false;
+    };
+
+  }();
+
   var submitApplicationModel = new function() {
     var self = this;
 
@@ -224,15 +244,15 @@
       LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-submit", loc("application.submit.areyousure.title"), loc("application.submit.areyousure.message"), loc("yes"), self.ok, loc("no"));
     });
   }();
-  
+
   var addPartyModel = new function() {
     var self = this;
-    
+
     self.applicationId = null;
     self.partyDocumentNames = ko.observableArray();
-    
+
     self.documentName = ko.observable();
-    
+
     self.init = function(applicationId) {
       self.applicationId = applicationId;
       ajax.query("party-document-names", {id: applicationId}).success(function(d) { self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));}).call();
@@ -240,7 +260,7 @@
       LUPAPISTE.ModalDialog.open("#dialog-add-party");
       return false;
     };
-    
+
     self.addPartyEnabled = function() {
       return self.documentName();
     };
@@ -267,7 +287,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    verdict: ko.observable(),
     initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
@@ -315,17 +334,6 @@
       ajax.command("request-for-complement", { id: applicationId})
         .success(function() {
           notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-          repository.load(applicationId);
-        })
-        .call();
-      return false;
-    },
-
-    markInforequestAnswered: function(model) {
-      var applicationId = application.id();
-      ajax.command("mark-inforequest-answered", {id: applicationId})
-        .success(function() {
-          notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
           repository.load(applicationId);
         })
         .call();
@@ -385,7 +393,7 @@
       window.location.hash = "#!/add-operation/" + application.id();
       return false;
     },
-    
+
     addParty: function() {
       var id = application.id();
       addPartyModel.init(id);
@@ -407,7 +415,16 @@
       stampModel.init(application.id());
       return false;
     },
-    
+
+    newAttachment: function() {
+      attachment.initFileUpload(currentId, null, null, true);
+    },
+
+    newOtherAttachment: function() {
+      attachment.initFileUpload(currentId, null, 'muut.muu', false);
+    },
+
+
     changeTab: function(model,event) {
       var $target = $(event.target);
       if ($target.is("span")) { $target = $target.parent(); }
@@ -488,12 +505,15 @@
 
       // Comments:
       commentModel.setApplicationId(app.id);
-      commentModel.setComments(app.comments);
+      commentModel.refresh(app);
+
+      // Verdict details
+      verdictModel.refresh(app);
 
       // Operations:
 
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
-      
+
       // Attachments:
 
       var statuses = {
@@ -671,9 +691,9 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(function(e) {
-    if ((pageutil.getPage() === "application" || pageutil.getPage() === "inforequest") && (!currentId || (currentId === e.applicationDetails.application.id))) {
-      showApplication(e.applicationDetails);
+  repository.loaded(["application","inforequest"], function(application, applicationDetails) {
+    if (!currentId || (currentId === application.id)) {
+      showApplication(applicationDetails);
     }
   });
 
@@ -696,11 +716,12 @@
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
+      verdictModel: verdictModel,
       stampModel: stampModel
     };
 
-    ko.applyBindings(bindings, $("#application")[0]);
-    ko.applyBindings(bindings, $("#inforequest")[0]);
+    $("#application").applyBindings(bindings);
+    $("#inforequest").applyBindings(bindings);
 
     attachmentTemplatesModel.init();
   });

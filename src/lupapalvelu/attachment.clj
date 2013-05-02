@@ -88,21 +88,23 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-(defn make-attachment [now target attachement-type]
+(defn make-attachment [now target locked op attachement-type]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
+   :locked locked
    :state :requires_user_action
    :target target
+   :op op
    :versions []})
 
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment nil now) attachement-types))
+  (map (partial make-attachment nil false nil now) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target]
-  (let [attachment (make-attachment now target attachement-type)]
+(defn create-attachment [application-id attachement-type now target locked]
+  (let [attachment (make-attachment now target locked nil attachement-type)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -181,9 +183,9 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target]
+(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
   (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created target)
+                        (create-attachment id attachement-type created target locked)
                         attachment-id)]
     (set-attachment-version id attachment-id file-id filename content-type size created user false)))
 
@@ -196,13 +198,15 @@
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
+(defn get-attachment-info
+  "gets an attachment from application or nil"
+  [{:keys [attachments]} attachmentId]
+  (first (filter #(= (:id %) attachmentId) attachments)))
+
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
-  [{:keys [attachments]} attachmentId]
-  (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
-        versions   (:versions attachment)
-        file-ids   (map :fileId versions)]
-    file-ids))
+  [application attachmentId]
+  (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
@@ -249,7 +253,7 @@
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId attachmentType]} :data :as command}]
   (with-application command
     (fn [application]
@@ -270,7 +274,7 @@
   {:description "Authority can approve attachement, moves to ok"
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open :complement-needed :submitted]}
+   :states      [:draft :info :open :complement-needed :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
@@ -284,7 +288,7 @@
   {:description "Authority can reject attachement, requires user action."
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open :complement-needed :submitted]}
+   :states      [:draft :info :open :complement-needed :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
@@ -298,7 +302,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :open :complement-needed]}
+   :states      [:draft :info :open :complement-needed :submitted]}
   [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (create-attachments application-id attachment-types created)]
     (ok :applicationId application-id :attachmentIds attachment-ids)
@@ -307,7 +311,7 @@
 (defcommand "delete-attachment"
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
-   :states      [:draft :open :complement-needed]}
+   :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -317,7 +321,7 @@
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
-   :states      [:draft :open :complement-needed]}
+   :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -325,22 +329,27 @@
         (delete-attachment-version application attachmentId fileId)
         (fail :file_not_linked_to_the_document)))))
 
+(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
+  (when (-> (get-attachment-info application attachmentId) :locked (= true))
+    (fail :error.attachment-is-locked)))
+
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
-   :states     [:draft :open :submitted :complement-needed :answered]
+   :validators [attachment-is-not-locked]
+   :states     [:draft :info :open :submitted :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text target]} :data :as command}]
-  (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
-  (let [file-id (mongo/create-id)
-        sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
-    (if (mime/allowed-file? sanitazed-filename)
-      (if-let [application (mongo/by-id :applications id)]
+  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
+  (if (> size 0)
+    (let [file-id (mongo/create-id)
+          sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+      (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
+      (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target)]
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
               (executed "add-comment"
                 (-> command
                   (assoc :data {:id id
@@ -352,8 +361,8 @@
                                          :fileId (:fileId attachment-version)}})))
               (fail :error.unknown)))
           (fail :error.illegal-attachment-type))
-        (fail :error.no-such-application))
-      (fail :error.illegal-file-type))))
+        (fail :error.illegal-file-type)))
+    (fail :error.select-file)))
 
 ;;
 ;; Download
@@ -518,7 +527,7 @@
 (defcommand "stamp-attachments"
   {:parameters [:id]
    :roles      [:authority]
-   :states     [:draft :open :submitted :complement-needed]
+   :states     [:verdictGiven]
    :description "Stamps all attachments of given application"}
   [command]
   (with-application command

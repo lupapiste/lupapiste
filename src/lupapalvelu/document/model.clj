@@ -31,7 +31,7 @@
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
 
-(defmethod validate :boolean [_ v]
+(defmethod validate :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
 
@@ -43,9 +43,6 @@
     nil
     (catch Exception e [:warn "invalid-date-format"])))
 
-;; FIXME
-(defmethod validate :checkbox [elem v]
-  nil)
 
 ;; FIXME
 (defmethod validate :select [elem v]

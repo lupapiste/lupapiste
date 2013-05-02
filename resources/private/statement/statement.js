@@ -1,4 +1,4 @@
-var statement = (function() {
+(function() {
   "use strict";
 
   var applicationId = null;
@@ -17,9 +17,13 @@ var statement = (function() {
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
-      self.data(ko.mapping.fromJS(statement));
-      self.selectedStatus(statement.status);
-      self.text(statement.text);
+      if(statement) {
+        self.data(ko.mapping.fromJS(statement));
+        self.selectedStatus(statement.status);
+        self.text(statement.text);
+      } else {
+        window.location.hash = "!/404";
+      }
     };
 
     self.openDeleteDialog = function() {
@@ -67,7 +71,7 @@ var statement = (function() {
     };
 
     self.newAttachment = function() {
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId});
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true);
     };
   }
 
@@ -77,16 +81,12 @@ var statement = (function() {
   var commentsModel = new comments.create();
   var attachmentsModel = new AttachmentsModel();
 
-  repository.loaded(function(event) {
-    var application = event.applicationDetails.application;
-    if (pageutil.getPage() === "statement" && applicationId === application.id) {
+  repository.loaded(["statement"], function(application) {
+    if (applicationId === application.id) {
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
       attachmentsModel.refresh(application);
-
-      commentsModel.setApplicationId(application.id);
-      commentsModel.setTarget({type: "statement", id: statementId});
-      commentsModel.setComments(application.comments);
+      commentsModel.refresh(application, {type: "statement", id: statementId});
     }
   });
 

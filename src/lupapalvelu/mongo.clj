@@ -54,7 +54,7 @@
 (defn update-by-query
   "Updates data into collection. Returns the number of documents updated"
   [collection query data]
-  (.getN (mc/update collection query data)))
+  (.getN (mc/update collection query data :multi true)))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
