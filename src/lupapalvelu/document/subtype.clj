@@ -16,11 +16,15 @@
     (re-matches #"^\+?[\d\s-]+" v) nil
     :else [:warn "illegal-tel"]))
 
-(defmethod subtype-validation :number [_ v]
-  (cond
-    (blank? v) nil
-    (re-matches #"\d+" v) nil
-    :else [:warn "illegal-number"]))
+(defmethod subtype-validation :number [{:keys [min max]} v]
+  (when-not (blank? v)
+    (let [safe-int (fn [x default]
+                     (if (and x (re-matches (re-pattern "-?\\d+") (str x))) (read-string (str x)) default))
+          min-int  (safe-int min (java.lang.Integer/MIN_VALUE))
+          max-int  (safe-int max (java.lang.Integer/MAX_VALUE))
+          number   (safe-int v nil)]
+      (when-not (and number (<= min-int number max-int))
+        [:warn "illegal-number"]))))
 
 (defmethod subtype-validation :digit [_ v]
   (cond
@@ -28,8 +32,8 @@
     (re-matches #"^\d$" v) nil
     :else [:warn "illegal-number"]))
 
-(defmethod subtype-validation :letter [{letter-case :case} v]
-  (let [regexp (condp = letter-case
+(defmethod subtype-validation :letter [{:keys [case]} v]
+  (let [regexp (condp = case
                  :lower #"^\p{Ll}$"
                  :upper #"^\p{Lu}$"
                  #"^\p{L}$")]
