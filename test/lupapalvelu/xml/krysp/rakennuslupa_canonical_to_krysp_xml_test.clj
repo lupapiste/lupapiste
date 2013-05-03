@@ -34,8 +34,8 @@
 
     ;(clojure.pprint/pprint canonical)
     ;(clojure.pprint/pprint rakennuslupa_to_krysp)
-    (with-open [out-file (writer "/Users/terotu/example.xml" )]
-        (emit xml out-file))
+    ;(with-open [out-file (writer "/Users/terotu/example.xml" )]
+    ;    (emit xml out-file))
     (fact xml => truthy)
 
     (let [xml-reader (java.io.StringReader. xml-s)
