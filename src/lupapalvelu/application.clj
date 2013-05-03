@@ -23,7 +23,10 @@
             [lupapalvelu.municipality :as municipality]
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.ktj :as ktj]
+            [lupapalvelu.document.commands :as commands]
+            [clj-time.format :as tf]))
 
 ;;
 ;; Common helpers:
@@ -300,7 +303,7 @@
 (defcommand "approve-application"
   {:parameters [:id :lang]
    :roles      [:authority]
-   :states     [:submitted]}
+   :states     [:submitted :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
@@ -348,7 +351,7 @@
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [{{:keys [shape]} :data :as command}]
   (update-application command
     {$set {:shapes [shape]}}))
@@ -388,6 +391,9 @@
   (let [v (str v)]
     (if (s/blank? v) 0.0 (Double/parseDouble v))))
 
+(defn- ->location [x y]
+  {:x (->double x) :y (->double y)})
+
 (defn- permit-type-from-operation [operation]
   ;; TODO operation to permit type mapping???
   "buildingPermit")
@@ -402,6 +408,28 @@
   {:id (mongo/create-id)
    :name (keyword op-name)
    :created created})
+
+(def ktj-format (tf/formatter "yyyyMMdd"))
+(def output-format (tf/formatter "dd.MM.yyyy"))
+
+(defn- autofill-rakennuspaikka [application]
+  (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
+        kiinteistotunnus (:propertyId application)
+        ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
+        updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
+                  ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
+                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]
+                  ["kiinteisto.rekisterointipvm" (try
+                                                   (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                   (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+
+    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
+    (mongo/update
+      :applications
+      {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
+      {$set (assoc
+              (commands/->update "documents.$.data" updates)
+              :modified (:created (now)))})))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
@@ -425,7 +453,7 @@
                          :operations    [op]
                          :state         state
                          :municipality  municipality
-                         :location      {:x (->double x) :y (->double y)}
+                         :location      (->location x y)
                          :address       address
                          :propertyId    propertyId
                          :title         address
@@ -439,13 +467,14 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
+      (autofill-rakennuspaikka app-with-ver)
       (ok :id id))
     (fail :error.unauthorized)))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [command]
   (with-application command
     (fn [application]
@@ -458,8 +487,19 @@
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:municipality application))}
-                                              $set {:modified created}})
-        (ok)))))
+                                              $set {:modified created}})))))
+
+(defcommand "change-location"
+  {:parameters [:id :x :y :address :propertyId]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :answered :open :complement-needed]
+   :input-validators [(partial non-blank-parameters [:address])]}
+  [{{:keys [id x y address propertyId]} :data created :created}]
+  (mongo/update-by-id :applications id {$set {;:location      (->location x y)
+                                              :address       (s/trim address)
+                                              ;:propertyId    propertyId
+                                              :title         (s/trim address)
+                                              :modified      created}}))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
