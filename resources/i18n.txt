@@ -1,0 +1,2 @@
+admin.applicant-users: Hakija-käyttäjät
+admin.addApplicantUser: Lisää Hakija-käyttäjä
