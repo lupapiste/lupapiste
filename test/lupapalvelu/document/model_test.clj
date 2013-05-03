@@ -87,6 +87,9 @@
 (defn valid? [document]
   (or (fact (validate-document document) => '()) true))
 
+(defn valid-against-current-schema? [document]
+  (or (fact (validate-against-current-schema document) => '()) true))
+
 (defn invalid? [document]
   (or (fact (validate-document document) => (has some not-empty)) true))
 
@@ -103,6 +106,4 @@
                     :body [{:name "aa" :type :string}
                            {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
    :data {:c {:aa {:value "kukka"}
-              :ab {:value "123"}}}} => invalid?
-
-  )
+              :ab {:value "123"}}}} => invalid?)

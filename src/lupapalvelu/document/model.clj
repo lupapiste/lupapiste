@@ -59,6 +59,7 @@
 ;;
 ;; Neue api:
 ;;
+
 (defn- find-by-name [schema-body [k & ks]]
   (when-let [elem (some #(when (= (:name %) k) %) schema-body)]
     (if (nil? ks)
@@ -76,29 +77,6 @@
     (if (nil? result)
       results
       (conj results (cons k result)))))
-
-(defn- validate-document-fields [schema-body k v path]
-  (let [current-path (if k (conj path (name k)) path)]
-    (if (contains? v :value)
-      (let [elem (find-by-name schema-body current-path)
-            result (validate (keywordize-keys elem) (:value v))]
-        (when-not (nil? result) (println k v path elem result))
-        (nil? result))
-      (every? true? (map (fn [[k2 v2]] (validate-document-fields schema-body k2 v2 current-path)) v)))))
-
-(defn validate-against-current-schema [document]
-  (let [schema-name (get-in document [:schema :info :name])
-        schema-body (:body (get schemas schema-name))
-        document-data (:data document)]
-    (if document-data
-      (validate-document-fields schema-body nil document-data [])
-      (do
-        (println "No data")
-        false))))
-
-;;
-;; the newest
-;;
 
 (defn- validate-fields [schema-body k v path]
   (let [current-path (if k (conj path (name k)) path)]
@@ -131,7 +109,7 @@
     (validate-document pimped-document)))
 
 ;;
-;; /the newest
+;; golden oldies
 ;;
 
 (defn validate-updates
