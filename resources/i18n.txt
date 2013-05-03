@@ -1,2 +1,4 @@
 organization.links: Kunnan rakennusvalvonnan suosittelemat linkit
-admin.organization: Organisaatio
+admin.organizations: Organisaatiot
+admin.selectAdminOrganizations: Pääkäyttäjän organisaatiot
+
