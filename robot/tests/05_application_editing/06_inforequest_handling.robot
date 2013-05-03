@@ -11,6 +11,7 @@ Mikko creates two new inforequests
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-handling}  inforequest-handlings${secs}
   Set Suite Variable  ${inforequest-cancelling}  inforequest-cancelling${secs}
+  Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Create inforequest the fast way  ${inforequest-handling}  753  753-416-25-30  Jiihaa
   Create inforequest the fast way  ${inforequest-cancelling}  753  753-416-25-30  Jiihaa
   Logout
@@ -40,8 +41,16 @@ Mikko should be able to cancel the inforequest but not mark it as answered
 Mikko should be able to add attachment
   Element should be visible  //*[@data-test-id='add-inforequest-attachment']
 
-Mikko opens inforequest for cancellation
+Mikko opens inforequest for renaming and cancellation
   Open inforequest  ${inforequest-cancelling}  753-416-25-30
+
+Mikko changes inforequest address
+  Page should not contain  ${newName}
+  Element should be visible  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
+  Click element  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
+  Input text by test id  application-new-address  ${newName}
+  Click enabled by test id  change-location-save
+  Wait Until  Page should contain  ${newName}
 
 Mikko cancels an inforequest
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
@@ -51,6 +60,7 @@ Mikko cancels an inforequest
 Mikko does not see the cancelled inforequest
   Wait until  Element should be visible  applications-list
   Wait Until  Inforequest is not visible  ${inforequest-cancelling}
+  Wait Until  Inforequest is not visible  ${newName}
 
 Mikko waits until the first inforequest is answered
   Logout

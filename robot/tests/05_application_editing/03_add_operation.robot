@@ -6,13 +6,11 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko creates application
+New application contains the default initial operation
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  add-operation${secs}
   Create application the fast way  ${appname}  753  753-416-25-31
-
-Application contains the default initial operation
   Wait Until  Page Should Contain  Asuinrakennuksen rakentaminen
 
 Mikko adds an operation

@@ -7,7 +7,12 @@ Resource       ../../common_resource.robot
 
 Mikko goes to parties tab of an application
   Mikko logs in
-  Open application  create-app  753-416-17-15
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  create-app${secs}
+  Set Suite Variable  ${newName}  ${appname}-edit
+  Set Suite Variable  ${propertyId}  753-416-17-15
+  Create application the fast way  ${appname}  753  ${propertyId}
+  Open application  ${appname}  ${propertyId}
   Open tab  parties
 
 Mikko decides to delete maksaja
@@ -22,15 +27,23 @@ Mikko adds party maksaja
   Click enabled by test id  add-party-button
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
-  
-Mikko decides to submit create-app
-  Open application  create-app  753-416-17-15
+
+Mikko changes application address
+  Page should not contain  ${newName}
+  Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
+  Click element  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
+  Input text by test id  application-new-address  ${newName}
+  Click enabled by test id  change-location-save
+  Wait Until  Page should contain  ${newName}
+
+Mikko decides to submit application
+  Open application  ${newName}  ${propertyId}
   Wait until  Application state should be  draft
   Submit application
 
 Mikko still sees the submitted app in applications list
   Go to page  applications
-  Request should be visible  create-app
+  Request should be visible  ${newName}
 
 Mikko has worked really hard and now he needs some strong coffee
   Logout
