@@ -372,7 +372,7 @@
                                                   {:name "sosiaaliturvarahasto"}
                                                   {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
                                                   {:name "ei tiedossa"}]}
-                                                {:name "muu-omistajalaji" :type :string :size "s"}])}])
+                                                {:name "muu-omistajalaji" :type :string}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
