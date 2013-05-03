@@ -2,11 +2,12 @@
   "use strict";
 
   var isInitializing = true;
-  var currentId;
+  var currentId = null;
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
-  var applicationMap;
-  var inforequestMap;
+  var applicationMap = null;
+  var inforequestMap = null;
+  var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
 
   var stampModel = new function() {
     var self = this;
@@ -273,7 +274,8 @@
     };
   }();
 
-  var application = {
+  var application = {};
+  application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
     state: ko.observable(),
@@ -287,7 +289,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
     applicant: ko.observable(),
@@ -613,7 +614,7 @@
   });
 
   // tabs
-  var selectedTab;
+  var selectedTab = "";
   var tabFlow = false;
   hub.subscribe("set-debug-tab-flow", function(e) {
     tabFlow = e.value;
@@ -691,7 +692,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -717,12 +718,13 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
-      stampModel: stampModel
+      stampModel: stampModel,
+      changeLocationModel: changeLocationModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-
+    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
     attachmentTemplatesModel.init();
   });
 

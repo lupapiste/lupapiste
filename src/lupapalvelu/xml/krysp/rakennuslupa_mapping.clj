@@ -82,6 +82,7 @@
                                  {:tag :jaahdytysmuoto}
                                  {:tag :asuinhuoneistot :child [huoneisto]}
                                  ]}
+                   {:tag :rakentajatyyppi}
                    {:tag :omistajatieto
                     :child [{:tag :Omistaja
                              :child [{:tag :kuntaRooliKoodi :ns "yht"}

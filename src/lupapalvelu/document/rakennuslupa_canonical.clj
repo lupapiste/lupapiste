@@ -236,7 +236,7 @@
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-     :rakentajaTyyppi (-> kaytto :rakentajaTyyppi :value)
+     :rakentajatyyppi (-> kaytto :rakentajaTyyppi :value)
      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
      :rakennuksenTiedot (merge {
                                 :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
