@@ -96,6 +96,42 @@
         (println "No data")
         false))))
 
+;;
+;; the newest
+;;
+
+(defn- validate-fields [schema-body k v path]
+  (let [current-path (if k (conj path (name k)) path)]
+    (if (contains? v :value)
+      (let [elem (find-by-name schema-body current-path)
+            result (validate (keywordize-keys elem) (:value v))]
+        (and result {:key k
+                     :data v
+                     :path path
+                     :element elem
+                     :result result}))
+      (filter
+        (comp not nil?)
+        (map (fn [[k2 v2]]
+               (validate-fields schema-body k2 v2 current-path)) v)))))
+
+(defn validate-document [{{{schema-name :name} :info schema-body :body} :schema document-data :data}]
+  (and document-data (validate-fields schema-body nil document-data [])))
+
+(defn validate-against-current-schema [document]
+  (let [schema-name (get-in document [:schema :info :name])
+        schema-body (:body (get schemas schema-name))
+        document-data (:data document)]
+    (if document-data
+      (validate-document-fields schema-body nil document-data [])
+      (do
+        (println "No data")
+        false))))
+
+;;
+;; /the newest
+;;
+
 (defn validate-updates
   "Validate updates against schema.
 

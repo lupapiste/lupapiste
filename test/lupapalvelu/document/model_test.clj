@@ -73,9 +73,24 @@
  (fact (validation-status [["foo" :warn "bar"] ["foo2" :warn "bar2"]]) => :warn)
  (fact (validation-status [["foo" :warn "bar"] ["foo2" :err "bar2"]]) => :err))
 
-; field validation
+; field type validation
 
 (facts "dates"
   (validate {:type :date} "abba") => [:warn "invalid-date-format"]
   (validate {:type :date} "") => nil
   (validate {:type :date} "11.12.2013") => nil)
+
+;;
+;; validate-against-current-schema
+;;
+
+(facts "validate-document"
+  (let [document {:schema {:info {:name "schema"}
+                           :body [{:name "a" :type :group
+                                   :body [{:name "aa" :type :string}
+                                          {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
+                  :data {:a {:aa {:value "kukka"}
+                             :ab {:value "kikka"}}}}]
+    (validate-document document) => true))
+
+
