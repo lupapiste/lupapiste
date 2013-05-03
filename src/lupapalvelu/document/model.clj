@@ -106,7 +106,7 @@
       (let [element (find-by-name schema-body current-path)
             result  (validate (keywordize-keys element) (:value v))]
         (and result {:data v
-                     :path current-path
+                     :path (vec (map keyword current-path))
                      :element element
                      :result result}))
       (filter
@@ -115,7 +115,7 @@
                (validate-fields schema-body k2 v2 current-path)) v)))))
 
 (defn validate-document [{{{schema-name :name} :info schema-body :body} :schema document-data :data}]
-  (and document-data (validate-fields schema-body nil document-data [])))
+  (and document-data (flatten (validate-fields schema-body nil document-data []))))
 
 (defn validate-against-current-schema [document]
   (let [schema-name (get-in document [:schema :info :name])
