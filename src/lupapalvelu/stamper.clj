@@ -11,13 +11,20 @@
            [java.awt.font FontRenderContext TextLayout]
            [java.awt.image BufferedImage RenderedImage]
            [javax.imageio ImageIO]
-           [com.lowagie.text.pdf PdfGState PdfStamper PdfReader]))
+           [com.lowagie.text.pdf PdfGState PdfStamper PdfReader]
+           [com.google.zxing BarcodeFormat]
+           [com.google.zxing.qrcode QRCodeWriter]
+           [com.google.zxing.client.j2se MatrixToImageWriter]))
 
 ; (set! *warn-on-reflection* true)
 
 ;;
 ;; Generate stamp:
 ;;
+
+(defn qrcode ^BufferedImage [data size]
+  (MatrixToImageWriter/toBufferedImage
+    (.encode (QRCodeWriter.) data BarcodeFormat/QR_CODE size size)))
 
 (defn draw-text [g text x y]
   (.setColor g (Color. 0 0 0 255))
@@ -34,9 +41,9 @@
                     municipality
                     "LUPAPISTE.fi"])
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
-        width (+ (reduce max text-widths) 52)
-        height 110
-        i (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)]
+        width (int (+ (reduce max text-widths) 52))
+        height (int 110)
+        i (BufferedImage. (+ width 70) height BufferedImage/TYPE_INT_ARGB)]
     (doto (.createGraphics i)
       (.setColor (Color. 0 0 0 0))
       (.fillRect 0 0 width height)
@@ -53,6 +60,7 @@
       (draw-text (nth texts 1) 22 50)
       (draw-text (nth texts 2) 22 65)
       (draw-text (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 85)
+      (.drawImage (qrcode "http://lupapiste.fi" 70) width (int 20) nil)
       (.dispose))
     i))
 
@@ -136,31 +144,37 @@
           iw (.getWidth i)
           ih (.getHeight i)]
       #_(doto g
-        (.setColor Color/GRAY)
-        (.fillRect 0 0 (int (/ w 2)) (int (/ h 2)))
-        (.setColor Color/WHITE)
-        (.fillRect (int (/ w 2)) 0 w (int (/ h 2)))
-        (.setColor Color/RED)
-        (.fillRect 0 (int (/ h 2)) (int (/ w 2)) h)
-        (.setColor Color/BLACK)
-        (.fillRect (int (/ w 2)) (int (/ h 2)) w h))
+          (.setColor Color/GRAY)
+          (.fillRect 0 0 (int (/ w 2)) (int (/ h 2)))
+          (.setColor Color/WHITE)
+          (.fillRect (int (/ w 2)) 0 w (int (/ h 2)))
+          (.setColor Color/RED)
+          (.fillRect 0 (int (/ h 2)) (int (/ w 2)) h)
+          (.setColor Color/BLACK)
+          (.fillRect (int (/ w 2)) (int (/ h 2)) w h))
       #_(lorem-ipsum g w h)
       (.drawImage g i (int (/ (- w iw) 2)) (int (/ (- h ih) 2)) nil)))
   
   (defn make-frame []
-    (let [f (doto (javax.swing.JFrame. "heelo")
-              (.setContentPane
-                (doto (proxy [javax.swing.JComponent] []
-                        (paint [g]
-                          (paint-component g (.getWidth this) (.getHeight this))))))
-              (.setMinimumSize (java.awt.Dimension. 100 100))
-              (.setDefaultCloseOperation javax.swing.JFrame/DISPOSE_ON_CLOSE)
-              (.setAlwaysOnTop true)
-              (.setLocationByPlatform true)
-              (.pack)
-              (.setVisible true))
-          repaint (fn [_ _ _ _]
-                    (javax.swing.SwingUtilities/invokeLater (fn [] (.repaint f))))]
-      (doseq [v [#'make-stamp #'paint-component #'lorem-line #'lorem-ipsum]]
-        (add-watch v :repaint repaint))
-      f)))
+    (let [watch-these [#'make-stamp #'paint-component]
+          frame (javax.swing.JFrame. "heelo")]
+      (doto frame
+        (.setContentPane
+          (doto (proxy [javax.swing.JComponent] []
+                  (paint [g]
+                    (paint-component g (.getWidth this) (.getHeight this))))))
+        (.addWindowListener
+          (proxy [java.awt.event.WindowAdapter] []
+            (windowOpened [_]
+              (doseq [v watch-these]
+                (add-watch v :repaint (fn [_ _ _ _] (javax.swing.SwingUtilities/invokeLater (fn [] (.repaint frame)))))))
+            (windowClosing [_]
+              (doseq [v watch-these]
+                (remove-watch v :repaint)))))  
+        (.setMinimumSize (java.awt.Dimension. 100 100))
+        (.setDefaultCloseOperation javax.swing.JFrame/DISPOSE_ON_CLOSE)
+        (.setAlwaysOnTop true)
+        (.pack)
+        (.setLocationRelativeTo nil)
+        (.setVisible true))
+      frame)))

@@ -456,7 +456,7 @@
         osapuolettieto (:osapuolettieto rakennusvalvontaasia)
         osapuolet (:Osapuolet osapuolettieto)
         osapuolitieto-hakija (first (:osapuolitieto osapuolet))
-        paasuunnitelija (:Suunnittelija (first (:suunnittelijatieto osapuolet)))
+        paasuunnitelija (:Suunnittelija (last (:suunnittelijatieto osapuolet)))
         hakija-osapuoli1 (:Osapuoli osapuolitieto-hakija)
         suunnittelijat (:suunnittelijatieto osapuolet)
         rakennuspaikkatiedot (:rakennuspaikkatieto rakennusvalvontaasia)
@@ -488,6 +488,7 @@
         muuTunnustieto (:muuTunnustieto LupaTunnus)
         MuuTunnus (:MuuTunnus muuTunnustieto)
         ]
+    ;(clojure.pprint/pprint osapuolet)
     (fact "canonical" canonical => truthy)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
     (fact "rakennusvalvonta" rakennusvalvonta => truthy)
@@ -514,7 +515,7 @@
 
     (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
     (fact "Rakennus" rakennus => truthy)
-    (fact "rakentajaTyyppi" (:rakentajaTyyppi rakennus) => "muu")
+    (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
     (fact "rakennuksentiedot" rakennuksentiedot => truthy)
     (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "011 yhden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
