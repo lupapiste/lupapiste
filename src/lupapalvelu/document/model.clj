@@ -117,9 +117,11 @@
 (defn validate-document
   "validates document against it's local schema and returns list of errors."
   [{{{schema-name :name} :info schema-body :body} :schema document-data :data}]
-  (when document-data
-    (let [errors (flatten (validate-fields schema-body nil document-data []))]
-      (when (not-empty errors) errors))))
+  (and document-data (flatten (validate-fields schema-body nil document-data []))))
+
+(defn valid-document?
+  "checks weather document is valid."
+  [document] (empty? (validate-document document)))
 
 (defn validate-against-current-schema
   "validates document against the latest schema and returns list of errors."
