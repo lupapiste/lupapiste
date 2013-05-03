@@ -7,9 +7,15 @@
         <a href="#!/admin" data-bind="ltext: 'admin.adminpage-title'"></a>
       </div>
       <h1 id="admin-header" data-bind="ltext: 'admin.adminpage-title'"></h1>
+<!--       <div data-bind="template: {name: 'admin-user-list-template', data: {users: $root.users.data(), usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateAdminModal, openCommandEditModal: $root.users.openAdminModifyModal, openCommandResetPwModal: $root.users.openAdminPasswordModal}}"></div> -->
+      <div data-bind="template: {name: 'admin-user-list-template', data: {type: $root.applicantUsers.type, users: $root.users.data(), usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateModal, openCommandEditModal: $root.users.openModifyModal, openCommandResetPwModal: $root.users.openPasswordModal}}"></div>
 
-      <div data-bind="template: {name: 'admin-user-list-template', data: {users: $root.users, usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateAdminModal, openCommandEditModal: $root.users.openAdminModifyModal, openCommandResetPwModal: $root.users.openAdminPasswordModal}}"></div>
 
+<!-- TODO: Muokkaa näitä! (Applicant-userilistaus) -->
+<!--       <div data-bind="template: {name: 'admin-user-list-template', data: {users: $root.users.applicantData(), usersListTitle: 'admin.applicant-users', addUserButtonLabel: 'admin.addApplicantUser', openCommandAddModal: $root.users.openCreateApplicantModal, openCommandEditModal: $root.users.openApplicantModifyModal, openCommandResetPwModal: $root.users.openAdminPasswordModal}}"></div> -->
+      <div data-bind="template: {name: 'admin-user-list-template', data: {type: $root.applicantUsers.type, users: $root.applicantUsers.data(), usersListTitle: 'admin.applicant-users', addUserButtonLabel: 'admin.addApplicantUser', openCommandAddModal: $root.applicantUsers.openCreateModal, openCommandEditModal: $root.applicantUsers.openModifyModal, openCommandResetPwModal: $root.applicantUsers.openPasswordModal}}"></div>
+
+      
       <h3>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h3>
       <ul data-bind="foreach: fixtures.data()">
         <li>
