@@ -19,12 +19,16 @@
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       if (application.verdict) {
-        self.verdictId(application.verdict.id);
-        self.status(application.verdict.status);
-        self.name(application.verdict.name);
-        self.given(application.verdict.given);
-        self.official(application.verdict.official);
+        self.reset(application.verdict);
       }
+    };
+
+    self.reset = function(verdict) {
+      self.verdictId(verdict.id);
+      self.status(verdict.status);
+      self.name(verdict.name);
+      self.given(verdict.given);
+      self.official(verdict.official);
     };
 
     self.submit = function() {
@@ -34,6 +38,7 @@
         .command("give-verdict", {id: applicationId, verdictId: self.verdictId(), status: self.status(), name: self.name(), given: givenMillis, official: officialMillis})
         .success(function() {
           repository.load(applicationId);
+          self.reset({});
           window.location.hash = "!/application/"+applicationId+"/verdict";
           return false;
         })

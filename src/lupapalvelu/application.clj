@@ -23,7 +23,10 @@
             [lupapalvelu.municipality :as municipality]
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]))
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.ktj :as ktj]
+            [lupapalvelu.document.commands :as commands]
+            [clj-time.format :as tf]))
 
 ;;
 ;; Common helpers:
@@ -300,7 +303,7 @@
 (defcommand "approve-application"
   {:parameters [:id :lang]
    :roles      [:authority]
-   :states     [:submitted]}
+   :states     [:submitted :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
@@ -403,6 +406,28 @@
    :name (keyword op-name)
    :created created})
 
+(def ktj-format (tf/formatter "yyyyMMdd"))
+(def output-format (tf/formatter "dd.MM.yyyy"))
+
+(defn- autofill-rakennuspaikka [application]
+  (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
+        kiinteistotunnus (:propertyId application)
+        ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
+        updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
+                  ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
+                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]
+                  ["kiinteisto.rekisterointipvm" (try
+                                                   (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                   (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+
+    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
+    (mongo/update
+      :applications
+      {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
+      {$set (assoc
+              (commands/->update "documents.$.data" updates)
+              :modified (:created (now)))})))
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
@@ -439,6 +464,7 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
+      (autofill-rakennuspaikka app-with-ver)
       (ok :id id))
     (fail :error.unauthorized)))
 
