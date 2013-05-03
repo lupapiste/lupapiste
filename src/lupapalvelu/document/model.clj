@@ -103,12 +103,11 @@
 (defn- validate-fields [schema-body k v path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? v :value)
-      (let [elem (find-by-name schema-body current-path)
-            result (validate (keywordize-keys elem) (:value v))]
-        (and result {:key k
-                     :data v
-                     :path path
-                     :element elem
+      (let [element (find-by-name schema-body current-path)
+            result  (validate (keywordize-keys element) (:value v))]
+        (and result {:data v
+                     :path current-path
+                     :element element
                      :result result}))
       (filter
         (comp not nil?)
