@@ -30,12 +30,12 @@
 
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-    (get-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO own test
+    (get-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO: own test
 
     ;(clojure.pprint/pprint canonical)
     ;(clojure.pprint/pprint rakennuslupa_to_krysp)
-    ;(with-open [out-file (writer "/Users/terotu/example.xml" )]
-     ;   (emit xml out-file))
+    (with-open [out-file (writer "/Users/terotu/example.xml" )]
+        (emit xml out-file))
     (fact xml => truthy)
 
     (let [xml-reader (java.io.StringReader. xml-s)
