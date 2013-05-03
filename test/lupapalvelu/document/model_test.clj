@@ -90,7 +90,7 @@
                                    :body [{:name "aa" :type :string}
                                           {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
                   :data {:a {:aa {:value "kukka"}
-                             :ab {:value "kikka"}}}}]
-    (validate-document document) => true))
+                             :ab {:value "123"}}}}]
+    (validate-document document) => falsey))
 
 

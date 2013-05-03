@@ -114,18 +114,19 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) v)))))
 
-(defn validate-document [{{{schema-name :name} :info schema-body :body} :schema document-data :data}]
-  (and document-data (flatten (validate-fields schema-body nil document-data []))))
+(defn validate-document
+  "validates document against it's local schema and returns list of errors."
+  [{{{schema-name :name} :info schema-body :body} :schema document-data :data}]
+  (when document-data
+    (let [errors (flatten (validate-fields schema-body nil document-data []))]
+      (when (not-empty errors) errors))))
 
-(defn validate-against-current-schema [document]
-  (let [schema-name (get-in document [:schema :info :name])
-        schema-body (:body (get schemas schema-name))
-        document-data (:data document)]
-    (if document-data
-      (validate-document-fields schema-body nil document-data [])
-      (do
-        (println "No data")
-        false))))
+(defn validate-against-current-schema
+  "validates document against the latest schema and returns list of errors."
+  [{{{schema-name :name} :info} :schema document-data :data :as document}]
+  (let [latest-schema-body (:body (get schemas schema-name))
+        pimped-document    (assoc-in document [:schema :body] latest-schema-body)]
+    (validate-document pimped-document)))
 
 ;;
 ;; /the newest
