@@ -81,23 +81,17 @@
   (validate {:type :date} "11.12.2013") => nil)
 
 ;;
-;; validate-against-current-schema
+;; validate-document
 ;;
 
-(def valid? '())
-
-(defn is-valid? [document]
+(defn valid? [document]
   (fact (validate-document document) => '())
   true)
 
 (facts "validate-document"
-  (let [document {:schema {:info {:name "schema"}
-                           :body [{:name "a" :type :group
-                                   :body [{:name "aa" :type :string}
-                                          {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
-                  :data {:a {:aa {:value "kukka"}
-                             :ab {:value "123"}}}}]
-    (validate-document document) => valid?
-    document => is-valid?))
-
-
+  {:schema {:info {:name "schema"}
+            :body [{:name "a" :type :group
+                    :body [{:name "aa" :type :string}
+                           {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
+   :data {:a {:aa {:value "kukka"}
+              :ab {:value "123"}}}} => valid?)
