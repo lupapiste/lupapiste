@@ -101,6 +101,9 @@
 (defn create-authority-admin [user]
   (create-any-user (merge user {:role :authorityAdmin :enabled true})))
 
+(defn create-applicant [user]
+  (create-any-user (merge user {:role :applicant :enabled true})))
+
 (defn update-user [email data]
   (mongo/update :users {:email email} {$set data}))
 
