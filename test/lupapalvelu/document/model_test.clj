@@ -85,8 +85,10 @@
 ;;
 
 (defn valid? [document]
-  (fact (validate-document document) => '())
-  true)
+  (or (fact (validate-document document) => '()) true))
+
+(defn invalid? [document]
+  (or (fact (validate-document document) => (has some not-empty)) true))
 
 (facts "validate-document"
   {:schema {:info {:name "schema"}
@@ -94,4 +96,13 @@
                     :body [{:name "aa" :type :string}
                            {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
    :data {:a {:aa {:value "kukka"}
-              :ab {:value "123"}}}} => valid?)
+              :ab {:value "123"}}}} => valid?
+
+  {:schema {:info {:name "schema"}
+            :body [{:name "a" :type :group
+                    :body [{:name "aa" :type :string}
+                           {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
+   :data {:c {:aa {:value "kukka"}
+              :ab {:value "123"}}}} => invalid?
+
+  )
