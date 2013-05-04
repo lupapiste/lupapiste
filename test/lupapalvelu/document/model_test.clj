@@ -87,9 +87,6 @@
 (defn valid? [document]
   (or (fact (validate-document document) => '()) true))
 
-(defn valid-against-current-schema? [document]
-  (or (fact (validate-against-current-schema document) => '()) true))
-
 (defn invalid? [document]
   (or (fact (validate-document document) => (has some not-empty)) true))
 

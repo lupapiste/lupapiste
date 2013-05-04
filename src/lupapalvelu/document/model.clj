@@ -10,6 +10,7 @@
 ;;
 ;; Validation:
 ;;
+
 ;; if you changes this value, change it in docgen.js, too
 (def default-max-len 255)
 
@@ -34,7 +35,6 @@
 (defmethod validate :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
 (defmethod validate :date [elem v]
@@ -42,7 +42,6 @@
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "invalid-date-format"])))
-
 
 (defmethod validate :select [elem v] nil)
 (defmethod validate :radioGroup [elem v] nil)
@@ -71,13 +70,6 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn- validate-update [schema-body results [k v]]
-  (let [elem   (keywordize-keys (find-by-name schema-body (s/split k #"\.")))
-        result (validate elem v)]
-    (if (nil? result)
-      results
-      (conj results (cons k result)))))
-
 (defn- validate-fields [schema-body k v path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? v :value)
@@ -93,24 +85,31 @@
                (validate-fields schema-body k2 v2 current-path)) v)))))
 
 (defn validate-document
-  "validates document against it's local schema and returns list of errors."
+  "Validates document against it's local schema and returns list of errors."
   [{{{schema-name :name} :info schema-body :body} :schema document-data :data}]
   (and document-data (flatten (validate-fields schema-body nil document-data []))))
 
 (defn valid-document?
-  "checks weather document is valid."
+  "Checks weather document is valid."
   [document] (empty? (validate-document document)))
 
 (defn validate-against-current-schema
-  "validates document against the latest schema and returns list of errors."
+  "Validates document against the latest schema and returns list of errors."
   [{{{schema-name :name} :info} :schema document-data :data :as document}]
-  (let [latest-schema-body (:body (get schemas schema-name))
-        pimped-document    (assoc-in document [:schema :body] latest-schema-body)]
-    (validate-document pimped-document)))
+  (let [latest-schema (get schemas schema-name)
+        pimped-doc    (assoc document :schema latest-schema)]
+    (validate-document pimped-doc)))
 
 ;;
 ;; golden oldies
 ;;
+
+(defn- validate-update [schema-body results [k v]]
+  (let [elem   (keywordize-keys (find-by-name schema-body (s/split k #"\.")))
+        result (validate elem v)]
+    (if (nil? result)
+      results
+      (conj results (cons k result)))))
 
 (defn validate-updates
   "Validate updates against schema.
