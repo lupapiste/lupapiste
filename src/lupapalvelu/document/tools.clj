@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.tools
-  (:require [clojure.walk :as walk]
-            [lupapalvelu.document.model :as model]))
+  (:require [clojure.walk :as walk]))
 
 (defn nil-values [_] nil)
 
@@ -20,7 +19,7 @@
   (->> col
     (walk/postwalk
       (fn [x]
-        (if (and (vector? x) (-> x first map?))
+        (if (and (sequential? x) (-> x first map?))
           (into {} x)
           x)))))
 
