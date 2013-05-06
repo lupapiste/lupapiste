@@ -659,5 +659,6 @@
         query (condp = kind
                 "inforequests" (assoc base-query :infoRequest true)
                 "applications" (assoc base-query :infoRequest false)
-                "both"         base-query)]
+                "both"         base-query
+                {:_id -1})]
     (ok :data (mongo/count :applications query))))
