@@ -495,7 +495,6 @@ var docgen = (function () {
         var elem = builder(subSchema, myModel, myPath.concat([id]), save, partOfChoice);
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
-        console.log(myPath);
         if (subSchema.type == "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
