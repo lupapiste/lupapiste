@@ -114,6 +114,12 @@
         pimped-doc    (assoc document :schema latest-schema)]
     (validate-document pimped-doc)))
 
+(defn update
+  "Updates a document returning the modified document.
+   Example: (apply-change document [:mitat :koko] 12)"
+  [document path value]
+  (assoc-in document (flatten [:data path :value]) value))
+
 ;;
 ;; golden oldies
 ;;

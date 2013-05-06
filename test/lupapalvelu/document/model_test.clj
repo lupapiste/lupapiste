@@ -110,6 +110,13 @@
               :ab {:value "123"}}}} => invalid?)
 
 ;;
+;; Updates
+;;
+
+(fact "updating document"
+  (update {} [:b :c] "kikka") => (contains {:data {:b {:c {:value "kikka"}}}}))
+
+;;
 ;; VRK-rules validation
 ;;
 
