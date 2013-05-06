@@ -104,3 +104,16 @@
                            {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
    :data {:c {:aa {:value "kukka"}
               :ab {:value "123"}}}} => invalid?)
+
+;;
+;; VRK-rules validation
+;;
+
+(use 'lupapalvelu.document.tools)
+(use 'lupapalvelu.document.schemas)
+
+(def uusi-rakennus
+  (let [schema (schemas "uusiRakennus")
+        data   (create-document-data schema dummy-values)]
+    {:schema schema
+     :data   data}))
