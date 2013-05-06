@@ -22,6 +22,10 @@ LUPAPISTE.ChangeLocationModel = function() {
     return util.prop.isPropertyId(self.propertyId()) && self.address();
   });
 
+  self.drawLocation = function() {
+    self.map.clear().add(self.x, self.y);
+  };
+
   self.reset = function(app) {
     self.id = app.id();
     self.x = app.location().x();
@@ -29,7 +33,13 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.address(app.address());
     self.propertyId(app.propertyId());
     self.errorMessage(null);
+    self.map.clear().updateSize().center(self.x, self.y, 10);
   };
+
+
+  /// Event handlers
+
+  // Saving
 
   self.onSuccess = function() {
     self.errorMessage(null);
@@ -47,14 +57,26 @@ LUPAPISTE.ChangeLocationModel = function() {
     return false;
   };
 
+  // Open the dialog
+
   self.changeLocation = function(app) {
     self.reset(app);
+    self.drawLocation();
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
-    self.map.updateSize();
-    self.map.clear().center(self.x, self.y, 10).add(self.x, self.y);
   };
 
+  // Click on the map
+
+  self.click = function(x, y) {
+    self.x = x;
+    self.y = y;
+    self.drawLocation();
+    return false;
+  };
+
+  // DOM ready
   $(function() {
     self.map = gis.makeMap("change-location-map").center([{x: 404168, y: 6693765}], 10);
+    self.map.addClickHandler(self.click);
   });
 };
