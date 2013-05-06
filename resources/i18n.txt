@@ -1,0 +1,1 @@
+error.invalid-property-id:Tarkasta kiinteistötunnus

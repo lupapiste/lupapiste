@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core]
-        [clojure.string :only [blank?]]
+        [clojure.string :only [blank? join]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
@@ -54,6 +54,15 @@
         :applications
         {:_id id}
         changes))))
+
+(defn- property-id? [^String s]
+  (re-matches #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$" s))
+
+(defn property-id-parameters [params command]
+  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
+    (info "invalid property id parameters:" (join ", " invalid))
+    (fail :error.invalid-property-id :parameters (vec invalid)))
+  )
 
 ;; Meta-fields:
 ;;
@@ -435,6 +444,8 @@
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
+   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+                      (partial property-id-parameters [:propertyId])]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
@@ -493,12 +504,13 @@
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
-   :input-validators [(partial non-blank-parameters [:address :propertyId])]}
+   :input-validators [(partial non-blank-parameters [:address])
+                      (partial property-id-parameters [:propertyId])]}
   [{{:keys [id x y address propertyId]} :data created :created}]
   (debug propertyId)
   (mongo/update-by-id :applications id {$set {:location      (->location x y)
                                               :address       (s/trim address)
-                                              ;:propertyId    propertyId
+                                              :propertyId    propertyId
                                               :title         (s/trim address)
                                               :modified      created}}))
 

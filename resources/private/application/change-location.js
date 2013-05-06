@@ -59,7 +59,7 @@ LUPAPISTE.ChangeLocationModel = function() {
   };
 
   self.saveNewLocation = function() {
-    var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: self.propertyId()};
+    var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
     ajax.command("change-location", data).success(self.onSuccess).error(self.onError).call();
     return false;
   };
