@@ -5,18 +5,19 @@
 
 (defn dummy-values [{:keys [type subtype name body]}]
   (condp = type
-    :text      "text"
-    :checkbox  true
-    :date      "2.5.1974"
-    :select    (-> body first :name)
-    :string    (condp = subtype
-                 :email            "example@example.com"
-                 :tel              "012 123 4567"
-                 :number           "42"
-                 :digit            "1"
-                 :letter           "\u00c5"
-                 :kiinteistotunnus "09100200990013"
-                 (str subtype))
+    :text       "text"
+    :checkbox   true
+    :date       "2.5.1974"
+    :select     (-> body first :name)
+    :radioGroup (-> body first :name)
+    :string     (condp = subtype
+                  :email            "example@example.com"
+                  :tel              "012 123 4567"
+                  :number           "42"
+                  :digit            "1"
+                  :letter           "\u00c5"
+                  :kiinteistotunnus "09100200990013"
+                  (str subtype))
     (str name)))
 
 ;;
