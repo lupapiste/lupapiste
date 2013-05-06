@@ -272,9 +272,8 @@
       template: $("#create-templates"),
       onSelect: function(v) {
         model.operation(v ? v.op : null); 
-
         var municipalityCode = model.municipality().municipalityCode;
-        ajax.query("get-organization-by-municipality", {municipality: municipalityCode}).success(function(d) {
+        ajax.query("resolve-organization", {municipality: municipalityCode, operation: v.op}).success(function(d) {
           model.organization(d);
         }).call();
       },
