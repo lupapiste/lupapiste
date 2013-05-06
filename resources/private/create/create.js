@@ -208,22 +208,12 @@
     };
 
     self.searchPropertyId = function(x, y) {
-      ajax
-        .get("/proxy/property-id-by-point")
-        .param("x", x)
-        .param("y", y)
-        .success(self.onResponse(self.propertyId))
-        .call();
+      locationSearch.propertyId(x, y, self.onResponse(self.propertyId));
       return self;
     };
 
     self.searchAddress = function(x, y) {
-      ajax
-        .get("/proxy/address-by-point")
-        .param("x", x)
-        .param("y", y)
-        .success(self.onResponse(self.addressData))
-        .call();
+      locationSearch.address(x, y, self.onResponse(self.addressData));
       return self;
     };
 
