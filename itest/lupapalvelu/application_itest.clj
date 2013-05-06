@@ -121,31 +121,30 @@
         app   (:application resp)]
     (first (:shapes app)) => shape))
 
-(fact "Authority is able to create an application to own municipality"
-      (let [command-resp    (create-app sonja :municipality sonja-muni)
-            application-id  (:id command-resp)]
-        (success command-resp) => true
-        (fact "Application is open"
-              (let [query-resp      (query sonja :application :id application-id)
-                    application     (:application query-resp)]
-                (success query-resp)   => true
-                application => truthy
-                (:state application) => "open"
-                (:opened application) => truthy
-                (:opened application) => (:created application)))
-        (fact "Authority could submit her own application"
-              (let [resp (query sonja :allowed-actions :id application-id)]
-                (success resp) => true
-                (get-in resp [:actions :submit-application :ok]) => true))
-        (fact "Application is submitted"
-              (let [resp        (command sonja :submit-application :id application-id)
-                    application (:application (query sonja :application :id application-id))]
-                (success resp) => true
-                (:state application) => "submitted"
-              ))))
+(fact "Authority is able to create an application to a municipality in own organization"
+  (let [command-resp    (create-app sonja :municipality sonja-muni)
+        application-id  (:id command-resp)]
+    (success command-resp) => true
+    (fact "Application is open"
+       (let [query-resp      (query sonja :application :id application-id)
+             application     (:application query-resp)]
+         (success query-resp)   => true
+         application => truthy
+         (:state application) => "open"
+         (:opened application) => truthy
+         (:opened application) => (:created application)))
+    (fact "Authority could submit her own application"
+       (let [resp (query sonja :allowed-actions :id application-id)]
+         (success resp) => true
+         (get-in resp [:actions :submit-application :ok]) => true))
+    (fact "Application is submitted"
+      (let [resp        (command sonja :submit-application :id application-id)
+            application (:application (query sonja :application :id application-id))]
+        (success resp) => true
+        (:state application) => "submitted"))))
 
-(fact "Authority in unable to create an application to other municipality"
-      (unauthorized (create-app sonja :municipality veikko-muni)) => true)
+(fact "Authority in unable to create an application to a municipality in another organization"
+  (unauthorized (create-app sonja :municipality veikko-muni)) => true)
 
 (facts "Add operations"
   (let [command-resp (create-app mikko :municipality veikko-muni)
