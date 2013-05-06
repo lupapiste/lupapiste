@@ -48,16 +48,6 @@
 ;; Public api
 ;;
 
-(defn create-document-data
-  "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
-  ([schema] (create-document-data schema nil-values))
-  ([schema f] (->
-                schema
-                (create f)
-                flattened
-                wrapped
-                )))
-
 (defn wrapped
   "Wraps leaf values in a map and under k key, key defaults to :value.
    Assumes that every key in the original map is a keyword."
@@ -75,3 +65,13 @@
     (walk/postwalk
       (fn [x] (if (contains? x k) (k x) x))
       m)))
+
+(defn create-document-data
+  "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
+  ([schema] (create-document-data schema nil-values))
+  ([schema f] (->
+                schema
+                (create f)
+                flattened
+                wrapped
+                )))

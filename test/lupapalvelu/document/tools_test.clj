@@ -25,7 +25,7 @@
           :members {:0 {:name nil
                         :instrument nil}}}})
 
-(def expected-k-wrapped-simple-document
+(def expected-wrapped-simple-document
   {:band {:name {:value nil}
           :genre {:value nil}
           :members {:0 {:name {:value nil}
@@ -40,13 +40,11 @@
   (-> schema
     (create nil-values)
     flattened
-    (wrapped :value)) => expected-k-wrapped-simple-document)
+    (wrapped :value)) => expected-wrapped-simple-document)
 
 ;;
 ;; Public api
 ;;
-
-(fact "create-dummy-document-data" (create-document-data schema) => expected-k-wrapped-simple-document)
 
 (fact "wrapped defaults to :value key"
   (wrapped nil) => {:value nil}
@@ -54,5 +52,8 @@
 
 (fact "un-wrapped"
   (un-wrapped {:k {:value nil}}) => {:k nil}
-  (un-wrapped expected-k-wrapped-simple-document :value) => expected-simple-document
+  (un-wrapped expected-wrapped-simple-document :value) => expected-simple-document
   (un-wrapped (wrapped expected-simple-document)) => expected-simple-document)
+
+(fact "create-dummy-document-data"
+  (create-document-data schema) => expected-wrapped-simple-document)
