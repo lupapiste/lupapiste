@@ -162,10 +162,7 @@
     self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
-      ajax
-        .get("/proxy/get-address")
-        .param("query", address)
-        .success(self.onResponse(function(result) {
+      locationSearch.pointByAddress(address, self.onResponse(function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -178,17 +175,12 @@
               .beginUpdateRequest()
               .searchPropertyId(x, y);
           }
-        }))
-        .fail(_.partial(self.useManualEntry, true))
-        .call();
+        }), _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPointByPropertyId = function(id) {
-      ajax
-        .get("/proxy/point-by-property-id")
-        .param("property-id", util.prop.toDbFormat(id))
-        .success(self.onResponse(function(result) {
+      locationSearch.pointByPropertyId(id, self.onResponse(function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -201,19 +193,18 @@
               .beginUpdateRequest()
               .searchAddress(x, y);
           }
-        }))
-        .fail(_.partial(self.useManualEntry, true))
-        .call();
+        }),
+        _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPropertyId = function(x, y) {
-      locationSearch.propertyId(x, y, self.onResponse(self.propertyId));
+      locationSearch.propertyIdByPoint(x, y, self.onResponse(self.propertyId));
       return self;
     };
 
     self.searchAddress = function(x, y) {
-      locationSearch.address(x, y, self.onResponse(self.addressData));
+      locationSearch.addressByPoint(x, y, self.onResponse(self.addressData));
       return self;
     };
 
