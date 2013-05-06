@@ -272,8 +272,8 @@
    :roles       [:authority]}
   [{{:keys [assigneeId]} :data user :user :as command}]
   (update-application command
-        (if assigneeId
-          {$set {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
+    (if assigneeId
+      {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
       {$unset {:authority ""}})))
 
 ;;
@@ -351,7 +351,7 @@
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [{{:keys [shape]} :data :as command}]
   (update-application command
     {$set {:shapes [shape]}}))
@@ -390,6 +390,9 @@
 (defn- ->double [v]
   (let [v (str v)]
     (if (s/blank? v) 0.0 (Double/parseDouble v))))
+
+(defn- ->location [x y]
+  {:x (->double x) :y (->double y)})
 
 (defn- permit-type-from-operation [operation]
   ;; TODO operation to permit type mapping???
@@ -439,45 +442,45 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (municipality/resolve-organization municipality operation))]
     (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
-      (let [user-summary  (security/summary user)
-            id            (make-application-id municipality)
-            owner         (role user :owner :type :owner)
-            op            (make-op operation created)
-            info-request? (if infoRequest true false)
-            state         (if info-request? :info (if (security/authority? user) :open :draft))
-            make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+    (let [user-summary  (security/summary user)
+          id            (make-application-id municipality)
+          owner         (role user :owner :type :owner)
+          op            (make-op operation created)
+          info-request? (if infoRequest true false)
+          state         (if info-request? :info (if (security/authority? user) :open :draft))
+          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
             organization  application-organization-id
-            application   {:id            id
-                           :created       created
-                           :opened        (when (#{:open :info} state) created)
-                           :modified      created
-                           :infoRequest   info-request?
-                           :operations    [op]
-                           :state         state
-                           :municipality  municipality
-                           :organization  organization
-                           :location      {:x (->double x) :y (->double y)}
-                           :address       address
-                           :propertyId    propertyId
-                           :title         address
-                           :auth          [owner]
-                           :documents     (if info-request? [] (make-documents user created nil op))
-                           :attachments   (if info-request? [] (make-attachments created op organization))
-                           :allowedAttachmentTypes (if info-request?
-                                                     [[:muut [:muu]]]
-                                                     (partition 2 attachment/attachment-types))
-                           :comments      (map make-comment messages)
-                           :permitType    (permit-type-from-operation op)}
-            app-with-ver  (domain/set-software-version application)]
-        (mongo/insert :applications app-with-ver)
-        (autofill-rakennuspaikka app-with-ver)
-        (ok :id id))
+          application   {:id            id
+                         :created       created
+                         :opened        (when (#{:open :info} state) created)
+                         :modified      created
+                         :infoRequest   info-request?
+                         :operations    [op]
+                         :state         state
+                         :municipality  municipality
+                         :location      (->location x y)
+                         :organization  organization
+                         :address       address
+                         :propertyId    propertyId
+                         :title         address
+                         :auth          [owner]
+                         :documents     (if info-request? [] (make-documents user created nil op))
+                         :attachments   (if info-request? [] (make-attachments created op organization))
+                         :allowedAttachmentTypes (if info-request?
+                                                   [[:muut [:muu]]]
+                                                   (partition 2 attachment/attachment-types))
+                         :comments      (map make-comment messages)
+                         :permitType    (permit-type-from-operation op)}
+          app-with-ver  (domain/set-software-version application)]
+      (mongo/insert :applications app-with-ver)
+      (autofill-rakennuspaikka app-with-ver)
+      (ok :id id))
       (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :states     [:draft :open :complement-needed]}
   [command]
   (with-application command
     (fn [application]
@@ -490,8 +493,19 @@
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
-                                              $set {:modified created}})
-        (ok)))))
+                                              $set {:modified created}})))))
+
+(defcommand "change-location"
+  {:parameters [:id :x :y :address :propertyId]
+   :roles      [:applicant :authority]
+   :states     [:draft :info :answered :open :complement-needed]
+   :input-validators [(partial non-blank-parameters [:address])]}
+  [{{:keys [id x y address propertyId]} :data created :created}]
+  (mongo/update-by-id :applications id {$set {;:location      (->location x y)
+                                              :address       (s/trim address)
+                                              ;:propertyId    propertyId
+                                              :title         (s/trim address)
+                                              :modified      created}}))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
@@ -651,5 +665,6 @@
         query (condp = kind
                 "inforequests" (assoc base-query :infoRequest true)
                 "applications" (assoc base-query :infoRequest false)
-                "both"         base-query)]
+                "both"         base-query
+                {:_id -1})]
     (ok :data (mongo/count :applications query))))

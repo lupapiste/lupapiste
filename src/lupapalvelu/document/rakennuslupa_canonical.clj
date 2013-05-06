@@ -176,9 +176,9 @@
 (def state-timestamps
   {:draft :created
    :open :opened
+   :complement-needed :opened
    ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
-   :submitted :opened
-   :complement-needed :opened})
+   :submitted :opened})
 
 (defn- get-state [application]
   (let [state (keyword (:state application))]
@@ -236,7 +236,7 @@
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-     :rakentajaTyyppi (-> kaytto :rakentajaTyyppi :value)
+     :rakentajatyyppi (-> kaytto :rakentajaTyyppi :value)
      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
      :rakennuksenTiedot (merge {
                                 :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)

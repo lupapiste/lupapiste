@@ -218,6 +218,8 @@ SolitaAdmin logs in
 Input text by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
+  Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
+  Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
   Input text  xpath=//input[@data-test-id="${id}"]  ${value}
 
 Select From List by test id
