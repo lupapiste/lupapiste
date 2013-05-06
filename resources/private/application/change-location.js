@@ -89,6 +89,7 @@ LUPAPISTE.ChangeLocationModel = function() {
         }
       }
       self.address(newAddress);
+      self.map.center(x, y);
     });
     return self;
   };
