@@ -8,13 +8,16 @@
             <p data-bind="ltext: 'edit'"></p>
             <p class="dialog-close close">X</p>
           </div>
+
+          <!-- TODO move styles to scss files  -->
+
           <div class="dialog-content" style="display: table-row;">
 
-          <div style="display: table-cell; border: 1px solid red">
+          <div style="display: table-cell;">
             <div id="change-location-map" class="map map-large" style="width: 480px; height: 360px;"></div>
           </div>
 
-          <div style="display: table-cell; border: 1px solid red; vertical-align: top; padding-left: 10px;">
+          <div style="display: table-cell; vertical-align: top; padding-left: 10px;">
            <div class="form-entry">
             <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
             <input data-bind="value: address, valueUpdate: 'afterkeydown'" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
