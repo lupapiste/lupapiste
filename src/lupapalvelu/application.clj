@@ -2,12 +2,11 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join]]
+        [clojure.string :only [blank? join trim]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [clojure.string :as s]
-            [clj-time.format :as timeformat]
+  (:require [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -217,7 +216,7 @@
       (condp = (keyword state)
 
         ;; LUPA-XYZ (was: open-application)
-        :draft  (when (not (s/blank? text))
+        :draft  (when (not (blank? text))
                   (update-application command
                     {$set {:modified created
                            :state    :open
@@ -251,7 +250,7 @@
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
             henkilo      (domain/user2henkilo subject)
-            full-path    (str "documents.$.data" (when-not (s/blank? path) (str "." path)))]
+            full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
           (do
@@ -397,7 +396,7 @@
 
 (defn- ->double [v]
   (let [v (str v)]
-    (if (s/blank? v) 0.0 (Double/parseDouble v))))
+    (if (blank? v) 0.0 (Double/parseDouble v))))
 
 (defn- ->location [x y]
   {:x (->double x) :y (->double y)})
@@ -508,9 +507,9 @@
   [{{:keys [id x y address propertyId]} :data created :created application :application}]
   (if (= (:municipality application) (municipality/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
-                                                :address       (s/trim address)
+                                                :address       (trim address)
                                                 :propertyId    propertyId
-                                                :title         (s/trim address)
+                                                :title         (trim address)
                                                 :modified      created}})
     (fail :error.property-in-other-muinicipality)))
 
