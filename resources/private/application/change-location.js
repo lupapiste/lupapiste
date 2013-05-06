@@ -9,12 +9,24 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.y = 0;
   self.address = ko.observable("");
   self.propertyId = ko.observable("");
+  self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
 
   self.propertyId.subscribe(function(id) {
+    if (!id || util.prop.isPropertyIdInDbFormat(id)) {
+      self.propertyIdAutoUpdated = true;
+    }
+
     var human = util.prop.toHumanFormat(id);
     if (human != id) {
       self.propertyId(human);
+    } else {
+      if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {
+        // Id changed from human format to valid human format:
+        // Turing test passed, search for new location
+debug("turing test passed: search for new location");
+      }
+      self.propertyIdAutoUpdated = false;
     }
   });
 
@@ -75,7 +87,10 @@ LUPAPISTE.ChangeLocationModel = function() {
   // Click on the map
 
   self.searchPropertyId = function(x, y) {
-    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
+    locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
+      self.propertyIdAutoUpdated = true;
+      self.propertyId(id);
+    });
     return self;
   };
 
