@@ -27,7 +27,7 @@
   (if (:repeating x)
     {:name :0
      :type :group
-     :body (dissoc x :repeating)}
+     :body (:body x)}
     (:body x)))
 
 (defn create [{body :body} f]
