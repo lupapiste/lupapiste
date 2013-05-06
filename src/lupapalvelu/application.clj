@@ -505,13 +505,14 @@
    :states     [:draft :info :answered :open :complement-needed]
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])]}
-  [{{:keys [id x y address propertyId]} :data created :created}]
-  (debug propertyId)
-  (mongo/update-by-id :applications id {$set {:location      (->location x y)
-                                              :address       (s/trim address)
-                                              :propertyId    propertyId
-                                              :title         (s/trim address)
-                                              :modified      created}}))
+  [{{:keys [id x y address propertyId]} :data created :created application :application}]
+  (if (= (:municipality application) (municipality/municipality-by-propertyId propertyId))
+    (mongo/update-by-id :applications id {$set {:location      (->location x y)
+                                                :address       (s/trim address)
+                                                :propertyId    propertyId
+                                                :title         (s/trim address)
+                                                :modified      created}})
+    (fail :error.property-in-other-muinicipality)))
 
 (defcommand "convert-to-application"
   {:parameters [:id]

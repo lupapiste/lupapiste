@@ -1,1 +1,2 @@
 error.invalid-property-id:Tarkasta kiinteistötunnus
+error.property-in-other-muinicipality:Kiinteistö ei ole valitun kunnan alueella
