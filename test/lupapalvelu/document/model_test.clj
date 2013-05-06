@@ -114,7 +114,10 @@
 ;;
 
 (fact "updating document"
-  (apply-update {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}})
+  (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}}
+  (apply-updates {} [[[:b :c] "kikka"]
+                     [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
+                                                        :d {:value "kukka"}}}})
 
 ;;
 ;; VRK-rules validation

@@ -124,7 +124,9 @@
   [document path value]
   (assoc-in document (flatten [:data path :value]) value))
 
-()
+(defn apply-updates
+  [document updates]
+  (reduce (fn [document [path value]] (apply-update document path value)) document updates))
 
 ;;
 ;; golden oldies
