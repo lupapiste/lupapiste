@@ -3,16 +3,20 @@
 
 (defn nil-values [_] nil)
 
-(defn dummy-values [{:keys [type name body]}]
+(defn dummy-values [{:keys [type subtype name body]}]
   (condp = type
-    :select           (-> body first :name)
-    :checkbox         true
-    :number           "42"
-    :email            "example@example.com"
-    :tel              "012 123 4567"
-    :letter           "\u00c5"
-    :date             "2.5.1974"
-    :kiinteistotunnus "09100200990013"
+    :text      "text"
+    :checkbox  true
+    :date      "2.5.1974"
+    :select    (-> body first :name)
+    :string    (condp = subtype
+                 :email            "example@example.com"
+                 :tel              "012 123 4567"
+                 :number           "42"
+                 :digit            "1"
+                 :letter           "\u00c5"
+                 :kiinteistotunnus "09100200990013"
+                 (str subtype))
     (str name)))
 
 ;;
