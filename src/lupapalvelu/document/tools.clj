@@ -15,7 +15,11 @@
     :kiinteistotunnus "09100200990013"
     name))
 
-(defn flattened [col]
+;;
+;; Internal
+;;
+
+(defn- ^{:testable true} flattened [col]
   (->> col
     (walk/postwalk
       (fn [x]
@@ -23,14 +27,14 @@
           (into {} x)
           x)))))
 
-(defn- group [x]
+(defn- ^{:testable true} group [x]
   (if (:repeating x)
     {:name :0
      :type :group
      :body (:body x)}
     (:body x)))
 
-(defn create [{body :body} f]
+(defn- ^{:testable true} create [{body :body} f]
   (->> body
     (walk/prewalk
       (fn [x]
@@ -39,6 +43,20 @@
                 v (if (= :group (:type x)) (group x)(f x))]
             {k v})
           x)))))
+
+;;
+;; Public api
+;;
+
+(defn create-document-data
+  "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
+  ([schema] (create-document schema nil-values))
+  ([schema f] (->
+                schema
+                (create f)
+                flattened
+                wrapped
+                )))
 
 (defn wrapped
   "Wraps leaf values in a map and under k key, key defaults to :value.
