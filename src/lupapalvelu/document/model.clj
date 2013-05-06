@@ -87,10 +87,12 @@
 (defn validate-rules
   [{{{schema-name :name} :info} :schema data :data}]
   []
-  #_(when (= schema-name "uusiRakennus")
-    (when (-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (when (-> data :mitat :kerrosluku :value java.lang.Integer/parseInt (> 4))
-        [{:result [:err "illegal-key"]}]))))
+  #_(when
+    (and
+      (= schema-name "uusiRakennus")
+      (-> data :rakenne :kantavaRakennusaine :value (= "puu"))
+      (-> data :mitat :kerrosluku :value (> 4)))
+    [{:result [:warn "vrk:BR106"]}]))
 
 (defn validate-document
   "Validates document against it's local schema and document level rules
