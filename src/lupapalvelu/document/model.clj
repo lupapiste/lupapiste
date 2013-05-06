@@ -114,6 +114,15 @@
         pimped-doc    (assoc document :schema latest-schema)]
     (validate-document pimped-doc)))
 
+(defn has-errors?
+  [results]
+  (->>
+    results
+    (map :result)
+    (map first)
+    (some (partial = :err))
+    true?))
+
 ;;
 ;; Updates
 ;;
@@ -132,14 +141,14 @@
 ;; golden oldies
 ;;
 
-(defn- validate-update [schema-body results [k v]]
+#_(defn- validate-update [schema-body results [k v]]
   (let [elem   (keywordize-keys (find-by-name schema-body (s/split k #"\.")))
         result (validate elem v)]
     (if (nil? result)
       results
       (conj results (cons k result)))))
 
-(defn validate-updates
+#_(defn validate-updates
   "Validate updates against schema.
 
   Updates is expected to be a seq of updates, where each update is a key/value seq. Key is name of
@@ -151,7 +160,7 @@
   [schema updates]
   (reduce (partial validate-update (:body schema)) [] updates))
 
-(defn validation-status
+#_(defn validation-status
   "Accepts validation results (as defined in 'validate-updates' function) and returns either :ok
   (when results is empty), :warn (when results contains only warnings) or :err (when results
   contains one or more errors)."
