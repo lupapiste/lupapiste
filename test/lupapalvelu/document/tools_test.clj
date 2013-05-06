@@ -19,12 +19,12 @@
 (def expected-simple-document
   {:band {:name nil
           :genre nil
-          :members {:0 {:members {:name nil :instrument nil}}}}})
+          :members {:0 {:name nil :instrument nil}}}})
 
 (def expected-k-wrapped-simple-document
   {:band {:name {:k nil}
           :genre {:k nil}
-          :members {:0 {:members {:name {:k nil} :instrument {:k nil}}}}}})
+          :members {:0 {:name {:k nil} :instrument {:k nil}}}}})
 
 (fact "simple schema"
   (-> schema
