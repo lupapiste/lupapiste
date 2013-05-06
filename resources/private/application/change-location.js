@@ -36,8 +36,15 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.map.clear().updateSize().center(self.x, self.y, 10);
   };
 
+  //
+  // Concurrency control
+  //
 
-  /// Event handlers
+  self.requestContext = new RequestContext();
+
+  //
+  // Event handlers
+  //
 
   // Saving
 
@@ -67,10 +74,35 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   // Click on the map
 
+  self.searchPropertyId = function(x, y) {
+    locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
+    return self;
+  };
+
+  self.searchAddress = function(x, y) {
+    locationSearch.addressByPoint(self.requestContext, x, y, function(a) {
+      var newAddress = "";
+      if (a) {
+        newAddress = a.street;
+        if (a.number && a.number !== "0") {
+          newAddress = newAddress + " " + a.number;
+        }
+      }
+      self.address(newAddress);
+    });
+    return self;
+  };
+
   self.click = function(x, y) {
     self.x = x;
     self.y = y;
     self.drawLocation();
+
+    self.address("");
+    self.propertyId("");
+
+    self.requestContext.begin();
+    self.searchPropertyId(x, y).searchAddress(x, y);
     return false;
   };
 
