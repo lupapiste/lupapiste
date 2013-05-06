@@ -84,10 +84,23 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) v)))))
 
+(defn validate-rules
+  [{{{schema-name :name} :info} :schema data :data}]
+  []
+  #_(when (= schema-name "uusiRakennus")
+    (when (-> data :rakenne :kantavaRakennusaine :value (= "puu"))
+      (when (-> data :mitat :kerrosluku :value java.lang.Integer/parseInt (> 4))
+        [{:result [:err "illegal-key"]}]))))
+
 (defn validate-document
-  "Validates document against it's local schema and returns list of errors."
-  [{{{schema-name :name} :info schema-body :body} :schema document-data :data}]
-  (and document-data (flatten (validate-fields schema-body nil document-data []))))
+  "Validates document against it's local schema and document level rules
+   retuning list of validation errors."
+  [{{schema-body :body} :schema data :data :as document}]
+  (and data
+    (flatten
+      (into
+        (validate-fields schema-body nil data [])
+        (validate-rules document)))))
 
 (defn valid-document?
   "Checks weather document is valid."
