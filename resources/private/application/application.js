@@ -38,7 +38,7 @@
     self.start = function() {
       self.status(self.statusStarting);
       ajax
-        .command("stamp-attachments", {id: self.applicationId})
+        .command("stamp-attachments", {id: self.applicationId, xMargin: 10, yMargin: 85})
         .success(self.started)
         .call();
       return false;
