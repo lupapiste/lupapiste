@@ -120,8 +120,8 @@
     // Concurrency control:
     //
 
-    self.updateRequestId = 0;
-    self.beginUpdateRequest = function() { self.updateRequestId++; return self; };
+    self.requestContext = new RequestContext();
+    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
 
     //
     // Callbacks:
@@ -138,11 +138,6 @@
         .searchPropertyId(x, y)
         .searchAddress(x, y);
       return false;
-    };
-
-    self.onResponse = function(fn) {
-      var requestId = self.updateRequestId;
-      return function(result) { if (requestId === self.updateRequestId) fn(result); };
     };
 
     // Search activation:
@@ -162,7 +157,7 @@
     self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
 
     self.serchPointByAddress = function(address) {
-      locationSearch.pointByAddress(address, self.onResponse(function(result) {
+      locationSearch.pointByAddress(self.requestContext, address, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -175,12 +170,12 @@
               .beginUpdateRequest()
               .searchPropertyId(x, y);
           }
-        }), _.partial(self.useManualEntry, true));
+        }, _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPointByPropertyId = function(id) {
-      locationSearch.pointByPropertyId(id, self.onResponse(function(result) {
+      locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -193,18 +188,18 @@
               .beginUpdateRequest()
               .searchAddress(x, y);
           }
-        }),
+        },
         _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPropertyId = function(x, y) {
-      locationSearch.propertyIdByPoint(x, y, self.onResponse(self.propertyId));
+      locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
       return self;
     };
 
     self.searchAddress = function(x, y) {
-      locationSearch.addressByPoint(x, y, self.onResponse(self.addressData));
+      locationSearch.addressByPoint(self.requestContext, x, y, self.addressData);
       return self;
     };
 
