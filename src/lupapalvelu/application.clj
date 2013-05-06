@@ -56,13 +56,12 @@
         changes))))
 
 (defn- property-id? [^String s]
-  (re-matches #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$" s))
+  (re-matches #"^[0-9]{14}$" s))
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
     (info "invalid property id parameters:" (join ", " invalid))
-    (fail :error.invalid-property-id :parameters (vec invalid)))
-  )
+    (fail :error.invalid-property-id :parameters (vec invalid))))
 
 ;; Meta-fields:
 ;;
