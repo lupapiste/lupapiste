@@ -423,7 +423,7 @@
                                                    (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
                                                    (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
 
-    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
+    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota!
     (mongo/update
       :applications
       {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
