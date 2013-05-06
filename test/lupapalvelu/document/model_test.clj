@@ -90,6 +90,10 @@
 (defn invalid? [document]
   (or (fact (validate-document document) => (has some not-empty)) true))
 
+(defn invalid-with? [result]
+  (fn [document]
+    (or (fact (validate-document document) => (has some (contains {:result result}))) true)))
+
 (facts "validate-document"
   {:schema {:info {:name "schema"}
             :body [{:name "a" :type :group
@@ -117,3 +121,13 @@
         data   (create-document-data schema dummy-values)]
     {:schema schema
      :data   data}))
+
+(facts "VRK-validations"
+
+  (fact "uusi rakennus is valid"
+    uusi-rakennus => valid?)
+
+  (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
+    (-> uusi-rakennus
+      (assoc-in [:data :rakenne :kantavaRakennusaine :value] "puu")
+      (assoc-in [:mitat :kerrosluku :value] "5")) => (invalid-with? [:warn "vrk:BR106"])))

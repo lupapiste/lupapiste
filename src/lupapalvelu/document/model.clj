@@ -86,12 +86,11 @@
 
 (defn validate-rules
   [{{{schema-name :name} :info} :schema data :data}]
-  []
-  #_(when
+  (when
     (and
       (= schema-name "uusiRakennus")
       (-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (-> data :mitat :kerrosluku :value (> 4)))
+      (-> data :mitat :kerrosluku :value java.lang.Integer/parseInt (> 4)))
     [{:result [:warn "vrk:BR106"]}]))
 
 (defn validate-document
