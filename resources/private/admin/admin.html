@@ -4,20 +4,18 @@
   <section class="page" id="admin">
     <div class="container">
       <div class="breadcrumb">
-        <a href="#!/applications">Pääkäyttäjän osio</a>
+        <a href="#!/admin" data-bind="ltext: 'admin.adminpage-title'"></a>
       </div>
-      <h1 id="admin-header">Pääkäyttäjän osio</h1>
+      <h1 id="admin-header" data-bind="ltext: 'admin.adminpage-title'"></h1>
+
+      <div data-bind="template: {name: 'admin-user-list-template', data: {users: $root.users, usersListTitle: 'admin.admin-users', addUserButtonLabel: 'admin.addAdminUser', openCommandAddModal: $root.users.openCreateAdminModal, openCommandEditModal: $root.users.openAdminModifyModal, openCommandResetPwModal: $root.users.openAdminPasswordModal}}"></div>
+
       <h3>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h3>
       <ul data-bind="foreach: fixtures.data()">
         <li>
           <a href="#" data-bind="text: $data, click: $root.fixtures.apply"></a>
         </li>
       </ul>
-      <h3>P&auml;&auml;t&ouml;kset</h3>
-      <ul data-bind="foreach: applications.data()">
-        <li><a href="#" data-bind="text: id, click: $root.applications.giveVerdict, attr: {'data-test-id': id}"></a></li>
-      </ul>
-      <b data-bind="text: applications.verdictResult" data-test-id="admin-verdict-result"></b>
       <h3>Aktivoi tili</h3>
       <ul data-bind="foreach: activations.data()">
         <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
@@ -29,6 +27,7 @@
           <th>toiminto</th>
           <th>tyyppi</th>
           <th>roolit</th>
+          <th>tilat</th>
           <th>parametrit</th>
           <th>l&auml;hdekoodi</th>
           <th>kuvaus</th>
@@ -42,6 +41,13 @@
             <td>
               <!-- ko if: $data.roles -->
               <ul data-bind="foreach: roles">
+                <li data-bind="text: $data"></li>
+              </ul>
+              <!-- /ko -->
+            </td>
+            <td>
+              <!-- ko if: $data.states -->
+              <ul data-bind="foreach: states">
                 <li data-bind="text: $data"></li>
               </ul>
               <!-- /ko -->
@@ -65,6 +71,9 @@
         </tbody>
       </table>
     </div>
+
+    <div data-bind="template: {name: 'user-modification-dialogs-template', data: {addUserTitle: 'admin.addAdminUser', modifyUserTitle: 'admin.editAdminUser'}}"></div>
+
   </section>
 </body>
 </html>

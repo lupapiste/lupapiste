@@ -9,7 +9,11 @@
         </div>
 
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span></h1>
+          <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span>
+          <a class="icon"
+             data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-test-id="change-location-link"></a>
+          </h1>
 
           <!-- Property ID: -->
           <div>
@@ -22,7 +26,7 @@
           </div>
           <div data-bind="if: state">
             <p data-bind="ltext: 'application.state'"></p>
-            <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
+            <span id="test-inforequest-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
 
           <div data-bind="with: $root.applicationModel.data">
@@ -53,7 +57,7 @@
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
-              <p data-bind="ltext: 'application.assignee'">K��sittelij��:</p>
+              <p data-bind="ltext: 'application.assignee'"></p>
               <span id="test-inforequest-assignee" class="application_summary_text">
 
                 <select id="inforequest-assignee-select"
@@ -70,9 +74,14 @@
         <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
-          <button data-bind="ltext: 'inforequest.markInforequestAnswered', visible: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" data-test-id="inforequest-mark-answered" type="submit" class="btn btn-primary"></button>
-          <button data-bind="ltext: 'inforequest.convertToApplication', visible: $root.authorization.ok('convert-to-application'), click: convertToApplication" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary"></button>
-          <button data-bind="ltext: 'inforequest.cancelInforequest',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn"></button>
+          <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">
+            <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
+            <span class="icon send left-align"></span>
+          </button>
+          <button data-bind="click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn">
+            <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
+            <span class="icon remove-grey left-align"></span>
+          </button>
         </div>
       </div>
     </div>
@@ -132,7 +141,10 @@
           <div data-bind="template: {name: 'comment-template', data: $root.comment}"></div>
         </div>
 
+      </div>
+
     </div>
+
   </section>
 </body>
 </html>

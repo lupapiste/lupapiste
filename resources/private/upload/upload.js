@@ -8,10 +8,11 @@ LUPAPISTE.Upload = {
   typeSelector: ko.observable(false),
   errorMessage: ko.observable(),
   targetType: ko.observable(),
-  targetId: ko.observable()
+  targetId: ko.observable(),
+  locked: ko.observable()
 };
 
-LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage, target) {
+LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage, target, locked) {
   "use strict";
   LUPAPISTE.Upload.applicationId(applicationId);
   LUPAPISTE.Upload.attachmentId(attachmentId);
@@ -20,6 +21,7 @@ LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType
   LUPAPISTE.Upload.errorMessage(errorMessage);
   LUPAPISTE.Upload.targetType(target ? target.type : null);
   LUPAPISTE.Upload.targetId(target ? target.id : null);
+  LUPAPISTE.Upload.locked(locked || false);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
@@ -45,9 +47,9 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
   }
 };
 
-LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector, target) {
+LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector, target, locked) {
   "use strict";
-  LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null, target);
+  LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null, target, locked);
   LUPAPISTE.Upload.loadTypes(applicationId);
 };
 
@@ -60,7 +62,8 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       pageutil.getURLParameter("attachmentType"),
       pageutil.getURLParameter("typeSelector"),
       pageutil.getURLParameter("errorMessage"),
-      {type: pageutil.getURLParameter("targetType"), id: pageutil.getURLParameter("targetId")});
+      {type: pageutil.getURLParameter("targetType"), id: pageutil.getURLParameter("targetId")},
+      pageutil.getURLParameter("locked"));
     LUPAPISTE.Upload.loadTypes(applicationId);
   }
 };

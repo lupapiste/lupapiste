@@ -50,7 +50,9 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
     $(selector)
       .css('top',  winHeight/2-$(selector).height()/2)
       .css('left', winWidth/2-$(selector).width()/2)
-      .fadeIn(600);
+      .fadeIn(600)
+      // Register modal window closing handlers
+      .find('.close').click(self.close);
 
     var inputs = $(selector + ' input:enabled');
     if (inputs.length) {
@@ -124,10 +126,6 @@ LUPAPISTE.ModalDialog.init = function() {
     }
     return false;
   });
-
-  // Register modal window closing handlers
-  $('.window .close').click(this.close);
-
 };
 
 /**

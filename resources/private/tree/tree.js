@@ -1,5 +1,13 @@
-;(function($) {
+var tree = (function() {
   "use strict";
+  
+  var setup = new function() {
+    var self = this;
+    self.speed = 200;
+    self.animation = function(enabled) {
+      self.speed = enabled ? 200 : 0;
+    };
+  };
 
   function nop() { return true; }
 
@@ -28,7 +36,6 @@
     self.baseModel = args.baseModel || {};
     self.data = [];
     self.width = args.width || context.width();
-    self.speed = args.speed || self.width / 2;
     self.moveLeft  = {"margin-left": "-=" + self.width};
     self.moveRight = {"margin-left": "+=" + self.width};
 
@@ -47,7 +54,7 @@
           nextElement = link[1],
           next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
       self.model.stack.push(selectedLink);
-      self.stateNop().content.append(next).animate(self.moveLeft, self.speed, self.stateGo);
+      self.stateNop().content.append(next).animate(self.moveLeft, setup.speed, self.stateGo);
       return false;
     };
 
@@ -59,7 +66,7 @@
       }
       self.stateNop();
       self.model.stack.pop();
-      self.content.animate(self.moveRight, self.speed, function() {
+      self.content.animate(self.moveRight, setup.speed, function() {
         self.stateGo();
         $(".tree-page", self.content).filter(":last").remove();
       });
@@ -101,7 +108,7 @@
         self.content
           .css("margin-left", "" + self.width + "px")
           .append(self.makeLinks(data))
-          .animate({"margin-left": "0px"}, self.speed, self.stateGo);
+          .animate({"margin-left": "0px"}, setup.speed, self.stateGo);
       }
       return self;
     };
@@ -134,4 +141,6 @@
     return new Tree(this, arg);
   };
 
-})(jQuery);
+  return setup;
+  
+})();

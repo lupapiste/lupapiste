@@ -2,11 +2,12 @@
   "use strict";
 
   var isInitializing = true;
-  var currentId;
+  var currentId = null;
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
-  var applicationMap;
-  var inforequestMap;
+  var applicationMap = null;
+  var inforequestMap = null;
+  var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
 
   var stampModel = new function() {
     var self = this;
@@ -202,6 +203,26 @@
 
   }();
 
+  var verdictModel = new function() {
+    var self = this;
+
+    self.verdicts = ko.observable();
+    self.attachments = ko.observable();
+
+    self.refresh = function(application) {
+      self.verdicts(application.verdict);
+      self.attachments(_.filter(application.attachments,function(attachment) {
+        return _.isEqual(attachment.target, {type: "verdict"});
+      }));
+    };
+
+    self.openVerdict = function() {
+      window.location.hash = "#!/verdict/" + currentId;
+      return false;
+    };
+
+  }();
+
   var submitApplicationModel = new function() {
     var self = this;
 
@@ -253,7 +274,8 @@
     };
   }();
 
-  var application = {
+  var application = {};
+  application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
     state: ko.observable(),
@@ -267,8 +289,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    verdict: ko.observable(),
-    initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
     applicant: ko.observable(),
@@ -315,17 +335,6 @@
       ajax.command("request-for-complement", { id: applicationId})
         .success(function() {
           notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-          repository.load(applicationId);
-        })
-        .call();
-      return false;
-    },
-
-    markInforequestAnswered: function(model) {
-      var applicationId = application.id();
-      ajax.command("mark-inforequest-answered", {id: applicationId})
-        .success(function() {
-          notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
           repository.load(applicationId);
         })
         .call();
@@ -499,6 +508,9 @@
       commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
 
+      // Verdict details
+      verdictModel.refresh(app);
+
       // Operations:
 
       application.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
@@ -602,7 +614,7 @@
   });
 
   // tabs
-  var selectedTab;
+  var selectedTab = "";
   var tabFlow = false;
   hub.subscribe("set-debug-tab-flow", function(e) {
     tabFlow = e.value;
@@ -680,7 +692,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -705,12 +717,14 @@
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
-      stampModel: stampModel
+      verdictModel: verdictModel,
+      stampModel: stampModel,
+      changeLocationModel: changeLocationModel
     };
 
-    ko.applyBindings(bindings, $("#application")[0]);
-    ko.applyBindings(bindings, $("#inforequest")[0]);
-
+    $("#application").applyBindings(bindings);
+    $("#inforequest").applyBindings(bindings);
+    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
     attachmentTemplatesModel.init();
   });
 

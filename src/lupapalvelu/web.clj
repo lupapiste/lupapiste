@@ -14,7 +14,6 @@
             [noir.cookies :as cookies]
             [sade.env :as env]
             [lupapalvelu.core :as core]
-            [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
             [lupapalvelu.user :as user]
@@ -221,7 +220,7 @@
 
 (defn- logout! []
   (session/clear!)
-  (cookies/put! :lupapiste-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
 
 (defjson [:post "/api/logout"] []
   (logout!)
@@ -291,13 +290,14 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
-  (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
-  (let [target (if (every? s/blank? [targetId targetType]) nil {:type targetType :id targetId})
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
+  (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
                            :target target
+                           :locked (java.lang.Boolean/parseBoolean locked)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
@@ -306,10 +306,11 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.4.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
+                                            :locked (or locked "false")
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
@@ -371,11 +372,12 @@
 (defn anti-csrf
   [handler]
   (fn [request]
-    (let [cookie-name "lupapiste-token"]
+    (let [cookie-name "anti-csrf-token"
+          cookie-attrs (dissoc (env/value :cookie) :http-only)]
       (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-        (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
+        (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
 
 ;;
 ;; dev utils:
