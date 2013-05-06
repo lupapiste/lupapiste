@@ -31,7 +31,7 @@ var docgen = (function () {
     self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
 
     // Context help
-    self.findHelpElement = function(e) {
+    self.findHelpElement = function (e) {
       var event = getEvent(e);
       var input$ = $(event.target);
       var help$ = input$.siblings('.form-help');
@@ -41,10 +41,10 @@ var docgen = (function () {
       return help$;
     };
 
-    self.showHelp = function(e) {
+    self.showHelp = function (e) {
       self.findHelpElement(e).fadeIn("slow").css("display", "block");
     };
-    self.hideHelp = function(e) {
+    self.hideHelp = function (e) {
       self.findHelpElement(e).fadeOut("slow").css("display", "none");
     };
 
@@ -109,7 +109,7 @@ var docgen = (function () {
 
     function makeEntrySpan(subSchema, pathStr) {
       var help = null;
-      var helpLocKey = locKeyFromPath(pathStr  + ".help");
+      var helpLocKey = locKeyFromPath(pathStr + ".help");
       var span = document.createElement("span");
       span.className = "form-entry";
 
@@ -201,7 +201,7 @@ var docgen = (function () {
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
 
-      if (subSchema.readonly){
+      if (subSchema.readonly) {
         input.readOnly = true;
       } else {
         input.onchange = save;
@@ -290,13 +290,16 @@ var docgen = (function () {
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
+      var clearDiv = document.createElement("div");
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
+      clearDiv.className = "clear";
       div.appendChild(makeLabel("group", myPath, true));
       div.appendChild(partsDiv);
+      div.appendChild(clearDiv);
       return div;
     }
 
@@ -310,6 +313,8 @@ var docgen = (function () {
       }
 
       var partsDiv = document.createElement("div");
+      var clearDiv = document.createElement("div");
+      clearDiv.className = "clear";
       var span = makeEntrySpan(subSchema, myPath);
 
       partsDiv.id = pathStrToID(myPath);
@@ -325,6 +330,7 @@ var docgen = (function () {
       });
 
       partsDiv.appendChild(span);
+      partsDiv.appendChild(clearDiv);
       return partsDiv;
     }
 
@@ -398,7 +404,7 @@ var docgen = (function () {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-    //TODO: Tuki readonlylle
+      //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox long";
       select.onchange = function (e) {
@@ -489,6 +495,12 @@ var docgen = (function () {
         var elem = builder(subSchema, myModel, myPath.concat([id]), save, partOfChoice);
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
+        console.log(myPath);
+        if (subSchema.type == "group") {
+          var clearDiv = document.createElement("div");
+          clearDiv.className = "clear";
+          elem.appendChild(clearDiv);
+        }
         return elem;
       }
 
@@ -593,7 +605,7 @@ var docgen = (function () {
         var event = getEvent(e);
         var target = event.target;
         if (target.parentNode.indicator) {
-          $(target.parentNode.indicator).fadeOut(200, function(){target.removeChild(indicator);});
+          $(target.parentNode.indicator).fadeOut(200, function () { target.removeChild(indicator); });
         }
         var indicator = document.createElement("span");
         $(indicator).addClass("form-indicator");
@@ -625,7 +637,7 @@ var docgen = (function () {
             $(indicator).fadeIn(300);
             setTimeout(function () {
               $(indicator).removeClass("form-input-saved");
-              $(indicator).fadeOut(200, function(){target.parentNode.removeChild(indicator);});
+              $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
             }, 2000);
           } else if (status !== "ok") {
             error("Unknown status:", status, "path:", path);
