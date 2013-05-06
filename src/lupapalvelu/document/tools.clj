@@ -13,7 +13,7 @@
     :letter           "\u00c5"
     :date             "2.5.1974"
     :kiinteistotunnus "09100200990013"
-    name))
+    (str name)))
 
 ;;
 ;; Internal
