@@ -493,9 +493,10 @@
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
-   :input-validators [(partial non-blank-parameters [:address])]}
+   :input-validators [(partial non-blank-parameters [:address :propertyId])]}
   [{{:keys [id x y address propertyId]} :data created :created}]
-  (mongo/update-by-id :applications id {$set {;:location      (->location x y)
+  (debug propertyId)
+  (mongo/update-by-id :applications id {$set {:location      (->location x y)
                                               :address       (s/trim address)
                                               ;:propertyId    propertyId
                                               :title         (s/trim address)
