@@ -208,7 +208,7 @@
                              :poikkeamat {:value "Ei poikkeamisia"}}})
 
 (def lisatieto {:id "lisatiedot" :schema {:info {:name "lisatiedot"}}
-                :data {:suoramarkkinointikielto {:value false}}})
+                :data {:suoramarkkinointikielto {:value true}}})
 
 ;TODO LIITETIETO
 
@@ -526,12 +526,12 @@
 
     (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
     (fact "Rakennus" rakennus => truthy)
-    (fact "rakentajaTyyppi" (:rakentajaTyyppi rakennus) => "muu")
+    (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
     (fact "rakennuksentiedot" rakennuksentiedot => truthy)
     (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "011 yhden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
     (fact "rakennuksen omistaja laji" (:omistajalaji (:omistajalaji rakennuksen-omistajatieto)) => "muu yksityinen henkil\u00f6 tai perikunta")
-    (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => false)
+    (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
     (fact "asianTiedot" asianTiedot => truthy)
     (fact "Asiantiedot" Asiantiedot => truthy)
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")

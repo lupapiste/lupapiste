@@ -10,6 +10,6 @@ The shared browser is opened
   Open browser to login page
 
 Login page is in Finnish
-  [Tags]  ie8  fail
+  [Tags]  ie8
   Page Should Not Contain  Suomeksi
   Page Should Contain  På svenska
