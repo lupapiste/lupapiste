@@ -274,7 +274,7 @@
         model.operation(v ? v.op : null); 
 
         var municipalityCode = model.municipality().municipalityCode;
-        ajax.query("get-organization", {municipality: municipalityCode}).success(function(d) {
+        ajax.query("get-organization-by-municipality", {municipality: municipalityCode}).success(function(d) {
           model.organization(d);
         }).call();
       },

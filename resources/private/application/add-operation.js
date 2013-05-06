@@ -28,7 +28,7 @@
         .url("#!/application/" + application.id);
       var id = application.id;
       ajax
-        .query("municipality", {municipality: application.municipality})
+        .query("organization", {organizationId: application.organization})
         .pending(self.waitingOperations)
         .success(function (data) {
           if (self.application.id === id) {
