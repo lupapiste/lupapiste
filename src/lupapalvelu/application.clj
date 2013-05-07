@@ -402,7 +402,7 @@
 ;;
 
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
-                  :address
+                  (fn [app] (str (:address app) ", " (loc (str "municipality." (:municipality app)))))
                   get-application-operation
                   get-applicant-name
                   :submitted
