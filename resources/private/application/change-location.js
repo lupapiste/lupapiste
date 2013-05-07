@@ -1,10 +1,12 @@
 LUPAPISTE.ChangeLocationModel = function() {
   var self = this;
+  self.dialogSelector = "#dialog-change-location";
+
+  // Model
 
   self.map = {};
   self.id = 0;
   self.municipalityCode = 0;
-  self.dialogSelector = "#dialog-change-location";
   self.x = 0;
   self.y = 0;
   self.address = ko.observable("");
@@ -12,30 +14,20 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
 
-  self.propertyId.subscribe(function(id) {
-    if (!id || util.prop.isPropertyIdInDbFormat(id)) {
-      self.propertyIdAutoUpdated = true;
-    }
-
-    var human = util.prop.toHumanFormat(id);
-    if (human != id) {
-      self.propertyId(human);
-    } else {
-      if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {
-        // Id changed from human format to valid human format:
-        // Turing test passed, search for new location
-debug("turing test passed: search for new location");
-      }
-      self.propertyIdAutoUpdated = false;
-    }
-  });
-
   self.ok = ko.computed(function() {
     return util.prop.isPropertyId(self.propertyId()) && self.address();
   });
 
   self.drawLocation = function() {
     self.map.clear().add(self.x, self.y);
+  };
+
+  self.setXY = function(x, y) {
+    self.x = x;
+    self.y = y;
+    if (self.map) {
+      self.drawLocation();
+    }
   };
 
   self.reset = function(app) {
@@ -53,10 +45,34 @@ debug("turing test passed: search for new location");
   //
 
   self.requestContext = new RequestContext();
+  self.beginUpdateRequest = function() {
+    self.errorMessage(null);
+    self.requestContext.begin();
+    return self;
+  };
 
   //
   // Event handlers
   //
+
+  self.propertyId.subscribe(function(id) {
+    if (!id || util.prop.isPropertyIdInDbFormat(id)) {
+      self.propertyIdAutoUpdated = true;
+    }
+
+    var human = util.prop.toHumanFormat(id);
+    if (human != id) {
+      self.propertyId(human);
+    } else {
+      if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {
+        // Id changed from human format to valid human format:
+        // Turing test passed, search for new location
+debug("turing test passed: search for new location");
+        self.beginUpdateRequest().searchPointByPropertyId(id);
+      }
+      self.propertyIdAutoUpdated = false;
+    }
+  });
 
   // Saving
 
@@ -86,6 +102,29 @@ debug("turing test passed: search for new location");
 
   // Click on the map
 
+  self.click = function(x, y) {
+    self.setXY(x, y);
+
+    self.address("");
+    self.propertyId("");
+
+    self.beginUpdateRequest().searchPropertyId(x, y).searchAddress(x, y);
+    return false;
+  };
+
+  // Service functions
+
+  self.searchPointByPropertyId = function(propertyId) {
+    locationSearch.pointByPropertyId(self.requestContext, propertyId, function(result) {
+        if (result.data && result.data.length > 0) {
+          self.setXY(result.data[0].x, result.data[0].y);
+        } else {
+          self.errorMessage("error.invalid-property-id");
+        }
+      });
+    return self;
+  };
+
   self.searchPropertyId = function(x, y) {
     locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
       self.propertyIdAutoUpdated = true;
@@ -107,19 +146,6 @@ debug("turing test passed: search for new location");
       self.map.center(x, y);
     });
     return self;
-  };
-
-  self.click = function(x, y) {
-    self.x = x;
-    self.y = y;
-    self.drawLocation();
-
-    self.address("");
-    self.propertyId("");
-
-    self.requestContext.begin();
-    self.searchPropertyId(x, y).searchAddress(x, y);
-    return false;
   };
 
   // DOM ready
