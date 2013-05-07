@@ -134,7 +134,6 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.searchPropertyId = function(x, y) {
     locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
-      self.propertyIdAutoUpdated = true;
       self.propertyId(id);
     });
     return self;
