@@ -599,10 +599,9 @@ var docgen = (function () {
     }
 
     function saveForReal(path, value, callback) {
-      //consolez.log("update:", path, value);
-      //consolez.log("update:", path.replace(new RegExp("^"+self.docId+"."),""), value);
+      var unPimpedPath = path.replace(new RegExp("^"+self.docId+"."),"");
       ajax
-        .command("update-doc", {doc: self.docId, id: self.appId, updates: [[path, value]]})
+        .command("update-doc", {doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]]})
         // Server returns empty array (all ok), or array containing an array with three
         // elements: [key status message]. Here we use just the status.
         .success(function(e) {
