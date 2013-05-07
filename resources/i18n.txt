@@ -62,3 +62,6 @@ rakennuksen-laajentaminen.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneist
 purku.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
 rakennuksen-muuttaminen.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
 uusiRakennus.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
+
+
+invite.default-text:Hei! Sinut on kutsuttu osallistumaan lupahakemuksen tekemiseen Lupapisteessä. 
