@@ -1,3 +1,9 @@
+error.invalid-property-id:Tarkasta kiinteistötunnus
+error.property-in-other-muinicipality:Kiinteistö ei ole valitun kunnan alueella
+stamp.margin:  Leiman sijainti:
+stamp.xMargin: Oikeasta reunasta
+stamp.yMargin: Ala reunasta
+
 hankkeen-kuvaus.kuvaus.help: Esimerkkejä hyvistä kuvauksista: Omakotitalo - Rakennetaan kaksikerroksinen, puuverhoiltu omakotitalo ja talousrakennus sekä maalämpökaivo; Rivitalo - Rakennetaan rivitaloa sekä väestönsuoja/varastorakennus. Asuntoja on 20 kpl; Kerrostalo - Rakennetaan neljäkerroksinen kerrostalo, josta osa on kellaritilaa ja tukimuuri. Asuntoja on 12 kpl. Anomus aloittaa rakennustyöt valitusaikana; Puunkaato - Kaadetaan n. 50 kuusta. Kiinteistöltä kaadetaan puita ja pintamaat poistetaan. Täyttöä on n. 10 000 m3.
 rakennuspaikka.kiinteisto.maaraalaTunnus.help:Jos rakennuspaikkana on määräala, syötä määräalan tunnus tähän. Muuten voit jättää kentän tyhjäksi.
 purku.kaytto.rakentajaTyyppi.help:Liiketaloudellinen rakentaminen merkitään rakentajaksi  silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella  rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu  rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
@@ -59,3 +65,5 @@ purku.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota ra
 rakennuksen-muuttaminen.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
 uusiRakennus.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
 
+
+invite.default-text:Hei! Sinut on kutsuttu osallistumaan lupahakemuksen tekemiseen Lupapisteessä. 

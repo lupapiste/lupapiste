@@ -9,6 +9,8 @@
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
 
+  function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
+  
   var stampModel = new function() {
     var self = this;
 
@@ -23,6 +25,12 @@
     self.version = null;
     self.files = null;
 
+    self.xMargin = ko.observable("");
+    self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
+    
+    self.yMargin = ko.observable("");
+    self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
+    
     self.status = ko.observable();
     self.filesTable = ko.observable();
 
@@ -30,7 +38,7 @@
       self.applicationId = applicationId;
       self.jobId = null;
       self.files = {};
-      self.status(self.statusInit).filesTable([]);
+      self.status(self.statusInit).filesTable([]).xMargin("10").yMargin("85");
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
@@ -38,7 +46,7 @@
     self.start = function() {
       self.status(self.statusStarting);
       ajax
-        .command("stamp-attachments", {id: self.applicationId})
+        .command("stamp-attachments", {id: self.applicationId, xMargin: _.parseInt(self.xMargin(), 10), yMargin: _.parseInt(self.yMargin(), 10)})
         .success(self.started)
         .call();
       return false;
@@ -572,7 +580,7 @@
     var self = this;
 
     self.email = ko.observable();
-    self.text = ko.observable();
+    self.text = ko.observable(loc('invite.default-text'));
     self.documentName = ko.observable();
     self.documentId = ko.observable();
     self.error = ko.observable();
@@ -581,7 +589,7 @@
       self.email(undefined);
       self.documentName(undefined);
       self.documentId(undefined);
-      self.text(undefined);
+      self.text(loc('invite.default-text'));
       self.error(undefined);
     };
 
