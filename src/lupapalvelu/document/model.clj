@@ -31,7 +31,7 @@
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
 
-(defmethod validate :boolean [_ v]
+(defmethod validate :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
 
@@ -43,9 +43,6 @@
     nil
     (catch Exception e [:warn "invalid-date-format"])))
 
-;; FIXME
-(defmethod validate :checkbox [elem v]
-  nil)
 
 ;; FIXME
 (defmethod validate :select [elem v]
@@ -88,17 +85,22 @@
 
 (defn- validate-document-fields [schema-body k v path]
   (let [current-path (if k (conj path (name k)) path)]
-    (if (map? v)
-      (every? true? (map (fn [[k2 v2]] (validate-document-fields schema-body k2 v2 current-path)) v))
+    (if (contains? v :value)
       (let [elem (find-by-name schema-body current-path)
-            result (validate (keywordize-keys elem) v)]
+            result (validate (keywordize-keys elem) (:value v))]
         (when-not (nil? result) (println k v path elem result))
-        (nil? result)))))
+        (nil? result))
+      (every? true? (map (fn [[k2 v2]] (validate-document-fields schema-body k2 v2 current-path)) v)))))
 
 (defn validate-against-current-schema [document]
   (let [schema-name (get-in document [:schema :info :name])
-        schema-body (:body (get schemas schema-name))]
-    (validate-document-fields schema-body nil (:body document) [])))
+        schema-body (:body (get schemas schema-name))
+        document-data (:data document)]
+    (if document-data
+      (validate-document-fields schema-body nil document-data [])
+      (do
+        (println "No data")
+        false))))
 
 (defn validate-updates
   "Validate updates against schema.

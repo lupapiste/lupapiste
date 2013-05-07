@@ -228,10 +228,9 @@
 ;;
 
 (defn raster-images [request]
-  (let [layer (get-in request [:query-params "LAYERS"])
-        basic-auth (if (re-matches #"ktj_kiinteisto.*" layer) (:kiinteisto auth) (:raster auth))]
+  (let [layer (get-in request [:query-params "LAYERS"])]
     (client/get "https://ws.nls.fi/rasteriaineistot/image"
                 {:query-params (:query-params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
-                 :basic-auth basic-auth
+                 :basic-auth (:raster auth)
                  :as :stream})))

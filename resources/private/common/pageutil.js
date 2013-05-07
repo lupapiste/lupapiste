@@ -1,6 +1,6 @@
 var pageutil = (function() {
   "use strict";
-  
+
   var ajaxImg;
   var ajaxLoaderContainer;
 
@@ -16,7 +16,7 @@ var pageutil = (function() {
     }
     return null;
   }
-  
+
   function showAjaxWait() {
     ajaxImg.hide();
     ajaxLoaderContainer.show();
@@ -28,9 +28,14 @@ var pageutil = (function() {
   function hideAjaxWait() {
     ajaxLoaderContainer.hide();
   }
-  
+
+  function getPage() {
+    var pageMatch = window.location.hash.match(/\/([\-\w]*)/);
+    return pageMatch ? pageMatch[1] : null;
+  }
+
   $(function() {
-    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader">');
+    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader" width="66" height="66">');
     ajaxLoaderContainer = $('<div class="ajax-loader-container">').append(ajaxImg);
     $('body').append(ajaxLoaderContainer);
   });
@@ -39,6 +44,7 @@ var pageutil = (function() {
     getURLParameter:  getURLParameter,
     showAjaxWait:     showAjaxWait,
     hideAjaxWait:     hideAjaxWait,
+    getPage:          getPage
   };
 
 })();

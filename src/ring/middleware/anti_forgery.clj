@@ -102,8 +102,8 @@
       (handler request)
       (attack-callback request))))
 
-(defn set-token-in-cookie [request response cookie-name]
+(defn set-token-in-cookie [request response cookie-name cookie-attrs]
   (when response
     (if (get-in request [:cookies cookie-name :value])
-       response
-       (assoc-in response [:cookies cookie-name] {:value (default-token-generation-fn) :path "/"}))))
+        response
+        (assoc-in response [:cookies cookie-name] (assoc cookie-attrs :value (default-token-generation-fn) :path "/")))))

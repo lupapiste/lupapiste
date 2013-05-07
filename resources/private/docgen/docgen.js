@@ -1,4 +1,4 @@
-var docgen = (function() {
+var docgen = (function () {
   "use strict";
 
   function makeButton(id, label) {
@@ -10,7 +10,7 @@ var docgen = (function() {
     return appendButton;
   }
 
-  LUPAPISTE.DocModel = function(schema, model, saveCallback, removeCallback, docId, application) {
+  LUPAPISTE.DocModel = function (schema, model, saveCallback, removeCallback, docId, application) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -26,9 +26,27 @@ var docgen = (function() {
     self.docId = docId;
     self.appId = application.id;
     self.application = application;
-    self.eventData = {doc: docId, app: self.appId};
+    self.eventData = { doc: docId, app: self.appId };
 
-    self.sizeClasses = {"s" : "form-input short", "m" : "form-input medium"};
+    self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
+
+    // Context help
+    self.findHelpElement = function (e) {
+      var event = getEvent(e);
+      var input$ = $(event.target);
+      var help$ = input$.siblings('.form-help');
+      if (!help$.length) {
+        help$ = input$.parent().siblings('.form-help');
+      }
+      return help$;
+    };
+
+    self.showHelp = function (e) {
+      self.findHelpElement(e).fadeIn("slow").css("display", "block");
+    };
+    self.hideHelp = function (e) {
+      self.findHelpElement(e).fadeOut("slow").css("display", "none");
+    };
 
     // ID utilities
 
@@ -44,10 +62,14 @@ var docgen = (function() {
       return "group-" + pathStrToID(pathStr);
     }
 
+    function locKeyFromPath(pathStr) {
+      return (self.schemaName + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+    }
+
     function makeLabel(type, pathStr, groupLabel) {
       var label = document.createElement("label");
       var path = groupLabel ? pathStr + "._group_label" : pathStr;
-      var locKey = (self.schemaName + "." + path.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+      var locKey = locKeyFromPath(path);
 
       label.id = pathStrToLabelID(pathStr);
       label.htmlFor = pathStrToID(pathStr);
@@ -56,10 +78,10 @@ var docgen = (function() {
       return label;
     }
 
-    function makeInput(type, path, value, save, extraClass) {
+    function makeInput(type, pathStr, value, save, extraClass, readonly) {
       var input = document.createElement("input");
-      input.id = pathStrToID(path);
-      input.name = docId + "." + path;
+      input.id = pathStrToID(pathStr);
+      input.name = docId + "." + pathStr;
 
       try {
         input.type = type;
@@ -69,7 +91,14 @@ var docgen = (function() {
       }
 
       input.className = "form-input " + type + " " + (extraClass || "");
-      input.onchange = save;
+
+      if (readonly) {
+        input.readOnly = true;
+      } else {
+        input.onchange = save;
+      }
+
+
       if (type === "checkbox") {
         input.checked = value;
       } else {
@@ -78,9 +107,30 @@ var docgen = (function() {
       return input;
     }
 
-    function makeEntrySpan() {
+    function makeEntrySpan(subSchema, pathStr) {
+      var help = null;
+      var helpLocKey = locKeyFromPath(pathStr + ".help");
       var span = document.createElement("span");
       span.className = "form-entry";
+
+      // Display text areas in a wide container
+      if (subSchema.type === "text") {
+        span.className = "form-entry form-full-width";
+      }
+
+      // Override style with layout option
+      if (subSchema.layout) {
+        span.className = "form-entry form-" + subSchema.layout;
+      }
+
+      // Add span for help text
+      if (loc.hasTerm(helpLocKey)) {
+        help = document.createElement("span");
+        help.className = "form-help";
+        help.innerHTML = loc(helpLocKey);
+        span.appendChild(help);
+      }
+
       return span;
     }
 
@@ -88,8 +138,8 @@ var docgen = (function() {
 
     function buildCheckbox(subSchema, model, path, save) {
       var myPath = path.join(".");
-      var span = makeEntrySpan();
-      span.appendChild(makeInput("checkbox", myPath, model[subSchema.name], save));
+      var span = makeEntrySpan(subSchema, myPath);
+      span.appendChild(makeInput("checkbox", myPath, getModelValue(model, subSchema.name), save, subSchema.readonly));
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
@@ -101,10 +151,10 @@ var docgen = (function() {
 
     function buildString(subSchema, model, path, save, partOfChoice) {
       var myPath = path.join(".");
-      var span =  makeEntrySpan();
+      var span = makeEntrySpan(subSchema, myPath);
       var type = (subSchema.subtype === "email") ? "email" : "text";
       var sizeClass = self.sizeClasses[subSchema.size] || "";
-      var input = makeInput(type, myPath, model[subSchema.name], save, sizeClass);
+      var input = makeInput(type, myPath, getModelValue(model, subSchema.name), save, sizeClass, subSchema.readonly);
       setMaxLen(input, subSchema);
 
       span.appendChild(makeLabel(partOfChoice ? "string-choice" : "string", myPath));
@@ -118,28 +168,47 @@ var docgen = (function() {
 
         unit.className = "form-string-unit";
         unit.appendChild(document.createTextNode(loc("unit." + subSchema.unit)));
+
+        input.onfocus = self.showHelp;
+        input.onblur = self.hideHelp;
+
         inputAndUnit.appendChild(unit);
         span.appendChild(inputAndUnit);
+
       } else {
+        input.onfocus = self.showHelp;
+        input.onblur = self.hideHelp;
         span.appendChild(input);
       }
 
       return span;
     }
 
+    function getModelValue(model, name) {
+      return model[name] ? model[name].value : "";
+    }
+
     function buildText(subSchema, model, path, save) {
       var myPath = path.join(".");
       var input = document.createElement("textarea");
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema, myPath);
+
+      input.onfocus = self.showHelp;
+      input.onblur = self.hideHelp;
 
       input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
 
+      if (subSchema.readonly) {
+        input.readOnly = true;
+      } else {
+        input.onchange = save;
+      }
+
       input.className = "form-input textarea";
-      input.onchange = save;
-      input.value = model[subSchema.name] || "";
+      input.value = getModelValue(model, subSchema.name);
 
       span.appendChild(makeLabel("text", myPath));
       span.appendChild(input);
@@ -149,19 +218,22 @@ var docgen = (function() {
     function buildDate(subSchema, model, path, save) {
       var lang = loc.getCurrentLanguage();
       var myPath = path.join(".");
-      var value = model[subSchema.name] || "";
-      var span = makeEntrySpan();
+      var value = getModelValue(model, subSchema.name);
+
+      var span = makeEntrySpan(subSchema, myPath);
+
+      // TODO: readonly support
 
       span.appendChild(makeLabel("date", myPath));
 
       // date
       $("<input>", {
-        id:    pathStrToID(myPath),
-        name:  docId + "." + path,
-        type:  "text",
+        id: pathStrToID(myPath),
+        name: docId + "." + path,
+        type: "text",
         "class": "form-input text form-date",
         value: value,
-        change: save,
+        change: save
       }).datepicker($.datepicker.regional[lang]).appendTo(span);
 
       return span;
@@ -170,13 +242,22 @@ var docgen = (function() {
     function buildSelect(subSchema, model, path, save) {
       var myPath = path.join(".");
       var select = document.createElement("select");
-      var selectedOption = model[subSchema.name] || "";
+      var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-      var span = makeEntrySpan();
+      var span = makeEntrySpan(subSchema, myPath);
+
+      select.onfocus = self.showHelp;
+      select.onblur = self.hideHelp;
 
       select.name = myPath;
       select.className = "form-input combobox";
-      select.onchange = save;
+
+
+      if (subSchema.readonly) {
+        select.readOnly = true;
+      } else {
+        select.onchange = save;
+      }
 
       option.value = "";
       option.appendChild(document.createTextNode(loc("selectone")));
@@ -209,27 +290,38 @@ var docgen = (function() {
       var myModel = model[name] || {};
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
+      var clearDiv = document.createElement("div");
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
+      clearDiv.className = "clear";
       div.appendChild(makeLabel("group", myPath, true));
       div.appendChild(partsDiv);
+      div.appendChild(clearDiv);
       return div;
     }
 
     function buildRadioGroup(subSchema, model, path, save) {
       var myPath = path.join(".");
-      var myModel = model[subSchema.name] || _.first(subSchema.body).name;
+      var myModel;
+      if (model[subSchema.name] && model[subSchema.name].value) {
+        myModel = model[subSchema.name].value;
+      } else {
+        myModel = _.first(subSchema.body).name;
+      }
+
       var partsDiv = document.createElement("div");
-      var span = makeEntrySpan();
+      var clearDiv = document.createElement("div");
+      clearDiv.className = "clear";
+      var span = makeEntrySpan(subSchema, myPath);
 
       partsDiv.id = pathStrToID(myPath);
 
       $.each(subSchema.body, function (i, o) {
         var pathForId = myPath + "." + o.name;
-        var input = makeInput("radio", myPath, o.name, save);
+        var input = makeInput("radio", myPath, o.name, save, subSchema.readonly);
         input.id = pathStrToID(pathForId);
         input.checked = o.name === myModel;
 
@@ -238,26 +330,27 @@ var docgen = (function() {
       });
 
       partsDiv.appendChild(span);
+      partsDiv.appendChild(clearDiv);
       return partsDiv;
     }
 
     function buildBuildingSelector(subSchema, model, path, save) {
       var myPath = path.join(".");
       var select = document.createElement("select");
-      var selectedOption = model[subSchema.name] || "";
+      var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-      var span = makeEntrySpan();
-
+      var span = makeEntrySpan(subSchema, myPath);
+      //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
-      select.onchange = function(e) {
+      select.onchange = function (e) {
         var event = getEvent(e);
         var target = event.target;
 
         var buildingId = target.value;
         ajax
-          .command("merge-details-from-krysp", {id: self.appId, buildingId: buildingId})
-          .success(function() {
+          .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId })
+          .success(function () {
             save(event);
             repository.load(self.appId);
           })
@@ -273,26 +366,26 @@ var docgen = (function() {
       select.appendChild(option);
 
       ajax
-        .command("get-building-info-from-legacy", {id: self.appId})
-        .success(function(data) {
+        .command("get-building-info-from-legacy", { id: self.appId })
+        .success(function (data) {
           $.each(data.data, function (i, building) {
             var name = building.buildingId;
             var usage = building.usage;
             var created = building.created;
             var option = document.createElement("option");
             option.value = name;
-            option.appendChild(document.createTextNode(name+" ("+usage+") - "+created));
+            option.appendChild(document.createTextNode(name + " (" + usage + ") - " + created));
             if (selectedOption === name) {
               option.selected = "selected";
             }
             select.appendChild(option);
           });
         })
-        .error(function(error) {
+        .error(function (error) {
           var text = error.text;
           var option = document.createElement("option");
           option.value = name;
-          option.appendChild(document.createTextNode(loc("error."+text)));
+          option.appendChild(document.createTextNode(loc("error." + text)));
           option.selected = "selected";
           select.appendChild(option);
           select.setAttribute("disabled", true);
@@ -305,23 +398,23 @@ var docgen = (function() {
     }
 
     function buildPersonSelector(subSchema, model, path, save) {
-      var span = makeEntrySpan();
       var myPath = path.join(".");
-      var myNs = path.slice(0,path.length-1).join(".");
+      var span = makeEntrySpan(subSchema, myPath);
+      var myNs = path.slice(0, path.length - 1).join(".");
       var select = document.createElement("select");
-      var selectedOption = model[subSchema.name] || "";
+      var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-
+      //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox long";
-      select.onchange = function(e) {
+      select.onchange = function (e) {
         var event = getEvent(e);
         var target = event.target;
         var userId = target.value;
         ajax
-          .command("set-user-to-document", {id: self.appId, documentId: docId, userId: userId, path: myNs})
-          .success(function() {
-            save(event,function() { repository.load(self.appId); });
+          .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs })
+          .success(function () {
+            save(event, function () { repository.load(self.appId); });
           })
           .call();
         return false;
@@ -335,11 +428,11 @@ var docgen = (function() {
 
       _.each(self.application.auth, function (user) {
         // LUPA-89: don't print fully empty names
-        if(user.firstName && user.lastName) {
+        if (user.firstName && user.lastName) {
           var option = document.createElement("option");
           var value = user.id;
           option.value = value;
-          option.appendChild(document.createTextNode(user.firstName+" "+user.lastName));
+          option.appendChild(document.createTextNode(user.firstName + " " + user.lastName));
           if (selectedOption === value) {
             option.selected = "selected";
           }
@@ -357,9 +450,9 @@ var docgen = (function() {
       // new invite
       $("<button>", {
         "class": "icon-remove",
-        "data-test-id": "application-invite-"+self.schemaName,
+        "data-test-id": "application-invite-" + self.schemaName,
         text: loc("personSelector.invite"),
-        click: function() {
+        click: function () {
           $("#invite-document-name").val(self.schemaName).change();
           $("#invite-document-id").val(self.docId).change();
           LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
@@ -393,7 +486,6 @@ var docgen = (function() {
     };
 
     function build(subSchema, model, path, save, partOfChoice) {
-
       var myName = subSchema.name;
       var myPath = path.concat([myName]);
       var builder = builders[subSchema.type] || buildUnknown;
@@ -403,23 +495,28 @@ var docgen = (function() {
         var elem = builder(subSchema, myModel, myPath.concat([id]), save, partOfChoice);
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
+        if (subSchema.type == "group") {
+          var clearDiv = document.createElement("div");
+          clearDiv.className = "clear";
+          elem.appendChild(clearDiv);
+        }
         return elem;
       }
 
       if (subSchema.repeating) {
         var models = model[myName] || [{}];
-        var elements = _.map(models, function(val, key) {
+        var elements = _.map(models, function (val, key) {
           var myModel = {};
           myModel[myName] = val;
           return makeElem(myModel, key);
         });
 
-        var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaName + "."+  myPath.join(".") + "._append_label"));
+        var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaName + "." + myPath.join(".") + "._append_label"));
 
-        var appender = function() {
+        var appender = function () {
           var parent$ = $(this.parentNode);
           var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-          while (parent$.children("*[data-repeating-id-" + repeatingId + "='"+ count + "']").length) {
+          while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
             count++;
           }
           var myModel = {};
@@ -437,12 +534,12 @@ var docgen = (function() {
     }
 
     function getSelectOneOfDefinition(schema) {
-      var selectOneOfSchema = _.find(schema.body, function(subSchema){
+      var selectOneOfSchema = _.find(schema.body, function (subSchema) {
         return subSchema.name === SELECT_ONE_OF_GROUP_KEY && subSchema.type === "radioGroup";
       });
 
       if (selectOneOfSchema) {
-        return _.map(selectOneOfSchema.body, function(subSchema) {return subSchema.name;}) || [];
+        return _.map(selectOneOfSchema.body, function (subSchema) { return subSchema.name; }) || [];
       }
 
       return [];
@@ -460,28 +557,32 @@ var docgen = (function() {
 
       var selectOneOf = getSelectOneOfDefinition(schema);
 
-      _.each(schema.body, function(subSchema) {
-          var children = build(subSchema, model, path, save, partOfChoice);
-          if (!_.isArray(children)) {
-            children = [children];
+      _.each(schema.body, function (subSchema) {
+        var children = build(subSchema, model, path, save, partOfChoice);
+        if (!_.isArray(children)) {
+          children = [children];
+        }
+        _.each(children, function (elem) {
+          if (_.indexOf(selectOneOf, subSchema.name) >= 0) {
+            elem.setAttribute("data-select-one-of", subSchema.name);
+            $(elem).hide();
           }
-          _.each(children, function(elem) {
-            if (_.indexOf(selectOneOf, subSchema.name) >= 0) {
-              elem.setAttribute("data-select-one-of", subSchema.name);
-              $(elem).hide();
-            }
 
-            body.appendChild(elem);
-          });
+          body.appendChild(elem);
         });
+      });
 
       if (selectOneOf.length) {
         // Show current selection or the first of the group
-        var myModel = model[SELECT_ONE_OF_GROUP_KEY] || _.first(selectOneOf);
+        var myModel = _.first(selectOneOf);
+        if (model[SELECT_ONE_OF_GROUP_KEY]) {
+          myModel = model[SELECT_ONE_OF_GROUP_KEY].value;
+        }
+
         toggleSelectedGroup(myModel);
 
         var s = "[name$='." + SELECT_ONE_OF_GROUP_KEY + "']";
-        $(body).find(s).change(function() {
+        $(body).find(s).change(function () {
           toggleSelectedGroup(this.value);
         });
       }
@@ -493,6 +594,8 @@ var docgen = (function() {
       var img = document.createElement("img");
       img.src = "/img/ajax-loader-12.gif";
       img.alt = "...";
+      img.width = 12;
+      img.height = 12;
       return img;
     }
 
@@ -500,6 +603,12 @@ var docgen = (function() {
       return function (e, callback) {
         var event = getEvent(e);
         var target = event.target;
+        if (target.parentNode.indicator) {
+          $(target.parentNode.indicator).fadeOut(200, function () { target.removeChild(indicator); });
+        }
+        var indicator = document.createElement("span");
+        $(indicator).addClass("form-indicator");
+        target.parentNode.appendChild(indicator);
         var path = target.name;
         var loader = loaderImg();
         var label = document.getElementById(pathStrToLabelID(path));
@@ -515,15 +624,24 @@ var docgen = (function() {
           if (label) {
             label.removeChild(loader);
           }
-          $(target).removeClass("form-input-warn").removeClass("form-input-err");
+          $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
           if (status === "warn") {
-            $(target).addClass("form-input-warn");
+            $(indicator).addClass("form-input-warn").text(loc("form.warn"));
+            $(indicator).fadeIn(200);
           } else if (status === "err") {
-            $(target).addClass("form-input-err");
+            $(indicator).addClass("form-input-err").text(loc("form.err"));
+            $(indicator).fadeIn(200);
+          } else if (status === "ok") {
+            $(indicator).addClass("form-input-saved").text(loc("form.saved"));
+            $(indicator).fadeIn(300);
+            setTimeout(function () {
+              $(indicator).removeClass("form-input-saved");
+              $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
+            }, 2000);
           } else if (status !== "ok") {
             error("Unknown status:", status, "path:", path);
           }
-          if(callback) { callback(); }
+          if (callback) { callback(); }
         }, eventData);
         // No return value or stoping the event propagation:
         // That would prevent moving to the next field with tab key in IE8.
@@ -531,7 +649,7 @@ var docgen = (function() {
     }
 
     function removeThis() {
-      this.parent().slideUp(function() { $(this).remove(); });
+      this.parent().slideUp(function () { $(this).remove(); });
     }
 
     function removeDoc(e) {
@@ -563,7 +681,7 @@ var docgen = (function() {
       title.appendChild(icon);
 
       if (op) {
-        title.appendChild(document.createTextNode(loc(op + "._group_label")));
+        title.appendChild(document.createTextNode(loc(op.name + "._group_label")));
       } else {
         title.appendChild(document.createTextNode(loc(self.schemaName + "._group_label")));
       }
@@ -574,6 +692,7 @@ var docgen = (function() {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
+            .attr("data-test-class", "delete-schemas." + self.schemaName)
             .click(removeDoc));
       }
 
@@ -591,23 +710,23 @@ var docgen = (function() {
     self.element = buildElement();
   };
 
-  var save = function(path, value, callback, data) {
+  var save = function (path, value, callback, data) {
     ajax
-      .command("update-doc", {doc: data.doc, id: data.app, updates: [[path, value]]})
-      // Server returns empty array (all ok), or array containing an array with three
-      // elements: [key status message]. Here we use just the status.
-      .success(function(e) {
+      .command("update-doc", { doc: data.doc, id: data.app, updates: [[path, value]] })
+    // Server returns empty array (all ok), or array containing an array with three
+    // elements: [key status message]. Here we use just the status.
+      .success(function (e) {
         var status = (e.results.length === 0) ? "ok" : e.results[0][1];
         callback(status);
       })
-      .error(function(e) { error(e); callback("err"); })
-      .fail(function(e) { error(e); callback("err"); })
+      .error(function (e) { error(e); callback("err"); })
+      .fail(function (e) { error(e); callback("err"); })
       .call();
   };
 
   function getDocumentOrder(doc) {
     var num = doc.schema.info.order || 7;
-    return num * 10000000000 + doc.created/1000;
+    return num * 10000000000 + doc.created / 1000;
   }
 
   function displayDocuments(containerSelector, removeDocModel, application, documents) {
@@ -615,19 +734,19 @@ var docgen = (function() {
     var sortedDocs = _.sortBy(documents, getDocumentOrder);
 
     var docgenDiv = $(containerSelector).empty();
-    _.each(sortedDocs, function(doc) {
+    _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.body, save, removeDocModel.init, doc.id, application).element);
+      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.data, save, removeDocModel.init, doc.id, application).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
-        $(btn).click(function() {
+        $(btn).click(function () {
           var self = this;
           ajax
-            .command("create-doc", {schema: schema.info.name, id: application.id})
-            .success(function(data) {
+            .command("create-doc", { schemaName: schema.info.name, id: application.id })
+            .success(function (data) {
               var newDocId = data.doc;
               var newElem = new LUPAPISTE.DocModel(schema, {}, save, removeDocModel.init, newDocId, application).element;
               $(self).before(newElem);

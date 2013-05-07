@@ -30,10 +30,12 @@
 ;; schema sniplets
 ;;
 
+(def kuvaus {:name "kuvaus" :type :text :max-len 4000 :layout :full-width})
+
 (def henkilo-valitsin [{:name :userId :type :personSelector }
                         {:name "turvakieltoKytkin" :type :checkbox}])
 
-(def rakennuksen-valitsin [{:name :rakennusnro :type :buildingSelector}])
+(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
@@ -266,7 +268,7 @@
                                          {:name "ter\u00e4s"}
                                          {:name "puu"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "muuRakennusaine" :type :string :size "s"}
+                                 {:name "muuRakennusaine" :type :string}
                                  {:name "julkisivu" :type :select
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
@@ -275,7 +277,7 @@
                                          {:name "puu"}
                                          {:name "lasi"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "muuMateriaali" :type :string :size "s"}]}
+                                 {:name "muuMateriaali" :type :string}]}
                          {:name "lammitys"
                           :type :group
                           :body [{:name "lammitystapa" :type :select
@@ -297,7 +299,7 @@
                                          {:name "puu"}
                                          {:name "muu" :type :string :size "s"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "muu-lammonlahde" :type :text :size "s"}]}
+                                 {:name "muu-lammonlahde" :type :string}]}
                          {:name "verkostoliittymat" :type :group
                           :body [{:name "viemariKytkin" :type :checkbox}
                                  {:name "vesijohtoKytkin" :type :checkbox}
@@ -313,8 +315,8 @@
                                  {:name "koneellinenilmastointiKytkin" :type :checkbox}
                                  {:name "lamminvesiKytkin" :type :checkbox}
                                  {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                 {:name "saunoja" :type :string :subtype :number :unit "kpl"}
-                                 {:name "vaestonsuoja" :type :string :subtype :number :unit "hengelle"}]}
+                                 {:name "saunoja" :type :string :subtype :number :size "s" :unit "kpl"}
+                                 {:name "vaestonsuoja" :type :string :subtype :number :size "s" :unit "hengelle"}]}
                          {:name "luokitus"
                           :type :group
                           :body [{:name "energialuokka" :type :select
@@ -349,11 +351,12 @@
                           :body huoneisto}])
 
 
-(def rakennelma (body {:name "kuvaus" :type :text :max-len 4000}))
-(def maisematyo (body {:name "kuvaus" :type :text :max-len 4000}))
+(def rakennelma (body kuvaus))
+(def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
-                             :type :group :repeating true
+                             :type :group
+                             :repeating true
                              :body (body party [{:name "omistajalaji" :type :select
                                            :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                                   {:name "muu yksityinen henkil\u00f6 tai perikunta"}
@@ -369,7 +372,7 @@
                                                   {:name "sosiaaliturvarahasto"}
                                                   {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
                                                   {:name "ei tiedossa"}]}
-                                                {:name "muu-omistajalaji" :type :string :size "s"}])}])
+                                                {:name "muu-omistajalaji" :type :string}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
@@ -395,26 +398,24 @@
 (def rakennuksen-laajentaminen (body [{:name "laajennuksen-tiedot"
                                        :type :group
                                        :body [{:name "perusparannuskytkin" :type :checkbox}
-                                                     {:name "mitat"
-                                                      :type :group
-                                                      :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
-                                                             {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
-                                                             {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
-                                                             {:name "huoneistoala"
-                                                              :type :group
-                                                              :repeating true
-                                                              :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
-                                                                     {:name "kayttotarkoitusKoodi" :type :select
-                                                                      :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
-                                                                             {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
-                                                                             {:name "hoitotilaa"}
-                                                                             {:name "toimisto- ja hallintotilaa"}
-                                                                             {:name "kokoontumistilaa"}
-                                                                             {:name "opetustilaa"}
-                                                                             {:name "tuotantotilaa(teollisuus)"}
-                                                                             {:name "varastotilaa"}
-                                                                             {:name "muuta huoneistoalaan kuuluvaa tilaa"}
-                                                                             {:name "ei tiedossa"}]}]}]}]}]
+                                              {:name "mitat"
+                                               :type :group
+                                               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
+                                                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
+                                                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
+                                                      {:name "huoneistoala" :type :group :repeating true :removable true
+                                                       :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
+                                                              {:name "kayttotarkoitusKoodi" :type :select
+                                                               :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
+                                                                      {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
+                                                                      {:name "hoitotilaa"}
+                                                                      {:name "toimisto- ja hallintotilaa"}
+                                                                      {:name "kokoontumistilaa"}
+                                                                      {:name "opetustilaa"}
+                                                                      {:name "tuotantotilaa(teollisuus)"}
+                                                                      {:name "varastotilaa"}
+                                                                      {:name "muuta huoneistoalaan kuuluvaa tilaa"}
+                                                                      {:name "ei tiedossa"}]}]}]}]}]
                                      olemassaoleva-rakennus))
 
 (def purku (body
@@ -435,8 +436,8 @@
   (to-map-by-name
     [{:info {:name "hankkeen-kuvaus"
              :order 1}
-      :body [{:name "kuvaus" :type :text :max-len 4000}
-             {:name "poikkeamat" :type :text :max-len 4000}]}
+      :body [kuvaus
+             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
      {:info {:name "uusiRakennus"}
       :body (body rakennuksen-omistajat rakennuksen-tiedot)}
@@ -465,27 +466,34 @@
 
      {:info {:name "paasuunnittelija"
              :order 4
+             :removable false
              :type :party}
       :body paasuunnittelija}
 
      {:info {:name "suunnittelija"
              :repeating true
              :order 5
+             :removable true
              :type :party}
       :body suunnittelija}
 
      {:info {:name "maksaja"
              :repeating true
              :order 6
+             :removable true
              :type :party}
       :body party}
 
      {:info {:name "rakennuspaikka"
-             :order 2} ; TODO sijainti(kios?/ jo kartalta osoitettu)
+             :order 2}
       :body [{:name "kiinteisto"
               :type :group
               :body [{:name "maaraalaTunnus" :type :string}
-                     {:name "tilanNimi" :type :string}]}
+                     {:name "tilanNimi" :type :string :readonly true}
+                     {:name "rekisterointipvm" :type :string :readonly true}
+                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                     {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
+
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}
@@ -500,4 +508,8 @@
 
        {:info {:name "lisatiedot"
                :order 100}
-        :body [{:name "suoramarkkinointikielto" :type :checkbox}]}]))
+        :body [{:name "suoramarkkinointikielto"
+                :type :checkbox
+                :layout :full-width}]}]))
+
+

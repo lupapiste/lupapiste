@@ -22,13 +22,6 @@
   (when k
     (cons (get m k) (select m ks))))
 
-(defn sub-map
-  "Return a new map with only the selected entries"
-  ([m ks]
-    (sub-map m ks nil))
-  ([m ks defaults]
-    (reduce (fn [r k] (assoc r k (get m k (get defaults k)))) {} ks)))
-
 ; From clojure.contrib/map-utils)
 (defn deep-merge-with
   "Like merge-with, but merges maps recursively, applying the given fn

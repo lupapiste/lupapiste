@@ -9,12 +9,16 @@
         </div>
 
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span></h1>
+          <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span>
+          <a class="icon"
+             data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-test-id="change-location-link"></a>
+          </h1>
 
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
-            <span class="application_summary_text" data-bind="text: propertyId" data-test-id="inforequest-property-id"></span>
+            <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="inforequest-property-id"></span>
           </div>
           <div>
             <p data-bind="ltext: 'application.applicant'"></p>
@@ -22,7 +26,7 @@
           </div>
           <div data-bind="if: state">
             <p data-bind="ltext: 'application.state'"></p>
-            <span id="test-inforequest-state" class="application_summary_text" data-bind="text: loc('inforequest_' + state())"></span>
+            <span id="test-inforequest-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
 
           <div data-bind="with: $root.applicationModel.data">
@@ -40,16 +44,20 @@
           <!-- Operations: -->
           <div>
             <p data-bind="ltext: 'application.operations'"></p>
-            <ul>
-              <li data-bind="if: initialOp">
-                <span data-bind="ltext: 'operations.' + initialOp()" data-test-id="inforequest-application-operation" class="application_summary_text"></span>
+            <ul data-bind="foreach: operationsCount">
+              <li>
+                <span data-bind="visible: count > 1">
+                  <span data-bind="text: count"></span>
+                  <span>&#x00D7;</span>
+                </span>
+                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
               </li>
             </ul>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
           <div>
-              <p data-bind="ltext: 'application.assignee'">Käsittelijä:</p>
+              <p data-bind="ltext: 'application.assignee'"></p>
               <span id="test-inforequest-assignee" class="application_summary_text">
 
                 <select id="inforequest-assignee-select"
@@ -66,9 +74,14 @@
         <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
-          <button data-bind="ltext: 'inforequest.markInforequestAnswered', visible: $root.authorization.ok('mark-inforequest-answered'), click: markInforequestAnswered" data-test-id="inforequest-mark-answered" type="submit" class="btn btn-primary"></button>
-          <button data-bind="ltext: 'inforequest.convertToApplication', visible: $root.authorization.ok('convert-to-application'), click: convertToApplication" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary"></button>
-          <button data-bind="ltext: 'inforequest.cancelInforequest',  click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn"></button>
+          <button data-bind="click: convertToApplication, visible: $root.authorization.ok('convert-to-application')" data-test-id="inforequest-convert-to-application" type="submit" class="btn btn-primary">
+            <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
+            <span class="icon send left-align"></span>
+          </button>
+          <button data-bind="click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn">
+            <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
+            <span class="icon remove-grey left-align"></span>
+          </button>
         </div>
       </div>
     </div>
@@ -119,39 +132,19 @@
 
         <button
           class="btn modal"
-          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: attachment.newAttachment"
+          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: application.newOtherAttachment"
           data-test-id="add-inforequest-attachment"
           data-window-id="upload-dialog"></button>
 
-        <div data-bind="with: $root.comment">
+        <div>
           <h3 class="tab-info" data-bind="ltext: 'inforequest.comments'"></h3>
-          <div>
-            <table data-test-id="comments-table" class="table table-striped conversation">
-              <tbody data-bind="foreach: comments">
-                <tr class="comment inforequest-comment">
-                  <td class="comment-party commenttd">
-                    <span data-bind="dateTimeString: created" class="date"></span>
-                    <br />
-                    <span data-bind="fullName: user" class="author"></span>
-                    <br />
-                    <!-- span class="author" data-bind="fullName: user"></span><br/  TODO: Does not woek -->
-                    <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
-                  </td>
-                  <td class="commenttd" data-bind="text: text">
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <form>
-              <h4 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h4>
-              <textarea data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
-                        class="form-input textarea" id="commentText" rows="3"></textarea>
-              <button data-bind="ltext: 'application.conversationSend', disable: disabled, click: submit"
-                      id="application.addComment" type="submit" class="btn btn-primary"></button>
-            </form>
-          </div>
+          <div data-bind="template: {name: 'comment-template', data: $root.comment}"></div>
         </div>
+
+      </div>
+
     </div>
+
   </section>
 </body>
 </html>

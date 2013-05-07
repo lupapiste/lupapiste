@@ -79,6 +79,14 @@ var gis = (function() {
       return self.map.getZoom();
     };
 
+    self.getMaxZoom = function() {
+      return 11;
+    };
+
+    self.centerWithMaxZoom = function(x, y) {
+      return self.center(x, y, self.getMaxZoom());
+    };
+
     self.updateSize = function() {
       self.map.updateSize();
       return self;

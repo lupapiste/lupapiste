@@ -9,10 +9,10 @@
 (apply-remote-minimal)
 
 (fact "can't inject js in 'x' or 'y' params"
-  (create-app pena :x ";alert(\"foo\");" :y "what ever") => (contains {:ok false})
-  (create-app pena :x "0.1x" :y "1.0") => (contains {:ok false})
-  (create-app pena :x "1x2" :y "1.0") => (contains {:ok false})
-  (create-app pena :x "2" :y "1.0") => (contains {:ok true}))
+  (create-app pena :x ";alert(\"foo\");" :y "what ever") => not-ok?
+  (create-app pena :x "0.1x" :y "1.0")                   => not-ok?
+  (create-app pena :x "1x2" :y "1.0")                    => not-ok?
+  (create-app pena :x "2" :y "1.0")                      => ok?)
 
 (fact "creating application without message"
   (let [resp  (create-app pena)
@@ -41,7 +41,7 @@
     (:opened application) => nil
     (count (:comments application)) => 1
     (-> (:comments application) first :text) => "hello"
-    (-> hakija :body :henkilo :henkilotiedot) => (contains {:etunimi "Pena" :sukunimi "Panaani"})))
+    (-> hakija :data :henkilo :henkilotiedot) => (contains {:etunimi {:value "Pena"} :sukunimi {:value "Panaani"}})))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (let [created-resp (create-app pena :municipality sonja-muni)
@@ -127,15 +127,15 @@
 (facts "Add operations"
   (let [command-resp (create-app mikko :municipality veikko-muni)
         application-id  (:id command-resp)]
-    (success command-resp) => true
-    (success (command mikko  :open-application   :id application-id)) => true
-    (success (command veikko :assign-application :id application-id :assigneeId veikko-id)) => true
+    command-resp => ok?
+    (comment-application application-id mikko)
+    (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
     (fact "Applicant is able to add operation"
-          (success (command mikko :add-operation :id application-id :operation "varasto-tms")) => true)
+      (success (command mikko :add-operation :id application-id :operation "varasto-tms")) => true)
 
     (fact "Authority is able to add operation"
-          (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
+      (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
 (comment
   (apply-remote-minimal)

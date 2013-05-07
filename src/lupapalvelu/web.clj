@@ -1,6 +1,7 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail]]
+        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
@@ -14,7 +15,6 @@
             [noir.cookies :as cookies]
             [sade.env :as env]
             [lupapalvelu.core :as core]
-            [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
             [lupapalvelu.user :as user]
@@ -24,10 +24,15 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.token :as token]
+            [lupapalvelu.etag :as etag]
             [sade.security :as sadesecurity]
             [sade.status :as status]
+            [sade.strings :as ss]
+            [clojure.string :as s]
             [sade.util :as util]
             [cheshire.core :as json]
+            [clojure.java.io :as io]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery])
   (:import [java.io ByteArrayInputStream]))
@@ -46,8 +51,21 @@
 
 (defjson "/system/apis" [] @apis)
 
+(defn parse-json-body-middleware [handler]
+  (fn [request]
+    (let [json-body (if (ss/starts-with (:content-type request) "application/json")
+                      (if-let [body (:body request)]
+                        (-> body
+                          (io/reader :encoding (or (:character-encoding request) "utf-8"))
+                          json/parse-stream
+                          keywordize-keys)
+                        {}))
+          request (assoc request :json json-body)
+          request (if json-body (assoc request :params json-body) request)]
+      (handler request))))
+
 (defn from-json [request]
-  (json/decode (slurp (:body request)) true))
+  (:json request))
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
@@ -107,8 +125,11 @@
      :userId        (get-in action [:user :id] "")}
     (core/execute action)))
 
-(defjson [:post "/api/command/:name"] {name :name}
+(defn- execute-command [name]
   (execute (enriched (core/command name (from-json (request/ring-request))))))
+
+(defjson [:post "/api/command/:name"] {name :name}
+  (execute-command name))
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
@@ -132,11 +153,14 @@
                    :admin admin?})
 
 (defn cache-headers [resource-type]
-  (if (= :html resource-type)
+  (if (env/dev-mode?)
     {"Cache-Control" "no-cache"}
-    (if (env/dev-mode?)
-      {"Cache-Control" "no-cache"}
-      {"Cache-Control" "public, max-age=86400"})))
+    (if (= :html resource-type)
+      {"Cache-Control" "no-cache"
+       "ETag"          etag/etag}
+      {"Cache-Control" "public, max-age=864000"
+       "Vary"          "Accept-Encoding"
+       "ETag"          etag/etag})))
 
 (def default-lang "fi")
 
@@ -150,7 +174,7 @@
     (->>
       (ByteArrayInputStream. (compose resource-type app))
       (resp/content-type (resource-type content-type))
-      (resp/set-headers (cache-headers [resource-type])))
+      (resp/set-headers (cache-headers resource-type)))
     failure))
 
 ;; CSS & JS
@@ -172,6 +196,14 @@
 (defn redirect-to-frontpage [lang]
   (redirect lang "welcome"))
 
+(defn- landing-page
+  ([]
+    (landing-page default-lang))
+  ([lang]
+    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
+      (redirect lang application-page)
+      (redirect-to-frontpage lang))))
+
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
   ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (when (and hashbang (local? hashbang))
@@ -184,7 +216,7 @@
 
 (defn- logout! []
   (session/clear!)
-  (cookies/put! :lupapiste-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
 
 (defjson [:post "/api/logout"] []
   (logout!)
@@ -192,19 +224,15 @@
 
 (defpage "/logout" []
   (logout!)
-  (resp/redirect "/"))
+  (landing-page))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
   (logout!)
   (redirect-to-frontpage lang))
 
-(defn- landing-page
-  ([]
-    (landing-page default-lang))
-  ([lang]
-    (if-let [application-page (and (logged-in?) (user/applicationpage-for (:role (current-user))))]
-      (redirect lang application-page)
-      (redirect-to-frontpage lang))))
+;; Saparate URL outside anti-csrf
+(defjson [:post "/api/login"] []
+  (execute-command "login"))
 
 (defpage "/" [] (landing-page))
 (defpage "/app/" [] (landing-page))
@@ -224,10 +252,10 @@
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (session/put! :user user)
-      (resp/redirect "/"))
+      (landing-page))
     (do
-      (warn (format "Invalid user account activation attempt with key '%s', possible hacking attempt?" key))
-      (resp/redirect "/"))))
+      (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
+      (landing-page))))
 
 ;;
 ;; Apikey-authentication
@@ -258,24 +286,28 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector] :as data}
-  (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
-  (let [upload-data (assoc upload
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
+  (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
+        upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
+                           :target target
+                           :locked (java.lang.Boolean/parseBoolean locked)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (core/execute (enriched (core/command "upload-attachment" upload-data)))]
+        result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.1.html"
-                                           {:applicationId applicationId
-                                            :attachmentId attachmentId
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.4.html"
+                                           {:applicationId (or applicationId "")
+                                            :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
-                                            :typeSelector typeSelector
+                                            :locked (or locked "false")
+                                            :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
@@ -307,6 +339,20 @@
     {:status 401}))
 
 ;;
+;; Token consuming:
+;;
+
+(defpage [:get "/api/token/:token-id"] {token-id :token-id}
+  (let [params (:params (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response {:status 404})))
+
+(defpage [:post "/api/token/:token-id"] {token-id :token-id}
+  (let [params (from-json (request/ring-request))
+        response (token/consume-token token-id params)]
+    (or response (resp/status 404 (resp/json {:ok false})))))
+
+;;
 ;; Cross-site request forgery protection
 ;;
 
@@ -322,18 +368,19 @@
 (defn anti-csrf
   [handler]
   (fn [request]
-    (let [cookie-name "lupapiste-token"]
+    (let [cookie-name "anti-csrf-token"
+          cookie-attrs (dissoc (env/value :cookie) :http-only)]
       (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-        (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
+        (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
 
 ;;
 ;; dev utils:
 ;;
 
 (env/in-dev
-  (defjson "/dev/spy" []
+  (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
   (defjson "/dev/user" []
@@ -344,6 +391,8 @@
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
     (str a))
+
+  (defjson "/dev/hgnotes" [] (env/hgnotes))
 
   (defjson "/dev/actions" []
     (execute (enriched (core/query "actions" (from-query)))))
@@ -362,4 +411,14 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
+
+  (defquery "qlang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*))
+
+  (defcommand "clang"
+    {:authenticated false}
+    [c]
+    (ok :lang *lang*)))

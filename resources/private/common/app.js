@@ -23,8 +23,8 @@ if (typeof LUPAPISTE === "undefined") {
   self.createLogo = function () {
     var href = "#!/" + self.startPage;
     var link$ = $("<a class='brand' href='" + href + "'></a>");
-    link$.append("<img src='/img/logo.png' alt='Lupapiste.fi'/>");
-    /*
+    link$.append("<img src='/img/logo.png' alt='Lupapiste.fi' width='251' height='24''>");
+
     var naviLinks$ = $("<span>").attr("id", "navi-right");
     _.each(loc.getSupportedLanguages(), function (lang) {
       if (lang !== loc.getCurrentLanguage()) {
@@ -39,7 +39,6 @@ if (typeof LUPAPISTE === "undefined") {
       }
     });
     link$.append(naviLinks$);
-    */
     return link$;
   };
 

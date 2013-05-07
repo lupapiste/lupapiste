@@ -6,7 +6,7 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
 
-  var commentModel = new comments.create();
+  var commentsModel = new comments.create();
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
 
@@ -31,7 +31,7 @@ var attachment = (function() {
       .success(function() {
         repository.load(applicationId);
       })
-      .error(function(e) {
+      .error(function() {
         repository.load(applicationId);
       })
       .call();
@@ -105,7 +105,6 @@ var attachment = (function() {
     filename:       ko.observable(),
     latestVersion:  ko.observable(),
     versions:       ko.observable(),
-    name:           ko.observable(),
     type:           ko.observable(),
     attachmentType: ko.observable(),
     allowedAttachmentTypes: ko.observableArray(),
@@ -157,17 +156,32 @@ var attachment = (function() {
     }
   };
 
+  model.name = ko.computed(function() {
+    if (model.attachmentType()) {
+      return "attachmentType." + model.attachmentType();
+    }
+    return null;
+  });
+
   model.attachmentType.subscribe(function(attachmentType) {
     var type = model.type();
     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
+    var loader$ = $("#attachment-type-select-loader");
     if (prevAttachmentType !== attachmentType) {
+      loader$.show();
       ajax
         .command("set-attachment-type",
           {id:              model.application.id(),
            attachmentId:    model.attachmentId(),
            attachmentType:  attachmentType})
-        .success(function(e) {
-          debug("Updated attachmentType:", e);
+        .success(function() {
+          loader$.hide();
+          repository.load(model.application.id());
+        })
+        .error(function(e) {
+          loader$.hide();
+          repository.load(model.application.id());
+          error(e.text);
         })
         .call();
     }
@@ -188,34 +202,38 @@ var attachment = (function() {
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
-    model.name("attachmentType." + type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
-    attachmentTypeSelect.initSelectList($('#attachment-type-select-list-container'), application.allowedAttachmentTypes, model.attachmentType());
+    // Knockout works poorly with dynamic options.
+    // To avoid headaches, init the select and update the ko model manually.
+    var selectList$ = $("#attachment-type-select");
+    attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
+    selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
     model.application.id(applicationId);
     model.application.title(application.title);
     model.attachmentId(attachmentId);
 
-    commentModel.setApplicationId(application.id);
-    commentModel.setTarget({type: "attachment", id: attachmentId});
-    commentModel.setComments(application.comments);
+    commentsModel.refresh(application, {type: "attachment", id: attachmentId});
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
 
-    authorizationModel.refresh(application);
+    authorizationModel.refresh(application, {attachmentId: attachmentId});
+    pageutil.hideAjaxWait();
   }
 
   hub.onPageChange("attachment", function(e) {
+    pageutil.showAjaxWait();
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
     repository.load(applicationId);
   });
 
-  repository.loaded(function(e) {
-    var app = e.applicationDetails.application;
-    if (applicationId === app.id) { showAttachment(app); }
+  repository.loaded(["attachment"], function(application) {
+    if (applicationId === application.id) {
+      showAttachment(application);
+    }
   });
 
   function resetUploadIframe() {
@@ -241,14 +259,13 @@ var attachment = (function() {
       attachment: model,
       approve: approveModel,
       authorization: authorizationModel,
-      comment: commentModel
+      commentsModel: commentsModel
     }, $("#attachment")[0]);
 
     // Iframe content must be loaded AFTER parent JS libraries are loaded.
     // http://stackoverflow.com/questions/12514267/microsoft-jscript-runtime-error-array-is-undefined-error-in-ie-9-while-using
     resetUploadIframe();
   });
-
 
   function uploadDone() {
     if (uploadingApplicationId) {
@@ -260,18 +277,11 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function newAttachment(m) {
-    var infoRequest = this.application.infoRequest(); //FIXME: MIHIN THIS:iin VIITATAAN???
-    var type = infoRequest ? "muut.muu" : null;
-    var selector = infoRequest ? false : true;
-    initFileUpload(m.application.id(), null, type, selector);
-  }
-
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector) {
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector);
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked);
   }
 
   function regroupAttachmentTypeList(types) {
@@ -279,7 +289,7 @@ var attachment = (function() {
   }
 
   return {
-    newAttachment: newAttachment,
+    initFileUpload: initFileUpload,
     regroupAttachmentTypeList: regroupAttachmentTypeList
   };
 

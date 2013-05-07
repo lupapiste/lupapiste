@@ -19,10 +19,18 @@
   // ["min", "max", "pattern", "step", "date", "dateISO", "digit", "phoneUS", "notEqual", "unique"];
   ko.validation.localize(loc.getErrorMessages());
 
+  ko.validation.rules.validPassword = {
+      validator: function (val) {
+        return val && util.isValidPassword(val);
+      },
+      message: loc("error.password.minlength")
+    };
+  ko.validation.registerExtenders();
+
   ko.bindingHandlers.dateString = {
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text(moment(value).format("D.M.YYYY"));
+      if (value) { $(element).text(moment(value).format("D.M.YYYY")); }
     }
   };
 
@@ -101,7 +109,7 @@
         value = value.toFixed(1);
       }
 
-      $(element).text(value + " " + unit);
+      $(element).text(value + "\u00a0" + unit);
     }
   };
 
@@ -118,6 +126,47 @@
         }
       }
       $(element).text(version);
+    }
+  };
+
+  ko.bindingHandlers.propertyId = {
+    update: function(element, valueAccessor) {
+      var v = ko.utils.unwrapObservable(valueAccessor()),
+          f = util.prop.toHumanFormat(v);
+      $(element).text(f ? f : "");
+    }
+  };
+
+  ko.bindingHandlers.datepicker = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+      //initialize datepicker with some optional options
+      var options = allBindingsAccessor().datepickerOptions || {};
+      $(element).datepicker(options);
+
+      //handle the field changing
+      ko.utils.registerEventHandler(element, "change", function () {
+        var observable = valueAccessor();
+        observable($(element).datepicker("getDate"));
+      });
+
+      //handle disposal (if KO removes by the template binding)
+      ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+        $(element).datepicker("destroy");
+      });
+    },
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+
+      //handle date data
+      if (String(value).indexOf('/Date(') === 0) {
+        value = new Date(parseInt(value.replace(/\/Date\((.*?)\)\//gi, "$1"), 10));
+      }
+
+      var current = $(element).datepicker("getDate");
+
+      if (value - current !== 0) {
+        $(element).datepicker("setDate", value);
+      }
     }
   };
 

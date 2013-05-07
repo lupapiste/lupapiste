@@ -6,11 +6,15 @@
         [lupapalvelu.i18n :only [loc]]
         [clojure.string :only [split join trim]])
   (:require [clojure.java.io :as io]
+            [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [sade.strings :as strings]
+            [sade.strings :as ss]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.ke6666 :as ke6666])
+            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.job :as job]
+            [lupapalvelu.stamper :as stamper]
+            [lupapalvelu.i18n :as i18n])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -85,18 +89,23 @@
 (defn municipality-attachments [municipality]
   attachment-types)
 
-(defn make-attachment [now attachement-type]
+(defn make-attachment [now target locked op attachement-type]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
+   :locked locked
    :state :requires_user_action
+   :target target
+   :op op
    :versions []})
 
-(defn make-attachments [now attachement-types]
-  (map (partial make-attachment now) attachement-types))
+(defn make-attachments
+  "creates attachments with nil target"
+  [now attachement-types]
+  (map (partial make-attachment nil false nil now) attachement-types))
 
-(defn create-attachment [application-id attachement-type now]
-  (let [attachment (make-attachment now attachement-type)]
+(defn create-attachment [application-id attachement-type now target locked]
+  (let [attachment (make-attachment now target locked nil attachement-type)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -134,9 +143,9 @@
     latest))
 
 (defn- set-attachment-version
-  ([application-id attachment-id file-id filename content-type size now user]
-    (set-attachment-version application-id attachment-id file-id filename content-type size now user 5))
-  ([application-id attachment-id file-id filename content-type size now user retry-limit]
+  ([application-id attachment-id file-id filename content-type size now user stamped]
+    (set-attachment-version application-id attachment-id file-id filename content-type size now user stamped 5))
+  ([application-id attachment-id file-id filename content-type size now user stamped retry-limit]
     (if (pos? retry-limit)
       (when-let [application (mongo/by-id :applications application-id)]
         (let [latest-version (attachment-latest-version (application :attachments) attachment-id)
@@ -150,7 +159,8 @@
                              ; Conversion could be done here as well, but we don't want to lose information.
                              :filename filename
                              :contentType content-type
-                             :size size}
+                             :size size
+                             :stamped stamped}
               result-count (mongo/update-by-query
                              :applications
                              {:_id application-id
@@ -169,16 +179,16 @@
               (warn
                 "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
                 attachment-id retry-limit)
-              (set-attachment-version application-id attachment-id file-id filename content-type size now user (dec retry-limit))))))
+              (set-attachment-version application-id attachment-id file-id filename content-type size now user stamped (dec retry-limit))))))
       (do
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user]
+(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
   (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created)
+                        (create-attachment id attachement-type created target locked)
                         attachment-id)]
-    (set-attachment-version id attachment-id file-id filename content-type size created user)))
+    (set-attachment-version id attachment-id file-id filename content-type size created user false)))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
@@ -189,13 +199,15 @@
   (if-let [types (some (fn [[group-name group-types]] (if (= group-name (name type-group)) group-types)) allowed-types)]
     (some (partial = (name type-id)) types)))
 
+(defn get-attachment-info
+  "gets an attachment from application or nil"
+  [{:keys [attachments]} attachmentId]
+  (first (filter #(= (:id %) attachmentId) attachments)))
+
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
-  [{:keys [attachments]} attachmentId]
-  (let [attachment (first (filter #(= (:id %) attachmentId) attachments))
-        versions   (:versions attachment)
-        file-ids   (map :fileId versions)]
-    file-ids))
+  [application attachmentId]
+  (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
@@ -242,7 +254,7 @@
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId attachmentType]} :data :as command}]
   (with-application command
     (fn [application]
@@ -263,7 +275,7 @@
   {:description "Authority can approve attachement, moves to ok"
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open :complement-needed :submitted]}
+   :states      [:draft :info :open :complement-needed :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
@@ -277,7 +289,7 @@
   {:description "Authority can reject attachement, requires user action."
    :parameters  [:id :attachmentId]
    :roles       [:authority]
-   :states      [:draft :open :complement-needed :submitted]}
+   :states      [:draft :info :open :complement-needed :submitted]}
   [{{:keys [attachmentId]} :data created :created :as command}]
   (with-application command
     (fn [{id :id}]
@@ -291,7 +303,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :open :complement-needed]}
+   :states      [:draft :info :open :complement-needed :submitted]}
   [{{application-id :id attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (create-attachments application-id attachment-types created)]
     (ok :applicationId application-id :attachmentIds attachment-ids)
@@ -300,7 +312,7 @@
 (defcommand "delete-attachment"
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
-   :states      [:draft :open :complement-needed]}
+   :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -310,7 +322,7 @@
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
-   :states      [:draft :open :complement-needed]}
+   :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -318,21 +330,27 @@
         (delete-attachment-version application attachmentId fileId)
         (fail :file_not_linked_to_the_document)))))
 
+(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
+  (when (-> (get-attachment-info application attachmentId) :locked (= true))
+    (fail :error.attachment-is-locked)))
+
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed :answered]}
-  [{:keys [created user] {:keys [id attachmentId attachmentType filename tempfile size text]} :data :as command}]
-  (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
-  (let [file-id (mongo/create-id)
-        sanitazed-filename (strings/suffix (strings/suffix filename "\\") "/")]
-    (if (mime/allowed-file? sanitazed-filename)
-      (if-let [application (mongo/by-id :applications id)]
+   :validators [attachment-is-not-locked]
+   :states     [:draft :info :open :submitted :complement-needed :answered]
+   :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
+  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
+  (if (> size 0)
+    (let [file-id (mongo/create-id)
+          sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+      (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
+      (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user)]
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
               (executed "add-comment"
                 (-> command
                   (assoc :data {:id id
@@ -344,8 +362,8 @@
                                          :fileId (:fileId attachment-version)}})))
               (fail :error.unknown)))
           (fail :error.illegal-attachment-type))
-        (fail :error.no-such-application))
-      (fail :error.illegal-file-type))))
+        (fail :error.illegal-file-type)))
+    (fail :error.select-file)))
 
 ;;
 ;; Download
@@ -364,9 +382,9 @@
   "Replaces all non-ascii chars and other that the allowed punctuation with dash.
    UTF-8 support would have to be browser specific, see http://greenbytes.de/tech/tc2231/"
   [unencoded-filename]
-  (when-let [de-accented (strings/de-accent unencoded-filename)]
+  (when-let [de-accented (ss/de-accent unencoded-filename)]
       (clojure.string/replace
-        (strings/last-n windows-filename-max-length de-accented)
+        (ss/last-n windows-filename-max-length de-accented)
         #"[^a-zA-Z0-9\.\-_ ]" "-")))
 
 (defn output-attachment [attachment-id user download?]
@@ -423,12 +441,111 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn output-all-attachments [application-id user]
-  (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
-    {:body (temp-file-input-stream (get-all-attachments application loc))
-     :status 200
-     :headers {"Content-Type" "application/octet-stream"
-               "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
-    {:body "404"
-     :status 404
-     :headers {"Content-Type" "text/plain"}}))
+(defn output-all-attachments [application-id user lang]
+  (let [loc (i18n/localizer lang)]
+    (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
+      {:body (temp-file-input-stream (get-all-attachments application loc lang))
+       :status 200
+       :headers {"Content-Type" "application/octet-stream"
+                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
+      {:body "404"
+       :status 404
+       :headers {"Content-Type" "text/plain"}})))
+
+;;
+;; Stamping:
+;;
+
+(defn- stampable? [attachment]
+  (let [latest       (-> attachment :versions last)
+        content-type (:contentType latest)
+        stamped      (:stamped latest)]
+    (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
+
+(defn- ->file-info [attachment]
+  (assoc (select-keys (-> attachment :versions last) [:contentType :fileId :filename :size])
+         :id (:id attachment)
+         :status :waiting))
+
+(defn- stamp-job-status [stamp-job]
+  (if (every? #{:done :error} (map :status (vals stamp-job))) :done :runnig))
+
+(defn- stamp-attachment [stamp file-info application-id job-id user created x-margin y-margin]
+  (let [temp-file (File/createTempFile (str "lupapiste.stamp." job-id ".") ".tmp")
+        new-file-id (mongo/create-id)
+        {:keys [id contentType fileId filename]} file-info]
+    (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
+    (try
+      (job/update job-id assoc-in [id :status] :working)
+      (with-open [in ((:content (mongo/download fileId)))
+                  out (io/output-stream temp-file)]
+        (stamper/stamp stamp contentType in out x-margin y-margin))
+      (mongo/upload application-id new-file-id filename contentType temp-file created)
+      (let [new-version (set-attachment-version application-id id new-file-id filename contentType (.length temp-file) created user true)]
+        ; mea culpa, but what the fuck was I supposed to do
+        (mongo/update-by-id :applications
+                            application-id
+                            {$set {:modified created}
+                             $push {:comments {:text    "Leimattu"
+                                               :created created
+                                               :user    user
+                                               :target  {:type "attachment"
+                                                         :id id
+                                                         :version (:version new-version)
+                                                         :filename filename
+                                                         :fileId new-file-id}}}}))
+      (.delete temp-file)
+      (job/update job-id assoc-in [id :status] :done)
+    (catch Exception e
+      (errorf e "failed to stamp attachment: application=%s, file=%s" application-id fileId)
+      (job/update job-id assoc-in [id :status] :error)))))
+
+(defn- stamp-attachments [file-infos application-id job-id user created x-margin y-margin]
+  (let [stamp (stamper/make-stamp
+                (i18n/loc "stamp.verdict")
+                created
+                (str (:firstName user) \space (:lastName user))
+                (->> user (:municipality) (str "municipality.") (i18n/loc) (s/upper-case)))]
+    (doseq [file-info (vals file-infos)]
+      (job/update job-id assoc-in [(:id file-info) :status] :working)
+      (try
+        (stamp-attachment stamp file-info application-id job-id user created x-margin y-margin)
+        (job/update job-id assoc-in [(:id file-info) :status] :done)
+        (catch Exception e
+          (errorf e "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
+          (job/update job-id assoc-in [(:id file-info) :status] :error))))))
+
+(defn- key-by [f coll]
+  (into {} (for [e coll] [(f e) e])))
+
+(defn- make-stamp-job [file-infos application-id user created x-margin y-margin]
+  (let [job (job/start file-infos stamp-job-status)
+        job-id (:id job)]
+    (future
+      (stamp-attachments file-infos application-id job-id user created x-margin y-margin))
+    job))
+
+(defn ->long [v]
+  (if (string? v) (Long/parseLong v) v))
+
+(defcommand "stamp-attachments"
+  {:parameters [:id :xMargin :yMargin]
+   :roles      [:authority]
+   :states     [:verdictGiven]
+   :description "Stamps all attachments of given application"}
+  [{{x-margin :xMargin y-margin :yMargin} :data :as command}]
+  (with-application command
+    (fn [application]
+      (let [file-infos (key-by :id (map ->file-info (filter stampable? (:attachments application))))
+            file-count (count file-infos)]
+        (ok :count file-count
+            :job (when-not (zero? file-count)
+                   (make-stamp-job file-infos (:id application) (:user command) (:created command) (->long x-margin) (->long y-margin))))))))
+
+(defquery "stamp-attachments-job"
+  {:parameters [:job-id :version]
+   :roles      [:authority]
+   :description "Returns state of stamping job"}
+  [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
+  (debugf "Stamp attachments job state: job-id=%s version=%d timeout=%d" job-id (->long version) (->long timeout))
+  (assoc (job/status job-id (->long version) (->long timeout)) :ok true))

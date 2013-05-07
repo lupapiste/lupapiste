@@ -2,7 +2,7 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=15  run_on_failure=Log Source
+Library        Selenium2Library   timeout=10  run_on_failure=Log Source
 
 *** Variables ***
 
@@ -10,6 +10,7 @@ ${SERVER}                       http://localhost:8000
 ${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
+${OP_TREE_SPEED}                0.1
 ${SLOW_SPEED}                   0.2
 ${SLOWEST_SPEED}                0.5
 
@@ -88,11 +89,14 @@ Go to page
   [Arguments]  ${page}
   Execute Javascript  window.location.hash = "!/${page}";
   Wait until  Element should be visible  ${page}
-  Sleep  1
 
 Open tab
   [Arguments]  ${name}
   Click by test id  application-open-${name}-tab
+  Tab should be visible  ${name}
+
+Tab should be visible
+  [Arguments]  ${name}
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
@@ -189,7 +193,7 @@ As Solitaadmin
   Solitaadmin logs in
 
 Mikko logs in
-  Applicant logs in  mikko@example.com  mikko69  Mikko Intonen
+  Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
@@ -214,6 +218,8 @@ SolitaAdmin logs in
 Input text by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
+  Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
+  Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
   Input text  xpath=//input[@data-test-id="${id}"]  ${value}
 
 Select From List by test id
@@ -239,23 +245,22 @@ Click enabled by test id
   Click by test id  ${id}
 
 #
-# Helpser for inforequest and application crud operations:
+# Helper for inforequest and application crud operations:
 #
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":"${propertyId}","messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Create application
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
-  Go to page  applications
   Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
   Click by test id  create-application
   Wait Until  Element should be visible  application
@@ -276,7 +281,7 @@ Create inforequest
 
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
-  Execute Javascript  window.location.hash = "!/applications";
+  Go to page  applications
   Click by test id  ${button}
   Wait and click  xpath=//button[@data-test-id="create-search-button"]
   # for IE8
@@ -284,14 +289,13 @@ Prepare new request
   Input text by test id  create-address  ${address}
   Input text by test id  create-property-id  ${propertyId}
   Select From List by test id  create-municipality-select  ${municipality}
+  Set animations off
   Click enabled by test id  create-continue
-  # Going too fast causes animation to stop
-  Set Selenium Speed  ${SLOW_SPEED}
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
-  Set Selenium Speed  ${DEFAULT_SPEED}
+  Set animations on
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
@@ -349,15 +353,24 @@ Add comment
   Open tab  conversation
   Input text  xpath=//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
-  Wait until  Element should be visible  xpath=//table[@data-test-id='application-comments-table']//td[text()='${message}']
+  Wait until  Element should be visible  xpath=//table[@data-test-id='comments-table']//span[text()='${message}']
+
+Input comment
+  [Arguments]  ${section}  ${message}
+  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
+  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//section[@id='${section}']//td[contains(@class,'comment-text')]//span[text()='${message}']
+
+Comment count is
+  [Arguments]  ${section}  ${amount}
+  Wait until  Xpath Should Match X Times  //section[@id='${section}']//td[contains(@class,'comment-text')]  ${amount}
 
 #
 # Quick, jettison the db...
 #
 
 Apply minimal fixture now
-  #Execute Javascript  ajax.query("apply-fixture", {"name":"minimal"}).success(function(){alert('OK')}).call();
-  #Wait Until  Alert Should Be Present
   Show dev-box
   Click element  debug-apply-minimal
   Wait until  Element should be visible  debug-apply-done
@@ -385,4 +398,14 @@ Set integration proxy on
 
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
+
+#
+# Animations control:
+#
+
+Set animations on
+  Execute Javascript  tree.animation(true);
+
+Set animations off
+  Execute Javascript  tree.animation(false);
 

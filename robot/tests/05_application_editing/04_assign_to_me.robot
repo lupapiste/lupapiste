@@ -8,7 +8,7 @@ Resource       ../../common_resource.robot
 
 Mikko creates an application
   Mikko logs in
-  Create application the fast way  assign-to-me  753  75341600250030
+  Create application the fast way  assign-to-me  753  753-416-25-30
   Add comment  hojo-hojo
 
 # LUPA-23
@@ -18,7 +18,7 @@ Mikko could add an operation
 
 Application is not assigned
   Sonja logs in
-  Open application  assign-to-me  75341600250030
+  Open application  assign-to-me  753-416-25-30
   Application is not assigned
 
 Sonja assign application to herself

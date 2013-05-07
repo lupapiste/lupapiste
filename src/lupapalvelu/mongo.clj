@@ -54,7 +54,7 @@
 (defn update-by-query
   "Updates data into collection. Returns the number of documents updated"
   [collection query data]
-  (.getN (mc/update collection query data)))
+  (.getN (mc/update collection query data :multi true)))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
@@ -81,7 +81,7 @@
   ([collection query projection]
     (with-id (mc/find-one-as-map collection query projection))))
 
-(defn ^Boolean update-one-and-return
+(defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
   [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
   (mc/find-and-modify collection conditions document :return-new true :upsert upsert :remove remove :sort sort :fields fields))
@@ -120,6 +120,9 @@
     (mc/count collection))
   ([collection query]
     (mc/count collection query)))
+
+(defn get-next-sequence-value [sequence-name]
+  (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
 
 ;;
 ;; Bootstrappin'

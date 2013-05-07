@@ -9,14 +9,17 @@
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
            [org.apache.commons.io IOUtils]
+           [com.googlecode.htmlcompressor.compressor HtmlCompressor]
            [com.yahoo.platform.yui.compressor JavaScriptCompressor CssCompressor]
            [org.mozilla.javascript ErrorReporter EvaluatorException]))
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
-(defn write-header [out n]
+(defn write-header [kind out n]
   (when (env/dev-mode?)
     (.write out (format "\n\n/*\n * %s\n */\n" n)))
+  (when (= kind :js)
+    (.write out "\n;\n\n"))
   out)
 
 (def error-reporter
@@ -51,11 +54,11 @@
     (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components kind component)]
         (if (fn? src)
-          (.write (write-header out (str "fn: " (fn-name src))) (src))
+          (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
             (if (.contains src ".min.")
-              (IOUtils/copy in (write-header out src))
-              (minified kind in (write-header out src)))))))
+              (IOUtils/copy in (write-header kind out src))
+              (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
 
 (defn parse-html-resource [c resource]
@@ -87,6 +90,20 @@
                   (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
                   (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary)))))
 
+(defn- compress-html [^String html]
+  (let [c (doto (HtmlCompressor.)
+            (.setRemoveScriptAttributes true)    ; remove optional attributes from script tags
+            (.setRemoveStyleAttributes true)     ; remove optional attributes from style tags
+            (.setRemoveLinkAttributes true)      ; remove optional attributes from link tags
+            (.setRemoveFormAttributes true)      ; remove optional attributes from form tags
+            (.setSimpleBooleanAttributes true)   ; remove values from boolean tag attributes
+            (.setRemoveJavaScriptProtocol true)  ; remove "javascript:" from inline event handlers
+            (.setRemoveHttpProtocol true)        ; replace "http://" with "//" inside tag attributes
+            (.setRemoveHttpsProtocol true)       ; replace "https://" with "//" inside tag attributes
+            (.setRemoveSurroundingSpaces HtmlCompressor/BLOCK_TAGS_MAX)  ; remove spaces around provided tags
+            (.setPreservePatterns [(re-pattern "<!--\\s*/?ko.*-->")]))] ; preserve KnockoutJS comments
+    (.compress c html)))
+
 (defn compose-html [component]
   (let [out (ByteArrayOutputStream.)]
     (doseq [element (inject-content
@@ -94,7 +111,7 @@
                       (reduce parse-html-resource {} (map (partial str (c/path)) (c/get-resources ui-components :html component)))
                       component)]
       (.write out (.getBytes element utf8)))
-    (.toByteArray out)))
+    (-> out (.toString (.name utf8)) (compress-html) (.getBytes utf8))))
 
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)

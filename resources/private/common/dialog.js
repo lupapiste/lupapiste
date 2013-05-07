@@ -50,13 +50,15 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
     $(selector)
       .css('top',  winHeight/2-$(selector).height()/2)
       .css('left', winWidth/2-$(selector).width()/2)
-      .fadeIn(600);
+      .fadeIn(600)
+      // Register modal window closing handlers
+      .find('.close').click(self.close);
 
     var inputs = $(selector + ' input:enabled');
-    if(inputs) {
-      inputs[0].focus();
+    if (inputs.length) {
+        inputs[0].focus();
     }
-    
+
     return false;
   };
 
@@ -121,15 +123,9 @@ LUPAPISTE.ModalDialog.init = function() {
     var id = $(this).attr('data-window-id');
     if (id) {
       LUPAPISTE.ModalDialog.open("#" + id);
-    } else {
-      warn("No 'data-window-id' attribute");
     }
     return false;
   });
-
-  // Register modal window closing handlers
-  $('.window .close').click(this.close);
-
 };
 
 /**

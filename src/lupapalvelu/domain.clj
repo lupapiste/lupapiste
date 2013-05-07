@@ -12,8 +12,10 @@
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)
                 :state {$ne "canceled"}}
-    :authority {:municipality (:municipality user)
-                $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
+    :authority {$or [{:municipality (:municipality user)}
+                     {:auth.id (:id user)}]
+                $and [{:state {$ne "draft"}}
+                      {:state {$ne "canceled"}}]}
     :admin     {:state {$ne "canceled"}}
     (do
       (warn "invalid role to get applications")
@@ -74,11 +76,19 @@
 ;;
 
 (defn user2henkilo [{:keys [id firstName lastName email phone street zip city]}]
-  {:userId                        id
-   :henkilotiedot {:etunimi       firstName
-                   :sukunimi      lastName}
-   :yhteystiedot {:email          email
-                  :puhelin        phone}
-   :osoite {:katu                 street
-            :postinumero          zip
-            :postitoimipaikannimi city}})
+  {:userId                        {:value id}
+   :henkilotiedot {:etunimi       {:value firstName}
+                   :sukunimi      {:value lastName}}
+   :yhteystiedot {:email          {:value email}
+                  :puhelin        {:value phone}}
+   :osoite {:katu                 {:value street}
+            :postinumero          {:value zip}
+            :postitoimipaikannimi {:value city}}})
+
+;;
+;; Software version metadata
+;;
+
+(defn set-software-version [m]
+  (assoc m :_software_version "1.0.5"))
+

@@ -8,26 +8,25 @@
     (some #(when (= (:id %) attachment-id) %) (:attachments application))))
 
 (defn- approve-attachment [application-id attachment-id]
-  (success (command veikko :approve-attachment :id application-id :attachmentId attachment-id)) => true
-  (:state (get-attachment application-id attachment-id)) => "ok")
+  (command veikko :approve-attachment :id application-id :attachmentId attachment-id) => ok?
+  (get-attachment application-id attachment-id) => (in-state? "ok"))
 
 (defn- reject-attachment [application-id attachment-id]
-  (success (command veikko :reject-attachment :id application-id :attachmentId attachment-id)) => true
-  (:state (get-attachment application-id attachment-id)) => "requires_user_action")
+  (command veikko :reject-attachment :id application-id :attachmentId attachment-id) => ok?
+  (get-attachment application-id attachment-id) => (in-state? "requires_user_action"))
 
 (facts "attachments"
-  (let [resp (create-app pena :municipality veikko-muni)
-        application-id  (:id resp)]
+  (let [{application-id :id :as response} (create-app pena :municipality veikko-muni)]
 
-    (success resp) => true
+    response => ok?
 
     (comment-application application-id pena)
 
     (let [resp (command veikko
-                        :create-attachments
-                        :id application-id
-                        :attachmentTypes [{:type-group "tg" :type-id "tid-1"}
-                                          {:type-group "tg" :type-id "tid-2"}])
+                 :create-attachments
+                 :id application-id
+                 :attachmentTypes [{:type-group "tg" :type-id "tid-1"}
+                                   {:type-group "tg" :type-id "tid-2"}])
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"

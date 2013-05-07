@@ -2,11 +2,15 @@
   (:use  [lupapalvelu.xml.krysp.yhteiset]
          [clojure.data.xml]
          [clojure.java.io]
-         [lupapalvelu.document.krysp :only [application-to-canonical]]
+         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical to-xml-datetime]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
-         [lupapalvelu.xml.krysp.validator :only [validate]])
+         [lupapalvelu.xml.krysp.validator :only [validate]]
+         [lupapalvelu.attachment :only [encode-filename]])
   (:require [sade.env :as env]
-            [me.raynes.fs :as fs]))
+            [me.raynes.fs :as fs]
+            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.mongo :as mongo])
+  )
 
 ;RakVal
 
@@ -36,7 +40,8 @@
                    {:tag :alkuHetki :ns "yht"}
                    sijantitieto
                    {:tag :rakennuksenTiedot
-                    :child [{:tag :rakennustunnus :child tunnus-children}
+                    :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
+                                                          {:tag :kiinttun}]}
                             {:tag :kayttotarkoitus}
                             {:tag :tilavuus}
                             {:tag :kokonaisala}
@@ -77,6 +82,7 @@
                                  {:tag :jaahdytysmuoto}
                                  {:tag :asuinhuoneistot :child [huoneisto]}
                                  ]}
+                   {:tag :rakentajatyyppi}
                    {:tag :omistajatieto
                     :child [{:tag :Omistaja
                              :child [{:tag :kuntaRooliKoodi :ns "yht"}
@@ -109,18 +115,30 @@
                               :child [rakennuspaikka]}
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
-                                       :child [{:tag :uusi
-                                                :child [{:tag :huoneistoala}
-                                                        {:tag :kuvaus}]}
-                                               {:tag :laajennus}
+                                       :child [{:tag :uusi :child [{:tag :kuvaus}]}
+                                               {:tag :laajennus :child [{:tag :laajennuksentiedot :child[{:tag :tilavuus}
+                                                                                                        {:tag :kerrosala}
+                                                                                                        {:tag :kokonaisala}
+                                                                                                        {:tag :huoneistoala :child [{:tag :pintaAla :ns "yht"}
+                                                                                                                                    {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
+                                                                         {:tag :kuvaus}
+                                                                         {:tag :perusparannusKytkin}]}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
-                                               {:tag :purkaminen}
-                                               {:tag :muuMuutosTyo}
-                                               {:tag :kaupunkikuvaToimenpide}
+                                               {:tag :purkaminen :child [{:tag :kuvaus}
+                                                                        {:tag :purkamisenSyy}
+                                                                        {:tag :poistumaPvm }]}
+                                               {:tag :muuMuutosTyo :child [{:tag :muutostyonLaji}
+                                                                           {:tag :kuvaus}
+                                                                           {:tag :perusparannusKytkin}]}
+                                               {:tag :kaupunkikuvaToimenpide :child [{:tag :kuvaus}]}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
-                                               {:tag :rakennelmatieto}]}]}
+                                               {:tag :rakennelmatieto :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
+                                                                                                        {:tag :alkuHetki :ns "yht"}
+                                                                                                        sijantitieto
+                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}]}]}
+                                               ]}]}
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
@@ -128,35 +146,101 @@
                                       {:tag :suoramarkkinointikieltoKytkin}]}]}
                              {:tag :liitetieto
                               :child [{:tag :Liite
-                                       :child [{:tag :kuvaus}
-                                               {:tag :linkkiliitteeseen}
-                                               {:tag :muokkausHetki}
-                                               {:tag :versionumero}
-                                               {:tag :tekija
+                                       :child [{:tag :kuvaus :ns "yht"}
+                                               {:tag :linkkiliitteeseen :ns "yht"}
+                                               {:tag :muokkausHetki :ns "yht"}
+                                               {:tag :versionumero :ns "yht"}
+                                               {:tag :tekija :ns "yht"
                                                 :child [{:tag :kuntaRooliKoodi}
                                                         {:tag :VRKrooliKoodi}
                                                         henkilo
                                                         yritys]}
-                                               {:tag :tyyppi}]}]}
+                                               {:tag :tyyppi :ns "yht"}]}]}
                              {:tag :kayttotapaus}
                              {:tag :asianTiedot
                               :child [{:tag :Asiantiedot
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
-(defn get-application-as-krysp [application]
-  (let [canonical  (application-to-canonical application)
-        xml        (element-to-xml canonical rakennuslupa_to_krysp)
-        xml-s      (indent-str xml)
-        output-dir (str (:outgoing-directory env/config) "/" (:municipality application) "/rakennus")
-        _          (fs/mkdirs output-dir)
-        file-name  (str output-dir "/Lupapiste" (:id application))
-        tempfile   (file (str file-name ".tmp"))
-        outfile    (file (str file-name ".xml"))]
-    (validate xml-s)
+(defn- get-file-name-on-server [file-id file-name]
+  (str file-id "_" (encode-filename file-name)))
 
+(defn- get-submitted-filename [application-id]
+  (str application-id "_submitted_application.pdf"))
+
+(defn- get-current-filename [application-id]
+  (str application-id "_current_application.pdf"))
+
+(defn- get-attachments-as-canonical [application begin-of-link ]
+  (let [attachments (:attachments application)
+        canonical-attachments (for [attachment attachments
+                                    :when (:latestVersion attachment)
+                                    :let [type (get-in attachment [:type :type-id] )
+                                          title (str (:title application) ": " type "-" (:id attachment))
+                                          file-id (get-in attachment [:latestVersion :fileId])
+                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                                          link (str begin-of-link attachment-file-name)]]
+                                {:Liite
+                                 {:kuvaus title
+                                  :linkkiliitteeseen link
+                                  :muokkausHetki (to-xml-datetime (:modified attachment))
+                                  :versionumero 1
+                                  :tyyppi type
+                                  :fileId file-id}})]
+    (not-empty canonical-attachments)))
+
+(defn- write-attachments [attachments output-dir]
+  (doseq [attachment attachments]
+    (let [file-id (get-in attachment [:Liite :fileId])
+          attachment-file (mongo/download file-id)
+          content (:content attachment-file)
+          attachment-file-name (str output-dir "/" (get-file-name-on-server file-id (:file-name attachment-file)))
+          attachment-file (file attachment-file-name)]
+      (with-open [out (output-stream attachment-file)
+                  in (content)]
+        (copy in out)))))
+
+(defn- write-application-pdf-versions [output-dir application submitted-application lang]
+  (let [id (:id application)
+        submitted-file (file (str output-dir "/" (get-submitted-filename id)))
+        current-file (file (str output-dir "/"  (get-current-filename id)))]
+    (ke6666/generate submitted-application lang submitted-file)
+    (ke6666/generate application lang current-file)))
+
+(defn get-application-as-krysp [application lang submitted-application municipality]
+  (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
+  (let [sftp-user (:rakennus-ftp-user municipality)
+        rakennusvalvonta-directory "/rakennus"
+        dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
+        output-dir (str (:outgoing-directory env/config) "/" dynamic-part-of-outgoing-directory)
+        _          (fs/mkdirs output-dir)
+        file-name  (str output-dir "/" (:id application))
+        tempfile   (file (str file-name ".tmp"))
+        outfile    (file (str file-name ".xml"))
+        canonical-without-attachments  (application-to-canonical application)
+        fileserver-address (:fileserver-address env/config)
+        begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
+        attachments (get-attachments-as-canonical application begin-of-link)
+        attachments-with-generated-pdfs (conj attachments
+                                              {:Liite
+                                               {:kuvaus "Application when submitted"
+                                                :linkkiliitteeseen (str begin-of-link (get-submitted-filename (:id application)))
+                                                :muokkausHetki (to-xml-datetime (:submitted application))
+                                                :versionumero 1
+                                                :tyyppi "hakemus_vireilletullessa"}}
+                                              {:Liite
+                                               {:kuvaus "Application when sent from Lupapiste"
+                                                :linkkiliitteeseen (str begin-of-link (get-current-filename (:id application)))
+                                                :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
+                                                :versionumero 1
+                                                :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
+        canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
+        xml        (element-to-xml canonical rakennuslupa_to_krysp)]
+    (validate (indent-str xml))
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
-    ;todoo liitetiedostot
+    (write-attachments attachments output-dir)
+    (write-application-pdf-versions output-dir application submitted-application lang)
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
+
