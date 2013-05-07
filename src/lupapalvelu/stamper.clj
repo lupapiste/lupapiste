@@ -141,7 +141,7 @@
     (with-open [in (io/input-stream "/Volumes/HD2/Users/jarppe/Downloads/in.png")
                 out (io/output-stream "/Volumes/HD2/Users/jarppe/Downloads/out.png")]
       (try
-        (stamp-image (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") "image/png" in out 100 85)
+        (stamp-image (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") "image/png" in out 10 85)
         (catch Exception e
           (println "Oh shit!")
           (.printStackTrace e)))))
