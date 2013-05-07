@@ -220,7 +220,7 @@
 
 (defn- logout! []
   (session/clear!)
-  (cookies/put! :lupapiste-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
 
 (defjson [:post "/api/logout"] []
   (logout!)
@@ -306,7 +306,7 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.3.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.4.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
@@ -372,11 +372,12 @@
 (defn anti-csrf
   [handler]
   (fn [request]
-    (let [cookie-name "lupapiste-token"]
+    (let [cookie-name "anti-csrf-token"
+          cookie-attrs (dissoc (env/value :cookie) :http-only)]
       (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-        (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
+        (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
 
 ;;
 ;; dev utils:
