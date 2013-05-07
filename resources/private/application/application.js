@@ -2,12 +2,15 @@
   "use strict";
 
   var isInitializing = true;
-  var currentId;
+  var currentId = null;
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
-  var applicationMap;
-  var inforequestMap;
+  var applicationMap = null;
+  var inforequestMap = null;
+  var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
 
+  function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
+  
   var stampModel = new function() {
     var self = this;
 
@@ -22,6 +25,12 @@
     self.version = null;
     self.files = null;
 
+    self.xMargin = ko.observable("");
+    self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
+    
+    self.yMargin = ko.observable("");
+    self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
+    
     self.status = ko.observable();
     self.filesTable = ko.observable();
 
@@ -29,7 +38,7 @@
       self.applicationId = applicationId;
       self.jobId = null;
       self.files = {};
-      self.status(self.statusInit).filesTable([]);
+      self.status(self.statusInit).filesTable([]).xMargin("10").yMargin("85");
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
@@ -37,7 +46,7 @@
     self.start = function() {
       self.status(self.statusStarting);
       ajax
-        .command("stamp-attachments", {id: self.applicationId})
+        .command("stamp-attachments", {id: self.applicationId, xMargin: _.parseInt(self.xMargin(), 10), yMargin: _.parseInt(self.yMargin(), 10)})
         .success(self.started)
         .call();
       return false;
@@ -273,7 +282,8 @@
     };
   }();
 
-  var application = {
+  var application = {};
+  application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
     state: ko.observable(),
@@ -287,7 +297,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
     applicant: ko.observable(),
@@ -334,17 +343,6 @@
       ajax.command("request-for-complement", { id: applicationId})
         .success(function() {
           notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-          repository.load(applicationId);
-        })
-        .call();
-      return false;
-    },
-
-    markInforequestAnswered: function(model) {
-      var applicationId = application.id();
-      ajax.command("mark-inforequest-answered", {id: applicationId})
-        .success(function() {
-          notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
           repository.load(applicationId);
         })
         .call();
@@ -582,7 +580,7 @@
     var self = this;
 
     self.email = ko.observable();
-    self.text = ko.observable();
+    self.text = ko.observable(loc('invite.default-text'));
     self.documentName = ko.observable();
     self.documentId = ko.observable();
     self.error = ko.observable();
@@ -591,7 +589,7 @@
       self.email(undefined);
       self.documentName(undefined);
       self.documentId(undefined);
-      self.text(undefined);
+      self.text(loc('invite.default-text'));
       self.error(undefined);
     };
 
@@ -624,7 +622,7 @@
   });
 
   // tabs
-  var selectedTab;
+  var selectedTab = "";
   var tabFlow = false;
   hub.subscribe("set-debug-tab-flow", function(e) {
     tabFlow = e.value;
@@ -702,7 +700,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -728,12 +726,13 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
-      stampModel: stampModel
+      stampModel: stampModel,
+      changeLocationModel: changeLocationModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-
+    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
     attachmentTemplatesModel.init();
   });
 
