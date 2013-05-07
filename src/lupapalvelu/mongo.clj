@@ -198,6 +198,7 @@
         (debug "DB is" (.getName (m/get-db)))))))
 
 (defn disconnect! []
+  (debug "Disconnecting")
   (if @connected
     (do
       (m/disconnect!)
@@ -217,7 +218,7 @@
   (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :activation {:email 1})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
-  (mc/ensure-index :municipalities {:municipalityCode 1}))
+  (mc/ensure-index :organizations {:municipalities 1}))
 
 (defn clear! []
   (warn "Clearing MongoDB")
