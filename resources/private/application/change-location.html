@@ -2,20 +2,32 @@
 <html>
   <body>
     <section class="page" id="change-location" style="visibility: visible; display: block;">
-      <div id="dialog-change-location" class="window autosized">
+      <div id="dialog-change-location" class="window autosized" >
         <div data-bind="with: changeLocationModel">
           <div class="dialog-header">
             <p data-bind="ltext: 'edit'"></p>
             <p class="dialog-close close">X</p>
           </div>
-          <div class="dialog-content">
-           <div class="form-entry">
-            <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-            <input data-bind="value: address, valueUpdate: 'afterkeydown'" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
-           </div>
-           <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
-           <button data-bind="ltext: 'save', click: saveNewLocation" class="btn btn-primary btn-dialog" data-test-id="change-location-save"></button>
-           <button data-bind="ltext: 'cancel'" class="btn btn-dialog close"></button>
+
+          <div class="dialog-content with-map">
+
+            <div class="map-container">
+              <div id="change-location-map" class="map map-large" style="width: 480px; height: 360px;"></div>
+            </div>
+
+            <div>
+              <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
+              <input data-bind="value: address, valueUpdate: 'afterkeydown'" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
+
+              <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
+              <input data-bind="value: propertyId, valueUpdate: 'afterkeydown'" data-test-id="application-new-propertyid" type="text" maxlength="20" class="form-input text long"></input>
+
+              <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
+
+              <button data-bind="ltext: 'save', click: saveNewLocation, enable: ok" class="btn btn-primary btn-dialog" data-test-id="change-location-save"></button>
+              <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+            </div>
+
           </div>
         </div>
       </div>

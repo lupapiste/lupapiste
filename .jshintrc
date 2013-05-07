@@ -42,6 +42,7 @@
     "notify",
     "ajax",
     "gis",
+    "locationSearch",
     "LUPAPISTE",
     "util",
     "invites",
