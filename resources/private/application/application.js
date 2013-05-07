@@ -38,7 +38,7 @@
       self.applicationId = applicationId;
       self.jobId = null;
       self.files = {};
-      self.status(self.statusInit).filesTable([]).xMargin("10").yMargin("850");
+      self.status(self.statusInit).filesTable([]).xMargin("10").yMargin("85");
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
