@@ -3,7 +3,9 @@
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
-            [sade.env :as env])
+            [sade.env :as env]
+            [noir.request :as request]
+            [noir.session :as session])
   (:import [org.mindrot.jbcrypt BCrypt]
            [com.mongodb MongoException MongoException$DuplicateKey]))
 
@@ -19,6 +21,11 @@
   [user]
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
+
+(defn current-user
+  "fetches the current user from 1) http-session 2) apikey from headers"
+  ([] (current-user (request/ring-request)))
+  ([request] (or (session/get :user) (request :user))))
 
 (defn login
   "returns non-private information of enabled user with the username and password"

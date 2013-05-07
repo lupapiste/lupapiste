@@ -1,6 +1,5 @@
 (ns lupapalvelu.find-address
   (:use [monger.operators]
-        [lupapalvelu.security :only [current-user]]
         [clojure.data.zip.xml :only [xml-> text]]
         [lupapalvelu.i18n :only [*lang*]])
   (:require [clojure.string :as s]

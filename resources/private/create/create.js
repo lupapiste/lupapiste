@@ -131,7 +131,6 @@
     // Called when user clicks on map:
 
     self.click = function(x, y) {
-      console.log("click:", x, y);
       self
         .setXY(x, y)
         .addressData(null)
@@ -173,7 +172,6 @@
     ];
     
     self.autocompleteSelect = function(e, data) {
-      console.log("SELECT:", data);
       var item = data.item;
       _.each(handlers, function(e) {
         var selector = e[0],
