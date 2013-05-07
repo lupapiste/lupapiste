@@ -524,6 +524,9 @@
       (stamp-attachments file-infos application-id job-id user created x-margin y-margin))
     job))
 
+(defn ->long [v]
+  (if (string? v) (Long/parseLong v) v))
+
 (defcommand "stamp-attachments"
   {:parameters [:id :xMargin :yMargin]
    :roles      [:authority]
@@ -536,10 +539,7 @@
             file-count (count file-infos)]
         (ok :count file-count
             :job (when-not (zero? file-count)
-                   (make-stamp-job file-infos (:id application) (:user command) (:created command) x-margin y-margin)))))))
-
-(defn ->long [v]
-  (if (string? v) (Long/parseLong v) v))
+                   (make-stamp-job file-infos (:id application) (:user command) (:created command) (->long x-margin) (->long y-margin))))))))
 
 (defquery "stamp-attachments-job"
   {:parameters [:job-id :version]

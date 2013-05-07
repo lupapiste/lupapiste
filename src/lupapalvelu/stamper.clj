@@ -42,12 +42,14 @@
                     "LUPAPISTE.fi"])
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
         width (int (+ (reduce max text-widths) 52))
-        height (int 110)
-        i (BufferedImage. (+ width 70) height BufferedImage/TYPE_INT_ARGB)]
+        height (int (+ 110 70))
+        i (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)]
     (doto (.createGraphics i)
       (.setColor (Color. 0 0 0 0))
       (.fillRect 0 0 width height)
-      (.setStroke (BasicStroke. 10.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
+      (.drawImage (qrcode "http://lupapiste.fi" 70) (- width 70) (int 5) nil)
+      (.translate 0 70)
+      (.setStroke (BasicStroke. 5.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
       (.setPaint (Color. 92 16 16 60))
       (.fillRoundRect 10 10 (- width 20) 90 30 30)
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC))
@@ -60,7 +62,6 @@
       (draw-text (nth texts 1) 22 50)
       (draw-text (nth texts 2) 22 65)
       (draw-text (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 85)
-      (.drawImage (qrcode "http://lupapiste.fi" 70) width (int 20) nil)
       (.dispose))
     i))
 
@@ -140,13 +141,16 @@
     (with-open [in (io/input-stream "/Volumes/HD2/Users/jarppe/Downloads/in.png")
                 out (io/output-stream "/Volumes/HD2/Users/jarppe/Downloads/out.png")]
       (try
-        (stamp-image (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") "image/png" in out 10 85)
+        (stamp-image (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") "image/png" in out 100 85)
         (catch Exception e
           (println "Oh shit!")
           (.printStackTrace e)))))
   
   (doseq [v [#'make-stamp #'stamp-image #'add-stamp]]
     (add-watch v :test-stamp (fn [_ _ _ _] (stamp-test-image))))
+  
+  (doseq [v [#'make-stamp #'stamp-image #'add-stamp]]
+    (remove-watch v :test-stamp))
   
   
   (defn- stamp-test-pdf []

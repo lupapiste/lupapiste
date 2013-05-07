@@ -1,0 +1,2 @@
+stamp.xMargin: Oikea reuna
+stamp.yMargin: Ala reuna

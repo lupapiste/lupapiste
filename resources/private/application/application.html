@@ -449,8 +449,18 @@
                 <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
                 <span data-bind="ltext: 'stamp.status.no-files', visible: status() === statusNoFiles"></span>
               </div>
-              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
-              <button data-bind="ltext: 'stamp.cancel', enabled: status() === statusInit" class="btn btn-dialog close"></button>
+              <div>
+                <label data-bind="ltext: 'stamp.xMargin'" for="stamp.xMargin" class="form-label"></label>
+                <input data-bind="value: xMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !xMarginOk()}" id="stamp.xMargin" type="text" class="form-input text">
+                <label>mm</label>
+              </div>
+              <div>
+                <label data-bind="ltext: 'stamp.yMargin'" for="stamp.yMargin" class="form-label"></label>
+                <input data-bind="value: yMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !yMarginOk()}" id="stamp.yMargin" type="text" class="form-input text">
+                <label>mm</label>
+              </div>
+              <button data-bind="click: start, ltext: 'stamp.start', enable: xMarginOk() && yMarginOk() && status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
+              <button data-bind="ltext: 'stamp.cancel', enable: status() === statusInit" class="btn btn-dialog close"></button>
             </div>
             <div data-bind="visible: status() >= statusRunning">
               <div>
