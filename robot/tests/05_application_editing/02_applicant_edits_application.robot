@@ -31,6 +31,7 @@ Mikko adds party maksaja
 
 Mikko changes application address and property id
   Page should not contain  ${newName}
+  Page should not contain  ${newId}
   Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
   Click element  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
   Input text by test id  application-new-address  ${newName}
