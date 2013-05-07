@@ -30,6 +30,12 @@ LUPAPISTE.ChangeLocationModel = function() {
     }
   };
 
+  self.center = function(zoom) {
+    if (self.map) {
+      self.map.center(self.x, self.y, zoom);
+    }
+  };
+
   self.reset = function(app) {
     self.id = app.id();
     self.x = app.location().x();
@@ -37,7 +43,8 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.address(app.address());
     self.propertyId(app.propertyId());
     self.errorMessage(null);
-    self.map.clear().updateSize().center(self.x, self.y, 10);
+    self.map.clear().updateSize();
+    self.center(10);
   };
 
   //
@@ -67,7 +74,6 @@ LUPAPISTE.ChangeLocationModel = function() {
       if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {
         // Id changed from human format to valid human format:
         // Turing test passed, search for new location
-debug("turing test passed: search for new location");
         self.beginUpdateRequest().searchPointByPropertyId(id);
       }
       self.propertyIdAutoUpdated = false;
@@ -118,6 +124,7 @@ debug("turing test passed: search for new location");
     locationSearch.pointByPropertyId(self.requestContext, propertyId, function(result) {
         if (result.data && result.data.length > 0) {
           self.setXY(result.data[0].x, result.data[0].y);
+          self.center();
         } else {
           self.errorMessage("error.invalid-property-id");
         }
@@ -143,7 +150,7 @@ debug("turing test passed: search for new location");
         }
       }
       self.address(newAddress);
-      self.map.center(x, y);
+      self.center();
     });
     return self;
   };
