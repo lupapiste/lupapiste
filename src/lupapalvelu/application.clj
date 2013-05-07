@@ -424,11 +424,12 @@
                                                    (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
 
     ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota!
+    ;FIXME - for REAL
     (mongo/update
       :applications
       {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
       {$set (assoc
-              (commands/->mongo-updates "documents.$.data" updates)
+              (commands/->mongo-updates "documents.$.data" (commands/->model-updates updates))
               :modified (:created (now)))})))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
