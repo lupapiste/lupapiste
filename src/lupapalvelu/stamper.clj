@@ -146,12 +146,11 @@
           (println "Oh shit!")
           (.printStackTrace e)))))
   
-  (doseq [v [#'make-stamp #'stamp-image #'add-stamp]]
+  (doseq [v [#'make-stamp #'stamp-image #'add-stamp #'stamp-test-image]]
     (add-watch v :test-stamp (fn [_ _ _ _] (stamp-test-image))))
   
-  (doseq [v [#'make-stamp #'stamp-image #'add-stamp]]
+  (doseq [v [#'make-stamp #'stamp-image #'add-stamp #'stamp-test-image]]
     (remove-watch v :test-stamp))
-  
   
   (defn- stamp-test-pdf []
     (with-open [in (io/input-stream "/Volumes/HD2/Users/jarppe/Downloads/in.pdf")
@@ -162,10 +161,12 @@
           (println "Oh shit!")
           (.printStackTrace e)))))
   
-  (doseq [v [#'make-stamp #'stamp-pdf]]
+  (doseq [v [#'make-stamp #'stamp-pdf #'stamp-test-pdf]]
     (add-watch v :test-stamp (fn [_ _ _ _] (stamp-test-pdf))))
   
-
+  (doseq [v [#'make-stamp #'stamp-pdf #'stamp-test-pdf]]
+    (remove-watch v :test-stamp))
+  
   (defn- lorem-line [c]
     (let [sb (StringBuilder.)]
       (while (< (.length sb) c)
