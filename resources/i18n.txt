@@ -1,3 +1,5 @@
+error.invalid-property-id:Tarkasta kiinteistötunnus
+error.property-in-other-muinicipality:Kiinteistö ei ole valitun kunnan alueella
 stamp.margin:  Leiman sijainti:
 stamp.xMargin: Oikeasta reunasta
 stamp.yMargin: Ala reunasta

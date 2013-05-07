@@ -40,6 +40,10 @@ var util = (function() {
     return propertyIdDbFormat.test(s) || propertyIdHumanFormat.test(s);
   }
 
+  function isPropertyIdInDbFormat(s) {
+    return propertyIdDbFormat.test(s);
+  }
+
   function propertyIdToHumanFormat(id) {
     if (!id) return null;
     if (propertyIdHumanFormat.test(id)) return id;
@@ -87,6 +91,7 @@ var util = (function() {
     isValidPassword: isValidPassword,
     prop: {
       isPropertyId: isPropertyId,
+      isPropertyIdInDbFormat: isPropertyIdInDbFormat,
       toHumanFormat: propertyIdToHumanFormat,
       toDbFormat: propertyIdToDbFormat
     }

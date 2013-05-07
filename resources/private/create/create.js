@@ -120,8 +120,8 @@
     // Concurrency control:
     //
 
-    self.updateRequestId = 0;
-    self.beginUpdateRequest = function() { self.updateRequestId++; return self; };
+    self.requestContext = new RequestContext();
+    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
 
     //
     // Callbacks:
@@ -140,11 +140,6 @@
       return false;
     };
 
-    self.onResponse = function(fn) {
-      var requestId = self.updateRequestId;
-      return function(result) { if (requestId === self.updateRequestId) fn(result); };
-    };
-
     // Search activation:
 
     self.searchNow = function() {
@@ -159,13 +154,10 @@
       return false;
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
+    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value); };
 
-    self.serchPointByAddress = function(address) {
-      ajax
-        .get("/proxy/get-address")
-        .param("query", address)
-        .success(self.onResponse(function(result) {
+    self.searchPointByAddress = function(address) {
+      locationSearch.pointByAddress(self.requestContext, address, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -178,17 +170,12 @@
               .beginUpdateRequest()
               .searchPropertyId(x, y);
           }
-        }))
-        .fail(_.partial(self.useManualEntry, true))
-        .call();
+        }, _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPointByPropertyId = function(id) {
-      ajax
-        .get("/proxy/point-by-property-id")
-        .param("property-id", util.prop.toDbFormat(id))
-        .success(self.onResponse(function(result) {
+      locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -201,29 +188,18 @@
               .beginUpdateRequest()
               .searchAddress(x, y);
           }
-        }))
-        .fail(_.partial(self.useManualEntry, true))
-        .call();
+        },
+        _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPropertyId = function(x, y) {
-      ajax
-        .get("/proxy/property-id-by-point")
-        .param("x", x)
-        .param("y", y)
-        .success(self.onResponse(self.propertyId))
-        .call();
+      locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
       return self;
     };
 
     self.searchAddress = function(x, y) {
-      ajax
-        .get("/proxy/address-by-point")
-        .param("x", x)
-        .param("y", y)
-        .success(self.onResponse(self.addressData))
-        .call();
+      locationSearch.addressByPoint(self.requestContext, x, y, self.addressData);
       return self;
     };
 
