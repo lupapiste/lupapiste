@@ -432,10 +432,9 @@
         "inforequests" {:infoRequest true}
         nil)
       (condp = (:filter-state params)
-        "not-canceled"      {:state {$ne "canceled"}}
-        "canceled-in-power" {:state "canceled"}  ; FIXME: in-power?
-        "canceled"          {:state "canceled"}
         "pre-verdict"       {:state {$in ["draft" "open" "submitted" "sent"]}}
+        "all"               nil
+        "canceled"          {:state "canceled"}
         nil)
       (if (and (:filter-user params) (not= (:filter-user params) "0"))
         {"auth.id" (:filter-user params)})

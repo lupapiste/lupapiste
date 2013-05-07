@@ -50,7 +50,7 @@ applications.filter.desc: Työjono
 applications.filter.user.all: Kaikki
 applications.filter.own: Vain omat
 applications.filter.state-desc: Näytä
-applications.filter.not-canceled: Piilota peruutetut
-applications.filter.canceled-in-power: Kaikki
-applications.filter.canceled: Peruutetut
+
 applications.filter.pre-verdict: Ei päätöstä
+applications.filter.all: Kaikki
+applications.filter.canceled: Peruutetut
