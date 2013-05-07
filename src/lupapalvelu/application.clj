@@ -428,7 +428,7 @@
       :applications
       {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
       {$set (assoc
-              (commands/->update "documents.$.data" updates)
+              (commands/->mongo-updates "documents.$.data" updates)
               :modified (:created (now)))})))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
