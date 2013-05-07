@@ -1,4 +1,4 @@
-stamp.margin  Leiman sijainti:
+stamp.margin:  Leiman sijainti:
 stamp.xMargin: Oikeasta reunasta
 stamp.yMargin: Ala reunasta
 
