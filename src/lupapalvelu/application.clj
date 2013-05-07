@@ -468,7 +468,7 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
-      (autofill-rakennuspaikka app-with-ver)
+      #_(autofill-rakennuspaikka app-with-ver) ;; does not work
       (ok :id id))
     (fail :error.unauthorized)))
 
