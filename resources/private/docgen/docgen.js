@@ -599,8 +599,8 @@ var docgen = (function () {
     }
 
     function saveForReal(path, value, callback) {
-      console.log("update:", path, value);
-      console.log("update:", path.replace(new RegExp("^"+self.docId+"."),""), value);
+      //consolez.log("update:", path, value);
+      //consolez.log("update:", path.replace(new RegExp("^"+self.docId+"."),""), value);
       ajax
         .command("update-doc", {doc: self.docId, id: self.appId, updates: [[path, value]]})
         // Server returns empty array (all ok), or array containing an array with three
