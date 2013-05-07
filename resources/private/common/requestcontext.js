@@ -10,7 +10,7 @@ var RequestContext = function() {
   self.onResponse = function(fn) {
     var requestId = self.id;
     return function(result) {
-      if (requestId === self.id) {
+      if (requestId === self.id && typeof fn === "function") {
         fn(result);
       }
     };
