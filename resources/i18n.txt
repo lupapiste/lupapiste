@@ -1,5 +1,6 @@
-stamp.xMargin: Oikea reuna
-stamp.yMargin: Ala reuna
+stamp.margin  Leiman sijainti:
+stamp.xMargin: Oikeasta reunasta
+stamp.yMargin: Ala reunasta
 
 hankkeen-kuvaus.kuvaus.help: Esimerkkejä hyvistä kuvauksista: Omakotitalo - Rakennetaan kaksikerroksinen, puuverhoiltu omakotitalo ja talousrakennus sekä maalämpökaivo; Rivitalo - Rakennetaan rivitaloa sekä väestönsuoja/varastorakennus. Asuntoja on 20 kpl; Kerrostalo - Rakennetaan neljäkerroksinen kerrostalo, josta osa on kellaritilaa ja tukimuuri. Asuntoja on 12 kpl. Anomus aloittaa rakennustyöt valitusaikana; Puunkaato - Kaadetaan n. 50 kuusta. Kiinteistöltä kaadetaan puita ja pintamaat poistetaan. Täyttöä on n. 10 000 m3.
 rakennuspaikka.kiinteisto.maaraalaTunnus.help:Jos rakennuspaikkana on määräala, syötä määräalan tunnus tähän. Muuten voit jättää kentän tyhjäksi.
