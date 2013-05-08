@@ -100,24 +100,28 @@ if (typeof LUPAPISTE === "undefined") {
     */
   };
 
-  hub.subscribe("connection-online", function () {
-    $(".connection-error").hide();
-  });
+  self.initSubscribtions = function() {
+    hub.subscribe("connection-online", function () {
+      $(".connection-error").hide();
+    });
 
-  hub.subscribe("connection-offline", function () {
-    $(".connection-error").show();
-  });
+    hub.subscribe("connection-offline", function () {
+      $(".connection-error").show();
+    });
 
-  hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
+    hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
 
-  hub.subscribe("logout", function () {
-    window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
-  });
+    hub.subscribe("logout", function () {
+      window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
+    });
+  };
 
   /**
    * Complete the App initialization after DOM is loaded.
    */
    self.domReady = function () {
+     self.initSubscribtions();
+
      $(window)
        .hashchange(self.hashChanged)
        .hashchange()
