@@ -135,7 +135,8 @@ var LUPAPISTE = LUPAPISTE || {};
        languages: loc.getSupportedLanguages(),
        currentLanguage: loc.getCurrentLanguage(),
        changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-       startPage: self.startPage
+       startPage: self.startPage,
+       allowAnonymous: self.allowAnonymous
      };
      $("nav").applyBindings(model);
    };

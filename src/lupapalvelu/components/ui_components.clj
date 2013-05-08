@@ -46,16 +46,14 @@
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js"]
                   :css ["css/main.css"]
-                  :html ["error.html"]}
+                  :html ["error.html" "nav.html"]}
 
    :map          {:depends [:common]
                   :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                    :js ["comment.js" "authorization.js" "municipalities.js"]
-                   :html ["comments.html" "nav.html"]}
-
-   :unauthenticated {:html ["nav.html"]}
+                   :html ["comments.html"]}
 
    :invites      {:depends [:common]
                   :js ["invites.js"]}
@@ -132,7 +130,7 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :unauthenticated :register :debug]
+   :welcome {:depends [:common :register :debug]
              :js ["welcome.js" "login.js"]
              :html ["index.html" "login.html"]}
 
@@ -141,7 +139,7 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :about {:depends [:common :unauthenticated :debug]
+   :about {:depends [:common :debug]
            :js ["about.js"]
            :html ["terms.html" "index.html"]}})
 
