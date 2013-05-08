@@ -429,15 +429,11 @@
                   ["kiinteisto.rekisterointipvm" (try
                                                    (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
                                                    (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
-
-    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota!
-    ;FIXME - for REAL
-    (mongo/update
-      :applications
-      {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
-      {$set (assoc
-              (commands/->mongo-updates "documents.$.data" (commands/->model-updates updates))
-              :modified (:created (now)))})))
+    (commands/persist-model-updates
+      (:id application)
+      rakennuspaikka
+      (commands/->model-updates updates)
+      (now))))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
@@ -477,7 +473,7 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
-      #_(autofill-rakennuspaikka app-with-ver) ;; does not work
+      (autofill-rakennuspaikka app-with-ver) ;; we do not capture failures here!
       (ok :id id))
     (fail :error.unauthorized)))
 
