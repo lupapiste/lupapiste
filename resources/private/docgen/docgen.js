@@ -632,6 +632,16 @@ var docgen = (function () {
       if (label) {
         label.appendChild(loader);
       }
+
+      function showIndicator(className, locKey, delay) {
+        $(indicator).addClass(className).text(loc(locKey));
+        $(indicator).fadeIn(delay);
+        setTimeout(function () {
+          $(indicator).removeClass(className);
+          $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
+        }, 2000);
+      }
+
       saveForReal(path, value, function (status) {
         if (label) {
           label.removeChild(loader);
@@ -644,12 +654,7 @@ var docgen = (function () {
           $(indicator).addClass("form-input-err").text(loc("form.err"));
           $(indicator).fadeIn(200);
         } else if (status === "ok") {
-          $(indicator).addClass("form-input-saved").text(loc("form.saved"));
-          $(indicator).fadeIn(300);
-          setTimeout(function () {
-            $(indicator).removeClass("form-input-saved");
-            $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
-          }, 2000);
+          showIndicator("form-input-saved","form.saved",300);
         } else if (status !== "ok") {
           error("Unknown status:", status, "path:", path);
         }
