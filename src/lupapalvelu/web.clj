@@ -412,14 +412,4 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
-
-  (defquery "qlang"
-    {:authenticated false}
-    [c]
-    (ok :lang *lang*))
-
-  (defcommand "clang"
-    {:authenticated false}
-    [c]
-    (ok :lang *lang*)))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))
