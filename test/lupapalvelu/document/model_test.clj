@@ -139,5 +139,5 @@
 
   (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
     (-> uusi-rakennus
-      (assoc-in [:data :rakenne :kantavaRakennusaine :value] "puu")
-      (assoc-in [:mitat :kerrosluku :value] "5")) => (invalid-with? [:warn "vrk:BR106"])))
+      (apply-update [:rakenne :kantavaRakennusaine] "puu")
+      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"])))

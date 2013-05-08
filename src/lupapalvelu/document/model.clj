@@ -78,16 +78,16 @@
    :element element
    :result  result})
 
-(defn- validate-fields [schema-body k v path]
+(defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
-    (if (contains? v :value)
+    (if (contains? data :value)
       (let [element (find-by-name schema-body current-path)
-            result  (validate (keywordize-keys element) (:value v))]
-        (and result (validation-result v current-path element result)))
+            result  (validate (keywordize-keys element) (:value data))]
+        (and result (validation-result data current-path element result)))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
-               (validate-fields schema-body k2 v2 current-path)) v)))))
+               (validate-fields schema-body k2 v2 current-path)) data)))))
 
 (defn validate-rules
   [{{{schema-name :name} :info} :schema data :data}]
@@ -96,7 +96,10 @@
       (= schema-name "uusiRakennus")
       (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
       (some-> data :mitat :kerrosluku :value java.lang.Integer/parseInt (> 4)))
-    [{:result [:warn "vrk:BR106"]}]))
+    [{:path    [:rakenne :kantavaRakennusaine]
+      :result  [:warn "vrk:BR106"]}
+     {:path    [:mitat :kerrosluku]
+      :result  [:warn "vrk:BR106"]}]))
 
 (defn validate-document
   "Validates document against it's local schema and document level rules
