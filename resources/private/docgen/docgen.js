@@ -648,11 +648,9 @@ var docgen = (function () {
         }
         $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
         if (status === "warn") {
-          $(indicator).addClass("form-input-warn").text(loc("form.warn"));
-          $(indicator).fadeIn(200);
+          showIndicator("form-input-warn","form.warn",200);
         } else if (status === "err") {
-          $(indicator).addClass("form-input-err").text(loc("form.err"));
-          $(indicator).fadeIn(200);
+          showIndicator("form-input-err","form.err",200);
         } else if (status === "ok") {
           showIndicator("form-input-saved","form.saved",300);
         } else if (status !== "ok") {
