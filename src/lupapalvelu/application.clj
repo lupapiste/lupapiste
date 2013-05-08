@@ -55,7 +55,7 @@
         changes))))
 
 (defn- property-id? [^String s]
-  (re-matches #"^[0-9]{14}$" s))
+  (and s (re-matches #"^[0-9]{14}$" s)))
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
