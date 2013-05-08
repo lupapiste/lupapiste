@@ -7,7 +7,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.notifications :as notifications]))
 
 ;;
@@ -84,7 +84,7 @@
   [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{:keys [organization] :as application}]
-      (municipality/with-organization organization
+      (organization/with-organization organization
         (fn [{:keys [statementPersons]}]
           (let [now            (now)
                 personIdSet    (set personIds)

@@ -19,7 +19,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
-            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.organization :as organization]
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
@@ -449,7 +449,7 @@
                       (partial property-id-parameters [:propertyId])]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [application-organization-id (:id (municipality/resolve-organization municipality operation))]
+  (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
     (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
     (let [user-summary  (security/summary user)
           id            (make-application-id municipality)
@@ -511,7 +511,7 @@
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])]}
   [{{:keys [id x y address propertyId]} :data created :created application :application}]
-  (if (= (:municipality application) (municipality/municipality-by-propertyId propertyId))
+  (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
                                                 :address       (trim address)
                                                 :propertyId    propertyId
@@ -569,7 +569,7 @@
   [{{:keys [id documentId buildingId]} :data :as command}]
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
-      (if-let [legacy (municipality/get-legacy organization)]
+      (if-let [legacy (organization/get-legacy organization)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-id (:documents application) documentId)
               old-body     (:data document)
@@ -591,7 +591,7 @@
   [{{:keys [id]} :data :as command}]
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
-      (if-let [legacy   (municipality/get-legacy organization)]
+      (if-let [legacy   (organization/get-legacy organization)]
         (let [kryspxml  (krysp/building-xml legacy propertyId)
               buildings (krysp/->buildings kryspxml)]
           (ok :data buildings))
