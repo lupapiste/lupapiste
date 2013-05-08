@@ -102,13 +102,13 @@
                 (replace-application-links "#link" application "" host))]
     (send-mail-to-recipients! [email] title msg)))
 
-(defn send-create-statement-person! [email text municipality]
+(defn send-create-statement-person! [email text organization]
   (let [title (get-email-title {:title "Lausunnot"})
         msg   (message
                 (template "add-statement-person.html")
                 (enlive/transform [:.text] (enlive/content text))
-                (enlive/transform [:#municipality-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str "municipality." municipality)))))
-                (enlive/transform [:#municipality-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str "municipality." municipality))))))]
+                (enlive/transform [:#organization-fi] (enlive/content (:fi (:name organization))))
+                (enlive/transform [:#organization-sv] (enlive/content (:sv (:name organization)))))]
     (send-mail-to-recipients! [email] title msg)))
 
 (defn send-on-request-for-statement! [persons application user host]

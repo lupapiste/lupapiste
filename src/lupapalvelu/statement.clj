@@ -7,7 +7,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.notifications :as notifications]))
 
 ;;
@@ -37,37 +37,40 @@
 
 (defquery "get-statement-persons"
   {:roles [:authority :authorityAdmin]}
-  [{{:keys [municipality]} :user}]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality})
-        permitPersons (or (:statementPersons municipality) [])]
+  [{{:keys [organizations]} :user}]
+  (let [organization (mongo/select-one :organizations {:_id (first organizations)})
+        permitPersons (or (:statementPersons organization) [])]
     (ok :data permitPersons)))
 
 (defcommand "create-statement-person"
   {:parameters [:email :text]
    :roles      [:authorityAdmin]}
-  [{{:keys [email text]} :data {:keys [municipality] :as user} :user}]
-  (with-user email
-    (fn [{:keys [firstName lastName] :as user}]
-      (if-not (security/authority? user)
-        (fail :error.not-authority)
-        (do
-          (mongo/update
-            :municipalities
-            {:_id municipality}
-            {$push {:statementPersons {:id (mongo/create-id)
-                                       :text text
-                                       :email email
-                                       :name (str firstName " " lastName)}}})
-          (notifications/send-create-statement-person! email text municipality))))))
-
+  [{{:keys [email text]} :data {:keys [organizations] :as user} :user}]
+  (let [organization-id (first organizations)
+        organization (mongo/select-one :organizations {:_id organization-id})]
+    (with-user email
+      (fn [{:keys [firstName lastName] :as user}]
+        (if-not (security/authority? user)
+          (fail :error.not-authority)
+          (do
+            (mongo/update
+              :organizations
+              {:_id organization-id}
+              {$push {:statementPersons {:id (mongo/create-id)
+                                         :text text
+                                         :email email
+                                         :name (str firstName " " lastName)}}})
+            (notifications/send-create-statement-person! email text organization)))))))
+  
 (defcommand "delete-statement-person"
   {:parameters [:personId]
    :roles      [:authorityAdmin]}
-  [{{:keys [personId]} :data {:keys [municipality] :as user} :user}]
+  [{{:keys [personId]} :data {:keys [organizations] :as user} :user}]
+  (let [organization-id (first organizations)]
   (mongo/update
-    :municipalities
-    {:_id municipality}
-    {$pull {:statementPersons {:id personId}}}))
+    :organizations
+    {:_id organization-id}
+    {$pull {:statementPersons {:id personId}}})))
 
 ;;
 ;; Authority operations
@@ -80,8 +83,8 @@
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
   [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
   (with-application command
-    (fn [{:keys [municipality] :as application}]
-      (municipality/with-municipality municipality
+    (fn [{:keys [organization] :as application}]
+      (organization/with-organization organization
         (fn [{:keys [statementPersons]}]
           (let [now            (now)
                 personIdSet    (set personIds)
