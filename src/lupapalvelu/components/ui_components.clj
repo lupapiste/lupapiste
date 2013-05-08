@@ -53,7 +53,9 @@
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                    :js ["comment.js" "authorization.js" "municipalities.js"]
-                   :html ["comments.html"]}
+                   :html ["comments.html" "nav.html"]}
+
+   :unauthenticated {:html ["nav.html"]}
 
    :invites      {:depends [:common]
                   :js ["invites.js"]}
@@ -130,7 +132,7 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :register :debug]
+   :welcome {:depends [:common :unauthenticated :register :debug]
              :js ["welcome.js" "login.js"]
              :html ["index.html" "login.html"]}
 
@@ -139,7 +141,7 @@
              :html ["mypage.html"]
              :css ["mypage.css"]}
 
-   :about {:depends [:common :debug]
+   :about {:depends [:common :unauthenticated :debug]
            :js ["about.js"]
            :html ["terms.html" "index.html"]}})
 
