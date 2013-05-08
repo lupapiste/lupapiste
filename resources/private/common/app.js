@@ -45,7 +45,6 @@ if (typeof LUPAPISTE === "undefined") {
     };
     $("nav").applyBindings(model);
   };
-  $(self.domReady);
 
   hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
 
