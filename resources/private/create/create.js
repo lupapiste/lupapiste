@@ -271,9 +271,8 @@
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
       onSelect: function(v) {
-        model.operation(v ? v.op : null); 
-        var municipalityCode = model.municipality().municipalityCode;
-        ajax.query("resolve-organization", {municipality: municipalityCode, operation: v.op}).success(function(d) {
+        model.operation(v ? v.op : null);
+        ajax.query("resolve-organization", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
           model.organization(d);
         }).call();
       },
