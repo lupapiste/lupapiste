@@ -65,7 +65,6 @@
         rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
         polished  (comp cr/index-maps cr/strip-empty-maps cr/strip-nils cr/convert-booleans)]
     (when rakennus
-        rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
       (polished
         {:muutostyolaji                 ...notimplemented...
          :rakennusnro                   (get-text rakennus :rakennusnro)
