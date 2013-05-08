@@ -85,13 +85,25 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) v)))))
 
+;; in loan from Clojure 1.5
+(defmacro some->
+  "When expr is not nil, threads it into the first form (via ->),
+  and when that result is not nil, through the next etc"
+  {:added "1.5"}
+  [expr & forms]
+  (let [g (gensym)
+        pstep (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (map pstep forms))]
+       ~g)))
+
 (defn validate-rules
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")
-      (-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (-> data :mitat :kerrosluku :value java.lang.Integer/parseInt (> 4)))
+      (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
+      (some-> data :mitat :kerrosluku :value java.lang.Integer/parseInt (> 4)))
     [{:result [:warn "vrk:BR106"]}]))
 
 (defn validate-document
