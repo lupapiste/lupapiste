@@ -14,20 +14,19 @@
 (defn find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
 
-(defquery "municipality-by-user"
-  {:description "Lists all municipality users by municipality."
+(defquery "organization-by-user"
+  {:description "Lists all organization users by organization."
    :roles [:authorityAdmin]
    :verified true}
   [{user :user {:keys [organizations]} :user}]
-  (let [municipalities (find-user-municipalities user)
-        orgs (find-user-organizations user)
+  (let [orgs (find-user-organizations user)
         organization (first orgs)
         ops (merge (zipmap (keys operations/operations) (repeat [])) (:operations-attachments organization))]
-    (ok :municipality (assoc organization :operations-attachments ops)
+    (ok :organization (assoc organization :operations-attachments ops)
         :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
 
-(defcommand "municipality-link-add"
-  {:description "Adds link to municipality."
+(defcommand "organization-link-add"
+  {:description "Adds link to organization."
    :parameters [:url :nameFi :nameSv]
    :roles [:authorityAdmin]
    :verified true}
@@ -36,8 +35,8 @@
     (mongo/update :organizations {:_id organization} {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "municipality-link-update"
-  {:description "Updates municipality link."
+(defcommand "organization-link-update"
+  {:description "Updates organization link."
    :parameters [:url :nameFi :nameSv :index]
    :roles [:authorityAdmin]
    :verified true}
@@ -46,8 +45,8 @@
     (mongo/update :organizations {:_id organization} {$set {(str "links." i) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "municipality-link-rm"
-  {:description "Removes municipality link."
+(defcommand "organization-link-rm"
+  {:description "Removes organization link."
    :parameters [:nameFi :nameSv :url]
    :roles [:authorityAdmin]
    :verified true}
@@ -82,7 +81,6 @@
         :attachments (attachments/organization-attachments organizationId))
     (fail :unknown-organization)))
 
-
 ; Returns the organization based on municipality and operation.
 ; For example in municipality 753 with operation of type R the organization is 753-R
 (defn resolve-organization [municipality operation]
@@ -97,7 +95,7 @@
     (ok :links (:links result))
     (fail :unknown-organization)))
 
-(defcommand "municipality-operations-attachments"
+(defcommand "organization-operations-attachments"
   {:parameters [:operation :attachments]
    :roles [:authorityAdmin]}
   [{{operation :operation attachments :attachments} :data user :user}]
