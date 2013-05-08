@@ -249,7 +249,7 @@
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (domain/user2henkilo subject)
+            henkilo      (domain/->henkilo subject)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
@@ -391,7 +391,7 @@
         new-docs              (cons op-doc required-docs)
         hakija                (make "hakija")]
     (if user
-      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/user2henkilo user)) new-docs)
+      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]

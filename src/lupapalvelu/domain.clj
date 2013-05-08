@@ -75,7 +75,7 @@
 ;; Conversion between Lupapiste and documents
 ;;
 
-(defn user2henkilo [{:keys [id firstName lastName email phone street zip city]}]
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]
   {:userId                        {:value id}
    :henkilotiedot {:etunimi       {:value firstName}
                    :sukunimi      {:value lastName}}
