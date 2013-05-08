@@ -2,7 +2,7 @@
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
 ...            More about robot http://code.google.com/p/robotframework/.
-Library        Selenium2Library   timeout=15  run_on_failure=Log Source
+Library        Selenium2Library   timeout=10  run_on_failure=Log Source
 
 *** Variables ***
 
@@ -218,6 +218,8 @@ SolitaAdmin logs in
 Input text by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
+  Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
+  Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
   Input text  xpath=//input[@data-test-id="${id}"]  ${value}
 
 Select From List by test id
@@ -243,7 +245,7 @@ Click enabled by test id
   Click by test id  ${id}
 
 #
-# Helpser for inforequest and application crud operations:
+# Helper for inforequest and application crud operations:
 #
 
 Create application the fast way
@@ -287,14 +289,13 @@ Prepare new request
   Input text by test id  create-address  ${address}
   Input text by test id  create-property-id  ${propertyId}
   Select From List by test id  create-municipality-select  ${municipality}
+  Set animations off
   Click enabled by test id  create-continue
-  # Going too fast causes animation to stop
-  Set Selenium Speed  ${OP_TREE_SPEED}
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
-  Set Selenium Speed  ${DEFAULT_SPEED}
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
+  Set animations on
 
 # Closes the application that is currently open by clicking cancel button
 Close current application
@@ -397,4 +398,14 @@ Set integration proxy on
 
 Set integration proxy off
   Execute Javascript  ajax.post("/api/proxy-ctrl/off").call();
+
+#
+# Animations control:
+#
+
+Set animations on
+  Execute Javascript  tree.animation(true);
+
+Set animations off
+  Execute Javascript  tree.animation(false);
 

@@ -20,7 +20,8 @@
   {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
    :open "vireill\u00e4"
    :sent "vireill\u00e4"
-   :submitted "vireill\u00e4"})
+   :submitted "vireill\u00e4"
+   :complement-needed "vireill\u00e4"})
 
 (defn to-xml-date [timestamp]
   (let [d (from-long timestamp)]
@@ -157,10 +158,10 @@
       base-data)))
 
 (defn- get-parties-by-type [documents tag-name party-type doc-transformer]
-  (into [] (for [doc (documents party-type)
-                 :let [osapuoli (:data doc)]
-                 :when (seq osapuoli)]
-             {tag-name (doc-transformer osapuoli party-type)})))
+  (for [doc (documents party-type)
+        :let [osapuoli (:data doc)]
+        :when (seq osapuoli)]
+    {tag-name (doc-transformer osapuoli party-type)}))
 
 (defn get-parties [documents]
   (into
@@ -175,6 +176,7 @@
 (def state-timestamps
   {:draft :created
    :open :opened
+   :complement-needed :opened
    ; Application state in KRYSP will be "vireill\u00e4" -> use :opened date
    :submitted :opened})
 
@@ -234,7 +236,7 @@
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-     :rakentajaTyyppi (-> kaytto :rakentajaTyyppi :value)
+     :rakentajatyyppi (-> kaytto :rakentajaTyyppi :value)
      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
      :rakennuksenTiedot (merge {
                                 :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)

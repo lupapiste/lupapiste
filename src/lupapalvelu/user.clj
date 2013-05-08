@@ -2,6 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [lupapalvelu.i18n :only [*lang*]]
+        [clojure.string :only [trim]]
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
@@ -9,6 +10,7 @@
             [lupapalvelu.vetuma :as vetuma]
             [sade.security :as sadesecurity]
             [sade.util :as util]
+            [sade.env :as env]
             [noir.session :as session]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
@@ -39,17 +41,19 @@
    :verified   true}
   [{{:keys [stamp] :as data} :data}]
   (if-let [vetuma-data (vetuma/get-user stamp)]
-    (do
-      (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (try
-        (if-let [user (security/create-user (merge data vetuma-data))]
-          (do
-            (future (sadesecurity/send-activation-mail-for user))
-            (vetuma/consume-user stamp)
-            (ok :id (:_id user)))
-          (fail :error.create-user))
-        (catch IllegalArgumentException e
-          (fail (keyword (.getMessage e))))))
+    (let [email (trim (:email data))]
+      (if (.contains email "@")
+        (try
+          (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+          (if-let [user (security/create-user (merge data vetuma-data {:email email}))]
+            (do
+              (future (sadesecurity/send-activation-mail-for user))
+              (vetuma/consume-user stamp)
+              (ok :id (:_id user)))
+            (fail :error.create-user))
+          (catch IllegalArgumentException e
+            (fail (keyword (.getMessage e)))))
+        (fail :error.email)))
     (fail :error.create-user)))
 
 (defcommand "change-passwd"
@@ -76,7 +80,7 @@
     (let [token (token/make-token :password-reset {:email email})]
       (infof "password reset request: email=%s, token=%s" email token)
       (notifications/send-password-reset-email! email token)
-      (ok)) 
+      (ok))
     (do
       (warnf "password reset request: unknown email: email=%s" email)
       (fail :email-not-found))))
@@ -102,3 +106,17 @@
     {$set (select-keys data [:firstName :lastName :street :city :zip :phone])})
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
+
+
+(env/in-dev
+  (defcommand "create-apikey"
+  {:parameters [:username :password]}
+  [command]
+  (if-let [user (security/login (-> command :data :username) (-> command :data :password))]
+    (let [apikey (security/create-apikey)]
+      (mongo/update
+        :users
+        {:username (:username user)}
+        {$set {"private.apikey" apikey}})
+      (ok :apikey apikey))
+      (fail :error.unauthorized))))

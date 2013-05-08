@@ -11,14 +11,17 @@ Mikko creates two new inforequests
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${inforequest-handling}  inforequest-handlings${secs}
   Set Suite Variable  ${inforequest-cancelling}  inforequest-cancelling${secs}
-  Create inforequest the fast way  ${inforequest-handling}  753  753-416-25-30  Jiihaa
-  Create inforequest the fast way  ${inforequest-cancelling}  753  753-416-25-30  Jiihaa
+  Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
+  Set Suite Variable  ${propertyId}  753-416-25-30
+  Set Suite Variable  ${newId}  753-416-25-29
+  Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  Jiihaa
+  Create inforequest the fast way  ${inforequest-cancelling}  753  ${propertyId}  Jiihaa
   Logout
 
 Authority assigns an inforequest to herself
   Sonja logs in
   Inforequest is not assigned  ${inforequest-handling}
-  Open inforequest  ${inforequest-handling}  753-416-25-30
+  Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Element should be visible  inforequest-assignee-select
   Select From List  inforequest-assignee-select  777777777777777777000023
   Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
@@ -33,15 +36,26 @@ Mikko sees Sonja as authority
   Inforequest is assigned to  ${inforequest-handling}  Sonja Sibbo
 
 Mikko should be able to cancel the inforequest but not mark it as answered
-  Open inforequest  ${inforequest-handling}  753-416-25-30
+  Open inforequest  ${inforequest-handling}  ${propertyId}
   Element should not be visible  //*[@data-test-id='inforequest-mark-answered']
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
 
 Mikko should be able to add attachment
   Element should be visible  //*[@data-test-id='add-inforequest-attachment']
 
-Mikko opens inforequest for cancellation
-  Open inforequest  ${inforequest-cancelling}  753-416-25-30
+Mikko opens inforequest for renaming and cancellation
+  Open inforequest  ${inforequest-cancelling}  ${propertyId}
+
+Mikko changes inforequest address and property id
+  Page should not contain  ${newName}
+  Page should not contain  ${newId}
+  Element should be visible  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
+  Click element  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
+  Input text by test id  application-new-address  ${newName}
+  Input text by test id  application-new-propertyid  ${newId}
+  Click enabled by test id  change-location-save
+  Wait Until  Page should contain  ${newName}
+  Page should contain  ${newId}
 
 Mikko cancels an inforequest
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']
@@ -51,31 +65,36 @@ Mikko cancels an inforequest
 Mikko does not see the cancelled inforequest
   Wait until  Element should be visible  applications-list
   Wait Until  Inforequest is not visible  ${inforequest-cancelling}
+  Wait Until  Inforequest is not visible  ${newName}
 
 Mikko waits until the first inforequest is answered
   Logout
 
 Authority can not cancel the inforequest
   Sonja logs in
-  Open inforequest  ${inforequest-handling}  753-416-25-30
+  Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Inforequest state is  Avoin
   Element should not be visible  //*[@data-test-id='inforequest-cancel-btn']
 
 Authority can not convert the inforequest to application
   Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
-Authority marks inforequest answered
-  Click by test id  inforequest-mark-answered
+Authority adds a comment marking inforequest answered
+  Add comment   oletko miettinyt tuulivoimaa?
   Wait until  Inforequest state is  Vastattu
   Logout
 
 Mikko sees the inforequest answered
   Mikko logs in
-  Open inforequest  ${inforequest-handling}  753-416-25-30
+  Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Inforequest state is  Vastattu
 
 Mikko should still be able to add attachment
   Element should be visible  //*[@data-test-id='add-inforequest-attachment']
+
+When Mikko adds a comment inforequest goes back to Avoin
+  Add comment   tuulivoima on ok.
+  Wait until  Inforequest state is  Avoin
 
 *** Keywords ***
 
@@ -94,3 +113,7 @@ Inforequest is not assigned
 Inforequest is assigned to
   [Arguments]  ${address}  ${name}
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${name}
+
+Add Comment
+  [Arguments]  ${message}
+  Input comment  inforequest  ${message}

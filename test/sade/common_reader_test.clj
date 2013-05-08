@@ -1,5 +1,5 @@
-(ns lupapalvelu.xml.krysp.reader-test
-  (:use [lupapalvelu.xml.krysp.reader]
+(ns sade.common-reader-test
+  (:use [sade.common-reader]
         [sade.xml]
         [midje.sweet]))
 

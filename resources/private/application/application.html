@@ -3,7 +3,7 @@
 <body>
   <section class="page" id="application">
     <div class="application_summary">
-      <div class=" container">
+      <div class="container">
         <div class="application-map-container">
           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
@@ -13,7 +13,11 @@
           </div>
         </div>
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: permitType"></span><span data-bind="text: address" data-test-id="application-title"></span></h1>
+          <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span>
+          <a class="icon"
+             data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-test-id="change-location-link"></a>
+          </h1>
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
@@ -84,13 +88,34 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc('municipality', municipality())"></p>
           </div>
-          <button data-bind="ltext: 'application.submitApplication',    click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn"></button>
-          <button data-bind="ltext: 'application.approveApplication',   click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: $root.authorization.ok('approve-application')"    data-test-id="approve-application"                ></button>
-          <button data-bind="ltext: 'application.requestForComplement', click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement"             ></button>
-          <button data-bind="ltext: 'application.addOperation',         click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: $root.authorization.ok('add-operation')"          data-test-id="add-operation"                      ></button>
-          <button data-bind="ltext: 'application.pdf',                  click: exportPdf"                                                                                                                                 data-test-id="application-pdf-btn"                ></button>
-          <button data-bind="ltext: 'application.cancelApplication',    click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn"></button>
-          <button data-bind="ltext: 'application.stampAttachments',     click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-cancel-btn"  class="btn"></button>
+          <button data-bind="click: submitApplication,    visible: $root.authorization.ok('submit-application'),     enable: $root.authorization.ok('submit-application')"     data-test-id="application-submit-btn"  class="btn btn-primary">
+            <span data-bind="ltext: 'application.submitApplication'"></span>
+            <span class="icon send left-align"></span>
+          </button>
+          <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
+            <span data-bind="ltext: 'application.approveApplication'"></span>
+            <span class="icon approve left-align"></span>
+          </button>
+          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement"             >
+            <span data-bind="ltext: 'application.requestForComplement'"></span>
+            <span class="icon complement left-align"></span>
+          </button>
+          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: $root.authorization.ok('add-operation')"          data-test-id="add-operation"                      >
+            <span data-bind="ltext: 'application.addOperation'"></span>
+            <span class="icon add-grey left-align"></span>
+          </button>
+          <button data-bind="click: exportPdf"                                                                                                                                 data-test-id="application-pdf-btn"                >
+            <span data-bind="ltext: 'application.pdf'"></span>
+            <span class="icon print left-align"></span>
+          </button>
+          <button data-bind="click: cancelApplication,    visible: $root.authorization.ok('cancel-application'),     enable: $root.authorization.ok('cancel-application')"     data-test-id="application-cancel-btn"  class="btn">
+            <span data-bind="ltext: 'application.cancelApplication'"></span>
+            <span class="icon remove-grey left-align"></span>
+          </button>
+          <button data-bind="click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-cancel-btn"  class="btn">
+            <span data-bind="ltext: 'application.stampAttachments'"></span>
+            <span class="icon stamp left-align"></span>
+          </button>
         </div>
 
         <!-- Tabs: -->
@@ -255,12 +280,46 @@
           </div>
         </div>
 
-        <div id="application-verdict-tab" class="tab-content" data-bind="with: application">
+        <div id="application-verdict-tab" class="tab-content">
           <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
-          <div class="tab-wrapper">
-            <div class="row" data-bind="with: verdict">
-              <span data-bind="text: text" data-test-id="application-verdict"></span>
+          <div class="tab-wrapper" >
+            <div class="row" data-bind="if: $root.verdictModel.verdicts()">
+              <table class="table table-striped tablesorter" id="application-verdict-details">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'verdict.id'"></th>
+                    <th data-bind="ltext: 'verdict.status'"></th>
+                    <th data-bind="ltext: 'verdict.name'"></th>
+                    <th data-bind="ltext: 'verdict.given'"></th>
+                    <th data-bind="ltext: 'verdict.official'"></th>
+                    <th data-bind="ltext: 'verdict.attachments'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: $root.verdictModel.verdicts">
+                  <tr class="statement-row">
+                    <td data-bind="text: id, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></td>
+                    <td data-bind="ltext: 'verdict.status.'+status"></td>
+                    <td data-bind="text: name"></td>
+                    <td data-bind="dateString: given"></td>
+                    <td data-bind="dateString: official"></td>
+                    <td data-bind="foreach: $root.verdictModel.attachments()">
+                      <span data-bind="with: $data.latestVersion">
+                        <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                          <i data-bind="ltext: contentType"></i>
+                          <i data-bind="size: size"></i><br/>
+                        </a>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+            <button
+              data-bind="click: $root.verdictModel.openVerdict, ltext: 'application.verdict.add', visible: $root.authorization.ok('give-verdict')"
+              class="btn btn-primary modal"
+              data-test-id="give-verdict">
+            </button>
+
           </div>
         </div>
 
@@ -320,7 +379,7 @@
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-            <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
+            <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
             <div data-bind="visible: error" >
               <div data-bind="text: error" class="context-error"></div>
             </div>
@@ -386,12 +445,28 @@
           <div class="dialog-content">
             <div data-bind="visible: status() < statusRunning">
               <div>
-                <span data-bind="ltext: 'stamp.sure', visible: status() === statusInit"></span>
                 <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
                 <span data-bind="ltext: 'stamp.status.no-files', visible: status() === statusNoFiles"></span>
               </div>
-              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
-              <button data-bind="ltext: 'stamp.cancel', enabled: status() === statusInit" class="btn btn-dialog close"></button>
+              <table data-bind="visible: status() === statusInit" class="stamp-margin">
+                <tbody>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.margin'" colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.xMargin'" class="label"></td>
+                    <td><input data-bind="value: xMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !xMarginOk()}" id="stamp.xMargin" type="text" class="form-input text"></td>
+                    <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.yMargin'" class="label"></td>
+                    <td><input data-bind="value: yMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !yMarginOk()}" id="stamp.yMargin" type="text" class="form-input text"></td>
+                    <td>mm</td>
+                  </tr>
+                </tbody>
+              </table>
+              <button data-bind="click: start, ltext: 'stamp.start', enable: xMarginOk() && yMarginOk() && status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
+              <button data-bind="ltext: 'stamp.cancel', enable: status() === statusInit" class="btn btn-dialog close"></button>
             </div>
             <div data-bind="visible: status() >= statusRunning">
               <div>

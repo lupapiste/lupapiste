@@ -39,6 +39,10 @@ var loc;
   loc.currentLanguage = null;
   loc.terms = {};
 
+  loc.hasTerm = function(key) {
+    return loc.terms[key] !== undefined;
+  };
+
   function resolveLang() {
     var url = window.parent ? window.parent.location.pathname : location.pathname;
     var langEndI = url.indexOf("/", 5);

@@ -1,0 +1,162 @@
+LUPAPISTE.ChangeLocationModel = function() {
+  var self = this;
+  self.dialogSelector = "#dialog-change-location";
+
+  // Model
+
+  self.map = {};
+  self.id = 0;
+  self.municipalityCode = 0;
+  self.x = 0;
+  self.y = 0;
+  self.address = ko.observable("");
+  self.propertyId = ko.observable("");
+  self.propertyIdAutoUpdated = true;
+  self.errorMessage = ko.observable(null);
+
+  self.ok = ko.computed(function() {
+    return util.prop.isPropertyId(self.propertyId()) && self.address();
+  });
+
+  self.drawLocation = function() {
+    self.map.clear().add(self.x, self.y);
+  };
+
+  self.setXY = function(x, y) {
+    self.x = x;
+    self.y = y;
+    if (self.map) {
+      self.drawLocation();
+    }
+  };
+
+  self.center = function(zoom) {
+    if (self.map) {
+      self.map.center(self.x, self.y, zoom);
+    }
+  };
+
+  self.reset = function(app) {
+    self.id = app.id();
+    self.x = app.location().x();
+    self.y = app.location().y();
+    self.address(app.address());
+    self.propertyId(app.propertyId());
+    self.errorMessage(null);
+    self.map.clear().updateSize();
+    self.center(10);
+  };
+
+  //
+  // Concurrency control
+  //
+
+  self.requestContext = new RequestContext();
+  self.beginUpdateRequest = function() {
+    self.errorMessage(null);
+    self.requestContext.begin();
+    return self;
+  };
+
+  //
+  // Event handlers
+  //
+
+  self.propertyId.subscribe(function(id) {
+    if (!id || util.prop.isPropertyIdInDbFormat(id)) {
+      self.propertyIdAutoUpdated = true;
+    }
+
+    var human = util.prop.toHumanFormat(id);
+    if (human != id) {
+      self.propertyId(human);
+    } else {
+      if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {
+        // Id changed from human format to valid human format:
+        // Turing test passed, search for new location
+        self.beginUpdateRequest().searchPointByPropertyId(id);
+      }
+      self.propertyIdAutoUpdated = false;
+    }
+  });
+
+  // Saving
+
+  self.onSuccess = function() {
+    self.errorMessage(null);
+    repository.load(self.id);
+    LUPAPISTE.ModalDialog.close();
+  };
+
+  self.onError = function(resp) {
+    self.errorMessage(resp.text);
+  };
+
+  self.saveNewLocation = function() {
+    var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
+    ajax.command("change-location", data).success(self.onSuccess).error(self.onError).call();
+    return false;
+  };
+
+  // Open the dialog
+
+  self.changeLocation = function(app) {
+    self.reset(app);
+    self.drawLocation();
+    LUPAPISTE.ModalDialog.open(self.dialogSelector);
+  };
+
+  // Click on the map
+
+  self.click = function(x, y) {
+    self.setXY(x, y);
+
+    self.address("");
+    self.propertyId("");
+
+    self.beginUpdateRequest().searchPropertyId(x, y).searchAddress(x, y);
+    return false;
+  };
+
+  // Service functions
+
+  self.searchPointByPropertyId = function(propertyId) {
+    locationSearch.pointByPropertyId(self.requestContext, propertyId, function(result) {
+        if (result.data && result.data.length > 0) {
+          self.setXY(result.data[0].x, result.data[0].y);
+          self.center();
+        } else {
+          self.errorMessage("error.invalid-property-id");
+        }
+      });
+    return self;
+  };
+
+  self.searchPropertyId = function(x, y) {
+    locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
+      self.propertyId(id);
+    });
+    return self;
+  };
+
+  self.searchAddress = function(x, y) {
+    locationSearch.addressByPoint(self.requestContext, x, y, function(a) {
+      var newAddress = "";
+      if (a) {
+        newAddress = a.street;
+        if (a.number && a.number !== "0") {
+          newAddress = newAddress + " " + a.number;
+        }
+      }
+      self.address(newAddress);
+      self.center();
+    });
+    return self;
+  };
+
+  // DOM ready
+  $(function() {
+    self.map = gis.makeMap("change-location-map").center([{x: 404168, y: 6693765}], 10);
+    self.map.addClickHandler(self.click);
+  });
+};
