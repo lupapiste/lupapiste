@@ -45,7 +45,8 @@
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
     self.municipality = ko.observable(null);
-    self.municipalityLinks = ko.computed(function() { var m = self.municipality(); return m ? m.links : null; });
+    self.organization = ko.observable(null);
+    self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
     self.municipalityCode = ko.observable(null);
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
@@ -245,7 +246,12 @@
 
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
-      onSelect: function(v) { model.operation(v ? v.op : null); },
+      onSelect: function(v) {
+        model.operation(v ? v.op : null);
+        ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+          model.organization(d);
+        }).call();
+      },
       baseModel: model
     });
 
