@@ -55,6 +55,12 @@
     (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
+(defquery "organizations"
+  {:authenticated true
+   :verified true}
+  [{user :user}]
+  (ok :organizations (mongo/select :organizations {} {:name 1})))
+
 (defn find-all-municipalities-in-organizations []
   (distinct (flatten (map #(:municipalities %) (mongo/select :organizations {} {"municipalities" 1})))))
 
@@ -75,16 +81,15 @@
         :attachments (attachments/organization-attachments organizationId))
     (fail :unknown-organization)))
 
-(defn resolve-organization 
-  "Returns the organization based on municipality and operation. 
-   For example in municipality 753 with operation of type R the organization is 753-R."
-  [municipality operation]
+; Returns the organization based on municipality and operation.
+; For example in municipality 753 with operation of type R the organization is 753-R
+(defn resolve-organization [municipality operation]
   (mongo/select-one :organizations {:municipalities municipality}))
 
+; return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R
+; TODO: operation does not have permitModule
 (defquery "get-organization-details"
-  {:description "return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R. 
-                 TODO: operation does not have permitModule"
-   :parameters [:municipality] :verified true}
+  {:parameters [:municipality] :verified true}
   [{{municipality :municipality operation :operation} :data}]
   (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1})]
     (ok :links (:links result))

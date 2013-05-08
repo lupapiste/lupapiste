@@ -52,7 +52,7 @@
                   :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js"]
+                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]
