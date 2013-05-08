@@ -134,6 +134,8 @@
   (assoc-in document (flatten [:data path :value]) value))
 
 (defn apply-updates
+  "Updates a document returning the modified document.
+   Example: (apply-update document [:mitat :koko] 12)"
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
 
