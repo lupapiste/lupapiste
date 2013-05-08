@@ -580,7 +580,7 @@
     var self = this;
 
     self.email = ko.observable();
-    self.text = ko.observable();
+    self.text = ko.observable(loc('invite.default-text'));
     self.documentName = ko.observable();
     self.documentId = ko.observable();
     self.error = ko.observable();
@@ -589,7 +589,7 @@
       self.email(undefined);
       self.documentName(undefined);
       self.documentId(undefined);
-      self.text(undefined);
+      self.text(loc('invite.default-text'));
       self.error(undefined);
     };
 
