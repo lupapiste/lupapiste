@@ -410,7 +410,11 @@
                   :state
                   :authority])
 
-(def order-by (assoc col-sources 0 :infoRequest, 2 nil, 3 nil))
+(def order-by (assoc col-sources
+                     0 :infoRequest
+                     1 :address
+                     2 nil
+                     3 nil))
 
 (def col-map (zipmap col-sources (map str (range))))
 
