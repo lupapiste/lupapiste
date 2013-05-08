@@ -139,6 +139,14 @@
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
 
+(defn new-document
+  "Creates an empty document out of schema"
+  [id schema created]
+  {:id id
+   :created created
+   :schema schema
+   :data {}})
+
 ;;
 ;; golden oldies
 ;;
