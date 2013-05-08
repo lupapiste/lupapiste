@@ -1,12 +1,8 @@
-/**
- * Prototype for Lupapiste Single Page Apps
- */
-
-if (typeof LUPAPISTE === "undefined") {
-  var LUPAPISTE = {};
-}
+var LUPAPISTE = LUPAPISTE || {};
 
 /**
+ * Prototype for Lupapiste Single Page Apps.
+ *
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
