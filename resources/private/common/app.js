@@ -21,32 +21,6 @@ if (typeof LUPAPISTE === "undefined") {
   self.allowAnonymous = allowAnonymous;
 
   /**
-  * Complete the App initialization after DOM is loaded.
-  */
-  self.domReady = function () {
-    $(window)
-      .hashchange(self.hashChanged)
-      .hashchange()
-      .unload(self.unload);
-
-    self.connectionCheck();
-
-    if (typeof LUPAPISTE.ModalDialog !== "undefined") {
-      LUPAPISTE.ModalDialog.init();
-    }
-
-    $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
-
-    var model = {
-      languages: loc.getSupportedLanguages(),
-      currentLanguage: loc.getCurrentLanguage(),
-      changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-      startPage: self.startPage
-    };
-    $("nav").applyBindings(model);
-  };
-
-  /**
   * Window unload event handler
   */
   self.unload = function () {
@@ -139,5 +113,31 @@ if (typeof LUPAPISTE === "undefined") {
   hub.subscribe("logout", function () {
     window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
   });
+
+  /**
+   * Complete the App initialization after DOM is loaded.
+   */
+   self.domReady = function () {
+     $(window)
+       .hashchange(self.hashChanged)
+       .hashchange()
+       .unload(self.unload);
+
+     self.connectionCheck();
+
+     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
+       LUPAPISTE.ModalDialog.init();
+     }
+
+     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
+
+     var model = {
+       languages: loc.getSupportedLanguages(),
+       currentLanguage: loc.getCurrentLanguage(),
+       changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
+       startPage: self.startPage
+     };
+     $("nav").applyBindings(model);
+   };
 
 };
