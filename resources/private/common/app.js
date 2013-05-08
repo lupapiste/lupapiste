@@ -46,8 +46,6 @@ if (typeof LUPAPISTE === "undefined") {
     $("nav").applyBindings(model);
   };
 
-  hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
-
   /**
   * Window unload event handler
   */
@@ -135,6 +133,8 @@ if (typeof LUPAPISTE === "undefined") {
   hub.subscribe("connection-offline", function () {
     $(".connection-error").show();
   });
+
+  hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
 
   hub.subscribe("logout", function () {
     window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
