@@ -2,6 +2,7 @@
   (:use [clojure.tools.logging]
         [sade.strings]
         [lupapalvelu.document.schemas :only [schemas]]
+        [lupapalvelu.clojure15]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
@@ -84,18 +85,6 @@
         (comp not nil?)
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) v)))))
-
-;; in loan from Clojure 1.5
-(defmacro some->
-  "When expr is not nil, threads it into the first form (via ->),
-  and when that result is not nil, through the next etc"
-  {:added "1.5"}
-  [expr & forms]
-  (let [g (gensym)
-        pstep (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))]
-    `(let [~g ~expr
-           ~@(interleave (repeat g) (map pstep forms))]
-       ~g)))
 
 (defn validate-rules
   [{{{schema-name :name} :info} :schema data :data}]
