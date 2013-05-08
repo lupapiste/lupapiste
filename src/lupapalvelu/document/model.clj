@@ -72,15 +72,18 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
+(defn validation-result [data path element result]
+  {:data    data
+   :path    (vec (map keyword path))
+   :element element
+   :result  result})
+
 (defn- validate-fields [schema-body k v path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? v :value)
       (let [element (find-by-name schema-body current-path)
             result  (validate (keywordize-keys element) (:value v))]
-        (and result {:data v
-                     :path (vec (map keyword current-path))
-                     :element element
-                     :result result}))
+        (and result (validation-result v current-path element result)))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
