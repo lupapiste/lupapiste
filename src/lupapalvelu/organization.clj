@@ -88,7 +88,7 @@
 
 ; return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R
 ; TODO: operation does not have permitModule
-(defquery "resolve-organization"
+(defquery "find-organization"
   {:parameters [:municipality] :verified true}
   [{{municipality :municipality operation :operation} :data}]
   (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1})]

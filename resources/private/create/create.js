@@ -248,7 +248,7 @@
       template: $("#create-templates"),
       onSelect: function(v) {
         model.operation(v ? v.op : null);
-        ajax.query("resolve-organization", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+        ajax.query("find-organization", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
           model.organization(d);
         }).call();
       },
