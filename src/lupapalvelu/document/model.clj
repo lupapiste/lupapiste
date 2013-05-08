@@ -5,6 +5,7 @@
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.subtype :as subtype]))
 
 ;;
@@ -141,11 +142,11 @@
 
 (defn new-document
   "Creates an empty document out of schema"
-  [id schema created]
-  {:id id
+  [schema created]
+  {:id      (mongo/create-id)
    :created created
-   :schema schema
-   :data {}})
+   :schema  schema
+   :data    {}})
 
 ;;
 ;; golden oldies
