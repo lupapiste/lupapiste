@@ -565,7 +565,7 @@
               document     (domain/get-document-by-id (:documents application) documentId)
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})
+              new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
               with-value-metadata (add-value-metadata new-body {:source :krysp})]
           (mongo/update
             :applications
