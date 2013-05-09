@@ -154,26 +154,3 @@
    :created created
    :schema  schema
    :data    {}})
-
-;;
-;; golden oldies
-;;
-
-#_(defn- validate-update [schema-body results [k v]]
-  (let [elem   (keywordize-keys (find-by-name schema-body (s/split k #"\.")))
-        result (validate elem v)]
-    (if (nil? result)
-      results
-      (conj results (cons k result)))))
-
-#_(defn validate-updates
-  "Validate updates against schema.
-
-  Updates is expected to be a seq of updates, where each update is a key/value seq. Key is name of
-  the element to update, and the value is a new value for element. Key should be dot separated path.
-
-  Returns a seq of validation failures. Each failure is a seq of three elements. First element is the
-  name of the element. Second element is either :warn or :err and finally, the last element is the
-  warning or error message."
-  [schema updates]
-  (reduce (partial validate-update (:body schema)) [] updates))
