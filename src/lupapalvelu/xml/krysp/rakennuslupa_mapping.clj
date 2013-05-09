@@ -139,6 +139,13 @@
                                                                                                         sijantitieto
                                                                                                         {:tag :kuvaus :child [{:tag :kuvaus}]}]}]}
                                                ]}]}
+                             {:tag :lausuntotieto :child [{:tag :Lausunto :ns "yht" :child [{:tag :pyydetty :child [{:tag :viranomainen}
+                                                                                                          {:tag :pyyntoPvm}]}
+                                                                                  {:tag :lausunto :child [{:tag :viranomainen}
+                                                                                                          {:tag :lausuntoPvm}
+                                                                                                          {:tag :lausunto :child [{:tag :lausunto}]}
+                                                                                                          {:tag :puoltotieto :child [{:tag :puolto}]}]}]}] }
+
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
                                        :child [{:tag :salassapitotietoKytkin}
