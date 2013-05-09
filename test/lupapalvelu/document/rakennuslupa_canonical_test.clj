@@ -497,7 +497,19 @@
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot)
         muuTunnustieto (:muuTunnustieto LupaTunnus)
         MuuTunnus (:MuuTunnus muuTunnustieto)
-        ]
+
+        lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))
+        Lausunto (:Lausunto lausuntotieto)
+        pyydetty (:pyydetty Lausunto)
+        viranomainen (:viranomainen pyydetty)
+        pyyntoPvm (:pyyntopvm viranomainen)
+        lausunto (:lausunto Lausunto)
+        lausuntoViranomainen (:viranomainen lausunto)
+        lausuntoPvm (:lausuntoPvm lausunto)
+        lausuntoType (:lausunto lausunto)
+        lausuntoTeksti (:lausunto lausunto)
+        puoltotieto (:puoltotieto lausunto)
+        puolto (:puolto puoltotieto)]
     ;(clojure.pprint/pprint osapuolet)
     (fact "canonical" canonical => truthy)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
