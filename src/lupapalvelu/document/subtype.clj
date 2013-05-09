@@ -21,7 +21,7 @@
   ([x] (parse-number x nil))
   ([x default]
     (let [s (.replaceAll (str x) "0*(\\d+)" "$1")]
-      (if (re-find #"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$" (.trim s))
+      (if (re-find #"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$" s)
         (read-string s)
         default))))
 
