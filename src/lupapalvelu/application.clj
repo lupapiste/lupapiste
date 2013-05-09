@@ -419,21 +419,22 @@
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
-(defn- autofill-rakennuspaikka [application]
-  (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
+(defn- autofill-rakennuspaikka [application created]
+  (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
         kiinteistotunnus (:propertyId application)
-        ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
-        updates  [["kiinteisto.tilanNimi"        (:nimi ktj-tiedot)]
-                  ["kiinteisto.maapintaala"      (:maapintaala ktj-tiedot)]
-                  ["kiinteisto.vesipintaala"     (:vesipintaala ktj-tiedot)]
-                  ["kiinteisto.rekisterointipvm" (try
-                                                   (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                   (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
-    (commands/persist-model-updates
-      (:id application)
-      rakennuspaikka
-      (commands/->model-updates updates)
-      (now))))
+        ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
+    (when ktj-tiedot
+      (let [updates [[[:kiinteisto :tilanNimi]        (:nimi ktj-tiedot)]
+                     [[:kiinteisto :maapintaala]      (:maapintaala ktj-tiedot)]
+                     [[:kiinteisto :vesipintaala]     (:vesipintaala ktj-tiedot)]
+                     [[:kiinteisto :rekisterointipvm] (try
+                                                        (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                        (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+        (commands/persist-model-updates
+          (:id application)
+          rakennuspaikka
+          updates
+          created)))))
 
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
@@ -479,9 +480,9 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
-      (autofill-rakennuspaikka app-with-ver) ;; we do not capture failures here!
+      (autofill-rakennuspaikka app-with-ver created)
       (ok :id id))
-      (fail :error.unauthorized))))
+    (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
