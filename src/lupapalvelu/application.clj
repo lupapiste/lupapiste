@@ -253,6 +253,7 @@
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
+         ;; TODO: update via model
           (do
             (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
             (mongo/update
@@ -574,6 +575,7 @@
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
               with-value-metadata (add-value-metadata new-body {:source :krysp})]
+          ;; TODO: update via model
           (mongo/update
             :applications
             {:_id (:id application)
