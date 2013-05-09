@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation   Authority admin edits municipality specific operation attachments
+Documentation   Authority admin edits organization specific operation attachments
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -20,8 +20,8 @@ New applications have Asemapiirros, Pohjapiiros and no Rasitustodistus
 Admin removes Pohjapiirros template and adds Rasitustodistus template
   Sipoo logs in
   # Open dialog
-  Wait until  Element should be visible  xpath=//section[@id='admin']//table[@data-test-id='municipality-operations-attachments']
-  Click element  xpath=//section[@id='admin']//table[@data-test-id='municipality-operations-attachments']//tr[@data-op-id='asuinrakennus']//a[@data-test-id='add-operations-attachments']
+  Wait until  Element should be visible  xpath=//section[@id='admin']//table[@data-test-id='organization-operations-attachments']
+  Click element  xpath=//section[@id='admin']//table[@data-test-id='organization-operations-attachments']//tr[@data-op-id='asuinrakennus']//a[@data-test-id='add-operations-attachments']
   Wait until  Element should be visible  xpath=//div[@id='dialog-edit-attachments']
   # Add Rasitusatodistus
   Click element  xpath=//div[@id='dialog-edit-attachments']//select[@class='selectm-source']//option[contains(text(),'Rasitustodistus')]

@@ -2,12 +2,11 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core]
-        [clojure.string :only [blank?]]
+        [clojure.string :only [blank? join trim]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [clojure.string :as s]
-            [clj-time.format :as timeformat]
+  (:require [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -20,7 +19,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
-            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.organization :as organization]
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
@@ -55,6 +54,14 @@
         {:_id id}
         changes))))
 
+(defn- property-id? [^String s]
+  (re-matches #"^[0-9]{14}$" s))
+
+(defn property-id-parameters [params command]
+  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
+    (info "invalid property id parameters:" (join ", " invalid))
+    (fail :error.invalid-property-id :parameters (vec invalid))))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -72,26 +79,26 @@
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
   (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
 
-(defn find-authorities-in-applications-municipality [app]
-  (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
+(defn find-authorities-in-applications-organization [app]
+  (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application"
   {:authenticated true
    :parameters [:id]}
   [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
-    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
+    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
-;; application id and the authorities in that municipality.
-(defquery "authorities-in-applications-municipality"
+;; application id and the authorities in that organization.
+(defquery "authorities-in-applications-organization"
   {:parameters [:id]
    :authenticated true}
   [command]
   (let [id (-> command :data :id)
-        app (mongo/select-one :applications {:_id id} {:municipality 1})
-        authorities (find-authorities-in-applications-municipality app)]
+        app (mongo/select-one :applications {:_id id} {:organization 1})
+        authorities (find-authorities-in-applications-organization app)]
     (ok :authorityInfo authorities)))
 
 (defn filter-repeating-party-docs [names]
@@ -209,7 +216,7 @@
       (condp = (keyword state)
 
         ;; LUPA-XYZ (was: open-application)
-        :draft  (when (not (s/blank? text))
+        :draft  (when (not (blank? text))
                   (update-application command
                     {$set {:modified created
                            :state    :open
@@ -243,7 +250,7 @@
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
             henkilo      (domain/user2henkilo subject)
-            full-path    (str "documents.$.data" (when-not (s/blank? path) (str "." path)))]
+            full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
           (do
@@ -310,10 +317,10 @@
       (let [new-state :submitted
             application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
-            municipality (mongo/by-id :municipalities (:municipality application))]
+            organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application municipality)
+        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application organization)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
@@ -356,9 +363,9 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created op municipality-id & {:keys [target]}]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
-    (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
+(defn- make-attachments [created op organization-id & {:keys [target]}]
+  (let [organization (mongo/select-one :organizations {:_id organization-id} {:operations-attachments 1})]
+    (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
       (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data]
@@ -389,7 +396,7 @@
 
 (defn- ->double [v]
   (let [v (str v)]
-    (if (s/blank? v) 0.0 (Double/parseDouble v))))
+    (if (blank? v) 0.0 (Double/parseDouble v))))
 
 (defn- ->location [x y]
   {:x (->double x) :y (->double y)})
@@ -431,13 +438,19 @@
               (commands/->update "documents.$.data" updates)
               :modified (:created (now)))})))
 
+(defn user-is-authority-in-organization? [user-id organization-id]
+  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
+   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
+                      (partial property-id-parameters [:propertyId])]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
+  (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
+    (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
     (let [user-summary  (security/summary user)
           id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
@@ -445,6 +458,7 @@
           info-request? (if infoRequest true false)
           state         (if info-request? :info (if (security/authority? user) :open :draft))
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+            organization  application-organization-id
           application   {:id            id
                          :created       created
                          :opened        (when (#{:open :info} state) created)
@@ -454,12 +468,13 @@
                          :state         state
                          :municipality  municipality
                          :location      (->location x y)
+                         :organization  organization
                          :address       address
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
                          :documents     (if info-request? [] (make-documents user created nil op))
-                         :attachments   (if info-request? [] (make-attachments created op municipality))
+                         :attachments   (if info-request? [] (make-attachments created op organization))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (partition 2 attachment/attachment-types))
@@ -469,7 +484,7 @@
       (mongo/insert :applications app-with-ver)
       (autofill-rakennuspaikka app-with-ver)
       (ok :id id))
-    (fail :error.unauthorized)))
+      (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
@@ -486,20 +501,23 @@
             new-docs   (make-documents nil created documents op)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
-                                                        :attachments (make-attachments created op (:municipality application))}
+                                                        :attachments (make-attachments created op (:organization application))}
                                               $set {:modified created}})))))
 
 (defcommand "change-location"
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
-   :input-validators [(partial non-blank-parameters [:address])]}
-  [{{:keys [id x y address propertyId]} :data created :created}]
-  (mongo/update-by-id :applications id {$set {;:location      (->location x y)
-                                              :address       (s/trim address)
-                                              ;:propertyId    propertyId
-                                              :title         (s/trim address)
-                                              :modified      created}}))
+   :input-validators [(partial non-blank-parameters [:address])
+                      (partial property-id-parameters [:propertyId])]}
+  [{{:keys [id x y address propertyId]} :data created :created application :application}]
+  (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
+    (mongo/update-by-id :applications id {$set {:location      (->location x y)
+                                                :address       (trim address)
+                                                :propertyId    propertyId
+                                                :title         (trim address)
+                                                :modified      created}})
+    (fail :error.property-in-other-muinicipality)))
 
 (defcommand "convert-to-application"
   {:parameters [:id]
@@ -516,7 +534,7 @@
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})))))
+                                              $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
 
 ;;
 ;; Verdicts
@@ -550,8 +568,8 @@
    :roles      [:applicant :authority]}
   [{{:keys [id documentId buildingId]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality propertyId] :as application}]
-      (if-let [legacy (municipality/get-legacy municipality)]
+    (fn [{:keys [organization propertyId] :as application}]
+      (if-let [legacy (organization/get-legacy organization)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-id (:documents application) documentId)
               old-body     (:data document)
@@ -572,8 +590,8 @@
    :roles      [:applicant :authority]}
   [{{:keys [id]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality propertyId] :as application}]
-      (if-let [legacy   (municipality/get-legacy municipality)]
+    (fn [{:keys [organization propertyId] :as application}]
+      (if-let [legacy   (organization/get-legacy organization)]
         (let [kryspxml  (krysp/building-xml legacy propertyId)
               buildings (krysp/->buildings kryspxml)]
           (ok :data buildings))

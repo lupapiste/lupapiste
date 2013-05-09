@@ -42,12 +42,14 @@
                     "LUPAPISTE.fi"])
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
         width (int (+ (reduce max text-widths) 52))
-        height (int 110)
-        i (BufferedImage. (+ width 70) height BufferedImage/TYPE_INT_ARGB)]
+        height (int (+ 110 70))
+        i (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)]
     (doto (.createGraphics i)
       (.setColor (Color. 0 0 0 0))
       (.fillRect 0 0 width height)
-      (.setStroke (BasicStroke. 10.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
+      (.drawImage (qrcode "http://lupapiste.fi" 70) (- width 70) (int 5) nil)
+      (.translate 0 70)
+      (.setStroke (BasicStroke. 5.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
       (.setPaint (Color. 92 16 16 60))
       (.fillRoundRect 10 10 (- width 20) 90 30 30)
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC))
@@ -60,7 +62,6 @@
       (draw-text (nth texts 1) 22 50)
       (draw-text (nth texts 2) 22 65)
       (draw-text (nth texts 3) (int (/ (- width (nth text-widths 3)) 2)) 85)
-      (.drawImage (qrcode "http://lupapiste.fi" 70) width (int 20) nil)
       (.dispose))
     i))
 
@@ -70,40 +71,47 @@
 
 (declare stamp-pdf stamp-image)
 
-(defn stamp [stamp content-type in out]
+(defn stamp [stamp content-type in out x-margin y-margin]
   (cond
-    (= content-type "application/pdf")      (do (stamp-pdf stamp in out) nil)
-    (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out) nil)
+    (= content-type "application/pdf")      (do (stamp-pdf stamp in out x-margin y-margin) nil)
+    (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin) nil)
     :else                                   nil))
 
 ;;
 ;; Stamp PDF:
 ;;
 
-(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out]
+; iText uses points as units, 1 mm is 2.835 points 
+(defn- mm->u [mm] (* 2.835 mm))
+
+(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
-    (let [stamp (doto (com.lowagie.text.Image/getInstance stamp-image nil false)
-                  (.setAbsolutePosition 5.0 5.0))
+    (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
+          stamp-width (.getPlainWidth stamp)
+          stamp-height (.getPlainHeight stamp)
           gstate (doto (PdfGState.)
                    (.setFillOpacity 0.25)
                    (.setStrokeOpacity 0.25))]
       (doseq [page (range (.getNumberOfPages reader))]
-        (doto (.getOverContent stamper (inc page))
-          (.saveState)
-          (.setGState gstate)
-          (.addImage stamp)
-          (.restoreState))))))
+        (let [page-size (.getPageSizeWithRotation reader (inc page))
+              page-width (.getWidth page-size)
+              page-height (.getHeight page-size)]
+          (doto (.getOverContent stamper (inc page))
+            (.saveState)
+            (.setGState gstate)
+            (.addImage stamp stamp-width 0 0 stamp-height (- page-width stamp-width (mm->u x-margin)) (mm->u y-margin))
+            (.restoreState))))))) 
 
 ;;
 ;; Stamp raster image:
 ;;
 
-(declare read-image write-image add-stamp)
+(declare read-image write-image add-stamp mm->p)
 
-(defn- stamp-image [stamp-image content-type in out]
+(defn- stamp-image [stamp-image content-type in out x-margin y-margin]
   (doto (read-image in)
-    (add-stamp stamp-image)
+    (add-stamp stamp-image x-margin y-margin)
     (write-image (second (s/split content-type #"/")) out)))
 
 (defn- read-image ^BufferedImage [^InputStream in]
@@ -113,16 +121,51 @@
   (when-not (ImageIO/write image image-type out)
     (throw+ "write: can't write stamped image")))
 
-(defn- add-stamp [^BufferedImage image ^Image stamp]
-  (doto (.createGraphics image)
-    (.drawImage stamp 5 (- (.getHeight image nil) (.getHeight stamp nil) 5) nil)
-    (.dispose)))
+(defn- add-stamp [^BufferedImage image ^Image stamp x-margin y-margin]
+  (let [x (- (.getWidth image nil) (.getWidth stamp nil) (mm->p x-margin))
+        y (- (.getHeight image nil) (.getHeight stamp nil) (mm->p y-margin))]
+    (doto (.createGraphics image)
+      (.drawImage stamp x y nil)
+      (.dispose))))
+
+; Images are (usually?) printed in 72 DPI. That means 1 mm is 2.835 points. 
+(defn- mm->p [mm] (int (* 2.835 mm)))
 
 ;;
 ;; Swing frame for testing stamp:
 ;;
 
 (comment
+
+  (defn- stamp-test-image []
+    (with-open [in (io/input-stream "/Volumes/HD2/Users/jarppe/Downloads/in.png")
+                out (io/output-stream "/Volumes/HD2/Users/jarppe/Downloads/out.png")]
+      (try
+        (stamp-image (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") "image/png" in out 10 85)
+        (catch Exception e
+          (println "Oh shit!")
+          (.printStackTrace e)))))
+  
+  (doseq [v [#'make-stamp #'stamp-image #'add-stamp #'stamp-test-image]]
+    (add-watch v :test-stamp (fn [_ _ _ _] (stamp-test-image))))
+  
+  (doseq [v [#'make-stamp #'stamp-image #'add-stamp #'stamp-test-image]]
+    (remove-watch v :test-stamp))
+  
+  (defn- stamp-test-pdf []
+    (with-open [in (io/input-stream "/Volumes/HD2/Users/jarppe/Downloads/in.pdf")
+                out (io/output-stream "/Volumes/HD2/Users/jarppe/Downloads/out.pdf")]
+      (try
+        (stamp-pdf (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") in out 10 85)
+        (catch Exception e
+          (println "Oh shit!")
+          (.printStackTrace e)))))
+  
+  (doseq [v [#'make-stamp #'stamp-pdf #'stamp-test-pdf]]
+    (add-watch v :test-stamp (fn [_ _ _ _] (stamp-test-pdf))))
+  
+  (doseq [v [#'make-stamp #'stamp-pdf #'stamp-test-pdf]]
+    (remove-watch v :test-stamp))
   
   (defn- lorem-line [c]
     (let [sb (StringBuilder.)]

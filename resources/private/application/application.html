@@ -3,7 +3,7 @@
 <body>
   <section class="page" id="application">
     <div class="application_summary">
-      <div class=" container">
+      <div class="container">
         <div class="application-map-container">
           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
@@ -13,7 +13,7 @@
           </div>
         </div>
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: permitType"></span><span data-bind="text: address" data-test-id="application-title"></span>
+          <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a class="icon"
              data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
@@ -379,7 +379,7 @@
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-            <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
+            <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
             <div data-bind="visible: error" >
               <div data-bind="text: error" class="context-error"></div>
             </div>
@@ -445,12 +445,28 @@
           <div class="dialog-content">
             <div data-bind="visible: status() < statusRunning">
               <div>
-                <span data-bind="ltext: 'stamp.sure', visible: status() === statusInit"></span>
                 <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
                 <span data-bind="ltext: 'stamp.status.no-files', visible: status() === statusNoFiles"></span>
               </div>
-              <button data-bind="click: start, ltext: 'stamp.start', enabled: status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
-              <button data-bind="ltext: 'stamp.cancel', enabled: status() === statusInit" class="btn btn-dialog close"></button>
+              <table data-bind="visible: status() === statusInit" class="stamp-margin">
+                <tbody>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.margin'" colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.xMargin'" class="label"></td>
+                    <td><input data-bind="value: xMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !xMarginOk()}" id="stamp.xMargin" type="text" class="form-input text"></td>
+                    <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.yMargin'" class="label"></td>
+                    <td><input data-bind="value: yMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !yMarginOk()}" id="stamp.yMargin" type="text" class="form-input text"></td>
+                    <td>mm</td>
+                  </tr>
+                </tbody>
+              </table>
+              <button data-bind="click: start, ltext: 'stamp.start', enable: xMarginOk() && yMarginOk() && status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
+              <button data-bind="ltext: 'stamp.cancel', enable: status() === statusInit" class="btn btn-dialog close"></button>
             </div>
             <div data-bind="visible: status() >= statusRunning">
               <div>
