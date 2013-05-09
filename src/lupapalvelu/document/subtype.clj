@@ -16,13 +16,20 @@
     (re-matches #"^\+?[\d\s-]+" v) nil
     :else [:warn "illegal-tel"]))
 
+(defn- parse-number
+  "Reads a number from input. Returns nil if not a number."
+  ([x] (parse-number x nil))
+  ([x default]
+    (let [s (.replaceAll (str x) "0*(\\d+)" "$1")]
+      (if (re-find #"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$" (.trim s))
+        (read-string s)
+        default))))
+
 (defmethod subtype-validation :number [{:keys [min max]} v]
   (when-not (blank? v)
-    (let [safe-int (fn [x default]
-                     (if (and x (re-matches (re-pattern "-?\\d+") (str x))) (read-string (str x)) default))
-          min-int  (safe-int min (java.lang.Integer/MIN_VALUE))
-          max-int  (safe-int max (java.lang.Integer/MAX_VALUE))
-          number   (safe-int v nil)]
+    (let [min-int  (parse-number min (java.lang.Integer/MIN_VALUE))
+          max-int  (parse-number max (java.lang.Integer/MAX_VALUE))
+          number   (parse-number v)]
       (when-not (and number (<= min-int number max-int))
         [:warn "illegal-number"]))))
 

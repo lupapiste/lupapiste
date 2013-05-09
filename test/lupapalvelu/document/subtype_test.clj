@@ -22,8 +22,11 @@
 
 (facts "Facts about number validation"
   (fact (subtype-validation {:subtype :number} "123") => nil?)
+  (fact (subtype-validation {:subtype :number} "-123") => nil?)
+  (fact (subtype-validation {:subtype :number} "001") => nil?)
+  (fact (subtype-validation {:subtype :number} "01.02") => nil?)
+  (fact (subtype-validation {:subtype :number} " 123 ") => nil?)
   (fact (subtype-validation {:subtype :number} "abc") => [:warn "illegal-number"])
-  (fact (subtype-validation {:subtype :number} " 123 ") => [:warn "illegal-number"])
   (fact "with min and max"
     (fact (subtype-validation {:subtype :number :min -1 :max 12} "-2") => [:warn "illegal-number"])
     (fact (subtype-validation {:subtype :number :min -1 :max 12} "-1") => nil?)
