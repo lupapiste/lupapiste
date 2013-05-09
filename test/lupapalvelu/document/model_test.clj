@@ -99,19 +99,31 @@
     (-> document
       (apply-update [:henkilotiedot :sukunimiz] "Palo")) => (invalid-with? [:err "illegal-key"])))
 
-#_(facts "Repeating section"
-  (fact "Single value contains no nested sections"
-    (validate-updates schema-with-repetition [["single.1.single2"]])           => [["single.1.single2" :err "illegal-key"]])
-  (fact "Repeating section happy case"
-    (validate-updates schema-with-repetition [["repeats.1.single2" "foo"]])    => [])
-  (fact "Invalid key under nested section"
-    (validate-updates schema-with-repetition [["repeats.1.single3" "foo"]])    => [["repeats.1.single3" :err "illegal-key"]])
-  (fact "Unindexed repeating section"
-    (validate-updates schema-with-repetition [["repeats.single2" "foo"]])      => [["repeats.single2" :err "illegal-key"]])
-  (fact "Repeating string, 0"
-    (validate-updates schema-with-repetition [["repeats.1.repeats2.0" "1"]])   => [])
-  (fact "Repeating string, 1"
-    (validate-updates schema-with-repetition [["repeats.1.repeats2.1" "foo"]]) => [["repeats.1.repeats2.1" :warn "illegal-number"]]))
+(facts "Repeating section"
+  (let [document (new-document schema-with-repetition ..now..)]
+    (fact "Single value contains no nested sections"
+      (-> document
+        (apply-update [:single :1 :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
+
+    (fact "Repeating section happy case"
+      (-> document
+        (apply-update [:repeats :1 :single2] "foo")) => valid?)
+
+    (fact "Invalid key under nested section"
+      (-> document
+        (apply-update [:repeats :1 :single3] "foo")) => (invalid-with? [:err "illegal-key"]))
+
+    (fact "Unindexed repeating section"
+      (-> document
+        (apply-update [:repeats :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
+
+    (fact "Repeating string, 0"
+      (-> document
+        (apply-update [:repeats :1 :repeats2 :0] "1")) => valid?)
+
+    (fact "Repeating string, 1"
+      (-> document
+        (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"]))))
 
 ;;
 ;; Updates
