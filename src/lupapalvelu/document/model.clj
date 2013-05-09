@@ -104,7 +104,7 @@
      {:path    [:mitat :kerrosluku]
       :result  [:warn "vrk:BR106"]}]))
 
-(defn validate-document
+(defn validate
   "Validates document against it's local schema and document level rules
    retuning list of validation errors."
   [{{schema-body :body} :schema data :data :as document}]
@@ -116,14 +116,14 @@
 
 (defn valid-document?
   "Checks weather document is valid."
-  [document] (empty? (validate-document document)))
+  [document] (empty? (validate document)))
 
 (defn validate-against-current-schema
   "Validates document against the latest schema and returns list of errors."
   [{{{schema-name :name} :info} :schema document-data :data :as document}]
   (let [latest-schema (get schemas schema-name)
         pimped-doc    (assoc document :schema latest-schema)]
-    (validate-document pimped-doc)))
+    (validate pimped-doc)))
 
 (defn has-errors?
   [results]

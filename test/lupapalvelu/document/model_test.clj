@@ -48,20 +48,20 @@
   (validate-field {:type :date} "11.12.2013") => nil)
 
 ;;
-;; validate-document
+;; validate
 ;;
 
 (defn valid? [document]
-  (or (fact (validate-document document) => '()) true))
+  (or (fact (validate document) => '()) true))
 
 (defn invalid? [document]
-  (or (fact (validate-document document) => (has some not-empty)) true))
+  (or (fact (validate document) => (has some not-empty)) true))
 
 (defn invalid-with? [result]
   (fn [document]
-    (or (fact (validate-document document) => (has some (contains {:result result}))) true)))
+    (or (fact (validate document) => (has some (contains {:result result}))) true)))
 
-(facts "validate-document"
+(facts "validate"
   {:schema {:info {:name "schema"}
             :body [{:name "a" :type :group
                     :body [{:name "aa" :type :string}
