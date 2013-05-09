@@ -261,7 +261,17 @@
    :propertyId "21111111111111"
    :modified 1354532324691,
    :address "Katutie 54",
-   :id "50bc85e4ea3e790c9ff7cdb0"})
+   :id "50bc85e4ea3e790c9ff7cdb0"
+   :statements [{:given 1368080324142
+                 :id "518b3ee60364ff9a63c6d6a1"
+                 :person {:text "Paloviranomainen"
+                          :name "Sonja Sibbo"
+                          :email "sonja.sibbo@sipoo.fi"
+                          :id "516560d6c2e6f603beb85147"}
+                 :requested 1368080102631
+                 :status "condition"
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}]
+   })
 
 (def get-osapuoli-data #'lupapalvelu.document.rakennuslupa_canonical/get-osapuoli-data)
 
