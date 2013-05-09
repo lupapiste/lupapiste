@@ -18,10 +18,11 @@
 
 (defn- parse-number
   "Reads a number from input. Returns nil if not a number."
+  #_#"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$"
   ([x] (parse-number x nil))
   ([x default]
     (let [s (.replaceAll (str x) "0*(\\d+)" "$1")]
-      (if (re-find #"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$" s)
+      (if (re-find #"^-?\d+$" s)
         (read-string s)
         default))))
 
