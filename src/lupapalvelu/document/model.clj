@@ -16,44 +16,44 @@
 ;; if you changes this value, change it in docgen.js, too
 (def default-max-len 255)
 
-(defmulti validate (fn [elem _] (keyword (:type elem))))
+(defmulti validate-field (fn [elem _] (keyword (:type elem))))
 
-(defmethod validate :group [_ v]
+(defmethod validate-field :group [_ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
-(defmethod validate :string [{:keys [max-len min-len] :as elem} v]
+(defmethod validate-field :string [{:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
 
-(defmethod validate :text [elem v]
+(defmethod validate-field :text [elem v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
 
-(defmethod validate :checkbox [_ v]
+(defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
-(defmethod validate :date [elem v]
+(defmethod validate-field :date [elem v]
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "invalid-date-format"])))
 
-(defmethod validate :select [elem v] nil)
-(defmethod validate :radioGroup [elem v] nil)
-(defmethod validate :buildingSelector [elem v] nil)
-(defmethod validate :personSelector [elem v] nil)
+(defmethod validate-field :select [elem v] nil)
+(defmethod validate-field :radioGroup [elem v] nil)
+(defmethod validate-field :buildingSelector [elem v] nil)
+(defmethod validate-field :personSelector [elem v] nil)
 
-(defmethod validate nil [_ _]
+(defmethod validate-field nil [_ _]
   [:err "illegal-key"])
 
-(defmethod validate :default [elem _]
+(defmethod validate-field :default [elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
   [:err "unknown-type"])
 
@@ -82,7 +82,7 @@
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
       (let [element (find-by-name schema-body current-path)
-            result  (validate (keywordize-keys element) (:value data))]
+            result  (validate-field (keywordize-keys element) (:value data))]
         (and result (validation-result data current-path element result)))
       (filter
         (comp not nil?)

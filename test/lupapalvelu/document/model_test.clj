@@ -43,9 +43,9 @@
 ; field type validation
 
 (facts "dates"
-  (validate {:type :date} "abba") => [:warn "invalid-date-format"]
-  (validate {:type :date} "") => nil
-  (validate {:type :date} "11.12.2013") => nil)
+  (validate-field {:type :date} "abba") => [:warn "invalid-date-format"]
+  (validate-field {:type :date} "") => nil
+  (validate-field {:type :date} "11.12.2013") => nil)
 
 ;;
 ;; validate-document
@@ -57,11 +57,9 @@
 (defn invalid? [document]
   (or (fact (validate-document document) => (has some not-empty)) true))
 
-(defn invalid-with-all? [results]
+(defn invalid-with? [result]
   (fn [document]
-    (doseq [result results]
-      (println result "...")
-      (or (fact (validate-document document) => (has some (contains {:result result}))) true))))
+    (or (fact (validate-document document) => (has some (contains {:result result}))) true)))
 
 (facts "validate-document"
   {:schema {:info {:name "schema"}
