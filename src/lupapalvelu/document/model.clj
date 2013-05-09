@@ -13,8 +13,13 @@
 ;; Validation:
 ;;
 
-;; if you changes this value, change it in docgen.js, too
+;; if you changes these values, change it in docgen.js, too
 (def default-max-len 255)
+(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
+
+;;
+;; Field validation
+;;
 
 (defmulti validate-field (fn [elem _] (keyword (:type elem))))
 
@@ -36,8 +41,6 @@
 
 (defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
-
-(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
 (defmethod validate-field :date [elem v]
   (try
@@ -89,7 +92,7 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
-(defn validate-rules
+(defn- validate-rules
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and
