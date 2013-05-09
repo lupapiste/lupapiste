@@ -82,18 +82,20 @@
 
 (facts "Simple validations"
   (let [document (new-document schema ..now..)]
-    (apply-update document [:a :ab] "foo")   => valid?
-    (apply-update document [:a :ab] "f")     => (invalid-with? [:warn "illegal-value:too-short"])
-    (apply-update document [:a :ab] "foooo") => (invalid-with? [:err "illegal-value:too-long"])))
+    (-> document
+      (apply-update [:a :ab] "foo"))   => valid?
+    (-> document
+      (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
+    (-> document
+      (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])))
 
 (facts "with real schemas - important field for paasuunnittelija"
-  (let [schema   (schemas "paasuunnittelija")
-        document (new-document schema ..now..)]
+  (let [document (new-document (schemas "paasuunnittelija") ..now..)]
     (-> document
       (apply-update [:henkilotiedot :etunimi] "Tauno")
       (apply-update [:henkilotiedot :sukunimi] "Palo")
       (apply-update [:yhteystiedot :email] "tauno@example.com")
-      (apply-update [:yhteystiedot :puhelin] "050"))  => valid?
+      (apply-update [:yhteystiedot :puhelin] "050")) => valid?
     (-> document
       (apply-update [:henkilotiedot :etunimiz] "Tauno")) => (invalid-with? [:err "illegal-key"])
     (-> document
@@ -101,6 +103,7 @@
 
 (facts "Repeating section"
   (let [document (new-document schema-with-repetition ..now..)]
+
     (fact "Single value contains no nested sections"
       (-> document
         (apply-update [:single :1 :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
