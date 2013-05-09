@@ -423,9 +423,9 @@
   (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
         kiinteistotunnus (:propertyId application)
         ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
-        updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
-                  ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
-                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]
+        updates  [["kiinteisto.tilanNimi"        (:nimi ktj-tiedot)]
+                  ["kiinteisto.maapintaala"      (:maapintaala ktj-tiedot)]
+                  ["kiinteisto.vesipintaala"     (:vesipintaala ktj-tiedot)]
                   ["kiinteisto.rekisterointipvm" (try
                                                    (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
                                                    (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
@@ -455,7 +455,7 @@
           info-request? (if infoRequest true false)
           state         (if info-request? :info (if (security/authority? user) :open :draft))
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
-            organization  application-organization-id
+          organization  application-organization-id
           application   {:id            id
                          :created       created
                          :opened        (when (#{:open :info} state) created)
