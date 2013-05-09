@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.subtype
   (:use [clojure.string :only [blank?]]
-        [clojure.tools.logging]))
+        [clojure.tools.logging])
+  (:require [sade.util :refer [safe-int]]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
 
@@ -16,21 +17,11 @@
     (re-matches #"^\+?[\d\s-]+" v) nil
     :else [:warn "illegal-tel"]))
 
-(defn- parse-number
-  "Reads a number from input. Returns nil if not a number."
-  #_#"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$"
-  ([x] (parse-number x nil))
-  ([x default]
-    (let [s (.replaceAll (str x) "0*(\\d+)" "$1")]
-      (if (re-find #"^-?\d+$" s)
-        (read-string s)
-        default))))
-
 (defmethod subtype-validation :number [{:keys [min max]} v]
   (when-not (blank? v)
-    (let [min-int  (parse-number min (java.lang.Integer/MIN_VALUE))
-          max-int  (parse-number max (java.lang.Integer/MAX_VALUE))
-          number   (parse-number v)]
+    (let [min-int  (safe-int min (java.lang.Integer/MIN_VALUE))
+          max-int  (safe-int max (java.lang.Integer/MAX_VALUE))
+          number   (safe-int v)]
       (when-not (and number (<= min-int number max-int))
         [:warn "illegal-number"]))))
 

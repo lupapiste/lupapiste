@@ -253,7 +253,7 @@
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
-         ;; TODO: update via model
+          ;; TODO: update via model
           (do
             (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
             (mongo/update

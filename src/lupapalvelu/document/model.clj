@@ -6,6 +6,7 @@
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
+            [sade.util :refer [safe-int]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -98,7 +99,7 @@
     (and
       (= schema-name "uusiRakennus")
       (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (some-> data :mitat :kerrosluku :value java.lang.Integer/parseInt (> 4)))
+      (some-> data :mitat :kerrosluku :value safe-int (> 4)))
     [{:path    [:rakenne :kantavaRakennusaine]
       :result  [:warn "vrk:BR106"]}
      {:path    [:mitat :kerrosluku]
