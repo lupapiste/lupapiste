@@ -192,6 +192,8 @@ var docgen = (function () {
       var input = document.createElement("textarea");
       var span = makeEntrySpan(subSchema, myPath);
 
+      input.id = pathStrToID(myPath);
+
       input.onfocus = self.showHelp;
       input.onblur = self.hideHelp;
 
@@ -251,6 +253,7 @@ var docgen = (function () {
       select.name = myPath;
       select.className = "form-input combobox";
 
+      select.id = pathStrToID(myPath);
 
       if (subSchema.readonly) {
         select.readOnly = true;
@@ -339,6 +342,9 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
+
+      select.id = pathStrToID(myPath);
+
       //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
@@ -404,6 +410,7 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       //TODO: Tuki readonlylle
+      select.id = pathStrToID(myPath);
       select.name = myPath;
       select.className = "form-input combobox long";
       select.onchange = function (e) {
