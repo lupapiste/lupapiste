@@ -55,7 +55,7 @@
         changes))))
 
 (defn- property-id? [^String s]
-  (re-matches #"^[0-9]{14}$" s))
+  (and s (re-matches #"^[0-9]{14}$" s)))
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
@@ -249,10 +249,11 @@
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (domain/user2henkilo subject)
+            henkilo      (domain/->henkilo subject)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
+          ;; TODO: update via model
           (do
             (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
             (mongo/update
@@ -391,7 +392,7 @@
         new-docs              (cons op-doc required-docs)
         hakija                (make "hakija")]
     (if user
-      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/user2henkilo user)) new-docs)
+      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
@@ -419,24 +420,22 @@
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
-(defn- autofill-rakennuspaikka [application]
-  (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
+(defn- autofill-rakennuspaikka [application created]
+  (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
         kiinteistotunnus (:propertyId application)
-        ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
-        updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
-                  ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
-                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]
-                  ["kiinteisto.rekisterointipvm" (try
-                                                   (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                   (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
-
-    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
-    (mongo/update
-      :applications
-      {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
-      {$set (assoc
-              (commands/->update "documents.$.data" updates)
-              :modified (:created (now)))})))
+        ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
+    (when ktj-tiedot
+      (let [updates [[[:kiinteisto :tilanNimi]        (:nimi ktj-tiedot)]
+                     [[:kiinteisto :maapintaala]      (:maapintaala ktj-tiedot)]
+                     [[:kiinteisto :vesipintaala]     (:vesipintaala ktj-tiedot)]
+                     [[:kiinteisto :rekisterointipvm] (try
+                                                        (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                        (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+        (commands/persist-model-updates
+          (:id application)
+          rakennuspaikka
+          updates
+          created)))))
 
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
@@ -458,7 +457,7 @@
           info-request? (if infoRequest true false)
           state         (if info-request? :info (if (security/authority? user) :open :draft))
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
-            organization  application-organization-id
+          organization  application-organization-id
           application   {:id            id
                          :created       created
                          :opened        (when (#{:open :info} state) created)
@@ -482,9 +481,9 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
-      (autofill-rakennuspaikka app-with-ver)
+      (autofill-rakennuspaikka app-with-ver created)
       (ok :id id))
-      (fail :error.unauthorized))))
+    (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
@@ -574,8 +573,9 @@
               document     (domain/get-document-by-id (:documents application) documentId)
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})
+              new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
               with-value-metadata (add-value-metadata new-body {:source :krysp})]
+          ;; TODO: update via model
           (mongo/update
             :applications
             {:_id (:id application)

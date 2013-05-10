@@ -1,7 +1,8 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
         [clojure.tools.logging])
-  (:require [lupapalvelu.mongo :as mongo]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
 ;; application mongo querys
@@ -75,15 +76,18 @@
 ;; Conversion between Lupapiste and documents
 ;;
 
-(defn user2henkilo [{:keys [id firstName lastName email phone street zip city]}]
-  {:userId                        {:value id}
-   :henkilotiedot {:etunimi       {:value firstName}
-                   :sukunimi      {:value lastName}}
-   :yhteystiedot {:email          {:value email}
-                  :puhelin        {:value phone}}
-   :osoite {:katu                 {:value street}
-            :postinumero          {:value zip}
-            :postitoimipaikannimi {:value city}}})
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]
+  (->
+    {:userId                        {:value id}
+     :henkilotiedot {:etunimi       {:value firstName}
+                     :sukunimi      {:value lastName}}
+     :yhteystiedot {:email          {:value email}
+                    :puhelin        {:value phone}}
+     :osoite {:katu                 {:value street}
+              :postinumero          {:value zip}
+              :postitoimipaikannimi {:value city}}}
+    strip-nils
+    strip-empty-maps))
 
 ;;
 ;; Software version metadata

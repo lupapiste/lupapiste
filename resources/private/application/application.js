@@ -10,7 +10,7 @@
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
 
   function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
-  
+
   var stampModel = new function() {
     var self = this;
 
@@ -27,10 +27,10 @@
 
     self.xMargin = ko.observable("");
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
-    
+
     self.yMargin = ko.observable("");
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
-    
+
     self.status = ko.observable();
     self.filesTable = ko.observable();
 

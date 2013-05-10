@@ -81,7 +81,6 @@
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
    :laajentaminen               {:schema "rakennuksen-laajentaminen"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet}
    :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen"
