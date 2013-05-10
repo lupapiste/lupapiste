@@ -1,7 +1,8 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
         [clojure.tools.logging])
-  (:require [lupapalvelu.mongo :as mongo]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
 ;; application mongo querys
@@ -11,7 +12,7 @@
 (defn basic-application-query-for [user]
   (case (keyword (:role user))
     :applicant {:auth.id (:id user)}
-    :authority {$or [{:municipality (:municipality user)} {:auth.id (:id user)}]}
+    :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
     :admin     {}
     (do
       (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
@@ -81,15 +82,18 @@
 ;; Conversion between Lupapiste and documents
 ;;
 
-(defn user2henkilo [{:keys [id firstName lastName email phone street zip city]}]
-  {:userId                        {:value id}
-   :henkilotiedot {:etunimi       {:value firstName}
-                   :sukunimi      {:value lastName}}
-   :yhteystiedot {:email          {:value email}
-                  :puhelin        {:value phone}}
-   :osoite {:katu                 {:value street}
-            :postinumero          {:value zip}
-            :postitoimipaikannimi {:value city}}})
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]
+  (->
+    {:userId                        {:value id}
+     :henkilotiedot {:etunimi       {:value firstName}
+                     :sukunimi      {:value lastName}}
+     :yhteystiedot {:email          {:value email}
+                    :puhelin        {:value phone}}
+     :osoite {:katu                 {:value street}
+              :postinumero          {:value zip}
+              :postitoimipaikannimi {:value city}}}
+    strip-nils
+    strip-empty-maps))
 
 ;;
 ;; Software version metadata

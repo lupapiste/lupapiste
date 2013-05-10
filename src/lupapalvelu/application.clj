@@ -19,7 +19,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
-            [lupapalvelu.municipality :as municipality]
+            [lupapalvelu.organization :as organization]
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
@@ -55,7 +55,7 @@
         changes))))
 
 (defn- property-id? [^String s]
-  (re-matches #"^[0-9]{14}$" s))
+  (and s (re-matches #"^[0-9]{14}$" s)))
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
@@ -79,26 +79,26 @@
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
   (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
 
-(defn find-authorities-in-applications-municipality [app]
-  (mongo/select :users {:municipality (:municipality app) :role "authority"} {:firstName 1 :lastName 1}))
+(defn find-authorities-in-applications-organization [app]
+  (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application"
   {:authenticated true
    :parameters [:id]}
   [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
-    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-municipality app))
+    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
-;; application id and the authorities in that municipality.
-(defquery "authorities-in-applications-municipality"
+;; application id and the authorities in that organization.
+(defquery "authorities-in-applications-organization"
   {:parameters [:id]
    :authenticated true}
   [command]
   (let [id (-> command :data :id)
-        app (mongo/select-one :applications {:_id id} {:municipality 1})
-        authorities (find-authorities-in-applications-municipality app)]
+        app (mongo/select-one :applications {:_id id} {:organization 1})
+        authorities (find-authorities-in-applications-organization app)]
     (ok :authorityInfo authorities)))
 
 (defn filter-repeating-party-docs [names]
@@ -249,10 +249,11 @@
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (domain/user2henkilo subject)
+            henkilo      (domain/->henkilo subject)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
+          ;; TODO: update via model
           (do
             (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
             (mongo/update
@@ -317,10 +318,10 @@
       (let [new-state :submitted
             application-id (:id application)
             submitted-application (mongo/by-id :submitted-applications (:id application))
-            municipality (mongo/by-id :municipalities (:municipality application))]
+            organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application municipality)
+        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application organization)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
@@ -363,9 +364,9 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created op municipality-id & {:keys [target]}]
-  (let [municipality (mongo/select-one :municipalities {:_id municipality-id} {:operations-attachments 1})]
-    (for [[type-group type-id] (get-in municipality [:operations-attachments (keyword (:name op))])]
+(defn- make-attachments [created op organization-id & {:keys [target]}]
+  (let [organization (mongo/select-one :organizations {:_id organization-id} {:operations-attachments 1})]
+    (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
       (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data]
@@ -391,7 +392,7 @@
         new-docs              (cons op-doc required-docs)
         hakija                (make "hakija")]
     (if user
-      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/user2henkilo user)) new-docs)
+      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
 
 (defn- ->double [v]
@@ -419,24 +420,25 @@
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
-(defn- autofill-rakennuspaikka [application]
-  (let [rakennuspaikka (domain/get-document-by-name application "rakennuspaikka")
+(defn- autofill-rakennuspaikka [application created]
+  (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
         kiinteistotunnus (:propertyId application)
-        ktj-tiedot (ktj/rekisteritiedot-xml kiinteistotunnus)
-        updates  [["kiinteisto.tilanNimi" (:nimi ktj-tiedot)]
-                  ["kiinteisto.maapintaala"  (:maapintaala ktj-tiedot)]
-                  ["kiinteisto.vesipintaala" (:vesipintaala ktj-tiedot)]
-                  ["kiinteisto.rekisterointipvm" (try
-                                                   (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                   (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+        ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
+    (when ktj-tiedot
+      (let [updates [[[:kiinteisto :tilanNimi]        (:nimi ktj-tiedot)]
+                     [[:kiinteisto :maapintaala]      (:maapintaala ktj-tiedot)]
+                     [[:kiinteisto :vesipintaala]     (:vesipintaala ktj-tiedot)]
+                     [[:kiinteisto :rekisterointipvm] (try
+                                                        (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                        (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+        (commands/persist-model-updates
+          (:id application)
+          rakennuspaikka
+          updates
+          created)))))
 
-    ;FIXME: refaktroi kayttaamaan defcommand :update-dockin kanssa yhteista fucntiota
-    (mongo/update
-      :applications
-      {:_id (:id application) :documents {$elemMatch {:id (:id rakennuspaikka)}}}
-      {$set (assoc
-              (commands/->update "documents.$.data" updates)
-              :modified (:created (now)))})))
+(defn user-is-authority-in-organization? [user-id organization-id]
+  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
@@ -446,7 +448,8 @@
                       (partial property-id-parameters [:propertyId])]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (if (or (security/applicant? user) (and (:municipality user) (= municipality (:municipality user))))
+  (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
+    (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
     (let [user-summary  (security/summary user)
           id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
@@ -454,6 +457,7 @@
           info-request? (if infoRequest true false)
           state         (if info-request? :info (if (security/authority? user) :open :draft))
           make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+          organization  application-organization-id
           application   {:id            id
                          :created       created
                          :opened        (when (#{:open :info} state) created)
@@ -463,12 +467,13 @@
                          :state         state
                          :municipality  municipality
                          :location      (->location x y)
+                         :organization  organization
                          :address       address
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
                          :documents     (if info-request? [] (make-documents user created nil op))
-                         :attachments   (if info-request? [] (make-attachments created op municipality))
+                         :attachments   (if info-request? [] (make-attachments created op organization))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (partition 2 attachment/attachment-types))
@@ -476,9 +481,9 @@
                          :permitType    (permit-type-from-operation op)}
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
-      (autofill-rakennuspaikka app-with-ver)
+      (autofill-rakennuspaikka app-with-ver created)
       (ok :id id))
-    (fail :error.unauthorized)))
+    (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
@@ -495,7 +500,7 @@
             new-docs   (make-documents nil created documents op)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
-                                                        :attachments (make-attachments created op (:municipality application))}
+                                                        :attachments (make-attachments created op (:organization application))}
                                               $set {:modified created}})))))
 
 (defcommand "change-location"
@@ -505,7 +510,7 @@
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])]}
   [{{:keys [id x y address propertyId]} :data created :created application :application}]
-  (if (= (:municipality application) (municipality/municipality-by-propertyId propertyId))
+  (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
                                                 :address       (trim address)
                                                 :propertyId    propertyId
@@ -528,7 +533,7 @@
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
                                                     :documents (make-documents (-> command :user security/summary) created nil op)
                                                     :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:municipality inforequest))}})))))
+                                              $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
 
 ;;
 ;; Verdicts
@@ -562,14 +567,15 @@
    :roles      [:applicant :authority]}
   [{{:keys [id documentId buildingId]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality propertyId] :as application}]
-      (if-let [legacy (municipality/get-legacy municipality)]
+    (fn [{:keys [organization propertyId] :as application}]
+      (if-let [legacy (organization/get-legacy organization)]
         (let [doc-name     "rakennuksen-muuttaminen"
               document     (domain/get-document-by-id (:documents application) documentId)
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
-              new-body     (or (krysp/->rakennuksen-muuttaminen kryspxml buildingId) {})
+              new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
               with-value-metadata (add-value-metadata new-body {:source :krysp})]
+          ;; TODO: update via model
           (mongo/update
             :applications
             {:_id (:id application)
@@ -584,8 +590,8 @@
    :roles      [:applicant :authority]}
   [{{:keys [id]} :data :as command}]
   (with-application command
-    (fn [{:keys [municipality propertyId] :as application}]
-      (if-let [legacy   (municipality/get-legacy municipality)]
+    (fn [{:keys [organization propertyId] :as application}]
+      (if-let [legacy   (organization/get-legacy organization)]
         (let [kryspxml  (krysp/building-xml legacy propertyId)
               buildings (krysp/->buildings kryspxml)]
           (ok :data buildings))

@@ -81,10 +81,18 @@
   ([collection query projection]
     (with-id (mc/find-one-as-map collection query projection))))
 
+(defn any?
+  "check if any"
+  ([collection query]
+    (mc/any? collection query)))
+
 (defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
   [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
   (mc/find-and-modify collection conditions document :return-new true :upsert upsert :remove remove :sort sort :fields fields))
+
+(defn drop-collection [collection]
+  (mc/drop collection))
 
 (defn remove-many
   "Returns all documents matching query."
@@ -193,6 +201,7 @@
         (debug "DB is" (.getName (m/get-db)))))))
 
 (defn disconnect! []
+  (debug "Disconnecting")
   (if @connected
     (do
       (m/disconnect!)
@@ -212,7 +221,7 @@
   (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :activation {:email 1})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
-  (mc/ensure-index :municipalities {:municipalityCode 1}))
+  (mc/ensure-index :organizations {:municipalities 1}))
 
 (defn clear! []
   (warn "Clearing MongoDB")

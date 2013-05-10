@@ -1,3 +1,7 @@
+organization.links: Kunnan rakennusvalvonnan suosittelemat linkit
+admin.organizations: Organisaatiot
+admin.selectAdminOrganizations: Pääkäyttäjän organisaatiot
+
 applications.empty.title: Tervetuloa Lupapisteeseen!
 applications.empty.desc: Lupapiste on uudenlainen sähköinen palvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa- ja ilmoitusasiansa vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa. Lupapiste toimii yhteisenä työtilana koko hankkeesi ajan. Alkaen luvantarpeen selvityksistä ja ensimmäisistä luonnoksista aina hankkeesi valmistumiseen asti.
 applications.no-match.title: Hakemuksia ei löydy 
@@ -111,7 +115,6 @@ purku.rakenne.kantavaRakennusaine.help:Betoniksi luetaan myöskin siporex-, kevy
 uusiRakennus.rakenne.kantavaRakennusaine.help:Betoniksi luetaan myöskin siporex-, kevytsora-, kuonajäte- ja  kaasubetoni ym. kevyet betonivalmisteet. 
 rakennuksen-muuttaminen.rakenne.kantavaRakennusaine.help:Betoniksi luetaan myöskin siporex-, kevytsora-, kuonajäte- ja  kaasubetoni ym. kevyet betonivalmisteet. 
 
-
 purku.lammitys.lammitystapa.help:Ilmoitetaan ainoastaan pääasiallinen lämmitystapa. Vesikeskuslämmityksessä rakennusta lämmitetään kiertävän  veden avulla. Ilmakeskuslämmityksessä rakennusta lämmitetään kiertävän  ilman avulla. Suorassa sähkölämmityksessä rakennusta lämmitetään sähkö-verkkoon kytketyn kiinteän lämpöpatterin tms. avulla. Uunilämmitykseksi luetaan myös muurin sisään asennetut sähköllä toimivat lämpövaraajat, erilliset kiinteät öljylämmittimet sekä lämpöä varaavat takat.
 rakennuksen-muuttaminen.lammitys.lammitystapa.help:Ilmoitetaan ainoastaan pääasiallinen lämmitystapa. Vesikeskuslämmityksessä rakennusta lämmitetään kiertävän  veden avulla. Ilmakeskuslämmityksessä rakennusta lämmitetään kiertävän  ilman avulla. Suorassa sähkölämmityksessä rakennusta lämmitetään sähkö-verkkoon kytketyn kiinteän lämpöpatterin tms. avulla. Uunilämmitykseksi luetaan myös muurin sisään asennetut sähköllä toimivat lämpövaraajat, erilliset kiinteät öljylämmittimet sekä lämpöä varaavat takat.
 uusiRakennus.lammitys.lammitystapa.help:Ilmoitetaan ainoastaan pääasiallinen lämmitystapa. Vesikeskuslämmityksessä rakennusta lämmitetään kiertävän  veden avulla. Ilmakeskuslämmityksessä rakennusta lämmitetään kiertävän  ilman avulla. Suorassa sähkölämmityksessä rakennusta lämmitetään sähkö-verkkoon kytketyn kiinteän lämpöpatterin tms. avulla. Uunilämmitykseksi luetaan myös muurin sisään asennetut sähköllä toimivat lämpövaraajat, erilliset kiinteät öljylämmittimet sekä lämpöä varaavat takat.
@@ -127,6 +130,4 @@ purku.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota ra
 rakennuksen-muuttaminen.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
 uusiRakennus.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
 
-
 invite.default-text:Hei! Sinut on kutsuttu osallistumaan lupahakemuksen tekemiseen Lupapisteessä.
-
