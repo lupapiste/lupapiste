@@ -1,3 +1,8 @@
+applications.empty.title: Tervetuloa Lupapisteeseen!
+applications.empty.desc: Lupapiste on uudenlainen sähköinen palvelu, jossa kansalaiset, yritykset ja yhteisöt hoitavat lupa- ja ilmoitusasiansa vuorovaikutuksessa viranomaisten ja muiden osapuolten kanssa. Lupapiste toimii yhteisenä työtilana koko hankkeesi ajan. Alkaen luvantarpeen selvityksistä ja ensimmäisistä luonnoksista aina hankkeesi valmistumiseen asti.
+applications.no-match.title: Hakemuksia ei löydy 
+applications.no-match.desc: Annetuilla hakuehdoilla ei löydy yhtään hakemusta. 
+
 auth-admin.statement-persons: Lausunnon antajat
 auth-admin.statement-person.name: Lausunnon antaja
 auth-admin.statement-person.add: Lisää henkilö
