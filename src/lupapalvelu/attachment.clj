@@ -85,7 +85,7 @@
                               :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
                               :muu]])
 
-(defn municipality-attachments [municipality]
+(defn organization-attachments [organization]
   attachment-types)
 
 (defn make-attachment [now target locked op attachement-type]
@@ -469,7 +469,7 @@
 (defn- stamp-job-status [stamp-job]
   (if (every? #{:done :error} (map :status (vals stamp-job))) :done :runnig))
 
-(defn- stamp-attachment [stamp file-info application-id job-id user created]
+(defn- stamp-attachment [stamp file-info application-id job-id user created x-margin y-margin]
   (let [temp-file (File/createTempFile (str "lupapiste.stamp." job-id ".") ".tmp")
         new-file-id (mongo/create-id)
         {:keys [id contentType fileId filename]} file-info]
@@ -478,7 +478,7 @@
       (job/update job-id assoc-in [id :status] :working)
       (with-open [in ((:content (mongo/download fileId)))
                   out (io/output-stream temp-file)]
-        (stamper/stamp stamp contentType in out))
+        (stamper/stamp stamp contentType in out x-margin y-margin))
       (mongo/upload application-id new-file-id filename contentType temp-file created)
       (let [new-version (set-attachment-version application-id id new-file-id filename contentType (.length temp-file) created user true)]
         ; mea culpa, but what the fuck was I supposed to do
@@ -499,7 +499,7 @@
       (errorf e "failed to stamp attachment: application=%s, file=%s" application-id fileId)
       (job/update job-id assoc-in [id :status] :error)))))
 
-(defn- stamp-attachments [file-infos application-id job-id user created]
+(defn- stamp-attachments [file-infos application-id job-id user created x-margin y-margin]
   (let [stamp (stamper/make-stamp
                 (i18n/loc "stamp.verdict")
                 created
@@ -508,7 +508,7 @@
     (doseq [file-info (vals file-infos)]
       (job/update job-id assoc-in [(:id file-info) :status] :working)
       (try
-        (stamp-attachment stamp file-info application-id job-id user created)
+        (stamp-attachment stamp file-info application-id job-id user created x-margin y-margin)
         (job/update job-id assoc-in [(:id file-info) :status] :done)
         (catch Exception e
           (errorf e "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
@@ -517,29 +517,29 @@
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
 
-(defn- make-stamp-job [file-infos application-id user created]
+(defn- make-stamp-job [file-infos application-id user created x-margin y-margin]
   (let [job (job/start file-infos stamp-job-status)
         job-id (:id job)]
     (future
-      (stamp-attachments file-infos application-id job-id user created))
+      (stamp-attachments file-infos application-id job-id user created x-margin y-margin))
     job))
 
+(defn ->long [v]
+  (if (string? v) (Long/parseLong v) v))
+
 (defcommand "stamp-attachments"
-  {:parameters [:id]
+  {:parameters [:id :xMargin :yMargin]
    :roles      [:authority]
    :states     [:verdictGiven]
    :description "Stamps all attachments of given application"}
-  [command]
+  [{{x-margin :xMargin y-margin :yMargin} :data :as command}]
   (with-application command
     (fn [application]
       (let [file-infos (key-by :id (map ->file-info (filter stampable? (:attachments application))))
             file-count (count file-infos)]
         (ok :count file-count
             :job (when-not (zero? file-count)
-                   (make-stamp-job file-infos (:id application) (:user command) (:created command))))))))
-
-(defn ->long [v]
-  (if (string? v) (Long/parseLong v) v))
+                   (make-stamp-job file-infos (:id application) (:user command) (:created command) (->long x-margin) (->long y-margin))))))))
 
 (defquery "stamp-attachments-job"
   {:parameters [:job-id :version]

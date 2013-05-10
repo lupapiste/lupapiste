@@ -3,13 +3,13 @@
 <body>
   <section class="page" id="inforequest">
     <div class="application_summary">
-      <div class= "container">
+      <div class="container">
         <div class="application-map-container">
           <div id="inforequest-map" class="map map-large" style="width: 320px; height: 280px;"></div>
         </div>
 
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: 'infoRequest'"></span><span data-bind="text: address"></span>
+          <h1><span data-bind="ltext: 'infoRequest'"></span> <span data-bind="text: address" class="address"></span>
           <a class="icon"
              data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>

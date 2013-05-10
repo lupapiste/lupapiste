@@ -49,3 +49,14 @@
     (if checker
       (checker coll)
       false)))
+
+(defn safe-int
+  "Reads a integer from input. Returns default if not a integer."
+  #_#"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$"
+  ([x] (safe-int x nil))
+  ([x default]
+    (let [s (.replaceAll (str x) "0*(\\d+)" "$1")]
+      (if (re-find #"^-?\d+$" s)
+        (read-string s)
+        default))))
+
