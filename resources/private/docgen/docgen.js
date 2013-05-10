@@ -10,7 +10,7 @@ var docgen = (function () {
     return appendButton;
   }
 
-  LUPAPISTE.DocModel = function(schema, model, removeCallback, docId, application) {
+  LUPAPISTE.DocModel = function (schema, model, removeCallback, docId, application) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -606,17 +606,17 @@ var docgen = (function () {
     }
 
     function saveForReal(path, value, callback) {
-      var unPimpedPath = path.replace(new RegExp("^"+self.docId+"."),"");
+      var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
-        .command("update-doc", {doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]]})
-        // Server returns empty array (all ok), or array containing an array with three
-        // elements: [key status message]. Here we use just the status.
-        .success(function(e) {
+        .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
+      // Server returns empty array (all ok), or array containing an array with three
+      // elements: [key status message]. Here we use just the status.
+        .success(function (e) {
           var status = (e.results.length === 0) ? "ok" : e.results[0][1];
           callback(status);
         })
-        .error(function(e) { error(e); callback("err"); })
-        .fail(function(e) { error(e); callback("err"); })
+        .error(function (e) { error(e); callback("err"); })
+        .fail(function (e) { error(e); callback("err"); })
         .call();
     }
 
@@ -654,12 +654,15 @@ var docgen = (function () {
           label.removeChild(loader);
         }
         $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
+        $(target).removeClass("warning").removeClass("error");
         if (status === "warn") {
-          showIndicator("form-input-warn","form.warn",200);
+          $(target).addClass("warning");
+          showIndicator("form-input-warn", "form.warn", 200);
         } else if (status === "err") {
-          showIndicator("form-input-err","form.err",200);
+          $(target).addClass("error");
+          showIndicator("form-input-err", "form.err", 200);
         } else if (status === "ok") {
-          showIndicator("form-input-saved","form.saved",300);
+          showIndicator("form-input-saved", "form.saved", 300);
         } else if (status !== "ok") {
           error("Unknown status:", status, "path:", path);
         }
@@ -734,7 +737,7 @@ var docgen = (function () {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
-      return num * 10000000000 + doc.created/1000;
+      return num * 10000000000 + doc.created / 1000;
     }
 
     var sortedDocs = _.sortBy(documents, getDocumentOrder);
