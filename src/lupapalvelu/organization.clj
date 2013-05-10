@@ -61,16 +61,13 @@
   [{user :user}]
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
-(defn find-all-municipalities-in-organizations []
-  (distinct (flatten (map :municipalities (mongo/select :organizations {} {"municipalities" 1})))))
-
 (defquery "municipalities-for-new-application"
   {:authenticated true
    :verified true}
   [{user :user}]
   (ok :municipalities
-     (map (fn [id] {:id id
-                    :operations (operations/municipality-operations id)}) (find-all-municipalities-in-organizations))))
+     (map (fn [id] {:id id :operations (operations/municipality-operations id)})
+          (->> (mongo/select :organizations {} {"municipalities" 1}) (mapcat :municipalities) (distinct)))))
 
 (defquery "organization"
   {:parameters [:organizationId] :verified true}
