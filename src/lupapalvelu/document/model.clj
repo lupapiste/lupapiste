@@ -93,6 +93,7 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
+;; TODO: separate namespace for these
 (defn- validate-rules
   [{{{schema-name :name} :info} :schema data :data}]
   (when
