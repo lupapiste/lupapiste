@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.model-test
   (:use [lupapalvelu.document.model]
         [lupapalvelu.document.schemas]
+        [lupapalvelu.document.validators]
         [midje.sweet]))
 
 ;; Simple test schema:
@@ -54,16 +55,6 @@
 ;;
 ;; validate
 ;;
-
-(defn valid? [document]
-  (or (fact (validate document) => '()) true))
-
-(defn invalid? [document]
-  (or (fact (validate document) => (has some not-empty)) true))
-
-(defn invalid-with? [result]
-  (fn [document]
-    (or (fact (validate document) => (has some (contains {:result result}))) true)))
 
 (facts "validate"
   {:schema {:info {:name "schema"}
@@ -148,29 +139,3 @@
   (apply-updates {} [[[:b :c] "kikka"]
                      [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
                                                         :d {:value "kukka"}}}})
-
-;;
-;; VRK-rules validation
-;;
-
-(use 'lupapalvelu.document.tools)
-(use 'lupapalvelu.document.schemas)
-
-(def uusi-rakennus
-  (let [schema (schemas "uusiRakennus")
-        data   (create-document-data schema dummy-values)]
-    {:schema schema
-     :data   data}))
-
-(facts "VRK-validations"
-
-  (fact "uusi rakennus is valid"
-    uusi-rakennus => valid?)
-
-  (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
-    (-> uusi-rakennus
-      (apply-update [:rakenne :kantavaRakennusaine] "puu")
-      (apply-update [:mitat :kerrosluku] "3")) => valid?
-    (-> uusi-rakennus
-      (apply-update [:rakenne :kantavaRakennusaine] "puu")
-      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"])))

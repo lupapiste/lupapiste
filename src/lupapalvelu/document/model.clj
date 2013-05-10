@@ -2,12 +2,11 @@
   (:use [clojure.tools.logging]
         [sade.strings]
         [lupapalvelu.document.schemas :only [schemas]]
-        [lupapalvelu.clojure15]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
-            [sade.util :refer [safe-int]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.vrk :as vrk]
             [lupapalvelu.document.subtype :as subtype]))
 
 ;;
@@ -96,19 +95,6 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
-;; TODO: separate namespace for these
-(defn- validate-rules
-  [{{{schema-name :name} :info} :schema data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (some-> data :mitat :kerrosluku :value safe-int (> 4)))
-    [{:path    [:rakenne :kantavaRakennusaine]
-      :result  [:warn "vrk:BR106"]}
-     {:path    [:mitat :kerrosluku]
-      :result  [:warn "vrk:BR106"]}]))
-
 (defn validate
   "Validates document against it's local schema and document level rules
    retuning list of validation errors."
@@ -117,7 +103,7 @@
     (flatten
       (into
         (validate-fields schema-body nil data [])
-        (validate-rules document)))))
+        (vrk/validate document)))))
 
 (defn valid-document?
   "Checks weather document is valid."
