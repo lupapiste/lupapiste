@@ -62,7 +62,7 @@
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
 (defn find-all-municipalities-in-organizations []
-  (distinct (flatten (map #(:municipalities %) (mongo/select :organizations {} {"municipalities" 1})))))
+  (distinct (flatten (map :municipalities (mongo/select :organizations {} {"municipalities" 1})))))
 
 (defquery "municipalities-for-new-application"
   {:authenticated true
