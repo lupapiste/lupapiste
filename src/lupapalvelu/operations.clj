@@ -1,6 +1,7 @@
 (ns lupapalvelu.operations
   (:use [clojure.tools.logging])
-  (:require [lupapalvelu.document.schemas :as schemas]))
+  (:require [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]))
 
 (def default-description "operations.tree.default-description")
 
@@ -34,8 +35,8 @@
                                                                   ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]
-   ["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa"]
-                                                  ["Suunnittelutarveratkaisu"]]]])
+   ["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
+                                                  ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -161,8 +162,14 @@
    :kortteli-yht-alue-muutos    {:schema "maisematyo"
                                  :required  common-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :muu-tontti-tai-kort-muutos {:schema "maisematyo"
+   :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
                                  :required  common-schemas
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :suunnittelutarveratkaisu    {:schema "suunnittelutarveratkaisun-lisaosa"
+                                 :required  (conj common-schemas "rakennushanke")
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
+                                 :required  (conj common-schemas "rakennushanke")
                                  :attachments [:paapiirustus [:asemapiirros]]}})
 
 
@@ -170,5 +177,5 @@
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not (schemas/schemas schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
 
