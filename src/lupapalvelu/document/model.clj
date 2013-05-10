@@ -49,7 +49,10 @@
     nil
     (catch Exception e [:warn "invalid-date-format"])))
 
-(defmethod validate-field :select [elem v] nil)
+(defmethod validate-field :select [{:keys [body]} v]
+  (when-not (or (s/blank? v) (some #{v} (map :name body)))
+    [:warn "illegal-value:select"]))
+
 (defmethod validate-field :radioGroup [elem v] nil)
 (defmethod validate-field :buildingSelector [elem v] nil)
 (defmethod validate-field :personSelector [elem v] nil)

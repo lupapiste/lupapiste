@@ -16,7 +16,11 @@
                                     {:name "bb" :type :boolean}]}
                             {:name "c" :type :list
                              :body [{:name "ca" :type :string}
-                                    {:name "cb" :type :checkbox}]}]}]})
+                                    {:name "cb" :type :checkbox}]}
+                            {:name "d" :type :select
+                             :body [{:name "A"}
+                                    {:name "B"}
+                                    {:name "C"}]}]}]})
 
 (def schema-with-repetition {:info {:name "repetition-model" :version 1}
                              :body [{:name "single" :type :string}
@@ -86,6 +90,15 @@
       (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
     (-> document
       (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])))
+
+(facts "Select"
+  (let [document (new-document schema ..now..)]
+    (-> document
+      (apply-update [:a :d] "A")) => valid?
+    (-> document
+      (apply-update [:a :d] "")) => valid?
+    (-> document
+      (apply-update [:a :d] "D")) => (invalid-with? [:warn "illegal-value:select"])))
 
 (facts "with real schemas - important field for paasuunnittelija"
   (let [document (new-document (schemas "paasuunnittelija") ..now..)]
