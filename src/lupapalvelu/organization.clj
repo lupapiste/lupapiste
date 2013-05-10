@@ -5,6 +5,7 @@
   (:require [clojure.string :as s]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.security :as security]
             [lupapalvelu.attachment :as attachments]
             [lupapalvelu.operations :as operations]))
 
@@ -13,6 +14,11 @@
 
 (defn find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+
+(defquery "users-in-same-organizations"
+  {:roles [:authority]}
+  [{user :user}]
+  (ok :users (map security/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
 
 (defquery "organization-by-user"
   {:description "Lists all organization users by organization."
