@@ -9,12 +9,13 @@
      {:doc ~doc-string
       :fn  (fn [~@bindings] ~@body)}))
 
+(defvalidator "BR102"
+  "puutalossa ei voi olla kuin nelja kerrosta"
+  [x]
+  x)
+
 (defvalidator "BR106"
   "puutalossa ei voi olla kuin nelja kerrosta"
-   [document]
-   (println document))
-
-(defn validate
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and
@@ -25,3 +26,11 @@
       :result  [:warn "vrk:BR106"]}
      {:path    [:mitat :kerrosluku]
       :result  [:warn "vrk:BR106"]}]))
+
+(defn validate
+  "Runs all validators"
+  [document]
+  (->> validators
+    deref
+    (map :fn)
+    (map #(partial apply document))))
