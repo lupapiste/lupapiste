@@ -1,6 +1,9 @@
 (ns lupapalvelu.document.tools-test
   (:use [lupapalvelu.document.tools]
-        [midje.sweet]))
+        [midje.sweet]
+        [midje.util :only [expose-testables]]))
+
+(expose-testables lupapalvelu.document.tools)
 
 (def schema
   {:info {:name "band"},
@@ -19,12 +22,14 @@
 (def expected-simple-document
   {:band {:name nil
           :genre nil
-          :members {:0 {:members {:name nil :instrument nil}}}}})
+          :members {:0 {:name nil
+                        :instrument nil}}}})
 
-(def expected-k-wrapped-simple-document
-  {:band {:name {:k nil}
-          :genre {:k nil}
-          :members {:0 {:members {:name {:k nil} :instrument {:k nil}}}}}})
+(def expected-wrapped-simple-document
+  {:band {:name {:value nil}
+          :genre {:value nil}
+          :members {:0 {:name {:value nil}
+                        :instrument {:value nil}}}}})
 
 (fact "simple schema"
   (-> schema
@@ -35,13 +40,20 @@
   (-> schema
     (create nil-values)
     flattened
-    (wrapped :k)) => expected-k-wrapped-simple-document)
+    (wrapped :value)) => expected-wrapped-simple-document)
+
+;;
+;; Public api
+;;
 
 (fact "wrapped defaults to :value key"
   (wrapped nil) => {:value nil}
-  (wrapped {:k nil}) => {:k {:value nil}})
+  (wrapped {:value nil}) => {:value {:value nil}})
 
 (fact "un-wrapped"
   (un-wrapped {:k {:value nil}}) => {:k nil}
-  (un-wrapped expected-k-wrapped-simple-document :k) => expected-simple-document
+  (un-wrapped expected-wrapped-simple-document :value) => expected-simple-document
   (un-wrapped (wrapped expected-simple-document)) => expected-simple-document)
+
+(fact "create-dummy-document-data"
+  (create-document-data schema) => expected-wrapped-simple-document)

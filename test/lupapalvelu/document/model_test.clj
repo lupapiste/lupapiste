@@ -10,6 +10,7 @@
              :body [{:name "a" :type :group
                      :body [{:name "aa" :type :string}
                             {:name "ab" :type :string :min-len 2 :max-len 3}
+                            {:name "ac" :type :string :min-len 2 :max-len 3}
                             {:name "b" :type :group
                              :body [{:name "ba" :type :string :min-len 2}
                                     {:name "bb" :type :boolean}]}
@@ -28,46 +29,135 @@
 (def find-by-name #'lupapalvelu.document.model/find-by-name)
 
 (facts "Facts about internals"
-  (fact (find-by-name (:body schema) ["a"]) => (-> schema :body first))
-  (fact (find-by-name (:body schema) ["a" "aa"]) => {:name "aa" :type :string})
+  (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
+  (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
   (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
+
+(facts "has-errors?"
+  (has-errors? [])                  => false
+  (has-errors? [{:result [:warn]}]) => false
+  (has-errors? [{:result [:warn]}
+                {:result [:err]}])  => true)
+
+; field type validation
+
+(facts "dates"
+  (validate-field {:type :date} "abba") => [:warn "invalid-date-format"]
+  (validate-field {:type :date} "") => nil
+  (validate-field {:type :date} "11.12.2013") => nil)
+
+;;
+;; validate
+;;
+
+(defn valid? [document]
+  (or (fact (validate document) => '()) true))
+
+(defn invalid? [document]
+  (or (fact (validate document) => (has some not-empty)) true))
+
+(defn invalid-with? [result]
+  (fn [document]
+    (or (fact (validate document) => (has some (contains {:result result}))) true)))
+
+(facts "validate"
+  {:schema {:info {:name "schema"}
+            :body [{:name "a" :type :group
+                    :body [{:name "aa" :type :string}
+                           {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
+   :data {:a {:aa {:value "kukka"}
+              :ab {:value "123"}}}} => valid?
+
+  {:schema {:info {:name "schema"}
+            :body [{:name "a" :type :group
+                    :body [{:name "aa" :type :string}
+                           {:name "ab" :type :string :min-len 2 :max-len 3}]}]}
+   :data {:c {:aa {:value "kukka"}
+              :ab {:value "123"}}}} => invalid?)
 
 ;; Validation tests:
 
 (facts "Simple validations"
-  (fact (validate-updates schema [["a.ab" "foo"]]) => [])
-  (fact (validate-updates schema [["a.ab" "f"]]) => [["a.ab" :warn "illegal-value:too-short"]])
-  (fact (validate-updates schema [["a.ab" "foooo"]]) => [["a.ab" :err "illegal-value:too-long"]])
-  (fact (validate-updates schema [["a.ab" "f"] ["a.ab" "foooo"]]) => [["a.ab" :warn "illegal-value:too-short"] ["a.ab" :err "illegal-value:too-long"]]))
+  (let [document (new-document schema ..now..)]
+    (-> document
+      (apply-update [:a :ab] "foo"))   => valid?
+    (-> document
+      (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
+    (-> document
+      (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])))
 
 (facts "with real schemas - important field for paasuunnittelija"
-  (let [schema (schemas "paasuunnittelija")]
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"]])   => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimiz" "Tauno"]])  => [["henkilotiedot.etunimiz" :err "illegal-key"]])
-    (fact (validate-updates schema [["henkilotiedot.sukunimi" "Palo"]])   => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimi"  "Palo"]])  => [])
-    (fact (validate-updates schema [["henkilotiedot.etunimi" "Tauno"] ["henkilotiedot.sukunimiz" "Palo"]])  => [["henkilotiedot.sukunimiz" :err "illegal-key"]])
-    (fact (validate-updates schema [["yhteystiedot.email" "tauno@example.com"]]) => [])
-    (fact (validate-updates schema [["yhteystiedot.puhelin" "050"]]) =>        [])))
+  (let [document (new-document (schemas "paasuunnittelija") ..now..)]
+    (-> document
+      (apply-update [:henkilotiedot :etunimi] "Tauno")
+      (apply-update [:henkilotiedot :sukunimi] "Palo")
+      (apply-update [:yhteystiedot :email] "tauno@example.com")
+      (apply-update [:yhteystiedot :puhelin] "050")) => valid?
+    (-> document
+      (apply-update [:henkilotiedot :etunimiz] "Tauno")) => (invalid-with? [:err "illegal-key"])
+    (-> document
+      (apply-update [:henkilotiedot :sukunimiz] "Palo")) => (invalid-with? [:err "illegal-key"])))
 
 (facts "Repeating section"
-  (fact "Single value contains no nested sections" (validate-updates schema-with-repetition [["single.1.single2"]]) => [["single.1.single2" :err "illegal-key"]])
-  (fact "Repeating section happy case" (validate-updates schema-with-repetition [["repeats.1.single2" "foo"]]) => [])
-  (fact "Invalid key under nested section" (validate-updates schema-with-repetition [["repeats.1.single3" "foo"]]) => [["repeats.1.single3" :err "illegal-key"]])
-  (fact "Unindexed repeating section" (validate-updates schema-with-repetition [["repeats.single2" "foo"]]) => [["repeats.single2" :err "illegal-key"]])
-  (fact "Repeating string, 0" (validate-updates schema-with-repetition [["repeats.1.repeats2.0" "1"]]) => [])
-  (fact "Repeating string, 1" (validate-updates schema-with-repetition [["repeats.1.repeats2.1" "foo"]]) => [["repeats.1.repeats2.1" :warn "illegal-number"]]))
+  (let [document (new-document schema-with-repetition ..now..)]
 
-(facts "Facts about validation-status"
- (fact (validation-status []) => :ok)
- (fact (validation-status [["foo" :warn "bar"]]) => :warn)
- (fact (validation-status [["foo" :warn "bar"] ["foo2" :warn "bar2"]]) => :warn)
- (fact (validation-status [["foo" :warn "bar"] ["foo2" :err "bar2"]]) => :err))
+    (fact "Single value contains no nested sections"
+      (-> document
+        (apply-update [:single :1 :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
 
-; field validation
+    (fact "Repeating section happy case"
+      (-> document
+        (apply-update [:repeats :1 :single2] "foo")) => valid?)
 
-(facts "dates"
-  (validate {:type :date} "abba") => [:warn "invalid-date-format"]
-  (validate {:type :date} "") => nil
-  (validate {:type :date} "11.12.2013") => nil)
+    (fact "Invalid key under nested section"
+      (-> document
+        (apply-update [:repeats :1 :single3] "foo")) => (invalid-with? [:err "illegal-key"]))
+
+    (fact "Unindexed repeating section"
+      (-> document
+        (apply-update [:repeats :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
+
+    (fact "Repeating string, 0"
+      (-> document
+        (apply-update [:repeats :1 :repeats2 :0] "1")) => valid?)
+
+    (fact "Repeating string, 1"
+      (-> document
+        (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"]))))
+
+;;
+;; Updates
+;;
+
+(fact "updating document"
+  (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}}
+  (apply-updates {} [[[:b :c] "kikka"]
+                     [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
+                                                        :d {:value "kukka"}}}})
+
+;;
+;; VRK-rules validation
+;;
+
+(use 'lupapalvelu.document.tools)
+(use 'lupapalvelu.document.schemas)
+
+(def uusi-rakennus
+  (let [schema (schemas "uusiRakennus")
+        data   (create-document-data schema dummy-values)]
+    {:schema schema
+     :data   data}))
+
+(facts "VRK-validations"
+
+  (fact "uusi rakennus is valid"
+    uusi-rakennus => valid?)
+
+  (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
+    (-> uusi-rakennus
+      (apply-update [:rakenne :kantavaRakennusaine] "puu")
+      (apply-update [:mitat :kerrosluku] "3")) => valid?
+    (-> uusi-rakennus
+      (apply-update [:rakenne :kantavaRakennusaine] "puu")
+      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"])))
