@@ -32,8 +32,8 @@
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :layout :full-width})
 
-(def henkilo-valitsin [{:name :userId :type :personSelector }
-                        {:name "turvakieltoKytkin" :type :checkbox}])
+(def henkilo-valitsin [{:name "userId" :type :personSelector}
+                       {:name "turvakieltoKytkin" :type :checkbox}])
 
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}])
 

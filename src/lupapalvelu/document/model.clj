@@ -2,71 +2,71 @@
   (:use [clojure.tools.logging]
         [sade.strings]
         [lupapalvelu.document.schemas :only [schemas]]
+        [lupapalvelu.clojure15]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
+            [sade.util :refer [safe-int]]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.subtype :as subtype]))
 
 ;;
 ;; Validation:
 ;;
-;; if you changes this value, change it in docgen.js, too
+
+;; if you changes these values, change it in docgen.js, too
 (def default-max-len 255)
+(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
-(defmulti validate (fn [elem _] (keyword (:type elem))))
+;;
+;; Field validation
+;;
 
-(defmethod validate :group [_ v]
+(defmulti validate-field (fn [elem _] (keyword (:type elem))))
+
+(defmethod validate-field :group [_ v]
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
-(defmethod validate :string [elem v]
+(defmethod validate-field :string [{:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
-    (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
-    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]
+    (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
+    (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
 
-(defmethod validate :text [elem v]
+(defmethod validate-field :text [elem v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
 
-(defmethod validate :checkbox [_ v]
+(defmethod validate-field :checkbox [_ v]
   (if (not= (type v) Boolean) [:err "illegal-value:not-a-boolean"]))
 
-
-(def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
-
-(defmethod validate :date [elem v]
+(defmethod validate-field :date [elem v]
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
     (catch Exception e [:warn "invalid-date-format"])))
 
+(defmethod validate-field :select [elem v] nil)
+(defmethod validate-field :radioGroup [elem v] nil)
+(defmethod validate-field :buildingSelector [elem v] nil)
+(defmethod validate-field :personSelector [elem v] nil)
 
-;; FIXME
-(defmethod validate :select [elem v]
-  nil)
-
-;; FIXME
-(defmethod validate :radioGroup [elem v]
-  nil)
-
-(defmethod validate :buildingSelector [elem v] nil)
-(defmethod validate :personSelector [elem v] nil)
-
-(defmethod validate nil [_ _]
+(defmethod validate-field nil [_ _]
   [:err "illegal-key"])
 
-(defmethod validate :default [elem _]
+(defmethod validate-field :default [elem _]
   (warn "Unknown schema type: elem=[%s]" elem)
   [:err "unknown-type"])
 
 ;;
 ;; Neue api:
 ;;
+
 (defn- find-by-name [schema-body [k & ks]]
-  (when-let [elem (some #(if (= (:name %) k) %) schema-body)]
+  (when-let [elem (some #(when (= (:name %) k) %) schema-body)]
     (if (nil? ks)
       elem
       (if (:repeating elem)
@@ -76,50 +76,86 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn- validate-update [schema-body results [k v]]
-  (let [elem (find-by-name schema-body (s/split k #"\."))
-        result (validate (keywordize-keys elem) v)]
-    (if (nil? result)
-      results
-      (conj results (cons k result)))))
+(defn validation-result [data path element result]
+  {:data    data
+   :path    (vec (map keyword path))
+   :element element
+   :result  result})
 
-(defn- validate-document-fields [schema-body k v path]
+(defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
-    (if (contains? v :value)
-      (let [elem (find-by-name schema-body current-path)
-            result (validate (keywordize-keys elem) (:value v))]
-        (when-not (nil? result) (println k v path elem result))
-        (nil? result))
-      (every? true? (map (fn [[k2 v2]] (validate-document-fields schema-body k2 v2 current-path)) v)))))
+    (if (contains? data :value)
+      (let [element (find-by-name schema-body current-path)
+            result  (validate-field (keywordize-keys element) (:value data))]
+        (and result (validation-result data current-path element result)))
+      (filter
+        (comp not nil?)
+        (map (fn [[k2 v2]]
+               (validate-fields schema-body k2 v2 current-path)) data)))))
 
-(defn validate-against-current-schema [document]
-  (let [schema-name (get-in document [:schema :info :name])
-        schema-body (:body (get schemas schema-name))
-        document-data (:data document)]
-    (if document-data
-      (validate-document-fields schema-body nil document-data [])
-      (do
-        (println "No data")
-        false))))
+;; TODO: separate namespace for these
+(defn- validate-rules
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
+      (some-> data :mitat :kerrosluku :value safe-int (> 4)))
+    [{:path    [:rakenne :kantavaRakennusaine]
+      :result  [:warn "vrk:BR106"]}
+     {:path    [:mitat :kerrosluku]
+      :result  [:warn "vrk:BR106"]}]))
 
-(defn validate-updates
-  "Validate updates against schema.
+(defn validate
+  "Validates document against it's local schema and document level rules
+   retuning list of validation errors."
+  [{{schema-body :body} :schema data :data :as document}]
+  (and data
+    (flatten
+      (into
+        (validate-fields schema-body nil data [])
+        (validate-rules document)))))
 
-  Updates is expected to be a seq of updates, where each update is a key/value seq. Key is name of
-  the element to update, and the value is a new value for element. Key should be dot separated path.
+(defn valid-document?
+  "Checks weather document is valid."
+  [document] (empty? (validate document)))
 
-  Returns a seq of validation failures. Each failure is a seq of three elements. First element is the
-  name of the element. Second element is either :warn or :err and finally, the last element is the
-  warning or error message."
-  [schema updates]
-  (reduce (partial validate-update (:body schema)) [] updates))
+(defn validate-against-current-schema
+  "Validates document against the latest schema and returns list of errors."
+  [{{{schema-name :name} :info} :schema document-data :data :as document}]
+  (let [latest-schema (get schemas schema-name)
+        pimped-doc    (assoc document :schema latest-schema)]
+    (validate pimped-doc)))
 
-(defn validation-status
-  "Accepts validation results (as defined in 'validate-updates' function) and returns either :ok
-  (when results is empty), :warn (when results contains only warnings) or :err (when results
-  contains one or more errors)."
+(defn has-errors?
   [results]
-  (cond
-    (empty? results) :ok
-    (some #(= (second %) :err) results) :err
-    :else :warn))
+  (->>
+    results
+    (map :result)
+    (map first)
+    (some (partial = :err))
+    true?))
+
+;;
+;; Updates
+;;
+
+(defn apply-update
+  "Updates a document returning the modified document.
+   Example: (apply-update document [:mitat :koko] 12)"
+  [document path value]
+  (assoc-in document (flatten [:data path :value]) value))
+
+(defn apply-updates
+  "Updates a document returning the modified document.
+   Example: (apply-update document [:mitat :koko] 12)"
+  [document updates]
+  (reduce (fn [document [path value]] (apply-update document path value)) document updates))
+
+(defn new-document
+  "Creates an empty document out of schema"
+  [schema created]
+  {:id      (mongo/create-id)
+   :created created
+   :schema  schema
+   :data    {}})

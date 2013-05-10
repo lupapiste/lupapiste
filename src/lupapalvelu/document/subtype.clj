@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.subtype
   (:use [clojure.string :only [blank?]]
-        [clojure.tools.logging]))
+        [clojure.tools.logging])
+  (:require [sade.util :refer [safe-int]]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
 
@@ -16,11 +17,13 @@
     (re-matches #"^\+?[\d\s-]+" v) nil
     :else [:warn "illegal-tel"]))
 
-(defmethod subtype-validation :number [_ v]
-  (cond
-    (blank? v) nil
-    (re-matches #"\d+" v) nil
-    :else [:warn "illegal-number"]))
+(defmethod subtype-validation :number [{:keys [min max]} v]
+  (when-not (blank? v)
+    (let [min-int  (safe-int min (java.lang.Integer/MIN_VALUE))
+          max-int  (safe-int max (java.lang.Integer/MAX_VALUE))
+          number   (safe-int v)]
+      (when-not (and number (<= min-int number max-int))
+        [:warn "illegal-number"]))))
 
 (defmethod subtype-validation :digit [_ v]
   (cond
@@ -28,11 +31,15 @@
     (re-matches #"^\d$" v) nil
     :else [:warn "illegal-number"]))
 
-(defmethod subtype-validation :letter [_ v]
+(defmethod subtype-validation :letter [{:keys [case]} v]
+  (let [regexp (condp = case
+                 :lower #"^\p{Ll}$"
+                 :upper #"^\p{Lu}$"
+                 #"^\p{L}$")]
   (cond
     (blank? v) nil
-    (re-matches #"^\p{L}$" v) nil
-    :else [:warn "illegal-letter"]))
+    (re-matches regexp v) nil
+    :else [:warn "illegal-letter"])))
 
 (defmethod subtype-validation :kiinteistotunnus [_ v]
   (cond

@@ -9,6 +9,9 @@
             [clojure.string :as s]
             [clj-time.format :as timeformat]))
 
+;; Macro to get values from
+(defmacro value [m & path] `(-> ~m ~@path :value))
+
 ; Empty String will be rendered as empty XML element
 (def empty-tag "")
 
