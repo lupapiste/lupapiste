@@ -85,7 +85,7 @@
                               :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
                               :muu]])
 
-(defn municipality-attachments [municipality]
+(defn organization-attachments [organization]
   attachment-types)
 
 (defn make-attachment [now target locked op attachement-type]

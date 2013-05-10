@@ -1,5 +1,8 @@
 admin.applicant-users: Hakija-käyttäjät
 admin.addApplicantUser: Lisää Hakija-käyttäjä
+organization.links: Kunnan rakennusvalvonnan suosittelemat linkit
+admin.organizations: Organisaatiot
+admin.selectAdminOrganizations: Pääkäyttäjän organisaatiot
 error.invalid-property-id:Tarkasta kiinteistötunnus
 error.property-in-other-muinicipality:Kiinteistö ei ole valitun kunnan alueella
 stamp.margin:  Leiman sijainti:

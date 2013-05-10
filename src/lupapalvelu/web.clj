@@ -19,7 +19,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
-            [lupapalvelu.municipality]
+            [lupapalvelu.organization]
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
