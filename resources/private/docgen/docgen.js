@@ -648,7 +648,6 @@ var docgen = (function () {
         }
         $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
         $(target).removeClass("warning").removeClass("error");
-        console.log(status);
         if (status === "warn") {
           $(target).addClass("warning");
           showIndicator("form-input-warn", "form.warn", 200);
