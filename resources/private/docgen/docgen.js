@@ -650,9 +650,7 @@ var docgen = (function () {
       }
 
       saveForReal(path, value, function (status,results) {
-        console.log("status:",status,results);
         if(results) {
-          console.log(docId);
           $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
           _.each(results,function(result) { $("*[name='"+docId+"."+result[0]+"']").addClass("warning"); });
         }
