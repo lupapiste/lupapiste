@@ -22,5 +22,15 @@
       (apply-update [:mitat :kerrosluku] "3")) => valid?
     (-> uusi-rakennus
       (apply-update [:rakenne :kantavaRakennusaine] "puu")
-      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"])))
+      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"]))
+
+  (fact "S\u00e4hk\u00f6 polttoaineena vaatii s\u00e4hk\u00f6liittym\u00e4n"
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
+      (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")) => valid?
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
+      (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR342"]))
+
+  )
 

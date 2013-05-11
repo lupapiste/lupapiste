@@ -2,6 +2,10 @@
   (:use [lupapalvelu.clojure15])
   (:require [sade.util :refer [safe-int]]))
 
+;;
+;; da lib
+;;
+
 (def validators (atom {}))
 
 (defmacro defvalidator [validator-name doc-string bindings & body]
@@ -9,13 +13,23 @@
      {:doc ~doc-string
       :fn  (fn [~@bindings] ~@body)}))
 
-(defvalidator "BR102"
-  "puutalossa ei voi olla kuin nelja kerrosta"
-  [x]
-  x)
+(defn validate
+  "Runs all validators, returning list of validation results."
+  [document]
+  (->>
+    validators
+    deref
+    vals
+    (map :fn)
+    (map #(apply % [document]))
+    (filter (comp not nil?))))
 
-(defvalidator "BR106"
-  "puutalossa ei voi olla kuin nelja kerrosta"
+;;
+;; validators
+;;
+
+(defvalidator "vrk:BR106"
+  "Puutalossa saa olla korkeintaan 4 kerrosta"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and
@@ -27,10 +41,15 @@
      {:path    [:mitat :kerrosluku]
       :result  [:warn "vrk:BR106"]}]))
 
-(defn validate
-  "Runs all validators"
-  [document]
-  (->> validators
-    deref
-    (map :fn)
-    (map #(partial apply document))))
+(defvalidator "vrk:CR342"
+  "S\u00e4hk\u00f6 polttoaineena vaatii s\u00e4hk\u00f6liittym\u00e4n"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
+      (some-> data :lammitys :lammonlahde :value (not= "s\u00e4hk\u00f6")))
+    [{:path    [:lammitys :lammitystapa]
+      :result  [:warn "vrk:CR342"]}
+     {:path    [:lammitys :lammonlahde]
+      :result  [:warn "vrk:CR342"]}]))
