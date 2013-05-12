@@ -620,6 +620,20 @@ var docgen = (function () {
         .call();
     }
 
+    function showValidationResults(results) {
+      if(results && results.length > 0) {
+        $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
+        _.each(results,function(result) { $("*[name='"+docId+"."+result[0]+"']").addClass("warning"); });
+      }
+    }
+
+    function validate() {
+      ajax
+        .query("validate-doc", { id: self.appId, doc: self.docId})
+        .success(function (e) { showValidationResults(e.results); })
+        .call();
+    }
+
     function save(e, callback) {
       var event = getEvent(e);
       var target = event.target;
@@ -650,10 +664,7 @@ var docgen = (function () {
       }
 
       saveForReal(path, value, function (status,results) {
-        if(results) {
-          $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
-          _.each(results,function(result) { $("*[name='"+docId+"."+result[0]+"']").addClass("warning"); });
-        }
+        showValidationResults(results);
         if (label) {
           label.removeChild(loader);
         }
@@ -732,6 +743,7 @@ var docgen = (function () {
     }
 
     self.element = buildElement();
+    validate();
   };
 
   function displayDocuments(containerSelector, removeDocModel, application, documents) {
