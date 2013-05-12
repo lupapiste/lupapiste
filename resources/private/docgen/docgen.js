@@ -612,7 +612,7 @@ var docgen = (function () {
         // Server returns empty array (all ok), or array containing an array with three
         // elements: [key status message]. Here we use just the status.
         .success(function (e) {
-          var status = (e.results.length === 0) ? "ok" : e.results[0][1];
+          var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
           callback(status,e.results);
         })
         .error(function (e) { error(e); callback("err"); })
@@ -623,7 +623,7 @@ var docgen = (function () {
     function showValidationResults(results) {
       if(results && results.length > 0) {
         $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
-        _.each(results,function(result) { $("*[name='"+docId+"."+result[0]+"']").addClass("warning"); });
+        _.each(results,function(result) { $("*[name='"+docId+"."+result.path.join(".")+"']").addClass("warning"); });
       }
     }
 
