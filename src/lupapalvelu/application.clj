@@ -626,6 +626,12 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
+(defn pre-verdict-states [user]
+  (let [states ["open" "submitted" "sent" "info" "answered" "complement-needed"]]
+    (if (= (keyword (:role user)) :applicant)
+      (cons "draft" states)
+      states)))
+
 (defn make-query [query params user]
   (let [search (params :sSearch)
         kind (params :kind)]
@@ -636,11 +642,11 @@
         "inforequests" {:infoRequest true}
         nil)
       (condp = (:filter-state params)
-        "pre-verdict"       {:state {$in ["open" "submitted" "sent" "info" "answered" "complement-needed"]}}
+        "pre-verdict"       {:state {$in (pre-verdict-states user)}}
         "all"               nil
         "canceled"          {:state "canceled"}
         nil)
-      (when-not (#{nil "0"} (:filter-user params))
+      (when-not (contains? #{nil "0"} (:filter-user params))
         {"authority.id" (:filter-user params)})
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
@@ -654,6 +660,8 @@
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
+        _ (println user-query)
+        _ (println query)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)
