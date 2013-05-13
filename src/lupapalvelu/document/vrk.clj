@@ -63,7 +63,7 @@
     (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value (re-matches #"(\d+) .*") last keyword)
           tilavuus        (some->> data :mitat :tilavuus :value safe-int)
           max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
-      (when (> tilavuus max-tilavuus)
+      (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
         [{:path[:kaytto :kayttotarkoitus]
           :result [:warn "vrk:ktark-tilavuus-max"]}
          {:path[:mitat :tilavuus]
