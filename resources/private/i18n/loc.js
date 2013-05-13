@@ -2,7 +2,7 @@ var loc;
 
 ;(function() {
   "use strict";
-  
+
   function not(v) { return !v; }
 
   loc = function() {
@@ -21,7 +21,7 @@ var loc;
 
     if (term === undefined) {
       debug("Missing localization key", key);
-      return "$$NOT_FOUND$$" + key;
+      return LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
     }
 
     return term;
