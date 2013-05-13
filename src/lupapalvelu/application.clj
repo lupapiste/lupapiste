@@ -640,8 +640,8 @@
         "all"               nil
         "canceled"          {:state "canceled"}
         nil)
-      (if (and (:filter-user params) (not= (:filter-user params) "0"))
-        {"auth.id" (:filter-user params)})
+      (when-not (#{nil "0"} (:filter-user params))
+        {"authority.id" (:filter-user params)})
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
 
