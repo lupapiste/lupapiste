@@ -285,7 +285,7 @@
         person-postitoimipaikannimi (:postitoimipaikannimi address)]
     (fact address => truthy)
     (fact person-katu => "katu")
-    (fact person-postinumero =>"666")
+    (fact person-postinumero =>"33800")
     (fact person-postitoimipaikannimi => "Tuonela")))
 
 (defn- validete-contact [m]
