@@ -636,7 +636,7 @@
         "inforequests" {:infoRequest true}
         nil)
       (condp = (:filter-state params)
-        "pre-verdict"       {:state {$in ["draft" "open" "submitted" "sent" "info" "answered" "complement-needed"]}}
+        "pre-verdict"       {:state {$in ["open" "submitted" "sent" "info" "answered" "complement-needed"]}}
         "all"               nil
         "canceled"          {:state "canceled"}
         nil)
