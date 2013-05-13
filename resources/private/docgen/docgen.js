@@ -621,8 +621,8 @@ var docgen = (function () {
     }
 
     function showValidationResults(results) {
+      $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
       if(results && results.length > 0) {
-        $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
         _.each(results,function(result) { $("*[name='"+docId+"."+result.path.join(".")+"']").addClass("warning"); });
       }
     }
