@@ -50,7 +50,7 @@ var docgen = (function () {
     // ID utilities
 
     function pathStrToID(pathStr) {
-      return self.docId + pathStr.replace(/\./g, "-");
+      return self.docId + "-" + pathStr.replace(/\./g, "-");;
     }
 
     function pathStrToLabelID(pathStr) {
@@ -197,7 +197,7 @@ var docgen = (function () {
       input.onfocus = self.showHelp;
       input.onblur = self.hideHelp;
 
-      input.name = docId + "." + myPath;
+      input.name = myPath;
       input.setAttribute("rows", subSchema.rows || "10");
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
@@ -250,7 +250,7 @@ var docgen = (function () {
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
 
-      select.name = docId + "." +myPath;
+      select.name = myPath;
       select.className = "form-input combobox";
 
       select.id = pathStrToID(myPath);
@@ -346,7 +346,7 @@ var docgen = (function () {
       select.id = pathStrToID(myPath);
 
       //TODO: Tuki readonlylle
-      select.name = docId + "." + myPath;
+      select.name = myPath;
       select.className = "form-input combobox really-long";
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -411,7 +411,7 @@ var docgen = (function () {
       var option = document.createElement("option");
       //TODO: Tuki readonlylle
       select.id = pathStrToID(myPath);
-      select.name = docId + "." + myPath;
+      select.name = myPath;
       select.className = "form-input combobox long";
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -621,9 +621,9 @@ var docgen = (function () {
     }
 
     function showValidationResults(results) {
+      $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
       if(results && results.length > 0) {
-        $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
-        _.each(results,function(result) { $("*[name='"+docId+"."+result.path.join(".")+"']").addClass("warning"); });
+        _.each(results,function(result) { $("#"+docId+"-"+result.path.join("-")).addClass("warning"); });
       }
     }
 
