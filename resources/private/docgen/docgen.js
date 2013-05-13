@@ -192,6 +192,8 @@ var docgen = (function () {
       var input = document.createElement("textarea");
       var span = makeEntrySpan(subSchema, myPath);
 
+      input.id = pathStrToID(myPath);
+
       input.onfocus = self.showHelp;
       input.onblur = self.hideHelp;
 
@@ -251,6 +253,7 @@ var docgen = (function () {
       select.name = myPath;
       select.className = "form-input combobox";
 
+      select.id = pathStrToID(myPath);
 
       if (subSchema.readonly) {
         select.readOnly = true;
@@ -339,6 +342,9 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
+
+      select.id = pathStrToID(myPath);
+
       //TODO: Tuki readonlylle
       select.name = myPath;
       select.className = "form-input combobox really-long";
@@ -404,6 +410,7 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       //TODO: Tuki readonlylle
+      select.id = pathStrToID(myPath);
       select.name = myPath;
       select.className = "form-input combobox long";
       select.onchange = function (e) {
@@ -602,11 +609,11 @@ var docgen = (function () {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
         .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
-      // Server returns empty array (all ok), or array containing an array with three
-      // elements: [key status message]. Here we use just the status.
+        // Server returns empty array (all ok), or array containing an array with three
+        // elements: [key status message]. Here we use just the status.
         .success(function (e) {
           var status = (e.results.length === 0) ? "ok" : e.results[0][1];
-          callback(status);
+          callback(status,e.results);
         })
         .error(function (e) { error(e); callback("err"); })
         .fail(function (e) { error(e); callback("err"); })
@@ -633,29 +640,29 @@ var docgen = (function () {
         label.appendChild(loader);
       }
 
-      function showIndicator(className, locKey, delay) {
+      function showIndicator(className, locKey) {
         $(indicator).addClass(className).text(loc(locKey));
-        $(indicator).fadeIn(delay);
+        $(indicator).fadeIn(200);
         setTimeout(function () {
           $(indicator).removeClass(className);
           $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
         }, 2000);
       }
 
-      saveForReal(path, value, function (status) {
+      saveForReal(path, value, function (status,results) {
+        if(results) {
+          $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
+          _.each(results,function(result) { $("*[name='"+docId+"."+result[0]+"']").addClass("warning"); });
+        }
         if (label) {
           label.removeChild(loader);
         }
-        $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
-        $(target).removeClass("warning").removeClass("error");
         if (status === "warn") {
-          $(target).addClass("warning");
-          showIndicator("form-input-warn", "form.warn", 200);
+          showIndicator("form-input-warn", "form.warn");
         } else if (status === "err") {
-          $(target).addClass("error");
-          showIndicator("form-input-err", "form.err", 200);
+          showIndicator("form-input-err", "form.err");
         } else if (status === "ok") {
-          showIndicator("form-input-saved", "form.saved", 300);
+          showIndicator("form-input-saved", "form.saved");
         } else if (status !== "ok") {
           error("Unknown status:", status, "path:", path);
         }
@@ -713,6 +720,7 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
+      sectionContainer.id = "document-"+docId;
 
       appendElements(elements, self.schema, self.model, []);
 
