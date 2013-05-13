@@ -178,10 +178,32 @@
 (defn- get-current-filename [application-id]
   (str application-id "_current_application.pdf"))
 
+(defn- get-Liite [title link attachment type file-id]
+  {:Liite
+   {:kuvaus title
+    :linkkiliitteeseen link
+    :muokkausHetki (to-xml-datetime (:modified attachment))
+    :versionumero 1
+    :tyyppi type
+    :fileId file-id}})
+
+(defn- get-statement-attachments-as-canonical [application begin-of-link ]
+  (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]) (filter (= "statement" (-> attachment :target :type)) (:attachments application))))
+        canonical-attachments (for [attachment attachments
+                                    :when (and (:latestVersion attachment) (= "statement" (-> attachment :target :type)))
+                                    :let [type (get-in attachment [:type :type-id] )
+                                          title (str (:title application) ": " type "-" (:id attachment))
+                                          file-id (get-in attachment [:latestVersion :fileId])
+                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                                          link (str begin-of-link attachment-file-name)]]
+                                {}
+                                )]
+    (not-empty canonical-attachments)))
+
 (defn- get-attachments-as-canonical [application begin-of-link ]
   (let [attachments (:attachments application)
         canonical-attachments (for [attachment attachments
-                                    :when (:latestVersion attachment)
+                                    :when (and (:latestVersion attachment) (not (= "statement" (-> attachment :target :type))))
                                     :let [type (get-in attachment [:type :type-id] )
                                           title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
