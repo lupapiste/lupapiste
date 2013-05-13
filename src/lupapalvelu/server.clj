@@ -10,6 +10,7 @@
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
+            [lupapalvelu.fixture.finland-rakval]
             [lupapalvelu.admin]
             [lupapalvelu.application]
             [lupapalvelu.authority-admin]

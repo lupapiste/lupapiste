@@ -10,7 +10,7 @@ var docgen = (function () {
     return appendButton;
   }
 
-  LUPAPISTE.DocModel = function(schema, model, removeCallback, docId, application) {
+  LUPAPISTE.DocModel = function (schema, model, removeCallback, docId, application) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -192,10 +192,12 @@ var docgen = (function () {
       var input = document.createElement("textarea");
       var span = makeEntrySpan(subSchema, myPath);
 
+      input.id = pathStrToID(myPath);
+
       input.onfocus = self.showHelp;
       input.onblur = self.hideHelp;
 
-      input.name = myPath;
+      input.name = docId + "." + myPath;
       input.setAttribute("rows", subSchema.rows || "10");
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
@@ -248,9 +250,10 @@ var docgen = (function () {
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
 
-      select.name = myPath;
+      select.name = docId + "." +myPath;
       select.className = "form-input combobox";
 
+      select.id = pathStrToID(myPath);
 
       if (subSchema.readonly) {
         select.readOnly = true;
@@ -339,8 +342,11 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       var span = makeEntrySpan(subSchema, myPath);
+
+      select.id = pathStrToID(myPath);
+
       //TODO: Tuki readonlylle
-      select.name = myPath;
+      select.name = docId + "." + myPath;
       select.className = "form-input combobox really-long";
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -404,7 +410,8 @@ var docgen = (function () {
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
       //TODO: Tuki readonlylle
-      select.name = myPath;
+      select.id = pathStrToID(myPath);
+      select.name = docId + "." + myPath;
       select.className = "form-input combobox long";
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -599,17 +606,31 @@ var docgen = (function () {
     }
 
     function saveForReal(path, value, callback) {
-      var unPimpedPath = path.replace(new RegExp("^"+self.docId+"."),"");
+      var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
-        .command("update-doc", {doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]]})
+        .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
         // Server returns empty array (all ok), or array containing an array with three
         // elements: [key status message]. Here we use just the status.
-        .success(function(e) {
-          var status = (e.results.length === 0) ? "ok" : e.results[0][1];
-          callback(status);
+        .success(function (e) {
+          var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
+          callback(status,e.results);
         })
-        .error(function(e) { error(e); callback("err"); })
-        .fail(function(e) { error(e); callback("err"); })
+        .error(function (e) { error(e); callback("err"); })
+        .fail(function (e) { error(e); callback("err"); })
+        .call();
+    }
+
+    function showValidationResults(results) {
+      if(results && results.length > 0) {
+        $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
+        _.each(results,function(result) { $("*[name='"+docId+"."+result.path.join(".")+"']").addClass("warning"); });
+      }
+    }
+
+    function validate() {
+      ajax
+        .query("validate-doc", { id: self.appId, doc: self.docId})
+        .success(function (e) { showValidationResults(e.results); })
         .call();
     }
 
@@ -633,26 +654,26 @@ var docgen = (function () {
         label.appendChild(loader);
       }
 
-      function showIndicator(className, locKey, delay) {
+      function showIndicator(className, locKey) {
         $(indicator).addClass(className).text(loc(locKey));
-        $(indicator).fadeIn(delay);
+        $(indicator).fadeIn(200);
         setTimeout(function () {
           $(indicator).removeClass(className);
           $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
         }, 2000);
       }
 
-      saveForReal(path, value, function (status) {
+      saveForReal(path, value, function (status,results) {
+        showValidationResults(results);
         if (label) {
           label.removeChild(loader);
         }
-        $(indicator).removeClass("form-input-warn").removeClass("form-input-err");
         if (status === "warn") {
-          showIndicator("form-input-warn","form.warn",200);
+          showIndicator("form-input-warn", "form.warn");
         } else if (status === "err") {
-          showIndicator("form-input-err","form.err",200);
+          showIndicator("form-input-err", "form.err");
         } else if (status === "ok") {
-          showIndicator("form-input-saved","form.saved",300);
+          showIndicator("form-input-saved", "form.saved");
         } else if (status !== "ok") {
           error("Unknown status:", status, "path:", path);
         }
@@ -710,6 +731,7 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
+      sectionContainer.id = "document-"+docId;
 
       appendElements(elements, self.schema, self.model, []);
 
@@ -721,13 +743,14 @@ var docgen = (function () {
     }
 
     self.element = buildElement();
+    validate();
   };
 
   function displayDocuments(containerSelector, removeDocModel, application, documents) {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
-      return num * 10000000000 + doc.created/1000;
+      return num * 10000000000 + doc.created / 1000;
     }
 
     var sortedDocs = _.sortBy(documents, getDocumentOrder);

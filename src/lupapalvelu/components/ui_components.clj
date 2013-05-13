@@ -12,11 +12,11 @@
               :name "common"})
 
 (defn- conf []
-  (let [js-conf {:maps (:maps env/config)
-                 :fileExtensions mime/allowed-extensions
-                 :passwordMinLength (get-in env/config [:password :minlength])}
-        data (json/generate-string js-conf)]
-    (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
+  (let [js-conf {:maps              (:maps env/config)
+                 :fileExtensions    mime/allowed-extensions
+                 :passwordMinLength (get-in env/config [:password :minlength])
+                 :mode              env/mode}]
+    (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn loc->js []
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))

@@ -3,8 +3,11 @@
 
 (defn nil-values [_] nil)
 
+(defn type-verifier [{:keys [type] :as element}]
+  (when-not (keyword? type) (throw (RuntimeException. (str "Invalid type: " element)))))
+
 (defn dummy-values [{:keys [type subtype name body]}]
-  (condp = type
+  (condp = (keyword type)
     :text       "text"
     :checkbox   true
     :date       "2.5.1974"

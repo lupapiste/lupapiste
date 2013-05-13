@@ -166,7 +166,7 @@
 (def talousrakennus "941 talousrakennukset")
 (def rakennuksen-tiedot [{:name "kaytto"
                           :type :group
-                          :body [{:name "rakentajaTyyppi" :type "select"
+                          :body [{:name "rakentajaTyyppi" :type :select
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
