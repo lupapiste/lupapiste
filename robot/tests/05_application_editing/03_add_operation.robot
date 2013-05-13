@@ -14,13 +14,12 @@ New application contains the default initial operation
   Wait Until  Page Should Contain  Asuinrakennuksen rakentaminen
 
 Mikko adds an operation
+  Set animations off
   Click enabled by test id  add-operation
   Wait Until  Element Should Be Visible  add-operation
-  Set Selenium Speed  ${OP_TREE_SPEED}
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun rakennuksen rakentaminen"]
-  Set Selenium Speed  ${DEFAULT_SPEED}
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
 

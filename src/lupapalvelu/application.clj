@@ -602,7 +602,7 @@
 ;;
 
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
-                  :address
+                  (juxt :address :municipality)
                   get-application-operation
                   get-applicant-name
                   :submitted
@@ -610,19 +610,29 @@
                   :state
                   :authority])
 
-(def order-by (assoc col-sources 0 :infoRequest, 2 nil, 3 nil))
+(def order-by (assoc col-sources
+                     0 :infoRequest
+                     1 :address
+                     2 nil
+                     3 nil))
 
 (def col-map (zipmap col-sources (map str (range))))
 
 (defn add-field [application data [app-field data-field]]
-  (assoc data data-field (if (keyword? app-field) (get application app-field) (app-field application))))
+  (assoc data data-field (app-field application)))
 
 (defn make-row [application]
   (let [base {"id" (:_id application)
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query params]
+(defn pre-verdict-states [user]
+  (let [states ["open" "submitted" "sent" "info" "answered" "complement-needed"]]
+    (if (= (keyword (:role user)) :applicant)
+      (cons "draft" states)
+      states)))
+
+(defn make-query [query params user]
   (let [search (params :sSearch)
         kind (params :kind)]
     (merge
@@ -631,6 +641,13 @@
         "applications" {:infoRequest false}
         "inforequests" {:infoRequest true}
         nil)
+      (condp = (:filter-state params)
+        "pre-verdict"       {:state {$in (pre-verdict-states user)}}
+        "all"               nil
+        "canceled"          {:state "canceled"}
+        nil)
+      (when-not (contains? #{nil "0"} (:filter-user params))
+        {"authority.id" (:filter-user params)})
       (when-not (blank? search)
         {:address {$regex search $options "i"}}))))
 
@@ -640,9 +657,11 @@
     (if col {col dir} {})))
 
 (defn applications-for-user [user params]
-  (let [user-query  (domain/application-query-for user)
+  (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params)
+        query       (make-query user-query params user)
+        _ (println user-query)
+        _ (println query)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)
@@ -653,15 +672,15 @@
                       (query/limit limit))
         rows        (map (comp make-row with-meta-fields) apps)
         echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
-
     {:aaData                rows
      :iTotalRecords         user-total
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
 (defcommand "applications-for-datatables"
-  {:parameters [:params] :verified true}
-  [{user :user {:keys [params]} :data}]
+  {:parameters [:params]
+   :verified true}
+  [{user :user {params :params} :data}]
   (ok :data (applications-for-user user params)))
 
 ;;
