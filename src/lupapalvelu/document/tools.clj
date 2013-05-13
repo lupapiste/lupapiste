@@ -20,6 +20,7 @@
                   :digit            "1"
                   :letter           "\u00c5"
                   :kiinteistotunnus "09100200990013"
+                  :zip              "33800"
                   (str subtype))
     (str name)))
 

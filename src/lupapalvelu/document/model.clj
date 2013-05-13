@@ -84,12 +84,18 @@
    :element element
    :result  result})
 
+(defn- validate-required-field [{:keys [required]} value])
+
 (defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
-      (let [element (find-by-name schema-body current-path)
-            result  (validate-field (keywordize-keys element) (:value data))]
-        (and result (validation-result data current-path element result)))
+      (let [element (keywordize-keys (find-by-name schema-body current-path))
+            results (conj []
+                      (validate-field element (:value data))
+                      (validate-required-field element (:value data)))
+            results (filter (comp not nil?) results)]
+        (when (not (empty? results))
+          (map (partial validation-result data current-path element) results)))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]

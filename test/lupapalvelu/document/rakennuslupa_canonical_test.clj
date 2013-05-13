@@ -29,7 +29,7 @@
 
 (def henkilotiedot (assoc nimi :hetu {:value "010100A0101"}))
 
-(def osoite {:katu {:value "katu"} :postinumero {:value "666"} :postitoimipaikannimi {:value "Tuonela"}})
+(def osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
 
 (def henkilo
   {:henkilotiedot henkilotiedot
