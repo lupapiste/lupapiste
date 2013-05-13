@@ -282,8 +282,8 @@ Create inforequest
 Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
   Go to page  applications
-  Click by test id  ${button}
-  Wait and click  xpath=//button[@data-test-id="create-search-button"]
+  Click by test id  applications-create-new
+  Click by test id  create-search-button
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}
