@@ -50,7 +50,7 @@ var docgen = (function () {
     // ID utilities
 
     function pathStrToID(pathStr) {
-      return self.docId + pathStr.replace(/\./g, "-");
+      return self.docId + "." + pathStr;
     }
 
     function pathStrToLabelID(pathStr) {
