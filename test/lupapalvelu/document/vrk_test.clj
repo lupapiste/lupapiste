@@ -32,5 +32,10 @@
       (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
       (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR342"]))
 
-  )
-
+  (fact "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
+    (-> uusi-rakennus
+      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
+      (apply-update [:mitat :tilavuus] "100000")) => valid?
+    (-> uusi-rakennus
+      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
+      (apply-update [:mitat :tilavuus] "100001")) => (invalid-with? [:warn "vrk:ktark-tilavuus-max"])))
