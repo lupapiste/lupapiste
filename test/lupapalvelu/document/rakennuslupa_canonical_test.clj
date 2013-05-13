@@ -8,6 +8,17 @@
         [clojure.data.xml]
         [clj-time.core :only [date-time]]))
 
+;;
+;; Local document validator predicate
+;;
+
+(defn valid-against-current-schema? [document]
+  (or (fact (validate-against-current-schema document) => '()) true))
+
+;;
+;; Facts
+;;
+
 (facts "Date format"
   (fact (to-xml-date (date-time 2012 1 14)) => "2012-01-14")
   (fact (to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
@@ -221,20 +232,20 @@
    lisatieto
    hankkeen-kuvaus])
 
-(fact "Meta test: hakija1"          (validate-against-current-schema hakija1) => true)
-(fact "Meta test: hakija2"          (validate-against-current-schema hakija2) => true)
-(fact "Meta test: paasuunnittelija" (validate-against-current-schema paasuunnittelija) => true)
-(fact "Meta test: suunnittelija1"   (validate-against-current-schema suunnittelija1) => true)
-(fact "Meta test: suunnittelija2"   (validate-against-current-schema suunnittelija2) => true)
-(fact "Meta test: maksaja1"         (validate-against-current-schema maksaja1) => true)
-(fact "Meta test: maksaja2"         (validate-against-current-schema maksaja2) => true)
-(fact "Meta test: rakennuspaikka"   (validate-against-current-schema rakennuspaikka) => true)
-(fact "Meta test: uusi-rakennus"    (validate-against-current-schema uusi-rakennus) => true)
-(fact "Meta test: lisatieto"        (validate-against-current-schema lisatieto) => true)
-(fact "Meta test: hankkeen-kuvaus"  (validate-against-current-schema hankkeen-kuvaus) => true)
+(fact "Meta test: hakija1"          hakija1          => valid-against-current-schema?)
+(fact "Meta test: hakija2"          hakija2          => valid-against-current-schema?)
+(fact "Meta test: paasuunnittelija" paasuunnittelija => valid-against-current-schema?)
+(fact "Meta test: suunnittelija1"   suunnittelija1   => valid-against-current-schema?)
+(fact "Meta test: suunnittelija2"   suunnittelija2   => valid-against-current-schema?)
+(fact "Meta test: maksaja1"         maksaja1         => valid-against-current-schema?)
+(fact "Meta test: maksaja2"         maksaja2         => valid-against-current-schema?)
+(fact "Meta test: rakennuspaikka"   rakennuspaikka   => valid-against-current-schema?)
+(fact "Meta test: uusi-rakennus"    uusi-rakennus    => valid-against-current-schema?)
+(fact "Meta test: lisatieto"        lisatieto        => valid-against-current-schema?)
+(fact "Meta test: hankkeen-kuvaus"  hankkeen-kuvaus  => valid-against-current-schema?)
 
 ;; In case a document was added but forgot to write test above
-(fact "Meta test: all documents in fixture are valid" (every? true? (map validate-against-current-schema documents)) => true)
+(fact "Meta test: all documents in fixture are valid" documents => (has every? valid-against-current-schema?))
 
 (def application
   {:municipality municipality,

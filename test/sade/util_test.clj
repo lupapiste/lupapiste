@@ -31,3 +31,8 @@
   (fact (contains-value? [false true] true?) => true)
   (fact (contains-value? [false [false false [false [false {"false" true}]]]] true?) => true)
   (fact (contains-value? [false [false false [false [false {"true" false}]]]] true?) => false))
+
+(fact "safe-int"
+  (safe-int "010")  => 10
+  (safe-int "-010") => -10
+  (safe-int "1.2")  => nil)
