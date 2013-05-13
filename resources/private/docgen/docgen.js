@@ -197,7 +197,7 @@ var docgen = (function () {
       input.onfocus = self.showHelp;
       input.onblur = self.hideHelp;
 
-      input.name = myPath;
+      input.name = docId + "." + myPath;
       input.setAttribute("rows", subSchema.rows || "10");
       input.setAttribute("cols", subSchema.cols || "40");
       setMaxLen(input, subSchema);
@@ -250,7 +250,7 @@ var docgen = (function () {
       select.onfocus = self.showHelp;
       select.onblur = self.hideHelp;
 
-      select.name = myPath;
+      select.name = docId + "." +myPath;
       select.className = "form-input combobox";
 
       select.id = pathStrToID(myPath);
@@ -346,7 +346,7 @@ var docgen = (function () {
       select.id = pathStrToID(myPath);
 
       //TODO: Tuki readonlylle
-      select.name = myPath;
+      select.name = docId + "." + myPath;
       select.className = "form-input combobox really-long";
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -411,7 +411,7 @@ var docgen = (function () {
       var option = document.createElement("option");
       //TODO: Tuki readonlylle
       select.id = pathStrToID(myPath);
-      select.name = myPath;
+      select.name = docId + "." + myPath;
       select.className = "form-input combobox long";
       select.onchange = function (e) {
         var event = getEvent(e);
@@ -612,11 +612,25 @@ var docgen = (function () {
         // Server returns empty array (all ok), or array containing an array with three
         // elements: [key status message]. Here we use just the status.
         .success(function (e) {
-          var status = (e.results.length === 0) ? "ok" : e.results[0][1];
+          var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
           callback(status,e.results);
         })
         .error(function (e) { error(e); callback("err"); })
         .fail(function (e) { error(e); callback("err"); })
+        .call();
+    }
+
+    function showValidationResults(results) {
+      if(results && results.length > 0) {
+        $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
+        _.each(results,function(result) { $("*[name='"+docId+"."+result.path.join(".")+"']").addClass("warning"); });
+      }
+    }
+
+    function validate() {
+      ajax
+        .query("validate-doc", { id: self.appId, doc: self.docId})
+        .success(function (e) { showValidationResults(e.results); })
         .call();
     }
 
@@ -650,10 +664,7 @@ var docgen = (function () {
       }
 
       saveForReal(path, value, function (status,results) {
-        if(results) {
-          $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
-          _.each(results,function(result) { $("*[name='"+docId+"."+result[0]+"']").addClass("warning"); });
-        }
+        showValidationResults(results);
         if (label) {
           label.removeChild(loader);
         }
@@ -732,6 +743,7 @@ var docgen = (function () {
     }
 
     self.element = buildElement();
+    validate();
   };
 
   function displayDocuments(containerSelector, removeDocModel, application, documents) {
