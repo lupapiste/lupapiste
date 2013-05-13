@@ -50,7 +50,7 @@ var docgen = (function () {
     // ID utilities
 
     function pathStrToID(pathStr) {
-      return self.docId + "." + pathStr;
+      return self.docId + "-" + pathStr.replace(/\./g, "-");;
     }
 
     function pathStrToLabelID(pathStr) {
@@ -623,7 +623,7 @@ var docgen = (function () {
     function showValidationResults(results) {
       $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
       if(results && results.length > 0) {
-        _.each(results,function(result) { $("*[name='"+docId+"."+result.path.join(".")+"']").addClass("warning"); });
+        _.each(results,function(result) { $("#"+docId+"-"+result.path.join("-")).addClass("warning"); });
       }
     }
 
