@@ -214,6 +214,8 @@
    {:id  "51112424c26b7342d92acf3c"
     :enabled  false
     :username  "dummy"
+    :firstName "Duff"
+    :lastName "Dummy"
     :email  "dummy@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
@@ -222,6 +224,8 @@
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
     :username  "dummy2"
+    :firstName "Duff"
+    :lastName "Dummy2"
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
@@ -229,6 +233,8 @@
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :username  "dummy3"
+    :firstName "Duff"
+    :lastName "Dummy3"
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
