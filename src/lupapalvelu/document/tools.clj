@@ -6,26 +6,33 @@
 (defn type-verifier [{:keys [type] :as element}]
   (when-not (keyword? type) (throw (RuntimeException. (str "Invalid type: " element)))))
 
-(defn dummy-values [{:keys [type subtype case name body]}]
+(defn missing [element]
+  (throw (UnsupportedOperationException. (str element))))
+
+(defn dummy-values [{:keys [type subtype case name body] :as element}]
   (condp = (keyword type)
-    :text       "text"
-    :checkbox   true
-    :date       "2.5.1974"
-    :select     (-> body first :name)
-    :radioGroup (-> body first :name)
-    :string     (condp = (keyword subtype)
-                  :email            "example@example.com"
-                  :tel              "012 123 4567"
-                  :number           "42"
-                  :digit            "1"
-                  :letter           (condp = (keyword case)
-                                      :lower "a"
-                                      :upper "A"
-                                      "B")
-                  :kiinteistotunnus "09100200990013"
-                  :zip              "33800"
-                  (str subtype))
-    (str name)))
+    :text             "text"
+    :checkbox         true
+    :date             "2.5.1974"
+    :select           (-> body first :name)
+    :radioGroup       (-> body first :name)
+    :personSelector   "123"
+    :buildingSelector "001"
+    :string           (condp = (keyword subtype)
+                        :email            "example@example.com"
+                        :tel              "012 123 4567"
+                        :number           "42"
+                        :digit            "1"
+                        :kiinteistotunnus "09100200990013"
+                        :zip              "33800"
+                        nil               "string"
+                        :letter           (condp = (keyword case)
+                                            :lower "a"
+                                            :upper "A"
+                                            nil    "Z"
+                                            (missing element))
+                        (missing element))
+    (missing element)))
 
 ;;
 ;; Internal
