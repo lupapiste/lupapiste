@@ -84,3 +84,41 @@
                 flattened
                 wrapped
                 )))
+
+(defn paths
+  [c m]
+  (reduce
+    (fn [[p l] [k v]]
+      (if (map? v)
+        (paths [(conj p k) l] v)
+        [p (concat l [v (vec (reverse (conj p k)))])]))
+    c m))
+
+(defn vec-paths
+  [m]
+  (->> m
+    (paths [])
+    last
+    (partition 2)
+    (map reverse)
+    (map vec)))
+
+(defn path-vals
+  ([m]
+    (path-vals [] [] m))
+  ([l p m]
+    (reduce
+      (fn [l [k v]]
+        (if (map? v)
+          (path-vals l (conj p k) v)
+          (cons [(conj p k) v] l)))
+      l m)))
+
+(defn assoc-in-path-vals
+  [c] (reduce (partial apply assoc-in) {} c))
+
+(def m {:a {:b {:c "kukka"}
+            :d "kakka"}
+        :e "kikka"})
+
+
