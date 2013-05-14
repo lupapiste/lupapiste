@@ -6,7 +6,7 @@
 (defn type-verifier [{:keys [type] :as element}]
   (when-not (keyword? type) (throw (RuntimeException. (str "Invalid type: " element)))))
 
-(defn dummy-values [{:keys [type subtype name body]}]
+(defn dummy-values [{:keys [type subtype case name body]}]
   (condp = (keyword type)
     :text       "text"
     :checkbox   true
@@ -18,7 +18,10 @@
                   :tel              "012 123 4567"
                   :number           "42"
                   :digit            "1"
-                  :letter           "\u00c5"
+                  :letter           (condp = (keyword case)
+                                      :lower "a"
+                                      :upper "A"
+                                      "B")
                   :kiinteistotunnus "09100200990013"
                   :zip              "33800"
                   (str subtype))
