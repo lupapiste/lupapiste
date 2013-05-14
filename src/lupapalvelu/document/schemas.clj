@@ -49,9 +49,9 @@
                           {:name "lahiosoite" :type :string}
                           {:name "osoitenumero" :type :string}
                           {:name "osoitenumero2" :type :string}
-                          {:name "jakokirjain" :type :string :size "s"}
+                          {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}
                           {:name "jakokirjain2" :type :string :size "s"}
-                          {:name "porras" :type :string :size "s"}
+                          {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
                           {:name "postinumero" :type :string :required true :subtype :zip :size "s"}
                           {:name "postitoimipaikannimi" :type :string :size "m"}
@@ -135,9 +135,9 @@
                       }))
 
 (def huoneisto [{:name "huoneistoTunnus" :type :group
-                 :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
+                 :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                         {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
-                        {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
+                        {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group
                  :body [{:name "huoneistoTyyppi" :type :select
