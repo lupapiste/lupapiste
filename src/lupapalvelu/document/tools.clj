@@ -13,7 +13,7 @@
     :date       "2.5.1974"
     :select     (-> body first :name)
     :radioGroup (-> body first :name)
-    :string     (condp = subtype
+    :string     (condp = (keyword subtype)
                   :email            "example@example.com"
                   :tel              "012 123 4567"
                   :number           "42"
@@ -49,7 +49,7 @@
       (fn [x]
         (if (map? x)
           (let [k (-> x :name keyword)
-                v (if (= :group (:type x)) (group x)(f x))]
+                v (if (= :group (keyword (:type x))) (group x)(f x))]
             {k v})
           x)))))
 
