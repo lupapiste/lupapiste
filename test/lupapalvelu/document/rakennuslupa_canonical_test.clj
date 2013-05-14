@@ -130,7 +130,7 @@
                      :energialuokka {:value "C"}
                      :energiatehokkuusluku {:value "124"}
                      :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
-          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "a"} :huoneistonumero {:value "1"} :jakokirjain {:value "A"}}
+          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "A"} :huoneistonumero {:value "1"} :jakokirjain {:value "a"}}
                            :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
                                               :huoneistoala {:value "56"}
                                               :huoneluku {:value "2H+K"}}
