@@ -77,25 +77,27 @@
 
 (defn create-document-data
   "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
-  ([schema] (create-document-data schema nil-values))
-  ([schema f] (->
-                schema
-                (create f)
-                flattened
-                wrapped
-                )))
+  ([schema]
+    (create-document-data schema nil-values))
+  ([schema f]
+    (->
+      schema
+      (create f)
+      flattened
+      wrapped)))
 
 (defn path-vals
   "Returns vector of tuples containing path vector to the value and the value."
-  ([m]
-    (path-vals [] [] m))
-  ([l p m]
-    (reduce
-      (fn [l [k v]]
-        (if (map? v)
-          (path-vals l (conj p k) v)
-          (cons [(conj p k) v] l)))
-      l m)))
+  [m]
+  (letfn
+    [(pvals [l p m]
+       (reduce
+         (fn [l [k v]]
+           (if (map? v)
+             (pvals l (conj p k) v)
+             (cons [(conj p k) v] l)))
+         l m))]
+    (pvals [] [] m)))
 
 (defn assoc-in-path-vals
   "Re-created a map from it's path-vals extracted with (path-vals)."
