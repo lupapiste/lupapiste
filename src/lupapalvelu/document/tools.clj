@@ -100,9 +100,3 @@
 (defn assoc-in-path-vals
   "Re-created a map from it's path-vals extracted with (path-vals)."
   [c] (reduce (partial apply assoc-in) {} c))
-
-(def m {:a {:b {:c "kukka"}
-            :d "kakka"}
-        :e "kikka"})
-
-
