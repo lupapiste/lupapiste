@@ -85,10 +85,6 @@
      :element element
      :result  result}))
 
-(defn- validate-required-field [{:keys [required]} value]
-  (when (and (java.lang.Boolean/valueOf required) (s/blank? value))
-    [:warn "illegal-value:required"]))
-
 (defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
@@ -100,6 +96,9 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
+(defn- validate-required-fields [document]
+  [#_[:warn "illegal-value:required"]])
+
 (defn validate
   "Validates document against it's local schema and document level rules
    retuning list of validation errors."
@@ -108,6 +107,7 @@
     (flatten
       (into
         (validate-fields schema-body nil data [])
+        #_(validate-required-fields document)
         (vrk/validate document)))))
 
 (defn valid-document?
