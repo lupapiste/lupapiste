@@ -138,10 +138,10 @@
 (facts "Required fields"
   (let [document (new-document schema-with-required ..now..)]
 
-    (-> document)                      => (invalid-with? [:warn "illegal-value:required"])
+    document => (invalid-with? [:warn "illegal-value:required"])
 
     (-> document
-      (apply-update [:a :aa] " "))     => (invalid-with? [:warn "illegal-value:required"])
+      (apply-update [:a :aa] " ")) => (invalid-with? [:warn "illegal-value:required"])
 
     (-> document
       (apply-update [:a :aa] "value")) => valid?))
