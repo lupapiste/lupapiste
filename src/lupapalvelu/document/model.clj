@@ -97,7 +97,7 @@
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
 (defn- validate-required-fields [document]
-  [#_[:warn "illegal-value:required"]])
+  [[:warn "illegal-value:required"]])
 
 (defn validate
   "Validates document against it's local schema and document level rules
