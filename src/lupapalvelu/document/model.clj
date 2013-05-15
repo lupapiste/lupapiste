@@ -78,24 +78,23 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn validation-result [data path element result]
-  {:data    data
-   :path    (vec (map keyword path))
-   :element element
-   :result  result})
+(defn ->validation-result [data path element result]
+  (when result
+    {:data    data
+     :path    (vec (map keyword path))
+     :element element
+     :result  result}))
 
-(defn- validate-required-field [{:keys [required]} value])
+(defn- validate-required-field [{:keys [required]} value]
+  (when (and (java.lang.Boolean/valueOf required) (s/blank? value))
+    [:warn "illegal-value:required"]))
 
 (defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
       (let [element (keywordize-keys (find-by-name schema-body current-path))
-            results (conj []
-                      (validate-field element (:value data))
-                      (validate-required-field element (:value data)))
-            results (filter (comp not nil?) results)]
-        (when (not (empty? results))
-          (map (partial validation-result data current-path element) results)))
+            result  (validate-field element (:value data))]
+        (->validation-result data current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
