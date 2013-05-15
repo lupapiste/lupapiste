@@ -97,7 +97,8 @@
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
 (defn- validate-required-fields [document]
-  [[:warn "illegal-value:required"]])
+  []
+  #_[[:warn "illegal-value:required"]])
 
 (defn validate
   "Validates document against it's local schema and document level rules
@@ -105,9 +106,9 @@
   [{{schema-body :body} :schema data :data :as document}]
   (and data
     (flatten
-      (into
+      (concat
         (validate-fields schema-body nil data [])
-        #_(validate-required-fields document)
+        (validate-required-fields document)
         (vrk/validate document)))))
 
 (defn valid-document?
