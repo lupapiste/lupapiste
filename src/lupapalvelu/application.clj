@@ -634,12 +634,11 @@
       (condp = kind
         "applications" {:infoRequest false}
         "inforequests" {:infoRequest true}
-        nil)
+        "both"         nil)
       (condp = (:filter-state params)
-        "all"       nil
-        "active"    {:state {$nin ["draft" "cancelled" "answered" "verdictGiven"]}}
-        "canceled"  {:state "canceled"}
-        nil)
+        "all"       {:state {$ne "canceled"}}
+        "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
+        "canceled"  {:state "canceled"})
       (when-not (contains? #{nil "0"} (:filter-user params))
         {"authority.id" (:filter-user params)})
       (when-not (blank? search)
