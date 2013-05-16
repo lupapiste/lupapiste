@@ -1,3 +1,22 @@
+error.illegal-value:not-a-map: Väärä tietorakenne (Map)
+error.illegal-value:not-a-string: Syötte ei ole merkkijono
+error.illegal-value:too-long: Liian pitkä arvo
+error.illegal-value:too-short: Liian lyhyt arvo
+error.illegal-value:not-a-boolean: Arvo ei ole totuusarvo (true/false)
+error.illegal-value:date: Päivämäärä annetaan muodossa dd.MM.YYYY (esim. 16.05.2013)
+error.illegal-value:select: Arvo ei ole sallitusta arvojoukosta
+error.illegal-key: Tuntematon avain
+error.unknown-type: Tuntematon tietotyyppi
+error.illegal-email: Sähköpostiosoite väärää muotoa
+error.illegal-tel: Puhelinunumeron muoto on väärä
+error.illegal-number: Ei ole numero
+error.illegal-letter:upper: Anna iso kirjain
+error.illegal-letter:lower: Anna pieni kirjain
+error.illegal-letter:any: Anna kirjain
+error.illegal-kiinteistotunnus: Kiinteistötunnus on 14 numeroa pitkä.
+error.illegal-zip: Eriskummallienn postinumero
+error.illegal-subtype: Tuntematon tietotyyppi
+
 error.vrk:CR341: Sähkölämmitys vaatii sähköliittymän
 error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän
 error.vrk:CR343: Jos lämmitystapa on 3 (sähkölämmitys), on polttoaineen oltava 4 (sähkö)
