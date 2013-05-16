@@ -224,7 +224,7 @@
         user           (or email "(anonymous)")
         sanitized-ua   (sanitize user-agent)
         sanitized-msg  (sanitize (str message))]
-    (errorf "User %s [%s] got an error on page %s: %s"
+    (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
             user sanitized-ua sanitized-page sanitized-msg)))
 
 ;;
