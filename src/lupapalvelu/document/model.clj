@@ -97,10 +97,12 @@
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
 (defn- do-validation [schema data k path]
-  (let [current-path (if k (conj path (name k)) path)]
-    (println "current-path:" current-path)
-    (map (fn [m] (println "map: " m)))))
-    ;(do-validation schema data k path)
+  (let [current-path (if k (conj path (name k)) path)
+        cd (get-in schema [current-path])]
+    (println "path:" path)
+    (if (contains? schema :body)
+      (doall
+        (map (fn [m] (do-validation schema data k (get-in schema [current-path]) cd)))))))
 
 (defn- validate-required-fields [document]
   (let [schema (:schema document)
