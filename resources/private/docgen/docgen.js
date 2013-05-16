@@ -50,7 +50,7 @@ var docgen = (function () {
     // ID utilities
 
     function pathStrToID(pathStr) {
-      return self.docId + "-" + pathStr.replace(/\./g, "-");;
+      return self.docId + "-" + pathStr.replace(/\./g, "-");
     }
 
     function pathStrToLabelID(pathStr) {
@@ -121,6 +121,12 @@ var docgen = (function () {
       if (subSchema.layout) {
         span.className = "form-entry form-" + subSchema.layout;
       }
+
+      // durable field error panels
+      var errorPanel = document.createElement("span");
+      errorPanel.className = "errorPanel";
+      errorPanel.id = pathStrToID(pathStr) + "-errorPanel";
+      span.appendChild(errorPanel);
 
       // Add span for help text
       if (loc.hasTerm(helpLocKey)) {
@@ -613,7 +619,7 @@ var docgen = (function () {
         // elements: [key status message]. Here we use just the status.
         .success(function (e) {
           var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
-          callback(status,e.results);
+          callback(status, e.results);
         })
         .error(function (e) { error(e); callback("err"); })
         .fail(function (e) { error(e); callback("err"); })
@@ -621,9 +627,16 @@ var docgen = (function () {
     }
 
     function showValidationResults(results) {
+      // remove warning and error highlights
       $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
+      // clear validation errors
+      $("#document-"+docId+" .errorPanel").text("").hide();
+      // apply new errors & highlights
       if(results && results.length > 0) {
-        _.each(results,function(result) { $("#"+docId+"-"+result.path.join("-")).addClass("warning"); });
+        _.each(results,function(result) {
+          $("#"+docId+"-"+result.path.join("-")+"-errorPanel").text(loc(result.result[1])).show();
+          $("#"+docId+"-"+result.path.join("-")).addClass("warning");
+        });
       }
     }
 
