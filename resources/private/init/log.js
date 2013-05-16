@@ -11,10 +11,7 @@
     }
 
     if (level >= serverLimit && typeof ajax !== "undefined") {
-      var message = args;
-      if (_.isArray(args) && args.length === 1) {
-        message = _.first(args);
-      }
+      var message = args.length === 1 ? args[0]: args;
       ajax.command("frontend-error", {"message": message}).call();
     }
   };
