@@ -8,9 +8,9 @@ var repository = (function() {
       .success(function(data) {
         hub.send("application-loaded", {applicationDetails: data});
       })
-      .error(function() {
-        error("Application " + id + " not found");
-        window.location.hash = "!/404";
+      .error(function(e) {
+        error("Application " + id + " not found", e);
+        LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
       })
       .call();
   }
@@ -23,6 +23,19 @@ var repository = (function() {
       }
     });
   }
+
+  function showApplicationList() {
+    pageutil.hideAjaxWait();
+    window.location.hash = "!/applications";
+  }
+
+  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-application-load-error",
+      loc("error.application-not-found"), loc("error.application-not-accessible"),
+      loc("navigation"), showApplicationList, loc("logout"), function() {hub.send("logout");});
+
+  hub.subscribe({type: "dialog-close", id : "dialog-application-load-error"}, function() {
+    showApplicationList();
+  });
 
   return {
     load: load,
