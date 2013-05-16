@@ -6,12 +6,12 @@
   var serverLimit = 4;
 
   var logv = function (level, args) {
-    if (level >= limit && typeof console !== "undefined") {
-      console.log(levelName[level], args);
-    }
+    var message = args.length === 1 ? args[0]: args;
 
+    if (level >= limit && typeof console !== "undefined") {
+      console.log(levelName[level], message);
+    }
     if (level >= serverLimit && typeof ajax !== "undefined") {
-      var message = args.length === 1 ? args[0]: args;
       ajax.command("frontend-error", {"message": message}).call();
     }
   };
