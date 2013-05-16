@@ -42,7 +42,7 @@
       :result [:warn "vrk:BR106"]}]))
 
 (defvalidator "vrk:CR343"
-  "Jos lämmitystapa on 3 (sähkölämmitys), on polttoaineen oltava 4 (sähkö)"
+  "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and
@@ -55,7 +55,7 @@
       :result [:warn "vrk:CR343"]}]))
 
 (defvalidator "vrk:CR342"
-  "Sähkö polttoaineena vaatii sähköliittymän"
+  "Sahko polttoaineena vaatii sahkoliittyman"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and
@@ -68,7 +68,7 @@
       :result [:warn "vrk:CR342"]}]))
 
 (defvalidator "vrk:CR341"
-  "Sähkölämmitys vaatii sähköliittymän"
+  "Sahkolammitus vaatii sahkoliittyman"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and

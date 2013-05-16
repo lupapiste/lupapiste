@@ -24,7 +24,7 @@
       (apply-update [:rakenne :kantavaRakennusaine] "puu")
       (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"]))
 
-  (fact "Jos lämmitystapa on 3 (sähkölämmitys), on polttoaineen oltava 4 (sähkö)"
+  (fact "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
     (-> uusi-rakennus
       (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
       (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")) => valid?
@@ -32,7 +32,7 @@
       (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
       (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR343"]))
 
-  (fact "Sähkö polttoaineena vaatii sähköliittymän"
+  (fact "Sahko polttoaineena vaatii sahkoliittyman"
     (-> uusi-rakennus
       (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")
       (apply-update [:verkostoliittymat :sahkoKytkin] true)) => valid?
@@ -40,7 +40,7 @@
       (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")
       (apply-update [:verkostoliittymat :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR342"]))
 
-  (fact "Sähkölämmitys vaatii sähköliittymän"
+  (fact "Sahkolammitus vaatii sahkoliittyman"
     (-> uusi-rakennus
       (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
       (apply-update [:verkostoliittymat :sahkoKytkin] true)) => (not-invalid-with? [:warn "vrk:CR341"])
