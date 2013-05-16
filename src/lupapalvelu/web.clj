@@ -214,14 +214,18 @@
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
 (defcommand "frontend-error" {}
-  [{{:keys [message]} :data}]
+  [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit    1000
         sanitize (fn [s] (let [line (s/replace s #"[\r\n]" "\\n")]
                            (if (> (.length line) limit)
                              (str (.substring line 0 limit) "... (truncated)")
                              line)))
-        sanitized-msg (sanitize (str message))]
-    (error "Fronend reported error:" sanitized-msg)))
+        sanitized-page (sanitize (or page "(unknown)"))
+        user           (or email "(anonymous)")
+        sanitized-ua   (sanitize user-agent)
+        sanitized-msg  (sanitize (str message))]
+    (errorf "User %s [%s] got an error on page %s: %s"
+            user sanitized-ua sanitized-page sanitized-msg)))
 
 ;;
 ;; Login/logout:

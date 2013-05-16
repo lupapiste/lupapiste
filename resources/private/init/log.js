@@ -12,7 +12,8 @@
       console.log(levelName[level], message);
     }
     if (level >= serverLimit && typeof ajax !== "undefined") {
-      ajax.command("frontend-error", {"message": message}).call();
+      var page = location.pathname + location.hash;
+      ajax.command("frontend-error", {page: page, message: message}).call();
     }
   };
 
