@@ -137,9 +137,12 @@
 
 (defn apply-update
   "Updates a document returning the modified document.
+   Value defaults to \"\" - unsetting the value.
    Example: (apply-update document [:mitat :koko] 12)"
-  [document path value]
-  (assoc-in document (flatten [:data path :value]) value))
+  ([document path]
+    (apply-update document path ""))
+  ([document path value]
+    (assoc-in document (flatten [:data path :value]) value)))
 
 (defn apply-updates
   "Updates a document returning the modified document.
