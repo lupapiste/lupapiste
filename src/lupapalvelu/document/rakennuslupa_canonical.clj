@@ -390,8 +390,7 @@
                          :puoltotieto {:puolto ((keyword (:status statement)) puolto-mapping)}}}})
 
 (defn- get-statements [statements]
-  (map get-statement statements)
-  )
+  (map get-statement statements))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."

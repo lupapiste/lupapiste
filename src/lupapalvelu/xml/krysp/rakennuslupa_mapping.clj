@@ -143,7 +143,18 @@
                                                                                                           {:tag :pyyntoPvm}]}
                                                                                   {:tag :lausunto :child [{:tag :viranomainen}
                                                                                                           {:tag :lausuntoPvm}
-                                                                                                          {:tag :lausunto :child [{:tag :lausunto}]}
+                                                                                                          {:tag :lausunto :child [{:tag :lausunto}
+                                                                                                                                  {:tag :liite
+                                                                                                                                   :child [{:tag :kuvaus :ns "yht"}
+                                                                                                                                           {:tag :linkkiliitteeseen :ns "yht"}
+                                                                                                                                           {:tag :muokkausHetki :ns "yht"}
+                                                                                                                                           {:tag :versionumero :ns "yht"}
+                                                                                                                                           {:tag :tekija :ns "yht"
+                                                                                                                                            :child [{:tag :kuntaRooliKoodi}
+                                                                                                                                                    {:tag :VRKrooliKoodi}
+                                                                                                                                                    henkilo
+                                                                                                                                                    yritys]}
+                                                                                                                                           {:tag :tyyppi :ns "yht"}]}]}
                                                                                                           {:tag :puoltotieto :child [{:tag :puolto}]}]}]}] }
 
                              {:tag :lisatiedot
@@ -187,17 +198,42 @@
     :tyyppi type
     :fileId file-id}})
 
+(defn- get-liite [attachment application begin-of-link]
+  (let [type "Lausunto"
+        title (str (:title application) ": " type "-" (:id attachment))
+        file-id (get-in attachment [:latestVersion :fileId])
+        attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+        link (str begin-of-link attachment-file-name)]
+    {:Liite
+     {:kuvaus title
+      :linkkiliitteeseen link
+      :muokkausHetki (to-xml-datetime (:modified attachment))
+      :versionumero 1
+      :tyyppi type
+      :fileId file-id}}))
+
+(defn- get-liite-zipped [id-and-attachments application begin-of-link]
+  (let [attachment (first (last id-and-attachments))
+        type "Lausunto"
+        title (str (:title application) ": " type "-" (:id attachment))
+        file-id (str "L-" (first id-and-attachments))
+        attachment-file-name (str (first id-and-attachments) ".zip")
+        link (str begin-of-link attachment-file-name)]
+    {:Liite
+     {:kuvaus title
+      :linkkiliitteeseen link
+      :muokkausHetki (to-xml-datetime (:modified attachment))
+      :versionumero 1
+      :tyyppi type
+      :fileId file-id}}))
+
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
-  (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]) (filter (= "statement" (-> attachment :target :type)) (:attachments application))))
-        canonical-attachments (for [attachment statement-attachments-by-id
-                                    (if
-                                    :let [type (get-in attachment [:type :type-id] )
-                                          title (str (:title application) ": " type "-" (:id attachment))
-                                          file-id (get-in attachment [:latestVersion :fileId])
-                                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                                          link (str begin-of-link attachment-file-name)]]
-                                {}
-                                )]
+  (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
+        canonical-attachments (for [attachment-tuple statement-attachments-by-id]
+                                (if (= 1 (count (last attachment-tuple)))
+
+                                  {(first attachment-tuple) (get-liite (first (last attachment-tuple)) application begin-of-link)}
+                                  {(first attachment-tuple) (get-liite-zipped attachment-tuple application begin-of-link)}))]
     (not-empty canonical-attachments)))
 
 (defn- get-attachments-as-canonical [application begin-of-link ]
@@ -209,13 +245,7 @@
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
-                                {:Liite
-                                 {:kuvaus title
-                                  :linkkiliitteeseen link
-                                  :muokkausHetki (to-xml-datetime (:modified attachment))
-                                  :versionumero 1
-                                  :tyyppi type
-                                  :fileId file-id}})]
+                                (get-liite attachment application begin-of-link))]
     (not-empty canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
@@ -236,6 +266,17 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
+(defn- add-statement-attchments [canonical statement-attachments]
+  (reduce (fn [c a]
+            (let [lausuntotieto (doall (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
+                  paivitettava-lausunto (filter #(= (get-in % [:Lausunto :id]) (first a)) lausuntotieto)
+                  index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
+                  lausunto (get-in paivitettava-lausunto [:Lausunto :lausunto :lausunto])
+                  paivitetty-lausunto (assoc lausunto :liite (:Liite (last a)))
+                  paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
+              (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
+            ) canonical statement-attachments))
+
 (defn get-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [sftp-user (:rakennus-ftp-user organization)
@@ -249,6 +290,7 @@
         canonical-without-attachments  (application-to-canonical application)
         fileserver-address (:fileserver-address env/config)
         begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
+        statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
                                               {:Liite
@@ -263,8 +305,11 @@
                                                 :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
                                                 :versionumero 1
                                                 :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
-        canonical (assoc-in canonical-without-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
+        canonical-with-statment-attachments  (add-statement-attchments canonical-without-attachments statement-attachments)
+        canonical (assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
+    (clojure.pprint/pprint(:attachments application))
+    (clojure.pprint/pprint statement-attachments)
     (validate (indent-str xml))
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))

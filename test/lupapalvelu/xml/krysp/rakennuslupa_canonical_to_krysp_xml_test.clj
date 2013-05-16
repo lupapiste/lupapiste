@@ -32,7 +32,7 @@
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (get-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO: own test
 
-    ;(clojure.pprint/pprint canonical)
+    (clojure.pprint/pprint application)
     ;(clojure.pprint/pprint rakennuslupa_to_krysp)
     ;(with-open [out-file (writer "/Users/terotu/example.xml" )]
     ;    (emit xml out-file))

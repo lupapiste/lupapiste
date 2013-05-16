@@ -259,7 +259,44 @@
    :state "open"
    :opened 1354532324658
    :location {:x 408048, :y 6693225},
-   :attachments [],
+   :attachments [{ :id "518ce59b036496133cf5ba7f"
+                  :latestVersion { :fileId "518ce59b036496133cf5ba7c"
+                                  :version { :major 0
+                                            :minor 1 }
+                                  :size 27726
+                                  :created 1368188315224
+                                  :filename "1901_001.pdf"
+                                  :contentType "application/pdf"
+                                  :user {:role "authority"
+                                         :lastName "Sibbo"
+                                         :firstName "Sonja"
+                                         :username "sonja"
+                                         :id "777777777777777777000023" }
+                                  :stamped false
+                                  :accepted nil }
+                  :locked true
+                  :modified 1368188315224
+                  :op nil
+                  :state "requires_authority_action"
+                  :target { :type "statement"
+                           :id "518ce582036496133cf5ba75" }
+                  :type { :type-group "muut"
+                         :type-id "muu" }
+                  :versions [
+                             {:fileId "518ce59b036496133cf5ba7c"
+                              :version { "major" 0
+                                        :minor 1 }
+                              :size 27726
+                              :created 1368188315224
+                              :filename "1901_001.pdf"
+                              :contentType "application/pdf"
+                              :user {:role "authority"
+                                     :lastName "Sibbo"
+                                     :firstName "Sonja"
+                                     :username "sonja"
+                                     :id "777777777777777777000023" }
+                              :stamped false
+                              :accepted nil}]}],
    :authority {:id "777777777777777777000023",
                :username "sonja",
                :firstName "Sonja",
