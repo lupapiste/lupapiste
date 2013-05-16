@@ -9,18 +9,24 @@
 ;;
 
 ;; TODO: test me!
-(defn application-query-for [user]
+(defn basic-application-query-for [user]
   (case (keyword (:role user))
-    :applicant {:auth.id (:id user)
-                :state {$ne "canceled"}}
-    :authority {$or [{:organization {$in (:organizations user)}}
-                     {:auth.id (:id user)}]
-                $and [{:state {$ne "draft"}}
-                      {:state {$ne "canceled"}}]}
-    :admin     {:state {$ne "canceled"}}
+    :applicant {:auth.id (:id user)}
+    :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :admin     {}
     (do
-      (warn "invalid role to get applications")
-      {:_id "-1"} ))) ; should not yield any results
+      (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
+      {:_id "-1"}))) ; should not yield any results
+
+;; TODO: test me!
+(defn application-query-for [user]
+  (merge
+    (basic-application-query-for user)
+    (case (keyword (:role user))
+      :applicant {:state {$ne "canceled"}}
+      :authority {$and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
+      :admin     {:state {$ne "canceled"}}
+      {})))
 
 (defn get-application-as [application-id user]
   (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
