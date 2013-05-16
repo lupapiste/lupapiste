@@ -2,5 +2,11 @@ poi: Paikka
 poi.540: Kaupunki
 poi.550: Kunta
 poi.560: Kylä tai kaupunginosa
+poi.325: Metsäalue
+poi.330: Suo
+poi.345: Niemi
+poi.350: Saari
+poi.410: Vesistö
+poi.420: Joki
 
 create.placeholder: Kasarmikatu 25, Helsinki
