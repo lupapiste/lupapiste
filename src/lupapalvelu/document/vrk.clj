@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.vrk
   (:use [lupapalvelu.clojure15])
-  (:require [sade.util :refer [safe-int]]))
+  (:require [sade.util :refer [safe-int]]
+            [clojure.string :as s]))
 
 ;;
 ;; da lib
@@ -24,79 +25,13 @@
     (map #(apply % [document]))
     (filter (comp not nil?))))
 
-;;
-;; validators
-;;
-
-(defvalidator "vrk:BR106"
-  "Puutalossa saa olla korkeintaan 4 kerrosta"
-  [{{{schema-name :name} :info} :schema data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (some-> data :mitat :kerrosluku :value safe-int (> 4)))
-    [{:path[:rakenne :kantavaRakennusaine]
-      :result [:warn "vrk:BR106"]}
-     {:path[:mitat :kerrosluku]
-      :result [:warn "vrk:BR106"]}]))
-
-(defvalidator "vrk:CR343"
-  "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
-  [{{{schema-name :name} :info} :schema data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
-      (some-> data :lammitys :lammonlahde :value (not= "s\u00e4hk\u00f6")))
-    [{:path [:lammitys :lammitystapa]
-      :result [:warn "vrk:CR343"]}
-     {:path [:lammitys :lammonlahde]
-      :result [:warn "vrk:CR343"]}]))
-
-(defvalidator "vrk:CR342"
-  "Sahko polttoaineena vaatii sahkoliittyman"
-  [{{{schema-name :name} :info} :schema data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammonlahde :value (= "s\u00e4hk\u00f6"))
-      (some-> data :verkostoliittymat :sahkoKytkin :value not))
-    [{:path [:lammitys :lammonlahde]
-      :result [:warn "vrk:CR342"]}
-     {:path [:verkostoliittymat :sahkoKytkin]
-      :result [:warn "vrk:CR342"]}]))
-
-(defvalidator "vrk:CR341"
-  "Sahkolammitus vaatii sahkoliittyman"
-  [{{{schema-name :name} :info} :schema data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
-      (some-> data :verkostoliittymat :sahkoKytkin :value not))
-    [{:path [:lammitys :lammitystapa]
-      :result [:warn "vrk:CR341"]}
-     {:path [:verkostoliittymat :sahkoKytkin]
-      :result [:warn "vrk:CR341"]}]))
-
-(declare kayttotarkoitus->tilavuus)
-
-(defvalidator "vrk:ktark-tilavuus-max"
-  "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
-  [{{{schema-name :name} :info} :schema data :data}]
-  (when (= schema-name "uusiRakennus")
-    (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value (re-matches #"(\d+) .*") last keyword)
-          tilavuus        (some->> data :mitat :tilavuus :value safe-int)
-          max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
-      (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
-        [{:path[:kaytto :kayttotarkoitus]
-          :result [:warn "vrk:ktark-tilavuus-max"]}
-         {:path[:mitat :tilavuus]
-          :result [:warn "vrk:ktark-tilavuus-max"]}]))))
+(defn has-value? [x]
+  (let [v (-> x s/blank? not)]
+    (println x v)
+    v))
 
 ;;
-;; Rule data
+;; Data
 ;;
 
 (def kayttotarkoitus->tilavuus {:011 10000
@@ -177,3 +112,84 @@
                                 :931 4000
                                 :941 50000
                                 :999 50000})
+;;
+;; validators
+;;
+
+(defvalidator "vrk:ktark-tilavuus-max"
+  "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when (= schema-name "uusiRakennus")
+    (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value (re-matches #"(\d+) .*") last keyword)
+          tilavuus        (some->> data :mitat :tilavuus :value safe-int)
+          max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
+      (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
+        [{:path[:kaytto :kayttotarkoitus]
+          :result [:warn "vrk:ktark-tilavuus-max"]}
+         {:path[:mitat :tilavuus]
+          :result [:warn "vrk:ktark-tilavuus-max"]}]))))
+
+(defvalidator "vrk:BR106"
+  "Puutalossa saa olla korkeintaan 4 kerrosta"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
+      (some-> data :mitat :kerrosluku :value safe-int (> 4)))
+    [{:path[:rakenne :kantavaRakennusaine]
+      :result [:warn "vrk:BR106"]}
+     {:path[:mitat :kerrosluku]
+      :result [:warn "vrk:BR106"]}]))
+
+(defvalidator "vrk:CR343"
+  "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
+      (some-> data :lammitys :lammonlahde :value (not= "s\u00e4hk\u00f6")))
+    [{:path [:lammitys :lammitystapa]
+      :result [:warn "vrk:CR343"]}
+     {:path [:lammitys :lammonlahde]
+      :result [:warn "vrk:CR343"]}]))
+
+(defvalidator "vrk:CR342"
+  "Sahko polttoaineena vaatii sahkoliittyman"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammonlahde :value (= "s\u00e4hk\u00f6"))
+      (some-> data :verkostoliittymat :sahkoKytkin :value not))
+    [{:path [:lammitys :lammonlahde]
+      :result [:warn "vrk:CR342"]}
+     {:path [:verkostoliittymat :sahkoKytkin]
+      :result [:warn "vrk:CR342"]}]))
+
+(defvalidator "vrk:CR341"
+  "Sahkolammitus vaatii sahkoliittyman"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
+      (some-> data :verkostoliittymat :sahkoKytkin :value not))
+    [{:path [:lammitys :lammitystapa]
+      :result [:warn "vrk:CR341"]}
+     {:path [:verkostoliittymat :sahkoKytkin]
+      :result [:warn "vrk:CR341"]}]))
+
+(defvalidator "vrk:CR336"
+  "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammitystapa :value (= "eiLammitysta"))
+      (some-> data :lammitys :lammonlahde :value has-value?))
+    [{:path [:lammitys :lammitystapa]
+      :result [:warn "vrk:CR336"]}
+     {:path [:lammitys :lammonlahde]
+      :result [:warn "vrk:CR336"]}]))

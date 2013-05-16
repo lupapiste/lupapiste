@@ -16,6 +16,14 @@
   (fact "uusi rakennus is valid"
     uusi-rakennus => valid?)
 
+  (fact "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
+    (-> uusi-rakennus
+      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
+      (apply-update [:mitat :tilavuus] "100000")) => valid?
+    (-> uusi-rakennus
+      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
+      (apply-update [:mitat :tilavuus] "100001")) => (invalid-with? [:warn "vrk:ktark-tilavuus-max"]))
+
   (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
     (-> uusi-rakennus
       (apply-update [:rakenne :kantavaRakennusaine] "puu")
@@ -48,10 +56,12 @@
       (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
       (apply-update [:verkostoliittymat :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR341"]))
 
-  (fact "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
+  (fact "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
     (-> uusi-rakennus
-      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
-      (apply-update [:mitat :tilavuus] "100000")) => valid?
+      (apply-update [:lammitys :lammitystapa] "eiLammitysta")
+      (apply-update [:lammitys :lammitystapa])) => valid?
     (-> uusi-rakennus
-      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
-      (apply-update [:mitat :tilavuus] "100001")) => (invalid-with? [:warn "vrk:ktark-tilavuus-max"])))
+      (apply-update [:lammitys :lammitystapa] "eiLammitysta")
+      (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR336"]))
+
+)
