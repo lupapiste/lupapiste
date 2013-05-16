@@ -58,7 +58,8 @@
   loc)
 
 (defmacro with-lang [lang & body]
-  `(binding [loc (localizer ~lang)]
+  `(binding [*lang* ~lang
+             loc (localizer ~lang)]
      ~@body))
 
 (defn lang-middleware [handler]
