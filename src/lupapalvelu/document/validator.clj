@@ -2,12 +2,17 @@
 
 (def validators (atom {}))
 
+(defn fetch-values [c]
+  (reduce
+    (fn [form [k v]]
+      (conj form k (str v "*")))
+    [] (partition 2 c)))
+
 (defmacro defvalidator [doc-string {:keys [code document fields]} & body]
   `(swap! validators assoc (keyword ~code)
      {:doc ~doc-string
-      :fn (fn [~'_]
-            (let [~'kerrosala 10
-                  ~'kokonaisala 9]
+      :fn (fn [~'document]
+            (let ~(fetch-values fields data)
               ~@body))}))
 
 (defvalidator "Kokonaisalan oltava vähintään kerrosala"
