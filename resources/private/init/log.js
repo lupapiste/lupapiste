@@ -3,9 +3,20 @@
 
   var levelName = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"];
   var limit = 1;
+  var serverLimit = 4;
 
-  var logv = (typeof console === "undefined") ? function() {} : function (level, args) {
-    if (level >= limit) console.log(levelName[level], args);
+  var logv = function (level, args) {
+    if (level >= limit && typeof console !== "undefined") {
+      console.log(levelName[level], args);
+    }
+
+    if (level >= serverLimit && typeof ajax !== "undefined") {
+      var message = args;
+      if (_.isArray(args) && args.length === 1) {
+        message = _.first(args);
+      }
+      ajax.command("frontend-error", {"message": message}).call();
+    }
   };
 
   window.trace = function() { logv(0, Array.prototype.slice.call(arguments)); };
