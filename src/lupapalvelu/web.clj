@@ -215,8 +215,11 @@
 
 (defcommand "frontend-error" {}
   [{{:keys [message]} :data}]
-  (let [s (when message (let [line (s/replace message #"[\r\n]" "\\n")] (str (.substring line 0 1000))))]
-    (error "Fronend reported error:" s)))
+  (let [limit    1000
+        sanitize (fn [s] (let [line (s/replace message #"[\r\n]" "\\n")]
+                           (if (> (.length line) limit) (.substring line 0 limit) line)))
+        sanitized-msg (sanitize (str message))]
+    (error "Fronend reported error:" sanitized-msg)))
 
 ;;
 ;; Login/logout:
