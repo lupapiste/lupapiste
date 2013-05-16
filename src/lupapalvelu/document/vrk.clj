@@ -41,18 +41,44 @@
      {:path[:mitat :kerrosluku]
       :result [:warn "vrk:BR106"]}]))
 
-(defvalidator "vrk:CR342"
-  "S\u00e4hk\u00f6 polttoaineena vaatii s\u00e4hk\u00f6liittym\u00e4n"
+(defvalidator "vrk:CR343"
+  "Jos lämmitystapa on 3 (sähkölämmitys), on polttoaineen oltava 4 (sähkö)"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
     (and
       (= schema-name "uusiRakennus")
       (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
       (some-> data :lammitys :lammonlahde :value (not= "s\u00e4hk\u00f6")))
-    [{:path[:lammitys :lammitystapa]
+    [{:path [:lammitys :lammitystapa]
+      :result [:warn "vrk:CR343"]}
+     {:path [:lammitys :lammonlahde]
+      :result [:warn "vrk:CR343"]}]))
+
+(defvalidator "vrk:CR342"
+  "Sähkö polttoaineena vaatii sähköliittymän"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammonlahde :value (= "s\u00e4hk\u00f6"))
+      (some-> data :verkostoliittymat :sahkoKytkin :value not))
+    [{:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR342"]}
-     {:path[:lammitys :lammonlahde]
+     {:path [:verkostoliittymat :sahkoKytkin]
       :result [:warn "vrk:CR342"]}]))
+
+(defvalidator "vrk:CR341"
+  "Sähkölämmitys vaatii sähköliittymän"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammitystapa :value (= "suorasahk\u00f6"))
+      (some-> data :verkostoliittymat :sahkoKytkin :value not))
+    [{:path [:lammitys :lammitystapa]
+      :result [:warn "vrk:CR341"]}
+     {:path [:verkostoliittymat :sahkoKytkin]
+      :result [:warn "vrk:CR341"]}]))
 
 (declare kayttotarkoitus->tilavuus)
 
