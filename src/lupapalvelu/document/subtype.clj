@@ -47,6 +47,12 @@
     (re-matches #"^\d{14}$" v) nil
     :else [:warn "illegal-kiinteistotunnus"]))
 
+(defmethod subtype-validation :zip [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^\d{5}$" v) nil
+    :else [:warn "illegal-zip"]))
+
 (defmethod subtype-validation nil [_ _]
   nil)
 

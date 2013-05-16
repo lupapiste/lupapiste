@@ -2,12 +2,11 @@
   (:use [clojure.tools.logging]
         [sade.strings]
         [lupapalvelu.document.schemas :only [schemas]]
-        [lupapalvelu.clojure15]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
-            [sade.util :refer [safe-int]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.vrk :as vrk]
             [lupapalvelu.document.subtype :as subtype]))
 
 ;;
@@ -49,7 +48,10 @@
     nil
     (catch Exception e [:warn "invalid-date-format"])))
 
-(defmethod validate-field :select [elem v] nil)
+(defmethod validate-field :select [{:keys [body]} v]
+  (when-not (or (s/blank? v) (some #{v} (map :name body)))
+    [:warn "illegal-value:select"]))
+
 (defmethod validate-field :radioGroup [elem v] nil)
 (defmethod validate-field :buildingSelector [elem v] nil)
 (defmethod validate-field :personSelector [elem v] nil)
@@ -76,35 +78,27 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn validation-result [data path element result]
-  {:data    data
-   :path    (vec (map keyword path))
-   :element element
-   :result  result})
+(defn ->validation-result [data path element result]
+  (when result
+    {:data    data
+     :path    (vec (map keyword path))
+     :element element
+     :result  result}))
 
 (defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
-      (let [element (find-by-name schema-body current-path)
-            result  (validate-field (keywordize-keys element) (:value data))]
-        (and result (validation-result data current-path element result)))
+      (let [element (keywordize-keys (find-by-name schema-body current-path))
+            result  (validate-field element (:value data))]
+        (->validation-result data current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
-;; TODO: separate namespace for these
-(defn- validate-rules
-  [{{{schema-name :name} :info} :schema data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (some-> data :mitat :kerrosluku :value safe-int (> 4)))
-    [{:path    [:rakenne :kantavaRakennusaine]
-      :result  [:warn "vrk:BR106"]}
-     {:path    [:mitat :kerrosluku]
-      :result  [:warn "vrk:BR106"]}]))
+(defn- validate-required-fields [document]
+  []
+  #_[[:warn "illegal-value:required"]])
 
 (defn validate
   "Validates document against it's local schema and document level rules
@@ -112,9 +106,10 @@
   [{{schema-body :body} :schema data :data :as document}]
   (and data
     (flatten
-      (into
+      (concat
         (validate-fields schema-body nil data [])
-        (validate-rules document)))))
+        (validate-required-fields document)
+        (vrk/validate document)))))
 
 (defn valid-document?
   "Checks weather document is valid."

@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.model-test
   (:use [lupapalvelu.document.model]
         [lupapalvelu.document.schemas]
+        [lupapalvelu.document.validators]
         [midje.sweet]))
 
 ;; Simple test schema:
@@ -16,13 +17,22 @@
                                     {:name "bb" :type :boolean}]}
                             {:name "c" :type :list
                              :body [{:name "ca" :type :string}
-                                    {:name "cb" :type :checkbox}]}]}]})
+                                    {:name "cb" :type :checkbox}]}
+                            {:name "d" :type :select
+                             :body [{:name "A"}
+                                    {:name "B"}
+                                    {:name "C"}]}]}]})
 
 (def schema-with-repetition {:info {:name "repetition-model" :version 1}
                              :body [{:name "single" :type :string}
                                     {:name "repeats" :type :group :repeating true
                                      :body [{:name "single2" :type :string}
                                             {:name "repeats2" :type :string :subtype :digit :repeating true}]}]})
+
+(def schema-with-required {:info {:name "with-required" :version 1}
+                           :body [{:name "a" :type :group
+                                   :body [{:name "aa" :type :string :required true}
+                                          {:name "ab" :type :string}]}]})
 
 ;; Tests for internals:
 
@@ -51,16 +61,6 @@
 ;; validate
 ;;
 
-(defn valid? [document]
-  (or (fact (validate document) => '()) true))
-
-(defn invalid? [document]
-  (or (fact (validate document) => (has some not-empty)) true))
-
-(defn invalid-with? [result]
-  (fn [document]
-    (or (fact (validate document) => (has some (contains {:result result}))) true)))
-
 (facts "validate"
   {:schema {:info {:name "schema"}
             :body [{:name "a" :type :group
@@ -86,6 +86,15 @@
       (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
     (-> document
       (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])))
+
+(facts "Select"
+  (let [document (new-document schema ..now..)]
+    (-> document
+      (apply-update [:a :d] "A")) => valid?
+    (-> document
+      (apply-update [:a :d] "")) => valid?
+    (-> document
+      (apply-update [:a :d] "D")) => (invalid-with? [:warn "illegal-value:select"])))
 
 (facts "with real schemas - important field for paasuunnittelija"
   (let [document (new-document (schemas "paasuunnittelija") ..now..)]
@@ -126,6 +135,18 @@
       (-> document
         (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"]))))
 
+;; TODO: implement so that these pass
+#_(facts "Required fields"
+  (let [document (new-document schema-with-required ..now..)]
+
+    document => (invalid-with? [:warn "illegal-value:required"])
+
+    (-> document
+      (apply-update [:a :aa] " ")) => (invalid-with? [:warn "illegal-value:required"])
+
+    (-> document
+      (apply-update [:a :aa] "value")) => valid?))
+
 ;;
 ;; Updates
 ;;
@@ -135,29 +156,3 @@
   (apply-updates {} [[[:b :c] "kikka"]
                      [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
                                                         :d {:value "kukka"}}}})
-
-;;
-;; VRK-rules validation
-;;
-
-(use 'lupapalvelu.document.tools)
-(use 'lupapalvelu.document.schemas)
-
-(def uusi-rakennus
-  (let [schema (schemas "uusiRakennus")
-        data   (create-document-data schema dummy-values)]
-    {:schema schema
-     :data   data}))
-
-(facts "VRK-validations"
-
-  (fact "uusi rakennus is valid"
-    uusi-rakennus => valid?)
-
-  (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
-    (-> uusi-rakennus
-      (apply-update [:rakenne :kantavaRakennusaine] "puu")
-      (apply-update [:mitat :kerrosluku] "3")) => valid?
-    (-> uusi-rakennus
-      (apply-update [:rakenne :kantavaRakennusaine] "puu")
-      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"])))

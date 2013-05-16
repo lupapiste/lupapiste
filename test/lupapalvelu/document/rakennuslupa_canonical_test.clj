@@ -29,7 +29,7 @@
 
 (def henkilotiedot (assoc nimi :hetu {:value "010100A0101"}))
 
-(def osoite {:katu {:value "katu"} :postinumero {:value "666"} :postitoimipaikannimi {:value "Tuonela"}})
+(def osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
 
 (def henkilo
   {:henkilotiedot henkilotiedot
@@ -130,16 +130,16 @@
                      :energialuokka {:value "C"}
                      :energiatehokkuusluku {:value "124"}
                      :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
-          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "a"} :huoneistonumero {:value "1"} :jakokirjain {:value "A"}}
+          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "A"} :huoneistonumero {:value "1"} :jakokirjain {:value "a"}}
                            :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
                                               :huoneistoala {:value "56"}
-                                              :huoneluku {:value "2H+K"}}
+                                              :huoneluku {:value "66"}}
                            :keittionTyyppi {:value "keittio"}
                            :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
                        :1 {:huoneistoTunnus {},
                            :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
                                               :huoneistoala {:value "02"}
-                                              :huoneluku {:value "Huoneiston tiedot liikehuoneistolle"}}
+                                              :huoneluku {:value "12"}}
                            :keittionTyyppi {:value "keittokomero"},
                            :varusteet {:ammeTaiSuihkuKytkin {:value true}, :saunaKytkin {:value true}, :lamminvesiKytkin {:value true}}}}})
 
@@ -295,7 +295,7 @@
         person-postitoimipaikannimi (:postitoimipaikannimi address)]
     (fact address => truthy)
     (fact person-katu => "katu")
-    (fact person-postinumero =>"666")
+    (fact person-postinumero =>"33800")
     (fact person-postitoimipaikannimi => "Tuonela")))
 
 (defn- validete-contact [m]
@@ -428,7 +428,7 @@
   (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
         h1 (first huoneistot), h2 (last huoneistot)]
     (fact (count huoneistot) => 2)
-    (fact (:huoneluku h1) => "2H+K")
+    (fact (:huoneluku h1) => "66")
     (fact (:keittionTyyppi h1) => "keittio")
     (fact (:huoneistoala h1) => "56")
     (fact (:huoneistonTyyppi h1) => "asuinhuoneisto")
@@ -442,7 +442,7 @@
     (fact (-> h1 :huoneistotunnus :huoneistonumero) => "001")
     (fact (-> h1 :huoneistotunnus :jakokirjain) => "a")
 
-    (fact (:huoneluku h2) => "Huoneiston tiedot liikehuoneistolle")
+    (fact (:huoneluku h2) => "12")
     (fact (:keittionTyyppi h2) => "keittokomero")
     (fact (:huoneistoala h2) => "02")
     (fact (:huoneistonTyyppi h2) => "toimitila")
