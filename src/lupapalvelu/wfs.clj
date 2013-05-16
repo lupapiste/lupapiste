@@ -148,15 +148,15 @@
      :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
             :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}}))
 
-(defn response->features [response]
-  (let [input-xml (:body response)
-        features (-> input-xml
-                   (s/replace "UTF-8" "ISO-8859-1")
-                   (.getBytes "ISO-8859-1")
-                   java.io.ByteArrayInputStream.
-                   xml/parse
-                   zip/xml-zip)]
-    (xml-> features :gml:featureMember)))
+(defn response->features [input-xml]
+  (when input-xml
+    (let [features (-> input-xml
+                     (s/replace "UTF-8" "ISO-8859-1")
+                     (.getBytes "ISO-8859-1")
+                     java.io.ByteArrayInputStream.
+                     xml/parse
+                     zip/xml-zip)]
+      (xml-> features :gml:featureMember))))
 
 ;;
 ;; Executing HTTP calls to Maanmittauslaitos:

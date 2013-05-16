@@ -20,6 +20,7 @@
       $("#create-part-2").hide();
       $("#create-part-3").hide();
       $("#create-search").focus();
+      self.map.updateSize();
     };
 
     self.goPhase2 = function() {
@@ -98,7 +99,6 @@
         self.map = gis.makeMap("create-map").center(404168, 7205000, 0);
         self.map.addClickHandler(self.click);
       }
-      self.map.clear().updateSize();
       return self
         .search("")
         .x(0)
@@ -146,7 +146,6 @@
 
     self.searchNow = function() {
       // $('.selected-location').show();
-      // self.map.updateSize();
       self
         .resetXY()
         .addressData(null)
