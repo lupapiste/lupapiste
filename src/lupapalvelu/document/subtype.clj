@@ -36,10 +36,10 @@
                  :lower #"^\p{Ll}$"
                  :upper #"^\p{Lu}$"
                  #"^\p{L}$")]
-  (cond
-    (blank? v) nil
-    (re-matches regexp v) nil
-    :else [:warn (str "illegal-letter:" (if case (name case) "any"))])))
+    (cond
+      (blank? v) nil
+      (re-matches regexp v) nil
+      :else [:warn (str "illegal-letter:" (if case (name case) "any"))])))
 
 (defmethod subtype-validation :kiinteistotunnus [_ v]
   (cond

@@ -46,7 +46,7 @@
   (try
     (or (s/blank? v) (timeformat/parse dd-mm-yyyy v))
     nil
-    (catch Exception e [:warn "invalid-date-format"])))
+    (catch Exception e [:warn "illegal-value:date"])))
 
 (defmethod validate-field :select [{:keys [body]} v]
   (when-not (or (s/blank? v) (some #{v} (map :name body)))

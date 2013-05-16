@@ -53,7 +53,7 @@
 ; field type validation
 
 (facts "dates"
-  (validate-field {:type :date} "abba") => [:warn "invalid-date-format"]
+  (validate-field {:type :date} "abba") => [:warn "illegal-value:date"]
   (validate-field {:type :date} "") => nil
   (validate-field {:type :date} "11.12.2013") => nil)
 
