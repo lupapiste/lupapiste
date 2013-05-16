@@ -5,8 +5,7 @@
         [clojure.tools.logging]
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
-        [clojure.walk :only [keywordize-keys]]
-        [clojure.string :only [blank?]])
+        [clojure.walk :only [keywordize-keys]])
   (:require [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
