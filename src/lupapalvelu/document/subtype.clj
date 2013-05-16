@@ -39,7 +39,7 @@
   (cond
     (blank? v) nil
     (re-matches regexp v) nil
-    :else [:warn "illegal-letter"])))
+    :else [:warn (str "illegal-letter:" (if case (name case) "any"))])))
 
 (defmethod subtype-validation :kiinteistotunnus [_ v]
   (cond
