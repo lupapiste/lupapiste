@@ -78,22 +78,27 @@
             elem))
         (find-by-name (:body elem) ks)))))
 
-(defn validation-result [data path element result]
-  {:data    data
-   :path    (vec (map keyword path))
-   :element element
-   :result  result})
+(defn ->validation-result [data path element result]
+  (when result
+    {:data    data
+     :path    (vec (map keyword path))
+     :element element
+     :result  result}))
 
 (defn- validate-fields [schema-body k data path]
   (let [current-path (if k (conj path (name k)) path)]
     (if (contains? data :value)
-      (let [element (find-by-name schema-body current-path)
-            result  (validate-field (keywordize-keys element) (:value data))]
-        (and result (validation-result data current-path element result)))
+      (let [element (keywordize-keys (find-by-name schema-body current-path))
+            result  (validate-field element (:value data))]
+        (->validation-result data current-path element result))
       (filter
         (comp not nil?)
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
+
+(defn- validate-required-fields [document]
+  []
+  #_[[:warn "illegal-value:required"]])
 
 (defn validate
   "Validates document against it's local schema and document level rules
@@ -101,8 +106,9 @@
   [{{schema-body :body} :schema data :data :as document}]
   (and data
     (flatten
-      (into
+      (concat
         (validate-fields schema-body nil data [])
+        (validate-required-fields document)
         (vrk/validate document)))))
 
 (defn valid-document?
