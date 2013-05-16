@@ -135,8 +135,7 @@
       (-> document
         (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"]))))
 
-;; TODO: implement so that these pass
-#_(facts "Required fields"
+(facts "Required fields"
   (let [document (new-document schema-with-required ..now..)]
 
     document => (invalid-with? [:warn "illegal-value:required"])

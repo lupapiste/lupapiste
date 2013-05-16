@@ -96,9 +96,24 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
+(defn- do-validation [schema data k path]
+  (let [current-path (if k (conj path (name k)) path)]
+    (println "current-path:" current-path)
+    (map (fn [m] (println "map: " m)))))
+    ;(do-validation schema data k path)
+
 (defn- validate-required-fields [document]
-  []
-  #_[[:warn "illegal-value:required"]])
+  (let [schema (:schema document)
+        data (:data document)]
+    (println "schema:")
+    (clojure.pprint/pprint schema)
+    (println "data:")
+    (clojure.pprint/pprint data)
+    (println "### do-validation")
+    (do-validation schema data nil :body)
+    (->validation-result {:value "kikka"} [:a :ab] {:max-len 3, :name "ab", :type :string, :min-len 2} [:err "illegal-value:too-long"])))
+;  []
+#_[[:warn "illegal-value:required"]]
 
 (defn validate
   "Validates document against it's local schema and document level rules
