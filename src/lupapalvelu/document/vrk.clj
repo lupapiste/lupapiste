@@ -113,7 +113,7 @@
 ;; validators
 ;;
 
-(defvalidator "vrk:ktark-tilavuus-max"
+(defvalidator "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
   [{{{schema-name :name} :info} :schema data :data}]
   (when (= schema-name "uusiRakennus")
@@ -122,9 +122,9 @@
           max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
       (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
         [{:path[:kaytto :kayttotarkoitus]
-          :result [:warn "vrk:ktark-tilavuus-max"]}
+          :result [:warn "vrk:CR327"]}
          {:path[:mitat :tilavuus]
-          :result [:warn "vrk:ktark-tilavuus-max"]}]))))
+          :result [:warn "vrk:CR327"]}]))))
 
 (defvalidator "vrk:BR106"
   "Puutalossa saa olla korkeintaan 4 kerrosta"

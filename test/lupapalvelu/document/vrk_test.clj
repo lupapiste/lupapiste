@@ -22,7 +22,7 @@
       (apply-update [:mitat :tilavuus] "100000")) => valid?
     (-> uusi-rakennus
       (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
-      (apply-update [:mitat :tilavuus] "100001")) => (invalid-with? [:warn "vrk:ktark-tilavuus-max"]))
+      (apply-update [:mitat :tilavuus] "100001")) => (invalid-with? [:warn "vrk:CR327"]))
 
   (fact "Puutalossa saa olla korkeintaan 4 kerrosta"
     (-> uusi-rakennus
