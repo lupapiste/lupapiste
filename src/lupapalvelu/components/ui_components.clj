@@ -133,6 +133,8 @@
    :welcome {:depends [:common :register :debug]
              :js ["welcome.js" "login.js"]
              :html ["index.html" "login.html"]}
+   
+   :oskari  {:css ["oskari.css"]}
 
    :mypage  {:depends [:common]
              :js ["mypage.js"]
