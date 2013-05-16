@@ -214,6 +214,11 @@
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
+(defcommand "frontend-error" {}
+  [{{:keys [message]} :data}]
+  (let [s (when message (let [line (s/replace message #"[\r\n]" "\\n")] (str (.substring line 0 1000))))]
+    (error "Fronend reported error:" s)))
+
 ;;
 ;; Login/logout:
 ;;
