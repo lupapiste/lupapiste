@@ -630,11 +630,12 @@ var docgen = (function () {
       // remove warning and error highlights
       $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
       // clear validation errors
-      $("#document-"+docId+" .errorPanel").text("").hide();
+      $("#document-"+docId+" .errorPanel").html("").hide();
       // apply new errors & highlights
       if(results && results.length > 0) {
         _.each(results,function(result) {
-          $("#"+docId+"-"+result.path.join("-")+"-errorPanel").text(loc(result.result[1])).show();
+          var errorPanel = $("#"+docId+"-"+result.path.join("-")+"-errorPanel");
+          errorPanel.html(errorPanel.html()+loc(result.result[1])+"<br/>").show();
           $("#"+docId+"-"+result.path.join("-")).addClass("warning");
         });
       }
