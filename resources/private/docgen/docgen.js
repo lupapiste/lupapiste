@@ -635,7 +635,7 @@ var docgen = (function () {
       if(results && results.length > 0) {
         _.each(results,function(result) {
           var errorPanel = $("#"+docId+"-"+result.path.join("-")+"-errorPanel");
-          errorPanel.html(errorPanel.html()+loc(result.result[1])+"<br/>").show();
+          errorPanel.html(errorPanel.html()+loc("error."+result.result[1])+"<br/>").show();
           $("#"+docId+"-"+result.path.join("-")).addClass("warning");
         });
       }

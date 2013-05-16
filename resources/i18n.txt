@@ -1,0 +1,3 @@
+error.vrk:CR341: Sähkölämmitys vaatii sähköliittymän
+error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän
+error.vrk:CR343: Jos lämmitystapa on 3 (sähkölämmitys), on polttoaineen oltava 4 (sähkö)
