@@ -189,8 +189,8 @@
 
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
   (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]) (filter (= "statement" (-> attachment :target :type)) (:attachments application))))
-        canonical-attachments (for [attachment attachments
-                                    :when (and (:latestVersion attachment) (= "statement" (-> attachment :target :type)))
+        canonical-attachments (for [attachment statement-attachments-by-id
+                                    (if
                                     :let [type (get-in attachment [:type :type-id] )
                                           title (str (:title application) ": " type "-" (:id attachment))
                                           file-id (get-in attachment [:latestVersion :fileId])
