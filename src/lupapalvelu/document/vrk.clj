@@ -25,10 +25,7 @@
     (map #(apply % [document]))
     (filter (comp not nil?))))
 
-(defn has-value? [x]
-  (let [v (-> x s/blank? not)]
-    (println x v)
-    v))
+(defn has-value? [x] (-> x s/blank? not))
 
 ;;
 ;; Data

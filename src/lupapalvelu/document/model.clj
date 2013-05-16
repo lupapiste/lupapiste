@@ -137,7 +137,7 @@
 
 (defn apply-update
   "Updates a document returning the modified document.
-   Value defaults to \"\" - unsetting the value.
+   Value defaults to \"\", e.g. unsetting the value.
    Example: (apply-update document [:mitat :koko] 12)"
   ([document path]
     (apply-update document path ""))
