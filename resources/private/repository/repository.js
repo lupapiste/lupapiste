@@ -8,7 +8,10 @@ var repository = (function() {
       .success(function(data) {
         hub.send("application-loaded", {applicationDetails: data});
       })
-      .error(function() { window.location.hash = "!/404"; })
+      .error(function() {
+        error("Application " + id + " not found");
+        window.location.hash = "!/404";
+      })
       .call();
   }
 
