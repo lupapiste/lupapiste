@@ -59,9 +59,17 @@
   (fact "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
     (-> uusi-rakennus
       (apply-update [:lammitys :lammitystapa] "eiLammitysta")
-      (apply-update [:lammitys :lammitystapa])) => valid?
+      (apply-update [:lammitys :lammonlahde])) => valid?
     (-> uusi-rakennus
       (apply-update [:lammitys :lammitystapa] "eiLammitysta")
       (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR336"]))
+
+  (fact "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammitystapa] "uuni")
+      (apply-update [:lammitys :lammonlahde])) => (invalid-with? [:warn "vrk:CR335"])
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammitystapa] "ei tiedossa")
+      (apply-update [:lammitys :lammonlahde] "ei tiedossa")) => valid?)
 
 )

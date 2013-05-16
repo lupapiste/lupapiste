@@ -190,3 +190,17 @@
       :result [:warn "vrk:CR336"]}
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR336"]}]))
+
+(defvalidator "vrk:CR335"
+  "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (when
+    (and
+      (= schema-name "uusiRakennus")
+      (some-> data :lammitys :lammitystapa :value has-value?)
+      (some-> data :lammitys :lammitystapa :value (not= "eiLammitysta"))
+      (some-> data :lammitys :lammonlahde :value has-value? not))
+    [{:path [:lammitys :lammitystapa]
+      :result [:warn "vrk:CR335"]}
+     {:path [:lammitys :lammonlahde]
+      :result [:warn "vrk:CR335"]}]))
