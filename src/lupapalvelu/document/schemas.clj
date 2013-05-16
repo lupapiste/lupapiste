@@ -258,18 +258,18 @@
                                  {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number}]}
                          {:name "rakenne"
                           :type :group
-                          :body [{:name "rakentamistapa" :type :select
+                          :body [{:name "rakentamistapa" :type :select :reqired true
                                   :body [{:name "elementti"}
                                          {:name "paikalla"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kantavaRakennusaine" :type :select
+                                 {:name "kantavaRakennusaine" :type :select :required true
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "ter\u00e4s"}
                                          {:name "puu"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muuRakennusaine" :type :string}
-                                 {:name "julkisivu" :type :select
+                                 {:name "julkisivu" :type :select :required true
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "metallilevy"}
@@ -280,7 +280,7 @@
                                  {:name "muuMateriaali" :type :string}]}
                          {:name "lammitys"
                           :type :group
-                          :body [{:name "lammitystapa" :type :select
+                          :body [{:name "lammitystapa" :type :select :required true
                                   :body [{:name "vesikeskus"}
                                          {:name "ilmakeskus"}
                                          {:name "suorasahk\u00f6"}
