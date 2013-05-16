@@ -72,4 +72,12 @@
       (apply-update [:lammitys :lammitystapa] "ei tiedossa")
       (apply-update [:lammitys :lammonlahde] "ei tiedossa")) => valid?)
 
+  (fact "Kokonaisalan oltava vähintään kerrosala"
+    (-> uusi-rakennus
+      (apply-update [:mitat :kerrosala] "100")
+      (apply-update [:mitat :kokonaisala] "100")) => valid?
+    (-> uusi-rakennus
+      (apply-update [:mitat :kerrosala] "100")
+      (apply-update [:mitat :kokonaisala] "99")) => (invalid-with? [:warn "vrk:CR326"]))
+
 )

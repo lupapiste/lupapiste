@@ -25,7 +25,7 @@
     (map #(apply % [document]))
     (filter (comp not nil?))))
 
-(defn has-value? [x] (-> x s/blank? not))
+(defn exists? [x] (-> x s/blank? not))
 
 ;;
 ;; Data
@@ -185,7 +185,7 @@
     (and
       (= schema-name "uusiRakennus")
       (some-> data :lammitys :lammitystapa :value (= "eiLammitysta"))
-      (some-> data :lammitys :lammonlahde :value has-value?))
+      (some-> data :lammitys :lammonlahde :value exists?))
     [{:path [:lammitys :lammitystapa]
       :result [:warn "vrk:CR336"]}
      {:path [:lammitys :lammonlahde]
@@ -197,10 +197,26 @@
   (when
     (and
       (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value has-value?)
+      (some-> data :lammitys :lammitystapa :value exists?)
       (some-> data :lammitys :lammitystapa :value (not= "eiLammitysta"))
-      (some-> data :lammitys :lammonlahde :value has-value? not))
+      (some-> data :lammitys :lammonlahde :value exists? not))
     [{:path [:lammitys :lammitystapa]
       :result [:warn "vrk:CR335"]}
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR335"]}]))
+
+(defvalidator "vrk:CR326"
+  "Kokonaisalan oltava vähintään kerrosala"
+  [{{{schema-name :name} :info} :schema data :data}]
+  (let [kokonaisala (some-> data :mitat :kokonaisala :value safe-int)
+        kerrosala   (some-> data :mitat :kerrosala :value safe-int)]
+    (when
+      (and
+        (= schema-name "uusiRakennus")
+        kokonaisala
+        kerrosala
+        (> kerrosala kokonaisala))
+      [{:path [:lammitys :lammitystapa]
+        :result [:warn "vrk:CR326"]}
+       {:path [:lammitys :lammonlahde]
+        :result [:warn "vrk:CR326"]}])))
