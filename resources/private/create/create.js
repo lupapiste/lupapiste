@@ -155,30 +155,48 @@
       return false;
     };
     
+    var zoomLevel = {
+        "540": 6,
+        "550": 7,
+        "560": 9
+    };
+    
+    function zoomer(item) { self.center(item.location.x, item.location.y, zoomLevel[item.type] || 8); }
+    function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
+    
     var handlers = [
-      [{kind: "poi", type: "560"}, function(item) { self.center(item.location.x, item.location.y, 9); }],
-      [{kind: "poi", type: "550"}, function(item) { self.center(item.location.x, item.location.y, 7); }],
-      [{kind: "poi", type: "540"}, function(item) { self.center(item.location.x, item.location.y, 6); }],
-      [{kind: "poi", type: "540"}, function(item) {
-        $("#create #create-search")
-          .val(", " + loc("municipality", item.municipality))
-          .caretToStart();
+      [{kind: "poi", type: "540"}, fillMunicipality],
+      [{kind: "poi", type: "550"}, fillMunicipality],
+      [{kind: "poi"}, zoomer],
+      [{kind: "address"}, function(item) { self.center(item.location.x, item.location.y, 11); }],
+      [{kind: "property-id"}, function(item) { self.center(item.location.x, item.location.y, 11); }]
+    ];
+
+    var renderers = [
+      [{kind: "poi"}, function(item) {
+        return $("<a>").html(item.text + " (" + loc("poi", item.type) + ", " + loc("municipality", item.municipality) + ")");
+      }],
+      [{kind: "address"}, function(item) {
+        return $("<a>").html(item.street + ", " + loc("municipality", item.municipality));
       }]
     ];
+
+    function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
+    function toHandler(value) { return value[1]; }
+    function invoker(item) { return function(handler) { return handler(item); }; } 
     
     self.autocompleteSelect = function(e, data) {
+      console.log("SELECT:", data);
       var item = data.item;
-      _.each(handlers, function(e) {
-        var selector = e[0],
-            handler = e[1];
-        if (_.every(selector, function(v, k) { return item[k] === v; })) handler(item);
-      });
+      _(handlers).filter(selector(item)).map(toHandler).each(invoker(item));
       return false;
     }
     
     self.autocompleteRender = function(ul, data) {
+      console.log("RENDER:", data);
+      var element = _(renderers).filter(selector(data)).first(1).map(toHandler).map(invoker(data)).value();
       return $("<li>")
-        .append("<a>" + data.text + "<br>" + loc("poi", data.type) + ", " + loc("municipality", data.municipality) + "</a>")
+        .append(element)
         .appendTo(ul);
     };
 
