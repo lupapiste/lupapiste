@@ -44,3 +44,8 @@
     (subtype-validation {:subtype :letter :case :upper} "a") => [:warn "illegal-letter"]
     (subtype-validation {:subtype :letter :case :lower} "a") => nil?
     (subtype-validation {:subtype :letter :case :lower} "A") => [:warn "illegal-letter"]))
+
+(facts "Facts about zip validation"
+  (fact (subtype-validation {:subtype :zip} "") => nil?)
+  (fact (subtype-validation {:subtype :zip} "33800") => nil?)
+  (fact (subtype-validation {:subtype :zip} "123") => [:warn "illegal-zip"]))
