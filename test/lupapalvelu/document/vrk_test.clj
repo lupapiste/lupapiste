@@ -24,13 +24,34 @@
       (apply-update [:rakenne :kantavaRakennusaine] "puu")
       (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:BR106"]))
 
-  (fact "S\u00e4hk\u00f6 polttoaineena vaatii s\u00e4hk\u00f6liittym\u00e4n"
+  (fact "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
     (-> uusi-rakennus
       (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
       (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")) => valid?
     (-> uusi-rakennus
       (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
-      (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR342"]))
+      (apply-update [:lammitys :lammonlahde] "kaasu")) => (invalid-with? [:warn "vrk:CR343"]))
 
-  )
+  (fact "Sahko polttoaineena vaatii sahkoliittyman"
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")
+      (apply-update [:verkostoliittymat :sahkoKytkin] true)) => valid?
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammonlahde] "s\u00e4hk\u00f6")
+      (apply-update [:verkostoliittymat :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR342"]))
 
+  (fact "Sahkolammitus vaatii sahkoliittyman"
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
+      (apply-update [:verkostoliittymat :sahkoKytkin] true)) => (not-invalid-with? [:warn "vrk:CR341"])
+    (-> uusi-rakennus
+      (apply-update [:lammitys :lammitystapa] "suorasahk\u00f6")
+      (apply-update [:verkostoliittymat :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR341"]))
+
+  (fact "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
+    (-> uusi-rakennus
+      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
+      (apply-update [:mitat :tilavuus] "100000")) => valid?
+    (-> uusi-rakennus
+      (apply-update [:kaytto :kayttotarkoitus] "032 luhtitalot")
+      (apply-update [:mitat :tilavuus] "100001")) => (invalid-with? [:warn "vrk:ktark-tilavuus-max"])))

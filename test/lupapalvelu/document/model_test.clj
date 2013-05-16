@@ -29,6 +29,11 @@
                                      :body [{:name "single2" :type :string}
                                             {:name "repeats2" :type :string :subtype :digit :repeating true}]}]})
 
+(def schema-with-required {:info {:name "with-required" :version 1}
+                           :body [{:name "a" :type :group
+                                   :body [{:name "aa" :type :string :required true}
+                                          {:name "ab" :type :string}]}]})
+
 ;; Tests for internals:
 
 (def find-by-name #'lupapalvelu.document.model/find-by-name)
@@ -129,6 +134,18 @@
     (fact "Repeating string, 1"
       (-> document
         (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"]))))
+
+;; TODO: implement so that these pass
+#_(facts "Required fields"
+  (let [document (new-document schema-with-required ..now..)]
+
+    document => (invalid-with? [:warn "illegal-value:required"])
+
+    (-> document
+      (apply-update [:a :aa] " ")) => (invalid-with? [:warn "illegal-value:required"])
+
+    (-> document
+      (apply-update [:a :aa] "value")) => valid?))
 
 ;;
 ;; Updates

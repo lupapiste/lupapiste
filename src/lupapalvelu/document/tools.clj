@@ -6,22 +6,33 @@
 (defn type-verifier [{:keys [type] :as element}]
   (when-not (keyword? type) (throw (RuntimeException. (str "Invalid type: " element)))))
 
-(defn dummy-values [{:keys [type subtype name body]}]
+(defn missing [element]
+  (throw (UnsupportedOperationException. (str element))))
+
+(defn dummy-values [{:keys [type subtype case name body] :as element}]
   (condp = (keyword type)
-    :text       "text"
-    :checkbox   true
-    :date       "2.5.1974"
-    :select     (-> body first :name)
-    :radioGroup (-> body first :name)
-    :string     (condp = subtype
-                  :email            "example@example.com"
-                  :tel              "012 123 4567"
-                  :number           "42"
-                  :digit            "1"
-                  :letter           "\u00c5"
-                  :kiinteistotunnus "09100200990013"
-                  (str subtype))
-    (str name)))
+    :text             "text"
+    :checkbox         true
+    :date             "2.5.1974"
+    :select           (-> body first :name)
+    :radioGroup       (-> body first :name)
+    :personSelector   "123"
+    :buildingSelector "001"
+    :string           (condp = (keyword subtype)
+                        :email            "example@example.com"
+                        :tel              "012 123 4567"
+                        :number           "42"
+                        :digit            "1"
+                        :kiinteistotunnus "09100200990013"
+                        :zip              "33800"
+                        nil               "string"
+                        :letter           (condp = (keyword case)
+                                            :lower "a"
+                                            :upper "A"
+                                            nil    "Z"
+                                            (missing element))
+                        (missing element))
+    (missing element)))
 
 ;;
 ;; Internal
@@ -48,7 +59,7 @@
       (fn [x]
         (if (map? x)
           (let [k (-> x :name keyword)
-                v (if (= :group (:type x)) (group x)(f x))]
+                v (if (= :group (-> x :type keyword)) (group x) (f x))]
             {k v})
           x)))))
 
@@ -76,10 +87,28 @@
 
 (defn create-document-data
   "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
-  ([schema] (create-document-data schema nil-values))
-  ([schema f] (->
-                schema
-                (create f)
-                flattened
-                wrapped
-                )))
+  ([schema]
+    (create-document-data schema nil-values))
+  ([schema f]
+    (->
+      schema
+      (create f)
+      flattened
+      wrapped)))
+
+(defn path-vals
+  "Returns vector of tuples containing path vector to the value and the value."
+  [m]
+  (letfn
+    [(pvals [l p m]
+       (reduce
+         (fn [l [k v]]
+           (if (map? v)
+             (pvals l (conj p k) v)
+             (cons [(conj p k) v] l)))
+         l m))]
+    (pvals [] [] m)))
+
+(defn assoc-in-path-vals
+  "Re-created a map from it's path-vals extracted with (path-vals)."
+  [c] (reduce (partial apply assoc-in) {} c))
