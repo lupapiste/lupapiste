@@ -12,11 +12,11 @@
               :name "common"})
 
 (defn- conf []
-  (let [js-conf {:maps (:maps env/config)
-                 :fileExtensions mime/allowed-extensions
-                 :passwordMinLength (get-in env/config [:password :minlength])}
-        data (json/generate-string js-conf)]
-    (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " data ";")))
+  (let [js-conf {:maps              (:maps env/config)
+                 :fileExtensions    mime/allowed-extensions
+                 :passwordMinLength (get-in env/config [:password :minlength])
+                 :mode              env/mode}]
+    (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn loc->js []
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
@@ -35,9 +35,6 @@
    :init         {:js [conf "hub.js" "log.js"]
                   :depends [:underscore]}
 
-   :map          {:depends [:init :jquery]
-                  :js ["openlayers.2.12.min.lupapiste.js" "gis.js"]}
-
    :debug        (if (env/dev-mode?) debugjs {})
 
    :i18n         {:depends [:jquery :underscore]
@@ -49,12 +46,15 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "datepicker.js"]
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js"]
                   :css ["css/main.css"]
-                  :html ["error.html"]}
+                  :html ["error.html" "nav.html"]}
+
+   :map          {:depends [:common]
+                  :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js"]
+                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]

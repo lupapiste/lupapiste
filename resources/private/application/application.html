@@ -3,17 +3,17 @@
 <body>
   <section class="page" id="application">
     <div class="application_summary">
-      <div class=" container">
+      <div class="container">
         <div class="application-map-container">
           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
             <!-- ko if: location() -->
-              <button data-bind="click: openOskariMap, ltext: 'application.mapActionOpen'" class="btn btn-primary map-search-button"></button>
+              <a data-bind="click: openOskariMap" class="map-search-button icon search"></a>
             <!-- /ko -->
           </div>
         </div>
         <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: permitType"></span><span data-bind="text: address" data-test-id="application-title"></span>
+          <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span>
           <a class="icon"
              data-bind="ltext: 'edit', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
              data-test-id="change-location-link"></a>
@@ -379,7 +379,7 @@
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-            <textarea id="invite-text" rows=5 class="form-input textarea long" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
+            <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
             <div data-bind="visible: error" >
               <div data-bind="text: error" class="context-error"></div>
             </div>

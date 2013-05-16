@@ -34,10 +34,10 @@
     xml => truthy
 
     (fact "invalid buildingid returns nil"
-      (->rakennuksen-muuttaminen xml "007") => nil)
+      (->rakennuksen-tiedot xml "007") => nil)
 
     (fact "valid buildingid returns mapped document"
-      (let [rakennus   (->rakennuksen-muuttaminen xml "001")
+      (let [rakennus   (->rakennuksen-tiedot xml "001")
             huoneistot (:huoneistot rakennus)
             omistajat  (:rakennuksenOmistajat rakennus)]
 

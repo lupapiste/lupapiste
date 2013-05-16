@@ -46,7 +46,8 @@
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
     self.municipality = ko.observable(null);
-    self.municipalityLinks = ko.computed(function() { var m = self.municipality(); return m ? m.links : null; });
+    self.organization = ko.observable(null);
+    self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
     self.municipalityCode = ko.observable(null);
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
@@ -121,8 +122,8 @@
     // Concurrency control:
     //
 
-    self.updateRequestId = 0;
-    self.beginUpdateRequest = function() { self.updateRequestId++; return self; };
+    self.requestContext = new RequestContext();
+    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
 
     //
     // Callbacks:
@@ -139,11 +140,6 @@
         .searchPropertyId(x, y)
         .searchAddress(x, y);
       return false;
-    };
-
-    self.onResponse = function(fn) {
-      var requestId = self.updateRequestId;
-      return function(result) { if (requestId === self.updateRequestId) fn(result); };
     };
 
     // Search activation:
@@ -187,13 +183,10 @@
         .appendTo(ul);
     };
 
-    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.serchPointByAddress(value); };
+    self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value); };
 
-    self.serchPointByAddress = function(address) {
-      ajax
-        .get("/proxy/get-address")
-        .param("query", address)
-        .success(self.onResponse(function(result) {
+    self.searchPointByAddress = function(address) {
+      locationSearch.pointByAddress(self.requestContext, address, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -206,17 +199,12 @@
               .beginUpdateRequest()
               .searchPropertyId(x, y);
           }
-        }))
-        .fail(_.partial(self.useManualEntry, true))
-        .call();
+        }, _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPointByPropertyId = function(id) {
-      ajax
-        .get("/proxy/point-by-property-id")
-        .param("property-id", util.prop.toDbFormat(id))
-        .success(self.onResponse(function(result) {
+      locationSearch.pointByPropertyId(self.requestContext, id, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.x,
@@ -229,29 +217,18 @@
               .beginUpdateRequest()
               .searchAddress(x, y);
           }
-        }))
-        .fail(_.partial(self.useManualEntry, true))
-        .call();
+        },
+        _.partial(self.useManualEntry, true));
       return self;
     };
 
     self.searchPropertyId = function(x, y) {
-      ajax
-        .get("/proxy/property-id-by-point")
-        .param("x", x)
-        .param("y", y)
-        .success(self.onResponse(self.propertyId))
-        .call();
+      locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
       return self;
     };
 
     self.searchAddress = function(x, y) {
-      ajax
-        .get("/proxy/address-by-point")
-        .param("x", x)
-        .param("y", y)
-        .success(self.onResponse(self.addressData))
-        .call();
+      locationSearch.addressByPoint(self.requestContext, x, y, self.addressData);
       return self;
     };
 
@@ -296,7 +273,12 @@
 
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
-      onSelect: function(v) { model.operation(v ? v.op : null); },
+      onSelect: function(v) {
+        model.operation(v ? v.op : null);
+        ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+          model.organization(d);
+        }).call();
+      },
       baseModel: model
     });
 

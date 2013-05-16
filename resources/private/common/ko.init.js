@@ -175,4 +175,12 @@
     return this;
   };
 
+  ko.bindingHandlers.readonly = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      element.readOnly = value;
+    }
+  };
+
+
 })(jQuery);
