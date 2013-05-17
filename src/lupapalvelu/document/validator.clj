@@ -16,12 +16,13 @@
   `(swap! validators assoc (keyword ~doc-string)
      (fn [{~'data :data}]
        (eval
-         (let ~(reduce into
-                 (for [[k v] (partition 2 fields)]
-                   [k `(get-in ~'data ~v)]))
+         (let
+           ~(reduce into
+              (for [[k v] (partition 2 fields)]
+                [k `(get-in ~'data ~v)]))
            (try
              (when-let [resp# ~@body]
-               {:result [:warn (name resp#)]})
+               (map (fn [x#] {:result [:warn (name resp#)]}) [1 2]))
              (catch Exception e# [:err "kosh"])))))))
 
 (defvalidator "Kokonaisalan oltava vähintään kerrosala"
