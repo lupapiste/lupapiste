@@ -45,10 +45,10 @@
 
 (defmacro defvalidator [doc-string {:keys [document fields]} & body]
   `(swap! validators assoc (keyword ~doc-string)
-     (fn [~'d]
+     (fn [d#]
        (eval
-         (let ~'[kokonaisala (get-in d [:mitat :kokonaisala])
-                 kerrosala   (get-in d [:mitat :kerrosala])]
+         (let [~'kokonaisala (get-in d# [:mitat :kokonaisala])
+               ~'kerrosala   (get-in d# [:mitat :kerrosala])]
            (try
              (when-let [resp# ~@body]
                {:result [:warn (name resp#)]})
