@@ -2,14 +2,6 @@
 
 (def validators (atom {}))
 
-(defn fetch-values [c]
-  (let [value (reduce
-                (fn [form [k v]]
-                  (conj form k 10))
-                [] (partition 2 c))]
-    (println value)
-    value))
-
 (defn validate
   "Runs all validators, returning list of validation results."
   [document]
@@ -37,14 +29,6 @@
    :fields [kokonaisala [:mitat :kokonaisala]
             kerrosala   [:mitat :kerrosala]]}
   (and kokonaisala kerrosala (> kerrosala kokonaisala) :vrk:CR326))
-
-#_(defvalidator
-  {:code      "vrk:CR326"
-   :text      "Kokonaisalan oltava vähintään kerrosala"
-   :document  "uusiRakennus"
-   :fields    [kokonaisala [:mitat :kokonaisala]
-               kerrosala   [:mitat :kerrosala]]}
-  (and kokonaisala kerrosala (> kerrosala kokonaisala)))
 
 (println "warn:" (validate {:data {:mitat {:kerrosala 10 :kokonaisala 9}}}))
 (println " err:" (validate {:data {:mitat {:kerrosala 10 :kokonaisala "abba"}}}))
