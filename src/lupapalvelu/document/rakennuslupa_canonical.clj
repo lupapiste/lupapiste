@@ -390,7 +390,8 @@
                          :puoltotieto {:puolto ((keyword (:status statement)) puolto-mapping)}}}})
 
 (defn- get-statements [statements]
-  (map get-statement statements))
+  ;Returing vector because this element to be Associative
+  (vec (map get-statement statements)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
