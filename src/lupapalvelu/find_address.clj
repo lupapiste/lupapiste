@@ -39,13 +39,31 @@
   (map (set-kind :property-id)
        (wfs/point-by-property-id property-id)))
 
+(def poi-types ["200" ; maa-aineksenottoalueen nimi
+                "225" ; liikennealueen nimi
+                "235" ; puiston nimi
+                "245" ; urheilu- tai virkistysalueen nimi
+                "325" ; metsa-alueen nimi
+                "330" ; suon nimi
+                "345" ; niemen nimi
+                "350" ; saaren nimi
+                "410" ; vakaveden nimi
+                "420" ; virtaveden nimi
+                "540" ; kunnan nimi, kaupunki
+                "550" ; kunnan nimi, maaseutu
+                "560" ; kylan, kaupunginosan tai kulmakunnan nimi
+                "575" ; maakunnan nimi
+                "580" ; laanin (2009) nimi
+                ])
+
 (defn search-poi [poi]
-  (let [name-elem (str "name." *lang*)]
-    (->> (q/with-collection "poi"
-           (q/find {name-elem {$regex (str \^ (s/lower-case poi))}})
-           (q/sort {name-elem -1})
-           (q/limit 10))
-      (map (comp (set-kind :poi) (fn [d] (assoc d :text (get-in d [:text (keyword *lang*)]))))))))
+  (->> (q/with-collection "poi"
+         (q/find {:name {$regex (str \^ (s/lower-case poi))}
+                  :lang *lang*
+                  :type {$in poi-types}})
+         (q/sort {:name -1})
+         (q/limit 10))
+    (map (comp (fn [r] (dissoc r :_id)) (set-kind :poi)))))
 
 (defn search-street [street]
   (let [mun-prop "oso:kuntanimiFin"]

@@ -165,8 +165,9 @@
     function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
     
     var handlers = [
-      [{kind: "poi", type: "540"}, fillMunicipality],
-      [{kind: "poi", type: "550"}, fillMunicipality],
+      [{kind: "poi", type: "540"}, fillMunicipality],  // kunnan nimi, kaupunki
+      [{kind: "poi", type: "550"}, fillMunicipality],  // kunnan nimi, maaseutu
+      [{kind: "poi", type: "575"}, fillMunicipality],  // maakunnan nimi 
       [{kind: "poi"}, zoomer],
       [{kind: "address"}, function(item) { self.center(item.location.x, item.location.y, 11); }],
       [{kind: "property-id"}, function(item) { self.center(item.location.x, item.location.y, 11); }]
