@@ -1,12 +1,59 @@
 poi: Paikka
-poi.540: Kaupunki
-poi.550: Kunta
-poi.560: Kylä tai kaupunginosa
-poi.325: Metsäalue
-poi.330: Suo
-poi.345: Niemi
-poi.350: Saari
-poi.410: Vesistö
-poi.420: Joki
+
+poi.type.100: autotien nimi
+poi.type.110: kulkuväylän nimi
+poi.type.120: rautatieliikennepaikan nimi
+poi.type.130: turvalaitteen nimi
+poi.type.200: maa-aineksenottoalueen nimi
+poi.type.205: hautausmaan nimi
+poi.type.210: kaatopaikan nimi
+poi.type.215: varastoalueen nimi
+poi.type.225: liikennealueen nimi
+poi.type.230: louhoksen nimi
+poi.type.235: puiston nimi
+poi.type.240: täytemaan nimi
+poi.type.245: urheilu- tai virkistysalueen nimi
+poi.type.300: puun nimi
+poi.type.305: kiven nimi
+poi.type.310: vesikiven nimi
+poi.type.315: merkittävän luontokohteen nimi
+poi.type.320: pellon tai niityn nimi
+poi.type.325: metsäalueen nimi
+poi.type.330: suon nimi
+poi.type.335: kohouman nimi
+poi.type.340: painanteen nimi
+poi.type.345: niemen nimi
+poi.type.350: saaren nimi
+poi.type.390: muun maastokohteen nimi
+poi.type.400: lähteen nimi
+poi.type.410: vakaveden nimi
+poi.type.415: vakaveden osan nimi
+poi.type.420: virtaveden nimi
+poi.type.425: virtaveden osan nimi
+poi.type.430: matalikon nimi
+poi.type.435: kosken nimi
+poi.type.490: muu vesistönimi
+poi.type.500: rakennuksen nimi
+poi.type.510: rakennusryhmän nimi
+poi.type.520: altaan nimi
+poi.type.530: muistomerkin nimi
+poi.type.540: kunnan nimi, kaupunki
+poi.type.550: kunnan nimi, maaseutu
+poi.type.560: kylän, kaupunginosan tai kulmakunnan nimi
+poi.type.570: talon nimi
+poi.type.575: maakunnan nimi
+poi.type.580: läänin nimi
+poi.type.590: muu asutusnimi
+poi.type.600: luonnonsuojelualueen nimi
+poi.type.602: luonnonpuiston nimi
+poi.type.604: kansallispuiston nimi
+poi.type.610: rauhoitetun kohteen nimi
+poi.type.612: luonnonmuistomerkin nimi
+poi.type.614: muinaisjäännöksen nimi
+poi.type.620: rauhoitetun alueen nimi
+poi.type.630: erämaa-alueen nimi
+poi.type.640: retkeilyalueen nimi
+poi.type.700: valtakunnan rajapyykin nimi
+poi.type.710: rajapyykin nimi
 
 create.placeholder: Kasarmikatu 25, Helsinki
