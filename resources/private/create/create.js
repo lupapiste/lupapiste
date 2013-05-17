@@ -163,6 +163,10 @@
     
     function zoomer(item) { self.center(item.location.x, item.location.y, zoomLevel[item.type] || 8); }
     function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
+
+    function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
+    function toHandler(value) { return value[1]; }
+    function invoker(item) { return function(handler) { return handler(item); }; } 
     
     var handlers = [
       [{kind: "poi", type: "540"}, fillMunicipality],  // kunnan nimi, kaupunki
@@ -175,16 +179,19 @@
 
     var renderers = [
       [{kind: "poi"}, function(item) {
-        return $("<a>").html(item.text + " (" + loc("poi", item.type) + ", " + loc("municipality", item.municipality) + ")");
+        return $("<a>")
+          .addClass("create-find")
+          .addClass("poi")
+          .append($("<span>").addClass("text").text(item.text))
+          .append($("<span>").addClass("type").text(loc("poi.type", item.type) + ", " + loc("municipality", item.municipality)));
       }],
       [{kind: "address"}, function(item) {
-        return $("<a>").html(item.street + ", " + loc("municipality", item.municipality));
+        return $("<a>")
+          .addClass("create-find")
+          .addClass("address")
+          .append($("<span>").text(item.street + ", " + loc("municipality", item.municipality)));
       }]
     ];
-
-    function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
-    function toHandler(value) { return value[1]; }
-    function invoker(item) { return function(handler) { return handler(item); }; } 
     
     self.autocompleteSelect = function(e, data) {
       console.log("SELECT:", data);
