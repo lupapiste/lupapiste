@@ -267,14 +267,14 @@
     (ke6666/generate application lang current-file)))
 
 (defn- add-statement-attchments [canonical statement-attachments]
-  (clojure.pprint/pprint statement-attachments)
   (reduce (fn [c a]
             (let [lausuntotieto (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
                   paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id])) %) lausuntotieto)
                   index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
                   lausunto (get-in paivitettava-lausunto [:Lausunto :lausunto :lausunto])
-                  paivitetty-lausunto (assoc lausunto :liite (:Liite (last a)))
+                  paivitetty-lausunto (assoc lausunto :liite (last (last a)))
                   paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
+              (clojure.pprint/pprint paivitetty)
               (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
             ) canonical statement-attachments))
 
@@ -310,7 +310,7 @@
         canonical (assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)]
     ;(clojure.pprint/pprint(:attachments application))
-    ;(clojure.pprint/pprint statement-attachments)
+    (clojure.pprint/pprint canonical-with-statment-attachments)
     (validate (indent-str xml))
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
