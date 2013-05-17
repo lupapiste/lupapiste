@@ -3,29 +3,12 @@
 (def validators (atom {}))
 
 (defn fetch-values [c]
-  (reduce
-    (fn [form [k v]]
-      (conj form k (str v "*")))
-    [] (partition 2 c)))
-
-(defmacro defvalidator [doc-string {:keys [code document fields]} & body]
-  `(swap! validators assoc (keyword ~code)
-     {:doc ~doc-string
-      :fn (fn [~'document]
-            (let ~(fetch-values fields data)
-              ~@body))}))
-
-(defvalidator "Kokonaisalan oltava vähintään kerrosala"
-  {:code "vrk:CR326"
-   :document "uusiRakennus"
-   :fields [kokonaisala [:mitat :kokonaisala]
-            kerrosala   [:mitat :kerrosala]]}
-  (when
-    (and
-      kokonaisala
-      kerrosala
-      (> kerrosala kokonaisala))
-    [:kosh]))
+  (let [value (reduce
+                (fn [form [k v]]
+                  (conj form k 10))
+                [] (partition 2 c))]
+    (println value)
+    value))
 
 (defn validate
   "Runs all validators, returning list of validation results."
@@ -34,10 +17,57 @@
     validators
     deref
     vals
-    (map :fn)
     (map #(apply % [(:data document)]))
     (filter (comp not nil?))))
 
-(validate {:data {:mitat {:kerrosala 10 :kokonaisala 10}}})
 
+#_(defmacro defvalidator [doc-string {:keys [code document fields]} & body]
+  `(swap! validators assoc (keyword ~code)
+     {:doc ~doc-string
+      :fn (fn [~'d]
+            (eval
+              (let ~(fetch-values fields)
+                ~@body)))}))
 
+#_(defmacro defvalidator [doc-string {:keys [code document fields]} & body]
+  `(swap! validators assoc (keyword ~code)
+     {:doc ~doc-string
+      :fn (fn [~'d]
+            (let [a# (vec
+                       (concat
+                         ~@(for [[k v] (partition 2 fields)]
+                             `['~k (get-in ~'d '~v)])))]
+              (println "*hello*" (map #(str % "*") a#)))
+            (eval
+              (let ~'[kokonaisala 10
+                      kerrosala   10]
+                ~@body)))}))
+
+(defmacro defvalidator [doc-string {:keys [document fields]} & body]
+  `(swap! validators assoc (keyword ~doc-string)
+     (fn [~'d]
+       (eval
+         (let ~'[kokonaisala (get-in d [:mitat :kokonaisala])
+                 kerrosala   (get-in d [:mitat :kerrosala])]
+           (try
+             (when-let [resp# ~@body]
+               {:result [:warn (name resp#)]})
+             (catch Exception e# [:err "kosh"])))))))
+
+(defvalidator "Kokonaisalan oltava vähintään kerrosala"
+  {:document "uusiRakennus"
+   :fields [kokonaisala [:mitat :kokonaisala]
+            kerrosala   [:mitat :kerrosala]]}
+  (and kokonaisala kerrosala (> kerrosala kokonaisala) :vrk:CR326))
+
+#_(defvalidator
+  {:code      "vrk:CR326"
+   :text      "Kokonaisalan oltava vähintään kerrosala"
+   :document  "uusiRakennus"
+   :fields    [kokonaisala [:mitat :kokonaisala]
+               kerrosala   [:mitat :kerrosala]]}
+  (and kokonaisala kerrosala (> kerrosala kokonaisala)))
+
+(println "warn:" (validate {:data {:mitat {:kerrosala 10 :kokonaisala 9}}}))
+(println " err:" (validate {:data {:mitat {:kerrosala 10 :kokonaisala "abba"}}}))
+(println "  ok:" (validate {:data {:mitat {:kerrosala 10 :kokonaisala 10}}}))
