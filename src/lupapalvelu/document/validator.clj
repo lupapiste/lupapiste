@@ -13,17 +13,21 @@
     (filter (comp not nil?))))
 
 (defmacro defvalidator [doc-string {:keys [schema fields]} & body]
-  `(swap! validators assoc (keyword ~doc-string)
-     (fn [{~'data :data}]
-       (eval
+  (let [paths (->> fields (partition 2) (map last) vec)]
+    `(swap! validators assoc (keyword ~doc-string)
+       (fn [{~'data :data}]
          (let
            ~(reduce into
               (for [[k v] (partition 2 fields)]
                 [k `(get-in ~'data ~v)]))
            (try
              (when-let [resp# ~@body]
-               (map (fn [x#] {:result [:warn (name resp#)]}) [1 2]))
-             (catch Exception e# [:err "kosh"])))))))
+               (map (fn [path#] {:path   path#
+                                 :result [:warn (name resp#)]}) ~paths))
+             (catch Exception e#
+               (map (fn [path#] {:path   path#
+                                 :result [:warn (str "validator")]
+                                 :reason (str e#)}) ~paths))))))))
 
 (defvalidator "Kokonaisalan oltava vähintään kerrosala"
   {:schema "uusiRakennus"
