@@ -20,35 +20,24 @@
     (map #(apply % [(:data document)]))
     (filter (comp not nil?))))
 
-
-#_(defmacro defvalidator [doc-string {:keys [code document fields]} & body]
-  `(swap! validators assoc (keyword ~code)
-     {:doc ~doc-string
-      :fn (fn [~'d]
-            (eval
-              (let ~(fetch-values fields)
-                ~@body)))}))
-
-#_(defmacro defvalidator [doc-string {:keys [code document fields]} & body]
-  `(swap! validators assoc (keyword ~code)
-     {:doc ~doc-string
-      :fn (fn [~'d]
-            (let [a# (vec
-                       (concat
-                         ~@(for [[k v] (partition 2 fields)]
-                             `['~k (get-in ~'d '~v)])))]
-              (println "*hello*" (map #(str % "*") a#)))
-            (eval
-              (let ~'[kokonaisala 10
-                      kerrosala   10]
-                ~@body)))}))
-
-(defmacro defvalidator [doc-string {:keys [document fields]} & body]
+#_(defmacro defvalidator [doc-string {:keys [document fields]} & body]
   `(swap! validators assoc (keyword ~doc-string)
      (fn [d#]
        (eval
          (let [~'kokonaisala (get-in d# [:mitat :kokonaisala])
                ~'kerrosala   (get-in d# [:mitat :kerrosala])]
+           (try
+             (when-let [resp# ~@body]
+               {:result [:warn (name resp#)]})
+             (catch Exception e# [:err "kosh"])))))))
+
+(defmacro defvalidator [doc-string {:keys [document fields]} & body]
+  `(swap! validators assoc (keyword ~doc-string)
+     (fn [~'d]
+       (eval
+         (let ~(reduce into
+                 (for [[k v] (partition 2 fields)]
+                   [k `(get-in ~'d ~v)]))
            (try
              (when-let [resp# ~@body]
                {:result [:warn (name resp#)]})
