@@ -9,23 +9,23 @@
     validators
     deref
     vals
-    (map #(apply % [(:data document)]))
+    (map #(apply % [document]))
     (filter (comp not nil?))))
 
-(defmacro defvalidator [doc-string {:keys [document fields]} & body]
+(defmacro defvalidator [doc-string {:keys [schema fields]} & body]
   `(swap! validators assoc (keyword ~doc-string)
-     (fn [~'d]
+     (fn [{~'data :data}]
        (eval
          (let ~(reduce into
                  (for [[k v] (partition 2 fields)]
-                   [k `(get-in ~'d ~v)]))
+                   [k `(get-in ~'data ~v)]))
            (try
              (when-let [resp# ~@body]
                {:result [:warn (name resp#)]})
              (catch Exception e# [:err "kosh"])))))))
 
 (defvalidator "Kokonaisalan oltava vähintään kerrosala"
-  {:document "uusiRakennus"
+  {:schema "uusiRakennus"
    :fields [kokonaisala [:mitat :kokonaisala]
             kerrosala   [:mitat :kerrosala]]}
   (and kokonaisala kerrosala (> kerrosala kokonaisala) :vrk:CR326))
