@@ -20,17 +20,6 @@
     (map #(apply % [(:data document)]))
     (filter (comp not nil?))))
 
-#_(defmacro defvalidator [doc-string {:keys [document fields]} & body]
-  `(swap! validators assoc (keyword ~doc-string)
-     (fn [d#]
-       (eval
-         (let [~'kokonaisala (get-in d# [:mitat :kokonaisala])
-               ~'kerrosala   (get-in d# [:mitat :kerrosala])]
-           (try
-             (when-let [resp# ~@body]
-               {:result [:warn (name resp#)]})
-             (catch Exception e# [:err "kosh"])))))))
-
 (defmacro defvalidator [doc-string {:keys [document fields]} & body]
   `(swap! validators assoc (keyword ~doc-string)
      (fn [~'d]
