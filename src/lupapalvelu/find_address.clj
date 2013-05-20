@@ -35,9 +35,9 @@
 ;;;
 
 (defn search-property-id [property-id]
-  (map (fn [f] (assoc (wfs/feature-to-position f)
-                      :property-id (:kiinttunnus (wfs/feature-to-property-id f))
-                      :kind :property-id))
+  (map (fn [f] {:location (wfs/feature-to-position f)
+                :property-id (:kiinttunnus (wfs/feature-to-property-id f))
+                :kind :property-id})
        (wfs/point-by-property-id property-id)))
 
 (def poi-types ["200" ; maa-aineksenottoalueen nimi
@@ -53,8 +53,6 @@
                 "540" ; kunnan nimi, kaupunki
                 "550" ; kunnan nimi, maaseutu
                 "560" ; kylan, kaupunginosan tai kulmakunnan nimi
-                "575" ; maakunnan nimi
-                "580" ; laanin (2009) nimi
                 ])
 
 (defn search-poi [poi]
