@@ -36,7 +36,7 @@
             (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
 (defn get-addresses-proxy [request]
-  (let [query (get (:query-params request) "query")
+  (let [query (get (:params request) :query)
         address (parse-address query)
         response (apply get-addresses address)]
     (if response
@@ -47,27 +47,27 @@
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn find-addresses-proxy [request]
-  (let [term (get (:query-params request) "term")]
+  (let [term (get (:params request) :term)]
     (if (string? term)
       (resp/json (or (find-address/search term) []))
       (resp/status 400 "Missing query param 'term'"))))
 
 (defn point-by-property-id-proxy [request]
-  (let [property-id (get (:query-params request) "property-id")
+  (let [property-id (get (:params request) :property-id)
         features (wfs/point-by-property-id property-id)]
     (if features
       (resp/json {:data (map wfs/feature-to-position features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn property-id-by-point-proxy [request]
-  (let [{x :x y :y} (:query-params request)
+  (let [{x :x y :y} (:params request)
         features (wfs/property-id-by-point x y)]
     (if features
       (resp/json (:kiinttunnus (wfs/feature-to-property-id (first features))))
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn address-by-point-proxy [request]
-  (let [{x :x y :y} (:query-params request)
+  (let [{x :x y :y} (:params request)
         features (wfs/address-by-point x y)]
     (if features
       (resp/json (wfs/feature-to-address-details (first features)))
