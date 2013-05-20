@@ -141,7 +141,6 @@
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
    :validators [validate-owner-or-writer]
-   :roles      [:applicant :authority]
    :verified   true}
   [{created :created
     user    :user
