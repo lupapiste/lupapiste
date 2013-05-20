@@ -6,7 +6,8 @@
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.vrk :as vrk]
+            [lupapalvelu.document.vrk]
+            [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
 ;;
@@ -109,7 +110,7 @@
       (concat
         (validate-fields schema-body nil data [])
         (validate-required-fields document)
-        (vrk/validate document)))))
+        (validator/validate document)))))
 
 (defn valid-document?
   "Checks weather document is valid."

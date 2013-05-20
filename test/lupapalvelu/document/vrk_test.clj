@@ -78,6 +78,4 @@
       (apply-update [:mitat :kokonaisala] "100")) => valid?
     (-> uusi-rakennus
       (apply-update [:mitat :kerrosala] "100")
-      (apply-update [:mitat :kokonaisala] "99")) => (invalid-with? [:warn "vrk:CR326"]))
-
-)
+      (apply-update [:mitat :kokonaisala] "99")) => (invalid-with? [:warn "vrk:CR326"])))

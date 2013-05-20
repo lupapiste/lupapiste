@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.vrk
-  (:use [lupapalvelu.clojure15])
+  (:use [lupapalvelu.clojure15]
+        [lupapalvelu.document.validator])
   (:require [sade.util :refer [safe-int]]
             [clojure.string :as s]))
 
@@ -7,23 +8,11 @@
 ;; da lib
 ;;
 
-(def validators (atom {}))
-
-(defmacro defvalidator [validator-name doc-string bindings & body]
+(defmacro defvalidator-old [validator-name doc-string bindings & body]
   `(swap! validators assoc (keyword ~validator-name)
-     {:doc ~doc-string
+     (fn [~@bindings] (do ~@body))
+     #_{:doc ~doc-string
       :fn (fn [~@bindings] ~@body)}))
-
-(defn validate
-  "Runs all validators, returning list of validation results."
-  [document]
-  (->>
-    validators
-    deref
-    vals
-    (map :fn)
-    (map #(apply % [document]))
-    (filter (comp not nil?))))
 
 (defn exists? [x] (-> x s/blank? not))
 
@@ -113,7 +102,7 @@
 ;; validators
 ;;
 
-(defvalidator "vrk:CR327"
+(defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
   [{{{schema-name :name} :info} :schema data :data}]
   (when (= schema-name "uusiRakennus")
@@ -126,7 +115,7 @@
          {:path[:mitat :tilavuus]
           :result [:warn "vrk:CR327"]}]))))
 
-(defvalidator "vrk:BR106"
+(defvalidator-old "vrk:BR106"
   "Puutalossa saa olla korkeintaan 4 kerrosta"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
@@ -139,7 +128,7 @@
      {:path[:mitat :kerrosluku]
       :result [:warn "vrk:BR106"]}]))
 
-(defvalidator "vrk:CR343"
+(defvalidator-old "vrk:CR343"
   "Jos lammitustapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
@@ -152,7 +141,7 @@
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR343"]}]))
 
-(defvalidator "vrk:CR342"
+(defvalidator-old "vrk:CR342"
   "Sahko polttoaineena vaatii sahkoliittyman"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
@@ -165,7 +154,7 @@
      {:path [:verkostoliittymat :sahkoKytkin]
       :result [:warn "vrk:CR342"]}]))
 
-(defvalidator "vrk:CR341"
+(defvalidator-old "vrk:CR341"
   "Sahkolammitus vaatii sahkoliittyman"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
@@ -178,7 +167,7 @@
      {:path [:verkostoliittymat :sahkoKytkin]
       :result [:warn "vrk:CR341"]}]))
 
-(defvalidator "vrk:CR336"
+(defvalidator-old "vrk:CR336"
   "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
@@ -191,7 +180,7 @@
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR336"]}]))
 
-(defvalidator "vrk:CR335"
+(defvalidator-old "vrk:CR335"
   "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
   [{{{schema-name :name} :info} :schema data :data}]
   (when
@@ -205,7 +194,7 @@
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR335"]}]))
 
-(defvalidator "vrk:CR326"
+(defvalidator-old "vrk:CR326"
   "Kokonaisalan oltava vähintään kerrosala"
   [{{{schema-name :name} :info} :schema data :data}]
   (let [kokonaisala (some-> data :mitat :kokonaisala :value safe-int)
