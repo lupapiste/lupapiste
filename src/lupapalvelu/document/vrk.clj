@@ -102,11 +102,14 @@
 ;; validators
 ;;
 
+(defn ->kayttotarkoitus [x]
+  (some->> x (re-matches #"(\d+) .*") last keyword ))
+
 (defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
   [{{{schema-name :name} :info} :schema data :data}]
   (when (= schema-name "uusiRakennus")
-    (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value (re-matches #"(\d+) .*") last keyword)
+    (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value ->kayttotarkoitus)
           tilavuus        (some->> data :mitat :tilavuus :value safe-int)
           max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
       (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
@@ -194,11 +197,15 @@
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR335"]}]))
 
+;;
+;; new stuff
+;;
+
 (defvalidator "Kokonaisalan oltava vahintaan kerrosala"
   {:schema "uusiRakennus"
-   :fields [kokonaisala [:mitat :kokonaisala]
-            kerrosala   [:mitat :kerrosala]]}
-  (and kokonaisala kerrosala (> (safe-int kerrosala) (safe-int kokonaisala)) :vrk:CR326))
+   :fields [kokonaisala [:mitat :kokonaisala safe-int]
+            kerrosala   [:mitat :kerrosala safe-int]]}
+  (and kokonaisala kerrosala (> kerrosala kokonaisala) :vrk:CR326))
 
 (defvalidator "Sahko polttoaineena vaatii varusteeksi sahkon"
   {:schema "uusiRakennus"
@@ -208,7 +215,15 @@
 
 (defvalidator "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
   {:schema "uusiRakennus"
-   :fields [kokonaisala [:mitat :kokonaisala]
+   :fields [kokonaisala [:mitat :kokonaisala safe-int]
             huoneistot  [:huoneistot]]}
   (let [huoneistoala (reduce + (map (fn=> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
-    (and kokonaisala huoneistoala (< (safe-int kokonaisala) huoneistoala) :vrk:CR322)))
+    (and kokonaisala huoneistoala (< kokonaisala huoneistoala) :vrk:CR322)))
+
+#_(defvalidator "Jos kayttotarkoitus on 011 – 022, on kerrosluvun oltava valilla 1 – 4"
+  {:schema "uusiRakennus"
+   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus]
+            kerrosluku      [:mitat :kerrosluku]]}
+  )
+
+
