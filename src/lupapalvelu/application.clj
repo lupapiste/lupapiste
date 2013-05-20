@@ -62,6 +62,13 @@
     (info "invalid property id parameters:" (join ", " invalid))
     (fail :error.invalid-property-id :parameters (vec invalid))))
 
+(defn- validate-owner-or-writer
+  "Validator: current user must be owner or writer.
+   To be used in commands' :validators vector."
+  [command application]
+  (when-not (domain/owner-or-writer? application (-> command :user :id))
+    (fail :error.unauthorized)))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -132,7 +139,8 @@
 
 (defcommand "invite"
   {:parameters [:id :email :title :text :documentName]
-   :roles      [:applicant]
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]
    :verified   true}
   [{created :created
     user    :user
@@ -140,7 +148,7 @@
   (with-application command
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
-        (fail :already-invited)
+        (fail :invite.already-invited)
         (let [invited (security/get-or-create-user-by-email email)
               invite  {:title        title
                        :application  application-id
@@ -154,7 +162,7 @@
               writer  (role invited :writer)
               auth    (assoc writer :invite invite)]
           (if (domain/has-auth? application (:id invited))
-            (fail :already-has-auth)
+            (fail :invite.already-has-auth)
             (do
               (mongo/update
                 :applications
@@ -181,7 +189,8 @@
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]}
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
@@ -194,7 +203,8 @@
 ;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
   {:parameters [:id :email]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]}
   [{{:keys [email]} :data :as command}]
   (update-application command
     {$pull {:auth {$and [{:username email}
@@ -334,9 +344,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :validators [(fn [command application]
-                  (when-not (domain/is-owner-or-writer? application (-> command :user :id))
-                    (fail :error.unauthorized)))]}
+   :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]

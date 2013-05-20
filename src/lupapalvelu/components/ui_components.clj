@@ -68,7 +68,7 @@
                   :css ["accordion.css"]}
 
    :application  {:depends [:common :repository :tree]
-                  :js ["change-location.js" "application.js" "add-operation.js"]
+                  :js ["change-location.js" "invite.js" "application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"]}
 
    :applications {:depends [:common :repository :invites]
@@ -136,7 +136,7 @@
    :welcome {:depends [:common :register :debug]
              :js ["welcome.js" "login.js"]
              :html ["index.html" "login.html"]}
-   
+
    :oskari  {:css ["oskari.css"]}
 
    :mypage  {:depends [:common]
