@@ -14,7 +14,9 @@
     (reduce concat)
     (filter (comp not nil?))))
 
-(defmacro defvalidator [doc-string {:keys [schema fields]} & body]
+(defmacro defvalidator
+  "Macro to create document-level validators."
+  [doc-string {:keys [schema fields]} & body]
   (let [paths (->> fields (partition 2) (map last) vec)]
     `(swap! validators assoc (keyword ~doc-string)
        (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
