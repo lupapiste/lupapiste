@@ -35,8 +35,8 @@
 (fact "safe-int"
   (safe-int "010")  => 10
   (safe-int "-010") => -10
-  (safe-int "1.2")  => nil
-  (safe-int "1.2" 0)  => 0)
+  (safe-int "1.2")  => 0
+  (safe-int "1.2" nil)  => nil)
 
 (fact "fn=>"
   (map (fn=> :a :b even?) [{:a {:b 2}}

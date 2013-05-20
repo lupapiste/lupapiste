@@ -221,3 +221,12 @@
    :fields [polttoaine [:lammitus :lammonlahde]
             sahko      [:varusteet :sahkoKytkin]]}
   (and (= polttoaine "s\u00e4hk\u00f6") (not= sahko true) :vrk:CR324))
+
+(defvalidator "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
+  {:schema "uusiRakennus"
+   :fields [kokonaisala [:mitat :kokonaisala]
+            huoneistot  [:huoneistot]]}
+  (let [huoneistoala (reduce + (map (fn=> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
+    (and kokonaisala huoneistoala (< (safe-int kokonaisala) huoneistoala) :vrk:CR322)))
+
+

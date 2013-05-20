@@ -51,8 +51,9 @@
       false)))
 
 (defn safe-int
-  "Reads a integer from input. Returns default if not a integer."
-  ([x] (safe-int x nil))
+  "Reads a integer from input. Returns default if not a integer.
+   Default default is 0"
+  ([x] (safe-int x 0))
   ([x default]
     (try
       (java.lang.Integer/parseInt x)

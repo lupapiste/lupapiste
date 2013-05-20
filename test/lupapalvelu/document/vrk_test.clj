@@ -88,4 +88,13 @@
       (apply-update [:lammitus :lammonlahde] "s\u00e4hk\u00f6")
       (apply-update [:varusteet :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR324"]))
 
+  (fact "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
+    (-> uusi-rakennus
+      (apply-update [:mitat :kokonaisala] "100")
+      (apply-update [:huoneistot :0 :huoneistoTyyppi :huoneistoAla] "60")) => (not-invalid-with? [:warn "vrk:CR322"])
+    (-> uusi-rakennus
+      (apply-update [:mitat :kokonaisala] "100")
+      (apply-update [:huoneistot :0 :huoneistonTyyppi :huoneistoala] "60")
+      (apply-update [:huoneistot :1 :huoneistonTyyppi :huoneistoala] "50")) => (invalid-with? [:warn "vrk:CR322"]))
+
 )
