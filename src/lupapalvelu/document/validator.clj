@@ -15,7 +15,7 @@
     (filter (comp not nil?))))
 
 (defmacro defvalidator
-  "Macro to create document-level validators."
+  "Macro to create document-level validators. Unwraps data etc."
   [doc-string {:keys [schema fields]} & body]
   (let [paths (->> fields (partition 2) (map last) vec)]
     `(swap! validators assoc (keyword ~doc-string)

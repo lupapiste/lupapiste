@@ -194,7 +194,7 @@
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR335"]}]))
 
-(defvalidator-old "vrk:CR326"
+#_(defvalidator-old "vrk:CR326"
   "Kokonaisalan oltava vähintään kerrosala"
   [{{{schema-name :name} :info} :schema data :data}]
   (let [kokonaisala (some-> data :mitat :kokonaisala :value safe-int)
@@ -209,3 +209,9 @@
         :result [:warn "vrk:CR326"]}
        {:path [:lammitys :lammonlahde]
         :result [:warn "vrk:CR326"]}])))
+
+(defvalidator "Kokonaisalan oltava vähintään kerrosala"
+  {:schema "uusiRakennus"
+   :fields [kokonaisala [:mitat :kokonaisala]
+            kerrosala   [:mitat :kerrosala]]}
+  (and kokonaisala kerrosala (> (safe-int kerrosala) (safe-int kokonaisala)) :vrk:CR326))
