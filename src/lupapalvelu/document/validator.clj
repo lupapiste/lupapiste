@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.validator
-  (:require [lupapalvelu.document.tools :as tools]))
+  (:require [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.clojure15 :refer [some->>]]))
 
 (def validators (atom {}))
 
@@ -25,7 +26,7 @@
              (let
                ~(reduce into
                   (for [[k v] (partition 2 fields)]
-                    [k `(get-in ~'d ~v)]))
+                    [k `(some->> ~'d ~@v)]))
                (try
                  (when-let [resp# (do ~@body)]
                    (map (fn [path#] {:path   path#
