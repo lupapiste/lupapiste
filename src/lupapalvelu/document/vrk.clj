@@ -194,22 +194,6 @@
      {:path [:lammitys :lammonlahde]
       :result [:warn "vrk:CR335"]}]))
 
-#_(defvalidator-old "vrk:CR326"
-  "Kokonaisalan oltava vahintaan kerrosala"
-  [{{{schema-name :name} :info} :schema data :data}]
-  (let [kokonaisala (some-> data :mitat :kokonaisala :value safe-int)
-        kerrosala   (some-> data :mitat :kerrosala :value safe-int)]
-    (when
-      (and
-        (= schema-name "uusiRakennus")
-        kokonaisala
-        kerrosala
-        (> kerrosala kokonaisala))
-      [{:path [:lammitys :lammitystapa]
-        :result [:warn "vrk:CR326"]}
-       {:path [:lammitys :lammonlahde]
-        :result [:warn "vrk:CR326"]}])))
-
 (defvalidator "Kokonaisalan oltava vahintaan kerrosala"
   {:schema "uusiRakennus"
    :fields [kokonaisala [:mitat :kokonaisala]
@@ -228,5 +212,3 @@
             huoneistot  [:huoneistot]]}
   (let [huoneistoala (reduce + (map (fn=> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
     (and kokonaisala huoneistoala (< (safe-int kokonaisala) huoneistoala) :vrk:CR322)))
-
-
