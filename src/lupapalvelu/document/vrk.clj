@@ -8,11 +8,10 @@
 ;; da lib
 ;;
 
-(defmacro defvalidator-old [validator-name doc-string bindings & body]
+(defmacro defvalidator-old [validator-name doc bindings & body]
   `(swap! validators assoc (keyword ~validator-name)
-     (fn [~@bindings] (do ~@body))
-     #_{:doc ~doc-string
-      :fn (fn [~@bindings] ~@body)}))
+     {:doc ~doc
+      :fn (fn [~@bindings] (do ~@body))}))
 
 (defn exists? [x] (-> x s/blank? not))
 
@@ -201,51 +200,59 @@
 ;; new stuff
 ;;
 
-(defvalidator "Kokonaisalan oltava vahintaan kerrosala"
-  {:schema "uusiRakennus"
+(defvalidator :vrk:CR326
+  {:doc    "Kokonaisalan oltava vahintaan kerrosala"
+   :schema "uusiRakennus"
    :fields [kokonaisala [:mitat :kokonaisala safe-int]
             kerrosala   [:mitat :kerrosala safe-int]]}
-  (and kokonaisala kerrosala (> kerrosala kokonaisala) :vrk:CR326))
+  (and kokonaisala kerrosala (> kerrosala kokonaisala)))
 
-(defvalidator "Sahko polttoaineena vaatii varusteeksi sahkon"
-  {:schema "uusiRakennus"
+(defvalidator :vrk:CR324
+  {:doc    "Sahko polttoaineena vaatii varusteeksi sahkon"
+   :schema "uusiRakennus"
    :fields [polttoaine [:lammitus :lammonlahde]
             sahko      [:varusteet :sahkoKytkin]]}
-  (and (= polttoaine "s\u00e4hk\u00f6") (not= sahko true) :vrk:CR324))
+  (and (= polttoaine "s\u00e4hk\u00f6") (not= sahko true)))
 
-(defvalidator "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
-  {:schema "uusiRakennus"
+(defvalidator :vrk:CR322
+  {:doc    "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
+   :schema "uusiRakennus"
    :fields [kokonaisala [:mitat :kokonaisala safe-int]
             huoneistot  [:huoneistot]]}
   (let [huoneistoala (reduce + (map (fn=> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
-    (and kokonaisala huoneistoala (< kokonaisala huoneistoala) :vrk:CR322)))
+    (and kokonaisala huoneistoala (< kokonaisala huoneistoala))))
 
-(defvalidator "Jos kayttotarkoitus on 011 - 022, on kerrosluvun oltava valilla 1 - 4"
-  {:schema "uusiRakennus"
+(defvalidator :vrk:CR320
+  {:doc    "Jos kayttotarkoitus on 011 - 022, on kerrosluvun oltava valilla 1 - 4"
+   :schema "uusiRakennus"
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
             kerrosluku      [:mitat :kerrosluku safe-int]]}
-  (and (#{:011 :012 :013 :021 :022} kayttotarkoitus) (> kerrosluku 4) :vrk:CR320))
+  (and (#{:011 :012 :013 :021 :022} kayttotarkoitus) (> kerrosluku 4)))
 
-(defvalidator "Verkostoliittymat ja rakennuksen varusteet tasmattava: Sahko"
-  {:schema "uusiRakennus"
+(defvalidator :vrk:CR328:sahko
+  {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Sahko"
+   :schema "uusiRakennus"
    :fields [liittyma [:verkostoliittymat :sahkoKytkin]
             varuste  [:varusteet         :sahkoKytkin]]}
-  (and liittyma (not varuste) :vrk:CR328:sahko))
+  (and liittyma (not varuste)))
 
-(defvalidator "Verkostoliittymat ja rakennuksen varusteet tasmattava: Viemari"
-  {:schema "uusiRakennus"
+(defvalidator :vrk:CR328:viemari
+  {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Viemari"
+   :schema "uusiRakennus"
    :fields [liittyma [:verkostoliittymat :viemariKytkin]
             varuste  [:varusteet         :viemariKytkin]]}
-  (and liittyma (not varuste) :vrk:CR328:viemari))
+  (and liittyma (not varuste)))
 
-(defvalidator "Verkostoliittymat ja rakennuksen varusteet tasmattava: Vesijohto"
-  {:schema "uusiRakennus"
+(defvalidator :vrk:CR328:vesijohto
+  {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Vesijohto"
+   :schema "uusiRakennus"
    :fields [liittyma [:verkostoliittymat :vesijohtoKytkin]
             varuste  [:varusteet         :vesijohtoKytkin]]}
-  (and liittyma (not varuste) :vrk:CR328:vesijohto))
+  (and liittyma (not varuste)))
 
-(defvalidator "Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1"
-  {:schema  "uusiRakennus"
+(defvalidator :vrk:CR312
+  {:doc     "Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1"
+   :schema  "uusiRakennus"
    :fields  [toimenpide [:kaytto :kayttotarkoitus ->kayttotarkoitus]
              kerrosluku [:mitat :kerrosluku safe-int]]}
-  (and (#{:691 :111} toimenpide) (not= kerrosluku 1) :vrk:CR312))
+  (and (#{:691 :111} toimenpide) (not= kerrosluku 1)))
