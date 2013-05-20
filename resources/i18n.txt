@@ -1,60 +1,60 @@
 poi: Paikka
 
-poi.type.100: autotien nimi
-poi.type.110: kulkuväylän nimi
-poi.type.120: rautatieliikennepaikan nimi
-poi.type.130: turvalaitteen nimi
-poi.type.200: maa-aineksenottoalueen nimi
-poi.type.205: hautausmaan nimi
-poi.type.210: kaatopaikan nimi
-poi.type.215: varastoalueen nimi
-poi.type.225: liikennealueen nimi
-poi.type.230: louhoksen nimi
-poi.type.235: puiston nimi
-poi.type.240: täytemaan nimi
-poi.type.245: urheilu- tai virkistysalueen nimi
-poi.type.300: puun nimi
-poi.type.305: kiven nimi
-poi.type.310: vesikiven nimi
-poi.type.315: merkittävän luontokohteen nimi
-poi.type.320: pellon tai niityn nimi
-poi.type.325: metsäalueen nimi
-poi.type.330: suon nimi
-poi.type.335: kohouman nimi
-poi.type.340: painanteen nimi
-poi.type.345: niemen nimi
-poi.type.350: saaren nimi
-poi.type.390: muun maastokohteen nimi
-poi.type.400: lähteen nimi
-poi.type.410: vakaveden nimi
-poi.type.415: vakaveden osan nimi
-poi.type.420: virtaveden nimi
-poi.type.425: virtaveden osan nimi
-poi.type.430: matalikon nimi
-poi.type.435: kosken nimi
-poi.type.490: muu vesistönimi
-poi.type.500: rakennuksen nimi
-poi.type.510: rakennusryhmän nimi
-poi.type.520: altaan nimi
-poi.type.530: muistomerkin nimi
-poi.type.540: kunnan nimi, kaupunki
-poi.type.550: kunnan nimi, maaseutu
-poi.type.560: kylän, kaupunginosan tai kulmakunnan nimi
-poi.type.570: talon nimi
-poi.type.575: maakunnan nimi
-poi.type.580: läänin nimi
-poi.type.590: muu asutusnimi
-poi.type.600: luonnonsuojelualueen nimi
-poi.type.602: luonnonpuiston nimi
-poi.type.604: kansallispuiston nimi
-poi.type.610: rauhoitetun kohteen nimi
-poi.type.612: luonnonmuistomerkin nimi
-poi.type.614: muinaisjäännöksen nimi
-poi.type.620: rauhoitetun alueen nimi
-poi.type.630: erämaa-alueen nimi
-poi.type.640: retkeilyalueen nimi
-poi.type.700: valtakunnan rajapyykin nimi
-poi.type.710: rajapyykin nimi
+poi.type.100: autotie
+poi.type.110: kulkuväylä
+poi.type.120: rautatieliikennepaikka
+poi.type.130: turvalaite
+poi.type.200: maa-aineksenottoalu
+poi.type.205: hautausmaa
+poi.type.210: kaatopaikka
+poi.type.215: varastoalue
+poi.type.225: liikennealue
+poi.type.230: louhos
+poi.type.235: puisto
+poi.type.240: täytemaa
+poi.type.245: viskistysalue
+poi.type.300: puu
+poi.type.305: kivi
+poi.type.310: vesikivi
+poi.type.315: luontokohde
+poi.type.320: pelto
+poi.type.325: metsä
+poi.type.330: suo
+poi.type.335: kohouma
+poi.type.340: painanne
+poi.type.345: niemi
+poi.type.350: saari
+poi.type.390: maastokohde
+poi.type.400: lähde
+poi.type.410: järvi
+poi.type.415: järven osa
+poi.type.420: joki
+poi.type.425: joen osa
+poi.type.430: matalikko
+poi.type.435: koski
+poi.type.490: vesistö
+poi.type.500: rakennus
+poi.type.510: rakennusryhmä
+poi.type.520: allas
+poi.type.530: muistomerkki
+poi.type.540: kunta
+poi.type.550: kunta
+poi.type.560: kylä tai kaupunginosa
+poi.type.570: talo
+poi.type.575: maakunta
+poi.type.580: lääni
+poi.type.590: asutus
+poi.type.600: luonnonsuojelualue
+poi.type.602: luonnonpuisto
+poi.type.604: kansallispuisto
+poi.type.610: rauhoitettu kohde
+poi.type.612: luonnonmuistomerkki
+poi.type.614: muinaisjäännös
+poi.type.620: rauhoitettu alue
+poi.type.630: erämaa-alue
+poi.type.640: retkeilyalue
+poi.type.700: valtakunnan rajapyykki
+poi.type.710: rajapyykki
 
 create.placeholder: Kasarmikatu 25, Helsinki
 
