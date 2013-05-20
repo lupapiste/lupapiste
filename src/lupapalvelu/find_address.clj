@@ -35,8 +35,9 @@
 ;;;
 
 (defn search-property-id [property-id]
-  ; FIXME: Fix result to property format
-  (map (set-kind :property-id)
+  (map (fn [f] (assoc (wfs/feature-to-position f)
+                      :property-id (:kiinttunnus (wfs/feature-to-property-id f))
+                      :kind :property-id))
        (wfs/point-by-property-id property-id)))
 
 (def poi-types ["200" ; maa-aineksenottoalueen nimi
