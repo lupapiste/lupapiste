@@ -40,20 +40,19 @@
                 :kind :property-id})
        (wfs/point-by-property-id property-id)))
 
-(def poi-types ["200" ; maa-aineksenottoalueen nimi
-                "225" ; liikennealueen nimi
-                "235" ; puiston nimi
-                "245" ; urheilu- tai virkistysalueen nimi
-                "325" ; metsa-alueen nimi
-                "330" ; suon nimi
-                "345" ; niemen nimi
-                "350" ; saaren nimi
-                "410" ; vakaveden nimi
-                "420" ; virtaveden nimi
-                "540" ; kunnan nimi, kaupunki
-                "550" ; kunnan nimi, maaseutu
-                "560" ; kylan, kaupunginosan tai kulmakunnan nimi
-                ])
+(def poi-types ["200"   ; maa-aineksenottoalueen nimi
+                "225"   ; liikennealueen nimi
+                "235"   ; puiston nimi
+                "245"   ; urheilu- tai virkistysalueen nimi
+                "325"   ; metsa-alueen nimi
+                "330"   ; suon nimi
+                "345"   ; niemen nimi
+                "350"   ; saaren nimi
+                "410"   ; vakaveden nimi
+                "420"   ; virtaveden nimi
+                "540"   ; kunnan nimi, kaupunki
+                "550"   ; kunnan nimi, maaseutu
+                "560"]) ; kylan, kaupunginosan tai kulmakunnan nimi
 
 (defn search-poi [poi]
   (->> (q/with-collection "poi"
