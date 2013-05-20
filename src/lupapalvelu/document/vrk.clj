@@ -243,3 +243,9 @@
    :fields [liittyma [:verkostoliittymat :vesijohtoKytkin]
             varuste  [:varusteet         :vesijohtoKytkin]]}
   (and liittyma (not varuste) :vrk:CR328:vesijohto))
+
+(defvalidator "Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1"
+  {:schema  "uusiRakennus"
+   :fields  [toimenpide [:kaytto :kayttotarkoitus ->kayttotarkoitus]
+             kerrosluku [:mitat :kerrosluku safe-int]]}
+  (and (#{:691 :111} toimenpide) (not= kerrosluku 1) :vrk:CR312))
