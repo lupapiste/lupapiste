@@ -96,37 +96,30 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
-(defn- do-validation [schema data k path]
-  (let [current-path (if k (conj path (name k)) path)
-        cd (get-in schema [current-path])]
-    (println "path:" path)
-    (if (contains? schema :body)
-      (doall
-        (map (fn [m] (do-validation schema data k (get-in schema [current-path]) cd)))))))
+(defn- do-validate [data schema-body path]
+  (let [kw (keyword (:name schema-body))
+        current-path (if (empty? path) [kw] (conj path kw))]
+    (if (not (and (:required schema-body) (get-in data (conj current-path (keyword "value")))))
+      (println "################ required field not found:" current-path ", value is" (get-in data (conj current-path (keyword "value")))))
+    (if (contains? schema-body :body)
+      (map (fn [m] (do-validate data m current-path)) (:body schema-body)))))
 
-(defn- validate-required-fields [document]
-  (let [schema (:schema document)
-        data (:data document)]
-    (println "schema:")
-    (clojure.pprint/pprint schema)
-    (println "data:")
-    (clojure.pprint/pprint data)
-    (println "### do-validation")
-    (do-validation schema data nil :body)
-    (->validation-result {:value "kikka"} [:a :ab] {:max-len 3, :name "ab", :type :string, :min-len 2} [:err "illegal-value:too-long"])))
-;  []
-#_[[:warn "illegal-value:required"]]
+(defn- validate-required-fields [schema-body data]
+  (map (fn [m] (do-validate data m [])) schema-body))
 
 (defn validate
   "Validates document against it's local schema and document level rules
    retuning list of validation errors."
   [{{schema-body :body} :schema data :data :as document}]
+  (println "doc")
+  (clojure.pprint/pprint document)
   (and data
     (flatten
       (concat
         (validate-fields schema-body nil data [])
-        (validate-required-fields document)
-        (vrk/validate document)))))
+        (validate-required-fields schema-body (:data document))
+        (vrk/validate document)
+        ))))
 
 (defn valid-document?
   "Checks weather document is valid."
