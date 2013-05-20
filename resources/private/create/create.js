@@ -190,6 +190,12 @@
           .addClass("create-find")
           .addClass("address")
           .append($("<span>").text(item.street + ", " + loc("municipality", item.municipality)));
+      }],
+      [{kind: "property-id"}, function(item) {
+        return $("<a>")
+          .addClass("create-find")
+          .addClass("property-id")
+          .append($("<span>").text(util.prop.toHumanFormat(item["property-id"])));
       }]
     ];
     
