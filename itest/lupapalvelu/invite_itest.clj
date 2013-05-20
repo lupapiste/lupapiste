@@ -24,16 +24,19 @@
 
     (count (:invites (query teppo :invites))) => 1
 
+    (fact "Sonja must NOT be able to uninvite Teppo!"
+      (command sonja :remove-invite :id id :email "teppo@example.com") => unauthorized?
+      (count (:invites (query teppo :invites))) => 1)
+
     (fact "Mikko must be able to uninvite Teppo!"
       (command mikko :remove-invite :id id :email "teppo@example.com") => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Mikko must be able to re-invite Teppo!"
-      (invite mikko id "teppo@example.com") => ok?)
+      (invite mikko id "teppo@example.com") => ok?
+      (count (:invites (query teppo :invites))) => 1)
 
-    (count (:invites (query teppo :invites))) => 1
-
-    (fact "Mikko must not be able to accept Teppo's invite"
+    (fact "Mikko must NOT be able to accept Teppo's invite"
       (command mikko :approve-invite :id id :email "teppo@example.com")
       (count (:invites (query teppo :invites))) => 1)
 
@@ -48,7 +51,10 @@
       (fact "Teppo should be able to do stuff."
         (-> actions :add-operation :ok) => true
         (-> actions :submit-application :ok) => true
-        (-> actions :cancel-application :ok) => true))))
+        (-> actions :cancel-application :ok) => true))
+
+    (fact "Sonja must NOT be able to remove authz from Teppo!"
+      (command sonja :remove-auth :id id :email "teppo@example.com") => unauthorized?)))
 
 (facts "Auhtority invites designer"
   (doseq [user-key [sonja mikko teppo]]
@@ -64,6 +70,16 @@
         (command sonja :remove-invite :id id :email "teppo@example.com") => ok?
         (count (:invites (query teppo :invites))) => 0)
 
+      (fact "Reinvite & accept"
+        (invite sonja id "teppo@example.com") => ok?
+        (count (:invites (query teppo :invites))) => 1
+        (command teppo :approve-invite :id id) => ok?)
 
-      )
-    )
+      (fact "Teppo must be able to comment!"
+        (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => ok?)
+
+      (fact "Teppo must be able to invite another designer, Mikko!"
+      (invite teppo id "mikko@example.com") => ok?)
+
+      (fact "Sonja must be able to remove authz from Teppo!"
+        (command sonja :remove-auth :id id :email "teppo@example.com") => ok?)))

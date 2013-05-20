@@ -189,7 +189,8 @@
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]}
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
@@ -202,7 +203,8 @@
 ;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
   {:parameters [:id :email]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]}
   [{{:keys [email]} :data :as command}]
   (update-application command
     {$pull {:auth {$and [{:username email}
