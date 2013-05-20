@@ -23,9 +23,9 @@
     (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn current-user
-  "fetches the current user from 1) http-session 2) apikey from headers"
+  "fetches the current user"
   ([] (current-user (request/ring-request)))
-  ([request] (or (session/get :user) (request :user))))
+  ([request] (request :user)))
 
 (defn login
   "returns non-private information of enabled user with the username and password"

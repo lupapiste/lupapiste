@@ -285,13 +285,14 @@
   (let [authorization (get-in request [:headers "authorization"])]
     (parse "apikey" authorization)))
 
-(defn apikey-authentication
-  "Reads apikey from 'Auhtorization' headers, pushed it to :user request attribute
-   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
+(defn authentication
+  "Middleware that adds :user to request. If request has apikey authentication header then
+   that is used for authentication. If not, then use user information from session."
   [handler]
   (fn [request]
-    (let [apikey (get-apikey request)]
-      (handler (assoc request :user (security/login-with-apikey apikey))))))
+    (handler (assoc request :user
+                    (or (security/login-with-apikey (get-apikey request))
+                        (session/get :user))))))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
