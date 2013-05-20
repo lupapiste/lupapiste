@@ -1,3 +1,142 @@
 body {
-  background: blue;
+  background: rgb(246,246,246);
+  
+}
+
+#maptools {
+  background-color: rgb(79,79,79);
+  position: absolute;
+  z-index: 2;
+}
+
+.oskari-tile-title {
+  font: 15px Calibri;
+  font-weight: normal;
+  margin-left: 10px;
+  line-height: 24px;
+}
+.icon-bubble-right {
+  border-radius: 10px;
+  background: rgb(245,126,35);
+  font: 15px Calibri;
+  font-weight: normal;
+  vertical-align: top;
+  line-height: 18px;
+  margin: 4px;
+}
+
+.oskari-flyout {
+  background-color: rgb(246,246,246);
+  position: absolute;
+  z-index: 1100;
+  margin: 0px;
+  padding: 0px;
+  border: 1px solid rgb(79,79,79);
+}
+
+.oskari-flyouttoolbar {
+  height: 57px;
+  width: 100%;
+  background-color: rgb(79,79,79);
+  color: white;
+  text-transform: uppercase;
+}
+
+.oskari-flyoutheading {
+  background-color: rgb(245,126,35);
+  border-top: 1px solid rgb(245,126,35);
+  border-bottom: 1px solid rgb(245,126,35);
+  height: 14px;
+  width: 100%;
+}
+
+.layer-icon, .icon-info {
+  display: none;
+}
+
+div.layerselection2 .layer.selected div.layer-info div.layer-title h4 {
+  font: 18px Calibri;
+  padding: 0;
+  margin: 8px 8px;
+}
+
+.layer-tools{
+  min-height: 26px;
+}
+
+.layer-visibility a, .layer-msg a {
+  font: 15px Calibri;
+  color:  rgb(79,79,79);
+  text-decoration: none;
+}
+
+.layer-visibility a:hover, .layer-msg a:hover {
+  text-decoration: underline;
+}
+
+.layer-msg {
+  font: 15px Calibri;
+}
+
+div.pzbDiv {
+  top: 8px;
+  left: 170px;
+  background-color: rgb(246,246,246);
+  background-color: rgba(246,246,246, .8);
+  max-width: 19px;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+div.divmanazerpopup.oskari-measurement {
+  width: 260px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  background-color: rgb(246,246,246);
+  -moz-background-clip: border;
+  -webkit-background-clip: border;
+  background-clip: border-box;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding;
+  background-clip: padding-box;
+  -moz-background-clip: content;
+  -webkit-background-clip: content;
+  background-clip: content-box;
+  border-radius: 10px;
+  z-index: 9000;
+  color:  black;
+  font: 15px Calibri;
+}
+
+div.divmanazerpopup.oskari-measurement h3 {
+  color:  white;
+  font: 18px Calibri;
+  text-transform: uppercase;
+  background-color: rgb(79,79,79);
+  margin-top:  0px;
+}
+
+div.divmanazerpopup.oskari-measurement [type=button] {
+  background: rgb(226,226,226);
+  cursor: pointer;
+  display: inline-block;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 23px;
+  font-weight: 400;
+  width: 100px;
+  margin: 0 0 4px;
+  padding: 4px 18px;
+  text-decoration: none;
+  text-shadow: 0px 1px 0px #fff;
+  border: none;
+  color: rgb(48,48,48);
+  position: relative;
+}
+
+div.divmanazerpopup.oskari-measurement [type=button]:HOVER {
+  background: rgb(206,206,206);
+  -webkit-box-shadow:0 1px 2px rgb(226,226,226);
+  box-shadow:0 1px 2px rgb(226,226,226);
 }
