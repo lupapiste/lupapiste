@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.vrk
   (:use [lupapalvelu.clojure15]
         [lupapalvelu.document.validator])
-  (:require [sade.util :refer [safe-int fn=>]]
+  (:require [sade.util :refer [safe-int fn->]]
             [clojure.string :as s]))
 
 ;;
@@ -219,7 +219,7 @@
    :schema "uusiRakennus"
    :fields [kokonaisala [:mitat :kokonaisala safe-int]
             huoneistot  [:huoneistot]]}
-  (let [huoneistoala (reduce + (map (fn=> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
+  (let [huoneistoala (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
     (and kokonaisala huoneistoala (< kokonaisala huoneistoala))))
 
 (defvalidator :vrk:CR320

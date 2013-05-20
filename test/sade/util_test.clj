@@ -38,7 +38,7 @@
   (safe-int "1.2")  => 0
   (safe-int "1.2" nil)  => nil)
 
-(fact "fn=>"
-  (map (fn=> :a :b even?) [{:a {:b 2}}
+(fact "fn->"
+  (map (fn-> :a :b even?) [{:a {:b 2}}
                            {:a {:b 3}}
                            {:a {:b 4}}]) => [true false true])
