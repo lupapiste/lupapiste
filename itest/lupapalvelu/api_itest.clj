@@ -80,7 +80,7 @@
               (get-in new-paasuunnittelija [:data :henkilotiedot]) => {:etunimi {:value "Mikko"} :sukunimi {:value "Intonen"}})))))))
 
 (defn- invite [apikey application-id email]
-  (command apikey :invite :id application-id :email email :title email :text email :documentName "suunnittelija"))
+  (command apikey :invite :id application-id :email email :title email :text email :documentName "suunnittelija" :path ""))
 
 (facts "Secure invites"
   (apply-remote-minimal)
