@@ -1,4 +1,4 @@
-(ns lupapalvelu.document.validators-test
+(ns lupapalvelu.document.validator-test
   (:use [lupapalvelu.document.validator]
         [lupapalvelu.factlet]
         [midje.sweet])
