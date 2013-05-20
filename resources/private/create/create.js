@@ -215,14 +215,12 @@
     ];
     
     self.autocompleteSelect = function(e, data) {
-      console.log("SELECT:", data);
       var item = data.item;
       _(handlers).filter(selector(item)).map(toHandler).each(invoker(item));
       return false;
     }
     
     self.autocompleteRender = function(ul, data) {
-      console.log("RENDER:", data);
       var element = _(renderers).filter(selector(data)).first(1).map(toHandler).map(invoker(data)).value();
       return $("<li>")
         .append(element)
