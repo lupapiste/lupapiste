@@ -76,7 +76,7 @@
       (map (comp (set-kind :address :street-number) wfs/feature-to-address)))))
 
 (defn search-poi-or-street [v]
-  (take 15 (concat (take 10 (search-street v)) (take 10 (search-poi v)))))
+  (take 25 (concat (take 15 (search-street v)) (search-poi v))))
 
 (defn search-street-with-number [street number]
   (let [mun-prop "oso:kuntanimiFin"]
