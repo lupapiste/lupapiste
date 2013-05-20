@@ -683,7 +683,7 @@ var docgen = (function () {
           label.removeChild(loader);
         }
         if (status === "warn") {
-          showIndicator("form-input-warn", "form.warn");
+          showIndicator("form-input-saved", "form.saved");
         } else if (status === "err") {
           showIndicator("form-input-err", "form.err");
         } else if (status === "ok") {
