@@ -3,6 +3,7 @@
         [lupapalvelu.core]
         [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
+        [lupapalvelu.i18n :only [loc]]
         [clojure.string :only [split join trim]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
@@ -416,7 +417,7 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc lang]
+(defn- get-all-attachments [application loc]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
@@ -426,9 +427,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
+          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
+        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application))
         (.finish zip)))
     temp-file))
 
