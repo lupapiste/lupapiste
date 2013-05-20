@@ -21,6 +21,7 @@ LUPAPISTE.InviteModel = function() {
   };
 
   self.submit = function(model) {
+    self.error(undefined);
     var email = model.email();
     var text = model.text();
     var documentName = model.documentName();
