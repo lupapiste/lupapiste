@@ -215,3 +215,9 @@
    :fields [kokonaisala [:mitat :kokonaisala]
             kerrosala   [:mitat :kerrosala]]}
   (and kokonaisala kerrosala (> (safe-int kerrosala) (safe-int kokonaisala)) :vrk:CR326))
+
+(defvalidator "Sahko polttoaineena vaatii varusteeksi sahkon"
+  {:schema "uusiRakennus"
+   :fields [polttoaine [:lammitus :lammonlahde]
+            sahko      [:varusteet :sahkoKytkin]]}
+  (and (= polttoaine "s\u00e4hk\u00f6") (not= sahko true) :vrk:CR324))

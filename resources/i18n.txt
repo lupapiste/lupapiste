@@ -19,4 +19,5 @@ error.illegal-subtype: Tuntematon tietotyyppi
 
 error.vrk:CR341: Sähkölämmitys vaatii sähköliittymän
 error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän
-error.vrk:CR343: Jos lämmitystapa on 3 (sähkölämmitys), on polttoaineen oltava 4 (sähkö)
+error.vrk:CR343: Jos lämmitystapa on sähkölämmitys, on polttoaineen oltava sähkö
+error.vrk:CR324: Sähkö polttoaineena vaatii varusteeksi sähkön

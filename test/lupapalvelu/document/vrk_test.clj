@@ -78,4 +78,14 @@
       (apply-update [:mitat :kokonaisala] "100")) => valid?
     (-> uusi-rakennus
       (apply-update [:mitat :kerrosala] "100")
-      (apply-update [:mitat :kokonaisala] "99")) => (invalid-with? [:warn "vrk:CR326"])))
+      (apply-update [:mitat :kokonaisala] "99")) => (invalid-with? [:warn "vrk:CR326"]))
+
+  (fact "Sahko polttoaineena vaatii varusteeksi sahkon"
+    (-> uusi-rakennus
+      (apply-update [:lammitus :lammonlahde] "s\u00e4hk\u00f6")
+      (apply-update [:varusteet :sahkoKytkin] true)) => (not-invalid-with? [:warn "vrk:CR324"])
+    (-> uusi-rakennus
+      (apply-update [:lammitus :lammonlahde] "s\u00e4hk\u00f6")
+      (apply-update [:varusteet :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR324"]))
+
+)
