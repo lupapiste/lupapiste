@@ -97,7 +97,6 @@ $(function() {
         .append($("<table>").addClass("dev-debug-timing"))
         .hide()));
 
-  $("footer .dev-debug div:eq(0)").slideToggle();
   setTimeout(loadTimingData, 10);
 
   ajax.get(window.location.protocol + "//" + window.location.host + "/perfmon/throttle")
