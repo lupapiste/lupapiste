@@ -67,8 +67,7 @@
     (let [lang (or (get-in request [:params :lang])
                    (get-in request [:user :lang])
                    "fi")]
-      (binding [*lang* lang
-                loc (localizer lang)]
+      (with-lang lang
         (handler request)))))
 
 (env/in-dev
