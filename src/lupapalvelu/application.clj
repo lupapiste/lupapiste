@@ -62,6 +62,13 @@
     (info "invalid property id parameters:" (join ", " invalid))
     (fail :error.invalid-property-id :parameters (vec invalid))))
 
+(defn- validate-owner-or-writer
+  "Validator: current user must be owner or writer.
+   To be used in commands' :validators vector."
+  [command application]
+  (when-not (domain/owner-or-writer? application (-> command :user :id))
+    (fail :error.unauthorized)))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -132,7 +139,8 @@
 
 (defcommand "invite"
   {:parameters [:id :email :title :text :documentName]
-   :roles      [:applicant]
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]
    :verified   true}
   [{created :created
     user    :user
@@ -334,9 +342,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :validators [(fn [command application]
-                  (when-not (domain/is-owner-or-writer? application (-> command :user :id))
-                    (fail :error.unauthorized)))]}
+   :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
