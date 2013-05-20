@@ -2,30 +2,31 @@
   (:use [lupapalvelu.proxy-services]
         [midje.sweet])
   (:require [lupapalvelu.wfs :as wfs]
+            [lupapalvelu.mongo :as mongo]
             [cheshire.core :as json]))
 
+(mongo/connect!)
+
 (facts "find-addresses-proxy"
-  (let [response (find-addresses-proxy {:query-params {"query" "piiriniitynkatu 9, tampere"}})
+  (let [response (find-addresses-proxy {:params {:term "piiriniitynkatu 9, tampere"}})
         r (json/decode (:body response) true)]
-    (fact (:query r) => "piiriniitynkatu 9, tampere")
-    (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
-    (fact (:data r) => [{:street "Piiriniitynkatu"
-                         :number "9"
-                         :name {:fi "Tampere" :sv "Tammerfors"}
-                         :municipality "837"
-                         :x "320371.953"
-                         :y "6825180.72"}]))
-  (let [response (find-addresses-proxy {:query-params {"query" "piiriniitynkatu"}})
+    (fact r => [{:kind "address"
+                 :type "street-number-city"
+                 :street "Piiriniitynkatu"
+                 :number "9"
+                 :municipality "837"
+                 :name {:fi "Tampere" :sv "Tammerfors"}
+                 :location {:x "320371.953" :y "6825180.72"}}]))
+  (let [response (find-addresses-proxy {:params {:term "piiriniitynkatu"}})
         r (json/decode (:body response) true)]
-    (fact (:query r) => "piiriniitynkatu")
-    (fact (:suggestions r) => ["Piiriniitynkatu, Tampere"])
-    (fact (:data r) => [{:street "Piiriniitynkatu",
-                         :number "1",
-                         :name {:fi "Tampere" :sv "Tammerfors"}
-                         :municipality "837"
-                         :x "320531.265"
-                         :y "6825180.25"}]))
-  (let [response (get-addresses-proxy {:query-params {"query" "piiriniitynkatu 9, tampere"}})
+    (fact r => [{:kind "address"
+                 :type "street"
+                 :street "Piiriniitynkatu"
+                 :number "1"
+                 :name {:fi "Tampere" :sv "Tammerfors"}
+                 :municipality "837"
+                 :location {:x "320531.265" :y "6825180.25"}}]))
+  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu 9, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
@@ -33,9 +34,8 @@
                          :number "9",
                          :name {:fi "Tampere" :sv "Tammerfors"}
                          :municipality "837"
-                         :x "320371.953"
-                         :y "6825180.72"}]))
-  (let [response (get-addresses-proxy {:query-params {"query" "piiriniitynkatu 19, tampere"}})
+                         :location {:x "320371.953" :y "6825180.72"}}]))
+  (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu 19, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
@@ -43,12 +43,11 @@
                          :number "19",
                          :name {:fi "Tampere" :sv "Tammerfors"}
                          :municipality "837"
-                         :x "320193.034"
-                         :y "6825190.138"}])))
+                         :location {:x "320193.034" :y "6825190.138"}}])))
 
 (facts "point-by-property-id"
   (let [property-id "09100200990013"
-        request {:query-params {"property-id" property-id}}
+        request {:params {:property-id property-id}}
         response (point-by-property-id-proxy request)]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)
@@ -60,7 +59,7 @@
 (facts "property-id-by-point"
   (let [x 385648
         y 6672157
-        request {:query-params {"x" x "y" y}}
+        request {:params {:x x :y y}}
         response (property-id-by-point-proxy request)]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)]
@@ -69,7 +68,7 @@
 (facts "address-by-point"
   (let [x 333168
         y 6822000
-        request {:query-params {"x" x "y" y}}
+        request {:params {:x x :y y}}
         response (address-by-point-proxy request)]
     (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
     (let [body (json/decode (:body response) true)]
@@ -93,7 +92,7 @@
                    {"LAYERS" "taustakartta_40k"}
                    {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
                    {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
-      (let [request {:query-params (merge base-params layer)
+      (let [request {:params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}}]
         (println "Checking" (get layer "LAYERS"))
         (:status (wfs/raster-images request)) => 200))))
