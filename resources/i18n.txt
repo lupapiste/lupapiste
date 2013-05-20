@@ -9,7 +9,7 @@ error.illegal-key: Tuntematon avain
 error.unknown-type: Tuntematon tietotyyppi
 error.illegal-email: Sähköpostiosoite väärää muotoa
 error.illegal-tel: Puhelinunumeron muoto on väärä
-error.illegal-number: Ei ole numero
+error.illegal-number: Virheellinen numero
 error.illegal-letter:upper: Anna iso kirjain
 error.illegal-letter:lower: Anna pieni kirjain
 error.illegal-letter:any: Anna kirjain
