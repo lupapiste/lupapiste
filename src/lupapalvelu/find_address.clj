@@ -109,9 +109,8 @@
                (wfs/filter
                  (wfs/and
                    (wfs/property-is-like "oso:katunimi" (str street "*"))
-                   ; WTF? Any other value of 'number' than "1" returns empty: (wfs/property-is-like "oso:katunumero" (str number "*"))
-                   (wfs/property-is-like mun-prop (str city "*"))
-                   (wfs/property-is-less "oso:jarjestysnumero" "10")))))
+                   (wfs/property-is-like "oso:katunumero" (str number "*"))
+                   (wfs/property-is-like mun-prop (str city "*"))))))
     (map (comp (set-kind :address :street-number-city) wfs/feature-to-address)))))
 
 ;;
