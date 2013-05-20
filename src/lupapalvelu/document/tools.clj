@@ -21,7 +21,7 @@
     :string           (condp = (keyword subtype)
                         :email            "example@example.com"
                         :tel              "012 123 4567"
-                        :number           "42"
+                        :number           "4"
                         :digit            "1"
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"

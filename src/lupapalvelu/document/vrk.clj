@@ -220,10 +220,8 @@
   (let [huoneistoala (reduce + (map (fn=> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
     (and kokonaisala huoneistoala (< kokonaisala huoneistoala) :vrk:CR322)))
 
-#_(defvalidator "Jos kayttotarkoitus on 011 – 022, on kerrosluvun oltava valilla 1 – 4"
+(defvalidator "Jos kayttotarkoitus on 011 – 022, on kerrosluvun oltava valilla 1 – 4"
   {:schema "uusiRakennus"
-   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus]
-            kerrosluku      [:mitat :kerrosluku]]}
-  )
-
-
+   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
+            kerrosluku      [:mitat :kerrosluku safe-int]]}
+  (and (#{:011 :012 :013 :021 :022} kayttotarkoitus) (> kerrosluku 4) :vrk:CR320))
