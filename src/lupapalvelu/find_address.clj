@@ -63,55 +63,53 @@
          (q/limit 10))
     (map (comp (fn [r] (dissoc r :_id)) (set-kind :poi)))))
 
+(defn municipality-prop [] (if (= *lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
+
 (defn search-street [street]
-  (let [mun-prop "oso:kuntanimiFin"]
-    (->> (wfs/post wfs/maasto
-           (wfs/query {"typeName" "oso:Osoitenimi"}
-             (wfs/sort-by [mun-prop])
-               (wfs/filter
-                 (wfs/and
-                   (wfs/property-is-like "oso:katunimi" (str street "*"))
-                   (wfs/property-is-less "oso:jarjestysnumero" "10")))))
-      (map (comp (set-kind :address :street) wfs/feature-to-address)))))
+  (->> (wfs/post wfs/maasto
+         (wfs/query {"typeName" "oso:Osoitenimi"}
+           (wfs/sort-by [(municipality-prop)])
+             (wfs/filter
+               (wfs/and
+                 (wfs/property-is-like "oso:katunimi" (str street "*"))
+                 (wfs/property-is-less "oso:jarjestysnumero" "10")))))
+    (map (comp (set-kind :address :street) wfs/feature-to-address))))
 
 (defn search-poi-or-street [v]
   (take 25 (concat (take 15 (search-street v)) (search-poi v))))
 
 (defn search-street-with-number [street number]
-  (let [mun-prop "oso:kuntanimiFin"]
-    (->> (wfs/post wfs/maasto
-           (wfs/query {"typeName" "oso:Osoitenimi"}
-             (wfs/sort-by [mun-prop])
-               (wfs/filter
-                 (wfs/and
-                   (wfs/property-is-like "oso:katunimi"   (str street "*"))
-                   (wfs/property-is-like "oso:katunumero" (str number "*"))
-                   (wfs/property-is-less "oso:jarjestysnumero" "10")))))
-      (map (comp (set-kind :address :street-number) wfs/feature-to-address)))))
+  (->> (wfs/post wfs/maasto
+         (wfs/query {"typeName" "oso:Osoitenimi"}
+           (wfs/sort-by [(municipality-prop)])
+             (wfs/filter
+               (wfs/and
+                 (wfs/property-is-like "oso:katunimi"   (str street "*"))
+                 (wfs/property-is-like "oso:katunumero" (str number "*"))
+                 (wfs/property-is-less "oso:jarjestysnumero" "10")))))
+    (map (comp (set-kind :address :street-number) wfs/feature-to-address))))
 
 (defn search-street-with-city [street city]
-  (let [mun-prop "oso:kuntanimiFin"]
-    (->> (wfs/post wfs/maasto
-           (wfs/query {"typeName" "oso:Osoitenimi"}
-             (wfs/sort-by ["oso:katunimi" "oso:katunumero"])
-               (wfs/filter
-                 (wfs/and
-                   (wfs/property-is-like "oso:katunimi" (str street "*"))
-                   (wfs/property-is-like mun-prop (str city "*"))
-                   (wfs/property-is-less "oso:jarjestysnumero" "10")))))
-      (map (comp (set-kind :address :street-city) wfs/feature-to-address)))))
+  (->> (wfs/post wfs/maasto
+         (wfs/query {"typeName" "oso:Osoitenimi"}
+           (wfs/sort-by ["oso:katunimi" "oso:katunumero"])
+             (wfs/filter
+               (wfs/and
+                 (wfs/property-is-like "oso:katunimi" (str street "*"))
+                 (wfs/property-is-like (municipality-prop) (str city "*"))
+                 (wfs/property-is-less "oso:jarjestysnumero" "10")))))
+    (map (comp (set-kind :address :street-city) wfs/feature-to-address))))
 
 (defn search-address [street number city]
-  (let [mun-prop "oso:kuntanimiFin"]
-    (->> (wfs/post wfs/maasto
-           (wfs/query {"typeName" "oso:Osoitenimi"}
-             (wfs/sort-by ["oso:katunimi" "oso:katunumero"])
-               (wfs/filter
-                 (wfs/and
-                   (wfs/property-is-like "oso:katunimi" (str street "*"))
-                   (wfs/property-is-like "oso:katunumero" (str number "*"))
-                   (wfs/property-is-like mun-prop (str city "*"))))))
-    (map (comp (set-kind :address :street-number-city) wfs/feature-to-address)))))
+  (->> (wfs/post wfs/maasto
+         (wfs/query {"typeName" "oso:Osoitenimi"}
+           (wfs/sort-by ["oso:katunimi" "oso:katunumero"])
+             (wfs/filter
+               (wfs/and
+                 (wfs/property-is-like "oso:katunimi" (str street "*"))
+                 (wfs/property-is-like "oso:katunumero" (str number "*"))
+                 (wfs/property-is-like (municipality-prop) (str city "*"))))))
+    (map (comp (set-kind :address :street-number-city) wfs/feature-to-address))))
 
 ;;
 ;; Utils:
