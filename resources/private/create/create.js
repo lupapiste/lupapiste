@@ -198,11 +198,13 @@
           .append($("<span>").addClass("type").text(loc("poi.type", item.type)));
       }],
       [{kind: "address"}, function(item) {
-        return $("<a>")
+        var a = $("<a>")
           .addClass("create-find")
           .addClass("address")
-          .append($("<span>").addClass("street").text(item.street))
-          .append($("<span>").addClass("municipality").text(loc("municipality", item.municipality)));
+          .append($("<span>").addClass("street").text(item.street));
+        if (item.type != "street-city") a.append($("<span>").addClass("number").text(item.number));
+        if (item.type != "street-number") a.append($("<span>").addClass("municipality").text(loc("municipality", item.municipality)));
+        return a;
       }],
       [{kind: "property-id"}, function(item) {
         return $("<a>")
