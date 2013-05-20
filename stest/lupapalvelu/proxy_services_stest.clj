@@ -1,14 +1,22 @@
 (ns lupapalvelu.proxy-services-stest
   (:use [lupapalvelu.proxy-services]
+        [lupapalvelu.itest-util]
         [midje.sweet])
   (:require [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
+            [clj-http.client :as c]
             [cheshire.core :as json]))
 
+(defn- proxy-request [apikey proxy-name & args]
+  (let [resp (c/post
+               (str (server-address) "/proxy/" (name proxy-name))
+               {:headers {"authorization" (str "apikey=" apikey)
+                          "content-type" "application/json;charset=utf-8"}
+                :body (json/encode (apply hash-map args))})]
+    (decode-response resp)))
+
 (facts "find-addresses-proxy"
-  ;; FIXME mongodb not available on lupaci!
-  #_(let [response (find-addresses-proxy {:params {:term "piiriniitynkatu 9, tampere"}})
-        r (json/decode (:body response) true)]
+  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere")]
     (fact r => [{:kind "address"
                  :type "street-number-city"
                  :street "Piiriniitynkatu"
@@ -16,8 +24,7 @@
                  :municipality "837"
                  :name {:fi "Tampere" :sv "Tammerfors"}
                  :location {:x "320371.953" :y "6825180.72"}}]))
-  #_(let [response (find-addresses-proxy {:params {:term "piiriniitynkatu"}})
-        r (json/decode (:body response) true)]
+  (let [r (proxy-request mikko :find-address :term "piiriniitynkatu")]
     (fact r => [{:kind "address"
                  :type "street"
                  :street "Piiriniitynkatu"
