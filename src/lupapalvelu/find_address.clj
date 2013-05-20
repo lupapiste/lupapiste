@@ -70,9 +70,9 @@
              (wfs/sort-by [mun-prop])
                (wfs/filter
                  (wfs/and
-                   (wfs/property-is-like "oso:katunimi"   (str street "*"))
+                   (wfs/property-is-like "oso:katunimi" (str street "*"))
                    (wfs/property-is-less "oso:jarjestysnumero" "10")))))
-      (map (comp (set-kind :address :street-number) wfs/feature-to-address)))))
+      (map (comp (set-kind :address :street) wfs/feature-to-address)))))
 
 (defn search-poi-or-street [v]
   (take 25 (concat (take 15 (search-street v)) (search-poi v))))
