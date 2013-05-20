@@ -97,10 +97,13 @@
       (apply-update [:huoneistot :0 :huoneistonTyyppi :huoneistoala] "60")
       (apply-update [:huoneistot :1 :huoneistonTyyppi :huoneistoala] "50")) => (invalid-with? [:warn "vrk:CR322"]))
 
-  (fact "Jos kayttotarkoitus on 011 – 022, on kerrosluvun oltava valilla 1 – 4"
+  (fact "Jos kayttotarkoitus on 011 - 022, on kerrosluvun oltava valilla 1 - 4"
     (-> uusi-rakennus
       (apply-update [:kaytto :kayttotarkoitus] "021 rivitalot")
       (apply-update [:mitat :kerrosluku] "4")) => valid?
     (-> uusi-rakennus
       (apply-update [:kaytto :kayttotarkoitus] "021 rivitalot")
-      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:CR320"])))
+      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:CR320"]))
+
+
+  )
