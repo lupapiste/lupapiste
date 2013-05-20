@@ -27,7 +27,7 @@
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
   [doc-string {:keys [schema fields]} & body]
-  (let [paths (->> fields (partition 2) (map last) vec (map starting-keywords))]
+  (let [paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     `(swap! validators assoc (keyword ~doc-string)
        (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
          (let [~'d (tools/un-wrapped ~'data)]
