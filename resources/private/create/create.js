@@ -161,20 +161,31 @@
         "560": 9
     };
     
-    function zoomer(item) { self.center(item.location.x, item.location.y, zoomLevel[item.type] || 8); }
+    // Return function that calls every function provided as arguments to 'comp'.
+    function comp() {
+      var fs = arguments;
+      var self = this;
+      return function() {
+        var args = arguments;
+        _.each(fs, function(f) {
+          f.apply(self, args);
+        });
+      };
+    }
+    
+    function zoom(item) { self.center(item.location.x, item.location.y, zoomLevel[item.type] || 8); }
+    function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
+    function fillAddress(item) { $("#create-search").val(item.street + " " + item.number + ", " + loc("municipality", item.municipality)).caretTo(item.street.length + 1); }
 
     function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
     function toHandler(value) { return value[1]; }
     function invoker(item) { return function(handler) { return handler(item); }; } 
     
     var handlers = [
-      [{kind: "poi", type: "540"}, fillMunicipality],  // kunnan nimi, kaupunki
-      [{kind: "poi", type: "550"}, fillMunicipality],  // kunnan nimi, maaseutu
-      [{kind: "poi", type: "575"}, fillMunicipality],  // maakunnan nimi 
-      [{kind: "poi"}, zoomer],
-      [{kind: "address"}, function(item) { self.center(item.location.x, item.location.y, 11); }],
-      [{kind: "property-id"}, function(item) { self.center(item.location.x, item.location.y, 11); }]
+      [{kind: "poi"}, comp(zoom, fillMunicipality)],
+      [{kind: "address"}, comp(zoomer(12), fillAddress)],
+      [{kind: "property-id"}, zoomer(12)]
     ];
 
     var renderers = [
