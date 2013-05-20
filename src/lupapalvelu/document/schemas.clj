@@ -166,7 +166,7 @@
 (def talousrakennus "941 talousrakennukset")
 (def rakennuksen-tiedot [{:name "kaytto"
                           :type :group
-                          :body [{:name "rakentajaTyyppi" :type :select
+                          :body [{:name "rakentajaTyyppi" :type :select :required true
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
@@ -252,8 +252,8 @@
                          {:name "mitat"
                           :type :group
                           :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                 {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999 :required true}
+                                 {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999 :required true}
                                  {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
                                  {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]}
                          {:name "rakenne"
