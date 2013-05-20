@@ -379,7 +379,7 @@
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
-                     {:name "muutostyolaji" :type :select
+                     {:name "muutostyolaji" :type :select :required true
                       :body
                       [{:name perustusten-korjaus}
                        {:name kayttotarkotuksen-muutos}
@@ -494,7 +494,7 @@
                      {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
                      {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
 
-             {:name "hallintaperuste" :type :select
+             {:name "hallintaperuste" :type :select :required true
               :body [{:name "oma"}
                      {:name "vuokra"}
                      {:name "ei tiedossa"}]}
