@@ -131,12 +131,12 @@
     (ok :invites invites)))
 
 (defcommand "invite"
-  {:parameters [:id :email :title :text :documentName]
+  {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant]
    :verified   true}
   [{created :created
     user    :user
-    {:keys [id email title text documentName documentId]} :data {:keys [host]} :web :as command}]
+    {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
@@ -145,6 +145,7 @@
               invite  {:title        title
                        :application  application-id
                        :text         text
+                       :path         path
                        :documentName documentName
                        :documentId   documentId
                        :created      created
@@ -174,6 +175,7 @@
         (executed "set-user-to-document"
           (-> command
             (assoc-in [:data :documentId] (:documentId my-invite))
+            (assoc-in [:data :path]       (:path my-invite))
             (assoc-in [:data :userId]     (:id user))))
         (mongo/update :applications
           {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
