@@ -140,7 +140,7 @@
   (with-application command
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
-        (fail :already-invited)
+        (fail :invite.already-invited)
         (let [invited (security/get-or-create-user-by-email email)
               invite  {:title        title
                        :application  application-id
@@ -154,7 +154,7 @@
               writer  (role invited :writer)
               auth    (assoc writer :invite invite)]
           (if (domain/has-auth? application (:id invited))
-            (fail :already-has-auth)
+            (fail :invite.already-has-auth)
             (do
               (mongo/update
                 :applications

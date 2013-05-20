@@ -36,8 +36,7 @@ LUPAPISTE.InviteModel = function() {
         LUPAPISTE.ModalDialog.close();
       })
       .error(function(d) {
-        // FIXME LUPA-467
-        self.error(loc('invite',d.text));
+        self.error(loc(d.text));
       })
       .call();
     return false;
