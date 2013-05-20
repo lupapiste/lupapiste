@@ -53,7 +53,7 @@
 (defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
     (send-off mail-agent (fn [_]
-                           (if (email/send-mail recipient title msg)
+                           (if (email/send-mail? recipient title msg)
                              (info "email was sent successfully")
                              (error "email could not be delivered."))))))
 
