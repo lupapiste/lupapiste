@@ -15,10 +15,19 @@
     (reduce concat)
     (filter (comp not nil?))))
 
+(defn- starting-keywords [v]
+  (last
+    (reduce
+      (fn [[stop result] x]
+        (if (or stop (not (keyword? x)))
+          [true result]
+          [false (conj result x)]))
+      [false []] v)))
+
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
   [doc-string {:keys [schema fields]} & body]
-  (let [paths (->> fields (partition 2) (map last) vec)]
+  (let [paths (->> fields (partition 2) (map last) vec (map starting-keywords))]
     `(swap! validators assoc (keyword ~doc-string)
        (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
          (let [~'d (tools/un-wrapped ~'data)]
