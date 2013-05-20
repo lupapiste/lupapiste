@@ -2,16 +2,19 @@
   (:use [clojure.tools.logging]
         [clojure.pprint :only [pprint]]
         [lupapalvelu.core :only [defquery ok]])
+  (:require [sade.env :as env])
   (:import [com.dumbster.smtp SimpleSmtpServer SmtpMessage]))
 
 (defonce server (atom nil))
 
 (defn stop []
-  (swap! server (fn [s] (when s (.stop s)) nil)))
+  (swap! server (fn [s] (when s (debug "Stopping dummy mail server") (.stop s)) nil)))
 
 (defn start []
   (stop)
-  (swap! server (constantly (SimpleSmtpServer/start 1025))))
+  (let [port (env/value :email :port)]
+    (debug "Starting dummy mail server on port" port)
+    (swap! server (constantly (SimpleSmtpServer/start port)))))
 
 (defn- message-header [message headers header-name]
   (assoc headers (keyword header-name) (.getHeaderValue message header-name)))
