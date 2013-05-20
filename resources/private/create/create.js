@@ -182,14 +182,16 @@
         return $("<a>")
           .addClass("create-find")
           .addClass("poi")
-          .append($("<span>").addClass("text").text(item.text))
-          .append($("<span>").addClass("type").text(loc("poi.type", item.type) + ", " + loc("municipality", item.municipality)));
+          .append($("<span>").addClass("name").text(item.text))
+          .append($("<span>").addClass("municipality").text(loc("municipality", item.municipality)))
+          .append($("<span>").addClass("type").text(loc("poi.type", item.type)));
       }],
       [{kind: "address"}, function(item) {
         return $("<a>")
           .addClass("create-find")
           .addClass("address")
-          .append($("<span>").text(item.street + ", " + loc("municipality", item.municipality)));
+          .append($("<span>").addClass("street").text(item.street))
+          .append($("<span>").addClass("municipality").text(loc("municipality", item.municipality)));
       }],
       [{kind: "property-id"}, function(item) {
         return $("<a>")
