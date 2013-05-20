@@ -33,10 +33,3 @@
                  (catch Exception e#
                    {:result [:warn (str "validator")]
                     :reason (str e#)})))))))))
-
-(comment
-  (defvalidator "Kokonaisalan oltava vähintään kerrosala"
-    {:schema "uusiRakennus"
-     :fields [kokonaisala [:mitat :kokonaisala]
-              kerrosala   [:mitat :kerrosala]]}
-    (and kokonaisala kerrosala (> kerrosala kokonaisala) :vrk:CR326)))
