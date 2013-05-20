@@ -21,7 +21,7 @@
   (when-not (blank? v)
     (let [min-int  (safe-int min (java.lang.Integer/MIN_VALUE))
           max-int  (safe-int max (java.lang.Integer/MAX_VALUE))
-          number   (safe-int v)]
+          number   (safe-int v nil)]
       (when-not (and number (<= min-int number max-int))
         [:warn "illegal-number"]))))
 

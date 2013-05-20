@@ -56,7 +56,7 @@
   ([x] (safe-int x 0))
   ([x default]
     (try
-      (java.lang.Integer/parseInt x)
+      (java.lang.Integer/parseInt (str x))
       (catch Exception e
         default))))
 
