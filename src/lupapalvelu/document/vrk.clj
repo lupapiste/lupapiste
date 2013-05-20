@@ -225,3 +225,21 @@
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
             kerrosluku      [:mitat :kerrosluku safe-int]]}
   (and (#{:011 :012 :013 :021 :022} kayttotarkoitus) (> kerrosluku 4) :vrk:CR320))
+
+(defvalidator "Verkostoliittymat ja rakennuksen varusteet tasmattava: Sahko"
+  {:schema "uusiRakennus"
+   :fields [liittyma [:verkostoliittymat :sahkoKytkin]
+            varuste  [:varusteet         :sahkoKytkin]]}
+  (and liittyma (not varuste) :vrk:CR328:sahko))
+
+(defvalidator "Verkostoliittymat ja rakennuksen varusteet tasmattava: Viemari"
+  {:schema "uusiRakennus"
+   :fields [liittyma [:verkostoliittymat :viemariKytkin]
+            varuste  [:varusteet         :viemariKytkin]]}
+  (and liittyma (not varuste) :vrk:CR328:viemari))
+
+(defvalidator "Verkostoliittymat ja rakennuksen varusteet tasmattava: Vesijohto"
+  {:schema "uusiRakennus"
+   :fields [liittyma [:verkostoliittymat :vesijohtoKytkin]
+            varuste  [:varusteet         :vesijohtoKytkin]]}
+  (and liittyma (not varuste) :vrk:CR328:vesijohto))

@@ -22,3 +22,6 @@ error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän
 error.vrk:CR343: Jos lämmitystapa on sähkölämmitys, on polttoaineen oltava sähkö
 error.vrk:CR324: Sähkö polttoaineena vaatii varusteeksi sähkön
 error.vrk:CR322: Uuden rakennuksen kokonaisalan oltava vähintään huoneistoala
+error.vrk:CR328:sahko: Sähköliittymä vaatii varusteeksi sähkön
+error.vrk:CR328:viemari: Viemäriliittymä vaatii varusteeksi viemärin
+error.vrk:CR328:vesijohto: Vesiliittymä vaatii varusteeksi vesijohdon
