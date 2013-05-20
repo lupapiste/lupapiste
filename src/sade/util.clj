@@ -60,3 +60,5 @@
         (read-string s)
         default))))
 
+(defmacro fn=> [& body] `(fn [x#] (-> x# ~@body)))
+
