@@ -47,7 +47,7 @@
                    :type :group
                    :body [{:name "kunta" :type :string}
                           {:name "lahiosoite" :type :string}
-                          {:name "osoitenumero" :type :string}
+                          {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
                           {:name "osoitenumero2" :type :string}
                           {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}
                           {:name "jakokirjain2" :type :string :size "s"}
@@ -144,7 +144,7 @@
                          :body [{:name "asuinhuoneisto"}
                                 {:name "toimitila"}
                                 {:name "ei tiedossa"}]}
-                        {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s" :min 1 :max 99999}
+                        {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s" :min 1 :max 9999999}
                         {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "m"}]}
                 {:name "keittionTyyppi" :type :select
                  :body [{:name "keittio"}
@@ -251,11 +251,11 @@
                                          {:name "ei tiedossa"}]}]}
                          {:name "mitat"
                           :type :group
-                          :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
-                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 99999}
-                                 {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 99999}
-                                 {:name "kerrosluku" :type :string :size "s" :subtype :number}
-                                 {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 99999}]}
+                          :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                 {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                 {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
+                                 {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]}
                          {:name "rakenne"
                           :type :group
                           :body [{:name "rakentamistapa" :type :select :reqired true
@@ -287,7 +287,7 @@
                                          {:name "uuni"}
                                          {:name "eiLammitysta"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "lammonlahde" :type :select
+                                 {:name "lammonlahde" :type :select :required true
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                                          {:name "kevyt poltto\u00f6ljy"}
                                          {:name "raskas poltto\u00f6ljy"}
@@ -400,11 +400,11 @@
                                        :body [{:name "perusparannuskytkin" :type :checkbox}
                                               {:name "mitat"
                                                :type :group
-                                               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
-                                                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 99999}
-                                                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 99999}
+                                               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                                                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                                                       {:name "huoneistoala" :type :group :repeating true :removable true
-                                                       :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 99999}
+                                                       :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                                                               {:name "kayttotarkoitusKoodi" :type :select
                                                                :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
                                                                       {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
