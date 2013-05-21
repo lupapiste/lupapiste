@@ -14,8 +14,8 @@
     assigned => ok?
     commented => ok?
 
-    ;; XXX Allow mail threads to run. Is this enough or should we poll the mail queue?
-    (Thread/yield)
+    ; XXX Wait for mail delivery
+    (Thread/sleep 1000)
 
     (let [resp (query mikko :sent-emails :reset true)
           messages (:messages resp)]
