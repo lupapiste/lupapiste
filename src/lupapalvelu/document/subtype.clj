@@ -67,7 +67,12 @@
       (catch Exception e
         [:warn "illegal-hetu"]))))
 
-(defn- validate-hetu-checksum [hetu])
+(defn- validate-hetu-checksum [hetu]
+  (let [number   (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))
+        n (mod number 31)
+        checksum  (nth ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E""F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"] n)
+        old-checksum (subs hetu 10 11)]
+    (when (not= checksum old-checksum) [:warn "illegal-hetu"])))
 
 (defmethod subtype-validation :hetu [_ v]
   (cond
