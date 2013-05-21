@@ -134,7 +134,7 @@
                            :body [{:name "a" :type :group
                                    :body [{:name "b" :type :group
 		                                   :body [{:name "aa" :type :string :required true}
-		                                          {:name "ab" :type :string}]}]}]})
+		                                          {:name "ab" :type :string :required true}]}]}]})
 
 (facts "Required fields"
   (let [document (new-document schema-with-required ..now..)]
@@ -142,10 +142,12 @@
     document => (invalid-with? [:warn "illegal-value:required"])
 
     (-> document
-      (apply-update [:a :aa] " ")) => (invalid-with? [:warn "illegal-value:required"])
+      (apply-update [:a :b :aa] " ")
+      (apply-update [:a :b :ab] " ")) => (invalid-with? [:warn "illegal-value:required"])
 
     (-> document
-      (apply-update [:a :aa] "value")) => valid?))
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")) => valid?))
 
 ;;
 ;; Updates

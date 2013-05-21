@@ -96,30 +96,28 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
-(defn- do-validate [data schema-body path]
-  (let [kw (keyword (:name schema-body))
-        current-path (if (empty? path) [kw] (conj path kw))]
-    (if (not (and (:required schema-body) (get-in data (conj current-path (keyword "value")))))
-      (println "################ required field not found:" current-path ", value is" (get-in data (conj current-path (keyword "value")))))
-    (if (contains? schema-body :body)
-      (map (fn [m] (do-validate data m current-path)) (:body schema-body)))))
-
-(defn- validate-required-fields [schema-body data]
-  (map (fn [m] (do-validate data m [])) schema-body))
+(defn- validate-required-fields [schema-body path data validation-errors]
+  (map (fn [element] 
+         (let [kw (keyword (:name element))
+               current-path (if (empty? path) [kw] (conj path kw))
+               validation-error (if (and (:required element) (s/blank? (get-in data (conj current-path (keyword "value"))))) 
+                                  (->validation-result nil current-path element [:warn "illegal-value:required"])
+                                  nil)
+               current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
+           (if (contains? element :body)
+             (validate-required-fields (:body element) current-path data current-validation-errors)
+             current-validation-errors))) schema-body))
 
 (defn validate
   "Validates document against it's local schema and document level rules
    retuning list of validation errors."
   [{{schema-body :body} :schema data :data :as document}]
-  (println "doc")
-  (clojure.pprint/pprint document)
   (and data
     (flatten
       (concat
         (validate-fields schema-body nil data [])
-        (validate-required-fields schema-body (:data document))
-        (vrk/validate document)
-        ))))
+        (validate-required-fields schema-body [] data [])
+        (vrk/validate document)))))
 
 (defn valid-document?
   "Checks weather document is valid."
