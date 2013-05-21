@@ -145,7 +145,6 @@
     // Search activation:
 
     self.searchNow = function() {
-      console.log("searchNow:", self.search());
       self
         .resetXY()
         .addressData(null)
@@ -173,7 +172,7 @@
       };
     }
     
-    function zoom(item) { self.center(item.location.x, item.location.y, zoomLevel[item.type] || 8); }
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
     function fillAddress(item) { $("#create-search").val(item.street + " " + item.number + ", " + loc("municipality", item.municipality)).caretTo(item.street.length + 1); }
@@ -184,7 +183,11 @@
     
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
-      [{kind: "address"}, comp(zoomer(12), fillAddress)],
+      [{kind: "address"}, fillAddress],
+      [{kind: "address", type: "street"}, zoomer(10)],
+      [{kind: "address", type: "street-city"}, zoomer(10)],
+      [{kind: "address", type: "street-number"}, zoomer(11)],
+      [{kind: "address", type: "street-number-city"}, zoomer(11)],
       [{kind: "property-id"}, zoomer(12)]
     ];
 
@@ -230,9 +233,7 @@
     self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value); };
 
     self.searchPointByAddress = function(address) {
-      console.log("searchPointByAddress:", address);
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
-          console.log("pointByAddress:", result);
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.location.x,
