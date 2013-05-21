@@ -5,7 +5,8 @@
         [noir.core :only [defpage]]
         [lupapalvelu.core :only [defquery ok]])
   (:require [clojure.string :as s]
-            [sade.env :as env])
+            [sade.env :as env]
+            [net.cgrand.enlive-html :as enlive])
   (:import [javax.mail.internet MimeUtility]
            [com.dumbster.smtp SimpleSmtpServer SmtpMessage]))
 
@@ -48,6 +49,16 @@
     (ok :messages (messages :reset reset)))
 
   (defpage "/api/last-email" []
-    (if-let [msg-body (:body (last (messages)))]
-      (first (re-find #"(?ms)<html>(.*)</html>" msg-body))
+    (if-let [msg (last (messages))]
+      (let [html     (first (re-find #"(?ms)<html>(.*)</html>" (:body msg)))
+            subject  (get-in msg [:headers :Subject])
+            to       (get-in msg [:headers :To])]
+        (debug (get-in msg [:headers]))
+        (enlive/emit* (-> (enlive/html-resource (input-stream (.getBytes html "UTF-8")))
+                        (enlive/transform [:head] (enlive/append {:tag :title :content subject}))
+                        (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
+                                                                                       {:tag :dd :attrs {:id "to"} :content to}
+                                                                                       {:tag :dt :content "Subject"}
+                                                                                       {:tag :dd :attrs {:id "subject"} :content subject}]}
+                                                                   {:tag :hr}])))))
       {:response 404 :body "No emails"})))
