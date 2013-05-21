@@ -30,6 +30,8 @@
 (facts "Embedded validator facts"
   (validator-facts))
 
+;; TODO: validate just one validator at a time to reduce hassle from side-effects
+
 (def uusi-rakennus
   (->
     "uusiRakennus"
