@@ -2,6 +2,7 @@
   (:use [clojure.java.io :only [input-stream]]
         [clojure.tools.logging]
         [clojure.pprint :only [pprint]]
+        [noir.core :only [defpage]]
         [lupapalvelu.core :only [defquery ok]])
   (:require [clojure.string :as s]
             [sade.env :as env])
@@ -39,7 +40,14 @@
   (doseq [message (messages)]
     (pprint message)))
 
-(defquery "sent-emails"
-  {}
-  [{{reset :reset} :data}]
-  (ok :messages (messages :reset reset)))
+(env/in-dev
+
+  (defquery "sent-emails"
+    {}
+    [{{reset :reset} :data}]
+    (ok :messages (messages :reset reset)))
+
+  (defpage "/api/last-email" []
+    (if-let [msg-body (:body (last (messages)))]
+      (first (re-find #"(?ms)<html>(.*)</html>" msg-body))
+      {:response 404 :body "No emails"})))
