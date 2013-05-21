@@ -257,5 +257,17 @@
   {:doc     "Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1"
    :schema  "uusiRakennus"
    :fields  [toimenpide [:kaytto :kayttotarkoitus ->kayttotarkoitus]
-             kerrosluku [:mitat :kerrosluku safe-int]]}
+             kerrosluku [:mitat :kerrosluku safe-int]]
+   :facts   {:ok ["111 myym\u00e4l\u00e4hallit" "1"] :fail ["111 myym\u00e4l\u00e4hallit" "2"]}}
   (and (#{:691 :111} toimenpide) (not= kerrosluku 1)))
+
+(defvalidator :vrk:CR313
+  {:doc     "Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala"
+   :schema  "uusiRakennus"
+   :fields  [tilavuus [:mitat :tilavuus safe-int]
+             kerrosala [:mitat :kerrosala safe-int]]
+   :facts   {:ok ["6" "4"] :fail ["5" "4"]}}
+  (and tilavuus (< tilavuus (* 1.5 kerrosala))))
+
+
+

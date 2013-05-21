@@ -7,11 +7,13 @@
         [sade.util])
   (:require [lupapalvelu.document.validator :as v]))
 
+;; TODO: aja yksi kerrallaan
+
 (defn validator-facts []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
     (println "About to test" (count validators) "awesome validators")
-    (doseq [{:keys [doc schema paths] {:keys [ok fail]} :facts} validators]
-      (let [dummy    (dummy-doc schema)
+    (doseq [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts} validators]
+      (let [dummy    (apply-update (dummy-doc schema) [:mitat :tilavuus] "6")
             update   (fn [values]
                        (reduce
                          (fn [d i]
@@ -21,18 +23,20 @@
             fail-doc (update fail)]
 
         (facts "Embedded validator fact"
-          (println doc)
-          dummy => valid?
-          ok-doc => valid?
-          fail-doc => invalid?)))))
+          (validate-fn dummy) => nil?
+          (validate-fn ok-doc) => nil?
+          (validate-fn fail-doc) => (has some (contains {:result [:warn (name code)]})))))))
 
 (facts "Embedded validator facts"
   (validator-facts))
 
 (def uusi-rakennus
-  (dummy-doc "uusiRakennus"))
+  (->
+    "uusiRakennus"
+    dummy-doc
+    (apply-update [:mitat :tilavuus] "6")))
 
-(facts "VRK-validations"
+#_(facts "VRK-validations"
 
   (fact "uusi rakennus is valid"
     uusi-rakennus => valid?)
