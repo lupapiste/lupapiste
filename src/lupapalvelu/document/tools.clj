@@ -25,6 +25,7 @@
                         :digit            "1"
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"
+                        :hetu             "210281-9988"
                         nil               "string"
                         :letter           (condp = (keyword case)
                                             :lower "a"
