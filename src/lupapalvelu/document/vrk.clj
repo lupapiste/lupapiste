@@ -233,21 +233,24 @@
   {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Sahko"
    :schema "uusiRakennus"
    :fields [liittyma [:verkostoliittymat :sahkoKytkin]
-            varuste  [:varusteet         :sahkoKytkin]]}
+            varuste  [:varusteet         :sahkoKytkin]]
+   :facts   {:ok [true true] :fail [true false]}}
   (and liittyma (not varuste)))
 
 (defvalidator :vrk:CR328:viemari
   {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Viemari"
    :schema "uusiRakennus"
    :fields [liittyma [:verkostoliittymat :viemariKytkin]
-            varuste  [:varusteet         :viemariKytkin]]}
+            varuste  [:varusteet         :viemariKytkin]]
+   :facts   {:ok [true true] :fail [true false]}}
   (and liittyma (not varuste)))
 
 (defvalidator :vrk:CR328:vesijohto
   {:doc    "Verkostoliittymat ja rakennuksen varusteet tasmattava: Vesijohto"
    :schema "uusiRakennus"
    :fields [liittyma [:verkostoliittymat :vesijohtoKytkin]
-            varuste  [:varusteet         :vesijohtoKytkin]]}
+            varuste  [:varusteet         :vesijohtoKytkin]]
+   :facts   {:ok [true true] :fail [true false]}}
   (and liittyma (not varuste)))
 
 (defvalidator :vrk:CR312

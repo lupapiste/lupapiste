@@ -126,31 +126,4 @@
       (apply-update [:kaytto :kayttotarkoitus] "021 rivitalot")
       (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:CR320"]))
 
-  (fact "Verkostoliittymat ja rakennuksen varusteet tasmattava: Sahko"
-    (-> uusi-rakennus
-      (apply-update [:verkostoliittymat :sahkoKytkin] true)
-      (apply-update [:varusteet :sahkoKytkin] true)) => valid?
-
-    (-> uusi-rakennus
-      (apply-update [:verkostoliittymat :sahkoKytkin] true)
-      (apply-update [:varusteet :sahkoKytkin] false)) => (invalid-with? [:warn "vrk:CR328:sahko"]))
-
-  (fact "Verkostoliittymat ja rakennuksen varusteet tasmattava: Viemari"
-    (-> uusi-rakennus
-      (apply-update [:verkostoliittymat :viemariKytkin] true)
-      (apply-update [:varusteet :viemariKytkin] true)) => valid?
-
-    (-> uusi-rakennus
-      (apply-update [:verkostoliittymat :viemariKytkin] true)
-      (apply-update [:varusteet :viemariKytkin] false)) => (invalid-with? [:warn "vrk:CR328:viemari"]))
-
-  (fact "Verkostoliittymat ja rakennuksen varusteet tasmattava: Vesijohto"
-    (-> uusi-rakennus
-      (apply-update [:verkostoliittymat :vesijohtoKytkin] true)
-      (apply-update [:varusteet :vesijohtoKytkin] true)) => valid?
-
-    (-> uusi-rakennus
-      (apply-update [:verkostoliittymat :vesijohtoKytkin] true)
-      (apply-update [:varusteet :vesijohtoKytkin] false)) => (invalid-with? [:warn "vrk:CR328:vesijohto"]))
-
     )
