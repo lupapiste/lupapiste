@@ -6,9 +6,15 @@
             [monger.collection :as mc]
             [monger.db :as db]
             [swiss-arrows.core :refer [-<>>]]
-            [slingshot.slingshot :refer [try+ throw+]]))
+            [slingshot.slingshot :refer [try+ throw+]])
+  (:gen-class))
 
 (def default-filename (str "/Volumes/HD2/Users/jarppe/swd/lupa-workspace/mml/" "PNR_2012_01.TXT"))
+
+(defn ->long [v]
+  (if (and v (string? v) (re-matches #"\d+" v))
+    (Long/parseLong v)
+    0))
 
 (def langs {"1" "fi"
             "2" "sv"
@@ -22,10 +28,10 @@
      :text          (get data 0)
      :name          (s/lower-case (get data 0))
      :lang          (langs (get data 1) "?")
-     :type          (->> (get data 3) Long/parseLong (format "%03d"))
-     :location {:x  (Long/parseLong (get data 10))
-                :y  (Long/parseLong (get data 9))}
-     :municipality  (->> (get data 11) Long/parseLong (format "%03d"))}))
+     :type          (->> (get data 3) ->long (format "%03d"))
+     :location {:x  (->long (get data 10))
+                :y  (->long (get data 9))}
+     :municipality  (->> (get data 11) ->long (format "%03d"))}))
 
 (defn save [record]
   (mc/insert :poi record))
@@ -39,7 +45,7 @@
   (with-open [input (io/reader filename :encoding "ISO-8859-1")]
     (doseq [record (map parse (take 10 (line-seq input)))
             [field valid?] validators]
-      (when-not (valid? (field record))
+      (when-not ((fnil valid? "") (field record))
         (throw+ (format "Input file does not look valid: field=%s, value=\"%s\"" (name field) (field record)))))))
 
 (defn process [filename]
@@ -68,12 +74,12 @@
       (when (s/blank? filename)
         (throw+ "Must provide a source file name"))
       (when-not (.exists (io/file filename))
-        (throw+ (str "Can't find file:" filename)))
+        (throw+ (str "Can't find file: " filename)))
       (validate-file! filename)
       (connect)
       (run filename)
       (catch string? message
-        (println "Processing failed:" message))
+        (println "Processing failed: " message))
       (catch Object e
         (println "Unexpected error")
         (.printStackTrace e)
