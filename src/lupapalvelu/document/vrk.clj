@@ -272,9 +272,10 @@
 (defvalidator :vrk:CR314
   {:doc     "Asuinrakennukssa pitaa olla lammitys"
    :schema  "uusiRakennus"
-   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus name safe-int]
-            lammitystapa    [:lammitys :lammitystapa]]
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus name safe-int]
+             lammitystapa    [:lammitys :lammitystapa]]
    :facts   {:ok ["032 luhtitalot" "ilmakeskus"] :fail ["032 luhtitalot" "eiLammitysta"]}}
    (and
      (<= 11 kayttotarkoitus 39)
      (not (#{"vesikeskus" "ilmakeskus" "suorasahk\u00f6" "uuni"} lammitystapa))))
+
