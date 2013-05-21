@@ -3,8 +3,9 @@
         [lupapalvelu.core]
         [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
-        [lupapalvelu.i18n :only [loc]]
-        [clojure.string :only [split join trim]])
+        [lupapalvelu.i18n :only [loc *lang* with-lang]]
+        [clojure.string :only [split join trim]]
+        [swiss-arrows.core :only [-<> -<>>]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -500,12 +501,22 @@
       (errorf e "failed to stamp attachment: application=%s, file=%s" application-id fileId)
       (job/update job-id assoc-in [id :status] :error)))))
 
+(defn- loc-organization-name [organization]
+  (get-in organization [:name (keyword *lang*)] (str "???ORG:" (:id organization) "???")))
+
+(defn- get-organization-name [application-id]
+  (-<> application-id
+       (mongo/by-id :applications <> [:organization])
+       (:organization)
+       (mongo/by-id :organizations <> [:name])
+       (loc-organization-name <>)))
+
 (defn- stamp-attachments [file-infos application-id job-id user created x-margin y-margin]
   (let [stamp (stamper/make-stamp
                 (i18n/loc "stamp.verdict")
                 created
                 (str (:firstName user) \space (:lastName user))
-                (->> user (:municipality) (str "municipality.") (i18n/loc) (s/upper-case)))]
+                (get-organization-name application-id))]
     (doseq [file-info (vals file-infos)]
       (job/update job-id assoc-in [(:id file-info) :status] :working)
       (try
