@@ -2,11 +2,15 @@
   "use strict";
 
   var isInitializing = true;
-  var currentId;
+  var currentId = null;
   var authorizationModel = authorization.create();
   var commentModel = comments.create(true);
-  var applicationMap;
-  var inforequestMap;
+  var applicationMap = null;
+  var inforequestMap = null;
+  var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
+  var inviteModel = new LUPAPISTE.InviteModel();
+
+  function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
 
   var stampModel = new function() {
     var self = this;
@@ -22,6 +26,12 @@
     self.version = null;
     self.files = null;
 
+    self.xMargin = ko.observable("");
+    self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
+
+    self.yMargin = ko.observable("");
+    self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
+
     self.status = ko.observable();
     self.filesTable = ko.observable();
 
@@ -29,7 +39,7 @@
       self.applicationId = applicationId;
       self.jobId = null;
       self.files = {};
-      self.status(self.statusInit).filesTable([]);
+      self.status(self.statusInit).filesTable([]).xMargin("10").yMargin("85");
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
@@ -37,7 +47,7 @@
     self.start = function() {
       self.status(self.statusStarting);
       ajax
-        .command("stamp-attachments", {id: self.applicationId})
+        .command("stamp-attachments", {id: self.applicationId, xMargin: _.parseInt(self.xMargin(), 10), yMargin: _.parseInt(self.yMargin(), 10)})
         .success(self.started)
         .call();
       return false;
@@ -273,7 +283,8 @@
     };
   }();
 
-  var application = {
+  var application = {};
+  application = {
     id: ko.observable(),
     infoRequest: ko.observable(),
     state: ko.observable(),
@@ -287,7 +298,6 @@
     attachments: ko.observableArray(),
     hasAttachment: ko.observable(false),
     address: ko.observable(),
-    initialOp: ko.observable(),
     operations: ko.observable(),
     operationsCount: ko.observable(),
     applicant: ko.observable(),
@@ -300,7 +310,7 @@
     data: ko.observable(),
 
     openOskariMap: function() {
-      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
+      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=12' + '&addPoint=0' + '&addArea=0';
       window.open(url);
       var applicationId = application.id();
 
@@ -334,17 +344,6 @@
       ajax.command("request-for-complement", { id: applicationId})
         .success(function() {
           notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-          repository.load(applicationId);
-        })
-        .call();
-      return false;
-    },
-
-    markInforequestAnswered: function(model) {
-      var applicationId = application.id();
-      ajax.command("mark-inforequest-answered", {id: applicationId})
-        .success(function() {
-          notify.success("neuvontapyynt\u00F6 merkitty vastatuksi",model);
           repository.load(applicationId);
         })
         .call();
@@ -514,6 +513,9 @@
       application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
+      // Invite
+      inviteModel.setApplicationId(app.id);
+
       // Comments:
       commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
@@ -578,53 +580,12 @@
     });
   }
 
-  var inviteModel = new function() {
-    var self = this;
-
-    self.email = ko.observable();
-    self.text = ko.observable();
-    self.documentName = ko.observable();
-    self.documentId = ko.observable();
-    self.error = ko.observable();
-
-    self.reset = function() {
-      self.email(undefined);
-      self.documentName(undefined);
-      self.documentId(undefined);
-      self.text(undefined);
-      self.error(undefined);
-    };
-
-    self.submit = function(model) {
-      var email = model.email();
-      var text = model.text();
-      var documentName = model.documentName();
-      var documentId = model.documentId();
-      var id = application.id();
-      ajax.command("invite", { id: id,
-                               documentName: documentName,
-                               documentId: documentId,
-                               email: email,
-                               title: "uuden suunnittelijan lis\u00E4\u00E4minen",
-                               text: text})
-        .success(function() {
-          repository.load(id);
-          LUPAPISTE.ModalDialog.close();
-        })
-        .error(function(d) {
-          self.error(loc('invite',d.text));
-        })
-        .call();
-      return false;
-    };
-  }();
-
   hub.subscribe({type: "dialog-close", id : "dialog-valtuutus"}, function() {
     inviteModel.reset();
   });
 
   // tabs
-  var selectedTab;
+  var selectedTab = "";
   var tabFlow = false;
   hub.subscribe("set-debug-tab-flow", function(e) {
     tabFlow = e.value;
@@ -702,7 +663,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -728,12 +689,13 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
-      stampModel: stampModel
+      stampModel: stampModel,
+      changeLocationModel: changeLocationModel
     };
 
     $("#application").applyBindings(bindings);
     $("#inforequest").applyBindings(bindings);
-
+    $("#dialog-change-location").applyBindings({changeLocationModel: changeLocationModel});
     attachmentTemplatesModel.init();
   });
 

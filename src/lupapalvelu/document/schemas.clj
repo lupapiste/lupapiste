@@ -32,15 +32,15 @@
 
 (def kuvaus {:name "kuvaus" :type :text :max-len 4000 :layout :full-width})
 
-(def henkilo-valitsin [{:name :userId :type :personSelector }
-                        {:name "turvakieltoKytkin" :type :checkbox}])
+(def henkilo-valitsin [{:name "userId" :type :personSelector}
+                       {:name "turvakieltoKytkin" :type :checkbox}])
 
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :body [{:name "katu" :type :string}
-                            {:name "postinumero" :type :string :size "s"}
+                            {:name "postinumero" :type :string :required true :subtype :zip :size "s"}
                             {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def full-osoite [{:name "osoite"
@@ -49,11 +49,11 @@
                           {:name "lahiosoite" :type :string}
                           {:name "osoitenumero" :type :string}
                           {:name "osoitenumero2" :type :string}
-                          {:name "jakokirjain" :type :string :size "s"}
+                          {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}
                           {:name "jakokirjain2" :type :string :size "s"}
-                          {:name "porras" :type :string :size "s"}
+                          {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
-                          {:name "postinumero" :type :string :size "s"}
+                          {:name "postinumero" :type :string :required true :subtype :zip :size "s"}
                           {:name "postitoimipaikannimi" :type :string :size "m"}
                           {:name "pistesijanti" :type :string}]}])
 
@@ -135,9 +135,9 @@
                       }))
 
 (def huoneisto [{:name "huoneistoTunnus" :type :group
-                 :body [{:name "porras" :type :string :subtype :letter :max-len 1 :size "s"}
+                 :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                         {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
-                        {:name "jakokirjain" :type :string :subtype :letter :max-len 1 :size "s"}]}
+                        {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
                 {:name "huoneistonTyyppi"
                  :type :group
                  :body [{:name "huoneistoTyyppi" :type :select
@@ -145,7 +145,7 @@
                                 {:name "toimitila"}
                                 {:name "ei tiedossa"}]}
                         {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
-                        {:name "huoneluku" :type :string :size "m"}]}
+                        {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "s"}]}
                 {:name "keittionTyyppi" :type :select
                  :body [{:name "keittio"}
                         {:name "keittokomero"}
@@ -166,7 +166,7 @@
 (def talousrakennus "941 talousrakennukset")
 (def rakennuksen-tiedot [{:name "kaytto"
                           :type :group
-                          :body [{:name "rakentajaTyyppi" :type "select"
+                          :body [{:name "rakentajaTyyppi" :type :select
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
@@ -372,7 +372,7 @@
                                                   {:name "sosiaaliturvarahasto"}
                                                   {:name "uskonnollinen yhteis\u00f6, s\u00e4\u00e4ti\u00f6, puolue tai yhdistys"}
                                                   {:name "ei tiedossa"}]}
-                                                {:name "muu-omistajalaji" :type :string :size "s"}])}])
+                                                {:name "muu-omistajalaji" :type :string}])}])
 
 (def muumuutostyo "muut muutosty\u00f6t")
 (def perustusten-korjaus "perustusten ja kantavien rakenteiden muutos- ja korjausty\u00f6t")
@@ -485,11 +485,15 @@
       :body party}
 
      {:info {:name "rakennuspaikka"
-             :order 2} ; TODO sijainti(kios?/ jo kartalta osoitettu)
+             :order 2}
       :body [{:name "kiinteisto"
               :type :group
               :body [{:name "maaraalaTunnus" :type :string}
-                     {:name "tilanNimi" :type :string}]}
+                     {:name "tilanNimi" :type :string :readonly true}
+                     {:name "rekisterointipvm" :type :string :readonly true}
+                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                     {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
+
              {:name "hallintaperuste" :type :select
               :body [{:name "oma"}
                      {:name "vuokra"}

@@ -20,11 +20,11 @@ Mikko submits application & goes for lunch
   Logout
 
 Sonja logs in and throws in a verdict
+  [Tags]  fail
   Sonja logs in
   Open application  Olutteltta  753-416-25-30
   Open tab  verdict
   Open verdict
-  Sleep  1
   Wait Until  Element Should Be Enabled  verdict-id
   Input text  verdict-id  123567890
   Select From List  verdict-type-select  6
@@ -38,6 +38,7 @@ Sonja logs in and throws in a verdict
   [Teardown]  Logout
 
 Mikko sees that the application has verdict
+  [Tags]  fail
   Mikko logs in
   Open application  Olutteltta  753-416-25-30
   Open tab  verdict

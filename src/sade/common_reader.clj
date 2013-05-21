@@ -1,9 +1,9 @@
 (ns sade.common-reader
-(:use sade.xml)
-(:require [clojure.string :as s]
-          [clojure.walk :refer [postwalk prewalk]]
-          [clj-time.format :as timeformat]
-          [clj-http.client :as http]))
+  (:use sade.xml)
+  (:require [clojure.string :as s]
+            [clojure.walk :refer [postwalk prewalk]]
+            [clj-time.format :as timeformat]
+            [clj-http.client :as http]))
 
 ;;
 ;; parsing time (TODO: might be copy-pasted from krysp)

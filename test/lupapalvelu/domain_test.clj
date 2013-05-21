@@ -44,19 +44,27 @@
     (fact "'2' is not owner" (has-auth-role? app 2 :owner) => false)))
 
 (facts
-  (let [user {:id        "123"
-              :firstName "kari"
-              :lastName  "tapio"
-              :email     "kari.tapio@example.com"
-              :phone     "050"
-              :street    "katu"
-              :zip       "123"
-              :city      "tampere"}]
-    (fact (user2henkilo user) => {:userId {:value "123"}
-                                  :henkilotiedot {:etunimi {:value "kari"}
-                                                  :sukunimi {:value "tapio"}}
-                                  :yhteystiedot {:email {:value "kari.tapio@example.com"}
-                                                 :puhelin {:value "050"}}
-                                  :osoite {:katu {:value "katu"}
-                                           :postinumero {:value "123"}
-                                           :postitoimipaikannimi {:value "tampere"}}})))
+  (fact "all fields are mapped"
+    (->henkilo {:id        "id"
+                :firstName "firstName"
+                :lastName  "lastName"
+                :email     "email"
+                :phone     "phone"
+                :street    "street"
+                :zip       "zip"
+                :city      "city"}) => {:userId                        {:value "id"}
+                                        :henkilotiedot {:etunimi       {:value "firstName"}
+                                                        :sukunimi      {:value "lastName"}}
+                                        :yhteystiedot {:email          {:value "email"}
+                                                       :puhelin        {:value "phone"}}
+                                        :osoite {:katu                 {:value "street"}
+                                                 :postinumero          {:value "zip"}
+                                                 :postitoimipaikannimi {:value "city"}}})
+  (fact "no fields are mapped"
+    (->henkilo {} => {}))
+
+  (fact "some fields are mapped"
+    (->henkilo {:firstName "firstName"
+                :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
+                                       :osoite {:postinumero     {:value "zip"}}}))
+

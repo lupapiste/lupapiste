@@ -1,23 +1,32 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
         [clojure.tools.logging])
-  (:require [lupapalvelu.mongo :as mongo]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
 ;; application mongo querys
 ;;
 
 ;; TODO: test me!
-(defn application-query-for [user]
+(defn basic-application-query-for [user]
   (case (keyword (:role user))
-    :applicant {:auth.id (:id user)
-                :state {$ne "canceled"}}
-    :authority {$or [{:municipality (:municipality user)} {:auth.id (:id user)}]
-                $and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
-    :admin     {:state {$ne "canceled"}}
+    :applicant {:auth.id (:id user)}
+    :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :admin     {}
     (do
-      (warn "invalid role to get applications")
-      {:_id "-1"} ))) ; should not yield any results
+      (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
+      {:_id "-1"}))) ; should not yield any results
+
+;; TODO: test me!
+(defn application-query-for [user]
+  (merge
+    (basic-application-query-for user)
+    (case (keyword (:role user))
+      :applicant {:state {$ne "canceled"}}
+      :authority {$and [{:state {$ne "draft"}} {:state {$ne "canceled"}}]}
+      :admin     {:state {$ne "canceled"}}
+      {})))
 
 (defn get-application-as [application-id user]
   (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
@@ -37,7 +46,7 @@
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
-(defn is-owner-or-writer? [application user-id]
+(defn owner-or-writer? [application user-id]
   (or (has-auth-role? application user-id "owner")
       (has-auth-role? application user-id "writer")))
 
@@ -73,20 +82,23 @@
 ;; Conversion between Lupapiste and documents
 ;;
 
-(defn user2henkilo [{:keys [id firstName lastName email phone street zip city]}]
-  {:userId                        {:value id}
-   :henkilotiedot {:etunimi       {:value firstName}
-                   :sukunimi      {:value lastName}}
-   :yhteystiedot {:email          {:value email}
-                  :puhelin        {:value phone}}
-   :osoite {:katu                 {:value street}
-            :postinumero          {:value zip}
-            :postitoimipaikannimi {:value city}}})
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]
+  (->
+    {:userId                        {:value id}
+     :henkilotiedot {:etunimi       {:value firstName}
+                     :sukunimi      {:value lastName}}
+     :yhteystiedot {:email          {:value email}
+                    :puhelin        {:value phone}}
+     :osoite {:katu                 {:value street}
+              :postinumero          {:value zip}
+              :postitoimipaikannimi {:value city}}}
+    strip-nils
+    strip-empty-maps))
 
 ;;
 ;; Software version metadata
 ;;
 
-(defn set-software-version [m] 
+(defn set-software-version [m]
   (assoc m :_software_version "1.0.5"))
 

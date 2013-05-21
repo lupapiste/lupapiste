@@ -60,7 +60,7 @@
                                            :puhelin   ...notfound...}}}
             :yritysnimi                               (get-text omistaja :nimi)}})
 
-(defn ->rakennuksen-muuttaminen [xml buildingId]
+(defn ->rakennuksen-tiedot [xml buildingId]
   (let [stripped  (cr/strip-xml-namespaces xml)
         rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text buildingId)])])
         polished  (comp cr/index-maps cr/strip-empty-maps cr/strip-nils cr/convert-booleans)]

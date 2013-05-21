@@ -19,15 +19,16 @@
                  [commons-io/commons-io "2.4"]
                  [com.lowagie/itext "2.1.7"]
                  [org.clojure/data.zip "0.1.1"]
-                 [com.draines/postal "1.9.2"]
+                 [com.draines/postal "1.10.3"]
                  [org.clojure/data.xml "0.0.7"]
-                 [swiss-arrows "0.5.1"]
+                 [swiss-arrows "0.6.0"]
                  [me.raynes/fs "1.4.0"]
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.9"]
-                 [slingshot "0.10.3"]]
+                 [fi.sito/oskari "0.9.12"]
+                 [slingshot "0.10.3"]
+                 [com.google.zxing/javase "2.1"]]
   :plugins [[org.timmc/lein-otf "2.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.1"]
@@ -37,7 +38,8 @@
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
-                             [lein-hgnotes "0.1.0"]]}
+                             [lein-hgnotes "0.1.0"]]
+                   :source-paths ["test-utils"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["itest" "stest"]}

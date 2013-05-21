@@ -3,7 +3,9 @@
         [clojure.tools.logging])
   (:require [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
-            [sade.env :as env])
+            [sade.env :as env]
+            [noir.request :as request]
+            [noir.session :as session])
   (:import [org.mindrot.jbcrypt BCrypt]
            [com.mongodb MongoException MongoException$DuplicateKey]))
 
@@ -19,6 +21,11 @@
   [user]
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
+
+(defn current-user
+  "fetches the current user"
+  ([] (current-user (request/ring-request)))
+  ([request] (request :user)))
 
 (defn login
   "returns non-private information of enabled user with the username and password"
@@ -50,7 +57,7 @@
 (defn valid-password? [password]
   (>= (count password) (get-in env/config [:password :minlength])))
 
-(defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled municipality]
+(defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
         new-user-base     {:username     email
@@ -62,16 +69,16 @@
                            :city         city
                            :street       street
                            :zip          zip
-                           :municipality municipality
+                           :organizations organizations
                            :enabled      enabled
                            :private      {:salt salt :password hashed-password}}]
     (if userid (assoc new-user-base :personId userid) new-user-base)))
 
-(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled municipality]
+(defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled organizations]
                          :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
   (let [id                (mongo/create-id)
         old-user          (get-user-by-email email)
-        new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled municipality)
+        new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled organizations)
         new-user          (assoc new-user-base :id id)]
     (info "register user:" (dissoc user :password))
     (try
@@ -97,6 +104,9 @@
 
 (defn create-authority [user]
   (create-any-user (merge user {:role :authority :enabled true})))
+
+(defn create-authority-admin [user]
+  (create-any-user (merge user {:role :authorityAdmin :enabled true})))
 
 (defn update-user [email data]
   (mongo/update :users {:email email} {$set data}))

@@ -6,7 +6,8 @@
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
-        [clojure.string :only [blank?]])
+        [clojure.string :only [blank?]]
+        [lupapalvelu.security :only [current-user]])
   (:require [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
@@ -14,13 +15,12 @@
             [noir.cookies :as cookies]
             [sade.env :as env]
             [lupapalvelu.core :as core]
-            [lupapalvelu.action :as action]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.security :as security]
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
-            [lupapalvelu.municipality]
+            [lupapalvelu.organization]
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
@@ -69,11 +69,6 @@
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
-
-(defn current-user
-  "fetches the current user from 1) http-session 2) apikey from headers"
-  ([] (current-user (request/ring-request)))
-  ([request] (or (session/get :user) (request :user))))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -150,6 +145,7 @@
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
                    :welcome anyone
+                   :oskari anyone
                    :about anyone
                    :upload logged-in?
                    :applicant logged-in?
@@ -215,13 +211,27 @@
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
 
+(defcommand "frontend-error" {}
+  [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
+  (let [limit    1000
+        sanitize (fn [s] (let [line (s/replace s #"[\r\n]" "\\n")]
+                           (if (> (.length line) limit)
+                             (str (.substring line 0 limit) "... (truncated)")
+                             line)))
+        sanitized-page (sanitize (or page "(unknown)"))
+        user           (or email "(anonymous)")
+        sanitized-ua   (sanitize user-agent)
+        sanitized-msg  (sanitize (str message))]
+    (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
+            user sanitized-ua sanitized-page sanitized-msg)))
+
 ;;
 ;; Login/logout:
 ;;
 
 (defn- logout! []
   (session/clear!)
-  (cookies/put! :lupapiste-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
 
 (defjson [:post "/api/logout"] []
   (logout!)
@@ -275,13 +285,14 @@
   (let [authorization (get-in request [:headers "authorization"])]
     (parse "apikey" authorization)))
 
-(defn apikey-authentication
-  "Reads apikey from 'Auhtorization' headers, pushed it to :user request attribute
-   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
+(defn authentication
+  "Middleware that adds :user to request. If request has apikey authentication header then
+   that is used for authentication. If not, then use user information from session."
   [handler]
   (fn [request]
-    (let [apikey (get-apikey request)]
-      (handler (assoc request :user (security/login-with-apikey apikey))))))
+    (handler (assoc request :user
+                    (or (security/login-with-apikey (get-apikey request))
+                        (session/get :user))))))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
@@ -291,13 +302,14 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType] :as data}
-  (debugf "upload: %s: %s type=[%s] selector=[%s]" data upload attachmentType typeSelector)
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
                            :target target
+                           :locked (java.lang.Boolean/parseBoolean locked)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
@@ -306,10 +318,11 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.2.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.4.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
+                                            :locked (or locked "false")
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
@@ -324,11 +337,11 @@
 (defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
 
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (attachment/output-all-attachments application-id (current-user) lang))
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
+  (attachment/output-all-attachments application-id (current-user)))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (ke6666/export application-id (current-user) lang))
+(defpage "/api/pdf-export/:application-id" {application-id :application-id}
+  (ke6666/export application-id (current-user) *lang*))
 
 ;;
 ;; Proxy
@@ -371,11 +384,12 @@
 (defn anti-csrf
   [handler]
   (fn [request]
-    (let [cookie-name "lupapiste-token"]
+    (let [cookie-name "anti-csrf-token"
+          cookie-attrs (dissoc (env/value :cookie) :http-only)]
       (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-        (anti-forgery/set-token-in-cookie request (handler request) cookie-name)))))
+        (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
 
 ;;
 ;; dev utils:
@@ -385,6 +399,9 @@
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
+  (defjson "/dev/user" []
+    (current-user))
+  
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
@@ -410,14 +427,4 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
-
-  (defquery "qlang"
-    {:authenticated false}
-    [c]
-    (ok :lang *lang*))
-
-  (defcommand "clang"
-    {:authenticated false}
-    [c]
-    (ok :lang *lang*)))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))

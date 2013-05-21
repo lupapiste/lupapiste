@@ -34,7 +34,7 @@ var ajax = (function() {
       },
       beforeSend: function(request) {
         _.each(self.headers, function(value, key) { request.setRequestHeader(key, value); });
-        request.setRequestHeader("x-anti-forgery-token", $.cookie("lupapiste-token"));
+        request.setRequestHeader("x-anti-forgery-token", $.cookie("anti-csrf-token"));
       }
     };
 
