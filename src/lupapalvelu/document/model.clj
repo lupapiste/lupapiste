@@ -97,15 +97,16 @@
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
 (defn- validate-required-fields [schema-body path data validation-errors]
-  (map (fn [element] 
-         (let [kw (keyword (:name element))
+  (pprint data)
+  (map (fn [{:keys [name required body] :as element}]
+         (let [kw (keyword name)
                current-path (if (empty? path) [kw] (conj path kw))
-               validation-error (if (and (:required element) (s/blank? (get-in data (conj current-path (keyword "value"))))) 
+               validation-error (if (and required (s/blank? (get-in data (conj current-path :value)))) 
                                   (->validation-result nil current-path element [:warn "illegal-value:required"])
                                   nil)
                current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
-           (if (contains? element :body)
-             (validate-required-fields (:body element) current-path data current-validation-errors)
+           (if body
+             (validate-required-fields body current-path data current-validation-errors)
              current-validation-errors))) schema-body))
 
 (defn validate

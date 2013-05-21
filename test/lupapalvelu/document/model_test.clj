@@ -133,8 +133,12 @@
 (def schema-with-required {:info {:name "with-required" :version 1}
                            :body [{:name "a" :type :group
                                    :body [{:name "b" :type :group
-		                                   :body [{:name "aa" :type :string :required true}
-		                                          {:name "ab" :type :string :required true}]}]}]})
+                                           :body [{:name "aa" :type :string :required true}
+                                                  {:name "ab" :type :string :required true}]}
+                                          #_{:name "c" :type :group :repeating true
+                                           :body [{:name "aa" :type :string}
+                                                  {:name "ab" :type :string :required true}]}
+                                          ]}]})
 
 (facts "Required fields"
   (let [document (new-document schema-with-required ..now..)]
@@ -147,7 +151,18 @@
 
     (-> document
       (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")) => valid?))
+      (apply-update [:a :b :ab] "value")) => valid?
+    
+    (comment (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :ab] "value")
+      (apply-update [:a :c :6 :ab] "value")) => valid?
+    
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :aa] "value")) => (invalid-with? [:warn "illegal-value:required"]))))
 
 ;;
 ;; Updates
