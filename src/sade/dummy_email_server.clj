@@ -1,9 +1,12 @@
 (ns sade.dummy-email-server
-  (:use [clojure.tools.logging]
+  (:use [clojure.java.io :only [input-stream]]
+        [clojure.tools.logging]
         [clojure.pprint :only [pprint]]
         [lupapalvelu.core :only [defquery ok]])
-  (:require [sade.env :as env])
-  (:import [com.dumbster.smtp SimpleSmtpServer SmtpMessage]))
+  (:require [clojure.string :as s]
+            [sade.env :as env])
+  (:import [javax.mail.internet MimeUtility]
+           [com.dumbster.smtp SimpleSmtpServer SmtpMessage]))
 
 (defonce server (atom nil))
 
@@ -21,7 +24,8 @@
 
 (defn- parse-message [message]
   (when message
-    {:body (.getBody message)
+    {:body    (-> (.getBody message) (s/replace #"=([^A-Z]{2})" "$1" ) ; strip extra '=' chars that are not part of quotation
+                (.getBytes "US-ASCII") (input-stream) (MimeUtility/decode "quoted-printable") (slurp))
      :headers (reduce (partial message-header message) {} (iterator-seq (.getHeaderNames message)))}))
 
 (defn messages [& {:keys [reset]}]
