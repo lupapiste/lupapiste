@@ -1,9 +1,6 @@
 var pageutil = (function() {
   "use strict";
 
-  var ajaxImg;
-  var ajaxLoaderContainer;
-
   /**
    * Returns HTTP GET parameter value or null if the parameter is not set.
    */
@@ -17,15 +14,17 @@ var pageutil = (function() {
     return null;
   }
 
-  function showAjaxWait() {
-    ajaxImg.hide();
-    ajaxLoaderContainer.show();
-    setTimeout(function() {
-      ajaxImg.show();
-    }, 300);
+  var ajaxLoaderContainer;
+  var ajaxLoaderTask;
+  
+  function showAjaxWait(message) {
+    if (ajaxLoaderTask) clearTimeout(ajaxLoaderTask);
+    ajaxLoaderTask = setTimeout(ajaxLoaderContainer.show, 300);
   }
 
   function hideAjaxWait() {
+    if (ajaxLoaderTask) clearTimeout(ajaxLoaderTask);
+    ajaxLoaderTask = undefined;
     ajaxLoaderContainer.hide();
   }
 
@@ -35,9 +34,10 @@ var pageutil = (function() {
   }
 
   $(function() {
-    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader" width="66" height="66">');
-    ajaxLoaderContainer = $('<div class="ajax-loader-container">').append(ajaxImg);
-    $('body').append(ajaxLoaderContainer);
+    ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
+      .append($("<img>").attr("src", "/img/ajax-loader.gif"))
+      .append($("<p>").addClass("message"));
+    $("body").append(ajaxLoaderContainer);
   });
 
   return {
