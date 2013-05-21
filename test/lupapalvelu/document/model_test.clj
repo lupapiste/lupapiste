@@ -159,3 +159,7 @@
   (apply-updates {} [[[:b :c] "kikka"]
                      [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
                                                         :d {:value "kukka"}}}})
+
+(fact "map2updates"
+  (map2updates [:a :b] {:c 1 :d {:e 2}}) => (just [[[:a :b :c] 1]
+                                                   [[:a :b :d :e] 2]] :in-any-order))

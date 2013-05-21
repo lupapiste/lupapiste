@@ -7,6 +7,7 @@
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -136,6 +137,13 @@
 ;; Updates
 ;;
 
+(declare apply-updates)
+
+(defn map2updates
+  "Creates model-updates from map into path."
+  [path m]
+  (map (fn [[p v]] [(into path p) v]) (tools/path-vals m)))
+
 (defn apply-update
   "Updates a document returning the modified document.
    Value defaults to \"\", e.g. unsetting the value.
@@ -143,11 +151,13 @@
   ([document path]
     (apply-update document path ""))
   ([document path value]
-    (assoc-in document (flatten [:data path :value]) value)))
+    (if (map? value)
+      (apply-updates document (map2updates path value))
+      (assoc-in document (flatten [:data path :value]) value))))
 
 (defn apply-updates
   "Updates a document returning the modified document.
-   Example: (apply-update document [:mitat :koko] 12)"
+   Example: (apply-updates document [[:mitat :koko] 12])"
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
 
