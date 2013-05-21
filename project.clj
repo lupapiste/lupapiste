@@ -19,7 +19,7 @@
                  [commons-io/commons-io "2.4"]
                  [com.lowagie/itext "2.1.7"]
                  [org.clojure/data.zip "0.1.1"]
-                 [com.draines/postal "1.9.2"]
+                 [com.draines/postal "1.10.3"]
                  [org.clojure/data.xml "0.0.7"]
                  [swiss-arrows "0.6.0"]
                  [me.raynes/fs "1.4.0"]

@@ -18,10 +18,10 @@
                       :subject subject
                       :body    [{:type "text/html; charset=utf-8"
                                  :content body}]})]
-        (if (= (:error status) :SUCCESS) (ok) (fail :reason (:msg status))))
+        (if (= (:error status) :SUCCESS) (ok) (fail (:msg status))))
       (catch Exception e
         (error e (.getMessage e))
-        (fail :reason (:msg "exeption"))))))
+        (fail (.getMessage e))))))
 
 (defn send-mail? [to subject body] (ok? (send-mail to subject body)))
 
