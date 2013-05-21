@@ -2,8 +2,6 @@
   (:use [clojure.string :only [blank?]]
         [clojure.tools.logging])
   (:require [sade.util :refer [safe-int]]
-            [clj-time.core :as t]
-            [clj-time.coerce :as tc]
             [clj-time.format :as tf]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
