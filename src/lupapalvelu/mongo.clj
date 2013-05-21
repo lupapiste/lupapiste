@@ -62,8 +62,11 @@
   (mc/insert collection (with-_id data))
   nil)
 
-(defn by-id [collection id]
-  (with-id (mc/find-one-as-map collection {:_id id})))
+(defn by-id
+  ([collection id]
+    (with-id (mc/find-one-as-map collection {:_id id})))
+  ([collection id fields]
+    (with-id (mc/find-one-as-map collection {:_id id} fields))))
 
 (defn select
   "returns multiple entries by matching the monger query"
