@@ -268,3 +268,13 @@
              kerrosala [:mitat :kerrosala safe-int]]
    :facts   {:ok ["6" "4"] :fail ["5" "4"]}}
   (and tilavuus (< tilavuus (* 1.5 kerrosala))))
+
+(defvalidator :vrk:CR314
+  {:doc     "Asuinrakennukssa pitaa olla lammitys"
+   :schema  "uusiRakennus"
+   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus name safe-int]
+            lammitystapa    [:lammitys :lammitystapa]]
+   :facts   {:ok ["032 luhtitalot" "ilmakeskus"] :fail ["032 luhtitalot" "eiLammitysta"]}}
+   (and
+     (<= 11 kayttotarkoitus 39)
+     (not (#{"vesikeskus" "ilmakeskus" "suorasahk\u00f6" "uuni"} lammitystapa))))

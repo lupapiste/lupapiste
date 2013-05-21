@@ -27,6 +27,7 @@ error.vrk:CR328:viemari: Viemäriliittymä vaatii varusteeksi viemärin
 error.vrk:CR328:vesijohto: Vesiliittymä vaatii varusteeksi vesijohdon
 error.vrk:CR312: Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1
 error.vrk:CR313: Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala
+error.vrk:CR314: Asuinrakennukssa pitää olla lämmitys
 
 
 poi: Paikka
