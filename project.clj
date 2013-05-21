@@ -21,7 +21,7 @@
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.10.3"]
                  [org.clojure/data.xml "0.0.7"]
-                 [swiss-arrows "0.5.1"]
+                 [swiss-arrows "0.6.0"]
                  [me.raynes/fs "1.4.0"]
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
