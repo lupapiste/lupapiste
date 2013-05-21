@@ -260,6 +260,7 @@
 
 (defjson "/system/ping" [] {:ok true})
 (defjson "/system/status" [] (status/status))
+(defjson "/system/alive" [] {:ok (if (security/current-user) true false)})
 
 (def activation-route (str (-> env/config :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}
