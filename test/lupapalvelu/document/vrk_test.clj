@@ -24,7 +24,6 @@
 
         (facts "Embedded validator fact"
           (println doc)
-          (validate-fn dummy) => nil?
           (validate-fn ok-doc) => nil?
           (validate-fn fail-doc) => (has some (contains {:result [:warn (name code)]})))))))
 
