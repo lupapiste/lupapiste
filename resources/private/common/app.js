@@ -82,27 +82,24 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   self.connectionCheck = function () {
-    /*
-    ajax.get("/api/ping")
-    .success(function() {
-    hub.send("connection-online");
-    setTimeout(self.connectionCheck, 15000);
-    })
-    .fail(function() {
-    hub.send("connection-offline");
-    setTimeout(self.connectionCheck, 5000);
-    })
-    .call();
-    */
+    ajax.get("/system/alive").raw(false)
+      .success(function() {
+        hub.send("connection", {status: "online"});
+        setTimeout(self.connectionCheck, 15000);
+      })
+      .error(function() {
+        hub.send("connection", {status: "session-dead"});
+      })
+      .fail(function() {
+        hub.send("connection", {status: "offline"});
+        setTimeout(self.connectionCheck, 5000);
+      })
+      .call();
   };
 
   self.initSubscribtions = function() {
-    hub.subscribe("connection-online", function () {
-      $(".connection-error").hide();
-    });
-
-    hub.subscribe("connection-offline", function () {
-      $(".connection-error").show();
+    hub.subscribe("connection", function (d) {
+      console.log("connection:", d);
     });
 
     hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
