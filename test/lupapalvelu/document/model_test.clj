@@ -152,13 +152,22 @@
 ;;
 
 (fact "updating document"
-  (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}}
-  (-> {}
-    (apply-update [:b :c] "kikka")
-    (apply-update [:b :c])) => {:data {:b {:c {:value ""}}}}
-  (apply-updates {} [[[:b :c] "kikka"]
-                     [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
-                                                        :d {:value "kukka"}}}})
+
+  (fact "single value"
+    (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}})
+
+  (fact "unsetting value"
+    (-> {}
+      (apply-update [:b :c] "kikka")
+      (apply-update [:b :c])) => {:data {:b {:c {:value ""}}}})
+
+  (fact "updates"
+    (apply-updates {} [[[:b :c] "kikka"]
+                       [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
+                                                          :d {:value "kukka"}}}})
+  (fact "update a map value"
+    (apply-update {} [:a :b] {:c 1 :d {:e 2}}) => {:data {:a {:b {:c {:value 1}
+                                                                  :d {:e {:value 2}}}}}}))
 
 (fact "map2updates"
   (map2updates [:a :b] {:c 1 :d {:e 2}}) => (just [[[:a :b :c] 1]
