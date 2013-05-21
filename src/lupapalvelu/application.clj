@@ -62,6 +62,13 @@
     (info "invalid property id parameters:" (join ", " invalid))
     (fail :error.invalid-property-id :parameters (vec invalid))))
 
+(defn- validate-owner-or-writer
+  "Validator: current user must be owner or writer.
+   To be used in commands' :validators vector."
+  [command application]
+  (when-not (domain/owner-or-writer? application (-> command :user :id))
+    (fail :error.unauthorized)))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -131,20 +138,22 @@
     (ok :invites invites)))
 
 (defcommand "invite"
-  {:parameters [:id :email :title :text :documentName]
-   :roles      [:applicant]
+  {:parameters [:id :email :title :text :documentName :path]
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]
    :verified   true}
   [{created :created
     user    :user
-    {:keys [id email title text documentName documentId]} :data {:keys [host]} :web :as command}]
+    {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
       (if (domain/invited? application email)
-        (fail :already-invited)
+        (fail :invite.already-invited)
         (let [invited (security/get-or-create-user-by-email email)
               invite  {:title        title
                        :application  application-id
                        :text         text
+                       :path         path
                        :documentName documentName
                        :documentId   documentId
                        :created      created
@@ -154,7 +163,7 @@
               writer  (role invited :writer)
               auth    (assoc writer :invite invite)]
           (if (domain/has-auth? application (:id invited))
-            (fail :already-has-auth)
+            (fail :invite.already-has-auth)
             (do
               (mongo/update
                 :applications
@@ -174,6 +183,7 @@
         (executed "set-user-to-document"
           (-> command
             (assoc-in [:data :documentId] (:documentId my-invite))
+            (assoc-in [:data :path]       (:path my-invite))
             (assoc-in [:data :userId]     (:id user))))
         (mongo/update :applications
           {:_id application-id :auth {$elemMatch {:invite.user.id (:id user)}}}
@@ -181,7 +191,8 @@
 
 (defcommand "remove-invite"
   {:parameters [:id :email]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]}
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
@@ -194,7 +205,8 @@
 ;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
   {:parameters [:id :email]
-   :roles      [:applicant]}
+   :roles      [:applicant :authority]
+   :validators [validate-owner-or-writer]}
   [{{:keys [email]} :data :as command}]
   (update-application command
     {$pull {:auth {$and [{:username email}
@@ -334,9 +346,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :validators [(fn [command application]
-                  (when-not (domain/is-owner-or-writer? application (-> command :user :id))
-                    (fail :error.unauthorized)))]}
+   :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :as command}]
   (with-application command
     (fn [application]
@@ -626,12 +636,6 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn pre-verdict-states [user]
-  (let [states ["open" "submitted" "sent" "info" "answered" "complement-needed"]]
-    (if (= (keyword (:role user)) :applicant)
-      (cons "draft" states)
-      states)))
-
 (defn make-query [query params user]
   (let [search (params :sSearch)
         kind (params :kind)]
@@ -640,12 +644,11 @@
       (condp = kind
         "applications" {:infoRequest false}
         "inforequests" {:infoRequest true}
-        nil)
+        "both"         nil)
       (condp = (:filter-state params)
-        "pre-verdict"       {:state {$in (pre-verdict-states user)}}
-        "all"               nil
-        "canceled"          {:state "canceled"}
-        nil)
+        "all"       {:state {$ne "canceled"}}
+        "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
+        "canceled"  {:state "canceled"})
       (when-not (contains? #{nil "0"} (:filter-user params))
         {"authority.id" (:filter-user params)})
       (when-not (blank? search)
@@ -660,8 +663,6 @@
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
-        _ (println user-query)
-        _ (println query)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)

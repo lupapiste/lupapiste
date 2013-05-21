@@ -22,8 +22,10 @@
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (def ui-components
-  {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.1.custom.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
-   :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.autocomplete.js" "jquery.cookie.js"]}
+  {:cdn-fallback {:js ["jquery-1.8.0.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
+   :jquery       {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]
+                  :css ["jquery-ui.css"]}
+
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
    :lo-dash      {:js ["lodash-1.1.1.min.js"]}
    :underscore   {:depends [:lo-dash]
@@ -66,7 +68,7 @@
                   :css ["accordion.css"]}
 
    :application  {:depends [:common :repository :tree]
-                  :js ["change-location.js" "application.js" "add-operation.js"]
+                  :js ["change-location.js" "invite.js" "application.js" "add-operation.js"]
                   :html ["application.html" "inforequest.html" "add-operation.html" "change-location.html"]}
 
    :applications {:depends [:common :repository :invites]
@@ -95,7 +97,8 @@
 
    :create       {:depends [:common]
                   :js ["create.js"]
-                  :html ["create.html"]}
+                  :html ["create.html"]
+                  :css ["create.css"]}
 
    :applicant    {:depends [:common :authenticated :map :applications :application :attachment
                             :statement :docgen :create :mypage :debug]
@@ -133,6 +136,8 @@
    :welcome {:depends [:common :register :debug]
              :js ["welcome.js" "login.js"]
              :html ["index.html" "login.html"]}
+
+   :oskari  {:css ["oskari.css"]}
 
    :mypage  {:depends [:common]
              :js ["mypage.js"]

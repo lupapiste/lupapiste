@@ -58,7 +58,8 @@
   loc)
 
 (defmacro with-lang [lang & body]
-  `(binding [loc (localizer ~lang)]
+  `(binding [*lang* ~lang
+             loc (localizer ~lang)]
      ~@body))
 
 (defn lang-middleware [handler]
@@ -66,8 +67,7 @@
     (let [lang (or (get-in request [:params :lang])
                    (get-in request [:user :lang])
                    "fi")]
-      (binding [*lang* lang
-                loc (localizer lang)]
+      (with-lang lang
         (handler request)))))
 
 (env/in-dev
