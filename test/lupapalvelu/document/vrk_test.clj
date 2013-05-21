@@ -3,13 +3,34 @@
         [lupapalvelu.document.schemas]
         [lupapalvelu.document.validators]
         [lupapalvelu.document.model]
-        [midje.sweet]))
+        [midje.sweet]
+        [sade.util])
+  (:require [lupapalvelu.document.validator :as v]))
+
+(defn validator-facts []
+  (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
+    (println "About to test" (count validators) "awesome validators")
+    (doseq [{:keys [doc schema paths] {:keys [ok fail]} :facts} validators]
+      (let [dummy    (dummy-doc schema)
+            update   (fn [values]
+                       (reduce
+                         (fn [d i]
+                           (apply-update d (get paths i) (get values i)))
+                         dummy (range 0 (count paths))))
+            ok-doc   (update ok)
+            fail-doc (update fail)]
+
+        (facts "Embedded validator fact"
+          (println doc)
+          dummy => valid?
+          ok-doc => valid?
+          fail-doc => invalid?)))))
+
+(facts "Embedded validator facts"
+  (validator-facts))
 
 (def uusi-rakennus
-  (let [schema (schemas "uusiRakennus")
-        data   (create-document-data schema dummy-values)]
-    {:schema schema
-     :data   data}))
+  (dummy-doc "uusiRakennus"))
 
 (facts "VRK-validations"
 
@@ -132,4 +153,4 @@
       (apply-update [:verkostoliittymat :vesijohtoKytkin] true)
       (apply-update [:varusteet :vesijohtoKytkin] false)) => (invalid-with? [:warn "vrk:CR328:vesijohto"]))
 
-  )
+    )
