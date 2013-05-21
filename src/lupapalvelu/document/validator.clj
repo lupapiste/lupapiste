@@ -6,7 +6,7 @@
 (defonce validators (atom {}))
 
 (defn validate
-  "Runs all validators, returning list of validation results."
+  "Runs all validators, returning list of concatenated validation results."
   [document]
   (->>
     validators
@@ -17,7 +17,10 @@
     (reduce concat)
     (filter (comp not nil?))))
 
-(defn- starting-keywords [v]
+(defn- starting-keywords
+  "Returns vector of starting keywords of vector until
+   a non-keyword is found. [:a :b even? :c] -> [:a :b]"
+  [v]
   (last
     (reduce
       (fn [[stop result] x]
@@ -28,22 +31,25 @@
 
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
-  [code {:keys [doc schema fields]} & body]
+  [code {:keys [doc schema fields facts]} & body]
   (let [paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     `(swap! validators assoc ~code
-       {:doc  (keyword ~doc)
-        :code ~code
-        :fn   (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
-                (let [~'d (tools/un-wrapped ~'data)]
-                  (when (or (not ~schema) (= ~schema ~'doc-schema))
-                    (let
-                      ~(reduce into
-                         (for [[k v] (partition 2 fields)]
-                           [k `(some->> ~'d ~@v)]))
-                      (try
-                        (when-let [resp# (do ~@body)]
-                          (map (fn [path#] {:path   path#
-                                            :result [:warn ~(name code)]}) ~paths))
-                        (catch Exception e#
-                          {:result [:warn (str "validator")]
-                           :reason (str e#)}))))))})))
+       {:code ~code
+        :doc ~doc
+        :paths ~paths
+        :schema ~schema
+        :facts ~facts
+        :fn (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
+              (let [~'d (tools/un-wrapped ~'data)]
+                (when (or (not ~schema) (= ~schema ~'doc-schema))
+                  (let
+                    ~(reduce into
+                       (for [[k v] (partition 2 fields)]
+                         [k `(some->> ~'d ~@v)]))
+                    (try
+                      (when-let [resp# (do ~@body)]
+                        (map (fn [path#] {:path   path#
+                                          :result [:warn ~(name code)]}) ~paths))
+                      (catch Exception e#
+                        {:result [:warn (str "validator")]
+                         :reason (str e#)}))))))})))
