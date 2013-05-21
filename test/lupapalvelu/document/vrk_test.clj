@@ -11,7 +11,7 @@
 
 (defn validator-facts []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
-    (println "About to test" (str (count validators) "/" (count @v/validators)) "awesome validators!")
+    (println "About to test" (str (count validators) "/" (count @v/validators)) "awesome validators")
     (doseq [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts} validators]
       (let [dummy    (dummy-doc schema)
             update   (fn [values]
@@ -22,7 +22,7 @@
             ok-doc   (update ok)
             fail-doc (update fail)]
 
-        (facts "Embedded validator fact"
+        (facts "Embedded validator facts"
           (println doc)
           (validate-fn ok-doc) => nil?
           (validate-fn fail-doc) => (has some (contains {:result [:warn (name code)]})))))))

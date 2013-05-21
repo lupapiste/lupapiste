@@ -279,3 +279,11 @@
      (<= 11 kayttotarkoitus 39)
      (not (#{"vesikeskus" "ilmakeskus" "suorasahk\u00f6" "uuni"} lammitystapa))))
 
+(defvalidator :vrk:CR315
+  {:doc     "Omakotitalossa pitaa olla huoneisto"
+   :schema  "uusiRakennus"
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
+             huoneistot      [:huoneistot keys count]]
+   :facts   {:ok   ["011 yhden asunnon talot" {}] ;; nop -> has 1 huoneisto
+             :fail ["011 yhden asunnon talot" {:6 {:any :any}}]}} ;; add another huoneisto
+   (and (= :011 kayttotarkoitus) (not= 1 huoneistot)))
