@@ -59,3 +59,8 @@ poi.type.710: rajapyykki
 create.placeholder: Kasarmikatu 25, Helsinki
 
 error.application-not-accessible: Hakemusta ei löydy tai siihen ei ole käyttöoikeutta. Avaa omat hakemukset tai kirjaudu sisään uudelleen.
+
+session-dead.title: Istunto vanhentunut
+session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
+session-dead.logout: Kirjaudu
+connection.offline: Yhteys palvelimeen katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
