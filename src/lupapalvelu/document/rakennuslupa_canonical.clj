@@ -387,7 +387,9 @@
               :lausunto {:viranomainen (get-in statement [:person :name])
                          :lausuntoPvm (to-xml-date (:given statement))
                          :lausunto {:lausunto (:text statement)}
-                         :puoltotieto {:puolto ((keyword (:status statement)) puolto-mapping)}}}})
+                         :puoltotieto (if (nil? (:status statement))
+                                        {:puolto "ei tiedossa"}
+                                        {:puolto ((keyword (:status statement)) puolto-mapping)})}}})
 
 (defn- get-statements [statements]
   ;Returing vector because this element to be Associative

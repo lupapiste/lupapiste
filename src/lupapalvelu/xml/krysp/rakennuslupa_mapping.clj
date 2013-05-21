@@ -5,12 +5,13 @@
          [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical to-xml-datetime]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]]
-         [lupapalvelu.attachment :only [encode-filename]])
+         [lupapalvelu.attachment :only [encode-filename]]
+         [clojure.java.io :as io])
   (:require [sade.env :as env]
             [me.raynes.fs :as fs]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo])
-  )
+  (:import [java.util.zip ZipOutputStream ZipEntry]))
 
 ;RakVal
 
@@ -223,7 +224,7 @@
      :muokkausHetki (to-xml-datetime (:modified attachment))
      :versionumero 1
      :tyyppi type
-     :fileId file-id}))
+     :files (map last id-and-attachments)}))
 
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
   (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
@@ -256,6 +257,29 @@
       (with-open [out (output-stream attachment-file)
                   in (content)]
         (copy in out)))))
+
+(defn- append-gridfs-file [zip file-name file-id]
+  (when file-id
+    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (with-open [in ((:content (mongo/download file-id)))]
+      (io/copy in zip))))
+
+(defn- write-statement-attachments [attachments output-dir]
+  (let [single-files (filter #(nil? (:files %)) attachments)
+        multiple-files (filter #(:files %) attachments)]
+    (doseq [file-tuple single-files]
+      (write-attachments (map (fn [m] {:Liite (:liite m)}) (vals file-tuple)) output-dir))
+    (for [statement-attachments multiple-files]
+      (let [tempfile (file (str (:kuvaus statement-attachments) ".zip.tmp"))
+            outfile (file (str (:kuvaus statement-attachments) ".zip"))]
+        (with-open [out (io/output-stream tempfile)]
+          (let [zip (ZipOutputStream. out)]
+            ; Add all attachments:
+            (doseq [file (:files statement-attachments)]
+              (append-gridfs-file zip (:filename file) (:fileId file))
+              (.finish zip))
+            (fs/rename tempfile outfile)
+          ))))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
@@ -317,6 +341,8 @@
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
     (write-attachments attachments output-dir)
+    (write-statement-attachments statement-attachments output-dir)
+
     (write-application-pdf-versions output-dir application submitted-application lang)
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
