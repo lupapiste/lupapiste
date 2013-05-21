@@ -145,7 +145,7 @@
     // Search activation:
 
     self.searchNow = function() {
-      // $('.selected-location').show();
+      console.log("searchNow:", self.search());
       self
         .resetXY()
         .addressData(null)
@@ -230,11 +230,13 @@
     self.searchPointByAddressOrPropertyId = function(value) { return util.prop.isPropertyId(value) ? self.searchPointByPropertyId(value) : self.searchPointByAddress(value); };
 
     self.searchPointByAddress = function(address) {
+      console.log("searchPointByAddress:", address);
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
+          console.log("pointByAddress:", result);
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
-                x = data.x,
-                y = data.y;
+                x = data.location.x,
+                y = data.location.y;
             self
               .useManualEntry(false)
               .setXY(x, y)
