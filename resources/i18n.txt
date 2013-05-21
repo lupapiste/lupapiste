@@ -14,8 +14,9 @@ error.illegal-letter:upper: Anna iso kirjain
 error.illegal-letter:lower: Anna pieni kirjain
 error.illegal-letter:any: Anna kirjain
 error.illegal-kiinteistotunnus: Kiinteistötunnus on 14 numeroa pitkä.
-error.illegal-zip: Eriskummallienn postinumero
+error.illegal-zip: Eriskummallinen postinumero
 error.illegal-subtype: Tuntematon tietotyyppi
+error.illegal-hetu: Tarkasta henkilötunnuksen muoto
 
 error.vrk:CR341: Sähkölämmitys vaatii sähköliittymän
 error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän
