@@ -3,6 +3,7 @@ LUPAPISTE.InviteModel = function() {
 
   self.applicationId = null;
   self.email = ko.observable();
+  self.path = ko.observable();
   self.text = ko.observable(loc('invite.default-text'));
   self.documentName = ko.observable();
   self.documentId = ko.observable();
@@ -16,6 +17,7 @@ LUPAPISTE.InviteModel = function() {
     self.email(undefined);
     self.documentName(undefined);
     self.documentId(undefined);
+    self.path(undefined);
     self.text(loc('invite.default-text'));
     self.error(undefined);
   };
@@ -26,9 +28,11 @@ LUPAPISTE.InviteModel = function() {
     var text = model.text();
     var documentName = model.documentName();
     var documentId = model.documentId();
+    var path = model.path();
     ajax.command("invite", { id: self.applicationId,
                              documentName: documentName,
                              documentId: documentId,
+                             path: path,
                              email: email,
                              title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                              text: text})
