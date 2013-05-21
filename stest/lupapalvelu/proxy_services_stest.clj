@@ -7,6 +7,9 @@
             [clj-http.client :as c]
             [cheshire.core :as json]))
 
+; make sure proxies are enabled:
+(c/post (str (server-address) "/api/proxy-ctrl/on"))
+
 (defn- proxy-request [apikey proxy-name & args]
   (let [resp (c/post
                (str (server-address) "/proxy/" (name proxy-name))

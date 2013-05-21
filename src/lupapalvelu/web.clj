@@ -342,7 +342,7 @@
   (attachment/output-all-attachments application-id (current-user)))
 
 (defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (ke6666/export application-id (current-user)))
+  (ke6666/export application-id (current-user) *lang*))
 
 ;;
 ;; Proxy
