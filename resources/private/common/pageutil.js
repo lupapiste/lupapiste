@@ -14,12 +14,19 @@ var pageutil = (function() {
     return null;
   }
 
+  function getPage() {
+    var pageMatch = window.location.hash.match(/\/([\-\w]*)/);
+    return pageMatch ? pageMatch[1] : null;
+  }
+
   var ajaxLoaderContainer;
   var ajaxLoaderTask;
   
+  function showAjaxWaitNow(message) { ajaxLoaderContainer.find("p").html(message || "").end().show(); }
+  
   function showAjaxWait(message) {
     if (ajaxLoaderTask) clearTimeout(ajaxLoaderTask);
-    ajaxLoaderTask = setTimeout(ajaxLoaderContainer.show, 300);
+    ajaxLoaderTask = _.delay(showAjaxWaitNow, 300, message);
   }
 
   function hideAjaxWait() {
@@ -28,23 +35,18 @@ var pageutil = (function() {
     ajaxLoaderContainer.hide();
   }
 
-  function getPage() {
-    var pageMatch = window.location.hash.match(/\/([\-\w]*)/);
-    return pageMatch ? pageMatch[1] : null;
-  }
-
   $(function() {
     ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
-      .append($("<img>").attr("src", "/img/ajax-loader.gif"))
-      .append($("<p>").addClass("message"));
-    $("body").append(ajaxLoaderContainer);
+      .append($("<div>"))
+      .append($("<p>").addClass("message"))
+      .appendTo($("body"));
   });
 
   return {
     getURLParameter:  getURLParameter,
+    getPage:          getPage,
     showAjaxWait:     showAjaxWait,
-    hideAjaxWait:     hideAjaxWait,
-    getPage:          getPage
+    hideAjaxWait:     hideAjaxWait
   };
 
 })();
