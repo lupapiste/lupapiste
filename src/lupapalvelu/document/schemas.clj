@@ -72,7 +72,7 @@
                                :type :group
                                :body [{:name "etunimi" :type :string}
                                       {:name "sukunimi" :type :string}
-                                      {:name "hetu" :type :string}]}])
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11}]}])
 
 (def henkilo (body
                henkilo-valitsin
