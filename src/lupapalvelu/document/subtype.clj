@@ -1,7 +1,10 @@
 (ns lupapalvelu.document.subtype
   (:use [clojure.string :only [blank?]]
         [clojure.tools.logging])
-  (:require [sade.util :refer [safe-int]]))
+  (:require [sade.util :refer [safe-int]]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
+            [clj-time.format :as tf]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
 
@@ -52,6 +55,25 @@
     (blank? v) nil
     (re-matches #"^\d{5}$" v) nil
     :else [:warn "illegal-zip"]))
+
+(defn- validate-hetu-date [hetu]
+  (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
+        yy (last (butlast dateparsts))
+        yyyy (str (case (last dateparsts) "+" "18" "-" "19" "20") yy)
+        basic-date (str yyyy (second dateparsts) (first dateparsts))]
+    (try
+      (tf/parse (tf/formatters :basic-date) basic-date)
+      nil
+      (catch Exception e
+        [:warn "illegal-hetu"]))))
+
+(defn- validate-hetu-checksum [hetu])
+
+(defmethod subtype-validation :hetu [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d+|\d\d-|[01]\dA)\d{3}[\dA-Z]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
+    :else [:warn "illegal-hetu"]))
 
 (defmethod subtype-validation nil [_ _]
   nil)
