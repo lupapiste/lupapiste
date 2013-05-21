@@ -62,8 +62,11 @@
   (mc/insert collection (with-_id data))
   nil)
 
-(defn by-id [collection id]
-  (with-id (mc/find-one-as-map collection {:_id id})))
+(defn by-id
+  ([collection id]
+    (with-id (mc/find-one-as-map collection {:_id id})))
+  ([collection id fields]
+    (with-id (mc/find-one-as-map collection {:_id id} fields))))
 
 (defn select
   "returns multiple entries by matching the monger query"
@@ -214,8 +217,9 @@
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:municipality 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
-  (mc/ensure-index "users" {:personId 1} {:unique true :sparse true :dropDups (env/in-dev)})
+  (mc/ensure-index :users {:personId 1} {:unique true :sparse true})
   (mc/ensure-index :applications {:municipality 1})
+  (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
