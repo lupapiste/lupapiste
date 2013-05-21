@@ -268,6 +268,3 @@
              kerrosala [:mitat :kerrosala safe-int]]
    :facts   {:ok ["6" "4"] :fail ["5" "4"]}}
   (and tilavuus (< tilavuus (* 1.5 kerrosala))))
-
-
-

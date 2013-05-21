@@ -13,7 +13,7 @@
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
     (println "About to test" (count validators) "awesome validators")
     (doseq [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts} validators]
-      (let [dummy    (apply-update (dummy-doc schema) [:mitat :tilavuus] "6")
+      (let [dummy    (dummy-doc schema)
             update   (fn [values]
                        (reduce
                          (fn [d i]
@@ -23,6 +23,7 @@
             fail-doc (update fail)]
 
         (facts "Embedded validator fact"
+          (println doc)
           (validate-fn dummy) => nil?
           (validate-fn ok-doc) => nil?
           (validate-fn fail-doc) => (has some (contains {:result [:warn (name code)]})))))))
@@ -99,11 +100,11 @@
 
   (fact "Kokonaisalan oltava vähintään kerrosala"
     (-> uusi-rakennus
-      (apply-update [:mitat :kerrosala] "100")
-      (apply-update [:mitat :kokonaisala] "100")) => valid?
+      (apply-update [:mitat :kerrosala] "4")
+      (apply-update [:mitat :kokonaisala] "4")) => valid?
     (-> uusi-rakennus
-      (apply-update [:mitat :kerrosala] "100")
-      (apply-update [:mitat :kokonaisala] "99")) => (invalid-with? [:warn "vrk:CR326"]))
+      (apply-update [:mitat :kerrosala] "6")
+      (apply-update [:mitat :kokonaisala] "4")) => (invalid-with? [:warn "vrk:CR326"]))
 
   (fact "Sahko polttoaineena vaatii varusteeksi sahkon"
     (-> uusi-rakennus
@@ -128,6 +129,4 @@
       (apply-update [:mitat :kerrosluku] "4")) => valid?
     (-> uusi-rakennus
       (apply-update [:kaytto :kayttotarkoitus] "021 rivitalot")
-      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:CR320"]))
-
-    )
+      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:CR320"])))
