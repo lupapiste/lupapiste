@@ -75,15 +75,13 @@
   (when-not (domain/owner-or-writer? application (-> command :user :id))
     (fail :error.unauthorized)))
 
-(defn- validate-x [{data :data} _]
-  (when-let [x (:x data)]
-    (when (< (->double x) 410000)
-        (fail :error.illegal-coordinates))))
+(defn- validate-x [{:keys [x]} _]
+  (when (and x (< (->double x) 410000))
+    (fail :error.illegal-coordinates)))
 
-(defn- validate-y [{data :data} _]
-  (when-let [y (:y data)]
-    (when (not (<= 6610000 (->double y) 7779999))
-        (fail :error.illegal-coordinates))))
+(defn- validate-y [{:keys [y]} _]
+  (when (and y (not (<= 6610000 (->double y) 7779999)))
+    (fail :error.illegal-coordinates)))
 
 ;; Meta-fields:
 ;;
