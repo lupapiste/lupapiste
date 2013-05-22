@@ -19,6 +19,8 @@
 (def default-max-len 255)
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
+(def latin1-encoder (.newEncoder (java.nio.charset.Charset/forName "ISO-8859-1")))
+
 ;;
 ;; Field validation
 ;;
@@ -31,6 +33,7 @@
 (defmethod validate-field :string [{:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
+    (not (.canEncode latin1-encoder v)) [:err "illegal-value:not-latin1-string"]
     (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
