@@ -25,5 +25,9 @@ stamp.cancel: Peruuta
 stamp.ok: Ok
 
 stamp.file.status.pending: Odottaa
-stamp.file.status.running: Leimaa
+stamp.file.status.working: Leimaa
 stamp.file.status.done: Valmis
+stamp.file.status.error: Virhe
+
+stamp.all: kaikki
+stamp.none: poista
