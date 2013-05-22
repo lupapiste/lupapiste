@@ -258,7 +258,8 @@
    :schema  "uusiRakennus"
    :fields  [toimenpide [:kaytto :kayttotarkoitus ->kayttotarkoitus]
              kerrosluku [:mitat :kerrosluku safe-int]]
-   :facts   {:ok ["111 myym\u00e4l\u00e4hallit" "1"] :fail ["111 myym\u00e4l\u00e4hallit" "2"]}}
+   :facts   {:ok   ["111 myym\u00e4l\u00e4hallit" "1"]
+             :fail ["111 myym\u00e4l\u00e4hallit" "2"]}}
   (and (#{:691 :111} toimenpide) (not= kerrosluku 1)))
 
 (defvalidator :vrk:CR313
@@ -306,7 +307,7 @@
                                       :2 {:any :any}
                                       :3 {:any :any}}]
              :fail ["032 luhtitalot" {}]}}
-  (and (<= 21 kayttotarkoitus 39) (< huoneistot 3)))
+  (and (<= 13 kayttotarkoitus 39) (< huoneistot 3)))
 
 (defvalidator :vrk:CR319
   {:doc     "Jos rakentamistoimenpide on 1 ja kayttotarkoitus on 032 – 039, on kerrosluvun oltava vahintaan 2"
