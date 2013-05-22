@@ -27,7 +27,7 @@
 
 (def nimi {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"}})
 
-(def henkilotiedot (assoc nimi :hetu {:value "010100A0101"}))
+(def henkilotiedot (assoc nimi :hetu {:value "210281-9988"}))
 
 (def osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
 
@@ -300,7 +300,7 @@
 
 (defn- validate-person [person]
   (validate-person-wo-ssn person)
-  (fact (:henkilotunnus person) => "010100A0101"))
+  (fact (:henkilotunnus person) => "210281-9988"))
 
 (defn- validate-minimal-company [company]
   (fact company => (contains {:nimi "Solita Oy" :liikeJaYhteisotunnus "10601555"}))
