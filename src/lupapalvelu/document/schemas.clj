@@ -68,15 +68,24 @@
                              :body [{:name "etunimi" :type :string}
                                     {:name "sukunimi" :type :string}]}])
 
-(def henkilotiedot-with-sotu [{:name "henkilotiedot"
+(def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
                                :body [{:name "etunimi" :type :string}
                                       {:name "sukunimi" :type :string}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11}]}])
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11}]})
 
 (def henkilo (body
                henkilo-valitsin
-               henkilotiedot-with-sotu
+               [henkilotiedot-with-hetu]
+               simple-osoite
+               yhteystiedot))
+
+(def henkilo-with-required-hetu (body
+               henkilo-valitsin
+               [(assoc henkilotiedot-with-hetu
+                       :body
+                       (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
+                            (:body henkilotiedot-with-hetu)))]
                simple-osoite
                yhteystiedot))
 
@@ -95,6 +104,12 @@
 (def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
             {:name "henkilo" :type :group :body henkilo}
             {:name "yritys" :type :group :body yritys}])
+
+(def party-with-required-hetu
+  [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+   {:name "henkilo" :type :group :body henkilo-with-required-hetu}
+   {:name "yritys" :type :group :body yritys}])
+
 
 (def patevyys [{:name "koulutus" :type :string}
                {:name "patevyysluokka" :type :select
@@ -357,7 +372,8 @@
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group
                              :repeating true
-                             :body (body party [{:name "omistajalaji" :type :select
+                             :body (body party-with-required-hetu
+                                         [{:name "omistajalaji" :type :select
                                            :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                                   {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                                   {:name "asunto-oy tai asunto-osuuskunta"}
