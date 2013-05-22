@@ -82,7 +82,7 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   self.connectionCheck = function () {
-    ajax.get("/system/alive").raw(false)
+    ajax.get("/api/alive").raw(false)
       .success(function() {
         hub.send("connection", {status: "online"});
         setTimeout(self.connectionCheck, 10000);
@@ -101,7 +101,7 @@ var LUPAPISTE = LUPAPISTE || {};
   var wasLoggedIn = false;
   
   hub.subscribe("login", function() { wasLoggedIn = true; });
-  
+
   hub.subscribe({type: "connection", status: "online"}, function () {
     if (offline) {
       offline = false;
