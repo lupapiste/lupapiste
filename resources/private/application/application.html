@@ -450,15 +450,35 @@
             <div class="stamp-margin">
               <table>
                 <tbody>
-                  <tr> <td data-bind="ltext: 'stamp.margin'" colspan="3"></td> </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.margin'" colspan="3"></td>
+                  </tr>
                   <tr>
                     <td data-bind="ltext: 'stamp.xMargin'" class="label"></td>
-                    <td><input data-bind="value: xMargin, enable: status() === statusInit, valueUpdate: 'afterkeydown', css: {'invalid-margin': !xMarginOk()}" id="stamp.xMargin" type="text" class="form-input text"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          value: xMargin,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown',
+                          css: {'invalid-margin': !xMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
                     <td>mm</td>
                   </tr>
                   <tr>
                     <td data-bind="ltext: 'stamp.yMargin'" class="label"></td>
-                    <td><input data-bind="value: yMargin, enable: status() === statusInit, valueUpdate: 'afterkeydown', css: {'invalid-margin': !yMarginOk()}" id="stamp.yMargin" type="text" class="form-input text"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          value: yMargin,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown',
+                          css: {'invalid-margin': !yMarginOk()}"
+                        type="text"
+                        class="form-input text">
+                      </td>
                     <td>mm</td>
                   </tr>
                 </tbody>
@@ -475,12 +495,20 @@
                     <td data-bind="ltext: 'stamp.status'"></td>
                   </tr>
                 </thead>
-                <tbody data-bind="foreach: filesTable">
+                <tbody data-bind="foreach: files">
                   <tr>
                     <td data-bind="text: filename"></td>
                     <td data-bind="version: version"></td>
                     <td data-bind="size: size"></td>
-                    <td data-bind="text: status"></td>
+                    <td>
+                      <input type="checkbox" data-bind="
+                          checked: selected,
+                          visible: $parent.status() < $parent.statusRunning,
+                          enable: $parent.status() === $parent.statusReady" />
+                      <span data-bind="
+                          text: status,
+                          visible: $parent.status() >= $parent.statusRunning"></span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -491,9 +519,24 @@
             </div>
             
             <div class="stamp-buttons">
-              <button data-bind="click: start, ltext: 'stamp.start', enable: xMarginOk() && yMarginOk() && status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
-              <button data-bind="ltext: 'stamp.cancel', enable: status() === statusInit" class="btn btn-dialog close"></button>
-              <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
+              <button data-bind="
+                  click: start,
+                  ltext: 'stamp.start',
+                  enable: status() === statusReady && xMarginOk() && yMarginOk() && filesSelected() > 0,
+                  visible: status() <= statusReady"
+                class="btn btn-primary btn-dialog">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.cancel',
+                  enable: status() === statusReady,
+                  visible: status() <= statusReady"
+                class="btn btn-dialog close">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.ok',
+                  visible: status() > statusRunning"
+                class="btn btn-primary btn-dialog close">
+              </button>
             </div>
             
           </div>

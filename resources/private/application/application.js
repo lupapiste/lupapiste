@@ -15,32 +15,61 @@
   var stampModel = new function() {
     var self = this;
 
-    self.statusInit      = 0;
-    self.statusStarting  = 1;
-    self.statusRunning   = 2;
-    self.statusDone      = 3;
-    self.statusNoFiles   = 4;
+                               // Start:  Cancel:  Ok:
+    self.statusInit      = 0;  //   -       -       -
+    self.statusReady     = 1;  //   +       +       -
+    self.statusStarting  = 2;  //   -       -       -
+    self.statusRunning   = 3;  //   -       -       -
+    self.statusDone      = 4;  //   -       -       +
+    self.statusNoFiles   = 5;  //   -       -       +
 
-    self.status = ko.observable(self.statusInit);
-
+    self.status = ko.observable(self.statusStarting);
+    self.application = null;
     self.applicationId = null;
+    self.files = ko.observable(null);
+    self.filesSelected = ko.computed(function() {
+      return _.filter(self.files(), function(f) { return f.selected(); }).length;
+    });
+    
     self.jobId = null;
-    self.version = null;
-    self.files = null;
+    self.jobVersion = null;
 
     self.xMargin = ko.observable("");
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
-
     self.yMargin = ko.observable("");
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
 
-    self.filesTable = ko.observable();
-
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
+    function stampableAttachment(a) {
+      var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
+      return ct == "application/pdf" || ct.search(/^image\//) == 0;
+    }
+    
+    function normalizeAttachment(a) {
+      var l = a.latestVersion;
+      return {
+        type:         { "type-group": a.type["type-group"](), "type-id": a.type["type-id"]() },
+        contentType:  l.contentType(),
+        filename:     l.filename(),
+        version:      { major: l.version.major(), minor: l.version.minor() },
+        size:         l.size(),
+        selected:     ko.observable(false),
+        status:       ko.observable(null)
+      };
+    }
+    
+    self.init = function(application) {
+      self.application = application;
+      self.applicationId = application.id();
       self.jobId = null;
-      self.files = {};
-      self.status(self.statusInit).filesTable([]).xMargin("10").yMargin("85");
+      
+      var f = _(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value();
+      
+      self
+        .files(f)
+        .status(f.length > 0 ? self.statusReady : self.statusNoFiles)
+        .xMargin("10")
+        .yMargin("85");
+      
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
@@ -48,17 +77,11 @@
     self.start = function() {
       self.status(self.statusStarting);
       ajax
-        .command("stamp-attachments", {id: self.applicationId, xMargin: _.parseInt(self.xMargin(), 10), yMargin: _.parseInt(self.yMargin(), 10)})
+        .command("stamp-attachments", {id: self.application.id(), xMargin: _.parseInt(self.xMargin(), 10), yMargin: _.parseInt(self.yMargin(), 10)})
         .success(self.started)
         .call();
       return false;
     };
-
-    function withObservableStatus(job, key) {
-      var s = job.status;
-      job.status = ko.observable(loc("stamp.file.status", s));
-      return [key, job];
-    }
 
     self.started = function(data) {
       if (data.count === 0) {
@@ -68,7 +91,7 @@
         self.jobId = data.job.id;
         self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
         self.filesTable(_.values(self.files));
-        self.version = 0;
+        self.jobVersion = 0;
         self.queryUpdate();
       }
       return false;
@@ -78,7 +101,7 @@
       ajax
         .query("stamp-attachments-job")
         .param("job-id", self.jobId)
-        .param("version", self.version)
+        .param("version", self.jobVersion)
         .success(self.update)
         .call();
       return self;
@@ -87,7 +110,7 @@
     self.update = function(data) {
       if (data.result === "timeout") { return self.queryUpdate(); }
       var job = data.job;
-      self.version = job.version;
+      self.jobVersion = job.version;
       _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
       if (job.status === "done") {
         repository.load(self.applicationId);
@@ -423,7 +446,7 @@
     },
 
     stampAttachments: function() {
-      stampModel.init(application.id());
+      stampModel.init(application);
       return false;
     },
 

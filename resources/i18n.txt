@@ -8,14 +8,18 @@ attachmentType.empty._group_label:
 # Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
 #
 
-stamp.status.0: Valmiina leimaamaan liiteet
-stamp.status.1: Leimaus käynnistyy...
-stamp.status.2: Leimaus käynnissä...
-stamp.status.3: Leimaus valmis
-stamp.status.4: Ei leimaus kelpoisia liitteitä
+stamp.status.0: Odota...
+stamp.status.1: Valmiina leimaamaan liiteet
+stamp.status.2: Leimaus käynnistyy...
+stamp.status.3: Leimaus käynnissä...
+stamp.status.4: Leimaus valmis
+stamp.status.5: Ei leimaus kelpoisia liitteitä
 
 stamp.filename: Tiedosto
 stamp.version: Versio
 stamp.size: Koko
 stamp.status: Tila
 
+stamp.start: Aloita
+stamp.cancel: Peruuta
+stamp.ok: Ok
