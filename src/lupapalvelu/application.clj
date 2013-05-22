@@ -3,6 +3,7 @@
         [clojure.tools.logging]
         [lupapalvelu.core]
         [clojure.string :only [blank? join trim]]
+        [sade.strings :only [numeric? decimal-number?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
@@ -32,8 +33,8 @@
 ;;
 
 (defn- ->double [v]
-  (let [v (str v)]
-    (if (blank? v) 0.0 (Double/parseDouble v))))
+  (let [s (str v)]
+    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
 
 (defn get-applicant-name [app]
   (if (:infoRequest app)
@@ -105,7 +106,8 @@
 
 (defquery "application"
   {:authenticated true
-   :parameters [:id]}
+   :parameters [:id]
+   :input-validators [(partial non-blank-parameters [:id])]}
   [{{id :id} :data user :user}]
   (if-let [app (domain/get-application-as id user)]
     (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-organization app))
