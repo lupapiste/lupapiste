@@ -167,7 +167,6 @@ var LUPAPISTE = LUPAPISTE || {};
      $("<div id='session-dead-dialog' class='window autosized-yes-no'>" +
          "<div class='dialog-header'>" +
            "<p class='dialog-title'></p>" +
-           "<p class='dialog-close logout'>X</p>" +
          "</div>" +
          "<div class='dialog-content'>" +
            "<p></p>" +
