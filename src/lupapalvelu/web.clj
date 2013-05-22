@@ -121,8 +121,8 @@
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (get-in action [:data :id] "")
-     :userId        (get-in action [:user :id] "")}
+    {:applicationId (or (get-in action [:data :id]) "")
+     :userId        (or (get-in action [:user :id]) "")}
     (core/execute action)))
 
 (defn- execute-command [name]
@@ -401,7 +401,7 @@
 
   (defjson "/dev/user" []
     (current-user))
-  
+
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
