@@ -41,8 +41,8 @@
     self.map = null;
 
     self.search = ko.observable("");
-    self.x = ko.observable(0.0);
-    self.y = ko.observable(0.0);
+    self.x = ko.observable(10000.1);
+    self.y = ko.observable(6610000.0);
     self.addressData = ko.observable(null);
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
@@ -101,8 +101,8 @@
       }
       return self
         .search("")
-        .x(0)
-        .y(0)
+        .x(10000.1)
+        .y(6610000)
         .addressData(null)
         .addressString("")
         .propertyId(null)
@@ -112,7 +112,7 @@
         .goPhase1();
     };
 
-    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
+    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(10000.1).y(6610000);  };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
@@ -154,13 +154,13 @@
         .searchPointByAddressOrPropertyId(self.search());
       return false;
     };
-    
+
     var zoomLevel = {
         "540": 6,
         "550": 7,
         "560": 9
     };
-    
+
     // Return function that calls every function provided as arguments to 'comp'.
     function comp() {
       var fs = arguments;
@@ -172,7 +172,7 @@
         });
       };
     }
-    
+
     function zoom(item) { self.center(item.location.x, item.location.y, zoomLevel[item.type] || 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
@@ -180,8 +180,8 @@
 
     function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
     function toHandler(value) { return value[1]; }
-    function invoker(item) { return function(handler) { return handler(item); }; } 
-    
+    function invoker(item) { return function(handler) { return handler(item); }; }
+
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
       [{kind: "address"}, comp(zoomer(12), fillAddress)],
@@ -213,13 +213,13 @@
           .append($("<span>").text(util.prop.toHumanFormat(item["property-id"])));
       }]
     ];
-    
+
     self.autocompleteSelect = function(e, data) {
       var item = data.item;
       _(handlers).filter(selector(item)).map(toHandler).each(invoker(item));
       return false;
     }
-    
+
     self.autocompleteRender = function(ul, data) {
       var element = _(renderers).filter(selector(data)).first(1).map(toHandler).map(invoker(data)).value();
       return $("<li>")
