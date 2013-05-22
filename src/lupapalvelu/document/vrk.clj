@@ -275,9 +275,9 @@
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus name safe-int]
              lammitystapa    [:lammitys :lammitystapa]]
    :facts   {:ok ["032 luhtitalot" "ilmakeskus"] :fail ["032 luhtitalot" "eiLammitysta"]}}
-   (and
-     (<= 11 kayttotarkoitus 39)
-     (not (#{"vesikeskus" "ilmakeskus" "suorasahk\u00f6" "uuni"} lammitystapa))))
+  (and
+    (<= 11 kayttotarkoitus 39)
+    (not (#{"vesikeskus" "ilmakeskus" "suorasahk\u00f6" "uuni"} lammitystapa))))
 
 (defvalidator :vrk:CR315
   {:doc     "Omakotitalossa pitaa olla huoneisto"
@@ -286,7 +286,7 @@
              huoneistot      [:huoneistot keys count]]
    :facts   {:ok   ["011 yhden asunnon talot" {}] ;; nop -> has 1 huoneisto
              :fail ["011 yhden asunnon talot" {:6 {:any :any}}]}} ;; add another huoneisto
-   (and (= :011 kayttotarkoitus) (not= 1 huoneistot)))
+  (and (= :011 kayttotarkoitus) (not= 1 huoneistot)))
 
 (defvalidator :vrk:CR316
   {:doc     "Paritalossa pitaa olla kaksi uutta huoneistoa"
@@ -295,4 +295,15 @@
              huoneistot      [:huoneistot keys count]]
    :facts   {:ok   ["012 kahden asunnon talot" {:6 {:any :any}}]
              :fail ["012 kahden asunnon talot" {}]}}
-   (and (= :012 kayttotarkoitus) (not= 2 huoneistot)))
+  (and (= :012 kayttotarkoitus) (not= 2 huoneistot)))
+
+(defvalidator :vrk:CR317
+  {:doc     "Rivi- tai kerrostaloissa tulee olla vahintaan kolme uutta huoneistoa"
+   :schema  "uusiRakennus"
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus name safe-int]
+             huoneistot      [:huoneistot keys count]]
+   :facts   {:ok   ["032 luhtitalot" {:1 {:any :any}
+                                      :2 {:any :any}
+                                      :3 {:any :any}}]
+             :fail ["032 luhtitalot" {}]}}
+  (and (<= 21 kayttotarkoitus 39) (< huoneistot 3)))
