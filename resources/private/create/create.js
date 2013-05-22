@@ -174,8 +174,13 @@
     
     function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
-    function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
-    function fillAddress(item) { $("#create-search").val(item.street + " " + item.number + ", " + loc("municipality", item.municipality)).caretTo(item.street.length + 1); }
+    function fillMunicipality(item) {
+      $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart();
+    }
+    function fillAddress(item) {
+      self.search(item.street + " " + item.number + ", " + loc("municipality", item.municipality));
+      $("#create-search").caretTo(item.street.length + item.number.toString().length + 1);
+    }
 
     function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
     function toHandler(value) { return value[1]; }
@@ -183,12 +188,12 @@
     
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
-      [{kind: "address"}, fillAddress],
+      [{kind: "address"}, comp(fillAddress, self.searchNow)],
       [{kind: "address", type: "street"}, zoomer(10)],
       [{kind: "address", type: "street-city"}, zoomer(10)],
       [{kind: "address", type: "street-number"}, zoomer(11)],
       [{kind: "address", type: "street-number-city"}, zoomer(11)],
-      [{kind: "property-id"}, zoomer(12)]
+      [{kind: "property-id"}, comp(zoomer(12), self.searchNow)]
     ];
 
     var renderers = [
