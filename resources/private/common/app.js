@@ -82,31 +82,49 @@ var LUPAPISTE = LUPAPISTE || {};
   };
 
   self.connectionCheck = function () {
-    /*
-    ajax.get("/api/ping")
-    .success(function() {
-    hub.send("connection-online");
-    setTimeout(self.connectionCheck, 15000);
-    })
-    .fail(function() {
-    hub.send("connection-offline");
-    setTimeout(self.connectionCheck, 5000);
-    })
-    .call();
-    */
+    ajax.get("/system/alive").raw(false)
+      .success(function() {
+        hub.send("connection", {status: "online"});
+        setTimeout(self.connectionCheck, 10000);
+      })
+      .error(function() {
+        hub.send("connection", {status: "session-dead"});
+      })
+      .fail(function() {
+        hub.send("connection", {status: "offline"});
+        setTimeout(self.connectionCheck, 2000);
+      })
+      .call();
   };
 
+  var offline = false;
+  var wasLoggedIn = false;
+  
+  hub.subscribe("login", function() { wasLoggedIn = true; });
+  
+  hub.subscribe({type: "connection", status: "online"}, function () {
+    if (offline) {
+      offline = false;
+      pageutil.hideAjaxWait();
+    }
+  });
+
+  hub.subscribe({type: "connection", status: "offline"}, function () {
+    if (!offline) {
+      offline = true;
+      pageutil.showAjaxWait(loc("connection.offline"));
+    }
+  });
+
+  hub.subscribe({type: "connection", status: "session-dead"}, function () {
+    if (wasLoggedIn) {
+      LUPAPISTE.ModalDialog.mask.unbind("click");
+      LUPAPISTE.ModalDialog.open("#session-dead-dialog");
+    }
+  });
+
   self.initSubscribtions = function() {
-    hub.subscribe("connection-online", function () {
-      $(".connection-error").hide();
-    });
-
-    hub.subscribe("connection-offline", function () {
-      $(".connection-error").show();
-    });
-
     hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
-
     hub.subscribe("logout", function () {
       window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
     });
@@ -138,7 +156,28 @@ var LUPAPISTE = LUPAPISTE || {};
        startPage: self.startPage,
        allowAnonymous: self.allowAnonymous
      };
+     
      $("nav").applyBindings(model);
+     
+     function showApplicationList() {
+       pageutil.hideAjaxWait();
+       window.location.hash = "!/applications";
+     }
+
+     $("<div id='session-dead-dialog' class='window autosized-yes-no'>" +
+         "<div class='dialog-header'>" +
+           "<p class='dialog-title'></p>" +
+         "</div>" +
+         "<div class='dialog-content'>" +
+           "<p></p>" +
+           "<button class='btn btn-primary btn-dialog logout'></button>" +
+         "</div>" +
+       "</div>")
+       .find(".dialog-title").text(loc("session-dead.title")).end()
+       .find(".dialog-content p").text(loc("session-dead.message")).end()
+       .find(".dialog-content button").text(loc("session-dead.logout")).end()
+       .find(".logout").click(function() { hub.send("logout"); return false; }).end()
+       .appendTo($("body"));
    };
 
 };

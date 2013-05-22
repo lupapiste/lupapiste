@@ -1,9 +1,6 @@
 var pageutil = (function() {
   "use strict";
 
-  var ajaxImg;
-  var ajaxLoaderContainer;
-
   /**
    * Returns HTTP GET parameter value or null if the parameter is not set.
    */
@@ -17,34 +14,39 @@ var pageutil = (function() {
     return null;
   }
 
-  function showAjaxWait() {
-    ajaxImg.hide();
-    ajaxLoaderContainer.show();
-    setTimeout(function() {
-      ajaxImg.show();
-    }, 300);
-  }
-
-  function hideAjaxWait() {
-    ajaxLoaderContainer.hide();
-  }
-
   function getPage() {
     var pageMatch = window.location.hash.match(/\/([\-\w]*)/);
     return pageMatch ? pageMatch[1] : null;
   }
 
+  var ajaxLoaderContainer;
+  var ajaxLoaderTask;
+  
+  function showAjaxWaitNow(message) { ajaxLoaderContainer.find("p").html(message || "").end().show(); }
+  
+  function showAjaxWait(message) {
+    if (ajaxLoaderTask) clearTimeout(ajaxLoaderTask);
+    ajaxLoaderTask = _.delay(showAjaxWaitNow, 300, message);
+  }
+
+  function hideAjaxWait() {
+    if (ajaxLoaderTask) clearTimeout(ajaxLoaderTask);
+    ajaxLoaderTask = undefined;
+    ajaxLoaderContainer.hide();
+  }
+
   $(function() {
-    ajaxImg = $('<img src="/img/ajax-loader.gif" class="ajax-loader" width="66" height="66">');
-    ajaxLoaderContainer = $('<div class="ajax-loader-container">').append(ajaxImg);
-    $('body').append(ajaxLoaderContainer);
+    ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
+      .append($("<div>"))
+      .append($("<p>").addClass("message"))
+      .appendTo($("body"));
   });
 
   return {
     getURLParameter:  getURLParameter,
+    getPage:          getPage,
     showAjaxWait:     showAjaxWait,
-    hideAjaxWait:     hideAjaxWait,
-    getPage:          getPage
+    hideAjaxWait:     hideAjaxWait
   };
 
 })();
