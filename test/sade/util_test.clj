@@ -35,6 +35,10 @@
 (fact "safe-int"
   (safe-int "010")  => 10
   (safe-int "-010") => -10
+  (safe-int :-10)   => -10
+  (safe-int -10)    => -10
+  (safe-int -60/6)  => -10
+  (safe-int "1.2")  => 0
   (safe-int "1.2")  => 0
   (safe-int "1.2" nil)  => nil)
 

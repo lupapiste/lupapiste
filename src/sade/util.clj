@@ -56,7 +56,10 @@
   ([x] (safe-int x 0))
   ([x default]
     (try
-      (java.lang.Integer/parseInt (str x))
+      (java.lang.Integer/parseInt (cond
+                                    (keyword? x) (name x)
+                                    (number? x) (str (int x))
+                                    :else (str x)))
       (catch Exception e
         default))))
 
