@@ -89,7 +89,7 @@
     (-> document
       (apply-update [:a :ab] "\u00d6\u00e9\u00c8")) => valid?
     (-> document
-      (apply-update [:a :ab] "\u047e\u0471")) => (invalid-with? [:err "illegal-value:not-latin1-string"])))
+      (apply-update [:a :ab] "\u047e\u0471")) => (invalid-with? [:warn "illegal-value:not-latin1-string"])))
 
 (facts "Select"
   (let [document (new-document schema ..now..)]

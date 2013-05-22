@@ -2,6 +2,7 @@ error.illegal-value:not-a-map: Väärä tietorakenne (Map)
 error.illegal-value:not-a-string: Syötte ei ole merkkijono
 error.illegal-value:too-long: Liian pitkä arvo
 error.illegal-value:too-short: Liian lyhyt arvo
+error.illegal-value:not-latin1-string: Arvo sisältää laittomia merkkejä
 error.illegal-value:not-a-boolean: Arvo ei ole totuusarvo (true/false)
 error.illegal-value:date: Päivämäärä annetaan muodossa dd.MM.YYYY (esim. 16.05.2013)
 error.illegal-value:select: Arvo ei ole sallitusta arvojoukosta
