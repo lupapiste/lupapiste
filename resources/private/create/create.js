@@ -175,7 +175,8 @@
     function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
-      $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart();
+      self.search(", " + loc("municipality", item.municipality));
+      $("#create-search").caretToStart();
     }
     function fillAddress(item) {
       self.search(item.street + " " + item.number + ", " + loc("municipality", item.municipality));
