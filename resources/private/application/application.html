@@ -506,7 +506,7 @@
                           visible: $parent.status() < $parent.statusRunning,
                           enable: $parent.status() === $parent.statusReady" />
                       <span data-bind="
-                          text: status,
+                          text: loc('stamp.file.status', status()),
                           visible: $parent.status() >= $parent.statusRunning"></span>
                     </td>
                   </tr>

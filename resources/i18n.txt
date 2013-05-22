@@ -23,3 +23,7 @@ stamp.status: Tila
 stamp.start: Aloita
 stamp.cancel: Peruuta
 stamp.ok: Ok
+
+stamp.file.status.pending: Odottaa
+stamp.file.status.running: Leimaa
+stamp.file.status.done: Valmis

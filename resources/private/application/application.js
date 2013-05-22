@@ -50,8 +50,8 @@
         filename:     l.filename(),
         version:      { major: l.version.major(), minor: l.version.minor() },
         size:         l.size(),
-        selected:     ko.observable(false),
-        status:       ko.observable(null)
+        selected:     ko.observable(true),
+        status:       ko.observable("pending")
       };
     }
     
