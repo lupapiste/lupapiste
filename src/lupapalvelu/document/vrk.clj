@@ -326,6 +326,10 @@
              :fail ["032 luhtitalot" "1"]}}
   (and (<= 32 kayttotarkoitus 39) (< kerrosluku 2)))
 
+;; Tommi's stuff here
+
+;; Juha's stuff here
+
 (comment
   (require '[lupapalvelu.document.vrk-test :refer [check-validator]])
   (check-validator (@validators :vrk:CR319))
