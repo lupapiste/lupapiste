@@ -30,18 +30,18 @@
 (def validate-y #'lupapalvelu.application/validate-y)
 
 (facts "coordinate validation"
-  (validate-x {:x nil} nil) => nil
-  (validate-y {:y nil} nil) => nil
-  (validate-x {:x ""} nil) => {:ok false :text "error.illegal-coordinates"}
-  (validate-x {:x "0"} nil) => {:ok false :text "error.illegal-coordinates"}
-  (validate-x {:x "409999"} nil) => {:ok false :text "error.illegal-coordinates"}
-  (validate-x {:x "410000"} nil) => nil
-  (validate-y {:y ""} nil) => {:ok false :text "error.illegal-coordinates"}
-  (validate-y {:y "0"} nil) => {:ok false :text "error.illegal-coordinates"}
-  (validate-y {:y "6609999"} nil) => {:ok false :text "error.illegal-coordinates"}
-  (validate-y {:y "6610000"} nil) => nil
-  (validate-y {:y "7780000"} nil) => {:ok false :text "error.illegal-coordinates"}
-  (validate-y {:y "7779999"} nil) => nil)
+  (validate-x {:data {:x nil}}) => nil
+  (validate-y {:data {:y nil}}) => nil
+  (validate-x {:data {:x ""}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-x {:data {:x "0"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-x {:data {:x "409999"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-x {:data {:x "410000"}}) => nil
+  (validate-y {:data {:y ""}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "0"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "6609999"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "6610000"}}) => nil
+  (validate-y {:data {:y "7780000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "7779999"}}) => nil)
 
 (def make-documents #'lupapalvelu.application/make-documents)
 

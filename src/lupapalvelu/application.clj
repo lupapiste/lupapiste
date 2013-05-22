@@ -75,11 +75,11 @@
   (when-not (domain/owner-or-writer? application (-> command :user :id))
     (fail :error.unauthorized)))
 
-(defn- validate-x [{:keys [x]} _]
+(defn- validate-x [{{:keys [x]} :data}]
   (when (and x (< (->double x) 410000))
     (fail :error.illegal-coordinates)))
 
-(defn- validate-y [{:keys [y]} _]
+(defn- validate-y [{{:keys [y]} :data}]
   (when (and y (not (<= 6610000 (->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
