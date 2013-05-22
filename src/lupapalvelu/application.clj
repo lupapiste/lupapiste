@@ -31,6 +31,10 @@
 ;; Common helpers:
 ;;
 
+(defn- ->double [v]
+  (let [v (str v)]
+    (if (blank? v) 0.0 (Double/parseDouble v))))
+
 (defn get-applicant-name [app]
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
@@ -54,6 +58,8 @@
         {:_id id}
         changes))))
 
+;; Validators
+
 (defn- property-id? [^String s]
   (and s (re-matches #"^[0-9]{14}$" s)))
 
@@ -68,6 +74,16 @@
   [command application]
   (when-not (domain/owner-or-writer? application (-> command :user :id))
     (fail :error.unauthorized)))
+
+(defn- validate-x [{data :data} _]
+  (when-let [x (:x data)]
+    (when (< (->double x) 410000)
+        (fail :error.illegal-coordinates))))
+
+(defn- validate-y [{data :data} _]
+  (when-let [y (:y data)]
+    (when (not (<= 6610000 (->double y) 7779999))
+        (fail :error.illegal-coordinates))))
 
 ;; Meta-fields:
 ;;
@@ -404,10 +420,6 @@
     (if user
       (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
-
-(defn- ->double [v]
-  (let [v (str v)]
-    (if (blank? v) 0.0 (Double/parseDouble v))))
 
 (defn- ->location [x y]
   {:x (->double x) :y (->double y)})
