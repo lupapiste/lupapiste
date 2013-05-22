@@ -170,8 +170,8 @@ var LUPAPISTE = LUPAPISTE || {};
            "<p class='dialog-close logout'>X</p>" +
          "</div>" +
          "<div class='dialog-content'>" +
-           "<p>MESSAGE</p>" +
-           "<button class='btn btn-primary btn-dialog logout'>LOGOUT</button>" +
+           "<p></p>" +
+           "<button class='btn btn-primary btn-dialog logout'></button>" +
          "</div>" +
        "</div>")
        .find(".dialog-title").text(loc("session-dead.title")).end()
