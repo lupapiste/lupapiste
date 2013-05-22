@@ -463,11 +463,6 @@
         stamped      (:stamped latest)]
     (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
 
-(defn- ->file-info [attachment]
-  (assoc (select-keys (-> attachment :versions last) [:contentType :fileId :filename :size])
-         :id (:id attachment)
-         :status :waiting))
-
 (defn- stamp-job-status [stamp-job]
   (if (every? #{:done :error} (map :status (vals stamp-job))) :done :runnig))
 
@@ -539,19 +534,26 @@
 (defn ->long [v]
   (if (string? v) (Long/parseLong v) v))
 
+(defn- ->file-info [attachment]
+  (assoc (select-keys (-> attachment :versions last) [:contentType :fileId :filename :size])
+         :id (:id attachment)
+         :status :waiting))
+
 (defcommand "stamp-attachments"
-  {:parameters [:id :xMargin :yMargin]
+  {:parameters [:id :files :xMargin :yMargin]
    :roles      [:authority]
    :states     [:verdictGiven]
    :description "Stamps all attachments of given application"}
-  [{{x-margin :xMargin y-margin :yMargin} :data :as command}]
+  [{{files :files x-margin :xMargin y-margin :yMargin} :data :as command}]
   (with-application command
     (fn [application]
-      (let [file-infos (key-by :id (map ->file-info (filter stampable? (:attachments application))))
-            file-count (count file-infos)]
-        (ok :count file-count
-            :job (when-not (zero? file-count)
-                   (make-stamp-job file-infos (:id application) (:user command) (:created command) (->long x-margin) (->long y-margin))))))))
+      (println "files:" files)
+      (let [file-infos (key-by :id (map ->file-info (filter (comp (set files) :id) (:attachments application))))]
+        (println "file-infos:")
+        (doseq [i file-infos]
+          (println "   >" i))
+        (ok :job 123)
+        #_(ok :job (make-stamp-job file-infos (:id application) (:user command) (:created command) (->long x-margin) (->long y-margin)))))))
 
 (defquery "stamp-attachments-job"
   {:parameters [:job-id :version]

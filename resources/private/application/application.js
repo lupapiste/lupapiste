@@ -28,9 +28,8 @@
     self.applicationId = null;
     self.files = ko.observable(null);
     self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
-    
-    self.jobId = null;
-    self.jobVersion = null;
+    self.jobId = ko.observable();
+    self.jobVersion = ko.observable();
 
     self.xMargin = ko.observable("");
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
@@ -45,6 +44,7 @@
     function normalizeAttachment(a) {
       var l = a.latestVersion;
       return {
+        id:           a.id(),
         type:         { "type-group": a.type["type-group"](), "type-id": a.type["type-id"]() },
         contentType:  l.contentType(),
         filename:     l.filename(),
@@ -57,14 +57,11 @@
     
     self.init = function(application) {
       self.application = application;
-      self.applicationId = application.id();
-      self.jobId = null;
-      
-      var f = _(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value();
+      self.jobId(null).jobVersion(null);
       
       self
-        .files(f)
-        .status(f.length > 0 ? self.statusReady : self.statusNoFiles)
+        .files(_(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value())
+        .status(self.files().length > 0 ? self.statusReady : self.statusNoFiles)
         .xMargin("10")
         .yMargin("85");
       
@@ -75,31 +72,30 @@
     self.start = function() {
       self.status(self.statusStarting);
       ajax
-        .command("stamp-attachments", {id: self.application.id(), xMargin: _.parseInt(self.xMargin(), 10), yMargin: _.parseInt(self.yMargin(), 10)})
+        .command("stamp-attachments", {
+          id: self.application.id(),
+          files: _.map(self.selectedFiles(), "id"),
+          xMargin: _.parseInt(self.xMargin(), 10),
+          yMargin: _.parseInt(self.yMargin(), 10)})
         .success(self.started)
         .call();
       return false;
     };
 
     self.started = function(data) {
-      if (data.count === 0) {
-        self.status(self.statusNoFiles);
-      } else {
-        self.status(self.statusRunning);
-        self.jobId = data.job.id;
-        self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
-        self.filesTable(_.values(self.files));
-        self.jobVersion = 0;
-        self.queryUpdate();
-      }
+      self
+        .status(self.statusRunning)
+        .jobId(data.job.id)
+        .jobVersion(0)
+        .queryUpdate();
       return false;
     };
 
     self.queryUpdate = function() {
       ajax
         .query("stamp-attachments-job")
-        .param("job-id", self.jobId)
-        .param("version", self.jobVersion)
+        .param("job-id", self.jobId())
+        .param("version", self.jobVersion())
         .success(self.update)
         .call();
       return self;
