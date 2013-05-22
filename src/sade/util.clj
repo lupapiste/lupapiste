@@ -50,10 +50,10 @@
       (checker coll)
       false)))
 
-(defn safe-int
+(defn ->int
   "Reads a integer from input. Returns default if not a integer.
    Default default is 0"
-  ([x] (safe-int x 0))
+  ([x] (->int x 0))
   ([x default]
     (try
       (java.lang.Integer/parseInt (cond

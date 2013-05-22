@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.vrk
   (:use [lupapalvelu.clojure15]
         [lupapalvelu.document.validator])
-  (:require [sade.util :refer [safe-int fn->]]
+  (:require [sade.util :refer [->int fn->]]
             [clojure.string :as s]))
 
 ;;
@@ -109,7 +109,7 @@
   [{{{schema-name :name} :info} :schema data :data}]
   (when (= schema-name "uusiRakennus")
     (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value ->kayttotarkoitus)
-          tilavuus        (some->> data :mitat :tilavuus :value safe-int)
+          tilavuus        (some->> data :mitat :tilavuus :value ->int)
           max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
       (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
         [{:path[:kaytto :kayttotarkoitus]
@@ -124,7 +124,7 @@
     (and
       (= schema-name "uusiRakennus")
       (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (some-> data :mitat :kerrosluku :value safe-int (> 4)))
+      (some-> data :mitat :kerrosluku :value ->int (> 4)))
     [{:path[:rakenne :kantavaRakennusaine]
       :result [:warn "vrk:BR106"]}
      {:path[:mitat :kerrosluku]
@@ -203,8 +203,8 @@
 (defvalidator :vrk:CR326
   {:doc    "Kokonaisalan oltava vahintaan kerrosala"
    :schema "uusiRakennus"
-   :fields [kokonaisala [:mitat :kokonaisala safe-int]
-            kerrosala   [:mitat :kerrosala safe-int]]}
+   :fields [kokonaisala [:mitat :kokonaisala ->int]
+            kerrosala   [:mitat :kerrosala ->int]]}
   (and kokonaisala kerrosala (> kerrosala kokonaisala)))
 
 (defvalidator :vrk:CR324
@@ -217,16 +217,16 @@
 (defvalidator :vrk:CR322
   {:doc    "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
    :schema "uusiRakennus"
-   :fields [kokonaisala [:mitat :kokonaisala safe-int]
+   :fields [kokonaisala [:mitat :kokonaisala ->int]
             huoneistot  [:huoneistot]]}
-  (let [huoneistoala (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala safe-int) huoneistot))]
+  (let [huoneistoala (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot))]
     (and kokonaisala huoneistoala (< kokonaisala huoneistoala))))
 
 (defvalidator :vrk:CR320
   {:doc    "Jos kayttotarkoitus on 011 - 022, on kerrosluvun oltava valilla 1 - 4"
    :schema "uusiRakennus"
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
-            kerrosluku      [:mitat :kerrosluku safe-int]]}
+            kerrosluku      [:mitat :kerrosluku ->int]]}
   (and (#{:011 :012 :013 :021 :022} kayttotarkoitus) (> kerrosluku 4)))
 
 (defvalidator :vrk:CR328:sahko
@@ -257,7 +257,7 @@
   {:doc     "Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1"
    :schema  "uusiRakennus"
    :fields  [toimenpide [:kaytto :kayttotarkoitus ->kayttotarkoitus]
-             kerrosluku [:mitat :kerrosluku safe-int]]
+             kerrosluku [:mitat :kerrosluku ->int]]
    :facts   {:ok   ["111 myym\u00e4l\u00e4hallit" "1"]
              :fail ["111 myym\u00e4l\u00e4hallit" "2"]}}
   (and (#{:691 :111} toimenpide) (not= kerrosluku 1)))
@@ -265,16 +265,16 @@
 (defvalidator :vrk:CR313
   {:doc     "Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala"
    :schema  "uusiRakennus"
-   :fields  [tilavuus        [:mitat :tilavuus safe-int]
-             kerrosala       [:mitat :kerrosala safe-int]
-             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus safe-int]]
+   :fields  [tilavuus        [:mitat :tilavuus ->int]
+             kerrosala       [:mitat :kerrosala ->int]
+             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
    :facts   {:ok ["6" "4"] :fail ["5" "4"]}}
   (and tilavuus (< tilavuus (* 1.5 kerrosala))))
 
 (defvalidator :vrk:CR314
   {:doc     "Asuinrakennukssa pitaa olla lammitys"
    :schema  "uusiRakennus"
-   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus safe-int]
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              lammitystapa    [:lammitys :lammitystapa]]
    :facts   {:ok ["032 luhtitalot" "ilmakeskus"] :fail ["032 luhtitalot" "eiLammitysta"]}}
   (and
@@ -302,7 +302,7 @@
 (defvalidator :vrk:CR317
   {:doc     "Rivi- tai kerrostaloissa tulee olla vahintaan kolme uutta huoneistoa"
    :schema  "uusiRakennus"
-   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus safe-int]
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              huoneistot      [:huoneistot keys count]]
    :facts   {:ok   ["032 luhtitalot" {:1 {:any :any}
                                       :2 {:any :any}
@@ -313,8 +313,8 @@
 (defvalidator :vrk:CR319
   {:doc     "Jos rakentamistoimenpide on 1 ja kayttotarkoitus on 032 – 039, on kerrosluvun oltava vahintaan 2"
    :schema  "uusiRakennus"
-   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus safe-int]
-             kerrosluku      [:mitat :kerrosluku safe-int]]
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
+             kerrosluku      [:mitat :kerrosluku ->int]]
    :facts   {:ok   ["032 luhtitalot" "2"]
              :fail ["032 luhtitalot" "1"]}}
   (and (<= 32 kayttotarkoitus 39) (< kerrosluku 2)))

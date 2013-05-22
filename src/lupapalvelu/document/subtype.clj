@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.subtype
   (:use [clojure.string :only [blank?]]
         [clojure.tools.logging])
-  (:require [sade.util :refer [safe-int]]
+  (:require [sade.util :refer [->int]]
             [clj-time.format :as tf]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -20,9 +20,9 @@
 
 (defmethod subtype-validation :number [{:keys [min max]} v]
   (when-not (blank? v)
-    (let [min-int  (safe-int min (java.lang.Integer/MIN_VALUE))
-          max-int  (safe-int max (java.lang.Integer/MAX_VALUE))
-          number   (safe-int v nil)]
+    (let [min-int  (->int min (java.lang.Integer/MIN_VALUE))
+          max-int  (->int max (java.lang.Integer/MAX_VALUE))
+          number   (->int v nil)]
       (when-not (and number (<= min-int number max-int))
         [:warn "illegal-number"]))))
 

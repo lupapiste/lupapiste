@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.validator-test
   (:use [lupapalvelu.document.validator]
         [midje.sweet])
-  (:require [sade.util :refer [safe-int]]))
+  (:require [sade.util :refer [->int]]))
 
 (defvalidator :too-much-health
   {:doc    "health validator"
