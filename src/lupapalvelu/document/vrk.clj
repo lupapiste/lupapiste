@@ -318,7 +318,7 @@
   (and (<= 13 kayttotarkoitus 39) (< huoneistot 3)))
 
 (defvalidator :vrk:CR319
-  {:doc     "Jos rakentamistoimenpide on 1 ja kayttotarkoitus on 032 – 039, on kerrosluvun oltava vahintaan 2"
+  {:doc     "Jos rakentamistoimenpide on 1 ja kayttotarkoitus on 032 - 039, on kerrosluvun oltava vahintaan 2"
    :schema  "uusiRakennus"
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              kerrosluku      [:mitat :kerrosluku ->int]]
