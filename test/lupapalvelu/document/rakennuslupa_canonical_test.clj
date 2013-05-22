@@ -98,7 +98,7 @@
                                      :henkilo henkilo
                                      :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
           :kaytto {:rakentajaTyyppi {:value "muu"}
-                   :kayttotarkoitus {:value "011 yhden asunnon talot"}}
+                   :kayttotarkoitus {:value "012 kahden asunnon talot"}}
           :mitat {:tilavuus {:value "1000"}
                   :kokonaisala {:value "1000"}
                   :kellarinpinta-ala {:value "100"}
@@ -528,7 +528,7 @@
     (fact "Rakennus" rakennus => truthy)
     (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
     (fact "rakennuksentiedot" rakennuksentiedot => truthy)
-    (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "011 yhden asunnon talot")
+    (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "012 kahden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
     (fact "rakennuksen omistaja laji" (:omistajalaji (:omistajalaji rakennuksen-omistajatieto)) => "muu yksityinen henkil\u00f6 tai perikunta")
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
