@@ -464,8 +464,9 @@
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
-   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-                      (partial property-id-parameters [:propertyId])]
+   :input-validators [(partial non-blank-parameters [:operation :x :y :address :municipality])
+                      (partial property-id-parameters [:propertyId])
+                      validate-x validate-y]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
@@ -527,8 +528,9 @@
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
-   :input-validators [(partial non-blank-parameters [:address])
-                      (partial property-id-parameters [:propertyId])]}
+   :input-validators [(partial non-blank-parameters [:address :x :y])
+                      (partial property-id-parameters [:propertyId])
+                      validate-x validate-y]}
   [{{:keys [id x y address propertyId]} :data created :created application :application}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
