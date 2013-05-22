@@ -77,7 +77,7 @@
     (fail :error.unauthorized)))
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (< (->double x) 410000))
+  (when (and x (< 10000 (->double x) 800000))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
