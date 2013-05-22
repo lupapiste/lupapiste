@@ -9,7 +9,8 @@
 (defn plus [x y] (swap! value-call-count inc) (+ x y))
 
 (facts "about factlet"
-  (reset! call-count 0)
+  (reset! fact-call-count 0)
+  (reset! value-call-count 0)
   (factlet
     [a (plus 1 1) => (result 2)
      b (plus a 1) => (result 3)]
