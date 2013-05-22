@@ -37,3 +37,8 @@ error.vrk:CR316: Paritalossa pitää olla kaksi uutta huoneistoa
 error.vrk:CR317: Rivi- tai kerrostaloissa tulee olla vähintään kolme uutta huoneistoa
 error.vrk:CR320: Jos käyttötarkoitus on 011 – 022, on kerrosluvun oltava välillä 1 – 4
 error.vrk:CR320: Jos rakentamistoimenpide on 1 ja käyttötarkoitus on 032 – 039, on kerrosluvun oltava vähintään 2
+session-dead.title: Istunto vanhentunut
+session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
+session-dead.logout: Kirjaudu
+connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
+attachmentType.empty._group_label:
