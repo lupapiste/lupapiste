@@ -34,8 +34,10 @@
   (validate-y {:data {:y nil}}) => nil
   (validate-x {:data {:x ""}}) => {:ok false :text "error.illegal-coordinates"}
   (validate-x {:data {:x "0"}}) => {:ok false :text "error.illegal-coordinates"}
-  (validate-x {:data {:x "409999"}}) => {:ok false :text "error.illegal-coordinates"}
-  (validate-x {:data {:x "410000"}}) => nil
+  (validate-x {:data {:x "1000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-x {:data {:x "10001"}}) => nil
+  (validate-x {:data {:x "799999"}}) => nil
+  (validate-x {:data {:x "800000"}}) => {:ok false :text "error.illegal-coordinates"}
   (validate-y {:data {:y ""}}) => {:ok false :text "error.illegal-coordinates"}
   (validate-y {:data {:y "0"}}) => {:ok false :text "error.illegal-coordinates"}
   (validate-y {:data {:y "6609999"}}) => {:ok false :text "error.illegal-coordinates"}

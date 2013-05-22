@@ -77,7 +77,7 @@
     (fail :error.unauthorized)))
 
 (defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (< 10000 (->double x) 800000))
+  (when (and x (not (< 10000 (->double x) 800000)))
     (fail :error.illegal-coordinates)))
 
 (defn- validate-y [{{:keys [y]} :data}]
@@ -466,7 +466,7 @@
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
-   :input-validators [(partial non-blank-parameters [:operation :x :y :address :municipality])
+   :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]
    :verified   true}
@@ -530,7 +530,7 @@
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
-   :input-validators [(partial non-blank-parameters [:address :x :y])
+   :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
   [{{:keys [id x y address propertyId]} :data created :created application :application}]
