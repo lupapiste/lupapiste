@@ -7,28 +7,32 @@
         [sade.util])
   (:require [lupapalvelu.document.validator :as v]))
 
-;; TODO: aja yksi kerrallaan
+(defn check-validator
+  "Runs generated facts of a single validator."
+  [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts}]
+  (when (and ok fail)
+    (let [dummy    (dummy-doc schema)
+          update   (fn [values]
+                     (reduce
+                       (fn [d i]
+                         (apply-update d (get paths i) (get values i)))
+                       dummy (range 0 (count paths))))
+          ok-doc   (update ok)
+          fail-doc (update fail)]
 
-(defn validator-facts []
+      (facts "Embedded validator facts"
+        (println "Checking:" doc)
+        (validate-fn ok-doc) => nil?
+        (validate-fn fail-doc) => (has some (contains {:result [:warn (name code)]}))))))
+
+(defn check-all-validators []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
     (println "Testing" (str (count validators) "/" (count @v/validators)) "awesome validators!")
-    (doseq [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts} validators]
-      (let [dummy    (dummy-doc schema)
-            update   (fn [values]
-                       (reduce
-                         (fn [d i]
-                           (apply-update d (get paths i) (get values i)))
-                         dummy (range 0 (count paths))))
-            ok-doc   (update ok)
-            fail-doc (update fail)]
-
-        (facts "Embedded validator facts"
-          (println doc)
-          (validate-fn ok-doc) => nil?
-          (validate-fn fail-doc) => (has some (contains {:result [:warn (name code)]})))))))
+    (doseq [validator validators]
+      (check-validator validator))))
 
 (facts "Embedded validator facts"
-  (validator-facts))
+  (check-all-validators))
 
 ;; TODO: validate just one validator at a time to reduce hassle from side-effects
 

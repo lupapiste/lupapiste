@@ -307,3 +307,17 @@
                                       :3 {:any :any}}]
              :fail ["032 luhtitalot" {}]}}
   (and (<= 21 kayttotarkoitus 39) (< huoneistot 3)))
+
+(defvalidator :vrk:CR319
+  {:doc     "Jos rakentamistoimenpide on 1 ja kayttotarkoitus on 032 – 039, on kerrosluvun oltava vahintaan 2"
+   :schema  "uusiRakennus"
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus name safe-int]
+             kerrosluku      [:mitat :kerrosluku safe-int]]
+   :facts   {:ok   ["032 luhtitalot" "2"]
+             :fail ["032 luhtitalot" "1"]}}
+  (and (<= 32 kayttotarkoitus 39) (< kerrosluku 2)))
+
+(comment
+  (require '[lupapalvelu.document.vrk-test :refer [check-validator]])
+  (check-validator (@validators :vrk:CR319))
+  )
