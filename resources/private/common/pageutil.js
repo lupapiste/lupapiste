@@ -38,7 +38,7 @@ var pageutil = (function() {
   $(function() {
     ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
       .append($("<div>"))
-      .append($("<p>").addClass("message"))
+      .append($("<p>"))
       .appendTo($("body"));
   });
 
