@@ -287,3 +287,12 @@
    :facts   {:ok   ["011 yhden asunnon talot" {}] ;; nop -> has 1 huoneisto
              :fail ["011 yhden asunnon talot" {:6 {:any :any}}]}} ;; add another huoneisto
    (and (= :011 kayttotarkoitus) (not= 1 huoneistot)))
+
+(defvalidator :vrk:CR316
+  {:doc     "Paritalossa pitaa olla kaksi uutta huoneistoa"
+   :schema  "uusiRakennus"
+   :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
+             huoneistot      [:huoneistot keys count]]
+   :facts   {:ok   ["012 kahden asunnon talot" {:6 {:any :any}}]
+             :fail ["012 kahden asunnon talot" {}]}}
+   (and (= :012 kayttotarkoitus) (not= 2 huoneistot)))
