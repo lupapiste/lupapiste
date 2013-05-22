@@ -318,10 +318,15 @@
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
       onSelect: function(v) {
-        model.operation(v ? v.op : null);
-        ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
-          model.organization(d);
-        }).call();
+        if (v) {
+          model.operation(v.op);
+          ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+            model.organization(d);
+          }).call();
+        } else {
+          model.operation(null);
+          model.organization(null);
+        }
       },
       baseModel: model
     });
