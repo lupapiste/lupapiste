@@ -522,7 +522,7 @@
               <button data-bind="
                   click: start,
                   ltext: 'stamp.start',
-                  enable: status() === statusReady && xMarginOk() && yMarginOk() && filesSelected() > 0,
+                  enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
                   visible: status() <= statusReady"
                 class="btn btn-primary btn-dialog">
               </button>

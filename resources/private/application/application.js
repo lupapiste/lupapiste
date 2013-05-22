@@ -27,9 +27,7 @@
     self.application = null;
     self.applicationId = null;
     self.files = ko.observable(null);
-    self.filesSelected = ko.computed(function() {
-      return _.filter(self.files(), function(f) { return f.selected(); }).length;
-    });
+    self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
     
     self.jobId = null;
     self.jobVersion = null;
