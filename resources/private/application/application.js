@@ -17,9 +17,9 @@
 
     self.statusInit      = 0;
     self.statusStarting  = 1;
-    self.statusNoFiles   = 2;
-    self.statusRunning   = 3;
-    self.statusDone      = 4;
+    self.statusRunning   = 2;
+    self.statusDone      = 3;
+    self.statusNoFiles   = 4;
 
     self.applicationId = null;
     self.jobId = null;
