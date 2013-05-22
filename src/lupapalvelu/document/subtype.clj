@@ -78,6 +78,12 @@
     (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d+|\d\d-|[01]\dA)\d{3}[\dA-Z]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
     :else [:warn "illegal-hetu"]))
 
+(defmethod subtype-validation :vrk-name [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^([\p{L}\-/ \.\*]+)$" v) nil
+    :else [:warn "illegal-name"]))
+
 (defmethod subtype-validation nil [_ _]
   nil)
 

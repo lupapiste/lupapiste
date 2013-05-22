@@ -65,13 +65,13 @@
 
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
-                             :body [{:name "etunimi" :type :string}
-                                    {:name "sukunimi" :type :string}]}])
+                             :body [{:name "etunimi" :type :string :subtype :vrk-name}
+                                    {:name "sukunimi" :type :string :subtype :vrk-name}]}])
 
 (def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
-                               :body [{:name "etunimi" :type :string}
-                                      {:name "sukunimi" :type :string}
+                               :body [{:name "etunimi" :type :string :subtype :vrk-name}
+                                      {:name "sukunimi" :type :string :subtype :vrk-name}
                                       {:name "hetu" :type :string :subtype :hetu :max-len 11}]})
 
 (def henkilo (body

@@ -18,6 +18,7 @@ error.illegal-kiinteistotunnus: Kiinteistötunnus on 14 numeroa pitkä.
 error.illegal-zip: Eriskummallinen postinumero
 error.illegal-subtype: Tuntematon tietotyyppi
 error.illegal-hetu: Tarkasta henkilötunnuksen muoto
+error.illegal-name: Sallitut arvot: kirjainmerkit, väliviiva, kauttaviiva, blanko, piste ja *
 
 error.vrk:CR341: Sähkölämmitys vaatii sähköliittymän
 error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän

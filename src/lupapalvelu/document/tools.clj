@@ -26,6 +26,7 @@
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"
                         :hetu             "210281-9988"
+                        :vrk-name         "Ilkka"
                         nil               "string"
                         :letter           (condp = (keyword case)
                                             :lower "a"

@@ -57,3 +57,14 @@
   (subtype-validation {:subtype :hetu} "210281_9988") => [:warn "illegal-hetu"]
   (subtype-validation {:subtype :hetu} "210281-9987") => [:warn "illegal-hetu"]
   (subtype-validation {:subtype :hetu} "300281-998V") => [:warn "illegal-hetu"])
+
+(facts "VRK compliant name validation"
+  (subtype-validation {:subtype :vrk-name} "") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha-Matti Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha/Matti Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha *Matti* Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Pertti \"Veltto\" Virtanen") => [:warn "illegal-name"]
+  (subtype-validation {:subtype :vrk-name} "Carl the 16th Gustav") => [:warn "illegal-name"]
+  (subtype-validation {:subtype :vrk-name} "Carl XVI Gustav") => nil?
+  )
