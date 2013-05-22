@@ -93,7 +93,7 @@
     };
 
     self.queryUpdate = function() {
-      console.log("queryUpdate:", data);
+      console.log("queryUpdate:", self.jobId(), self.jobVersion());
       ajax
         .query("stamp-attachments-job")
         .param("job-id", self.jobId())
@@ -105,12 +105,13 @@
 
     self.update = function(data) {
       console.log("update:", data);
-      if (data.result === "timeout") { return self.queryUpdate(); }
+      if (data.result === "timeout") return self.queryUpdate();
       var job = data.job;
-      self.jobVersion = job.version;
-      _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
+      self.jobVersion(job.version);
+      _.each(self.files(), function(f) { f.status(job.value[f.id]); });
+      //_.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
       if (job.status === "done") {
-        repository.load(self.applicationId);
+        repository.load(self.application.id());
         self.status(self.statusDone);
       } else {
         self.queryUpdate();
