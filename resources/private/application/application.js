@@ -83,6 +83,7 @@
     };
 
     self.started = function(data) {
+      console.log("started:", data);
       self
         .status(self.statusRunning)
         .jobId(data.job.id)
@@ -92,6 +93,7 @@
     };
 
     self.queryUpdate = function() {
+      console.log("queryUpdate:", data);
       ajax
         .query("stamp-attachments-job")
         .param("job-id", self.jobId())
@@ -102,6 +104,7 @@
     };
 
     self.update = function(data) {
+      console.log("update:", data);
       if (data.result === "timeout") { return self.queryUpdate(); }
       var job = data.job;
       self.jobVersion = job.version;
@@ -113,6 +116,10 @@
         self.queryUpdate();
       }
     };
+
+    function selectAllFiles(value) { _.each(self.files(), function(f) { f.selected(value); }); }
+    self.selectAll = _.partial(selectAllFiles, true);
+    self.selectNone = _.partial(selectAllFiles, false);
 
   }();
 
