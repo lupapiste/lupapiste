@@ -14,3 +14,8 @@ stamp.status.2: Leimaus käynnissä...
 stamp.status.3: Leimaus valmis
 stamp.status.4: Ei leimaus kelpoisia liitteitä
 
+stamp.filename: Tiedosto
+stamp.version: Versio
+stamp.size: Koko
+stamp.status: Tila
+

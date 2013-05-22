@@ -439,13 +439,15 @@
 
       <div id="dialog-stamp-attachments" class="window autosized">
         <div data-bind="with: $root.stampModel">
+
           <div class="dialog-header">
             <p data-bind="ltext: 'stamp.title'"></p>
             <p class="dialog-close close">X</p>
           </div>
+
           <div class="dialog-content">
+          
             <div class="stamp-margin">
-              <div data-bind="text: loc('stamp.status', status())"></div>
               <table>
                 <tbody>
                   <tr> <td data-bind="ltext: 'stamp.margin'" colspan="3"></td> </tr>
@@ -462,15 +464,13 @@
                 </tbody>
               </table>
             </div>
-            <div data-bind="visible: status() >= statusRunning">
-              <div>
-                <span data-bind="ltext: 'stamp.status.running', visible: status() === statusRunning"></span>
-                <span data-bind="ltext: 'stamp.status.done', visible: status() === statusDone"></span>
-              </div>
+            
+            <div class="stamp-files">
               <table>
                 <thead>
                   <tr>
                     <td data-bind="ltext: 'stamp.filename'"></td>
+                    <td data-bind="ltext: 'stamp.version'"></td>
                     <td data-bind="ltext: 'stamp.size'"></td>
                     <td data-bind="ltext: 'stamp.status'"></td>
                   </tr>
@@ -478,17 +478,24 @@
                 <tbody data-bind="foreach: filesTable">
                   <tr>
                     <td data-bind="text: filename"></td>
+                    <td data-bind="version: version"></td>
                     <td data-bind="size: size"></td>
                     <td data-bind="text: status"></td>
                   </tr>
                 </tbody>
               </table>
-              
+            </div>
+            
+            <div class="stamp-status">
+              <span data-bind="text: loc('stamp.status', status().toString())"></span>
+            </div>
+            
+            <div class="stamp-buttons">
               <button data-bind="click: start, ltext: 'stamp.start', enable: xMarginOk() && yMarginOk() && status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
               <button data-bind="ltext: 'stamp.cancel', enable: status() === statusInit" class="btn btn-dialog close"></button>
               <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
-              
             </div>
+            
           </div>
         </div>
       </div>

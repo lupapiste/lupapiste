@@ -21,6 +21,8 @@
     self.statusDone      = 3;
     self.statusNoFiles   = 4;
 
+    self.status = ko.observable(self.statusInit);
+
     self.applicationId = null;
     self.jobId = null;
     self.version = null;
@@ -32,7 +34,6 @@
     self.yMargin = ko.observable("");
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
 
-    self.status = ko.observable();
     self.filesTable = ko.observable();
 
     self.init = function(applicationId) {
