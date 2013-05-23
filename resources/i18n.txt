@@ -1,1 +1,5 @@
-error.application-not-accessible:Hakemusta ei löydy tai siihen ei ole käyttöoikeutta. Avaa omat hakemukset tai kirjaudu sisään uudelleen.
+session-dead.title: Istunto vanhentunut
+session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
+session-dead.logout: Kirjaudu
+connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
+attachmentType.empty._group_label:

@@ -19,9 +19,9 @@
                  [commons-io/commons-io "2.4"]
                  [com.lowagie/itext "2.1.7"]
                  [org.clojure/data.zip "0.1.1"]
-                 [com.draines/postal "1.9.2"]
+                 [com.draines/postal "1.10.3"]
                  [org.clojure/data.xml "0.0.7"]
-                 [swiss-arrows "0.5.1"]
+                 [swiss-arrows "0.6.0"]
                  [me.raynes/fs "1.4.0"]
                  [ontodev/excel "0.2.0" :exclusions [[xml-apis]]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
@@ -38,7 +38,8 @@
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
-                             [lein-hgnotes "0.1.0"]]}
+                             [lein-hgnotes "0.1.0"]]
+                   :source-paths ["test-utils"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["itest" "stest"]}
@@ -54,6 +55,6 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
-  :aot [lupapalvelu.conversion.convert]
+  :aot [lupapalvelu.conversion.convert lupapalvelu.mml.update-poi]
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

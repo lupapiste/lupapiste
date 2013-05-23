@@ -5,7 +5,9 @@
         [clojure.tools.logging]
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
-        [clojure.walk :only [keywordize-keys]])
+        [clojure.walk :only [keywordize-keys]]
+        [clojure.string :only [blank?]]
+        [lupapalvelu.security :only [current-user]])
   (:require [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
@@ -67,11 +69,6 @@
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
-
-(defn current-user
-  "fetches the current user from 1) http-session 2) apikey from headers"
-  ([] (current-user (request/ring-request)))
-  ([request] (or (session/get :user) (request :user))))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -288,13 +285,14 @@
   (let [authorization (get-in request [:headers "authorization"])]
     (parse "apikey" authorization)))
 
-(defn apikey-authentication
-  "Reads apikey from 'Auhtorization' headers, pushed it to :user request attribute
-   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
+(defn authentication
+  "Middleware that adds :user to request. If request has apikey authentication header then
+   that is used for authentication. If not, then use user information from session."
   [handler]
   (fn [request]
-    (let [apikey (get-apikey request)]
-      (handler (assoc request :user (security/login-with-apikey apikey))))))
+    (handler (assoc request :user
+                    (or (security/login-with-apikey (get-apikey request))
+                        (session/get :user))))))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
@@ -339,11 +337,13 @@
 (defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
 
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (attachment/output-all-attachments application-id (current-user) lang))
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
+  (attachment/output-all-attachments application-id (current-user)))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (ke6666/export application-id (current-user) lang))
+(defpage "/api/pdf-export/:application-id" {application-id :application-id}
+  (ke6666/export application-id (current-user) *lang*))
+
+(defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
 ;; Proxy
@@ -401,6 +401,9 @@
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
+  (defjson "/dev/user" []
+    (current-user))
+  
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt

@@ -100,7 +100,7 @@ Tab should be visible
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
-  Go to  ${LOGIN URL}
+  Go to  ${LOGOUT URL}
   Wait until page contains element  login-username
 
 #
