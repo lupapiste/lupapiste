@@ -75,6 +75,12 @@
        :osoite (get-simple-osoite (:osoite henkilo))}
      (get-yhteystiedot-data yhteystiedot))))
 
+(defn- get-yhteyshenkilo-data [henkilo]
+  (let [henkilotiedot (:henkilotiedot henkilo)
+        yhteystiedot (:yhteystiedot henkilo)]
+    (merge (get-name henkilotiedot)
+     (get-yhteystiedot-data yhteystiedot))))
+
 (defn- get-handler [application]
   (if-let [handler (:authority application)]
     {:henkilo {:nimi {:etunimi  (:firstName handler)
@@ -139,7 +145,7 @@
     (if (= (-> osapuoli :_selected :value) "yritys")
       (merge codes
              {:yritys  (get-yritys-data (:yritys osapuoli))}
-             {:henkilo (get-name (get-in osapuoli [:yritys :yhteyshenkilo :henkilotiedot]))})
+             {:henkilo (get-yhteyshenkilo-data (get-in osapuoli [:yritys :yhteyshenkilo]))})
       (merge codes {:henkilo (get-henkilo-data henkilo)}))))
 
 (defn- get-suunnittelija-data [suunnittelija party-type]
