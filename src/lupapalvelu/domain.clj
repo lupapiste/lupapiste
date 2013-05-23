@@ -46,7 +46,7 @@
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
-(defn is-owner-or-writer? [application user-id]
+(defn owner-or-writer? [application user-id]
   (or (has-auth-role? application user-id "owner")
       (has-auth-role? application user-id "writer")))
 

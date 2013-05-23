@@ -376,6 +376,25 @@
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus")))
 
+(def puolto-mapping {:condition "ehdoilla"
+                     :no "ei puolla"
+                     :yes "puoltaa"})
+
+(defn- get-statement [statement]
+  {:Lausunto {:id (:id statement)
+              :pyydetty {:viranomainen (get-in statement [:person :text])
+                         :pyyntoPvm (to-xml-date (:requested statement))}
+              :lausunto {:viranomainen (get-in statement [:person :name])
+                         :lausuntoPvm (to-xml-date (:given statement))
+                         :lausunto {:lausunto (:text statement)}
+                         :puoltotieto (if (nil? (:status statement))
+                                        {:puolto "ei tiedossa"}
+                                        {:puolto ((keyword (:status statement)) puolto-mapping)})}}})
+
+(defn- get-statements [statements]
+  ;Returing vector because this element to be Associative
+  (vec (map get-statement statements)))
+
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application]
@@ -400,6 +419,7 @@
                        {:osapuolitieto (get-parties documents)
                         :suunnittelijatieto (get-designers documents)}}
                       :rakennuspaikkatieto (get-bulding-places documents application)
+                      :lausuntotieto (get-statements (:statements application))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents))
                       :kayttotapaus (get-kayttotapaus documents)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}

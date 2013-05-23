@@ -409,7 +409,6 @@ var docgen = (function () {
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
       var option = document.createElement("option");
-      //TODO: Tuki readonlylle
       select.id = pathStrToID(myPath);
       select.name = myPath;
       select.className = "form-input combobox long";
@@ -460,6 +459,7 @@ var docgen = (function () {
         text: loc("personSelector.invite"),
         click: function () {
           $("#invite-document-name").val(self.schemaName).change();
+          $("#invite-document-path").val(myNs).change();
           $("#invite-document-id").val(self.docId).change();
           LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
           return false;
@@ -669,7 +669,7 @@ var docgen = (function () {
           label.removeChild(loader);
         }
         if (status === "warn") {
-          showIndicator("form-input-warn", "form.warn");
+          showIndicator("form-input-saved", "form.saved");
         } else if (status === "err") {
           showIndicator("form-input-err", "form.err");
         } else if (status === "ok") {
