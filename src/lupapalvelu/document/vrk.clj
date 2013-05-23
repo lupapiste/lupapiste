@@ -356,6 +356,38 @@
              :fail [[6]]}}
   (and (asuinrakennus? data) (< kerrosala 7)))
 
+(defvalidator :vrk:CR333:tilavuus
+  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
+   :schema  "uusiRakennus"
+   :fields  [tilavuus [:mitat :tilavuus ->int]]
+   :facts   {:ok   [[10]]
+             :fail [[0]]}}
+  (= tilavuus 0))
+
+(defvalidator :vrk:CR333:kerrosala
+  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
+   :schema  "uusiRakennus"
+   :fields  [kerrosala [:mitat :kerrosala ->int]]
+   :facts   {:ok   [[10]]
+             :fail [[0]]}}
+  (= kerrosala 0))
+
+(defvalidator :vrk:CR333:kokonaisala
+  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
+   :schema  "uusiRakennus"
+   :fields  [kokonaisala [:mitat :kokonaisala ->int]]
+   :facts   {:ok   [[10]]
+             :fail [[0]]}}
+  (= kokonaisala 0))
+
+(defvalidator :vrk:CR333:kerrosluku
+  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
+   :schema  "uusiRakennus"
+   :fields  [kerrosluku [:mitat :kerrosluku ->int]]
+   :facts   {:ok   [[10]]
+             :fail [[0]]}}
+  (= kerrosluku 0))
+
 ;; Juha's stuff here
 
 (comment
