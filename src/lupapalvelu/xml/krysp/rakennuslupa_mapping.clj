@@ -224,7 +224,8 @@
      :muokkausHetki (to-xml-datetime (:modified attachment))
      :versionumero 1
      :tyyppi type
-     :files (map last id-and-attachments)}))
+     :files (for [attachment (last id-and-attachments)]
+              (:id attachment))}))
 
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
   (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
@@ -232,7 +233,8 @@
                                 (if (= 1 (count (last attachment-tuple)))
 
                                   {(first attachment-tuple) {:liite (get-liite (first (last attachment-tuple)) application begin-of-link)}}
-                                  {(first attachment-tuple) {:liite (get-liite-zipped attachment-tuple application begin-of-link)}}))]
+                                  ; Ei tueta useampaa liitetta toistaiseksi. krysp menee uusiksi{(first attachment-tuple) {:liite (get-liite-zipped attachment-tuple application begin-of-link)}}
+                                  ))]
     (not-empty canonical-attachments)))
 
 (defn- get-attachments-as-canonical [application begin-of-link ]
@@ -267,6 +269,10 @@
 (defn- write-statement-attachments [attachments output-dir]
   (let [single-files (filter #(nil? (:files %)) attachments)
         multiple-files (filter #(:files %) attachments)]
+    (println "single-files")
+    (clojure.pprint/pprint single-files)
+    (println "multiple-files")
+    (clojure.pprint/pprint multiple-files)
     (doseq [file-tuple single-files]
       (write-attachments (map (fn [m] {:Liite (:liite m)}) (vals file-tuple)) output-dir))
     (for [statement-attachments multiple-files]
