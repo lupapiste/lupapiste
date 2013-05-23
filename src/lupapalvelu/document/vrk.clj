@@ -208,8 +208,8 @@
    :schema "uusiRakennus"
    :fields [kokonaisala [:mitat :kokonaisala ->int]
             kerrosala   [:mitat :kerrosala ->int]]
-   :facts  {:ok   [["10" "10"]]
-            :fail [["10" "11"]]}}
+   :facts  {:ok   [[10 10]]
+            :fail [[10 11]]}}
   (and kokonaisala kerrosala (< kokonaisala kerrosala)))
 
 (defvalidator :vrk:CR324
@@ -231,8 +231,8 @@
    :schema "uusiRakennus"
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
             kerrosluku      [:mitat :kerrosluku ->int]]
-   :facts  {:ok   [["011 yhden asunnon talot" "3"]]
-            :fail [["011 yhden asunnon talot" "4"]]}}
+   :facts  {:ok   [["011 yhden asunnon talot" 3]]
+            :fail [["011 yhden asunnon talot" 4]]}}
   (and (#{:011 :012 :013 :021 :022} kayttotarkoitus) (> kerrosluku 3)))
 
 (defvalidator :vrk:CR328:sahko
@@ -267,8 +267,8 @@
    :schema  "uusiRakennus"
    :fields  [toimenpide [:kaytto :kayttotarkoitus ->kayttotarkoitus]
              kerrosluku [:mitat :kerrosluku ->int]]
-   :facts   {:ok   [["111 myym\u00e4l\u00e4hallit" "1"]]
-             :fail [["111 myym\u00e4l\u00e4hallit" "2"]]}}
+   :facts   {:ok   [["111 myym\u00e4l\u00e4hallit" 1]]
+             :fail [["111 myym\u00e4l\u00e4hallit" 2]]}}
   (and (#{:691 :111} toimenpide) (not= kerrosluku 1)))
 
 (defvalidator :vrk:CR313
@@ -277,8 +277,8 @@
    :fields  [tilavuus        [:mitat :tilavuus ->int]
              kerrosala       [:mitat :kerrosala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]]
-   :facts   {:ok   [["6" "4" "611 voimalaitosrakennukset"]]
-             :fail [["5" "4" "611 voimalaitosrakennukset"]]}}
+   :facts   {:ok   [[6 4 "611 voimalaitosrakennukset"]]
+             :fail [[5 4 "611 voimalaitosrakennukset"]]}}
   (and
     tilavuus
     (< tilavuus (* 1.5 kerrosala))
@@ -333,8 +333,8 @@
    :schema  "uusiRakennus"
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              kerrosluku      [:mitat :kerrosluku ->int]]
-   :facts   {:ok   [["032 luhtitalot" "2"]]
-             :fail [["032 luhtitalot" "1"]]}}
+   :facts   {:ok   [["032 luhtitalot" 2]]
+             :fail [["032 luhtitalot" 1]]}}
   (and (<= 32 kayttotarkoitus 39) (< kerrosluku 2)))
 
 ;; Tommi's stuff here
