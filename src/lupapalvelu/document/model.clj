@@ -97,8 +97,7 @@
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
 (defn- validate-required-fields [schema-body path data validation-errors]
-  (pprint data)
-  (map (fn [{:keys [name required body] :as element}]
+  (map (fn [{:keys [name required body repeating] :as element}]
          (let [kw (keyword name)
                current-path (if (empty? path) [kw] (conj path kw))
                validation-error (if (and required (s/blank? (get-in data (conj current-path :value)))) 
@@ -106,7 +105,9 @@
                                   nil)
                current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
            (if body
-             (validate-required-fields body current-path data current-validation-errors)
+             (if repeating
+               (map (fn [k] (validate-required-fields body (conj current-path k) data current-validation-errors) ) (keys (get-in data current-path)))
+               (validate-required-fields body current-path data current-validation-errors))
              current-validation-errors))) schema-body))
 
 (defn validate

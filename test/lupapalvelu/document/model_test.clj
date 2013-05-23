@@ -136,9 +136,9 @@
                                    :body [{:name "b" :type :group
                                            :body [{:name "aa" :type :string :required true}
                                                   {:name "ab" :type :string :required true}]}
-                                          #_{:name "c" :type :group :repeating true
-                                           :body [{:name "aa" :type :string}
-                                                  {:name "ab" :type :string :required true}]}
+                                          {:name "c" :type :group :repeating true
+                                           :body [{:name "raa" :type :string}
+                                                  {:name "rab" :type :string :required true}]}
                                           ]}]})
 
 (facts "Required fields"
@@ -153,17 +153,17 @@
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")) => valid?
-    
-    (comment (-> document
+
+    (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :ab] "value")
-      (apply-update [:a :c :6 :ab] "value")) => valid?
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :c :6 :rab] "value")) => valid?
     
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :aa] "value")) => (invalid-with? [:warn "illegal-value:required"]))))
+      (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:warn "illegal-value:required"])))
 
 ;;
 ;; Updates
