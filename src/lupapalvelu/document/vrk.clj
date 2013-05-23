@@ -107,6 +107,9 @@
 (defn ->huoneistoala [huoneistot]
   (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
 
+(defn <-huoneistoala [x]
+  {:huoneistonTyyppi {:huoneistoala x}})
+
 (defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
   [{{{schema-name :name} :info} :schema data :data}]
@@ -281,7 +284,8 @@
    :fields  [tilavuus        [:mitat :tilavuus ->int]
              kerrosala       [:mitat :kerrosala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]]
-   :facts   {:ok   [[6 4 "611 voimalaitosrakennukset"]]
+   :facts   {:ok   [[6 4 "611 voimalaitosrakennukset"]
+                    [5 4 "032 luhtitalot"]]
              :fail [[5 4 "611 voimalaitosrakennukset"]]}}
   (and
     tilavuus
