@@ -369,13 +369,13 @@
              - Kerrosala voi olla 0, jos käyttötarkoitus on 162, 163, 169, 611, 613, 712, 719, 722 tai 941."
    :schema  "uusiRakennus"
    :fields  [kerrosala       [:mitat :kerrosala ->int]
-             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]]
+             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
    :facts   {:ok   [[9 "032 luhtitalot"]
                     [0 "611 voimalaitosrakennukset"]]
              :fail [[0 "032 luhtitalot"]]}}
   (and
     (= kerrosala 0)
-    (not (#{:162 :163 :169 :611 :613 :712 :719 :722 :941} kayttotarkoitus))))
+    (not (#{162 163 169 611 613 712 719 722 941} kayttotarkoitus))))
 
 (defvalidator :vrk:CR333:kokonaisala
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
@@ -385,18 +385,26 @@
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
    :facts   {:ok   [[9 "032 luhtitalot"]
                     [0 "892 kasvihuoneet"]]
-             :fail [[0 "032 luhtitalot"]]}}
+             :fail [[0 "032 luhtitalot"]
+                    [0 "729 muut palo- ja pelastustoimen rakennukset"]]}}
   (and
     (= kokonaisala 0)
-    (< kayttotarkoitus 729)))
+    (<= kayttotarkoitus 729)))
 
 (defvalidator :vrk:CR333:kerrosluku
-  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
+  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
+             Kerrosluku voi olla 0, jos käyttötarkoitus = 162, 163, 169, 611, 613, 712, 719, 722 tai >729."
    :schema  "uusiRakennus"
-   :fields  [kerrosluku [:mitat :kerrosluku ->int]]
-   :facts   {:ok   [[10]]
-             :fail [[0]]}}
-  (= kerrosluku 0))
+   :fields  [kerrosluku      [:mitat :kerrosluku ->int]
+             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
+   :facts   {:ok   [[9 "032 luhtitalot"]
+                    [0 "892 kasvihuoneet"]
+                    [0 "611 voimalaitosrakennukset"]]
+             :fail [[0 "729 muut palo- ja pelastustoimen rakennukset"]]}}
+  (and
+    (= kerrosluku 0)
+    (not (#{162 163 169 611 613 712 719 722} kayttotarkoitus))
+    (<= kayttotarkoitus 729)))
 
 ;; Juha's stuff here
 

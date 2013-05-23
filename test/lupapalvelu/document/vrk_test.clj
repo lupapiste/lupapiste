@@ -5,13 +5,15 @@
         [lupapalvelu.document.model]
         [midje.sweet]
         [sade.util])
-  (:require [lupapalvelu.document.validator :as v]))
+  (:require [lupapalvelu.document.validator :as v]
+            [clojure.string :as s]))
 
 (defn check-validator
   "Runs generated facts of a single validator."
   [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts}]
   (when (and ok fail)
     (let [dummy  (dummy-doc schema)
+          doc    (s/replace doc #"\s+" " ")
           update (fn [values]
                    (reduce
                      (fn [d i]
