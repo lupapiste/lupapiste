@@ -144,7 +144,7 @@
 
 (defn- get-suunnittelija-data [suunnittelija party-type]
   (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
-        codes {:kuntaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
+        codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
         patevyys (:patevyys suunnittelija)
         henkilo (merge (get-name (:henkilotiedot suunnittelija))

@@ -99,7 +99,7 @@
 
 
 (def rakennuslupa_to_krysp
-  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.4/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.4/rakennusvalvonta.xsd"
+  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.7/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.5/rakennusvalvonta.xsd"
                                         :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
                                         :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
                                         :xmlns:xlink "http://www.w3.org/1999/xlink"
