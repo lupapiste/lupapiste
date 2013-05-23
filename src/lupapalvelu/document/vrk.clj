@@ -107,9 +107,6 @@
 (defn ->huoneistoala [huoneistot]
   (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
 
-(defn <-huoneistoala [x]
-  {:huoneistonTyyppi {:huoneistoala x}})
-
 (defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
   [{{{schema-name :name} :info} :schema data :data}]
