@@ -104,6 +104,9 @@
 (defn ->kayttotarkoitus [x]
   (some->> x (re-matches #"(\d+) .*") last keyword ))
 
+(defn ->huoneistoala [huoneistot]
+  (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
+
 (defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
   [{{{schema-name :name} :info} :schema data :data}]
@@ -204,8 +207,10 @@
   {:doc    "Kokonaisalan oltava vahintaan kerrosala"
    :schema "uusiRakennus"
    :fields [kokonaisala [:mitat :kokonaisala ->int]
-            kerrosala   [:mitat :kerrosala ->int]]}
-  (and kokonaisala kerrosala (> kerrosala kokonaisala)))
+            kerrosala   [:mitat :kerrosala ->int]]
+   :facts  {:ok   [["10" "10"]]
+            :fail [["10" "11"]]}}
+  (and kokonaisala kerrosala (< kokonaisala kerrosala)))
 
 (defvalidator :vrk:CR324
   {:doc    "Sahko polttoaineena vaatii varusteeksi sahkon"
@@ -217,10 +222,9 @@
 (defvalidator :vrk:CR322
   {:doc    "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
    :schema "uusiRakennus"
-   :fields [kokonaisala [:mitat :kokonaisala ->int]
-            huoneistot  [:huoneistot]]}
-  (let [huoneistoala (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot))]
-    (and kokonaisala huoneistoala (< kokonaisala huoneistoala))))
+   :fields [kokonaisala  [:mitat :kokonaisala ->int]
+            huoneistoala [:huoneistot ->huoneistoala]]}
+  (and kokonaisala huoneistoala (< kokonaisala huoneistoala)))
 
 (defvalidator :vrk:BR113
   {:doc    "Pien- tai rivitalossa saa olla korkeintaan 3 kerrosta"
@@ -319,8 +323,8 @@
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              huoneistot      [:huoneistot keys count]]
    :facts   {:ok   [["032 luhtitalot" {:1 {:any :any}
-                                      :2 {:any :any}
-                                      :3 {:any :any}}]]
+                                       :2 {:any :any}
+                                       :3 {:any :any}}]]
              :fail [["032 luhtitalot" {}]]}}
   (and (<= 13 kayttotarkoitus 39) (< huoneistot 3)))
 
