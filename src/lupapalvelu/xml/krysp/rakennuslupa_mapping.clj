@@ -190,16 +190,15 @@
 (defn- get-current-filename [application-id]
   (str application-id "_current_application.pdf"))
 
-;(defn- get-Liite [title link attachment type file-id]
-;  {:Liite
-;   {:kuvaus title
-;    :linkkiliitteeseen link
-;    :muokkausHetki (to-xml-datetime (:modified attachment))
-;    :versionumero 1
-;    :tyyppi type
-;    :fileId file-id}})
+(defn- get-Liite [title link attachment type file-id]
+   {:kuvaus title
+    :linkkiliitteeseen link
+    :muokkausHetki (to-xml-datetime (:modified attachment))
+    :versionumero 1
+    :tyyppi type
+    :fileId file-id})
 
-(defn- get-liite [attachment application begin-of-link]
+(defn- get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
@@ -232,7 +231,7 @@
         canonical-attachments (for [attachment-tuple statement-attachments-by-id]
                                 (if (= 1 (count (last attachment-tuple)))
                                   nil
-                                  ; kommentoitu pois kryspiun choicen vuoksi{(first attachment-tuple) {:liite (get-liite (first (last attachment-tuple)) application begin-of-link)}}
+                                  ; kommentoitu pois kryspiun choicen vuoksi{(first attachment-tuple) {:liite (for-lausunto (first (last attachment-tuple)) application begin-of-link)}}
                                   ; Ei tueta useampaa liitetta toistaiseksi. krysp menee uusiksi{(first attachment-tuple) {:liite (get-liite-zipped attachment-tuple application begin-of-link)}}
                                   ))]
     (not-empty canonical-attachments)))
@@ -246,7 +245,7 @@
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-liite attachment application begin-of-link)})]
+                                {:Liite (get-Liite title link attachment type file-id)})]
     (not-empty canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
@@ -343,7 +342,7 @@
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
     (write-attachments attachments output-dir)
-    (write-statement-attachments statement-attachments output-dir)
+    ;(write-statement-attachments statement-attachments output-dir)
 
     (write-application-pdf-versions output-dir application submitted-application lang)
     (when (fs/exists? outfile) (fs/delete outfile))
