@@ -269,10 +269,10 @@
 (defn- write-statement-attachments [attachments output-dir]
   (let [single-files (filter #(nil? (:files %)) attachments)
         multiple-files (filter #(:files %) attachments)]
-    (println "single-files")
-    (clojure.pprint/pprint single-files)
-    (println "multiple-files")
-    (clojure.pprint/pprint multiple-files)
+    ;(println "single-files")
+    ;(clojure.pprint/pprint single-files)
+    ;(println "multiple-files")
+    ;(clojure.pprint/pprint multiple-files)
     (doseq [file-tuple single-files]
       (write-attachments (map (fn [m] {:Liite (:liite m)}) (vals file-tuple)) output-dir))
     (for [statement-attachments multiple-files]
