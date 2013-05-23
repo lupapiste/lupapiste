@@ -467,8 +467,7 @@
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-                      (partial property-id-parameters [:propertyId])
-                      validate-x validate-y]
+                      (partial property-id-parameters [:propertyId])]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]

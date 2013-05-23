@@ -41,8 +41,8 @@
     self.map = null;
 
     self.search = ko.observable("");
-    self.x = ko.observable(10000.1);
-    self.y = ko.observable(6610000.0);
+    self.x = ko.observable(0);
+    self.y = ko.observable(0.0);
     self.addressData = ko.observable(null);
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
@@ -101,8 +101,8 @@
       }
       return self
         .search("")
-        .x(10000.1)
-        .y(6610000)
+        .x(0)
+        .y(0)
         .addressData(null)
         .addressString("")
         .propertyId(null)
@@ -112,7 +112,7 @@
         .goPhase1();
     };
 
-    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(10000.1).y(6610000);  };
+    self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0);  };
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add(x, y); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
