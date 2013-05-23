@@ -32,3 +32,5 @@ stamp.file.status.error: Virhe
 
 stamp.all: kaikki
 stamp.none: poista
+
+stamp.comment: Leimattu
