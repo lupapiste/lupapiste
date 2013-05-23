@@ -231,8 +231,8 @@
   (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
         canonical-attachments (for [attachment-tuple statement-attachments-by-id]
                                 (if (= 1 (count (last attachment-tuple)))
-
-                                  {(first attachment-tuple) {:liite (get-liite (first (last attachment-tuple)) application begin-of-link)}}
+                                  nil
+                                  ; kommentoitu pois kryspiun choicen vuoksi{(first attachment-tuple) {:liite (get-liite (first (last attachment-tuple)) application begin-of-link)}}
                                   ; Ei tueta useampaa liitetta toistaiseksi. krysp menee uusiksi{(first attachment-tuple) {:liite (get-liite-zipped attachment-tuple application begin-of-link)}}
                                   ))]
     (not-empty canonical-attachments)))
@@ -300,11 +300,7 @@
                   paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id])) %) lausuntotieto)
                   index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
                   paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausunto :lausunto :liite] (:liite (last (last a))))
-                  ;lausunto (get-in paivitettava-lausunto [:Lausunto :lausunto :lausunto] paivitetty-lausunto)
-                  ;paivitetty-lausunto (assoc lausunto :liite (last (last a)))
                   paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
-              ;(clojure.pprint/pprint (last (last a)))
-
               (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
             ) canonical statement-attachments))
 
