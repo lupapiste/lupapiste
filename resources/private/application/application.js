@@ -28,8 +28,8 @@
     self.applicationId = null;
     self.files = ko.observable(null);
     self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
-    self.jobId = ko.observable();
-    self.jobVersion = ko.observable();
+    self.jobId = null;
+    self.jobVersion = null;
 
     self.xMargin = ko.observable("");
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
@@ -51,13 +51,12 @@
         version:      { major: l.version.major(), minor: l.version.minor() },
         size:         l.size(),
         selected:     ko.observable(true),
-        status:       ko.observable("pending")
+        status:       ko.observable("")
       };
     }
     
     self.init = function(application) {
       self.application = application;
-      self.jobId(null).jobVersion(null);
       
       self
         .files(_(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value())
@@ -84,20 +83,18 @@
 
     self.started = function(data) {
       console.log("started:", data);
-      self
-        .status(self.statusRunning)
-        .jobId(data.job.id)
-        .jobVersion(0)
-        .queryUpdate();
+      self.jobId = data.job.id;
+      self.jobVersion = 0;
+      self.status(self.statusRunning).queryUpdate();
       return false;
     };
 
     self.queryUpdate = function() {
-      console.log("queryUpdate:", self.jobId(), self.jobVersion());
+      console.log("queryUpdate:", self.jobId, self.jobVersion);
       ajax
         .query("stamp-attachments-job")
-        .param("job-id", self.jobId())
-        .param("version", self.jobVersion())
+        .param("job-id", self.jobId)
+        .param("version", self.jobVersion)
         .success(self.update)
         .call();
       return self;
@@ -105,17 +102,22 @@
 
     self.update = function(data) {
       console.log("update:", data);
-      if (data.result === "timeout") return self.queryUpdate();
-      var job = data.job;
-      self.jobVersion(job.version);
-      _.each(self.files(), function(f) { f.status(job.value[f.id]); });
-      //_.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
-      if (job.status === "done") {
-        repository.load(self.application.id());
-        self.status(self.statusDone);
-      } else {
-        self.queryUpdate();
+      
+      if (data.result === "update") {
+        var update = data.job;
+        
+        self.jobVersion = update.version;
+        _.each(update.value, function (newStatus, fileId) {
+          _(self.files()).filter({id: fileId}).each(function(f) { f.status(newStatus); });
+        });
+       
+        if (update.status === "done") {
+          repository.load(self.application.id());
+          return self.status(self.statusDone);
+        }
       }
+        
+      return self.queryUpdate();
     };
 
     function selectAllFiles(value) { _.each(self.files(), function(f) { f.selected(value); }); }

@@ -18,6 +18,7 @@ stamp.status.5: Ei leimaus kelpoisia liitteitä
 stamp.filename: Tiedosto
 stamp.version: Versio
 stamp.size: Koko
+stamp.select: Leimaa
 stamp.status: Tila
 
 stamp.start: Aloita
