@@ -480,38 +480,41 @@
   (if (string? v) (Long/parseLong v) v))
 
 (defn- ->file-info [attachment]
-  (assoc (select-keys (-> attachment :versions last) [:contentType :fileId :filename :size])
-         :id (:id attachment)
-         :status :waiting))
+  (let [versions   (-> attachment :versions reverse)
+        re-stamp?  (:stamped (first versions))
+        source     (if re-stamp? (second versions) (first versions))]
+    (assoc (select-keys source [:contentType :fileId :filename :size])
+           :re-stamp? re-stamp?
+           :attachment-id (:id attachment))))
 
-(defn- add-stamp-comment [application-id id created user new-version filename new-file-id]
+(defn- add-stamp-comment [new-version new-file-id file-info context]
   ; mea culpa, but what the fuck was I supposed to do
-  (mongo/update-by-id :applications
-                      application-id
-                      {$set {:modified created}
-                       $push {:comments {:text    (loc "stamp.comment")
-                                         :created created
-                                         :user    user
-                                         :target  {:type "attachment"
-                                                   :id id
-                                                   :version (:version new-version)
-                                                   :filename filename
-                                                   :fileId new-file-id}}}}))
+  (mongo/update-by-id :applications (:application-id context)
+    {$set {:modified (:created context)}
+     $push {:comments {:text    (loc "stamp.comment")
+                       :created (:created context)
+                       :user    (:user context)
+                       :target  {:type "attachment"
+                                 :id (:attachment-id file-info)
+                                 :version (:version new-version)
+                                 :filename (:filename file-info)
+                                 :fileId new-file-id}}}}))
 
-(defn- stamp-attachment! [stamp file-info {:keys [application-id user created x-margin y-margin]}]
-  (let [temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
+(defn- stamp-attachment! [stamp file-info context]
+  (let [{:keys [application-id user created]} context
+        temp-file (File/createTempFile "lupapiste.stamp." ".tmp")
         new-file-id (mongo/create-id)
-        {:keys [id contentType fileId filename]} file-info]
+        {:keys [attachment-id contentType fileId filename]} file-info]
     (debug "created temp file for stamp job:" (.getAbsolutePath temp-file))
     (with-open [in ((:content (mongo/download fileId)))
                 out (io/output-stream temp-file)]
-      (stamper/stamp stamp contentType in out x-margin y-margin))
+      (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context)))
     (mongo/upload application-id new-file-id filename contentType temp-file created)
-    (let [new-version (set-attachment-version application-id id new-file-id filename contentType (.length temp-file) created user true)]
-      (add-stamp-comment application-id id created user new-version filename new-file-id))
+    (let [new-version (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) created user true)]
+      (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-#_(defn- stamp-attachment! [stamp file-info context]
+(defn- stamp-attachment! [stamp file-info context]
     (println "stamp-attachment:" file-info)
     (Thread/sleep 2000))
 
@@ -523,12 +526,12 @@
                 (get-organization-name application-id))]
     (doseq [file-info (vals file-infos)]
       (try
-        (job/update job-id assoc (:id file-info) :working)
+        (job/update job-id assoc (:attachment-id file-info) :working)
         (stamp-attachment! stamp file-info context)
-        (job/update job-id assoc (:id file-info) :done)
+        (job/update job-id assoc (:attachment-id file-info) :done)
         (catch Exception e
           (errorf e "failed to stamp attachment: application=%s, file=%s" application-id (:fileId file-info))
-          (job/update job-id assoc (:id file-info) :error))))))
+          (job/update job-id assoc (:attachment-id file-info) :error))))))
 
 (defn- stamp-job-status [data]
   (if (every? #{:done :error} (vals data)) :done :runnig))
@@ -547,7 +550,7 @@
   (with-application command
     (fn [application]
       (ok :job (make-stamp-job
-                 (key-by :id (map ->file-info (filter (comp (set (:files data)) :id) (:attachments application))))
+                 (key-by :attachment-id (map ->file-info (filter (comp (set (:files data)) :id) (:attachments application))))
                  {:application-id (:id application)
                   :user (:user command)
                   :created (:created command)
