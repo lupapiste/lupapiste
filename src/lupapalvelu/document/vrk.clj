@@ -365,7 +365,8 @@
   (= tilavuus 0))
 
 (defvalidator :vrk:CR333:kerrosala
-  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
+  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
+             - Kerrosala voi olla 0, jos käyttötarkoitus on 162, 163, 169, 611, 613, 712, 719, 722 tai 941."
    :schema  "uusiRakennus"
    :fields  [kerrosala       [:mitat :kerrosala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]]
@@ -377,7 +378,8 @@
     (not (#{:162 :163 :169 :611 :613 :712 :719 :722 :941} kayttotarkoitus))))
 
 (defvalidator :vrk:CR333:kokonaisala
-  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
+  {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
+             Kokonaisala voi olla 0 , jos käyttötarkoitus >729."
    :schema  "uusiRakennus"
    :fields  [kokonaisala     [:mitat :kokonaisala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
