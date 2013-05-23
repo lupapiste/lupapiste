@@ -223,7 +223,11 @@
   {:doc    "Uuden rakennuksen kokonaisalan oltava vahintaan huoneistoala"
    :schema "uusiRakennus"
    :fields [kokonaisala  [:mitat :kokonaisala ->int]
-            huoneistoala [:huoneistot ->huoneistoala]]}
+            huoneistoala [:huoneistot ->huoneistoala]]
+   :facts  {:ok   [[100 {:0 {:huoneistonTyyppi {:huoneistoala 60}}
+                         :1 {:huoneistonTyyppi {:huoneistoala 40}}}]]
+            :fail [[100 {:0 {:huoneistonTyyppi {:huoneistoala 60}}
+                         :1 {:huoneistonTyyppi {:huoneistoala 50}}}]]}}
   (and kokonaisala huoneistoala (< kokonaisala huoneistoala)))
 
 (defvalidator :vrk:BR113
