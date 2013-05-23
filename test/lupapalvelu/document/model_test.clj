@@ -139,7 +139,11 @@
                                           {:name "c" :type :group :repeating true
                                            :body [{:name "raa" :type :string}
                                                   {:name "rab" :type :string :required true}]}
-                                          ]}]})
+                                          {:name "d" :type :group :repeating true
+                                           :body [{:name "d2" :type :group :repeating true
+                                                   :body [{:name "od1" :type :string}
+                                                          {:name "rd" :type :string :required true}
+                                                          {:name "od2" :type :string}]}]}]}]})
 
 (facts "Required fields"
   (let [document (new-document schema-with-required ..now..)]
@@ -163,9 +167,30 @@
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:warn "illegal-value:required"])))
+      (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:warn "illegal-value:required"])
+    
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")) => (invalid-with? [:warn "illegal-value:required"])
+    
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")
+      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (invalid-with? [:warn "illegal-value:required"])
+    
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")
+      (apply-update [:a :d :0 :d2 :0 :rd] "value")
+      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?))
 
-;;
+    ;;
 ;; Updates
 ;;
 
