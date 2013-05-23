@@ -11,12 +11,12 @@
   "Runs generated facts of a single validator."
   [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts}]
   (when (and ok fail)
-    (let [dummy    (dummy-doc schema)
-          update   (fn [values]
-                     (reduce
-                       (fn [d i]
-                         (apply-update d (get paths i) (get values i)))
-                       dummy (range 0 (count paths))))]
+    (let [dummy  (dummy-doc schema)
+          update (fn [values]
+                   (reduce
+                     (fn [d i]
+                       (apply-update d (get paths i) (get values i)))
+                     dummy (range 0 (count paths))))]
 
       (facts "Embedded validator facts"
         (println "Checking:" doc)
@@ -27,7 +27,7 @@
 
 (defn check-all-validators []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
-    (println "Testing" (str (count validators) "/" (count @v/validators)) "awesome validators!")
+    (println "Checking" (str (count validators) "/" (count @v/validators)) "awesome validators!")
     (doseq [validator validators]
       (check-validator validator))))
 
