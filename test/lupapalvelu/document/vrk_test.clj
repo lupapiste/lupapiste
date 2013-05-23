@@ -16,14 +16,14 @@
                      (reduce
                        (fn [d i]
                          (apply-update d (get paths i) (get values i)))
-                       dummy (range 0 (count paths))))
-          ok-doc   (update ok)
-          fail-doc (update fail)]
+                       dummy (range 0 (count paths))))]
 
       (facts "Embedded validator facts"
         (println "Checking:" doc)
-        (validate-fn ok-doc) => nil?
-        (validate-fn fail-doc) => (has some (contains {:result [:warn (name code)]}))))))
+        (doseq [values ok]
+          (validate-fn (update values)) => nil?)
+        (doseq [values fail]
+          (validate-fn (update values)) => (has some (contains {:result [:warn (name code)]})))))))
 
 (defn check-all-validators []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]
@@ -126,12 +126,4 @@
     (-> uusi-rakennus
       (apply-update [:mitat :kokonaisala] "100")
       (apply-update [:huoneistot :0 :huoneistonTyyppi :huoneistoala] "60")
-      (apply-update [:huoneistot :1 :huoneistonTyyppi :huoneistoala] "50")) => (invalid-with? [:warn "vrk:CR322"]))
-
-  (fact "Jos kayttotarkoitus on 011 - 022, on kerrosluvun oltava valilla 1 - 4"
-    (-> uusi-rakennus
-      (apply-update [:kaytto :kayttotarkoitus] "021 rivitalot")
-      (apply-update [:mitat :kerrosluku] "4")) => valid?
-    (-> uusi-rakennus
-      (apply-update [:kaytto :kayttotarkoitus] "021 rivitalot")
-      (apply-update [:mitat :kerrosluku] "5")) => (invalid-with? [:warn "vrk:CR320"])))
+      (apply-update [:huoneistot :1 :huoneistonTyyppi :huoneistoala] "50")) => (invalid-with? [:warn "vrk:CR322"])))
