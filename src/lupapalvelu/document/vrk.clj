@@ -107,6 +107,10 @@
 (defn ->huoneistoala [huoneistot]
   (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
 
+;; FIME: please implement
+(defn asuinrakennus? [data]
+  true)
+
 (defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
   [{{{schema-name :name} :info} :schema data :data}]
@@ -343,6 +347,14 @@
   (and (<= 32 kayttotarkoitus 39) (< kerrosluku 2)))
 
 ;; Tommi's stuff here
+
+(defvalidator :vrk:CR340
+  {:doc     "Asuinrakennuksessa kerrosalan on oltava vahintaaan 7 neliota"
+   :schema  "uusiRakennus"
+   :fields  [kerrosala [:mitat :kerrosala ->int]]
+   :facts   {:ok   [[7]]
+             :fail [[6]]}}
+  (and (asuinrakennus? data) (< kerrosala 7)))
 
 ;; Juha's stuff here
 

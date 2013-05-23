@@ -40,12 +40,12 @@
         :schema ~schema
         :facts ~facts
         :fn (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
-              (let [~'d (tools/un-wrapped ~'data)]
+              (let [~'data (tools/un-wrapped ~'data)]
                 (when (or (not ~schema) (= ~schema ~'doc-schema))
                   (let
                     ~(reduce into
                        (for [[k v] (partition 2 fields)]
-                         [k `(some->> ~'d ~@v)]))
+                         [k `(some->> ~'data ~@v)]))
                     (try
                       (when-let [resp# (do ~@body)]
                         (map (fn [path#] {:path   path#
