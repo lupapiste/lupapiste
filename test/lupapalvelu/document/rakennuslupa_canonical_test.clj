@@ -393,7 +393,7 @@
         henkilo (:henkilo suunnittelija-model)
         yritys (:yritys suunnittelija-model)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
@@ -404,7 +404,7 @@
 (facts "Canonical suunnittelija1 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija1) :suunnittelija)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
@@ -414,7 +414,7 @@
 (facts "Canonical suunnittelija2 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija2) :suunnittelija)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "El\u00e4m\u00e4n koulu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
@@ -567,7 +567,7 @@
     (fact "osapuolettieto" osapuolettieto => truthy)
     (fact "osapuolet" osapuolet => truthy)
     (fact "osapuolitieto" osapuolitieto-hakija => truthy)
-    (fact "paasuunnitelija" paasuunnitelija => (contains {:kuntaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
+    (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "hakija-osapuoli1" hakija-osapuoli1 => truthy)
     (fact "Suunnitelijat" suunnittelijat => truthy)
     (fact "Osapuolijien maara" (+ (count suunnittelijat) (count (:osapuolitieto osapuolet))) => 7)
