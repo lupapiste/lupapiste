@@ -367,18 +367,26 @@
 (defvalidator :vrk:CR333:kerrosala
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
    :schema  "uusiRakennus"
-   :fields  [kerrosala [:mitat :kerrosala ->int]]
-   :facts   {:ok   [[10]]
-             :fail [[0]]}}
-  (= kerrosala 0))
+   :fields  [kerrosala       [:mitat :kerrosala ->int]
+             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]]
+   :facts   {:ok   [[9 "032 luhtitalot"]
+                    [0 "611 voimalaitosrakennukset"]]
+             :fail [[0 "032 luhtitalot"]]}}
+  (and
+    (= kerrosala 0)
+    (not (#{:162 :163 :169 :611 :613 :712 :719 :722 :941} kayttotarkoitus))))
 
 (defvalidator :vrk:CR333:kokonaisala
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
    :schema  "uusiRakennus"
-   :fields  [kokonaisala [:mitat :kokonaisala ->int]]
-   :facts   {:ok   [[10]]
-             :fail [[0]]}}
-  (= kokonaisala 0))
+   :fields  [kokonaisala     [:mitat :kokonaisala ->int]
+             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
+   :facts   {:ok   [[9 "032 luhtitalot"]
+                    [0 "892 kasvihuoneet"]]
+             :fail [[0 "032 luhtitalot"]]}}
+  (and
+    (= kokonaisala 0)
+    (< kayttotarkoitus 729)))
 
 (defvalidator :vrk:CR333:kerrosluku
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
