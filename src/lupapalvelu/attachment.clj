@@ -185,40 +185,15 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn- update-version-content [application-id attachment-id file-id filename content-type size now user stamped]
-  (let [application (mongo/by-id :applications application-id)
-        latest-version (attachment-latest-version (application :attachments) attachment-id)
-        next-version (next-attachment-version latest-version user)
-        version-model {:version  next-version
-                       :fileId   file-id
-                       :created  now
-                       :accepted nil
-                       :user    (security/summary user)
-                       ; File name will be presented in ASCII when the file is downloaded.
-                       ; Conversion could be done here as well, but we don't want to lose information.
-                       :filename filename
-                       :contentType content-type
-                       :size size
-                       :stamped stamped}
-        result-count (mongo/update-by-query
-                       :applications
-                       {:_id application-id
-                        :attachments {$elemMatch {:id attachment-id
-                                                  :latestVersion.version.major (:major latest-version)
-                                                  :latestVersion.version.minor (:minor latest-version)}}}
-                       {$set {:modified now
-                              :attachments.$.modified now
-                              :attachments.$.state  :requires_authority_action
-                              :attachments.$.latestVersion version-model}
-                        $push {:attachments.$.versions version-model}})]
-    ; Check return value and try again with new version number
-    (if (pos? result-count)
-      (assoc version-model :id attachment-id)
-      (do
-        (warn
-          "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
-          attachment-id retry-limit)
-        (set-attachment-version application-id attachment-id file-id filename content-type size now user stamped (dec retry-limit))))))
+(defn- update-version-content [application-id attachment-id file-id size now]
+  (mongo/update-by-query :applications
+    {:_id application-id
+     :attachments {$elemMatch {:id attachment-id}}}
+    {$set {:modified now
+           :attachments.$.modified now
+           :attachments.$.latestVersion.fileId file-id
+           :attachments.$.latestVersion.size size
+           :attachments.$.latestVersion.created now}}))
 
 (defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
   (let [attachment-id (if (empty? attachment-id)
@@ -526,7 +501,7 @@
   ; mea culpa, but what the fuck was I supposed to do
   (mongo/update-by-id :applications (:application-id context)
     {$set {:modified (:created context)}
-     $push {:comments {:text    (loc "stamp.comment")
+     $push {:comments {:text    (loc (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment")
                        :created (:created context)
                        :user    (:user context)
                        :target  {:type "attachment"
@@ -546,7 +521,7 @@
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context)))
     (mongo/upload application-id new-file-id filename contentType temp-file created)
     (let [new-version (if re-stamp?
-                        (update-version-content application-id attachment-id new-file-id filename contentType (.length temp-file) created user)
+                        (update-version-content application-id attachment-id new-file-id (.length temp-file) created)
                         (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) created user true))]
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))

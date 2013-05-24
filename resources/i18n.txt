@@ -34,3 +34,4 @@ stamp.all: kaikki
 stamp.none: poista
 
 stamp.comment: Leimattu
+stamp.comment.restamp: Uudelleen leimattu
