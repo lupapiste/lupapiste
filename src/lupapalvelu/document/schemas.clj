@@ -330,7 +330,7 @@
                                  {:name "koneellinenilmastointiKytkin" :type :checkbox}
                                  {:name "lamminvesiKytkin" :type :checkbox}
                                  {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                 {:name "saunoja" :type :string :subtype :number :size "s" :unit "kpl"}
+                                 {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
                                  {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}]}
                          {:name "luokitus"
                           :type :group
