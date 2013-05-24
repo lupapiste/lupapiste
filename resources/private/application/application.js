@@ -85,7 +85,6 @@
     };
 
     self.started = function(data) {
-      console.log("started:", data);
       self.jobId = data.job.id;
       self.jobVersion = 0;
       self.status(self.statusRunning).queryUpdate();
@@ -93,7 +92,6 @@
     };
 
     self.queryUpdate = function() {
-      console.log("queryUpdate:", self.jobId, self.jobVersion);
       ajax
         .query("stamp-attachments-job")
         .param("job-id", self.jobId)
@@ -104,8 +102,6 @@
     };
 
     self.update = function(data) {
-      console.log("update:", data);
-      
       if (data.result === "update") {
         var update = data.job;
         
