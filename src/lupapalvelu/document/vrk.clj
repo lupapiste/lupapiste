@@ -98,7 +98,7 @@
                                 :941 50000
                                 :999 50000})
 ;;
-;; validators
+;; helpers
 ;;
 
 (defn ->kayttotarkoitus [x]
@@ -107,9 +107,22 @@
 (defn ->huoneistoala [huoneistot]
   (reduce + (map (fn-> second :huoneistonTyyppi :huoneistoala ->int) huoneistot)))
 
+(defn ->count [m]
+  (-> m keys count))
+
 ;; FIME: please implement
 (defn asuinrakennus? [data]
   true)
+
+(defn repeating
+  ([n]
+    (repeating n {:any :any}))
+  ([n body]
+    (for [i (take n (range))]
+      {(-> i str keyword) body})))
+;;
+;; Validators
+;;
 
 (defvalidator-old "vrk:CR327"
   "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
@@ -312,29 +325,27 @@
   {:doc     "Omakotitalossa pitaa olla huoneisto"
    :schema  "uusiRakennus"
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
-             huoneistot      [:huoneistot keys count]]
-   :facts   {:ok   [["011 yhden asunnon talot" {}]] ;; nop -> has 1 huoneisto
-             :fail [["011 yhden asunnon talot" {:6 {:any :any}}]]}} ;; add another huoneisto
+             huoneistot      [:huoneistot ->count]]
+   :facts   {:ok   [["011 yhden asunnon talot" (repeating 1)]]
+             :fail [["011 yhden asunnon talot" (repeating 2)]]}}
   (and (= :011 kayttotarkoitus) (not= 1 huoneistot)))
 
 (defvalidator :vrk:CR316
   {:doc     "Paritalossa pitaa olla kaksi uutta huoneistoa"
    :schema  "uusiRakennus"
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
-             huoneistot      [:huoneistot keys count]]
-   :facts   {:ok   [["012 kahden asunnon talot" {:6 {:any :any}}]]
-             :fail [["012 kahden asunnon talot" {}]]}}
+             huoneistot      [:huoneistot ->count]]
+   :facts   {:ok   [["012 kahden asunnon talot" (repeating 2)]]
+             :fail [["012 kahden asunnon talot" (repeating 1)]]}}
   (and (= :012 kayttotarkoitus) (not= 2 huoneistot)))
 
 (defvalidator :vrk:CR317
   {:doc     "Rivi- tai kerrostaloissa tulee olla vahintaan kolme uutta huoneistoa"
    :schema  "uusiRakennus"
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
-             huoneistot      [:huoneistot keys count]]
-   :facts   {:ok   [["032 luhtitalot" {:1 {:any :any}
-                                       :2 {:any :any}
-                                       :3 {:any :any}}]]
-             :fail [["032 luhtitalot" {}]]}}
+             huoneistot      [:huoneistot ->count]]
+   :facts   {:ok   [["032 luhtitalot" (repeating 3)]]
+             :fail [["032 luhtitalot" (repeating 1)]]}}
   (and (<= 13 kayttotarkoitus 39) (< huoneistot 3)))
 
 (defvalidator :vrk:CR319
@@ -405,6 +416,15 @@
     (= kerrosluku 0)
     (not (#{162 163 169 611 613 712 719 722} kayttotarkoitus))
     (<= kayttotarkoitus 729)))
+
+(defvalidator :vrk:AR307
+  {:doc     "Uusien asuntojen lukumäärä: sallitut arvot 0 - 300"
+   :schema  "uusiRakennus"
+   :fields  [huoneistot [:huoneistot ->count]]
+   :facts   {:ok   [[(repeating 1)]
+                    [(repeating 300)]]
+             :fail [[(repeating 301)]]}}
+  (not (<= 0 huoneistot 300)))
 
 ;; Juha's stuff here
 
