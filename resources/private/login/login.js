@@ -14,8 +14,8 @@
         ajax.get("/api/hashbang")
           .success(function(e) {
             var bang = (e.bang.indexOf("#") !== 0) ? "#" + e.bang : e.bang;
-            window.location = redirectLocation + bang;})
-          .error(function() { window.location = redirectLocation; })
+            window.parent.location = redirectLocation + bang;})
+          .error(function() { window.parent.location = redirectLocation; })
           .call();
       })
       .error(function(e) { hub.send("login-failure", e); })
