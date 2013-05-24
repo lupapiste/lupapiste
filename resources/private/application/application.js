@@ -42,16 +42,19 @@
     }
     
     function normalizeAttachment(a) {
-      var l = a.latestVersion;
+      var versions = _(a.versions()).reverse().value(),
+          restamp = versions[0].stamped(),
+          selected = restamp ? versions[1] : versions[0];
       return {
         id:           a.id(),
         type:         { "type-group": a.type["type-group"](), "type-id": a.type["type-id"]() },
-        contentType:  l.contentType(),
-        filename:     l.filename(),
-        version:      { major: l.version.major(), minor: l.version.minor() },
-        size:         l.size(),
+        contentType:  selected.contentType(),
+        filename:     selected.filename(),
+        version:      { major: selected.version.major(), minor: selected.version.minor() },
+        size:         selected.size(),
         selected:     ko.observable(true),
-        status:       ko.observable("")
+        status:       ko.observable(""),
+        restamp:      restamp
       };
     }
     

@@ -498,7 +498,10 @@
                 <tbody data-bind="foreach: files">
                   <tr>
                     <td data-bind="text: filename"></td>
-                    <td data-bind="version: version"></td>
+                    <td>
+                      <span data-bind="version: version"></span>
+                      <span data-bind="visible: restamp">*</span>
+                    </td>
                     <td data-bind="size: size"></td>
                     <td>
                       <input type="checkbox" data-bind="
