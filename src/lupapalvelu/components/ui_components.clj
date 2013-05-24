@@ -133,8 +133,15 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :register :debug]
-             :js ["welcome.js" "login.js"]
+   :login   {:depends [:common]
+             :js      ["login.js"]}
+
+   :login-frame {:depends [:login]
+                 :html    ["login-frame.html"]
+                 :js      ["login-frame.js"]}
+
+   :welcome {:depends [:login :register :debug]
+             :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 
    :oskari  {:css ["oskari.css"]}

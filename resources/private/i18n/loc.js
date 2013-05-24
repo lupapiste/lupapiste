@@ -48,7 +48,7 @@ var loc;
     var url = window.parent ? window.parent.location.pathname : location.pathname;
     var langEndI = url.indexOf("/", 5);
     var lang = langEndI > 0 ? url.substring(5, langEndI) : null;
-    return _.contains(loc.supported, lang) ? lang : defaultLanguage;
+    return _.contains(loc.supported, lang) ? lang : loc.defaultLanguage;
   }
 
   loc.setTerms = function(newTerms) {
