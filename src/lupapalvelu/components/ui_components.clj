@@ -137,7 +137,7 @@
              :js      ["login.js"]}
 
    :login-frame {:depends [:login]
-                 :html    ["login-frame.html" "login-frame-nav.html"]
+                 :html    ["login-frame.html"]
                  :js      ["login-frame.js"]}
 
    :welcome {:depends [:login :register :debug]
