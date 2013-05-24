@@ -4,6 +4,8 @@ session-dead.logout: Kirjaudu
 connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
 attachmentType.empty._group_label:
 
+application.filter.search: etsi:
+
 #
 # Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
 #
@@ -35,3 +37,4 @@ stamp.none: poista
 
 stamp.comment: Leimattu
 stamp.comment.restamp: Uudelleen leimattu
+
