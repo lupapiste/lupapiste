@@ -526,10 +526,6 @@
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-#_(defn- stamp-attachment! [stamp file-info context]
-    (println "stamp-attachment:" file-info)
-    (Thread/sleep 2000))
-
 (defn- stamp-attachments! [file-infos {:keys [user created job-id application-id] :as context}]
   (let [stamp (stamper/make-stamp
                 (i18n/loc "stamp.verdict")
