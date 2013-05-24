@@ -501,7 +501,7 @@
   ; mea culpa, but what the fuck was I supposed to do
   (mongo/update-by-id :applications (:application-id context)
     {$set {:modified (:created context)}
-     $push {:comments {:text    (loc (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment")
+     $push {:comments {:text    (loc (if (:re-stamp? file-info) "stamp.comment.restamp" "stamp.comment"))
                        :created (:created context)
                        :user    (:user context)
                        :target  {:type "attachment"
@@ -526,7 +526,7 @@
       (add-stamp-comment new-version new-file-id file-info context))
     (try (.delete temp-file) (catch Exception _))))
 
-(defn- stamp-attachment! [stamp file-info context]
+#_(defn- stamp-attachment! [stamp file-info context]
     (println "stamp-attachment:" file-info)
     (Thread/sleep 2000))
 
