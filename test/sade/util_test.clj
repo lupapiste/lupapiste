@@ -46,3 +46,8 @@
   (map (fn-> :a :b even?) [{:a {:b 2}}
                            {:a {:b 3}}
                            {:a {:b 4}}]) => [true false true])
+
+(fact "fn->>"
+  (map (fn->> :a (reduce +)) [{:a [1 2 3]}
+                              {:a [2 3 4]}
+                              {:a [3 4 5]}]) => [6 9 12])

@@ -64,4 +64,5 @@
         default))))
 
 (defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
+(defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
 
