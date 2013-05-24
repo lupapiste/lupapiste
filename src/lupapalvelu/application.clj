@@ -637,8 +637,9 @@
     (reduce (partial add-field application) base col-map)))
 
 (defn make-query [query params user]
-  (let [search (params :sSearch)
-        kind (params :kind)]
+  (let [search (params :filter-search)
+        kind (params :filter-kind)]
+    (println "** search:" search)
     (merge
       query
       (condp = kind
