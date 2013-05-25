@@ -259,7 +259,44 @@
    :state "open"
    :opened 1354532324658
    :location {:x 408048, :y 6693225},
-   :attachments [],
+   :attachments [{ :id "518ce59b036496133cf5ba7f"
+                  :latestVersion { :fileId "518ce59b036496133cf5ba7c"
+                                  :version { :major 0
+                                            :minor 1 }
+                                  :size 27726
+                                  :created 1368188315224
+                                  :filename "1901_001.pdf"
+                                  :contentType "application/pdf"
+                                  :user {:role "authority"
+                                         :lastName "Sibbo"
+                                         :firstName "Sonja"
+                                         :username "sonja"
+                                         :id "777777777777777777000023" }
+                                  :stamped false
+                                  :accepted nil }
+                  :locked true
+                  :modified 1368188315224
+                  :op nil
+                  :state "requires_authority_action"
+                  :target { :type "statement"
+                           :id "518ce582036496133cf5ba75" }
+                  :type { :type-group "muut"
+                         :type-id "muu" }
+                  :versions [
+                             {:fileId "518ce59b036496133cf5ba7c"
+                              :version { "major" 0
+                                        :minor 1 }
+                              :size 27726
+                              :created 1368188315224
+                              :filename "1901_001.pdf"
+                              :contentType "application/pdf"
+                              :user {:role "authority"
+                                     :lastName "Sibbo"
+                                     :firstName "Sonja"
+                                     :username "sonja"
+                                     :id "777777777777777777000023" }
+                              :stamped false
+                              :accepted nil}]}],
    :authority {:id "777777777777777777000023",
                :username "sonja",
                :firstName "Sonja",
@@ -272,7 +309,17 @@
    :propertyId "21111111111111"
    :modified 1354532324691,
    :address "Katutie 54",
-   :id "50bc85e4ea3e790c9ff7cdb0"})
+   :id "50bc85e4ea3e790c9ff7cdb0"
+   :statements [{:given 1368080324142
+                 :id "518b3ee60364ff9a63c6d6a1"
+                 :person {:text "Paloviranomainen"
+                          :name "Sonja Sibbo"
+                          :email "sonja.sibbo@sipoo.fi"
+                          :id "516560d6c2e6f603beb85147"}
+                 :requested 1368080102631
+                 :status "condition"
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}]
+   })
 
 (def get-osapuoli-data #'lupapalvelu.document.rakennuslupa_canonical/get-osapuoli-data)
 
@@ -346,7 +393,7 @@
         henkilo (:henkilo suunnittelija-model)
         yritys (:yritys suunnittelija-model)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
@@ -357,7 +404,7 @@
 (facts "Canonical suunnittelija1 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija1) :suunnittelija)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
@@ -367,7 +414,7 @@
 (facts "Canonical suunnittelija2 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija2) :suunnittelija)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "El\u00e4m\u00e4n koulu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
@@ -498,8 +545,20 @@
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot)
         muuTunnustieto (:muuTunnustieto LupaTunnus)
         MuuTunnus (:MuuTunnus muuTunnustieto)
-        ]
-    ;(clojure.pprint/pprint osapuolet)
+
+        lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))
+        Lausunto (:Lausunto lausuntotieto)
+        pyydetty (:pyydetty Lausunto)
+        viranomainen (:viranomainen pyydetty)
+        pyyntoPvm (:pyyntoPvm pyydetty)
+        lausunto (:lausunto Lausunto)
+        lausuntoViranomainen (:viranomainen lausunto)
+        lausuntoPvm (:lausuntoPvm lausunto)
+        lausuntoType (:lausunto lausunto)
+        lausuntoTeksti (:lausunto lausuntoType)
+        puoltotieto (:puoltotieto lausunto)
+        puolto (:puolto puoltotieto)]
+    ;(clojure.pprint/pprint canonical)
     (fact "canonical" canonical => truthy)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
     (fact "rakennusvalvonta" rakennusvalvonta => truthy)
@@ -508,7 +567,7 @@
     (fact "osapuolettieto" osapuolettieto => truthy)
     (fact "osapuolet" osapuolet => truthy)
     (fact "osapuolitieto" osapuolitieto-hakija => truthy)
-    (fact "paasuunnitelija" paasuunnitelija => (contains {:kuntaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
+    (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "hakija-osapuoli1" hakija-osapuoli1 => truthy)
     (fact "Suunnitelijat" suunnittelijat => truthy)
     (fact "Osapuolijien maara" (+ (count suunnittelijat) (count (:osapuolitieto osapuolet))) => 7)
@@ -556,6 +615,14 @@
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
+
+    (fact "Lasunto" lausunto => truthy)
+    (fact "viranomainen" viranomainen => "Paloviranomainen")
+    (fact "Pyyntopvm" pyyntoPvm => "2013-05-09")
+    (fact "Lasunto viranomainen" lausuntoViranomainen => "Sonja Sibbo")
+    (fact "Lausunto pvm" "20130509")
+    (fact "lausunto teksti osa" lausuntoTeksti => "Savupiippu pit\u00e4\u00e4 olla.")
+    (fact  "Puolto" puolto => "ehdoilla")
 
     ;(clojure.pprint/pprint kaupunkikuva-t)
     ))

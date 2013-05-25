@@ -145,6 +145,7 @@
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
                    :welcome anyone
+                   :login-frame anyone
                    :oskari anyone
                    :about anyone
                    :upload logged-in?
