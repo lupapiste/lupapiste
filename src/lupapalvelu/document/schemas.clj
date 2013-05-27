@@ -40,7 +40,7 @@
 (def simple-osoite [{:name "osoite"
                      :type :group
                      :body [{:name "katu" :type :string}
-                            {:name "postinumero" :type :string :required true :subtype :zip :size "s"}
+                            {:name "postinumero" :type :string :subtype :zip :size "s"}
                             {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
 (def full-osoite [{:name "osoite"
@@ -53,7 +53,7 @@
                           {:name "jakokirjain2" :type :string :size "s"}
                           {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
-                          {:name "postinumero" :type :string :required true :subtype :zip :size "s"}
+                          {:name "postinumero" :type :string :subtype :zip :size "s"}
                           {:name "postitoimipaikannimi" :type :string :size "m"}
                           {:name "pistesijanti" :type :string}]}])
 
