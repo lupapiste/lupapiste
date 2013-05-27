@@ -106,14 +106,17 @@
     (fn [{:keys [name required body repeating] :as element}]
       (let [kw (keyword name)
             current-path (if (empty? path) [kw] (conj path kw))
-            validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
+            validation-error (when
+                               (and required
+                                    (s/blank? (get-in data (conj current-path :value))))
                                (->validation-result nil current-path element [:warn "illegal-value:required"]))
             current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
-        (if body
-          (if repeating
-            (map (fn [k] (validate-required-fields body (conj current-path k) data current-validation-errors)) (keys (get-in data current-path)))
-            (validate-required-fields body current-path data current-validation-errors))
-          current-validation-errors)))
+        (concat current-validation-errors
+          (if body
+            (if repeating
+              (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
+              (validate-required-fields body current-path data []))
+            []))))
     schema-body))
 
 (defn validate
@@ -124,9 +127,7 @@
     (flatten
       (concat
         (validate-fields schema-body nil data [])
-        (let [v (validate-required-fields schema-body nil data [])]
-          (println "***" v)
-          v)
+        (validate-required-fields schema-body nil data [])
         (validator/validate document)))))
 
 (defn valid-document?
