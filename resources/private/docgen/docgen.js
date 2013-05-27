@@ -632,12 +632,9 @@ var docgen = (function () {
       // clear validation errors
       $("#document-"+docId+" .errorPanel").html("").hide();
       // apply new errors & highlights
-      console.log(results.length);
-      console.log(JSON.stringify(results));
       if(results && results.length > 0) {
         _.each(results,function(result) {
           var errorPanel = $("#"+docId+"-"+result.path.join("-")+"-errorPanel");
-          console.log("errorpanel:",errorPanel.length,result.path);
           errorPanel.html(errorPanel.html()+loc("error."+result.result[1])+"<br/>").show();
           $("#"+docId+"-"+result.path.join("-")).addClass("warning");
         });
