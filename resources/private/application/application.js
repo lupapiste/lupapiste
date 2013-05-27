@@ -282,6 +282,7 @@
       return false;
     };
   }();
+  
 
   var application = {};
   application = {
@@ -302,7 +303,8 @@
     operationsCount: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
-
+    neighbors: ko.observable(),
+    
     // new stuff
     invites: ko.observableArray(),
 
@@ -577,6 +579,7 @@
 
       isInitializing = false;
       pageutil.hideAjaxWait();
+      
     });
   }
 
