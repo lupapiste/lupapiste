@@ -72,16 +72,14 @@
         yhteystiedot (:yhteystiedot henkilo)]
     (merge (get-name henkilotiedot)
       {:henkilotunnus (-> henkilotiedot :hetu :value)
-       :osoite (get-simple-osoite (:osoite henkilo))
-       :turvakieltoKytkin (true? (-> henkilo :turvakieltoKytkin :value ))}
+       :osoite (get-simple-osoite (:osoite henkilo))}
      (get-yhteystiedot-data yhteystiedot))))
 
 (defn- get-yhteyshenkilo-data [henkilo]
   (let [henkilotiedot (:henkilotiedot henkilo)
         yhteystiedot (:yhteystiedot henkilo)]
     (merge (get-name henkilotiedot)
-     (get-yhteystiedot-data yhteystiedot)
-     {:turvakieltoKytkin (true? (-> henkilo :turvakieltoKytkin :value ))})))
+     (get-yhteystiedot-data yhteystiedot))))
 
 (defn- get-handler [application]
   (if-let [handler (:authority application)]
@@ -141,7 +139,7 @@
                          (-> osapuoli :omistajalaji :value))
         role-codes     {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
                         :kuntaRooliKoodi kuntaRoolicode
-                        :turvakieltoKytkin (true? (-> osapuoli :turvakieltoKytkin :value))}
+                        :turvakieltoKytkin (true? (-> henkilo :turvakieltoKytkin :value))}
         codes          (if omistajalaji
                          (merge role-codes {:omistajalaji omistajalaji})
                          role-codes)]
