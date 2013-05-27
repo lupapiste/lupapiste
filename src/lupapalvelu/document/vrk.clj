@@ -110,10 +110,6 @@
 (defn ->count [m]
   (-> m keys count))
 
-;; FIME: please implement
-(defn asuinrakennus? [data]
-  true)
-
 (defn repeating
   ([n]
     (repeating n {:any :any}))
@@ -362,10 +358,12 @@
 (defvalidator :vrk:CR340
   {:doc     "Asuinrakennuksessa kerrosalan on oltava vahintaaan 7 neliota"
    :schema  "uusiRakennus"
-   :fields  [kerrosala [:mitat :kerrosala ->int]]
-   :facts   {:ok   [[7]]
-             :fail [[6]]}}
-  (and (asuinrakennus? data) (< kerrosala 7)))
+   :fields  [kerrosala       [:mitat :kerrosala ->int]
+             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
+   :facts   {:ok   [[7 "032 luhtitalot"]
+                    [6 "611 voimalaitosrakennukset"]]
+             :fail [[6 "032 luhtitalot"]]}}
+  (and (<= 11 kayttotarkoitus 39) (< kerrosala 7)))
 
 (defvalidator :vrk:CR333:tilavuus
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
@@ -425,8 +423,6 @@
                     [(repeating 300)]]
              :fail [[(repeating 301)]]}}
   (not (<= 0 huoneistot 300)))
-
-;; Juha's stuff here
 
 (comment
   (require '[lupapalvelu.document.vrk-test :refer [check-validator]])
