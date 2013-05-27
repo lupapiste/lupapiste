@@ -36,7 +36,8 @@
    :yhteystiedot {:puhelin {:value "+358401234567"}
                   :email {:value "pena@example.com"}
                   :fax {:value "+358401234568"}}
-   :osoite osoite})
+   :osoite osoite
+   :turvakieltoKytkin { :value true}})
 
 (def suunnittelija-henkilo
   (assoc henkilo :henkilotiedot nimi))
@@ -366,8 +367,10 @@
         yritys (:yritys hakija-model)]
     (fact hakija-model => truthy)
 
+    (clojure.pprint/pprint hakija-model)
     (fact (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact (:VRKrooliKoodi hakija-model) => "hakija")
+    (fact (:turvakieltoKytkin henkilo) => true)
     (validate-person henkilo)
     (fact yritys => nil)))
 
@@ -378,7 +381,7 @@
     (fact hakija-model => truthy)
     (fact (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact (:VRKrooliKoodi hakija-model) => "hakija")
-    (fact (:turvakieltoKytkin hakija-model) => true)
+    (fact (:turvakieltoKytkin henkilo) => false)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 

@@ -72,14 +72,16 @@
         yhteystiedot (:yhteystiedot henkilo)]
     (merge (get-name henkilotiedot)
       {:henkilotunnus (-> henkilotiedot :hetu :value)
-       :osoite (get-simple-osoite (:osoite henkilo))}
+       :osoite (get-simple-osoite (:osoite henkilo))
+       :turvakieltoKytkin (true? (-> henkilo :turvakieltoKytkin :value ))}
      (get-yhteystiedot-data yhteystiedot))))
 
 (defn- get-yhteyshenkilo-data [henkilo]
   (let [henkilotiedot (:henkilotiedot henkilo)
         yhteystiedot (:yhteystiedot henkilo)]
     (merge (get-name henkilotiedot)
-     (get-yhteystiedot-data yhteystiedot))))
+     (get-yhteystiedot-data yhteystiedot)
+     {:turvakieltoKytkin (true? (-> henkilo :turvakieltoKytkin :value ))})))
 
 (defn- get-handler [application]
   (if-let [handler (:authority application)]
