@@ -138,7 +138,8 @@
                          :omistajalaji
                          (-> osapuoli :omistajalaji :value))
         role-codes     {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
-                        :kuntaRooliKoodi kuntaRoolicode}
+                        :kuntaRooliKoodi kuntaRoolicode
+                        :turvakieltoKytkin (true? (-> osapuoli :turvakieltoKytkin :value))}
         codes          (if omistajalaji
                          (merge role-codes {:omistajalaji omistajalaji})
                          role-codes)]

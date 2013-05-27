@@ -49,7 +49,7 @@
                    :yhteystiedot {:email {:value "solita@solita.fi"},
                                   :fax {:value "03-389 1380"},
                                   :puhelin {:value "03-389 1380"}}}})
-
+TURVAKIELTO
 (def hakija1
   {:id "hakija1" :schema {:info {:name "hakija"}}
    :data {:henkilo henkilo}})
@@ -378,6 +378,7 @@
     (fact hakija-model => truthy)
     (fact (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact (:VRKrooliKoodi hakija-model) => "hakija")
+    (fact (:turvakieltoKytkin hakija-model) => true)
     (validate-minimal-person henkilo)
     (validate-company yritys)))
 
