@@ -10,6 +10,7 @@
             [lupapalvelu.fixture.kind]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
+            [lupapalvelu.fixture.finland-rakval]
             [lupapalvelu.admin]
             [lupapalvelu.application]
             [lupapalvelu.authority-admin]
@@ -41,7 +42,7 @@
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware headers/add-security-headers)
   (server/add-middleware web/anti-csrf)
-  (server/add-middleware web/apikey-authentication)
+  (server/add-middleware web/authentication)
   (server/add-middleware etag/if-none-match-build-number)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")

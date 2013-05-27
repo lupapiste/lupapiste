@@ -3,7 +3,9 @@
         [lupapalvelu.core]
         [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as application-query-for]]
-        [clojure.string :only [split join trim]])
+        [lupapalvelu.i18n :only [loc *lang* with-lang]]
+        [clojure.string :only [split join trim]]
+        [swiss-arrows.core :only [-<> -<>>]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
@@ -101,7 +103,7 @@
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment nil false nil now) attachement-types))
+  (map (partial make-attachment now nil false nil) attachement-types))
 
 (defn create-attachment [application-id attachement-type now target locked]
   (let [attachment (make-attachment now target locked nil attachement-type)]
@@ -416,7 +418,7 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc lang]
+(defn- get-all-attachments [application loc]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
@@ -426,9 +428,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
+          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
+        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application))
         (.finish zip)))
     temp-file))
 
@@ -499,12 +501,22 @@
       (errorf e "failed to stamp attachment: application=%s, file=%s" application-id fileId)
       (job/update job-id assoc-in [id :status] :error)))))
 
+(defn- loc-organization-name [organization]
+  (get-in organization [:name (keyword *lang*)] (str "???ORG:" (:id organization) "???")))
+
+(defn- get-organization-name [application-id]
+  (-<> application-id
+       (mongo/by-id :applications <> [:organization])
+       (:organization)
+       (mongo/by-id :organizations <> [:name])
+       (loc-organization-name <>)))
+
 (defn- stamp-attachments [file-infos application-id job-id user created x-margin y-margin]
   (let [stamp (stamper/make-stamp
                 (i18n/loc "stamp.verdict")
                 created
                 (str (:firstName user) \space (:lastName user))
-                (->> user (:municipality) (str "municipality.") (i18n/loc) (s/upper-case)))]
+                (get-organization-name application-id))]
     (doseq [file-info (vals file-infos)]
       (job/update job-id assoc-in [(:id file-info) :status] :working)
       (try

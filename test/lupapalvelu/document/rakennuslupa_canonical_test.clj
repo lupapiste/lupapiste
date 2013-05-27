@@ -8,6 +8,17 @@
         [clojure.data.xml]
         [clj-time.core :only [date-time]]))
 
+;;
+;; Local document validator predicate
+;;
+
+(defn valid-against-current-schema? [document]
+  (or (fact (validate-against-current-schema document) => '()) true))
+
+;;
+;; Facts
+;;
+
 (facts "Date format"
   (fact (to-xml-date (date-time 2012 1 14)) => "2012-01-14")
   (fact (to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
@@ -18,7 +29,7 @@
 
 (def henkilotiedot (assoc nimi :hetu {:value "010100A0101"}))
 
-(def osoite {:katu {:value "katu"} :postinumero {:value "666"} :postitoimipaikannimi {:value "Tuonela"}})
+(def osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
 
 (def henkilo
   {:henkilotiedot henkilotiedot
@@ -119,16 +130,16 @@
                      :energialuokka {:value "C"}
                      :energiatehokkuusluku {:value "124"}
                      :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
-          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "a"} :huoneistonumero {:value "1"} :jakokirjain {:value "A"}}
+          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "A"} :huoneistonumero {:value "1"} :jakokirjain {:value "a"}}
                            :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
                                               :huoneistoala {:value "56"}
-                                              :huoneluku {:value "2H+K"}}
+                                              :huoneluku {:value "66"}}
                            :keittionTyyppi {:value "keittio"}
                            :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
                        :1 {:huoneistoTunnus {},
                            :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
                                               :huoneistoala {:value "02"}
-                                              :huoneluku {:value "Huoneiston tiedot liikehuoneistolle"}}
+                                              :huoneluku {:value "12"}}
                            :keittionTyyppi {:value "keittokomero"},
                            :varusteet {:ammeTaiSuihkuKytkin {:value true}, :saunaKytkin {:value true}, :lamminvesiKytkin {:value true}}}}})
 
@@ -221,20 +232,20 @@
    lisatieto
    hankkeen-kuvaus])
 
-(fact "Meta test: hakija1"          (validate-against-current-schema hakija1) => true)
-(fact "Meta test: hakija2"          (validate-against-current-schema hakija2) => true)
-(fact "Meta test: paasuunnittelija" (validate-against-current-schema paasuunnittelija) => true)
-(fact "Meta test: suunnittelija1"   (validate-against-current-schema suunnittelija1) => true)
-(fact "Meta test: suunnittelija2"   (validate-against-current-schema suunnittelija2) => true)
-(fact "Meta test: maksaja1"         (validate-against-current-schema maksaja1) => true)
-(fact "Meta test: maksaja2"         (validate-against-current-schema maksaja2) => true)
-(fact "Meta test: rakennuspaikka"   (validate-against-current-schema rakennuspaikka) => true)
-(fact "Meta test: uusi-rakennus"    (validate-against-current-schema uusi-rakennus) => true)
-(fact "Meta test: lisatieto"        (validate-against-current-schema lisatieto) => true)
-(fact "Meta test: hankkeen-kuvaus"  (validate-against-current-schema hankkeen-kuvaus) => true)
+(fact "Meta test: hakija1"          hakija1          => valid-against-current-schema?)
+(fact "Meta test: hakija2"          hakija2          => valid-against-current-schema?)
+(fact "Meta test: paasuunnittelija" paasuunnittelija => valid-against-current-schema?)
+(fact "Meta test: suunnittelija1"   suunnittelija1   => valid-against-current-schema?)
+(fact "Meta test: suunnittelija2"   suunnittelija2   => valid-against-current-schema?)
+(fact "Meta test: maksaja1"         maksaja1         => valid-against-current-schema?)
+(fact "Meta test: maksaja2"         maksaja2         => valid-against-current-schema?)
+(fact "Meta test: rakennuspaikka"   rakennuspaikka   => valid-against-current-schema?)
+(fact "Meta test: uusi-rakennus"    uusi-rakennus    => valid-against-current-schema?)
+(fact "Meta test: lisatieto"        lisatieto        => valid-against-current-schema?)
+(fact "Meta test: hankkeen-kuvaus"  hankkeen-kuvaus  => valid-against-current-schema?)
 
 ;; In case a document was added but forgot to write test above
-(fact "Meta test: all documents in fixture are valid" (every? true? (map validate-against-current-schema documents)) => true)
+(fact "Meta test: all documents in fixture are valid" documents => (has every? valid-against-current-schema?))
 
 (def application
   {:municipality municipality,
@@ -248,7 +259,44 @@
    :state "open"
    :opened 1354532324658
    :location {:x 408048, :y 6693225},
-   :attachments [],
+   :attachments [{ :id "518ce59b036496133cf5ba7f"
+                  :latestVersion { :fileId "518ce59b036496133cf5ba7c"
+                                  :version { :major 0
+                                            :minor 1 }
+                                  :size 27726
+                                  :created 1368188315224
+                                  :filename "1901_001.pdf"
+                                  :contentType "application/pdf"
+                                  :user {:role "authority"
+                                         :lastName "Sibbo"
+                                         :firstName "Sonja"
+                                         :username "sonja"
+                                         :id "777777777777777777000023" }
+                                  :stamped false
+                                  :accepted nil }
+                  :locked true
+                  :modified 1368188315224
+                  :op nil
+                  :state "requires_authority_action"
+                  :target { :type "statement"
+                           :id "518ce582036496133cf5ba75" }
+                  :type { :type-group "muut"
+                         :type-id "muu" }
+                  :versions [
+                             {:fileId "518ce59b036496133cf5ba7c"
+                              :version { "major" 0
+                                        :minor 1 }
+                              :size 27726
+                              :created 1368188315224
+                              :filename "1901_001.pdf"
+                              :contentType "application/pdf"
+                              :user {:role "authority"
+                                     :lastName "Sibbo"
+                                     :firstName "Sonja"
+                                     :username "sonja"
+                                     :id "777777777777777777000023" }
+                              :stamped false
+                              :accepted nil}]}],
    :authority {:id "777777777777777777000023",
                :username "sonja",
                :firstName "Sonja",
@@ -261,7 +309,17 @@
    :propertyId "21111111111111"
    :modified 1354532324691,
    :address "Katutie 54",
-   :id "50bc85e4ea3e790c9ff7cdb0"})
+   :id "50bc85e4ea3e790c9ff7cdb0"
+   :statements [{:given 1368080324142
+                 :id "518b3ee60364ff9a63c6d6a1"
+                 :person {:text "Paloviranomainen"
+                          :name "Sonja Sibbo"
+                          :email "sonja.sibbo@sipoo.fi"
+                          :id "516560d6c2e6f603beb85147"}
+                 :requested 1368080102631
+                 :status "condition"
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}]
+   })
 
 (def get-osapuoli-data #'lupapalvelu.document.rakennuslupa_canonical/get-osapuoli-data)
 
@@ -274,7 +332,7 @@
         person-postitoimipaikannimi (:postitoimipaikannimi address)]
     (fact address => truthy)
     (fact person-katu => "katu")
-    (fact person-postinumero =>"666")
+    (fact person-postinumero =>"33800")
     (fact person-postitoimipaikannimi => "Tuonela")))
 
 (defn- validete-contact [m]
@@ -335,7 +393,7 @@
         henkilo (:henkilo suunnittelija-model)
         yritys (:yritys suunnittelija-model)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
@@ -346,7 +404,7 @@
 (facts "Canonical suunnittelija1 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija1) :suunnittelija)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "Koulutus")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
@@ -356,7 +414,7 @@
 (facts "Canonical suunnittelija2 model is correct"
   (let [suunnittelija-model (get-suunnittelija-data (:data suunnittelija2) :suunnittelija)]
     (fact suunnittelija-model => truthy)
-    (fact "kuntaRoolikoodi" (:kuntaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
+    (fact "kuntaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
     (fact "koulutus" (:koulutus suunnittelija-model) => "El\u00e4m\u00e4n koulu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
@@ -407,7 +465,7 @@
   (let [huoneistot (get-huoneisto-data (get-in uusi-rakennus [:data :huoneistot]))
         h1 (first huoneistot), h2 (last huoneistot)]
     (fact (count huoneistot) => 2)
-    (fact (:huoneluku h1) => "2H+K")
+    (fact (:huoneluku h1) => "66")
     (fact (:keittionTyyppi h1) => "keittio")
     (fact (:huoneistoala h1) => "56")
     (fact (:huoneistonTyyppi h1) => "asuinhuoneisto")
@@ -421,7 +479,7 @@
     (fact (-> h1 :huoneistotunnus :huoneistonumero) => "001")
     (fact (-> h1 :huoneistotunnus :jakokirjain) => "a")
 
-    (fact (:huoneluku h2) => "Huoneiston tiedot liikehuoneistolle")
+    (fact (:huoneluku h2) => "12")
     (fact (:keittionTyyppi h2) => "keittokomero")
     (fact (:huoneistoala h2) => "02")
     (fact (:huoneistonTyyppi h2) => "toimitila")
@@ -487,8 +545,20 @@
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot)
         muuTunnustieto (:muuTunnustieto LupaTunnus)
         MuuTunnus (:MuuTunnus muuTunnustieto)
-        ]
-    ;(clojure.pprint/pprint osapuolet)
+
+        lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))
+        Lausunto (:Lausunto lausuntotieto)
+        pyydetty (:pyydetty Lausunto)
+        viranomainen (:viranomainen pyydetty)
+        pyyntoPvm (:pyyntoPvm pyydetty)
+        lausunto (:lausunto Lausunto)
+        lausuntoViranomainen (:viranomainen lausunto)
+        lausuntoPvm (:lausuntoPvm lausunto)
+        lausuntoType (:lausunto lausunto)
+        lausuntoTeksti (:lausunto lausuntoType)
+        puoltotieto (:puoltotieto lausunto)
+        puolto (:puolto puoltotieto)]
+    ;(clojure.pprint/pprint canonical)
     (fact "canonical" canonical => truthy)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
     (fact "rakennusvalvonta" rakennusvalvonta => truthy)
@@ -497,7 +567,7 @@
     (fact "osapuolettieto" osapuolettieto => truthy)
     (fact "osapuolet" osapuolet => truthy)
     (fact "osapuolitieto" osapuolitieto-hakija => truthy)
-    (fact "paasuunnitelija" paasuunnitelija => (contains {:kuntaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
+    (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "hakija-osapuoli1" hakija-osapuoli1 => truthy)
     (fact "Suunnitelijat" suunnittelijat => truthy)
     (fact "Osapuolijien maara" (+ (count suunnittelijat) (count (:osapuolitieto osapuolet))) => 7)
@@ -545,6 +615,14 @@
     (fact "Poistuma pvm" (-> purku-t :purkaminen :poistumaPvm) => "2013-04-17")
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
+
+    (fact "Lasunto" lausunto => truthy)
+    (fact "viranomainen" viranomainen => "Paloviranomainen")
+    (fact "Pyyntopvm" pyyntoPvm => "2013-05-09")
+    (fact "Lasunto viranomainen" lausuntoViranomainen => "Sonja Sibbo")
+    (fact "Lausunto pvm" "20130509")
+    (fact "lausunto teksti osa" lausuntoTeksti => "Savupiippu pit\u00e4\u00e4 olla.")
+    (fact  "Puolto" puolto => "ehdoilla")
 
     ;(clojure.pprint/pprint kaupunkikuva-t)
     ))

@@ -5,6 +5,7 @@
   (:require [clojure.string :as s]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.security :as security]
             [lupapalvelu.attachment :as attachments]
             [lupapalvelu.operations :as operations]))
 
@@ -13,6 +14,11 @@
 
 (defn find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+
+(defquery "users-in-same-organizations"
+  {:roles [:authority]}
+  [{user :user}]
+  (ok :users (map security/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
 
 (defquery "organization-by-user"
   {:description "Lists all organization users by organization."
@@ -61,16 +67,13 @@
   [{user :user}]
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
-(defn find-all-municipalities-in-organizations []
-  (distinct (flatten (map #(:municipalities %) (mongo/select :organizations {} {"municipalities" 1})))))
-
 (defquery "municipalities-for-new-application"
   {:authenticated true
    :verified true}
   [{user :user}]
   (ok :municipalities
-     (map (fn [id] {:id id
-                    :operations (operations/municipality-operations id)}) (find-all-municipalities-in-organizations))))
+     (map (fn [id] {:id id :operations (operations/municipality-operations id)})
+          (->> (mongo/select :organizations {} {"municipalities" 1}) (mapcat :municipalities) (distinct)))))
 
 (defquery "organization"
   {:parameters [:organizationId] :verified true}

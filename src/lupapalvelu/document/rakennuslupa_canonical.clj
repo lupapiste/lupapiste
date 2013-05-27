@@ -9,6 +9,9 @@
             [clojure.string :as s]
             [clj-time.format :as timeformat]))
 
+;; Macro to get values from
+(defmacro value [m & path] `(-> ~m ~@path :value))
+
 ; Empty String will be rendered as empty XML element
 (def empty-tag "")
 
@@ -70,6 +73,12 @@
     (merge (get-name henkilotiedot)
       {:henkilotunnus (-> henkilotiedot :hetu :value)
        :osoite (get-simple-osoite (:osoite henkilo))}
+     (get-yhteystiedot-data yhteystiedot))))
+
+(defn- get-yhteyshenkilo-data [henkilo]
+  (let [henkilotiedot (:henkilotiedot henkilo)
+        yhteystiedot (:yhteystiedot henkilo)]
+    (merge (get-name henkilotiedot)
      (get-yhteystiedot-data yhteystiedot))))
 
 (defn- get-handler [application]
@@ -136,12 +145,12 @@
     (if (= (-> osapuoli :_selected :value) "yritys")
       (merge codes
              {:yritys  (get-yritys-data (:yritys osapuoli))}
-             {:henkilo (get-name (get-in osapuoli [:yritys :yhteyshenkilo :henkilotiedot]))})
+             {:henkilo (get-yhteyshenkilo-data (get-in osapuoli [:yritys :yhteyshenkilo]))})
       (merge codes {:henkilo (get-henkilo-data henkilo)}))))
 
 (defn- get-suunnittelija-data [suunnittelija party-type]
   (let [kuntaRoolikoodi (get-kuntaRooliKoodi suunnittelija party-type)
-        codes {:kuntaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
+        codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
         patevyys (:patevyys suunnittelija)
         henkilo (merge (get-name (:henkilotiedot suunnittelija))
@@ -373,6 +382,25 @@
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus")))
 
+(def puolto-mapping {:condition "ehdoilla"
+                     :no "ei puolla"
+                     :yes "puoltaa"})
+
+(defn- get-statement [statement]
+  {:Lausunto {:id (:id statement)
+              :pyydetty {:viranomainen (get-in statement [:person :text])
+                         :pyyntoPvm (to-xml-date (:requested statement))}
+              :lausunto {:viranomainen (get-in statement [:person :name])
+                         :lausuntoPvm (to-xml-date (:given statement))
+                         :lausunto {:lausunto (:text statement)}
+                         :puoltotieto (if (nil? (:status statement))
+                                        {:puolto "ei tiedossa"}
+                                        {:puolto ((keyword (:status statement)) puolto-mapping)})}}})
+
+(defn- get-statements [statements]
+  ;Returing vector because this element to be Associative
+  (vec (map get-statement statements)))
+
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application]
@@ -397,6 +425,7 @@
                        {:osapuolitieto (get-parties documents)
                         :suunnittelijatieto (get-designers documents)}}
                       :rakennuspaikkatieto (get-bulding-places documents application)
+                      :lausuntotieto (get-statements (:statements application))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents))
                       :kayttotapaus (get-kayttotapaus documents)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}

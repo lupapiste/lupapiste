@@ -69,9 +69,14 @@ var gis = (function() {
       self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
+    
+    self.zoomTo = function(zoom) {
+      self.map.zoomTo(zoom);
+      return self;
+    };
 
     self.getZoom = function() {
-      return self.map.zoom;
+      return self.map.getZoom();
     };
 
     self.getMaxZoom = function() {

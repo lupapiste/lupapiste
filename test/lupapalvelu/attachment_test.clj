@@ -65,3 +65,24 @@
                                   :fileId :file2}]}]]
     (latest-version-after-removing-file attachments :attachment2 :file1) => {:version { :major 1 :minor 1}
                                                                              :fileId :file2}))
+
+(fact "make attachments"
+  (make-attachments 999 [:a :b]) => [{:id "123"
+                                      :locked false
+                                      :modified 999
+                                      :op nil
+                                      :state :requires_user_action
+                                      :target nil
+                                      :type :a
+                                      :versions []}
+                                     {:id "123"
+                                      :locked false
+                                      :modified 999
+                                      :op nil
+                                      :state :requires_user_action
+                                      :target nil
+                                      :type :b
+                                      :versions []}]
+  (provided
+    (mongo/create-id) => "123"))
+

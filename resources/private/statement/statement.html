@@ -76,7 +76,7 @@
         </div>
         <label class="form-label" for="attachment.commentText" data-bind="ltext: 'statement.text'"></label>
         <textarea
-          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-statement')"
+          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', readonly: !$root.authorization.ok('give-statement')"
           id="statement-text"
           rows="20"></textarea>
         <button

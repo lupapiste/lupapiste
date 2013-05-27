@@ -8,7 +8,7 @@
           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
             <!-- ko if: location() -->
-              <button data-bind="click: openOskariMap, ltext: 'application.mapActionOpen'" class="btn btn-primary map-search-button"></button>
+              <a data-bind="click: openOskariMap" class="map-search-button icon search"></a>
             <!-- /ko -->
           </div>
         </div>
@@ -376,6 +376,7 @@
             <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
             <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName, valueUpdate: 'afterkeydown'" />
             <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId, valueUpdate: 'afterkeydown'" />
+            <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>

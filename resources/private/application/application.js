@@ -8,9 +8,10 @@
   var applicationMap = null;
   var inforequestMap = null;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
+  var inviteModel = new LUPAPISTE.InviteModel();
 
   function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
-  
+
   var stampModel = new function() {
     var self = this;
 
@@ -27,10 +28,10 @@
 
     self.xMargin = ko.observable("");
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
-    
+
     self.yMargin = ko.observable("");
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
-    
+
     self.status = ko.observable();
     self.filesTable = ko.observable();
 
@@ -309,7 +310,7 @@
     data: ko.observable(),
 
     openOskariMap: function() {
-      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=10';
+      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=12' + '&addPoint=0' + '&addArea=0';
       window.open(url);
       var applicationId = application.id();
 
@@ -512,6 +513,9 @@
       application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
+      // Invite
+      inviteModel.setApplicationId(app.id);
+
       // Comments:
       commentModel.setApplicationId(app.id);
       commentModel.refresh(app);
@@ -575,47 +579,6 @@
       pageutil.hideAjaxWait();
     });
   }
-
-  var inviteModel = new function() {
-    var self = this;
-
-    self.email = ko.observable();
-    self.text = ko.observable(loc('invite.default-text'));
-    self.documentName = ko.observable();
-    self.documentId = ko.observable();
-    self.error = ko.observable();
-
-    self.reset = function() {
-      self.email(undefined);
-      self.documentName(undefined);
-      self.documentId(undefined);
-      self.text(loc('invite.default-text'));
-      self.error(undefined);
-    };
-
-    self.submit = function(model) {
-      var email = model.email();
-      var text = model.text();
-      var documentName = model.documentName();
-      var documentId = model.documentId();
-      var id = application.id();
-      ajax.command("invite", { id: id,
-                               documentName: documentName,
-                               documentId: documentId,
-                               email: email,
-                               title: "uuden suunnittelijan lis\u00E4\u00E4minen",
-                               text: text})
-        .success(function() {
-          repository.load(id);
-          LUPAPISTE.ModalDialog.close();
-        })
-        .error(function(d) {
-          self.error(loc('invite',d.text));
-        })
-        .call();
-      return false;
-    };
-  }();
 
   hub.subscribe({type: "dialog-close", id : "dialog-valtuutus"}, function() {
     inviteModel.reset();
