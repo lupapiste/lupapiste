@@ -188,7 +188,15 @@
       (apply-update [:a :c :0 :rab] "value")
       (apply-update [:a :d :0 :d2 :0 :od1] "value")
       (apply-update [:a :d :0 :d2 :0 :rd] "value")
-      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?))
+      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?
+    
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")
+      (apply-update [:a :d :0 :d2 :0 :rd] "value")
+      (apply-update [:a :d :1 :d2 :6 :rd] "value")) => valid?))
 
     ;;
 ;; Updates
