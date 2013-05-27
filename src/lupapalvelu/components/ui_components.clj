@@ -27,7 +27,7 @@
                   :css ["jquery-ui.css"]}
 
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
-   :lo-dash      {:js ["lodash-1.1.1.min.js"]}
+   :lo-dash      {:js ["lodash-1.2.1.min.js"]}
    :underscore   {:depends [:lo-dash]
                   :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
@@ -133,8 +133,15 @@
              :js ["upload.js"]
              :css ["upload.css"]}
 
-   :welcome {:depends [:common :register :debug]
-             :js ["welcome.js" "login.js"]
+   :login   {:depends [:common]
+             :js      ["login.js"]}
+
+   :login-frame {:depends [:login]
+                 :html    ["login-frame.html"]
+                 :js      ["login-frame.js"]}
+
+   :welcome {:depends [:login :register :debug]
+             :js ["welcome.js"]
              :html ["index.html" "login.html"]}
 
    :oskari  {:css ["oskari.css"]}
