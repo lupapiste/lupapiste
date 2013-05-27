@@ -31,7 +31,7 @@ error.vrk:CR328:viemari: Viemäriliittymä vaatii varusteeksi viemärin
 error.vrk:CR328:vesijohto: Vesiliittymä vaatii varusteeksi vesijohdon
 error.vrk:CR312: Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1
 error.vrk:CR313: Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala
-error.vrk:CR314: Asuinrakennukssa pitää olla lämmitys
+error.vrk:CR314: Asuinrakennuksessa pitää olla lämmitys
 error.vrk:CR315: Omakotitalossa pitaa olla tasan yksi huoneisto
 error.vrk:CR316: Paritalossa pitää olla kaksi uutta huoneistoa
 error.vrk:CR317: Rivi- tai kerrostaloissa tulee olla vähintään kolme uutta huoneistoa
@@ -43,6 +43,7 @@ error.vrk:CR333:kerrosala: Kerrosala on pakollinen tässä käyttötarkoituksess
 error.vrk:CR333:kokonaisala: Kokonaisala on pakollinen tässä käyttötarkoituksessa
 error.vrk:CR333:kerrosluku: Kerrosluku on pakollinen tässä käyttötarkoituksessa
 error.vrk:BR113: Pien- tai rivitalossa saa olla korkeintaan 3 kerrosta
+error.validator: Validointivirhe
 
 session-dead.title: Istunto vanhentunut
 session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
