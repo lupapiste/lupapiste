@@ -19,8 +19,15 @@
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
+
+        // LUPA-482
+        if (statement.status) {
         self.selectedStatus(statement.status);
+        }
+        if (statement.text) {
         self.text(statement.text);
+        }
+
       } else {
         window.location.hash = "!/404";
       }
