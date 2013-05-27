@@ -18,12 +18,18 @@
 
 (defn ->map [x] (into {} x))
 
-(def suckers [["RakennuksenTiedotType" ->keyword-value ->map]
-              ["KatselmuksenLajiType"]
-              ["JulkisivumateriaaliType"]
-              ["LammitystapaType"]])
+(def extractors [["RakennuksenTiedotType" ->keyword-value ->map]
+                 ["KatselmuksenLajiType"]
+                 ["JulkisivumateriaaliType"]
+                 ["LammitystapaType"]
+                 ["PolttoaineType"]
+                 ["OmistajalajiType"]
+                 ["PaloluokkaType"]
+                 ["EnergialuokkaType"]
+                 ["PurkamisenSyyType"]])
 
-(let [schema (xml/parse "./resources/krysp/rakennusvalvonta.xsd")]
-  (doseq [[name mapper writer] suckers]
-    (println (str "\n" name ":"))
-    (clojure.pprint/pprint ((or writer vec) (extract schema name (or mapper ->value))))))
+(comment
+  (let [schema (xml/parse "./resources/krysp/rakennusvalvonta.xsd")]
+    (doseq [[name mapper writer] extractors]
+      (println (str "\n" name ":"))
+      (clojure.pprint/pprint ((or writer vec) (extract schema name (or mapper ->value)))))))
