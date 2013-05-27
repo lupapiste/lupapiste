@@ -51,5 +51,6 @@
                         (map (fn [path#] {:path   path#
                                           :result [:warn ~(name code)]}) ~paths))
                       (catch Exception e#
-                        {:result [:warn (str "validator")]
-                         :reason (str e#)}))))))})))
+                        [{:path   []
+                          :result [:warn (str "validator")]
+                          :reason (str e#)}]))))))})))
