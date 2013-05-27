@@ -752,12 +752,12 @@ var docgen = (function () {
       sectionContainer.appendChild(elements);
       section.appendChild(title);
 
-      /* form-level validation errors
+/*
       $("<div>", {
         "class": "errorPanel",
         "id": docId+"--errorPanel"
-      }).appendTo(section);
-      */
+      }).text("kosh").show().appendTo(section);
+*/
 
       section.appendChild(sectionContainer);
 

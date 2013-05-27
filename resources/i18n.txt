@@ -44,6 +44,7 @@ error.vrk:CR333:kokonaisala: Kokonaisala on pakollinen tässä käyttötarkoituk
 error.vrk:CR333:kerrosluku: Kerrosluku on pakollinen tässä käyttötarkoituksessa
 error.vrk:BR113: Pien- tai rivitalossa saa olla korkeintaan 3 kerrosta
 error.validator: Validointivirhe
+error.vrk:CR326: Kokonaisalan oltava vahintaan kerrosala
 
 session-dead.title: Istunto vanhentunut
 session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
