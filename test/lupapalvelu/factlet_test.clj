@@ -26,7 +26,7 @@
     (fact "or even deeper nested"
       (fact* "here's the beef"
         (fact "which can haev more nesting under"
-          (let [a (plus 1 1) =not=> (result 2)
+          (let [a (plus 1 1) =not=> (result 3)
                 b (plus a 1) => (result 3)]
             a => 2
             b => 3)))))
