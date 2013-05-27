@@ -45,7 +45,7 @@
                   (let
                     ~(reduce into
                        (for [[k v] (partition 2 fields)]
-                         [k `(some->> ~'data ~@v)]))
+                         [k `(->> ~'data ~@v)]))
                     (try
                       (when-let [resp# (do ~@body)]
                         (map (fn [path#] {:path   path#
