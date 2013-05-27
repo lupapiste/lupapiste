@@ -14,6 +14,16 @@
   [(some->> x (re-matches #"(\d+) .*") last keyword)
    (s/replace x #"\d+\s*" "")])
 
-(comment
-  (def schema (xml/parse "./resources/krysp/rakennusvalvonta.xsd"))
-  (extract schema "RakennuksenTiedotType" ->keyword-value))
+(defn ->value [x] x)
+
+(defn ->map [x] (into {} x))
+
+(def suckers [["RakennuksenTiedotType" ->keyword-value ->map]
+              ["KatselmuksenLajiType"]
+              ["JulkisivumateriaaliType"]
+              ["LammitystapaType"]])
+
+(let [schema (xml/parse "./resources/krysp/rakennusvalvonta.xsd")]
+  (doseq [[name mapper writer] suckers]
+    (println (str "\n" name ":"))
+    (clojure.pprint/pprint ((or writer vec) (extract schema name (or mapper ->value))))))
