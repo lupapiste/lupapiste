@@ -161,13 +161,13 @@
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :rab] "value")
-      (apply-update [:a :c :6 :rab] "value")) => valid?
+      (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:warn "illegal-value:required"])
     
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:warn "illegal-value:required"])
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :c :6 :rab] "value")) => valid?
     
     (-> document
       (apply-update [:a :b :aa] "value")
