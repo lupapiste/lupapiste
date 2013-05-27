@@ -49,7 +49,7 @@
                    :yhteystiedot {:email {:value "solita@solita.fi"},
                                   :fax {:value "03-389 1380"},
                                   :puhelin {:value "03-389 1380"}}}})
-TURVAKIELTO
+
 (def hakija1
   {:id "hakija1" :schema {:info {:name "hakija"}}
    :data {:henkilo henkilo}})
