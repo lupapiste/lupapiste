@@ -166,26 +166,26 @@
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
       (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:warn "illegal-value:required"])
-    
+
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
       (apply-update [:a :c :0 :rab] "value")
       (apply-update [:a :c :6 :rab] "value")) => valid?
-    
+
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
       (apply-update [:a :c :0 :rab] "value")
       (apply-update [:a :d :0 :d2 :0 :od1] "value")) => (invalid-with? [:warn "illegal-value:required"])
-    
+
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
       (apply-update [:a :c :0 :rab] "value")
       (apply-update [:a :d :0 :d2 :0 :od1] "value")
       (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (invalid-with? [:warn "illegal-value:required"])
-    
+
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
@@ -193,7 +193,7 @@
       (apply-update [:a :d :0 :d2 :0 :od1] "value")
       (apply-update [:a :d :0 :d2 :0 :rd] "value")
       (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?
-    
+
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")

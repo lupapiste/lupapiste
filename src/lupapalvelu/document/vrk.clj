@@ -353,8 +353,6 @@
              :fail [["032 luhtitalot" 1]]}}
   (and (<= 32 kayttotarkoitus 39) (< kerrosluku 2)))
 
-;; Tommi's stuff here
-
 (defvalidator :vrk:CR340
   {:doc     "Asuinrakennuksessa kerrosalan on oltava vahintaaan 7 neliota"
    :schema  "uusiRakennus"
@@ -423,8 +421,3 @@
                     [(repeating 300)]]
              :fail [[(repeating 301)]]}}
   (not (<= 0 huoneistot 300)))
-
-(comment
-  (require '[lupapalvelu.document.vrk-test :refer [check-validator]])
-  (check-validator (@validators :vrk:CR319))
-  )
