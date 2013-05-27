@@ -14,13 +14,28 @@
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
 
+    self.clear = function() {
+      self.data(null);
+      self.application(null);
+      self.selectedStatus(null);
+      self.text(null);
+      return self;
+    };
+
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
-        self.selectedStatus(statement.status);
-        self.text(statement.text);
+
+        // LUPA-482
+        if (statement.status) {
+          self.selectedStatus(statement.status);
+        }
+        if (statement.text) {
+          self.text(statement.text);
+        }
+
       } else {
         window.location.hash = "!/404";
       }
@@ -91,6 +106,7 @@
   });
 
   hub.onPageChange("statement", function(e) {
+    statementModel.clear();
     applicationId = e.pagePath[0];
     statementId = e.pagePath[1];
     repository.load(applicationId);
