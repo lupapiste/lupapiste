@@ -426,8 +426,6 @@
              :fail [[(repeating 301)]]}}
   (not (<= 0 huoneistot 300)))
 
-;; Juha's stuff here
-
 (comment
   (require '[lupapalvelu.document.vrk-test :refer [check-validator]])
   (check-validator (@validators :vrk:CR319))
