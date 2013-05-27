@@ -10,10 +10,10 @@
     (e/select schema [(e/attr= :name name) :xs:restriction :xs:enumeration])
     (map (fn-> :attrs :value mapper))))
 
-(defn ->kayttotarkoitus [x]
+(defn ->keyword-value [x]
   [(some->> x (re-matches #"(\d+) .*") last keyword)
    (s/replace x #"\d+\s*" "")])
 
 (comment
   (def schema (xml/parse "./resources/krysp/rakennusvalvonta.xsd"))
-  (extract schema "RakennuksenTiedotType" ->kayttotarkoitus))
+  (extract schema "RakennuksenTiedotType" ->keyword-value))
