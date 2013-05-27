@@ -36,7 +36,8 @@
    :yhteystiedot {:puhelin {:value "+358401234567"}
                   :email {:value "pena@example.com"}
                   :fax {:value "+358401234568"}}
-   :osoite osoite})
+   :osoite osoite
+   :turvakieltoKytkin {:value true}})
 
 (def suunnittelija-henkilo
   (assoc henkilo :henkilotiedot nimi))
@@ -363,11 +364,12 @@
 (facts "Canonical hakija/henkilo model is correct"
   (let [hakija-model (get-osapuoli-data (:data hakija1) :hakija)
         henkilo (:henkilo hakija-model)
+        ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
     (fact hakija-model => truthy)
-
     (fact (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact (:VRKrooliKoodi hakija-model) => "hakija")
+    (fact (:turvakieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact yritys => nil)))
 
