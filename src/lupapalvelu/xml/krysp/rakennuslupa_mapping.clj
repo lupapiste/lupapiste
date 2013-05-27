@@ -99,7 +99,7 @@
 
 
 (def rakennuslupa_to_krysp
-  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.4/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.4/rakennusvalvonta.xsd"
+  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.7/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.0.5/rakennusvalvonta.xsd"
                                         :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
                                         :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
                                         :xmlns:xlink "http://www.w3.org/1999/xlink"
@@ -190,16 +190,15 @@
 (defn- get-current-filename [application-id]
   (str application-id "_current_application.pdf"))
 
-;(defn- get-Liite [title link attachment type file-id]
-;  {:Liite
-;   {:kuvaus title
-;    :linkkiliitteeseen link
-;    :muokkausHetki (to-xml-datetime (:modified attachment))
-;    :versionumero 1
-;    :tyyppi type
-;    :fileId file-id}})
+(defn- get-Liite [title link attachment type file-id]
+   {:kuvaus title
+    :linkkiliitteeseen link
+    :muokkausHetki (to-xml-datetime (:modified attachment))
+    :versionumero 1
+    :tyyppi type
+    :fileId file-id})
 
-(defn- get-liite [attachment application begin-of-link]
+(defn- get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
@@ -232,7 +231,7 @@
         canonical-attachments (for [attachment-tuple statement-attachments-by-id]
                                 (if (= 1 (count (last attachment-tuple)))
                                   nil
-                                  ; kommentoitu pois kryspiun choicen vuoksi{(first attachment-tuple) {:liite (get-liite (first (last attachment-tuple)) application begin-of-link)}}
+                                  ; kommentoitu pois kryspiun choicen vuoksi{(first attachment-tuple) {:liite (for-lausunto (first (last attachment-tuple)) application begin-of-link)}}
                                   ; Ei tueta useampaa liitetta toistaiseksi. krysp menee uusiksi{(first attachment-tuple) {:liite (get-liite-zipped attachment-tuple application begin-of-link)}}
                                   ))]
     (not-empty canonical-attachments)))
@@ -246,7 +245,7 @@
                                           file-id (get-in attachment [:latestVersion :fileId])
                                           attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                                           link (str begin-of-link attachment-file-name)]]
-                                {:Liite (get-liite attachment application begin-of-link)})]
+                                {:Liite (get-Liite title link attachment type file-id)})]
     (not-empty canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
@@ -269,10 +268,10 @@
 (defn- write-statement-attachments [attachments output-dir]
   (let [single-files (filter #(nil? (:files %)) attachments)
         multiple-files (filter #(:files %) attachments)]
-    (println "single-files")
-    (clojure.pprint/pprint single-files)
-    (println "multiple-files")
-    (clojure.pprint/pprint multiple-files)
+    ;(println "single-files")
+    ;(clojure.pprint/pprint single-files)
+    ;(println "multiple-files")
+    ;(clojure.pprint/pprint multiple-files)
     (doseq [file-tuple single-files]
       (write-attachments (map (fn [m] {:Liite (:liite m)}) (vals file-tuple)) output-dir))
     (for [statement-attachments multiple-files]
@@ -343,7 +342,7 @@
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
     (write-attachments attachments output-dir)
-    (write-statement-attachments statement-attachments output-dir)
+    ;(write-statement-attachments statement-attachments output-dir)
 
     (write-application-pdf-versions output-dir application submitted-application lang)
     (when (fs/exists? outfile) (fs/delete outfile))

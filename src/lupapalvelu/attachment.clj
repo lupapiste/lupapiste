@@ -103,7 +103,7 @@
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment nil false nil now) attachement-types))
+  (map (partial make-attachment now nil false nil) attachement-types))
 
 (defn create-attachment [application-id attachement-type now target locked]
   (let [attachment (make-attachment now target locked nil attachement-type)]
