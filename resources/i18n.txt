@@ -45,6 +45,8 @@ error.vrk:CR333:kerrosluku: Kerrosluku on pakollinen tässä käyttötarkoitukse
 error.vrk:BR113: Pien- tai rivitalossa saa olla korkeintaan 3 kerrosta
 error.validator: Validointivirhe
 error.vrk:CR326: Kokonaisalan oltava vahintaan kerrosala
+error.vrk:CR335: Jos lämmitystapa ei ole "ei kiinteää lämmityslaitetta", on polttoaine ilmoitettava
+error.illegal-value:required: Arvo on pakollinen
 
 session-dead.title: Istunto vanhentunut
 session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
@@ -53,4 +55,3 @@ connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään m
 attachmentType.empty._group_label:
 
 application.filter.search: etsi:
-error.illegal-value:required: Arvo on pakollinen
