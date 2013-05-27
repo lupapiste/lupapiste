@@ -101,9 +101,19 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
-(defn- validate-required-fields [document]
-  []
-  #_[[:warn "illegal-value:required"]])
+(defn- validate-required-fields [schema-body path data validation-errors]
+  (map (fn [{:keys [name required body repeating] :as element}]
+         (let [kw (keyword name)
+               current-path (if (empty? path) [kw] (conj path kw))
+               validation-error (if (and required (s/blank? (get-in data (conj current-path :value)))) 
+                                  (->validation-result nil current-path element [:warn "illegal-value:required"])
+                                  nil)
+               current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
+           (if body
+             (if repeating
+               (map (fn [k] (validate-required-fields body (conj current-path k) data current-validation-errors) ) (keys (get-in data current-path)))
+               (validate-required-fields body current-path data current-validation-errors))
+             current-validation-errors))) schema-body))
 
 (defn validate
   "Validates document against it's local schema and document level rules
@@ -113,7 +123,7 @@
     (flatten
       (concat
         (validate-fields schema-body nil data [])
-        (validate-required-fields document)
+        (validate-required-fields schema-body [] data [])
         (validator/validate document)))))
 
 (defn valid-document?

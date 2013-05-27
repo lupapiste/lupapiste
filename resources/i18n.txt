@@ -51,3 +51,4 @@ connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään m
 attachmentType.empty._group_label:
 
 application.filter.search: etsi:
+error.illegal-value:required: Arvo on pakollinen
