@@ -18,3 +18,5 @@ neighbors.sendEmail.email: Sähköpostiosoite:
 neighbors.sendEmail.message: Viesti:
 neighbors.sendEmail.ok: Lähetä
 neighbors.sendEmail.cancel: Peruuta
+neighbors.sendEmail.sending: Sähköpostia lähetetään
+neighbors.sendEmail.reloading: Päivitetään tilaa
