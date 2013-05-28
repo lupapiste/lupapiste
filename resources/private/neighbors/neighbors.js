@@ -9,10 +9,21 @@
     self.application = ko.observable();
     self.neighbors = ko.observableArray();
     self.map = null;
-    self.propertyId = function(v) { console.log("propertyId:", v); };
+    self.addNeighbor = function(propertyId) { self.neighbors.push({
+      propertyId: propertyId,
+      owner: {
+        name: "foo",
+        address: {
+          street: "?",
+          city: "?",
+          zip: "?"
+        }
+      },
+      state: "new"
+    });};
     self.requestContext = new RequestContext();
     self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
-    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId); return self;  };
+    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.addNeighbor); return self;  };
   
     self.click = function(x, y) { self.beginUpdateRequest().searchPropertyId(x, y); return false; };
     
@@ -23,9 +34,8 @@
           y = location.y;
       self
         .application(application)
-        .neighbors(_.map(application.neighbors, function(data, propertyId) { data.propertyId = propertyId; return data; }))
+        .neighbors(_.map(application.neighbors, function(data, propertyId) { data.propertyId = propertyId; data.state = "ready"; return data; }))
         .map.updateSize().clear().center(x, y, 11).add(x, y);
-      console.log("N", self.application(), self.neighbors());
     }
   }
   
