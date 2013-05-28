@@ -687,6 +687,7 @@
   function SendNeighborEmailModel() {
     var self = this;
     
+    self.id = ko.observable();
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
@@ -697,12 +698,22 @@
     });
     
     self.open = function(neighbor) {
-      self.propertyId(neighbor.propertyId).name(neighbor.owner.name()).email("").message("");
+      self
+        .id(application.id())
+        .propertyId(neighbor.propertyId)
+        .name(neighbor.owner.name())
+        .email("")
+        .message("");
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
     self.send = function() {
-      console.log("SEND:", self.propertyId(), self.email(), self.message());
+      ajax
+        .command("send-neighbor-invite", {id: self.id(), propertyId: self.propertyId(), email: self.email(), message: self.message()})
+        .pending(pageutil.makePendingAjaxWait("Oh noes"))
+        .complete(LUPAPISTE.ModalDialog.close)
+        .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(null)))
+        .call();
       return false;
     };
   }
