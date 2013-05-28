@@ -27,6 +27,7 @@
                         :zip              "33800"
                         :hetu             "210281-9988"
                         :vrk-name         "Ilkka"
+                        :y-tunnus         "2341528-4"
                         nil               "string"
                         :letter           (condp = (keyword case)
                                             :lower "a"
