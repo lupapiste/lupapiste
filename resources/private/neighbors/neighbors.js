@@ -8,8 +8,12 @@
     
     self.application = ko.observable();
     self.map = null;
-
-    self.click = function() { console.log("click:", arguments); };
+    self.propertyId = function(v) { console.log("propertyId:", v); };
+    self.requestContext = new RequestContext();
+    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
+    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId); return self;  };
+  
+    self.click = function(pos) { self.beginUpdateRequest().searchPropertyId(pos[0], pos[1]); return false; };
     
     self.init = function(application) {
       if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
