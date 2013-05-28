@@ -30,7 +30,7 @@ var util = (function() {
   }
 
   function isValidEmailAddress(val) {
-    return val.indexOf("@") != -1;
+    return /\S+@\S+\.\S+/.test(val);
   }
 
   var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/;
