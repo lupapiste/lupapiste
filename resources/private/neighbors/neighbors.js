@@ -40,6 +40,7 @@
         .application(application)
         .neighbors(_.map(application.neighbors, function(data, propertyId) { data.propertyId = propertyId; data.state = "ready"; return data; }))
         .map.updateSize().clear().center(x, y, 11).add(x, y);
+      console.log("N:", self.neighbors());
     }
   }
   

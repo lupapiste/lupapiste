@@ -16,11 +16,12 @@
       <tbody data-bind="foreach: neighbors">
         <tr>
           <td data-bind="text: propertyId"></td>
-          <td data-bind="with: owner">
-            <span data-bind="text: name" class="owner-name"></span>
-            <span data-bind="text: address.street" class="owner-street"></span>
-            <span data-bind="text: address.zip" class="owner-zip"></span>
-            <span data-bind="text: address.city" class="owner-city"></span>
+          <td>
+            <span data-bind="visible: state != 'new', text: owner.name" class="owner-name"></span>
+            <input data-bind="visible: state === 'new', value: owner.name" type="text" class="owner-name" />
+            <span data-bind="visible: state != 'new', text: owner.address.street" class="owner-street"></span>
+            <span data-bind="visible: state != 'new', text: owner.address.zip" class="owner-zip"></span>
+            <span data-bind="visible: state != 'new', text: owner.address.city" class="owner-city"></span>
           </td>
           <td>
             <a href="#">poista</a>
