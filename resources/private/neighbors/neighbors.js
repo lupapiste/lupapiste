@@ -18,8 +18,6 @@
     };
   }
   
-  Winner!
-  
   function Model() {
     var self = this;
     
