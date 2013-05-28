@@ -687,13 +687,23 @@
   function SendNeighborEmailModel() {
     var self = this;
     
-    self.neighbor = ko.observable();
+    self.propertyId = ko.observable();
+    self.name = ko.observable();
     self.email = ko.observable();
     self.message = ko.observable();
     
+    self.ok = ko.computed(function() {
+      return util.isValidEmailAddress(self.email()) && !_.isBlank(self.message());
+    });
+    
     self.open = function(neighbor) {
-      self.neighbor(neighbor).email("").message("");
+      self.propertyId(neighbor.propertyId).name(neighbor.owner.name()).email("").message("");
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
+    };
+
+    self.send = function() {
+      console.log("SEND:", self.propertyId(), self.email(), self.message());
+      return false;
     };
   }
   

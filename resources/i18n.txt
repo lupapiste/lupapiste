@@ -12,4 +12,9 @@ neighbors.status: Tila
 neighbors.actions: Toiminnot
 neighbors.actionSendEmail: Lähetä sähköposti kutsu
 
-neighbor.sendEmail.title: Kutsu naapuri
+neighbors.sendEmail.title: Kutsu naapuri
+neighbors.sendEmail.name: Naapurin nimi:
+neighbors.sendEmail.email: Sähköpostiosoite:
+neighbors.sendEmail.message: Viesti:
+neighbors.sendEmail.ok: Lähetä
+neighbors.sendEmail.cancel: Peruuta
