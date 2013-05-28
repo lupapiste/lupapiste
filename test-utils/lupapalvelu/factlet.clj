@@ -3,7 +3,7 @@
         clojure.walk)
   (:require [midje.parsing.util.recognizing :as recognize]))
 
-(defn create-facts
+(defn- create-facts
   [c]
   (reduce
     (fn [form [k v]]
@@ -16,10 +16,16 @@
   `(let ~(create-facts letform)
      ~@body))
 
+(defn- let? [form]
+  (and (list? form) (= 'let (first form))))
+
+(defn- let-facts [form]
+  (prewalk
+    (fn [x]
+      (if (let? x)
+        `(let ~(create-facts (second x)) ~@(nnext x))
+        x))
+    form))
+
 (defmacro fact* [& form]
-  (let [form (prewalk
-               (fn [x]
-                 (if (and (list? x) (= 'let (first x)))
-                   `(let ~(create-facts (second x)) ~@(-> x next next))
-                   x)) form)]
-    `(do ~@form)))
+  `(do ~@(let-facts form)))
