@@ -438,7 +438,7 @@
 
     changeTab: function(model,event) {
       var $target = $(event.target);
-      if ($target.is("span")) { $target = $target.parent(); }
+      while ($target.is("span")) { $target = $target.parent(); }
       window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
       window.scrollTo(0,0);
     }
