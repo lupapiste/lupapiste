@@ -7,11 +7,11 @@
     return {
       propertyId: propertyId,
       owner: {
-        name: "",
+        name: ko.observable(""),
         address: {
-          street: "",
-          city: "",
-          zip: ""
+          street: ko.observable(""),
+          city: ko.observable(""),
+          zip: ko.observable("")
         }
       },
       state: "new"
