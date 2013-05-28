@@ -14,7 +14,6 @@
     self.application = ko.observable();
     
     self.init = function(application) {
-      console.log("init:", application);
       if (!map) map = makeMap();
       var location = application.location,
           x = location.x,
