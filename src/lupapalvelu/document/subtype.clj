@@ -33,7 +33,7 @@
     :else [:warn "illegal-number"]))
 
 (defmethod subtype-validation :letter [{:keys [case]} v]
-  (let [regexp (condp = case
+  (let [regexp (condp = (keyword case)
                  :lower #"^\p{Ll}$"
                  :upper #"^\p{Lu}$"
                  #"^\p{L}$")]
