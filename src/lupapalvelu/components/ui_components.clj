@@ -86,7 +86,11 @@
    :verdict      {:depends [:common :repository]
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
-
+   
+   :neighbors    {:depends [:common :repository]
+                  :js ["neighbors.js"]
+                  :html ["neighbors.html"]}
+   
    :register     {:depends [:common]
                   :css ["register.css"]
                   :js ["register.js"]
@@ -106,7 +110,7 @@
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :application :attachment
-                            :statement :verdict :docgen :create :mypage :debug]
+                            :statement :verdict :neighbors :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
