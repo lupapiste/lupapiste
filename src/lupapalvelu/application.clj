@@ -31,7 +31,7 @@
 ;; Common helpers:
 ;;
 
-(defn get-applicant-name [app]
+(defn get-applicant-name [_ app]
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
@@ -79,15 +79,15 @@
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}])
 
-(defn with-meta-fields [app]
-  (reduce (fn [app {field :field f :fn}] (assoc app field (f app))) app meta-fields))
+(defn with-meta-fields [user app]
+  (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
 ;;
 ;; Query application:
 ;;
 
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
-  (ok :applications (without-system-keys (map with-meta-fields (mongo/select :applications (domain/application-query-for user))))))
+  (ok :applications (without-system-keys (map (partial with-meta-fields user) (mongo/select :applications (domain/application-query-for user))))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
@@ -95,9 +95,12 @@
 (defquery "application"
   {:authenticated true
    :parameters [:id]}
-  [{app :application}]
+  [{app :application user :user}]
   (if app
-    (ok :application (-> app with-meta-fields without-system-keys) :authorities (find-authorities-in-applications-organization app))
+    (ok :application (-> app
+                       (partial with-meta-fields user)
+                       without-system-keys)
+        :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -614,7 +617,7 @@
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   (juxt :address :municipality)
                   get-application-operation
-                  get-applicant-name
+                  :applicant
                   :submitted
                   :modified
                   :state
@@ -672,7 +675,7 @@
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp make-row with-meta-fields) apps)
+        rows        (map (comp make-row (partial with-meta-fields user)) apps)
         echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total
