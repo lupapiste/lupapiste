@@ -31,7 +31,7 @@
                           :user-id (:id (security/current-user))})
     token-id))
 
-(defn get-token [id consume]
+(defn get-token [id & {:keys [consume] :or {consume false}}]
   (when-let [token (mongo/select-one :token {:_id id
                                              :used nil
                                              :expires {$gt (core/now)}})]
@@ -39,9 +39,6 @@
       (mongo/update-by-id :token id {$set {:used (core/now)}}))
     (assoc token :token-type (keyword (:token-type token)))))
 
-(defn get-and-consume-token [id]
-  (get-token id true))
-
-(defn consume-token [id params]
-  (when-let [token-data (get-token id true)]
+(defn consume-token [id params & {:keys [consume] :or {consume false}}]
+  (when-let [token-data (get-token id :consume consume)]
     (handle-token token-data params)))
