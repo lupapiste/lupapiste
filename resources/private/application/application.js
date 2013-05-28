@@ -681,6 +681,11 @@
     },
     sendNeighborEmail: function(neighbor) {
       ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call();
+      return false;
+    },
+    manage: function(application) {
+      window.location.hash = "!/neighbors/" + application.id();
+      return false;
     }
   };
   

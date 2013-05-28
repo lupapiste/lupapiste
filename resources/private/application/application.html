@@ -399,12 +399,7 @@
               </tbody>
             </table>
             
-            <button
-                x-data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
-                class="btn btn-primary modal"
-                data-test-id="add-neighbor">
-              Lisää naapuri
-            </button>
+            <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage'" class="btn btn-primary modal"></button>
             
           </div>
             
