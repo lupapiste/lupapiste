@@ -15,7 +15,9 @@ neighbors.actionSendEmail: Lähetä sähköposti kutsu
 neighbors.sendEmail.title: Kutsu naapuri
 neighbors.sendEmail.name: Naapurin nimi:
 neighbors.sendEmail.email: Sähköpostiosoite:
+neighbors.sendEmail.email.placeholder: matti.meikalainen@osoite.fi
 neighbors.sendEmail.message: Viesti:
+neighbors.sendEmail.message.placeholder: Viestisi naapurille
 neighbors.sendEmail.ok: Lähetä
 neighbors.sendEmail.cancel: Peruuta
 neighbors.sendEmail.sending: Sähköpostia lähetetään
