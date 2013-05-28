@@ -41,6 +41,12 @@
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str (:value first-name) \space (:value last-name)))))))
 
+(defn get-unseen-comment-count [user app]
+  (let [last-read (get-in app [:_comments-read-by (keyword (:id user))] 0)]
+    (count (filter (fn [comment] (> (:created comment) last-read)) (:comments app)))
+    )
+  )
+
 (defn get-application-operation [app]
   (first (:operations app)))
 
@@ -77,7 +83,8 @@
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}])
+(def meta-fields [{:field :applicant :fn get-applicant-name}
+                  {:field :unseenComments :fn get-unseen-comment-count}])
 
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
@@ -98,7 +105,7 @@
   [{app :application user :user}]
   (if app
     (ok :application (-> app
-                       (partial with-meta-fields user)
+                       ((partial with-meta-fields user))
                        without-system-keys)
         :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
