@@ -693,7 +693,11 @@
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
       stampModel: stampModel,
-      changeLocationModel: changeLocationModel
+      changeLocationModel: changeLocationModel,
+      neighbor: {
+        normalize: function(neighbors) { return _.map(neighbors, function(data, propertyId) { data.propertyId = propertyId; return data; }); },
+        sendNeighborEmail: function(neighbor) { ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call(); }
+      }
     };
 
     $("#application").applyBindings(bindings);

@@ -368,10 +368,6 @@
   
             <h1>Naapurit</h1>
 
-            <ul data-bind="foreach: neighbors">
-              <li data-bind="text: propertyId"></li>
-            </ul>
-            
             <table>
               <thead>
                 <tr>
@@ -381,7 +377,7 @@
                   <th>Toiminnot</th>
                 </tr>
               </thead>
-              <tbody data-bind="foreach: neighbors">
+              <tbody data-bind="foreach: $root.neighbor.normalize(neighbors())">
                 <tr>
                   <td data-bind="text: propertyId"></td>
                   <td data-bind="with: owner">
@@ -395,7 +391,12 @@
                     <span data-bind="dateTimeString: created" class="status-time"></span>
                   </td>
                   <td>
-                    <a href="#">Lähetä sähköposti</a>
+                    <a data-bind="
+                           click: $root.neighbor.sendNeighborEmail,
+                           visible: $root.authorization.ok('send-neighbor-invite')"
+                       href="#">
+                     Lähetä sähköposti
+                   </a>
                     <a href="#">Lisää skannattu lausunto</a>
                     <a href="#">Merkitse kuulluksi</a>
                   </td>
