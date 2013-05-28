@@ -421,3 +421,25 @@
                     [(repeating 300)]]
              :fail [[(repeating 301)]]}}
   (not (<= 0 huoneistot 300)))
+
+(defvalidator :vrk:CR330
+  {:doc    "Rakennus ei saa olla yli 150 metria korkea"
+   :schema "uusiRakennus"
+   :fields [tilavuus        [:mitat :tilavuus ->int]
+            kerrosala       [:mitat :kerrosala ->int]
+            kerrosluku      [:mitat :kerrosluku ->int]
+            kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
+   :facts  {:ok   [[ 570 145  1 "032 luhtitalot"]
+                   [ 200   0  0 "032 luhtitalot"]
+                   [3000 800 40 "342 seurakuntatalot"]
+                   [3300 800 40 "611 voimalaitosrakennukset"]
+                   [3300 800 40 "931 saunarakennukset"]]
+            :fail [[3300 800 40 "342 seurakuntatalot"]]}}
+  (and
+    (> kerrosluku 0)
+    (> kerrosala 0)
+    (not (#{162 163 169 722 611 613 699 712 719} kayttotarkoitus))
+    (<= kayttotarkoitus 799)
+      (> (/ tilavuus (/ kerrosala kerrosluku)) 150)))
+
+

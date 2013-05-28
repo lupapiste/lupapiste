@@ -48,6 +48,7 @@ error.vrk:CR326: Kokonaisalan oltava vahintaan kerrosala
 error.vrk:CR335: Jos lämmitystapa ei ole "ei kiinteää lämmityslaitetta", on polttoaine ilmoitettava
 error.illegal-value:required: Arvo on pakollinen
 error.illegal-y-tunnus: Y-tunnus on väärää muotoa
+error.vrk:CR330: Rakennus ei saa olla yli 150 metriä korkea
 
 session-dead.title: Istunto vanhentunut
 session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
