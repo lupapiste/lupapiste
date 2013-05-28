@@ -672,6 +672,33 @@
     }
   });
 
+  var neighborActions = {
+    normalize: function(neighbors) {
+      return _.map(neighbors, function(data, propertyId) { data.propertyId = propertyId; return data; });
+    },
+    openSendEmailDialog: function(neighbor) {
+      return false;
+    },
+    sendNeighborEmail: function(neighbor) {
+      ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call();
+    }
+  };
+  
+  function SendNeighborEmailModel() {
+    var self = this;
+    
+    self.neighbor = ko.observable();
+    self.email = ko.observable();
+    self.message = ko.observable();
+    
+    self.open = function(neighbor) {
+      self.neighbor(neighbor).email("").message("");
+      LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
+    };
+  }
+  
+  var sendNeighborEmailModel = new SendNeighborEmailModel();
+  
   $(function() {
     applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
     inforequestMap = gis.makeMap("inforequest-map", false).center([{x: 404168, y: 6693765}], 12);
@@ -694,10 +721,8 @@
       verdictModel: verdictModel,
       stampModel: stampModel,
       changeLocationModel: changeLocationModel,
-      neighbor: {
-        normalize: function(neighbors) { return _.map(neighbors, function(data, propertyId) { data.propertyId = propertyId; return data; }); },
-        sendNeighborEmail: function(neighbor) { ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call(); }
-      }
+      neighbor: neighborActions,
+      sendNeighborEmailModel: sendNeighborEmailModel
     };
 
     $("#application").applyBindings(bindings);
