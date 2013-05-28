@@ -2,7 +2,12 @@
   "use strict";
 
   var neighbors = "neighbors";
-
+  var map = null;
+  
+  function initMap() {
+    return gis.makeMap("neighbors-map", false).center([{x: 404168, y: 6693765}], 12);
+  }
+  
   function Model() {
     var self = this;
     
@@ -10,6 +15,8 @@
     
     self.init = function(application) {
       console.log("init:", application);
+      if (!map) map = initMap();
+      map.updateSize();
       self.application(application);
     }
   }
