@@ -13,7 +13,7 @@
     self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
     self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId); return self;  };
   
-    self.click = function(x, y) { console.log("c", x, y); self.beginUpdateRequest().searchPropertyId(x, y); return false; };
+    self.click = function(x, y) { self.beginUpdateRequest().searchPropertyId(x, y); return false; };
     
     self.init = function(application) {
       if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
