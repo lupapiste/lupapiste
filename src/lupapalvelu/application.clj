@@ -95,8 +95,8 @@
 (defquery "application"
   {:authenticated true
    :parameters [:id]}
-  [{{id :id} :data user :user}]
-  (if-let [app (domain/get-application-as id user)]
+  [{app :application}]
+  (if app
     (ok :application (-> app with-meta-fields without-system-keys) :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
@@ -105,11 +105,8 @@
 (defquery "authorities-in-applications-organization"
   {:parameters [:id]
    :authenticated true}
-  [command]
-  (let [id (-> command :data :id)
-        app (mongo/select-one :applications {:_id id} {:organization 1})
-        authorities (find-authorities-in-applications-organization app)]
-    (ok :authorityInfo authorities)))
+  [{app :application}]
+  (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
 (defn filter-repeating-party-docs [names]
   (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
