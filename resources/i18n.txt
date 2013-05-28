@@ -22,3 +22,4 @@ neighbors.sendEmail.ok: Lähetä
 neighbors.sendEmail.cancel: Peruuta
 neighbors.sendEmail.sending: Sähköpostia lähetetään
 neighbors.sendEmail.reloading: Päivitetään tilaa
+neighbors.manage: Hallitse naapureita
