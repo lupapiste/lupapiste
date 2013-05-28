@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.subtype
   (:use [clojure.string :only [blank?]]
         [clojure.tools.logging])
-  (:require [sade.util :refer [->int]]
+  (:require [sade.util :refer [->int fn->]]
             [clj-time.format :as tf]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -48,10 +48,10 @@
     (re-matches #"^\d{14}$" v) nil
     :else [:warn "illegal-kiinteistotunnus"]))
 
-(defn- y-tunnus? [x]
-  (when-let [[_ checksum] (re-matches #"[0-9]{7}-([0-9])" x)]
-    (let [sum (->> x
-                (map #(Character/digit % 10))
+(defn- y-tunnus? [s]
+  (when-let [[_ checksum] (re-matches #"[0-9]{7}-([0-9])" s)]
+    (let [sum (->> s
+                (map ->int)
                 (map * [7 9 10 5 8 4 2])
                 (reduce +))
           mod (mod sum 11)
