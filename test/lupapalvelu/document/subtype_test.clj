@@ -66,5 +66,11 @@
   (subtype-validation {:subtype :vrk-name} "Juha *Matti* Jokim\u00e4ki") => nil?
   (subtype-validation {:subtype :vrk-name} "Pertti \"Veltto\" Virtanen") => [:warn "illegal-name"]
   (subtype-validation {:subtype :vrk-name} "Carl the 16th Gustav") => [:warn "illegal-name"]
-  (subtype-validation {:subtype :vrk-name} "Carl XVI Gustav") => nil?
-  )
+  (subtype-validation {:subtype :vrk-name} "Carl XVI Gustav") => nil?)
+
+(facts "y-tunnus validation"
+  (subtype-validation {:subtype :y-tunnus} "") => nil?
+  (subtype-validation {:subtype :y-tunnus} "2341528-4") => nil?
+  (subtype-validation {:subtype :y-tunnus} "2341528-1") => [:warn "illegal-y-tunnus"])
+
+
