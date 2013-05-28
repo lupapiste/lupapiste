@@ -34,7 +34,8 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery])
+            [ring.middleware.anti-forgery :as anti-forgery]
+            [lupapalvelu.neighbors])
   (:import [java.io ByteArrayInputStream]))
 
 ;;
