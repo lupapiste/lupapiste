@@ -3,13 +3,8 @@
 
   var neighbors = "neighbors";
   
-  function Model() {
-    var self = this;
-    
-    self.application = ko.observable();
-    self.neighbors = ko.observableArray();
-    self.map = null;
-    self.addNeighbor = function(propertyId) { self.neighbors.push({
+  function makeNew(propertyId) {
+    return {
       propertyId: propertyId,
       owner: {
         name: "foo",
@@ -20,7 +15,16 @@
         }
       },
       state: "new"
-    });};
+    };
+  }
+  
+  function Model() {
+    var self = this;
+    
+    self.application = ko.observable();
+    self.neighbors = ko.observableArray();
+    self.map = null;
+    self.addNeighbor = function(propertyId) { self.neighbors.push(makeNew(propertyId));};
     self.requestContext = new RequestContext();
     self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
     self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.addNeighbor); return self;  };
