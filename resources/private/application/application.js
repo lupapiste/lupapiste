@@ -612,6 +612,12 @@
     markTabActive(tab);
     openTab(tab);
     selectedTab = tab; // remove after tab-spike
+
+    if (tab === "conversation") {
+      ajax.command("mark-comments-seen", {id:currentId})
+        .success(function() {application.unseenComments(0);})
+        .call();
+    }
   }
 
   var accordian = function(data, event) { accordion.toggle(event); };
@@ -653,13 +659,13 @@
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
-    selectTab(tab || "info");
     if (newId !== currentId || !tab) {
       pageutil.showAjaxWait();
       currentId = newId;
       ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
       repository.load(currentId);
     }
+    selectTab(tab || "info");
   }
 
   hub.onPageChange("application", _.partial(initPage, "application"));
