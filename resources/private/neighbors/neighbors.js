@@ -7,11 +7,11 @@
     return {
       propertyId: propertyId,
       owner: {
-        name: "foo",
+        name: "",
         address: {
-          street: "?",
-          city: "?",
-          zip: "?"
+          street: "",
+          city: "",
+          zip: ""
         }
       },
       state: "new"
