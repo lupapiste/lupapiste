@@ -2,24 +2,21 @@
   "use strict";
 
   var neighbors = "neighbors";
-  var map = null;
-  
-  function makeMap() {
-    return gis.makeMap("neighbors-map", false);
-  }
   
   function Model() {
     var self = this;
     
     self.application = ko.observable();
+    self.map = null;
+
+    self.click = function() { console.log("click:", arguments); };
     
     self.init = function(application) {
-      if (!map) map = makeMap();
+      if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
       var location = application.location,
           x = location.x,
           y = location.y;
-      map.updateSize().clear().center(x, y, 11).add(x, y);
-      self.application(application);
+      self.application(application).map.updateSize().clear().center(x, y, 11).add(x, y);
     }
   }
   
