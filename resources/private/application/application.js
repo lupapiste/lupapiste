@@ -440,7 +440,6 @@
       var $target = $(event.target);
       while ($target.is("span")) { $target = $target.parent(); }
       window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
-      window.scrollTo(0,0);
     }
   };
 
