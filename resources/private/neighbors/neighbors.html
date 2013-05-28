@@ -5,6 +5,30 @@
 
     <div id="neighbors-map" class="map map-large" style="width: 100%; height: 480px;"></div>
     
+    <table>
+      <thead>
+        <tr>
+          <th data-bind="ltext: 'neighbors.propertyId'"></th>
+          <th data-bind="ltext: 'neighbors.owner'"></th>
+          <th data-bind="ltext: 'neighbors.actions'"></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: neighbors">
+        <tr>
+          <td data-bind="text: propertyId"></td>
+          <td data-bind="with: owner">
+            <span data-bind="text: name" class="owner-name"></span>
+            <span data-bind="text: address.street" class="owner-street"></span>
+            <span data-bind="text: address.zip" class="owner-zip"></span>
+            <span data-bind="text: address.city" class="owner-city"></span>
+          </td>
+          <td>
+            <a href="#">poista</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
   </section>
 </body>
 </html>

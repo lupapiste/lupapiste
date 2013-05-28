@@ -7,6 +7,7 @@
     var self = this;
     
     self.application = ko.observable();
+    self.neighbors = ko.observableArray();
     self.map = null;
     self.propertyId = function(v) { console.log("propertyId:", v); };
     self.requestContext = new RequestContext();
@@ -20,7 +21,11 @@
       var location = application.location,
           x = location.x,
           y = location.y;
-      self.application(application).map.updateSize().clear().center(x, y, 11).add(x, y);
+      self
+        .application(application)
+        .neighbors(_.map(application.neighbors, function(data, propertyId) { data.propertyId = propertyId; return data; }))
+        .map.updateSize().clear().center(x, y, 11).add(x, y);
+      console.log("N", self.application(), self.neighbors());
     }
   }
   
