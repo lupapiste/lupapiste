@@ -18,7 +18,6 @@
   var model = new Model();
   
   hub.onPageChange(neighbors, function(e) {
-    console.log("Here we are!", e);
     applicationId = e.pagePath[0];
     repository.load(applicationId);
   });
