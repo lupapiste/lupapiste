@@ -337,6 +337,7 @@
                   :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
                                                  :alkuHetki (to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                                                 :kokonaisala (-> toimenpide :kokonaisala :value)
                                                  :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}}}}
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
