@@ -43,9 +43,11 @@
 
 (defn get-unseen-comment-count [user app]
   (let [last-read (get-in app [:_comments-read-by (keyword (:id user))] 0)]
-    (count (filter (fn [comment] (> (:created comment) last-read)) (:comments app)))
-    )
-  )
+    (count (filter (fn [comment]
+                     (and (> (:created comment) last-read)
+                          (not= (get-in comment [:user :id]) (:id user))
+                          (not (blank? (:text comment)))))
+                   (:comments app)))))
 
 (defn get-application-operation [app]
   (first (:operations app)))
