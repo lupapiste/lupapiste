@@ -90,7 +90,7 @@
                yhteystiedot))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string}
-                     {:name "liikeJaYhteisoTunnus" :type :string}])
+                     {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus}])
 
 (def yritys (body
               yritys-minimal
