@@ -710,9 +710,9 @@
     self.send = function() {
       ajax
         .command("send-neighbor-invite", {id: self.id(), propertyId: self.propertyId(), email: self.email(), message: self.message()})
-        .pending(pageutil.makePendingAjaxWait("Oh noes"))
+        .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending"))
         .complete(LUPAPISTE.ModalDialog.close)
-        .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc(""))))
+        .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
         .call();
       return false;
     };
