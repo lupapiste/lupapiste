@@ -351,7 +351,7 @@
                           :body huoneisto}])
 
 
-(def rakennelma (body [{:name "Kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}] kuvaus))
+(def rakennelma (body [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}] kuvaus))
 (def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"

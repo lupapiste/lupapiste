@@ -6,4 +6,4 @@ attachmentType.empty._group_label:
 
 application.filter.search: etsi:
 
-kaupunkikuvatoimenpide.Kokonaisala: Kokonaisala
+kaupunkikuvatoimenpide.kokonaisala: Kokonaisala
