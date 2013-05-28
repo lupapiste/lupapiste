@@ -263,6 +263,12 @@
       ;; TODO: details should come from updated state!
       (notifications/send-notifications-on-new-comment! application user text host))))
 
+(defcommand "mark-comments-seen"
+  {:parameters [:id]
+   :authenticated true}
+  [{:keys [user created] :as command}]
+  (update-application command {$set {(str "_comments-read-by." (:id user)) created}}))
+
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId :userId :path]
    :authenticated true}
