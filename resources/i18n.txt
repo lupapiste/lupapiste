@@ -5,3 +5,11 @@ connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään m
 attachmentType.empty._group_label:
 
 application.filter.search: etsi:
+
+neighbors.propertyId: Kiinteistötunnus
+neighbors.owner: Omistaja
+neighbors.status: Tila
+neighbors.actions: Toiminnot
+neighbors.actionSendEmail: Lähetä sähköposti kutsu
+
+neighbor.sendEmail.title: Kutsu naapuri
