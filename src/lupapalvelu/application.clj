@@ -634,6 +634,7 @@
                   get-application-operation
                   :applicant
                   :submitted
+                  :unseenComments
                   :modified
                   :state
                   :authority])
