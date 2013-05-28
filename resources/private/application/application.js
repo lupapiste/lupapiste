@@ -435,11 +435,13 @@
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     },
 
-
     changeTab: function(model,event) {
       var $target = $(event.target);
-      while ($target.is("span")) { $target = $target.parent(); }
-      window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
+      while ($target.is("span")) {
+        $target = $target.parent();
+      }
+      var targetTab = $target.attr("data-target");
+      window.location.hash = "#!/application/" + application.id() + "/" + targetTab;
     }
   };
 
