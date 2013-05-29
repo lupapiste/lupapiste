@@ -44,7 +44,7 @@
 
 (def yritys
   {:yritysnimi {:value "Solita Oy"}
-   :liikeJaYhteisoTunnus {:value "10601555"}
+   :liikeJaYhteisoTunnus {:value "1060155-5"}
    :osoite osoite
    :yhteyshenkilo {:henkilotiedot nimi
                    :yhteystiedot {:email {:value "solita@solita.fi"},
@@ -64,21 +64,21 @@
    :data (merge
            suunnittelija-henkilo
            {:patevyys {:koulutus {:value "Arkkitehti"} :patevyysluokka {:value "ei tiedossa"}}}
-           {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "10601555"}}})})
+           {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def suunnittelija1
   {:id "suunnittelija1" :schema {:info {:name "suunnittelija"}}
    :data (merge suunnittelija-henkilo
                 {:patevyys {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
                             :koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
-                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "10601555"}}})})
+                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def suunnittelija2
   {:id "suunnittelija2"  :schema {:info {:name "suunnittelija"}}
    :data (merge suunnittelija-henkilo
                 {:patevyys {:kuntaRoolikoodi {:value "GEO-suunnittelija"}
                             :koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
-                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "10601555"}}})})
+                {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def maksaja1
   {:id "maksaja1" :schema {:info {:name "maksaja"}}
@@ -351,7 +351,7 @@
   (fact (:henkilotunnus person) => "210281-9988"))
 
 (defn- validate-minimal-company [company]
-  (fact company => (contains {:nimi "Solita Oy" :liikeJaYhteisotunnus "10601555"}))
+  (fact company => (contains {:nimi "Solita Oy" :liikeJaYhteisotunnus "1060155-5"}))
   ; postiosoite is required in KRYSP Rakennusvalvonta
   (validate-address (:postiosoite company)))
 
