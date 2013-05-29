@@ -159,9 +159,9 @@
                          :body [{:name "asuinhuoneisto"}
                                 {:name "toimitila"}
                                 {:name "ei tiedossa"}]}
-                        {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s" :min 1 :max 9999999}
+                        {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s" :min 1 :max 9999999 :required true}
                         {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "s"}]}
-                {:name "keittionTyyppi" :type :select
+                {:name "keittionTyyppi" :type :select :required true
                  :body [{:name "keittio"}
                         {:name "keittokomero"}
                         {:name "keittotila"}
