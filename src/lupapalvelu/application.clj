@@ -42,9 +42,9 @@
           (str (:value first-name) \space (:value last-name)))))))
 
 (defn get-unseen-comment-count [user app]
-  (let [last-read (get-in app [:_comments-read-by (keyword (:id user))] 0)]
+  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
     (count (filter (fn [comment]
-                     (and (> (:created comment) last-read)
+                     (and (> (:created comment) last-seen)
                           (not= (get-in comment [:user :id]) (:id user))
                           (not (blank? (:text comment)))))
                    (:comments app)))))
@@ -267,7 +267,7 @@
   {:parameters [:id]
    :authenticated true}
   [{:keys [user created] :as command}]
-  (update-application command {$set {(str "_comments-read-by." (:id user)) created}}))
+  (update-application command {$set {(str "_comments-seen-by." (:id user)) created}}))
 
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId :userId :path]
