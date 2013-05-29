@@ -31,6 +31,7 @@
 
 (def no-childs [nil])
 (defn conj-not-nil [v x] (if (nil? x) v (conj v x)))
+(defn safe-into [v c] (if (nil? c) v (into v c)))
 
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
@@ -51,19 +52,22 @@
                                 no-childs)]
                   (reduce concat
                     (for [~'child# childs#]
-                      (let
-                        ~(reduce into
-                           (for [[k v] (partition 2 fields)
-                                 :let [path nil #_(-> childs (conj-not-nil ~'child#))]]
-                             [k `(-> ~'data ~@v)]))
-                        (try
-                          (when-let [resp# (do ~@body)]
-                            (map (fn [path#] {:path   path#
-                                              :result [:warn ~(name code)]}) ~paths))
-                          (catch Exception e#
-                            [{:path   []
-                              :result [:warn (str "validator")]
-                              :reason (str e#)}]))))))))})))
+                      (do (println ~'child#)
+                        (let
+                          ~(reduce into
+                             (for [[k v] (partition 2 fields)
+                                   :let [v (-> childs (into v))]]
+                               (do
+                                 (println k v)
+                                 [k `(-> ~'data ~@v)])))
+                          (try
+                            (when-let [resp# (do ~@body)]
+                              (map (fn [path#] {:path   path#
+                                                :result [:warn ~(name code)]}) ~paths))
+                            (catch Exception e#
+                              [{:path   []
+                                :result [:warn (str "validator")]
+                                :reason (str e#)}])))))))))})))
 
 (let [childs [:a]
       fields [:first  [:b]
