@@ -3,28 +3,38 @@
 <body>
   <section class="page container" id="neighbors">
 
-    <div id="neighbors-map" class="map map-large" style="width: 100%; height: 480px;"></div>
+    <div class="map-holder">
+      <div class="map map-large" id="neighbors-map"></div>
+      <div class="map-ajax">
+        <!--  <img src="/img/ajax-loader.gif"/> -->
+      </div>
+    </div>
     
     <table class="application-neighbors">
       <thead>
         <tr>
           <th data-bind="ltext: 'neighbors.propertyId'"></th>
           <th data-bind="ltext: 'neighbors.owner'"></th>
+          <th data-bind="ltext: 'neighbors.status'"></th>
           <th data-bind="ltext: 'neighbors.actions'"></th>
         </tr>
       </thead>
       <tbody data-bind="foreach: neighbors">
         <tr>
           <td data-bind="text: propertyId"></td>
-          <td>
-            <span data-bind="visible: state != 'new', text: owner.name" class="owner-name"></span>
-            <input data-bind="visible: state === 'new', value: owner.name" type="text" class="owner-name" />
-            <span data-bind="visible: state != 'new', text: owner.address.street" class="owner-street"></span>
-            <span data-bind="visible: state != 'new', text: owner.address.zip" class="owner-zip"></span>
-            <span data-bind="visible: state != 'new', text: owner.address.city" class="owner-city"></span>
+          <td data-bind="with: owner">
+            <span data-bind="text: name" class="owner-name"></span>
+            <span data-bind="text: address.street" class="owner-street"></span>
+            <span data-bind="text: address.zip" class="owner-zip"></span>
+            <span data-bind="text: address.city" class="owner-city"></span>
+          </td>
+          <td data-bind="with: _.last(status)">
+            <span data-bind="text: state" class="status-state"></span>
+            <span data-bind="dateTimeString: created" class="status-time"></span>
           </td>
           <td>
-            <a href="#">poista</a>
+            <a data-bind="click: $root.edit, clickBubble: false, ltext: 'neighbors.actions.edit'" href="#"></a>
+            <a data-bind="click: $root.remove, clickBubble: false, ltext: 'neighbors.actions.remove'" href="#"></a>
           </td>
         </tr>
       </tbody>

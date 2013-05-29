@@ -8,9 +8,24 @@ application.filter.search: etsi:
 
 neighbors.propertyId: Kiinteistötunnus
 neighbors.owner: Omistaja
+neighbors.owner.name: Nimi
+neighbors.owner.name.placeholder: nimi
+neighbors.owner.name: Sähköpostiosoite
+neighbors.owner.name.placeholder: email
+neighbors.owner.address: Osoite
+neighbors.owner.address.street: Katu
+neighbors.owner.address.street.placeholder: katu
+neighbors.owner.address.zip: Postinumero:
+neighbors.owner.address.zip.placeholder: postinumero
+neighbors.owner.address.city: Postitoimipaikka
+neighbors.owner.address.city.placeholder: postitoimipaikka
+
 neighbors.status: Tila
+
 neighbors.actions: Toiminnot
-neighbors.actionSendEmail: Lähetä sähköposti kutsu
+neighbors.actions.edit: muokkaa
+neighbors.actions.remove: poista
+neighbors.actions.sendEmail: Lähetä sähköposti kutsu
 
 neighbors.sendEmail.title: Kutsu naapuri
 neighbors.sendEmail.name: Naapurin nimi:

@@ -1,6 +1,8 @@
 var util = (function() {
   "use strict";
 
+  function nop() {}
+  
   function zeropad(len, val) {
     return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
   }
@@ -94,7 +96,8 @@ var util = (function() {
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
       toHumanFormat: propertyIdToHumanFormat,
       toDbFormat: propertyIdToDbFormat
-    }
+    },
+    nop: nop
   };
 
 })();

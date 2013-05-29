@@ -18,30 +18,44 @@
     };
   }
   
+  function toObservables(o) {
+    return _.reduce(o, function(r, v, k) { console.log("O:", k, v); r[k] = _.isString(v) ? ko.observable(v) : toObservables(v); return r; }, {});
+  }
+  
+  function toNeighbors(neighbors, propertyId) {
+    return _.map(neighbors, function(neighbor, propertyId) { neighbor.propertyId = propertyId; return neighbor; });
+  }
+  
+  function ajaxOn() { $("#neighbors .map-ajax").show(); }
+  function ajaxOff() { $("#neighbors .map-ajax").hide(); }
+  
   function Model() {
     var self = this;
     
-    self.application = ko.observable();
+    self.applicationId = ko.observable();
     self.neighbors = ko.observableArray();
     self.map = null;
-    self.addNeighbor = function(propertyId) { self.neighbors.push(makeNew(propertyId));};
-    self.requestContext = new RequestContext();
+    self.requestContext = new RequestContext({begin: ajaxOn, done: ajaxOff});
     self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
-    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.addNeighbor); return self;  };
   
     self.click = function(x, y) { self.beginUpdateRequest().searchPropertyId(x, y); return false; };
+    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.add); return self;  };
     
     self.init = function(application) {
+      console.log("N:", application.neighbors, toNeighbors(application.neighbors));
       if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
       var location = application.location,
           x = location.x,
           y = location.y;
       self
-        .application(application)
-        .neighbors(_.map(application.neighbors, function(data, propertyId) { data.propertyId = propertyId; data.state = "ready"; return data; }))
+        .applicationId(application.id)
+        .neighbors(toNeighbors(application.neighbors))
         .map.updateSize().clear().center(x, y, 11).add(x, y);
-      console.log("N:", self.neighbors());
-    }
+    };
+    
+    self.edit = function(neighbor) { console.log("edit:", neighbor); };
+    self.remove = function(neighbor) { console.log("remove:", neighbor); };
+    self.add = function(propertyId) { self.neighbors.push(makeNew(propertyId)); };
   }
   
   var applicationId;
