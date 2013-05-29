@@ -429,17 +429,54 @@
             kerrosala       [:mitat :kerrosala ->int]
             kerrosluku      [:mitat :kerrosluku ->int]
             kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
-   :facts  {:ok   [[ 570 145  1 "032 luhtitalot"]
-                   [ 200   0  0 "032 luhtitalot"]
-                   [3000 800 40 "342 seurakuntatalot"]
-                   [3300 800 40 "611 voimalaitosrakennukset"]
-                   [3300 800 40 "931 saunarakennukset"]]
-            :fail [[3300 800 40 "342 seurakuntatalot"]]}}
+   :facts  {:ok   [[ 570 145  1 "032 luhtitalot"] ; 3.7m (sample case)
+                   [ 200   0  0 "032 luhtitalot"] ; kerrosala/kerrosluku not set
+                   [3000 800 40 "342 seurakuntatalot"] ; 150m
+                   [3300 800 40 "611 voimalaitosrakennukset"] ; 165m
+                   [3300 800 40 "931 saunarakennukset"]] ; 165m
+            :fail [[3300 800 40 "342 seurakuntatalot"]]}} ; 165m
   (and
     (> kerrosluku 0)
     (> kerrosala 0)
     (not (#{162 163 169 722 611 613 699 712 719} kayttotarkoitus))
     (<= kayttotarkoitus 799)
-      (> (/ tilavuus (/ kerrosala kerrosluku)) 150)))
+    (> (/ tilavuus (/ kerrosala kerrosluku)) 150)))
 
+(defvalidator :vrk:BR319:julkisivu
+  {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
+         rakennuksen rakentamistapa, julkisivumateriaali ja lämmitystapa pakollisia Huom!
+         Kuitenkin, jos käyttötarkoitus on > 729 saavat pääasiallinen julkisivumateriaali ja lämmitystapa puuttua."
+   :schema "uusiRakennus"
+   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
+            julkisivu       [:rakenne :julkisivu]]
+   :facts  {:ok    [["032 luhtitalot"       "tiili"]
+                    ["931 saunarakennukset" "ei tiedossa"]
+                    ["931 saunarakennukset" nil]]
+            :fail  [["032 luhtitalot"       nil]
+                    ["032 luhtitalot"       "ei tiedossa"]]}}
+  (and
+    (<= kayttotarkoitus 729)
+    (or
+      (not julkisivu)
+      (= "ei tiedossa" julkisivu))))
+
+(defvalidator :vrk:BR319:lammitustapa
+  {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
+         rakennuksen rakentamistapa, julkisivumateriaali ja lämmitystapa pakollisia Huom!
+         Kuitenkin, jos käyttötarkoitus on > 729 saavat pääasiallinen julkisivumateriaali ja lämmitystapa puuttua."
+   :schema "uusiRakennus"
+   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
+            lammitustapa    [:lammitys :lammitystapa]]
+   :facts  {:ok    [["032 luhtitalot"       "uuni"]
+                    ["032 luhtitalot"       "ei tiedossa"]
+                    ["931 saunarakennukset" "eiLammitysta"]
+                    ["931 saunarakennukset" nil]
+                    ["931 saunarakennukset" " "]]
+            :fail  [["032 luhtitalot"       nil]
+                    ["032 luhtitalot"       "eiLammitysta"]]}}
+  (and
+    (<= kayttotarkoitus 729)
+    (or
+      (not lammitustapa)
+      (= "eiLammitysta" lammitustapa))))
 
