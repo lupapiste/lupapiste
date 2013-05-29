@@ -51,10 +51,10 @@
         .map.updateSize().clear().center(x, y, 11).add(x, y);
     };
     
-    self.edit = function(neighbor) { console.log("edit:", neighbor); };
-    self.remove = function(neighbor) { console.log("remove:", neighbor); };
+    self.edit = function(neighbor) { editModel.init(neighbor).edit().open(); };
     self.add = function() { editModel.init().edit().open(); };
     self.click = function(x, y) { editModel.init().search(x, y).open(); };
+    self.remove = function(neighbor) { console.log("remove:", neighbor); };
   }
   
   function EditModel() {
@@ -65,15 +65,18 @@
     self.statusSearch  = 1;
     self.statusEdit    = 2;
 
-    self.init = function() {
+    self.init = function(n) {
+      var neighbor = n || {},
+          owner = neighbor.owner || {},
+          address = owner.address || {};
       return self
         .status(self.statusInit)
-        .propertyId("")
-        .name("")
-        .street("")
-        .city("")
-        .zip("")
-        .email("");
+        .propertyId(neighbor.propertyId)
+        .name(owner.name)
+        .street(address.street)
+        .city(address.city)
+        .zip(address.zip)
+        .email(owner.email);
     };
 
     self.edit = function() { return self.status(self.statusEdit); }

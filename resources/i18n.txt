@@ -10,8 +10,8 @@ neighbors.propertyId: Kiinteistötunnus
 neighbors.owner: Omistaja
 neighbors.owner.name: Nimi
 neighbors.owner.name.placeholder: nimi
-neighbors.owner.name: Sähköpostiosoite
-neighbors.owner.name.placeholder: email
+neighbors.owner.email: Sähköpostiosoite
+neighbors.owner.email.placeholder: email
 neighbors.owner.address: Osoite
 neighbors.owner.address.street: Katu
 neighbors.owner.address.street.placeholder: katu
