@@ -1,8 +1,6 @@
 (function() {
   "use strict";
 
-  var neighbors = "neighbors";
-  
   function makeNew(propertyId) {
     return {
       propertyId: propertyId,
@@ -19,16 +17,13 @@
   }
   
   function toObservables(o) {
-    return _.reduce(o, function(r, v, k) { console.log("O:", k, v); r[k] = _.isString(v) ? ko.observable(v) : toObservables(v); return r; }, {});
+    return _.reduce(o, function(r, v, k) { r[k] = _.isString(v) ? ko.observable(v) : toObservables(v); return r; }, {});
   }
   
   function toNeighbors(neighbors, propertyId) {
-    return _.map(neighbors, function(neighbor, propertyId) { neighbor.propertyId = propertyId; return neighbor; });
+    return _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; });
   }
   
-  function ajaxOn() { $("#neighbors .map-ajax").show(); }
-  function ajaxOff() { $("#neighbors .map-ajax").hide(); }
-
   var applicationId;
   var model = new Model();
   var editModel = new EditModel();
@@ -51,10 +46,10 @@
         .map.updateSize().clear().center(x, y, 11).add(x, y);
     };
     
-    self.edit = function(neighbor) { editModel.init(neighbor).edit().open(); };
-    self.add = function() { editModel.init().edit().open(); };
-    self.click = function(x, y) { editModel.init().search(x, y).open(); };
-    self.remove = function(neighbor) { console.log("remove:", neighbor); };
+    self.edit   = function(neighbor) { editModel.init(neighbor).edit().open(); };
+    self.add    = function()         { editModel.init().edit().open(); };
+    self.click  = function(x, y)     { editModel.init().search(x, y).open(); };
+    self.remove = function(neighbor) { /* TODO */ console.log("remove:", neighbor); };
   }
   
   function EditModel() {
@@ -72,6 +67,7 @@
           address = owner.address || {};
       return self
         .status(self.statusInit)
+        .neighborId(neighbor.neighborId)
         .propertyId(neighbor.propertyId)
         .name(owner.name)
         .street(address.street)
@@ -89,6 +85,7 @@
     self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; };
     self.focusName = function() { $("#neighbors-edit-name").focus(); return self; };
 
+    self.neighborId = ko.observable();
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.street = ko.observable();
@@ -107,12 +104,12 @@
     self.requestContext = new RequestContext();
   }
   
-  hub.onPageChange(neighbors, function(e) {
+  hub.onPageChange("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
   });
 
-  repository.loaded([neighbors], function(application) {
+  repository.loaded(["neighbors"], function(application) {
     if (applicationId === application.id) model.init(application);
   });
 

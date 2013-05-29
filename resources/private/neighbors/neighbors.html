@@ -54,22 +54,22 @@
         </div>
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
-          <input data-bind="value: propertyId, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" />
+          <input data-bind="value: propertyId, enable: status() > statusSearch, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" />
 
           <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors.owner.name"></label>
-          <input data-bind="value: name" class="form-input text long" type="text" id="neighbors.owner.name" />
+          <input data-bind="value: name, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.name" />
 
           <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors.owner.address.street"></label>
-          <input data-bind="value: street" class="form-input text long" type="text" id="neighbors.owner.address.street" />
+          <input data-bind="value: street, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.street" />
 
           <label data-bind="ltext: 'neighbors.owner.address.city'" class="form-label" for="neighbors.owner.address.city"></label>
-          <input data-bind="value: city" class="form-input text long" type="text" id="neighbors.owner.address.city" />
+          <input data-bind="value: city, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.city" />
 
           <label data-bind="ltext: 'neighbors.owner.address.zip'" class="form-label" for="neighbors.owner.address.zip"></label>
-          <input data-bind="value: zip" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
+          <input data-bind="value: zip, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
           
           <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
-          <input data-bind="value: email, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" />
+          <input data-bind="value: email, enable: status() > statusSearch, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" />
         </form>
         
         <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog"></button>

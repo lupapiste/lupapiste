@@ -674,10 +674,7 @@
 
   var neighborActions = {
     normalize: function(neighbors) {
-      return _.map(neighbors, function(data, propertyId) { data.propertyId = propertyId; return data; });
-    },
-    openSendEmailDialog: function(neighbor) {
-      return false;
+      return _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; });
     },
     sendNeighborEmail: function(neighbor) {
       ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call();
@@ -688,11 +685,12 @@
       return false;
     }
   };
-  
+
   function SendNeighborEmailModel() {
     var self = this;
     
     self.id = ko.observable();
+    self.neighborId = ko.observable();
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
@@ -705,6 +703,7 @@
     self.open = function(neighbor) {
       self
         .id(application.id())
+        .neighborId(neighbor.neighborId)
         .propertyId(neighbor.propertyId)
         .name(neighbor.owner.name())
         .email("")
@@ -713,8 +712,12 @@
     };
 
     self.send = function() {
+      var params = _(self)
+        .pick("id", "neighborId", "propertyId", "name", "email", "message")
+        .map(function(fn) { return fn(); })
+        .valueOf();
       ajax
-        .command("send-neighbor-invite", {id: self.id(), propertyId: self.propertyId(), email: self.email(), message: self.message()})
+        .command("send-neighbor-invite", params)
         .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending")))
         .complete(LUPAPISTE.ModalDialog.close)
         .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
