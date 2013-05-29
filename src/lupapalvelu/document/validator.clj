@@ -29,10 +29,14 @@
           [false (conj result x)]))
       [false []] v)))
 
+(def no-childs [nil])
+(defn conj-not-nil [v x] (if (nil? x) v (conj v x)))
+
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
   [code {:keys [doc schema childs fields facts]} & body]
-  (let [paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
+  (let [paths  (->> fields (partition 2) (map last) (map starting-keywords) vec)
+        childs (or childs [])]
     `(swap! validators assoc ~code
        {:code ~code
         :doc ~doc
@@ -41,19 +45,25 @@
         :facts ~facts
         :fn (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
               (when (or (not ~schema) (= ~schema ~'doc-schema))
-                (let [~'data (tools/un-wrapped ~'data)]
-                  (let
-                    ~(reduce into
-                       (for [[k v] (partition 2 fields)]
-                         [k `(->> ~'data ~@v)]))
-                    (try
-                      (when-let [resp# (do ~@body)]
-                        (map (fn [path#] {:path   path#
-                                          :result [:warn ~(name code)]}) ~paths))
-                      (catch Exception e#
-                        [{:path   []
-                          :result [:warn (str "validator")]
-                          :reason (str e#)}]))))))})))
+                (let [~'data  (tools/un-wrapped ~'data)
+                      childs# (if (not-empty ~childs)
+                                (-> ~'data (get-in ~childs) keys)
+                                no-childs)]
+                  (reduce concat
+                    (for [~'child# childs#]
+                      (let
+                        ~(reduce into
+                           (for [[k v] (partition 2 fields)
+                                 :let [path nil #_(-> childs (conj-not-nil ~'child#))]]
+                             [k `(-> ~'data ~@v)]))
+                        (try
+                          (when-let [resp# (do ~@body)]
+                            (map (fn [path#] {:path   path#
+                                              :result [:warn ~(name code)]}) ~paths))
+                          (catch Exception e#
+                            [{:path   []
+                              :result [:warn (str "validator")]
+                              :reason (str e#)}]))))))))})))
 
 (let [childs [:a]
       fields [:first  [:b]
@@ -64,9 +74,39 @@
                       :c 2}}}
       childd (when (not-empty childs)
                (-> data (get-in childs) keys))]
-  (if childd
-    (for [child childd]
-      (for [[k v] (partition 2 fields)]
-        [k (-> childs (conj child) (concat v))]))
-    (for [[k v] (partition 2 fields)]
-      [k v])))
+  (map
+    (fn [x] (str "R:" x))
+    (map
+      (fn [x] (str "**" (vec x)))
+      (if childd
+        (for [child childd]
+          (for [[k v] (partition 2 fields)]
+            [k (-> childs (conj child) (concat v))]))
+        (for [[k v] (partition 2 fields)]
+          [k v])))))
+
+(let [childs [:a]
+      childs (or childs [])
+      fields [:first  [:b]
+              :second [:c]]
+      data   {:a {:0 {:b 1
+                      :c 1}
+                  :1 {:b 2
+                      :c 2}}}
+      childd (if (not-empty childs)
+               (-> data (get-in childs) keys)
+               no-childs)]
+  (map
+    (fn [x] (str "R:" x))
+    (map
+      (fn [x] (str "**" (vec x)))
+      (for [child childd]
+        (for [[k v] (partition 2 fields)
+              :let [v (-> childs (conj-not-nil child) (concat v))]]
+          [k v])))))
+
+
+
+
+
+

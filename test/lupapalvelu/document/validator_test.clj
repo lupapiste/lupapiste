@@ -45,6 +45,7 @@
    :fields [health [:health]]}
   (> health 0))
 
+1
 (facts
   (let [document {:schema {:info {:name "test2"}}
                   :data   {:team {:0 {:health 8}
