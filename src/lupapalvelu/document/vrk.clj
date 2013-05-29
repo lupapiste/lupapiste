@@ -477,3 +477,17 @@
       (not lammitustapa)
       (= "eiLammitysta" lammitustapa))))
 
+#_(defvalidator :vrk:BR203
+  {:doc "Jos huoneiston jakokirjain on annettu taytyy olla myos porraskirjain tai huoneistonumero"
+   :schema "uusiRakennus"
+   :childs [:huoneistot]
+   :fields [jakokirjain      [:huoneistoTunnus :jakokirjain]
+            porraskirjain    [:huoneistoTunnus :porras]
+            huoneistonumero  [:huoneistoTunnus :huoneistonumero]]
+   :facts  {:ok    [["032 luhtitalot"       "tiili"]
+                    ["032 luhtitalot"       "ei tiedossa"]
+                    ["931 saunarakennukset" nil]]
+            :fail  [["032 luhtitalot"       nil]]}}
+  (and
+    (<= kayttotarkoitus 729)
+    (not julkisivu)))
