@@ -204,7 +204,42 @@
       (apply-update [:a :d :0 :d2 :0 :rd] "value")
       (apply-update [:a :d :1 :d2 :6 :rd] "value")) => valid?))
 
-    ;;
+(facts "with real schemas - required fields for henkilo hakija"
+  (let [document (-> (new-document (schemas "hakija") ..now..)
+                   (apply-update [:_selected] "henkilo")
+                   (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
+                   (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
+                   (apply-update [:henkilo :osoite :katu] "katu")
+                   (apply-update [:henkilo :osoite :postinumero] "12345")
+                   (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
+                   (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
+                   (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
+    document => valid?
+    (-> document
+      (apply-update [:_selected] nil)) => valid?
+    (-> document
+      (apply-update [:henkilo :osoite :katu] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:henkilo :osoite :postinumero] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:henkilo :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:warn "illegal-value:required"])))
+
+(facts "with real schemas - required fields for yritys hakija"
+  (let [document (-> (new-document (schemas "hakija") ..now..)
+                   (apply-update [:_selected] "yritys")
+                   (apply-update [:yritys :yritysnimi] "Solita")
+                   (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
+                   (apply-update [:yritys :osoite :postinumero] "33720")
+                   (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
+    document => valid?
+    (-> document
+      (apply-update [:yritys :osoite :katu] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:yritys :osoite :postinumero] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:yritys :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:warn "illegal-value:required"])))
+
+;;
 ;; Updates
 ;;
 

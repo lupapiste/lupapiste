@@ -101,23 +101,30 @@
         (map (fn [[k2 v2]]
                (validate-fields schema-body k2 v2 current-path)) data)))))
 
+(defn- sub-schema-by-name [sub-schemas name]
+  (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
+
+(defn- one-of-many-selection [sub-schemas path data]
+  (when-let [one-of (seq (map :name (:body (sub-schema-by-name sub-schemas "_selected"))))]
+    (or (get-in data (conj path :_selected :value)) (first one-of))))
+
 (defn- validate-required-fields [schema-body path data validation-errors]
-  (map
-    (fn [{:keys [name required body repeating] :as element}]
-      (let [kw (keyword name)
-            current-path (if (empty? path) [kw] (conj path kw))
-            validation-error (when
-                               (and required
-                                    (s/blank? (get-in data (conj current-path :value))))
-                               (->validation-result nil current-path element [:warn "illegal-value:required"]))
-            current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
-        (concat current-validation-errors
-          (if body
-            (if repeating
-              (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
-              (validate-required-fields body current-path data []))
-            []))))
-    schema-body))
+  (let [check
+        (fn [{:keys [name required body repeating] :as element}]
+          (let [kw (keyword name)
+                current-path (if (empty? path) [kw] (conj path kw))
+                validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
+                                   (->validation-result nil current-path element [:warn "illegal-value:required"]))
+                current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
+            (concat current-validation-errors
+                    (if body
+                      (if repeating
+                        (map (fn [k] (validate-required-fields body (conj current-path k) data [])) (keys (get-in data current-path)))
+                        (validate-required-fields body current-path data []))
+                      []))))]
+    (if-let [selected (one-of-many-selection schema-body path data)]
+      [(check (sub-schema-by-name schema-body selected))]
+      (map check schema-body))))
 
 (defn validate
   "Validates document against it's local schema and document level rules
@@ -127,7 +134,7 @@
     (flatten
       (concat
         (validate-fields schema-body nil data [])
-        (validate-required-fields schema-body nil data [])
+        (validate-required-fields schema-body [] data [])
         (validator/validate document)))))
 
 (defn valid-document?
