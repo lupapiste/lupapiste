@@ -38,3 +38,9 @@ neighbors.sendEmail.cancel: Peruuta
 neighbors.sendEmail.sending: Sähköpostia lähetetään
 neighbors.sendEmail.reloading: Päivitetään tilaa
 neighbors.manage: Hallitse naapureita
+
+neighbors.edit.title: Naapurin tiedot:
+neighbors.edit.propertyId: Kiinteistötunnus
+neighbors.edit.name: Nimi
+neighbors.edit.ok: Tallenna
+neighbors.edit.cancel: Peruuta

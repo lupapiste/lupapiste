@@ -28,7 +28,11 @@
   
   function ajaxOn() { $("#neighbors .map-ajax").show(); }
   function ajaxOff() { $("#neighbors .map-ajax").hide(); }
-  
+
+  var applicationId;
+  var model = new Model();
+  var editModel = new EditModel();
+
   function Model() {
     var self = this;
     
@@ -55,11 +59,31 @@
     
     self.edit = function(neighbor) { console.log("edit:", neighbor); };
     self.remove = function(neighbor) { console.log("remove:", neighbor); };
-    self.add = function(propertyId) { self.neighbors.push(makeNew(propertyId)); };
+    self.add = function(propertyId) {
+      console.log("add:", propertyId);
+      editModel.propertyId(propertyId);
+      LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor");
+    };
+    self.addNew = _.partial(self.add, null);
   }
   
-  var applicationId;
-  var model = new Model();
+  function EditModel() {
+    var self = this;
+    
+    self.propertyId = ko.observable();
+    self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
+    self.name = ko.observable();
+    self.nameOk = ko.computed(function() { return !_.isBlank(self.name()); });
+    
+    
+    self.ok = ko.computed(function() {
+      return self.propertyIdOk() && self.nameOk();
+    });
+    
+    self.save = function() { console.log("SAVE!"); LUPAPISTE.ModalDialog.close(); };
+    // self.neighbors.push(makeNew(propertyId));
+  }
+  
   
   hub.onPageChange(neighbors, function(e) {
     applicationId = e.pagePath[0];
@@ -71,7 +95,8 @@
   });
 
   $(function() {
-    $("#neighbors").applyBindings(model);
+    $("#neighbors-content").applyBindings(model);
+    $("#dialog-edit-neighbor").applyBindings(editModel);
   });
 
 })();
