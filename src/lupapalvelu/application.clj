@@ -639,7 +639,6 @@
 (defn make-query [query params user]
   (let [search (params :filter-search)
         kind (params :filter-kind)]
-    (println "** search:" search)
     (merge
       query
       (condp = kind
