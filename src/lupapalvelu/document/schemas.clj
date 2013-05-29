@@ -41,7 +41,7 @@
                      :type :group
                      :body [{:name "katu" :type :string :subtype :vrk-address :required true}
                             {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
-                            {:name "postitoimipaikannimi" :type :string :vrk-address :size "m" :required true}]}])
+                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
 
 (def full-osoite [{:name "osoite"
                    :type :group

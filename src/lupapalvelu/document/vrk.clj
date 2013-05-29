@@ -444,8 +444,8 @@
 
 (defvalidator :vrk:BR319:julkisivu
   {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
-         rakennuksen rakentamistapa, julkisivumateriaali ja lämmitystapa pakollisia Huom!
-         Kuitenkin, jos käyttötarkoitus on > 729 saavat pääasiallinen julkisivumateriaali ja lämmitystapa puuttua."
+         rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
+         Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             julkisivu       [:rakenne :julkisivu]]
@@ -459,8 +459,8 @@
 
 (defvalidator :vrk:BR319:lammitustapa
   {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
-         rakennuksen rakentamistapa, julkisivumateriaali ja lämmitystapa pakollisia Huom!
-         Kuitenkin, jos käyttötarkoitus on > 729 saavat pääasiallinen julkisivumateriaali ja lämmitystapa puuttua."
+         rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
+         Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             lammitustapa    [:lammitys :lammitystapa]]
