@@ -5,10 +5,7 @@
 
     <div id="neighbors-content">
 
-      <div class="map-holder">
-        <div class="map map-large" id="neighbors-map"></div>
-        <div class="map-ajax"></div>
-      </div>
+      <div class="map map-large" id="neighbors-map"></div>
       
       <table class="application-neighbors">
         <thead>
@@ -40,7 +37,7 @@
         </tbody>
       </table>
       
-      <button data-bind="click: $root.addNew, ltext: 'neighbors.manage'" class="btn btn-primary modal"></button>
+      <button data-bind="click: $root.add, ltext: 'neighbors.manage'" class="btn btn-primary modal"></button>
       
     </div>
 
@@ -53,10 +50,22 @@
         
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors-edit-propertyId"></label>
-          <input data-bind="value: propertyId, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" type="text" id="neighbors-edit-propertyId" />
+          <input data-bind="value: propertyId, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors-edit-propertyId" />
 
           <label data-bind="ltext: 'neighbors.edit.name'" class="form-label" for="neighbors-edit-name"></label>
-          <input data-bind="value: name, css: {'error': !nameOk()}, valueUpdate: 'afterkeydown'" type="text" id="neighbors-edit-name" />
+          <input data-bind="value: name" class="form-input text long" type="text" id="neighbors-edit-name" />
+
+          <label data-bind="ltext: 'neighbors.edit.street'" class="form-label" for="neighbors-edit-street"></label>
+          <input data-bind="value: street" class="form-input text long" type="text" id="neighbors-edit-street" />
+
+          <label data-bind="ltext: 'neighbors.edit.city'" class="form-label" for="neighbors-edit-city"></label>
+          <input data-bind="value: city" class="form-input text long" type="text" id="neighbors-edit-city" />
+
+          <label data-bind="ltext: 'neighbors.edit.zip'" class="form-label" for="neighbors-edit-zip"></label>
+          <input data-bind="value: zip" class="form-input text long" type="text" id="neighbors-edit-sip" />
+          
+          <label data-bind="ltext: 'neighbors.edit.email'" class="form-label" for="neighbors-edit-email"></label>
+          <input data-bind="value: email, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors-edit-email" />
         </form>
         
         <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog"></button>

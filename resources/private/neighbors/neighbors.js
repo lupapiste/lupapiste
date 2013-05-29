@@ -39,14 +39,8 @@
     self.applicationId = ko.observable();
     self.neighbors = ko.observableArray();
     self.map = null;
-    self.requestContext = new RequestContext({begin: ajaxOn, done: ajaxOff});
-    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
-  
-    self.click = function(x, y) { self.beginUpdateRequest().searchPropertyId(x, y); return false; };
-    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.add); return self;  };
-    
+      
     self.init = function(application) {
-      console.log("N:", application.neighbors, toNeighbors(application.neighbors));
       if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
       var location = application.location,
           x = location.x,
@@ -59,31 +53,52 @@
     
     self.edit = function(neighbor) { console.log("edit:", neighbor); };
     self.remove = function(neighbor) { console.log("remove:", neighbor); };
-    self.add = function(propertyId) {
-      console.log("add:", propertyId);
-      editModel.propertyId(propertyId);
-      LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor");
-    };
-    self.addNew = _.partial(self.add, null);
+    self.add = function() { editModel.init().edit().open(); };
+    self.click = function(x, y) { editModel.init().search(x, y).open(); };
   }
   
   function EditModel() {
     var self = this;
+
+    self.status = ko.observable();
+    self.statusInit    = 0;
+    self.statusSearch  = 1;
+    self.statusEdit    = 2;
+
+    self.init = function() {
+      return self
+        .status(self.statusInit)
+        .propertyId("")
+        .name("")
+        .street("")
+        .city("")
+        .zip("")
+        .email("");
+    };
+
+    self.edit = function() { return self.status(self.statusEdit); }
+    self.search = function(x, y) { return self.status(self.statusSearch).beginUpdateRequest().searchPropertyId(x, y); };
+    
+    self.requestContext = new RequestContext();
+    self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
+    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.searchDone); return self;  };
+    self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; }
     
     self.propertyId = ko.observable();
-    self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
     self.name = ko.observable();
-    self.nameOk = ko.computed(function() { return !_.isBlank(self.name()); });
+    self.street = ko.observable();
+    self.city = ko.observable();
+    self.zip = ko.observable();
+    self.email = ko.observable();
+
+    self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
+    self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
+    self.ok = ko.computed(function() { return self.propertyIdOk() && self.emailOk(); });
     
-    
-    self.ok = ko.computed(function() {
-      return self.propertyIdOk() && self.nameOk();
-    });
-    
-    self.save = function() { console.log("SAVE!"); LUPAPISTE.ModalDialog.close(); };
+    self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };
+    self.save = function() { console.log("SAVE!"); LUPAPISTE.ModalDialog.close(); return self; };
     // self.neighbors.push(makeNew(propertyId));
   }
-  
   
   hub.onPageChange(neighbors, function(e) {
     applicationId = e.pagePath[0];
