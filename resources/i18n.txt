@@ -6,6 +6,7 @@ attachmentType.empty._group_label:
 
 application.filter.search: etsi:
 
+neighbors.add: Lisää naapuri
 neighbors.propertyId: Kiinteistötunnus
 neighbors.owner: Omistaja
 neighbors.owner.name: Nimi

@@ -37,7 +37,7 @@
         </tbody>
       </table>
       
-      <button data-bind="click: $root.add, ltext: 'neighbors.manage'" class="btn btn-primary modal"></button>
+      <button data-bind="click: $root.add, ltext: 'neighbors.add'" class="btn btn-primary modal"></button>
       
     </div>
 
@@ -53,23 +53,23 @@
           <img data-bind="visible: status() === statusSearch" src="/img/ajax-loader-16.gif"/>
         </div>
         <form>
-          <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors-edit-propertyId"></label>
-          <input data-bind="value: propertyId, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors-edit-propertyId" />
+          <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
+          <input data-bind="value: propertyId, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" />
 
-          <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors-edit-name"></label>
-          <input data-bind="value: name" class="form-input text long" type="text" id="neighbors-edit-name" />
+          <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors.owner.name"></label>
+          <input data-bind="value: name" class="form-input text long" type="text" id="neighbors.owner.name" />
 
-          <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors-edit-street"></label>
-          <input data-bind="value: street" class="form-input text long" type="text" id="neighbors-edit-street" />
+          <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors.owner.address.street"></label>
+          <input data-bind="value: street" class="form-input text long" type="text" id="neighbors.owner.address.street" />
 
-          <label data-bind="ltext: 'neighbors.owner.address.city'" class="form-label" for="neighbors-edit-city"></label>
-          <input data-bind="value: city" class="form-input text long" type="text" id="neighbors-edit-city" />
+          <label data-bind="ltext: 'neighbors.owner.address.city'" class="form-label" for="neighbors.owner.address.city"></label>
+          <input data-bind="value: city" class="form-input text long" type="text" id="neighbors.owner.address.city" />
 
-          <label data-bind="ltext: 'neighbors.owner.address.zip'" class="form-label" for="neighbors-edit-zip"></label>
-          <input data-bind="value: zip" class="form-input text long" type="text" id="neighbors-edit-sip" />
+          <label data-bind="ltext: 'neighbors.owner.address.zip'" class="form-label" for="neighbors.owner.address.zip"></label>
+          <input data-bind="value: zip" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
           
-          <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors-edit-email"></label>
-          <input data-bind="value: email, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors-edit-email" />
+          <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
+          <input data-bind="value: email, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" />
         </form>
         
         <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog"></button>

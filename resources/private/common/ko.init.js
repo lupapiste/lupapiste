@@ -182,5 +182,13 @@
     }
   };
 
-
+  $.fn.placeloderize = function() {
+    /*
+    this.find("input").each(function(i, e) {
+      e.attr()
+    });
+    */
+    return this;
+  }
+  
 })(jQuery);
