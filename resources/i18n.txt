@@ -42,6 +42,7 @@ neighbors.manage: Hallitse naapureita
 
 neighbors.edit.title: Naapurin tiedot:
 neighbors.edit.propertyId: Kiinteistötunnus
+neighbors.edit.propertyId.placeholder: kiinteistötunnus 
 neighbors.edit.name: Nimi
 neighbors.edit.ok: Tallenna
 neighbors.edit.cancel: Peruuta

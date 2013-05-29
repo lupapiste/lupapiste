@@ -182,13 +182,16 @@
     }
   };
 
-  $.fn.placeloderize = function() {
-    /*
-    this.find("input").each(function(i, e) {
-      e.attr()
+  $.fn.placeholderize = function() {
+    console.log("placeholderize:", this);
+    this.find("input").each(function(i, element) {
+      var e = $(element),
+          id = e.attr("id"),
+          p = loc(id, "placeholder");
+      console.log("P:", id, p, e);
+      if (p) e.attr("placeholder", p);
     });
-    */
     return this;
-  }
+  };
   
 })(jQuery);

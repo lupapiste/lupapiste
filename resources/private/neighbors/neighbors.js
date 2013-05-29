@@ -118,7 +118,7 @@
 
   $(function() {
     $("#neighbors-content").applyBindings(model);
-    $("#dialog-edit-neighbor").applyBindings(editModel);
+    $("#dialog-edit-neighbor").applyBindings(editModel).find("form").placeholderize();
   });
 
 })();
