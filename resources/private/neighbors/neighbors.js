@@ -16,10 +16,6 @@
     };
   }
   
-  function toObservables(o) {
-    return _.reduce(o, function(r, v, k) { r[k] = _.isString(v) ? ko.observable(v) : toObservables(v); return r; }, {});
-  }
-  
   function toNeighbors(neighbors, propertyId) {
     return _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; });
   }
@@ -49,7 +45,10 @@
     self.edit   = function(neighbor) { editModel.init(neighbor).edit().open(); };
     self.add    = function()         { editModel.init().edit().open(); };
     self.click  = function(x, y)     { editModel.init().search(x, y).open(); };
-    self.remove = function(neighbor) { /* TODO */ console.log("remove:", neighbor); };
+    self.remove = function(neighbor) {
+      /* TODO */ console.log("remove:", neighbor);
+      ajax.command("")
+    };
   }
   
   function EditModel() {
