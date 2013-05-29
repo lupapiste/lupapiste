@@ -49,6 +49,8 @@ error.vrk:CR335: Jos lämmitystapa ei ole "ei kiinteää lämmityslaitetta", on 
 error.illegal-value:required: Arvo on pakollinen
 error.illegal-y-tunnus: Y-tunnus on väärää muotoa
 error.vrk:CR330: Rakennus ei saa olla yli 150 metriä korkea
+error.vrk:BR319:julkisivu: Julkisivumateriaali on pakollinen
+error.vrk:BR319:lammitystapa: Lämmitystapa on pakollinen
 
 session-dead.title: Istunto vanhentunut
 session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
