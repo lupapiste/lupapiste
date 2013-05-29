@@ -450,15 +450,12 @@
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             julkisivu       [:rakenne :julkisivu]]
    :facts  {:ok    [["032 luhtitalot"       "tiili"]
-                    ["931 saunarakennukset" "ei tiedossa"]
+                    ["032 luhtitalot"       "ei tiedossa"]
                     ["931 saunarakennukset" nil]]
-            :fail  [["032 luhtitalot"       nil]
-                    ["032 luhtitalot"       "ei tiedossa"]]}}
+            :fail  [["032 luhtitalot"       nil]]}}
   (and
     (<= kayttotarkoitus 729)
-    (or
-      (not julkisivu)
-      (= "ei tiedossa" julkisivu))))
+    (not julkisivu)))
 
 (defvalidator :vrk:BR319:lammitustapa
   {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
