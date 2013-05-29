@@ -39,9 +39,9 @@
 
 (def simple-osoite [{:name "osoite"
                      :type :group
-                     :body [{:name "katu" :type :string}
-                            {:name "postinumero" :type :string :subtype :zip :size "s"}
-                            {:name "postitoimipaikannimi" :type :string :size "m"}]}])
+                     :body [{:name "katu" :type :string :subtype :vrk-address :required true}
+                            {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
+                            {:name "postitoimipaikannimi" :type :string :vrk-address :size "m" :required true}]}])
 
 (def full-osoite [{:name "osoite"
                    :type :group

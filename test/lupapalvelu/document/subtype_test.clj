@@ -68,6 +68,11 @@
   (subtype-validation {:subtype :vrk-name} "Carl the 16th Gustav") => [:warn "illegal-name"]
   (subtype-validation {:subtype :vrk-name} "Carl XVI Gustav") => nil?)
 
+(facts "VRK compliant address validation"
+  (subtype-validation {:subtype :vrk-address} "") => nil?
+  (subtype-validation {:subtype :vrk-address} "\u00e4h\u00e4kutti74: ()-/ &.,:*") => nil?
+  (subtype-validation {:subtype :vrk-address} "Suur-\"Halli\" 66") => [:warn "illegal-address"])
+
 (facts "y-tunnus validation"
   (subtype-validation {:subtype :y-tunnus} "") => nil?
   (subtype-validation {:subtype :y-tunnus} "2341528-4") => nil?

@@ -26,6 +26,7 @@
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"
                         :hetu             "210281-9988"
+                        :vrk-address      "Ranta\"tie\" 66:*"
                         :vrk-name         "Ilkka"
                         :y-tunnus         "2341528-4"
                         nil               "string"

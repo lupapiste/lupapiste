@@ -100,6 +100,12 @@
     (re-matches #"^([\p{L}\-/ \.\*]+)$" v) nil
     :else [:warn "illegal-name"]))
 
+(defmethod subtype-validation :vrk-address [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^([\p{L}\(\)\-/ &\.,:\*\d]+)$" v) nil
+    :else [:warn "illegal-address"]))
+
 (defmethod subtype-validation nil [_ _]
   nil)
 
