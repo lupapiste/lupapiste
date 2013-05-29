@@ -112,7 +112,7 @@
   (let [check
         (fn [{:keys [name required body repeating] :as element}]
           (let [kw (keyword name)
-                current-path (if (empty? path) [kw] (conj path kw))
+                current-path (conj path kw)
                 validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
                                    (->validation-result nil current-path element [:warn "illegal-value:required"]))
                 current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
