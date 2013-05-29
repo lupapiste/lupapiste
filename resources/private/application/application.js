@@ -302,6 +302,7 @@
     operationsCount: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
+    unseenComments: ko.observable(),
 
     // new stuff
     invites: ko.observableArray(),
@@ -434,12 +435,13 @@
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     },
 
-
     changeTab: function(model,event) {
       var $target = $(event.target);
-      if ($target.is("span")) { $target = $target.parent(); }
-      window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
-      window.scrollTo(0,0);
+      while ($target.is("span")) {
+        $target = $target.parent();
+      }
+      var targetTab = $target.attr("data-target");
+      window.location.hash = "#!/application/" + application.id() + "/" + targetTab;
     }
   };
 
@@ -610,6 +612,12 @@
     markTabActive(tab);
     openTab(tab);
     selectedTab = tab; // remove after tab-spike
+
+    if (tab === "conversation" && currentId) {
+      ajax.command("mark-comments-seen", {id:currentId})
+        .success(function() {application.unseenComments(0);})
+        .call();
+    }
   }
 
   var accordian = function(data, event) { accordion.toggle(event); };
