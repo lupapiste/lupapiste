@@ -44,3 +44,7 @@ neighbors.edit.propertyId: Kiinteistötunnus
 neighbors.edit.name: Nimi
 neighbors.edit.ok: Tallenna
 neighbors.edit.cancel: Peruuta
+neighbors.edit.status.0: Odota
+neighbors.edit.status.1: Etsitään tietoja
+neighbors.edit.status.2: Naapurin tiedot
+neighbors.edit.status.3: Tietoja ei löydy

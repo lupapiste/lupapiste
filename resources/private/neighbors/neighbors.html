@@ -48,6 +48,10 @@
       </div>
       <div class="dialog-content">
         
+        <div>
+          <span data-bind="text: loc('neighbors.edit.status', status())"></span>
+          <img data-bind="visible: status() === statusSearch" src="/img/ajax-loader-16.gif"/>
+        </div>
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors-edit-propertyId"></label>
           <input data-bind="value: propertyId, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors-edit-propertyId" />

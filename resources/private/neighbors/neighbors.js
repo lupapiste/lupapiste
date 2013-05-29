@@ -61,9 +61,10 @@
     var self = this;
 
     self.status = ko.observable();
-    self.statusInit    = 0;
-    self.statusSearch  = 1;
-    self.statusEdit    = 2;
+    self.statusInit         = 0;
+    self.statusSearch       = 1;
+    self.statusEdit         = 2;
+    self.statusSearchFailed = 3;
 
     self.init = function(n) {
       var neighbor = n || {},
@@ -81,12 +82,13 @@
 
     self.edit = function() { return self.status(self.statusEdit); }
     self.search = function(x, y) { return self.status(self.statusSearch).beginUpdateRequest().searchPropertyId(x, y); };
-    
-    self.requestContext = new RequestContext();
     self.beginUpdateRequest = function() { self.requestContext.begin(); return self; };
-    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.searchDone); return self;  };
-    self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; }
-    
+    self.searchPropertyId = function(x, y) { locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyIdFound, self.propertyIfNotFound); return self; };
+    self.propertyIdFound = function(propertyId) { return self.propertyId(propertyId).status(self.statusEdit).focusName(); };
+    self.propertyIfNotFound = function() { return self.status(self.statusSearchFailed); };
+    self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; };
+    self.focusName = function() { $("#neighbors-edit-name").focus(); return self; };
+
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.street = ko.observable();
@@ -101,6 +103,8 @@
     self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };
     self.save = function() { console.log("SAVE!"); LUPAPISTE.ModalDialog.close(); return self; };
     // self.neighbors.push(makeNew(propertyId));
+    
+    self.requestContext = new RequestContext();
   }
   
   hub.onPageChange(neighbors, function(e) {
