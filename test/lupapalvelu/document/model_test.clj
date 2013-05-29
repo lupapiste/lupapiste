@@ -100,7 +100,9 @@
     (-> document
       (apply-update [:henkilotiedot :etunimi] "Tauno")
       (apply-update [:henkilotiedot :sukunimi] "Palo")
+      (apply-update [:osoite :katu] "katu")
       (apply-update [:osoite :postinumero] "12345")
+      (apply-update [:osoite :postitoimipaikannimi] "Demola")
       (apply-update [:yhteystiedot :email] "tauno@example.com")
       (apply-update [:yhteystiedot :puhelin] "050")) => valid?
     (-> document
