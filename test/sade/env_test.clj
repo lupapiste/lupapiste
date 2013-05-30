@@ -28,17 +28,13 @@
   (fact "feature is not on"
 
     (feature? :a) => false
-    (provided
-      (get-config) => {:feature {:a false}})
+    (provided (get-config) => {:feature {:a false}})
 
     (feature? :a) => false
-    (provided
-      (get-config) => {:feature {:a "totta"}})
+    (provided (get-config) => {:feature {:a "totta"}})
 
     (feature? :a) => false
-    (provided
-      (get-config) => {:feature false})
+    (provided (get-config) => {:feature false})
 
     (feature? :a) => false
-    (provided
-      (get-config) => {})))
+    (provided (get-config) => {})))
