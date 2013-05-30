@@ -6,11 +6,11 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]))
 
-(facts "get-unseen-comment-count"
-  (get-unseen-comment-count {:id "user1"} {:comments [{:created 10 :text "a" :user {:id "user2"}}]}) => 1
-  (get-unseen-comment-count {:id ..id..} {:comments [{:created 10 :text "a" :user {:id ..id..}}]}) => 0
-  (get-unseen-comment-count {:id "user1"} {:comments [{:created 0 :text "a" :user {:id "user2"}}]}) => 0
-  (get-unseen-comment-count {:id "user1"} {:comments [{:created 10 :text "" :user {:id "user2"}}]}) => 0)
+(facts "count-unseen-comment"
+  (count-unseen-comment {:id "user1"} {:comments [{:created 10 :text "a" :user {:id "user2"}}]}) => 1
+  (count-unseen-comment {:id ..id..} {:comments [{:created 10 :text "a" :user {:id ..id..}}]}) => 0
+  (count-unseen-comment {:id "user1"} {:comments [{:created 0 :text "a" :user {:id "user2"}}]}) => 0
+  (count-unseen-comment {:id "user1"} {:comments [{:created 10 :text "" :user {:id "user2"}}]}) => 0)
 
 
 

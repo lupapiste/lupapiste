@@ -77,7 +77,7 @@
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str (:value first-name) \space (:value last-name)))))))
 
-(defn get-unseen-comment-count [user app]
+(defn count-unseen-comment [user app]
   (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
     (count (filter (fn [comment]
                      (and (> (:created comment) last-seen)
@@ -86,7 +86,7 @@
                    (:comments app)))))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :unseenComments :fn get-unseen-comment-count}])
+                  {:field :unseenComments :fn count-unseen-comment}])
 
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
