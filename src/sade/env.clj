@@ -26,25 +26,25 @@
     (numeric? s) (Long/parseLong s)
     :default s))
 
-(defn read-config [file-name password]
-  (let [decryptor (EncryptableProperties. (doto (StandardPBEStringEncryptor.)
-                                            (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
-                                            (.setPassword password)))]
-    (with-open [resource (clojure.lang.RT/resourceAsStream nil file-name)]
-      (.load decryptor resource)
-      (clojure.walk/keywordize-keys
-        (apply deep-merge-with into
-               (for [[k _] decryptor
-                     ; _ contains "ENC(...)" value, decryption using getProperty
-                     :let [v (.getProperty decryptor k)]]
-                 (assoc-in {} (clojure.string/split k #"\.") (read-value v))))))))
+(defn read-config
+  ([file-name]
+    (read-config file-name (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")))
+  ([file-name password]
+    (let [decryptor (EncryptableProperties. (doto (StandardPBEStringEncryptor.)
+                                              (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
+                                              (.setPassword password)))]
+      (with-open [resource (clojure.lang.RT/resourceAsStream nil file-name)]
+        (.load decryptor resource)
+        (clojure.walk/keywordize-keys
+          (apply deep-merge-with into
+            (for [[k _] decryptor
+                  ; _ contains "ENC(...)" value, decryption using getProperty
+                  :let [v (.getProperty decryptor k)]]
+              (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))))))
 
-(def config
-  (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
-    (read-config prop-file password)))
+(def ^:private config (atom (read-config prop-file)))
 
-(defn get-config []
-  config)
+(defn get-config [] @config)
 
 (defn value
   "returns a value from config directly."
