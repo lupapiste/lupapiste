@@ -85,9 +85,13 @@
                           (not (blank? (:text comment)))))
                    (:comments app)))))
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :unseenComments :fn count-unseen-comment}])
+(defn count-attachments-requiring-action [user app]
+  0
+  )
 
+(def meta-fields [{:field :applicant :fn get-applicant-name}
+                  {:field :unseenComments :fn count-unseen-comment}
+                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}])
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
