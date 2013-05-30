@@ -7,7 +7,7 @@
 (def default-description "operations.tree.default-description")
 
 (def ^:private operations-tree
-  [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" :asuinrakennus]
+  (concat [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" :asuinrakennus]
                                                                      ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
                                                                      ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
                                                                      ["Julkinen rakennus" :julkinen-rakennus]
@@ -35,9 +35,9 @@
                                   ["Tontti tai korttelialueen jarjestelymuutos" [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
                                                                   ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
-                                                                  ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]
-   (when (env/feature? "poikkari") ["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
-                                                  ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]])])
+                                                                  ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
+          (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
+                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
