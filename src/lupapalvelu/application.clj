@@ -110,6 +110,13 @@
                           (not (blank? (:text comment)))))
                    (:comments app)))))
 
+(defn count-unseen-statements [user app]
+  (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
+    (count (filter (fn [statement]
+                     (and (> (or (:given statement) 0) last-seen)
+                          (not= (get-in statement [:person :id]) (:id user))))
+                   (:statements app)))))
+
 (defn count-attachments-requiring-action [user app]
   (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
     (case (keyword (:role user))
@@ -119,6 +126,7 @@
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :unseenComments :fn count-unseen-comment}
+                  {:field :unseenStatements :fn count-unseen-statements}
                   {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}])
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
