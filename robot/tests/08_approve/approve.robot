@@ -12,7 +12,6 @@ Mikko creates an application
   Create application the fast way  ${appname}  753  753-416-25-30
   Execute Javascript  $("textarea[name='kuvaus']").val('Hieno hanke...').change();
   Execute Javascript  $("textarea[name='poikkeamat']").val('poikkeuksetta!').change();
-  Wait for jQuery
 
 Mikko can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']

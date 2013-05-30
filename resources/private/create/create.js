@@ -41,7 +41,7 @@
     self.map = null;
 
     self.search = ko.observable("");
-    self.x = ko.observable(0.0);
+    self.x = ko.observable(0);
     self.y = ko.observable(0.0);
     self.addressData = ko.observable(null);
     self.addressString = ko.observable(null);
@@ -329,9 +329,9 @@
       onSelect: function(v) {
         if (v) {
           model.operation(v.op);
-          ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
-            model.organization(d);
-          }).call();
+        ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+          model.organization(d);
+        }).call();
         } else {
           model.operation(null);
           model.organization(null);

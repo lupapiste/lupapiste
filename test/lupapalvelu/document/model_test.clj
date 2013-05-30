@@ -29,11 +29,6 @@
                                      :body [{:name "single2" :type :string}
                                             {:name "repeats2" :type :string :subtype :digit :repeating true}]}]})
 
-(def schema-with-required {:info {:name "with-required" :version 1}
-                           :body [{:name "a" :type :group
-                                   :body [{:name "aa" :type :string :required true}
-                                          {:name "ab" :type :string}]}]})
-
 ;; Tests for internals:
 
 (def find-by-name #'lupapalvelu.document.model/find-by-name)
@@ -53,7 +48,7 @@
 ; field type validation
 
 (facts "dates"
-  (validate-field {:type :date} "abba") => [:warn "invalid-date-format"]
+  (validate-field {:type :date} "abba") => [:warn "illegal-value:date"]
   (validate-field {:type :date} "") => nil
   (validate-field {:type :date} "11.12.2013") => nil)
 
@@ -85,7 +80,11 @@
     (-> document
       (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
     (-> document
-      (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])))
+      (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])
+    (-> document
+      (apply-update [:a :ab] "\u00d6\u00e9\u00c8")) => valid?
+    (-> document
+      (apply-update [:a :ab] "\u047e\u0471")) => (invalid-with? [:warn "illegal-value:not-latin1-string"])))
 
 (facts "Select"
   (let [document (new-document schema ..now..)]
@@ -101,6 +100,9 @@
     (-> document
       (apply-update [:henkilotiedot :etunimi] "Tauno")
       (apply-update [:henkilotiedot :sukunimi] "Palo")
+      (apply-update [:osoite :katu] "katu")
+      (apply-update [:osoite :postinumero] "12345")
+      (apply-update [:osoite :postitoimipaikannimi] "Demola")
       (apply-update [:yhteystiedot :email] "tauno@example.com")
       (apply-update [:yhteystiedot :puhelin] "050")) => valid?
     (-> document
@@ -135,24 +137,130 @@
       (-> document
         (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"]))))
 
-;; TODO: implement so that these pass
-#_(facts "Required fields"
+(def schema-with-required {:info {:name "with-required" :version 1}
+                           :body [{:name "a" :type :group
+                                   :body [{:name "b" :type :group
+                                           :body [{:name "aa" :type :string :required true}
+                                                  {:name "ab" :type :string :required true}]}
+                                          {:name "c" :type :group :repeating true
+                                           :body [{:name "raa" :type :string}
+                                                  {:name "rab" :type :string :required true}]}
+                                          {:name "d" :type :group :repeating true
+                                           :body [{:name "d2" :type :group :repeating true
+                                                   :body [{:name "od1" :type :string}
+                                                          {:name "rd" :type :string :required true}
+                                                          {:name "od2" :type :string}]}]}]}]})
+
+(facts "Required fields"
   (let [document (new-document schema-with-required ..now..)]
 
     document => (invalid-with? [:warn "illegal-value:required"])
 
     (-> document
-      (apply-update [:a :aa] " ")) => (invalid-with? [:warn "illegal-value:required"])
+      (apply-update [:a :b :aa] " ")
+      (apply-update [:a :b :ab] " ")) => (invalid-with? [:warn "illegal-value:required"])
 
     (-> document
-      (apply-update [:a :aa] "value")) => valid?))
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")) => valid?
+
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:warn "illegal-value:required"])
+
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :c :6 :rab] "value")) => valid?
+
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")) => (invalid-with? [:warn "illegal-value:required"])
+
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")
+      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (invalid-with? [:warn "illegal-value:required"])
+
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")
+      (apply-update [:a :d :0 :d2 :0 :rd] "value")
+      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?
+
+    (-> document
+      (apply-update [:a :b :aa] "value")
+      (apply-update [:a :b :ab] "value")
+      (apply-update [:a :c :0 :rab] "value")
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")
+      (apply-update [:a :d :0 :d2 :0 :rd] "value")
+      (apply-update [:a :d :1 :d2 :6 :rd] "value")) => valid?))
+
+(facts "with real schemas - required fields for henkilo hakija"
+  (let [document (-> (new-document (schemas "hakija") ..now..)
+                   (apply-update [:_selected] "henkilo")
+                   (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
+                   (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
+                   (apply-update [:henkilo :osoite :katu] "katu")
+                   (apply-update [:henkilo :osoite :postinumero] "12345")
+                   (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
+                   (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
+                   (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
+    document => valid?
+    (-> document
+      (apply-update [:_selected] nil)) => valid?
+    (-> document
+      (apply-update [:henkilo :osoite :katu] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:henkilo :osoite :postinumero] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:henkilo :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:warn "illegal-value:required"])))
+
+(facts "with real schemas - required fields for yritys hakija"
+  (let [document (-> (new-document (schemas "hakija") ..now..)
+                   (apply-update [:_selected] "yritys")
+                   (apply-update [:yritys :yritysnimi] "Solita")
+                   (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
+                   (apply-update [:yritys :osoite :postinumero] "33720")
+                   (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
+    document => valid?
+    (-> document
+      (apply-update [:yritys :osoite :katu] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:yritys :osoite :postinumero] nil)) => (invalid-with? [:warn "illegal-value:required"])
+    (-> document
+      (apply-update [:yritys :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:warn "illegal-value:required"])))
 
 ;;
 ;; Updates
 ;;
 
 (fact "updating document"
-  (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}}
-  (apply-updates {} [[[:b :c] "kikka"]
-                     [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
-                                                        :d {:value "kukka"}}}})
+
+  (fact "single value"
+    (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}})
+
+  (fact "unsetting value"
+    (-> {}
+      (apply-update [:b :c] "kikka")
+      (apply-update [:b :c])) => {:data {:b {:c {:value ""}}}})
+
+  (fact "updates"
+    (apply-updates {} [[[:b :c] "kikka"]
+                       [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
+                                                          :d {:value "kukka"}}}})
+  (fact "update a map value"
+    (apply-update {} [:a :b] {:c 1 :d {:e 2}}) => {:data {:a {:b {:c {:value 1}
+                                                                  :d {:e {:value 2}}}}}}))
+
+(fact "map2updates"
+  (map2updates [:a :b] {:c 1 :d {:e 2}}) => (just [[[:a :b :c] 1]
+                                                   [[:a :b :d :e] 2]] :in-any-order))

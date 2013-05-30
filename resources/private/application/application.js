@@ -302,6 +302,8 @@
     operationsCount: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
+    attachmentsRequiringAction: ko.observable(),
+    unseenComments: ko.observable(),
 
     // new stuff
     invites: ko.observableArray(),
@@ -434,12 +436,13 @@
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     },
 
-
     changeTab: function(model,event) {
       var $target = $(event.target);
-      if ($target.is("span")) { $target = $target.parent(); }
-      window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
-      window.scrollTo(0,0);
+      while ($target.is("span")) {
+        $target = $target.parent();
+      }
+      var targetTab = $target.attr("data-target");
+      window.location.hash = "#!/application/" + application.id() + "/" + targetTab;
     }
   };
 
@@ -610,6 +613,14 @@
     markTabActive(tab);
     openTab(tab);
     selectedTab = tab; // remove after tab-spike
+
+    setTimeout(function() {
+      // Mark comments seen after a second
+      if (tab === "conversation" && currentId) {
+        ajax.command("mark-comments-seen", {id:currentId})
+          .success(function() {application.unseenComments(0);})
+          .call();
+      }}, 1000);
   }
 
   var accordian = function(data, event) { accordion.toggle(event); };
@@ -651,13 +662,13 @@
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
-    selectTab(tab || "info");
     if (newId !== currentId || !tab) {
       pageutil.showAjaxWait();
       currentId = newId;
       ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
       repository.load(currentId);
     }
+    selectTab(tab || "info");
   }
 
   hub.onPageChange("application", _.partial(initPage, "application"));
