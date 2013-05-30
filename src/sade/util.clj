@@ -50,13 +50,19 @@
       (checker coll)
       false)))
 
-(defn safe-int
-  "Reads a integer from input. Returns default if not a integer."
-  #_#"^-?\d+\.?\d*([Ee]\+\d+|[Ee]-\d+|[Ee]\d+)?$"
-  ([x] (safe-int x nil))
+(defn ->int
+  "Reads a integer from input. Returns default if not a integer.
+   Default default is 0"
+  ([x] (->int x 0))
   ([x default]
-    (let [s (.replaceAll (str x) "0*(\\d+)" "$1")]
-      (if (re-find #"^-?\d+$" s)
-        (read-string s)
+    (try
+      (java.lang.Integer/parseInt (cond
+                                    (keyword? x) (name x)
+                                    (number? x) (str (int x))
+                                    :else (str x)))
+      (catch Exception e
         default))))
+
+(defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
+(defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
 
