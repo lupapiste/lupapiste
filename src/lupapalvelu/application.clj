@@ -642,6 +642,7 @@
                   get-application-operation
                   :applicant
                   :submitted
+                  :attachmentsRequiringAction
                   :unseenComments
                   :modified
                   :state
@@ -652,7 +653,8 @@
                      1 :address
                      2 nil
                      3 nil
-                     5 nil))
+                     5 nil
+                     6 nil))
 
 (def col-map (zipmap col-sources (map str (range))))
 
