@@ -16,11 +16,11 @@ var RequestContext = function(listener) {
   };
 
   self.onResponse = function(fn) {
-    if (!_.isFunction(fn)) throw "RequestContext.onResponse: fn must be a function";
+    if (fn && !_.isFunction(fn)) throw "RequestContext.onResponse: fn must be a function: " + fn;
     var requestId = self.id;
     return function(result) {
       self.onDone();
-      if (requestId === self.id) fn(result);
+      if (requestId === self.id && fn) fn(result);
     };
   };
 };
