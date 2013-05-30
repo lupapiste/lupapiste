@@ -36,7 +36,7 @@
   (let [s (str v)]
     (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
 
-(defn get-applicant-name [app]
+(defn get-applicant-name [_ app]
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
       (str first-name \space last-name))
@@ -45,6 +45,14 @@
         (get-in body [:yritys :yritysnimi :value])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str (:value first-name) \space (:value last-name)))))))
+
+(defn get-unseen-comment-count [user app]
+  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
+    (count (filter (fn [comment]
+                     (and (> (:created comment) last-seen)
+                          (not= (get-in comment [:user :id]) (:id user))
+                          (not (blank? (:text comment)))))
+                   (:comments app)))))
 
 (defn get-application-operation [app]
   (first (:operations app)))
@@ -84,33 +92,40 @@
   (when (and y (not (<= 6610000 (->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
+(defn- without-system-keys [application]
+  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
+
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}])
+(def meta-fields [{:field :applicant :fn get-applicant-name}
+                  {:field :unseenComments :fn get-unseen-comment-count}])
 
-(defn with-meta-fields [app]
-  (reduce (fn [app {field :field f :fn}] (assoc app field (f app))) app meta-fields))
+(defn with-meta-fields [user app]
+  (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
 ;;
 ;; Query application:
 ;;
 
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map with-meta-fields (mongo/select :applications (domain/application-query-for user)))))
+  (ok :applications (map #(-> % ((partial with-meta-fields user)) without-system-keys)
+                         (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
 
 (defquery "application"
   {:authenticated true
-   :parameters [:id]
-   :input-validators [(partial non-blank-parameters [:id])]}
-  [{{id :id} :data user :user}]
-  (if-let [app (domain/get-application-as id user)]
-    (ok :application (with-meta-fields app) :authorities (find-authorities-in-applications-organization app))
+   :parameters [:id]}
+  [{app :application user :user}]
+  (if app
+    (ok :application (-> app
+                       ((partial with-meta-fields user))
+                       without-system-keys)
+        :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
@@ -118,11 +133,8 @@
 (defquery "authorities-in-applications-organization"
   {:parameters [:id]
    :authenticated true}
-  [command]
-  (let [id (-> command :data :id)
-        app (mongo/select-one :applications {:_id id} {:organization 1})
-        authorities (find-authorities-in-applications-organization app)]
-    (ok :authorityInfo authorities)))
+  [{app :application}]
+  (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
 (defn filter-repeating-party-docs [names]
   (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
@@ -266,6 +278,12 @@
 
       ;; TODO: details should come from updated state!
       (notifications/send-notifications-on-new-comment! application user text host))))
+
+(defcommand "mark-comments-seen"
+  {:parameters [:id]
+   :authenticated true}
+  [{:keys [user created] :as command}]
+  (update-application command {$set {(str "_comments-seen-by." (:id user)) created}}))
 
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId :userId :path]
@@ -420,6 +438,10 @@
     (if user
       (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
+
+(defn- ->double [v]
+  (let [v (str v)]
+    (if (blank? v) 0.0 (Double/parseDouble v))))
 
 (defn- ->location [x y]
   {:x (->double x) :y (->double y)})
@@ -627,8 +649,9 @@
 (def col-sources [(fn [app] (if (:infoRequest app) "inforequest" "application"))
                   (juxt :address :municipality)
                   get-application-operation
-                  get-applicant-name
+                  :applicant
                   :submitted
+                  :unseenComments
                   :modified
                   :state
                   :authority])
@@ -637,7 +660,8 @@
                      0 :infoRequest
                      1 :address
                      2 nil
-                     3 nil))
+                     3 nil
+                     5 nil))
 
 (def col-map (zipmap col-sources (map str (range))))
 
@@ -684,7 +708,7 @@
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp make-row with-meta-fields) apps)
+        rows        (map (comp make-row (partial with-meta-fields user)) apps)
         echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total

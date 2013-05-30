@@ -59,3 +59,6 @@ connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään m
 attachmentType.empty._group_label:
 
 application.filter.search: etsi:
+
+kaupunkikuvatoimenpide.kokonaisala: Kokonaisala
+applications.unseenComments:

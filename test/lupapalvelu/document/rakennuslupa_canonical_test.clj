@@ -187,7 +187,8 @@
                          :poistumanAjankohta { :value "17.04.2013" },
                          :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
 
-(def aidan-rakentaminen { :data { :kuvaus { :value "Aidan rakentaminen rajalle"}}
+(def aidan-rakentaminen { :data {:kokonaisala {:value "0"}
+                                 :kuvaus { :value "Aidan rakentaminen rajalle"}}
                          :id "aidan-rakentaminen"
                          :created 5
                          :schema {:info { :removable true
@@ -626,5 +627,5 @@
     (fact "lausunto teksti osa" lausuntoTeksti => "Savupiippu pit\u00e4\u00e4 olla.")
     (fact  "Puolto" puolto => "ehdoilla")
 
-    ;(clojure.pprint/pprint kaupunkikuva-t)
+    ;(clojure.pprint/pprint canonical)
     ))

@@ -242,7 +242,8 @@
                                           (str (-> lammitys :lammonlahde :value) ".")
                                           (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)
-                                      :julkisivumateriaali (-> rakenne :julkisivu :value))]
+                                      :julkisivumateriaali (-> rakenne :julkisivu :value))
+        lammitystapa (-> lammitys :lammitystapa :value)]
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
@@ -266,7 +267,9 @@
                                 :energiatehokkuusluku (-> luokitus :energiatehokkuusluku :value)
                                 :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko :value)
                                 :paloluokka (-> luokitus :paloluokka :value)
-                                :lammitystapa (-> lammitys :lammitystapa :value)
+                                :lammitystapa (if (= lammitystapa "suorasahk\u00f6")
+                                                "suora s\u00e4hk\u00f6"
+                                                lammitystapa)
                                 :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
                                             :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin :value))
                                             :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
@@ -337,6 +340,7 @@
                   :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
                                                  :alkuHetki (to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                                                 :kokonaisala (-> toimenpide :kokonaisala :value)
                                                  :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}}}}
      :created (:created kaupunkikuvatoimenpide-doc)}))
 

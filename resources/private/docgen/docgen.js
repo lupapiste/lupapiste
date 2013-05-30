@@ -707,7 +707,7 @@ var docgen = (function () {
 
       var documentName = loc(self.schemaName + "._group_label");
       if (op) {
-        documentName = loc(op + "._group_label");
+        documentName = loc(op.name + "._group_label");
       }
 
       self.removeCallback(self.appId, self.docId, documentName, removeThis.bind(n));
