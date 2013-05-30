@@ -14,7 +14,9 @@
 
 (facts "count-attachments-requiring-action"
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_authority_action"}]}) => 0
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action"}]}) => 1
+  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action"}]}) => 0
+  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions []}]}) => 0
+  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions [{}]}]}) => 1
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "ok"}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action"}]}) => 1
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_user_action"}]}) => 0
