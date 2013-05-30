@@ -385,6 +385,7 @@
                     <span data-bind="text: address.street" class="owner-street"></span>
                     <span data-bind="text: address.zip" class="owner-zip"></span>
                     <span data-bind="text: address.city" class="owner-city"></span>
+                    <span data-bind="text: email" class="owner-email"></span>
                   </td>
                   <td data-bind="with: lastStatus">
                     <span data-bind="text: loc('neighbor.state', state())" class="status-state"></span>
@@ -393,7 +394,7 @@
                   <td>
                     <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('neighbor-send-invite'), ltext: 'neighbors.actions.sendEmail'" href="#"></a>
                     <a data-bind="click: $root.neighbor.upload, ltext: 'neighbors.actions.upload', clickBubble: false" href="#"></a>
-                    <a data-bind="click: $root.neighbor.markDone, visible: lastStatus.state() != 'done' && $root.authorization.ok('neighbor-mark-done'), ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>
+                    <a data-bind="click: $root.neighbor.markDone, visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'), ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>
                   </td>
                 </tr>
               </tbody>
