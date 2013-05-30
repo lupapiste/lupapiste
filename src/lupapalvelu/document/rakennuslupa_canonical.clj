@@ -280,7 +280,7 @@
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}
-                                :asuinhuoneisto {:huoneisto (get-huoneisto-data huoneistot)}}
+                                :asuinhuoneistot {:huoneisto (get-huoneisto-data huoneistot)}}
                                (when (-> toimenpide :rakennusnro :value)
                                    {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value)
                                                     :kiinttun (:propertyId application)}})
