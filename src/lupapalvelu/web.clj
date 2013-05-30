@@ -145,6 +145,7 @@
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
                    :welcome anyone
+                   :login-frame anyone
                    :oskari anyone
                    :about anyone
                    :upload logged-in?
@@ -403,7 +404,7 @@
 
   (defjson "/dev/user" []
     (current-user))
-  
+
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt

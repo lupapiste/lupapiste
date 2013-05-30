@@ -103,7 +103,7 @@
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment nil false nil now) attachement-types))
+  (map (partial make-attachment now nil false nil) attachement-types))
 
 (defn create-attachment [application-id attachement-type now target locked]
   (let [attachment (make-attachment now target locked nil attachement-type)]
@@ -394,7 +394,10 @@
     (let [response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:content-length attachment))}}]
+                              "Content-Length" (str (:content-length attachment))
+                              ; Prevents MSIE and Chrome from interpreting files as
+                              ; something else than declared by the Content-Type.
+                              "X-Content-Type-Options" "nosniff"}}]
       (if download?
         (assoc-in response
                   [:headers "Content-Disposition"]

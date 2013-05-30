@@ -32,11 +32,6 @@
                                  {:tag :jakokirjain}]}]})
 
 
-(def rakennelma (conj [{:tag :kuvaus
-                        :child [{:tag :kuvaus}]}]
-                      sijantitieto
-                      {:tag :tunnus :child tunnus-children}))
-
 (def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
                    {:tag :alkuHetki :ns "yht"}
                    sijantitieto
@@ -138,7 +133,8 @@
                                                {:tag :rakennelmatieto :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
                                                                                                         {:tag :alkuHetki :ns "yht"}
                                                                                                         sijantitieto
-                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}]}]}
+                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}
+                                                                                                        {:tag :kokonaisala}]}]}
                                                ]}]}
                              {:tag :lausuntotieto :child [{:tag :Lausunto :ns "yht" :child [{:tag :pyydetty :child [{:tag :viranomainen}
                                                                                                           {:tag :pyyntoPvm}]}
