@@ -21,10 +21,15 @@
    :a {:b {:c {:d {:e {:f {:g 1 :h 2 :i true :j false :k "str"}}}}}}})
 
 (facts "feature flags"
+
   (fact "feature is on"
+
     (feature? :a) => true
-    (provided
-      (get-config) => {:feature {:a true}}))
+    (provided (get-config) => {:feature {:a true}})
+
+    (feature? :a) => true
+    (provided (get-config) => {:feature {:a "true"}}))
+
   (fact "feature is not on"
 
     (feature? :a) => false
