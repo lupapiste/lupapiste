@@ -65,8 +65,6 @@ Application is shown after login
   User logs in  mikko@example.com  mikko123  Mikko Intonen
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
-Mikko sees comment indicator
-  Element text should be  applicationUnseenComments  1
 
 *** Keywords ***
 
