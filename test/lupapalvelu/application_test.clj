@@ -27,6 +27,24 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update :applications {:_id ..id..} ..changes..) => true))
 
+(def validate-x #'lupapalvelu.application/validate-x)
+(def validate-y #'lupapalvelu.application/validate-y)
+
+(facts "coordinate validation"
+  (validate-x {:data {:x nil}}) => nil
+  (validate-y {:data {:y nil}}) => nil
+  (validate-x {:data {:x ""}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-x {:data {:x "0"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-x {:data {:x "1000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-x {:data {:x "10001"}}) => nil
+  (validate-x {:data {:x "799999"}}) => nil
+  (validate-x {:data {:x "800000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y ""}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "0"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "6609999"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "6610000"}}) => nil
+  (validate-y {:data {:y "7780000"}}) => {:ok false :text "error.illegal-coordinates"}
+  (validate-y {:data {:y "7779999"}}) => nil)
 
 (def make-documents #'lupapalvelu.application/make-documents)
 

@@ -53,7 +53,7 @@ Teppo can edit Mikko's application
   Open application  invite-app  753-416-25-25
   # OnChange event does not seem to get triggered. Do it manually.
   Execute Javascript  $("input[id$='kiinteisto-maaraalaTunnus']").val("1024").change();
-  Wait for jQuery
+  Wait Until  Page Should Contain  Tiedot tallennettu
   Textfield Value Should Be  xpath=//input[contains(@id,'kiinteisto-maaraalaTunnus')]  1024
   Logout
 

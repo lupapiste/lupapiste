@@ -1,2 +1,64 @@
+error.illegal-value:not-a-map: Väärä tietorakenne (Map)
+error.illegal-value:not-a-string: Syötte ei ole merkkijono
+error.illegal-value:too-long: Liian pitkä arvo
+error.illegal-value:too-short: Liian lyhyt arvo
+error.illegal-value:not-latin1-string: Arvo sisältää laittomia merkkejä
+error.illegal-value:not-a-boolean: Arvo ei ole totuusarvo (true/false)
+error.illegal-value:date: Päivämäärä annetaan muodossa dd.MM.YYYY (esim. 16.05.2013)
+error.illegal-value:select: Arvo ei ole sallitusta arvojoukosta
+error.illegal-key: Tuntematon avain
+error.unknown-type: Tuntematon tietotyyppi
+error.illegal-email: Sähköpostiosoite väärää muotoa
+error.illegal-tel: Puhelinunumeron muoto on väärä
+error.illegal-number: Virheellinen numero
+error.illegal-letter:upper: Anna iso kirjain
+error.illegal-letter:lower: Anna pieni kirjain
+error.illegal-letter:any: Anna kirjain
+error.illegal-kiinteistotunnus: Kiinteistötunnus on 14 numeroa pitkä.
+error.illegal-zip: Eriskummallinen postinumero
+error.illegal-subtype: Tuntematon tietotyyppi
+error.illegal-hetu: Tarkasta henkilötunnuksen muoto
+error.illegal-name: Sallitut arvot: kirjainmerkit, väliviiva, kauttaviiva, blanko, piste ja *
+error.illegal-coordinates: Virheellinen sijainti
+
+error.vrk:CR341: Sähkölämmitys vaatii sähköliittymän
+error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän
+error.vrk:CR343: Jos lämmitystapa on sähkölämmitys, on polttoaineen oltava sähkö
+error.vrk:CR324: Sähkö polttoaineena vaatii varusteeksi sähkön
+error.vrk:CR322: Uuden rakennuksen kokonaisalan oltava vähintään huoneistoala
+error.vrk:CR328:sahko: Sähköliittymä vaatii varusteeksi sähkön
+error.vrk:CR328:viemari: Viemäriliittymä vaatii varusteeksi viemärin
+error.vrk:CR328:vesijohto: Vesiliittymä vaatii varusteeksi vesijohdon
+error.vrk:CR312: Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1
+error.vrk:CR313: Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala
+error.vrk:CR314: Asuinrakennuksessa pitää olla lämmitys
+error.vrk:CR315: Omakotitalossa pitaa olla tasan yksi huoneisto
+error.vrk:CR316: Paritalossa pitää olla kaksi uutta huoneistoa
+error.vrk:CR317: Rivi- tai kerrostaloissa tulee olla vähintään kolme uutta huoneistoa
+error.vrk:CR320: Jos käyttötarkoitus on 011 – 022, on kerrosluvun oltava välillä 1 – 4
+error.vrk:CR320: Jos rakentamistoimenpide on 1 ja käyttötarkoitus on 032 – 039, on kerrosluvun oltava vähintään 2
+error.vrk:CR340: Asuinrakennuksessa kerrosalan on oltava vähintaään 7 neliötä
+error.vrk:CR333:tilavuus: Tilavuus on pakollinen tässä käyttötarkoituksessa
+error.vrk:CR333:kerrosala: Kerrosala on pakollinen tässä käyttötarkoituksessa
+error.vrk:CR333:kokonaisala: Kokonaisala on pakollinen tässä käyttötarkoituksessa
+error.vrk:CR333:kerrosluku: Kerrosluku on pakollinen tässä käyttötarkoituksessa
+error.vrk:BR113: Pien- tai rivitalossa saa olla korkeintaan 3 kerrosta
+error.validator: Validointivirhe
+error.vrk:CR326: Kokonaisalan oltava vahintaan kerrosala
+error.vrk:CR335: Jos lämmitystapa ei ole "ei kiinteää lämmityslaitetta", on polttoaine ilmoitettava
+error.illegal-value:required: Arvo on pakollinen
+error.illegal-y-tunnus: Y-tunnus on väärää muotoa
+error.vrk:CR330: Rakennus ei saa olla yli 150 metriä korkea
+error.vrk:BR319:julkisivu: Julkisivumateriaali on pakollinen
+error.vrk:BR319:lammitystapa: Lämmitystapa on pakollinen
+
+session-dead.title: Istunto vanhentunut
+session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
+session-dead.logout: Kirjaudu
+connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
+attachmentType.empty._group_label:
+
+application.filter.search: etsi:
+
 kaupunkikuvatoimenpide.kokonaisala: Kokonaisala
 applications.unseenComments:

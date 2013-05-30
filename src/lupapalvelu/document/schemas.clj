@@ -39,21 +39,21 @@
 
 (def simple-osoite [{:name "osoite"
                      :type :group
-                     :body [{:name "katu" :type :string}
-                            {:name "postinumero" :type :string :required true :subtype :zip :size "s"}
-                            {:name "postitoimipaikannimi" :type :string :size "m"}]}])
+                     :body [{:name "katu" :type :string :subtype :vrk-address :required true}
+                            {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
+                            {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
 
 (def full-osoite [{:name "osoite"
                    :type :group
                    :body [{:name "kunta" :type :string}
                           {:name "lahiosoite" :type :string}
-                          {:name "osoitenumero" :type :string}
+                          {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
                           {:name "osoitenumero2" :type :string}
                           {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}
                           {:name "jakokirjain2" :type :string :size "s"}
                           {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                           {:name "huoneisto" :type :string :size "s"}
-                          {:name "postinumero" :type :string :required true :subtype :zip :size "s"}
+                          {:name "postinumero" :type :string :subtype :zip :size "s"}
                           {:name "postitoimipaikannimi" :type :string :size "m"}
                           {:name "pistesijanti" :type :string}]}])
 
@@ -65,23 +65,32 @@
 
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
-                             :body [{:name "etunimi" :type :string}
-                                    {:name "sukunimi" :type :string}]}])
+                             :body [{:name "etunimi" :type :string :subtype :vrk-name}
+                                    {:name "sukunimi" :type :string :subtype :vrk-name}]}])
 
-(def henkilotiedot-with-sotu [{:name "henkilotiedot"
+(def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
-                               :body [{:name "etunimi" :type :string}
-                                      {:name "sukunimi" :type :string}
-                                      {:name "hetu" :type :string}]}])
+                               :body [{:name "etunimi" :type :string :subtype :vrk-name}
+                                      {:name "sukunimi" :type :string :subtype :vrk-name}
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11}]})
 
 (def henkilo (body
                henkilo-valitsin
-               henkilotiedot-with-sotu
+               [henkilotiedot-with-hetu]
+               simple-osoite
+               yhteystiedot))
+
+(def henkilo-with-required-hetu (body
+               henkilo-valitsin
+               [(assoc henkilotiedot-with-hetu
+                       :body
+                       (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
+                            (:body henkilotiedot-with-hetu)))]
                simple-osoite
                yhteystiedot))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string}
-                     {:name "liikeJaYhteisoTunnus" :type :string}])
+                     {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus}])
 
 (def yritys (body
               yritys-minimal
@@ -95,6 +104,12 @@
 (def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
             {:name "henkilo" :type :group :body henkilo}
             {:name "yritys" :type :group :body yritys}])
+
+(def party-with-required-hetu
+  [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+   {:name "henkilo" :type :group :body henkilo-with-required-hetu}
+   {:name "yritys" :type :group :body yritys}])
+
 
 (def patevyys [{:name "koulutus" :type :string}
                {:name "patevyysluokka" :type :select
@@ -144,9 +159,9 @@
                          :body [{:name "asuinhuoneisto"}
                                 {:name "toimitila"}
                                 {:name "ei tiedossa"}]}
-                        {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s"}
+                        {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s" :min 1 :max 9999999 :required true}
                         {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "s"}]}
-                {:name "keittionTyyppi" :type :select
+                {:name "keittionTyyppi" :type :select :required true
                  :body [{:name "keittio"}
                         {:name "keittokomero"}
                         {:name "keittotila"}
@@ -166,7 +181,7 @@
 (def talousrakennus "941 talousrakennukset")
 (def rakennuksen-tiedot [{:name "kaytto"
                           :type :group
-                          :body [{:name "rakentajaTyyppi" :type :select
+                          :body [{:name "rakentajaTyyppi" :type :select :required true
                                   :body [{:name "liiketaloudellinen"}
                                          {:name "muu"}
                                          {:name "ei tiedossa"}]}
@@ -251,18 +266,18 @@
                                          {:name "ei tiedossa"}]}]}
                          {:name "mitat"
                           :type :group
-                          :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
-                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
-                                 {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
-                                 {:name "kerrosluku" :type :string :size "s" :subtype :number}
-                                 {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number}]}
+                          :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                                 {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                 {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                 {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
+                                 {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]}
                          {:name "rakenne"
                           :type :group
-                          :body [{:name "rakentamistapa" :type :select
+                          :body [{:name "rakentamistapa" :type :select :required true
                                   :body [{:name "elementti"}
                                          {:name "paikalla"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "kantavaRakennusaine" :type :select
+                                 {:name "kantavaRakennusaine" :type :select :required true
                                   :body [{:name "betoni"}
                                          {:name "tiili"}
                                          {:name "ter\u00e4s"}
@@ -287,7 +302,7 @@
                                          {:name "uuni"}
                                          {:name "eiLammitysta"}
                                          {:name "ei tiedossa"}]}
-                                 {:name "lammonlahde" :type :select
+                                 {:name "lammonlahde" :type :select :required true
                                   :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                                          {:name "kevyt poltto\u00f6ljy"}
                                          {:name "raskas poltto\u00f6ljy"}
@@ -315,8 +330,8 @@
                                  {:name "koneellinenilmastointiKytkin" :type :checkbox}
                                  {:name "lamminvesiKytkin" :type :checkbox}
                                  {:name "aurinkopaneeliKytkin" :type :checkbox}
-                                 {:name "saunoja" :type :string :subtype :number :size "s" :unit "kpl"}
-                                 {:name "vaestonsuoja" :type :string :subtype :number :size "s" :unit "hengelle"}]}
+                                 {:name "saunoja" :type :string :subtype :number :min 1 :max 99 :size "s" :unit "kpl"}
+                                 {:name "vaestonsuoja" :type :string :subtype :number :min 1 :max 99999 :size "s" :unit "hengelle"}]}
                          {:name "luokitus"
                           :type :group
                           :body [{:name "energialuokka" :type :select
@@ -357,7 +372,8 @@
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group
                              :repeating true
-                             :body (body party [{:name "omistajalaji" :type :select
+                             :body (body party-with-required-hetu
+                                         [{:name "omistajalaji" :type :select
                                            :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                                   {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                                   {:name "asunto-oy tai asunto-osuuskunta"}
@@ -379,7 +395,7 @@
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
-                     {:name "muutostyolaji" :type :select
+                     {:name "muutostyolaji" :type :select :required true
                       :body
                       [{:name perustusten-korjaus}
                        {:name kayttotarkotuksen-muutos}
@@ -400,11 +416,11 @@
                                        :body [{:name "perusparannuskytkin" :type :checkbox}
                                               {:name "mitat"
                                                :type :group
-                                               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number}
-                                                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number}
-                                                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}
+                                               :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                                                      {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                                                      {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                                                       {:name "huoneistoala" :type :group :repeating true :removable true
-                                                       :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
+                                                       :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                                                               {:name "kayttotarkoitusKoodi" :type :select
                                                                :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
                                                                       {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
@@ -494,7 +510,7 @@
                      {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
                      {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
 
-             {:name "hallintaperuste" :type :select
+             {:name "hallintaperuste" :type :select :required true
               :body [{:name "oma"}
                      {:name "vuokra"}
                      {:name "ei tiedossa"}]}

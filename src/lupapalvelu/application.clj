@@ -3,6 +3,7 @@
         [clojure.tools.logging]
         [lupapalvelu.core]
         [clojure.string :only [blank? join trim]]
+        [sade.strings :only [numeric? decimal-number?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
@@ -30,6 +31,10 @@
 ;;
 ;; Common helpers:
 ;;
+
+(defn- ->double [v]
+  (let [s (str v)]
+    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
 
 (defn get-applicant-name [_ app]
   (if (:infoRequest app)
@@ -62,6 +67,8 @@
         {:_id id}
         changes))))
 
+;; Validators
+
 (defn- property-id? [^String s]
   (and s (re-matches #"^[0-9]{14}$" s)))
 
@@ -76,6 +83,14 @@
   [command application]
   (when-not (domain/owner-or-writer? application (-> command :user :id))
     (fail :error.unauthorized)))
+
+(defn- validate-x [{{:keys [x]} :data}]
+  (when (and x (not (< 10000 (->double x) 800000)))
+    (fail :error.illegal-coordinates)))
+
+(defn- validate-y [{{:keys [y]} :data}]
+  (when (and y (not (<= 6610000 (->double y) 7779999)))
+    (fail :error.illegal-coordinates)))
 
 (defn- without-system-keys [application]
   (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
@@ -537,7 +552,8 @@
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
    :input-validators [(partial non-blank-parameters [:address])
-                      (partial property-id-parameters [:propertyId])]}
+                      (partial property-id-parameters [:propertyId])
+                      validate-x validate-y]}
   [{{:keys [id x y address propertyId]} :data created :created application :application}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
@@ -660,7 +676,6 @@
 (defn make-query [query params user]
   (let [search (params :filter-search)
         kind (params :filter-kind)]
-    (println "** search:" search)
     (merge
       query
       (condp = kind
