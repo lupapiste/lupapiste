@@ -510,7 +510,7 @@
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (facts "Canonical model is correct"
-  let [canonical (application-to-canonical application)
+  (let [canonical (application-to-canonical application)
         rakennusvalvonta (:Rakennusvalvonta canonical)
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto)
@@ -628,4 +628,4 @@
     (fact  "Puolto" puolto => "ehdoilla")
 
  ;   (clojure.pprint/pprint canonical)
-    )
+    ))
