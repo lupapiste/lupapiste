@@ -124,10 +124,14 @@
       :authority (count-attachments "requires_authority_action")
       0)))
 
+(defn indicator-sum [_ app]
+  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :attachmentsRequiringAction} k) v 0)) app)))
+
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :unseenComments :fn count-unseen-comment}
                   {:field :unseenStatements :fn count-unseen-statements}
-                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}])
+                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
+                  {:field :indicators :fn indicator-sum}])
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
@@ -676,7 +680,7 @@
                   get-application-operation
                   :applicant
                   :submitted
-                  :attachmentsRequiringAction
+                  :indicators
                   :unseenComments
                   :modified
                   :state
