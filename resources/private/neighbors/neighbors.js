@@ -53,6 +53,7 @@
         .call();
       return self;
     };
+    self.done = function() { window.location.hash = "!/application/" + applicationId + "/statement"; };
   }
   
   function EditModel() {

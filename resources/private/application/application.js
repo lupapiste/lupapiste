@@ -666,7 +666,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment","neighbors"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
@@ -674,7 +674,7 @@
 
   var neighborActions = {
     normalize: function(neighbors) {
-      return _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; });
+      return neighbors ? _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; }) : [];
     },
     sendNeighborEmail: function(neighbor) {
       ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call();

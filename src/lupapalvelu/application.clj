@@ -25,6 +25,7 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.neighbors :as neighbors]
             [clj-time.format :as tf]))
 
 ;;
@@ -74,7 +75,8 @@
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}])
+(def meta-fields [{:field :applicant :fn get-applicant-name}
+                  {:field :neighbors :fn neighbors/normalize-negighbors}])
 
 (defn with-meta-fields [app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f app))) app meta-fields))
