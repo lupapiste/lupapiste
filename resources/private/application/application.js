@@ -302,6 +302,7 @@
     operationsCount: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
+    attachmentsRequiringAction: ko.observable(),
     unseenComments: ko.observable(),
 
     // new stuff
