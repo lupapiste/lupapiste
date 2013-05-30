@@ -59,6 +59,9 @@
         {:_id id}
         changes))))
 
+(defn- without-system-keys [application]
+  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
+
 ;; Validators
 
 (defn- property-id? [^String s]
@@ -83,9 +86,6 @@
 (defn- validate-y [{{:keys [y]} :data}]
   (when (and y (not (<= 6610000 (->double y) 7779999)))
     (fail :error.illegal-coordinates)))
-
-(defn- without-system-keys [application]
-  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
 
 ;; Meta-fields:
 ;;
