@@ -707,7 +707,7 @@
         .neighborId(neighbor.neighborId())
         .propertyId(neighbor.neighbor.propertyId())
         .name(neighbor.neighbor.owner.name())
-        .email("")
+        .email(neighbor.neighbor.owner.email())
         .message("");
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
