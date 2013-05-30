@@ -16,7 +16,7 @@
     };
   }
   
-  function toNeighbors(neighbors, propertyId) {
+  function toNeighbors(neighbors) {
     return _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; });
   }
   
@@ -46,8 +46,12 @@
     self.add    = function()         { editModel.init().edit().open(); };
     self.click  = function(x, y)     { editModel.init().search(x, y).open(); };
     self.remove = function(neighbor) {
-      /* TODO */ console.log("remove:", neighbor);
-      ajax.command("")
+      // TODO: needs "Are you sure?" dialog.
+      ajax
+        .command("neighbor-remove", {id: applicationId, neighborId: neighbor.neighborId})
+        .complete(_.partial(repository.load, applicationId, util.nop))
+        .call();
+      return self;
     };
   }
   
@@ -60,19 +64,22 @@
     self.statusEdit         = 2;
     self.statusSearchFailed = 3;
 
-    self.init = function(n) {
-      var neighbor = n || {},
+    self.init = function(data) {
+      var data = data || {},
+          neighbor = data.neighbor || {},
           owner = neighbor.owner || {},
           address = owner.address || {};
       return self
         .status(self.statusInit)
-        .neighborId(neighbor.neighborId)
+        .id(applicationId)
+        .neighborId(data.neighborId)
         .propertyId(neighbor.propertyId)
         .name(owner.name)
         .street(address.street)
         .city(address.city)
         .zip(address.zip)
-        .email(owner.email);
+        .email(owner.email)
+        .pending(false);
     };
 
     self.edit = function() { return self.status(self.statusEdit); }
@@ -84,6 +91,7 @@
     self.cancelSearch = function() { self.status(self.statusEdit).requestContext.begin(); return self; };
     self.focusName = function() { $("#neighbors-edit-name").focus(); return self; };
 
+    self.id = ko.observable();
     self.neighborId = ko.observable();
     self.propertyId = ko.observable();
     self.name = ko.observable();
@@ -91,13 +99,30 @@
     self.city = ko.observable();
     self.zip = ko.observable();
     self.email = ko.observable();
-
+    
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
     self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
     self.ok = ko.computed(function() { return self.propertyIdOk() && self.emailOk(); });
     
+    self.pending = function(pending) {
+      // Should have ajax indicator too
+      $("#dialog-edit-neighbor button").attr("disabled", pending ? "disabled" : null);
+      return self;
+    }
+    
+    var paramNames = ["id", "neighborId", "propertyId", "name", "street", "city", "zip", "email"];
+    function paramValue(paramName) { return self[paramName](); }
+
     self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };
-    self.save = function() { console.log("SAVE!"); LUPAPISTE.ModalDialog.close(); return self; };
+    self.save = function() {
+      ajax
+        .command(self.neighborId() ? "neighbor-update" : "neighbor-add", _.zipObject(paramNames, _.map(paramNames, paramValue)))
+        .pending(self.pending)
+        .complete(_.partial(repository.load, self.id(), function(v) { if (!v) LUPAPISTE.ModalDialog.close(); }))
+        .call();
+      return self;
+    };
+    
     // self.neighbors.push(makeNew(propertyId));
     
     self.requestContext = new RequestContext();
