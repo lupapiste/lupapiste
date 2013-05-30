@@ -42,10 +42,23 @@
   (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
     (read-config prop-file password)))
 
+(defn get-config []
+  config)
+
 (defn value
   "returns a value from config directly."
   [& keys]
   (get-in config (flatten [keys])))
+
+(defn feature?
+  "checks if a feature is enabled"
+  [& keys]
+  (->
+    (get-config)
+    (get-in (cons :feature (into [] keys)))
+    str
+    read-value
+    true?))
 
 (defn- get-prop [prop-name default]
   (or
