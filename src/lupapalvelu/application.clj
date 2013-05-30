@@ -31,24 +31,6 @@
 ;; Common helpers:
 ;;
 
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
-
-(defn get-unseen-comment-count [user app]
-  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
-    (count (filter (fn [comment]
-                     (and (> (:created comment) last-seen)
-                          (not= (get-in comment [:user :id]) (:id user))
-                          (not (blank? (:text comment)))))
-                   (:comments app)))))
-
 (defn get-application-operation [app]
   (first (:operations app)))
 
@@ -84,6 +66,24 @@
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
+
+(defn get-applicant-name [_ app]
+  (if (:infoRequest app)
+    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
+      (str first-name \space last-name))
+    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
+      (if (= (get-in body [:_selected :value]) "yritys")
+        (get-in body [:yritys :yritysnimi :value])
+        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+          (str (:value first-name) \space (:value last-name)))))))
+
+(defn get-unseen-comment-count [user app]
+  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
+    (count (filter (fn [comment]
+                     (and (> (:created comment) last-seen)
+                          (not= (get-in comment [:user :id]) (:id user))
+                          (not (blank? (:text comment)))))
+                   (:comments app)))))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :unseenComments :fn get-unseen-comment-count}])
