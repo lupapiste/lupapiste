@@ -387,7 +387,7 @@
                     <span data-bind="text: address.city" class="owner-city"></span>
                   </td>
                   <td data-bind="with: lastStatus">
-                    <span data-bind="text: state" class="status-state"></span>
+                    <span data-bind="text: loc('neighbor.state', state())" class="status-state"></span>
                     <span data-bind="dateTimeString: created" class="status-time"></span>
                   </td>
                   <td>

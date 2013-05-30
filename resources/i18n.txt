@@ -24,6 +24,10 @@ neighbors.done: Palaa hakemukseen
 
 neighbors.status: Tila
 
+neighbor.state.open: Avoin
+neighbor.state.mark-done: Merkitty kuulluksi
+neighbor.state.email-sent: Sähköposti lähetetty
+
 neighbors.actions: Toiminnot
 neighbors.actions.edit: muokkaa
 neighbors.actions.remove: poista

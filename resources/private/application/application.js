@@ -704,21 +704,21 @@
     self.open = function(neighbor) {
       self
         .id(application.id())
-        .neighborId(neighbor.neighborId)
-        .propertyId(neighbor.propertyId)
-        .name(neighbor.owner.name())
+        .neighborId(neighbor.neighborId())
+        .propertyId(neighbor.neighbor.propertyId())
+        .name(neighbor.neighbor.owner.name())
         .email("")
         .message("");
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
+    var paramNames = ["id", "neighborId", "propertyId", "name", "email", "message"];
+    function paramValue(paramName) { return self[paramName](); }
+
     self.send = function() {
-      var params = _(self)
-        .pick("id", "neighborId", "propertyId", "name", "email", "message")
-        .map(function(fn) { return fn(); })
-        .valueOf();
+      console.log("params", _.zipObject(paramNames, _.map(paramNames, paramValue)));
       ajax
-        .command("send-neighbor-invite", params)
+        .command("neighbor-send-invite", _.zipObject(paramNames, _.map(paramNames, paramValue)))
         .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending")))
         .complete(LUPAPISTE.ModalDialog.close)
         .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
