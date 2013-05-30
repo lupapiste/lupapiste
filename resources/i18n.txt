@@ -1,65 +1,58 @@
-error.illegal-value:not-a-map: Väärä tietorakenne (Map)
-error.illegal-value:not-a-string: Syötte ei ole merkkijono
-error.illegal-value:too-long: Liian pitkä arvo
-error.illegal-value:too-short: Liian lyhyt arvo
-error.illegal-value:not-latin1-string: Arvo sisältää laittomia merkkejä
-error.illegal-value:not-a-boolean: Arvo ei ole totuusarvo (true/false)
-error.illegal-value:date: Päivämäärä annetaan muodossa dd.MM.YYYY (esim. 16.05.2013)
-error.illegal-value:select: Arvo ei ole sallitusta arvojoukosta
-error.illegal-key: Tuntematon avain
-error.unknown-type: Tuntematon tietotyyppi
-error.illegal-email: Sähköpostiosoite väärää muotoa
-error.illegal-tel: Puhelinunumeron muoto on väärä
-error.illegal-number: Virheellinen numero
-error.illegal-letter:upper: Anna iso kirjain
-error.illegal-letter:lower: Anna pieni kirjain
-error.illegal-letter:any: Anna kirjain
-error.illegal-kiinteistotunnus: Kiinteistötunnus on 14 numeroa pitkä.
-error.illegal-zip: Eriskummallinen postinumero
-error.illegal-subtype: Tuntematon tietotyyppi
-error.illegal-hetu: Tarkasta henkilötunnuksen muoto
-error.illegal-name: Sallitut arvot: kirjainmerkit, väliviiva, kauttaviiva, blanko, piste ja *
-error.illegal-coordinates: Virheellinen sijainti
-
-error.vrk:CR341: Sähkölämmitys vaatii sähköliittymän
-error.vrk:CR342: Sähkö polttoaineena vaatii sähköliittymän
-error.vrk:CR343: Jos lämmitystapa on sähkölämmitys, on polttoaineen oltava sähkö
-error.vrk:CR324: Sähkö polttoaineena vaatii varusteeksi sähkön
-error.vrk:CR322: Uuden rakennuksen kokonaisalan oltava vähintään huoneistoala
-error.vrk:CR328:sahko: Sähköliittymä vaatii varusteeksi sähkön
-error.vrk:CR328:viemari: Viemäriliittymä vaatii varusteeksi viemärin
-error.vrk:CR328:vesijohto: Vesiliittymä vaatii varusteeksi vesijohdon
-error.vrk:CR312: Jos rakentamistoimenpide on 691 tai 111, on kerrosluvun oltava 1
-error.vrk:CR313: Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala
-error.vrk:CR314: Asuinrakennuksessa pitää olla lämmitys
-error.vrk:CR315: Omakotitalossa pitaa olla tasan yksi huoneisto
-error.vrk:CR316: Paritalossa pitää olla kaksi uutta huoneistoa
-error.vrk:CR317: Rivi- tai kerrostaloissa tulee olla vähintään kolme uutta huoneistoa
-error.vrk:CR320: Jos käyttötarkoitus on 011 – 022, on kerrosluvun oltava välillä 1 – 4
-error.vrk:CR320: Jos rakentamistoimenpide on 1 ja käyttötarkoitus on 032 – 039, on kerrosluvun oltava vähintään 2
-error.vrk:CR340: Asuinrakennuksessa kerrosalan on oltava vähintaään 7 neliötä
-error.vrk:CR333:tilavuus: Tilavuus on pakollinen tässä käyttötarkoituksessa
-error.vrk:CR333:kerrosala: Kerrosala on pakollinen tässä käyttötarkoituksessa
-error.vrk:CR333:kokonaisala: Kokonaisala on pakollinen tässä käyttötarkoituksessa
-error.vrk:CR333:kerrosluku: Kerrosluku on pakollinen tässä käyttötarkoituksessa
-error.vrk:BR113: Pien- tai rivitalossa saa olla korkeintaan 3 kerrosta
-error.validator: Validointivirhe
-error.vrk:CR326: Kokonaisalan oltava vahintaan kerrosala
-error.vrk:CR335: Jos lämmitystapa ei ole "ei kiinteää lämmityslaitetta", on polttoaine ilmoitettava
-error.illegal-value:required: Arvo on pakollinen
-error.illegal-y-tunnus: Y-tunnus on väärää muotoa
-error.vrk:CR330: Rakennus ei saa olla yli 150 metriä korkea
-error.vrk:BR319:julkisivu: Julkisivumateriaali on pakollinen
-error.vrk:BR319:lammitystapa: Lämmitystapa on pakollinen
-
-session-dead.title: Istunto vanhentunut
-session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
-session-dead.logout: Kirjaudu
-connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
-attachmentType.empty._group_label:
-
-application.filter.search: etsi:
-
-kaupunkikuvatoimenpide.kokonaisala: Kokonaisala
-applications.unseenComments:
-applications.attachmentsRequiringAction:
+operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
+rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
+rakennushanke.kaytettykerrosala._append_label: Lisää olemassaolevaa
+rakennushanke.kaytettykerrosala._group_label: Olemassaolevat rakennukset
+rakennushanke.kaytettykerrosala.kayttotarkoitusKoodi._group_label: Käyttötarkoitus
+rakennushanke.kaytettykerrosala.pintaAla: Käytetty pinta-ala
+rakennushanke.toimenpiteet._append_label: Lisää toimenpide
+rakennushanke.toimenpiteet._group_label: Suunnitellut toimenpiteet
+rakennushanke.toimenpiteet.huoneistoja: Huoneistoja
+rakennushanke.toimenpiteet.kerroksia: Kerroksia
+rakennushanke.toimenpiteet.kerrosala: Kerrosala
+rakennushanke.toimenpiteet.kokonaisala: Kokonaisala
+rakennushanke.toimenpiteet.Toimenpide._group_label: Toimenpide
+rakennushanke.toimenpiteet.Toimenpide.laajennus: Laajennus
+rakennushanke.toimenpiteet.Toimenpide.muu muutostyö: Muu muutostyö
+rakennushanke.toimenpiteet.Toimenpide.purku: Purku
+rakennushanke.toimenpiteet.Toimenpide.uudelleenrakentamiseen verrattava muutos: Uudelleenrakentamiseen verratava muutos
+rakennushanke.toimenpiteet.Toimenpide.uusi: Uusi
+suunnittelutarveratkaisu._group_label: Suunnitelutarveratkaisuhakemuksen lisäosa
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne._group_label: Kaavoituksen ja alueiden tilanne
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.asemakaavaluonnos: Asemakaavaluonnos
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.rajoittuuko_tiehen: Rajoittuuko tiehen
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.tienkayttooikeus: Tienkäyttöoikeus
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.vesijohto: Vesijohto
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.viemarijohto: Viemärijohto
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.yleiskaavaa: Yleiskaava
+suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri._group_label: Luonto ja kulttuuri
+suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri.kulttuurisesti_merkittava: Rakennuspaikka on kulttuurihistoriallisesti merkittävällä alueella tai arvokkaassa maisemassa
+suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri.suojelukohteita: Rakennuspaikan läheisyydessä on suojelukohteita tai -alueita
+suunnittelutarveratkaisun-lisaosa.maisema._group_label: Maisema - rakennuspaikka sijaitsee
+suunnittelutarveratkaisun-lisaosa.maisema.metsan_reunassa: Metsän reunassa
+suunnittelutarveratkaisun-lisaosa.maisema.metsassa:Metsässä
+suunnittelutarveratkaisun-lisaosa.maisema.nykyisen_rakennuspaikan_vieressa: Nykyisen rakennuspaikan vieressä
+suunnittelutarveratkaisun-lisaosa.maisema.pellolla: Pellolla
+suunnittelutarveratkaisun-lisaosa.maisema.vanhalla_rakennuspaikalla: Vanhalla rakennuspaikalla
+suunnittelutarveratkaisun-lisaosa.merkittavyys._group_label: Merkittävyys
+suunnittelutarveratkaisun-lisaosa.merkittavyys.rakentamisen_vaikutusten_merkittavyys: Rakentamisen vaikutusten merkittävyys
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset._group_label: Muut vaikutukset
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset.etaisyys_viemariverkosta: Etäisyys nykyisestä viemäriverkosta
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset.liitytaanko_viemariverkostoon: Liitytään rakennusaikana viemäriverkostoon
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset.pohjavesialuetta: Rakennuspaikka on pohjavesialueella
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle._group_label: Vaikutukset yhdyskuntakehykselle
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyys_kauppaan: Etäisyys kauppaan
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyys_paivakotiin:Etäisyys päiväkotiin
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyyys_kouluun: Etäisyys kouluun
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.muita_vaikutuksia: Muita vaikutuksia
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.turvallinen_polkupyoratie_kouluun: Turvallinen polkupyörätie kouluun
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyys_kuntakeskuksen_palveluihin: Etäisyys kuntakeskuksen palveluihin
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet._group_label: Vaikutukset alueen virkistystarpeisiin
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet.ulkoilu_ja_virkistysaluetta_varattu:  Emätilalta varattu virkistys- ja ulkoilutarpeisiin rakennuspaikan viereltä vähintään saman verran aluetta kuin rakennuspaikoiksi
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet.vaikeuttaako_ulkoilureittia: Vaikuttaa yleiskaavassa osoitetun ulkoilureitin toteuttamiseen
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet.virkistysalueella: Rakennuspaikka sijaitsee maakuntakaavan tai yleiskaavan virkistysalueella
+unit.km: km
+unit.m: m
+poikkeuslupa._group_label: Poikkeamishakemuksen lisäosa
+poikkeamishakemuksen-lisaosa.perustelut: Perustelut
+poikkeamishakemuksen-lisaosa.vaikutukset: Vaikutukset
+poikkeamishakemuksen-lisaosa.lisätiedot: Lisätiedot

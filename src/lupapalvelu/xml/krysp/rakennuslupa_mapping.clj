@@ -16,20 +16,20 @@
 ;RakVal
 
 (def ^:private huoneisto {:tag :huoneisto
-                :child [{:tag :huoneluku}
-                        {:tag :keittionTyyppi}
-                        {:tag :huoneistoala}
-                        {:tag :varusteet
-                         :child [{:tag :WCKytkin}
-                                 {:tag :ammeTaiSuihkuKytkin}
-                                 {:tag :saunaKytkin}
-                                 {:tag :parvekeTaiTerassiKytkin}
-                                 {:tag :lamminvesiKytkin}]}
-                        {:tag :huoneistonTyyppi}
-                        {:tag :huoneistotunnus
-                         :child [{:tag :porras}
-                                 {:tag :huoneistonumero}
-                                 {:tag :jakokirjain}]}]})
+                          :child [{:tag :huoneluku}
+                                  {:tag :keittionTyyppi}
+                                  {:tag :huoneistoala}
+                                  {:tag :varusteet
+                                   :child [{:tag :WCKytkin}
+                                           {:tag :ammeTaiSuihkuKytkin}
+                                           {:tag :saunaKytkin}
+                                           {:tag :parvekeTaiTerassiKytkin}
+                                           {:tag :lamminvesiKytkin}]}
+                                  {:tag :huoneistonTyyppi}
+                                  {:tag :huoneistotunnus
+                                   :child [{:tag :porras}
+                                           {:tag :huoneistonumero}
+                                           {:tag :jakokirjain}]}]})
 
 
 (def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
