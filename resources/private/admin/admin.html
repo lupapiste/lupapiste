@@ -24,7 +24,7 @@
       </ul><br/>
       <h2>Featuret</h2>
       <ul data-bind="foreach: features.data()">
-        <li><span data-bind="text: $data"></span></li>
+        <li><span data-bind="text: $data[0].join('.'), attr: {'style': 'color: ' + ($data[1] ? 'green' : 'red')}"></span></li>
       </ul><br/>
       <h2>Toiminnot</h2>
       <table>
