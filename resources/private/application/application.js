@@ -678,7 +678,13 @@
       return false;
     },
     upload: function(neighbor) { console.log("upload:", neighbor); },
-    markDone: function(neighbor) { console.log("markDone:", neighbor); },
+    markDone: function(neighbor) {
+      console.log("makrDone:", neighbor, neighbor.neighborId());
+      ajax
+        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
+        .complete(_.partial(repository.load, currentId, util.nop))
+        .call();
+    }
   };
 
   function SendNeighborEmailModel() {

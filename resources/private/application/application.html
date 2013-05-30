@@ -386,14 +386,14 @@
                     <span data-bind="text: address.zip" class="owner-zip"></span>
                     <span data-bind="text: address.city" class="owner-city"></span>
                   </td>
-                  <td data-bind="with: _.last(status())">
+                  <td data-bind="with: lastStatus">
                     <span data-bind="text: state" class="status-state"></span>
                     <span data-bind="dateTimeString: created" class="status-time"></span>
                   </td>
                   <td>
-                    <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('send-neighbor-invite'), ltext: 'neighbors.actions.sendEmail'" href="#"></a>
+                    <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('neighbor-send-invite'), ltext: 'neighbors.actions.sendEmail'" href="#"></a>
                     <a data-bind="click: $root.neighbor.upload, ltext: 'neighbors.actions.upload', clickBubble: false" href="#"></a>
-                    <a data-bind="click: $root.neighbor.markDone, ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>
+                    <a data-bind="click: $root.neighbor.markDone, visible: lastStatus.state() == 'open' && $root.authorization.ok('neighbor-mark-done'), ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>
                   </td>
                 </tr>
               </tbody>
