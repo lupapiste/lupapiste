@@ -13,20 +13,20 @@
   (count-unseen-comment {:id "user1"} {:comments [{:created 10 :text "" :user {:id "user2"}}]}) => 0)
 
 (facts "count-attachments-requiring-action"
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_authority_action"}]}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action"}]}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions []}]}) => 0
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions [{}]}]}) => 1
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "ok"}]}) => 0
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action"}]}) => 1
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_user_action"}]}) => 0
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "ok"}]}) => 0
-  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_authority_action"}]}) => 0
-  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_user_action"}]}) => 0
-  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "ok"}]}) => 0
-  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_authority_action"}]}) => 0
-  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_user_action"}]}) => 0
-  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "ok"}]}) => 0)
+  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 1
+  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
+  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0)
 
 (facts "sorting parameter parsing"
   (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {:infoRequest 1}

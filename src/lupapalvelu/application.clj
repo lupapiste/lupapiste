@@ -86,7 +86,7 @@
                    (:comments app)))))
 
 (defn count-attachments-requiring-action [user app]
-  (let [count-attachments (fn [state] (count (filter #(= (:state %) state) (:attachments app))))]
+  (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
     (case (keyword (:role user))
       :applicant (count-attachments "requires_user_action")
       :authority (count-attachments "requires_authority_action")
