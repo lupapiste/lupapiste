@@ -42,9 +42,20 @@
                   :let [v (.getProperty decryptor k)]]
               (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))))))
 
-(def ^:private config (atom (read-config prop-file)))
+(def ^:private config (atom {:last (java.lang.System/currentTimeMillis)
+                             :data (read-config prop-file)}))
 
-(defn get-config [] @config)
+(defn get-config
+  "If value autoreload=true, rereads the file, otherwise
+   Returns cached dereffed configuration."
+  []
+  (let [modified   (-> config deref :last)
+        now        (java.lang.System/currentTimeMillis)
+        autoreload (-> config deref :data :autoreload str read-value true?)]
+    (if (and autoreload (> now (+ 10000 modified)))
+      (reset! config {:last now
+                      :data (read-config prop-file)})
+      @config)))
 
 (defn value
   "returns a value from config directly."
