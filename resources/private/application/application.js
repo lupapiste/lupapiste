@@ -583,7 +583,7 @@
     });
   }
 
-  hub.subscribe({type: "dialog-close", id : "dialog-valtuutus"}, function() {
+  hub.subscribe({type: "dialog-close", id: "dialog-valtuutus"}, function() {
     inviteModel.reset();
   });
 
