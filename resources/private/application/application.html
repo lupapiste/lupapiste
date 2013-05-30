@@ -125,8 +125,12 @@
                    href="#" data-target="info" data-test-id="application-open-info-tab"></a></li>
             <li><a data-bind="ltext: 'application.tabParties', click: $root.application.changeTab"
                    href="#" data-target="parties" data-test-id="application-open-parties-tab"></a></li>
-            <li><a data-bind="ltext: 'application.tabAttachments', click: $root.application.changeTab"
-                   href="#" data-target="attachments" data-test-id="application-open-attachments-tab"></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
+                <span data-bind="ltext: 'application.tabAttachments'"></span>
+                <span data-bind="if: $root.application.attachmentsRequiringAction">
+                  <span data-bind="text: $root.application.attachmentsRequiringAction"
+                        id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
             <li><a data-bind="ltext: 'application.tabStatement', click: $root.application.changeTab"
                    href="#" data-target="statement" data-test-id="application-open-statement-tab"></a></li>
             <li><a data-bind="ltext: 'application.tabVerdict', click: $root.application.changeTab"

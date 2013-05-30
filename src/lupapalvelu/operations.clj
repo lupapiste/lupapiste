@@ -1,7 +1,8 @@
 (ns lupapalvelu.operations
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]))
+            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")
 
@@ -35,8 +36,8 @@
                                                                   ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]
-   ["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
-                                                  ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
+   (when (env/feature? "poikkari") ["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
+                                                  ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]])])
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.

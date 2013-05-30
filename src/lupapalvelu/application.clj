@@ -3,6 +3,7 @@
         [clojure.tools.logging]
         [lupapalvelu.core]
         [clojure.string :only [blank? join trim]]
+        [sade.strings :only [numeric? decimal-number?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
@@ -32,6 +33,10 @@
 ;; Common helpers:
 ;;
 
+(defn- ->double [v]
+  (let [s (str v)]
+    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
+
 (defn get-applicant-name [_ app]
   (if (:infoRequest app)
     (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
@@ -41,14 +46,6 @@
         (get-in body [:yritys :yritysnimi :value])
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str (:value first-name) \space (:value last-name)))))))
-
-(defn get-unseen-comment-count [user app]
-  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
-    (count (filter (fn [comment]
-                     (and (> (:created comment) last-seen)
-                          (not= (get-in comment [:user :id]) (:id user))
-                          (not (blank? (:text comment)))))
-                   (:comments app)))))
 
 (defn get-application-operation [app]
   (first (:operations app)))
@@ -62,6 +59,8 @@
         :applications
         {:_id id}
         changes))))
+
+;; Validators
 
 (defn- property-id? [^String s]
   (and s (re-matches #"^[0-9]{14}$" s)))
@@ -78,6 +77,14 @@
   (when-not (domain/owner-or-writer? application (-> command :user :id))
     (fail :error.unauthorized)))
 
+(defn- validate-x [{{:keys [x]} :data}]
+  (when (and x (not (< 10000 (->double x) 800000)))
+    (fail :error.illegal-coordinates)))
+
+(defn- validate-y [{{:keys [y]} :data}]
+  (when (and y (not (<= 6610000 (->double y) 7779999)))
+    (fail :error.illegal-coordinates)))
+
 (defn- without-system-keys [application]
   (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
 
@@ -86,9 +93,34 @@
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :unseenComments :fn get-unseen-comment-count}])
+(defn get-applicant-name [_ app]
+  (if (:infoRequest app)
+    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
+      (str first-name \space last-name))
+    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
+      (if (= (get-in body [:_selected :value]) "yritys")
+        (get-in body [:yritys :yritysnimi :value])
+        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+          (str (:value first-name) \space (:value last-name)))))))
 
+(defn count-unseen-comment [user app]
+  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
+    (count (filter (fn [comment]
+                     (and (> (:created comment) last-seen)
+                          (not= (get-in comment [:user :id]) (:id user))
+                          (not (blank? (:text comment)))))
+                   (:comments app)))))
+
+(defn count-attachments-requiring-action [user app]
+  (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
+    (case (keyword (:role user))
+      :applicant (count-attachments "requires_user_action")
+      :authority (count-attachments "requires_authority_action")
+      0)))
+
+(def meta-fields [{:field :applicant :fn get-applicant-name}
+                  {:field :unseenComments :fn count-unseen-comment}
+                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}])
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
@@ -538,7 +570,8 @@
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed]
    :input-validators [(partial non-blank-parameters [:address])
-                      (partial property-id-parameters [:propertyId])]}
+                      (partial property-id-parameters [:propertyId])
+                      validate-x validate-y]}
   [{{:keys [id x y address propertyId]} :data created :created application :application}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
@@ -636,6 +669,7 @@
                   get-application-operation
                   :applicant
                   :submitted
+                  :attachmentsRequiringAction
                   :unseenComments
                   :modified
                   :state
@@ -646,7 +680,8 @@
                      1 :address
                      2 nil
                      3 nil
-                     5 nil))
+                     5 nil
+                     6 nil))
 
 (def col-map (zipmap col-sources (map str (range))))
 
@@ -661,7 +696,6 @@
 (defn make-query [query params user]
   (let [search (params :filter-search)
         kind (params :filter-kind)]
-    (println "** search:" search)
     (merge
       query
       (condp = kind
