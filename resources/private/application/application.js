@@ -673,9 +673,6 @@
   });
 
   var neighborActions = {
-    normalize: function(neighbors) {
-      return neighbors ? _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; }) : [];
-    },
     sendNeighborEmail: function(neighbor) {
       ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call();
       return false;

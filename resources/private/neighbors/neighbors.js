@@ -16,10 +16,6 @@
     };
   }
   
-  function toNeighbors(neighbors) {
-    return _.map(neighbors, function(neighbor, id) { neighbor.neighborId = id; return neighbor; });
-  }
-  
   var applicationId;
   var model = new Model();
   var editModel = new EditModel();
@@ -38,7 +34,7 @@
           y = location.y;
       self
         .applicationId(application.id)
-        .neighbors(toNeighbors(application.neighbors))
+        .neighbors(application.neighbors)
         .map.updateSize().clear().center(x, y, 11).add(x, y);
     };
     

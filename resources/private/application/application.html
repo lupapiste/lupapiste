@@ -377,7 +377,7 @@
                   <th data-bind="ltext: 'neighbors.actions'"></th>
                 </tr>
               </thead>
-              <tbody data-bind="foreach: $root.neighbor.normalize(neighbors())">
+              <tbody data-bind="foreach: neighbors">
                 <tr>
                   <td data-bind="text: neighbor.propertyId"></td>
                   <td data-bind="with: neighbor.owner">
