@@ -49,7 +49,7 @@
 (defn value
   "returns a value from config directly."
   [& keys]
-  (get-in config (flatten [keys])))
+  (get-in (get-config) (flatten [keys])))
 
 (defn feature?
   "checks if a feature is enabled"
@@ -75,7 +75,7 @@
 
 (defn- get-prop [prop-name default]
   (or
-    (get-in config (map keyword (s/split prop-name #"\.")))
+    (get-in (get-config) (map keyword (s/split prop-name #"\.")))
     (System/getProperty prop-name)
     (System/getenv (-> prop-name (s/replace \. \_) (s/upper-case)))
     default))
