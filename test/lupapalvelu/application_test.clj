@@ -6,6 +6,14 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]))
 
+(facts "get-unseen-comment-count"
+  (get-unseen-comment-count {:id "user1"} {:comments [{:created 10 :text "a" :user {:id "user2"}}]}) => 1
+  (get-unseen-comment-count {:id ..id..} {:comments [{:created 10 :text "a" :user {:id ..id..}}]}) => 0
+  (get-unseen-comment-count {:id "user1"} {:comments [{:created 0 :text "a" :user {:id "user2"}}]}) => 0
+  (get-unseen-comment-count {:id "user1"} {:comments [{:created 10 :text "" :user {:id "user2"}}]}) => 0)
+
+
+
 (facts "sorting parameter parsing"
   (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {:infoRequest 1}
   (make-sort {:iSortCol_0 1 :sSortDir_0 "desc"}) => {:address -1}
