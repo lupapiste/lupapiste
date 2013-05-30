@@ -1,6 +1,5 @@
 (ns lupapalvelu.notification-itest
   (:use [lupapalvelu.itest-util]
-        [lupapalvelu.factlet]
         [midje.sweet]))
 
 (facts "email is sent on comment"
