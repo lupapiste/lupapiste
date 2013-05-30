@@ -22,6 +22,10 @@
       <ul data-bind="foreach: activations.data()">
         <li><a href="#" data-bind="text: email, click: $root.activations.activate"></a></li>
       </ul><br/>
+      <h2>Featuret</h2>
+      <ul data-bind="foreach: features.data()">
+        <li><span data-bind="text: $data"></span></li>
+      </ul><br/>
       <h2>Toiminnot</h2>
       <table>
         <thead>
