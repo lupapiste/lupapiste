@@ -157,7 +157,11 @@
 
    :about {:depends [:common :debug]
            :js ["about.js"]
-           :html ["terms.html" "index.html"]}})
+           :html ["terms.html" "index.html"]}
+   
+   :neighbor {:depends [:common :debug]
+              :html ["neighbor.html"]
+              :js ["neighbor.js" "begin.js" "show.js"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

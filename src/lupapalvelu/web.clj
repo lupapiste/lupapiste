@@ -153,7 +153,8 @@
                    :applicant logged-in?
                    :authority authority?
                    :authority-admin authority-admin?
-                   :admin admin?})
+                   :admin admin?
+                   :neighbor anyone})
 
 (defn cache-headers [resource-type]
   (if (env/dev-mode?)
@@ -186,7 +187,7 @@
 
 ;; Single Page App HTML
 (def apps-pattern
-  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
+  (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
 (defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
 
