@@ -29,15 +29,10 @@
           [false (conj result x)]))
       [false []] v)))
 
-(def no-childs [nil])
-(defn conj-not-nil [v x] (if (nil? x) v (conj v x)))
-(defn safe-into [v c] (if (nil? c) v (into v c)))
-
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
-  [code {:keys [doc schema childs fields facts]} & body]
-  (let [paths  (->> fields (partition 2) (map last) (map starting-keywords) vec)
-        childs (or childs [])]
+  [code {:keys [doc schema fields facts]} & body]
+  (let [paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     `(swap! validators assoc ~code
        {:code ~code
         :doc ~doc
@@ -45,23 +40,17 @@
         :schema ~schema
         :facts ~facts
         :fn (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
-              (when (or (not ~schema) (= ~schema ~'doc-schema))
-                (let [~'data  (tools/un-wrapped ~'data)
-                      childs# (if (not-empty ~childs)
-                                (-> ~'data (get-in ~childs) keys)
-                                no-childs)]
-                  (reduce concat
-                    (for [~'child# childs#]
-                      (let
-                        ~(reduce into
-                           (for [[k v] (partition 2 fields)
-                                 :let [v (-> childs (into v))]]
-                             [k `(-> ~'data '~@childs ~@v)]))
-                        (try
-                          (when-let [resp# (do ~@body)]
-                            (map (fn [path#] {:path   path#
-                                              :result [:warn ~(name code)]}) ~paths))
-                          (catch Exception e#
-                            [{:path   []
-                              :result [:warn (str "validator")]
-                              :reason (str e#)}]))))))))})))
+              (let [~'data (tools/un-wrapped ~'data)]
+                (when (or (not ~schema) (= ~schema ~'doc-schema))
+                  (let
+                    ~(reduce into
+                       (for [[k v] (partition 2 fields)]
+                         [k `(->> ~'data ~@v)]))
+                    (try
+                      (when-let [resp# (do ~@body)]
+                        (map (fn [path#] {:path   path#
+                                          :result [:warn ~(name code)]}) ~paths))
+                      (catch Exception e#
+                        [{:path   []
+                          :result [:warn (str "validator")]
+                          :reason (str e#)}]))))))})))
