@@ -52,65 +52,51 @@
                                 no-childs)]
                   (reduce concat
                     (for [~'child# childs#]
-                      (do (println ~'child#)
-                        (let
-                          ~(reduce into
-                             (for [[k v] (partition 2 fields)
-                                   :let [v (-> childs (into v))]]
-                               (do
-                                 (println k v)
-                                 [k `(-> ~'data ~@v)])))
-                          (try
-                            (when-let [resp# (do ~@body)]
-                              (map (fn [path#] {:path   path#
-                                                :result [:warn ~(name code)]}) ~paths))
-                            (catch Exception e#
-                              [{:path   []
-                                :result [:warn (str "validator")]
-                                :reason (str e#)}])))))))))})))
+                      (let
+                        ~(reduce into
+                           (for [[k v] (partition 2 fields)
+                                 :let [v (-> childs (into v))]]
+                             [k `(-> ~'data '~@childs ~@v)]))
+                        (try
+                          (when-let [resp# (do ~@body)]
+                            (map (fn [path#] {:path   path#
+                                              :result [:warn ~(name code)]}) ~paths))
+                          (catch Exception e#
+                            [{:path   []
+                              :result [:warn (str "validator")]
+                              :reason (str e#)}]))))))))})))
 
-(let [childs [:a]
-      fields [:first  [:b]
-              :second [:c]]
-      data   {:a {:0 {:b 1
-                      :c 1}
-                  :1 {:b 2
-                      :c 2}}}
-      childd (when (not-empty childs)
-               (-> data (get-in childs) keys))]
-  (map
-    (fn [x] (str "R:" x))
-    (map
-      (fn [x] (str "**" (vec x)))
-      (if childd
-        (for [child childd]
-          (for [[k v] (partition 2 fields)]
-            [k (-> childs (conj child) (concat v))]))
-        (for [[k v] (partition 2 fields)]
-          [k v])))))
-
-(let [childs [:a]
-      childs (or childs [])
-      fields [:first  [:b]
-              :second [:c]]
-      data   {:a {:0 {:b 1
-                      :c 1}
-                  :1 {:b 2
-                      :c 2}}}
-      childd (if (not-empty childs)
-               (-> data (get-in childs) keys)
-               no-childs)]
-  (map
-    (fn [x] (str "R:" x))
-    (map
-      (fn [x] (str "**" (vec x)))
+(println
+  (let [childs [:a]
+        fields [:first  [:b]
+                :second [:c]]
+        data   {:a {:0 {:b 1
+                        :c 1}
+                    :1 {:b 2
+                        :c 2}}}
+        childd (when (not-empty childs)
+                 (-> data (get-in childs) keys))]
+    (if childd
       (for [child childd]
-        (for [[k v] (partition 2 fields)
-              :let [v (-> childs (conj-not-nil child) (concat v))]]
-          [k v])))))
+        (reduce concat
+          (for [[k v] (partition 2 fields)]
+            [k (-> childs (conj child) (concat v))])))
+      (for [[k v] (partition 2 fields)]
+        [k v]))))
 
-
-
-
-
-
+(println
+  (let [childs [:a]
+        childs (or childs [])
+        fields [:first  [:b]
+                :second [:c]]
+        data   {:a {:0 {:b 1
+                        :c 1}
+                    :1 {:b 2
+                        :c 2}}}
+        childd (if (not-empty childs)
+                 (-> data (get-in childs) keys)
+                 no-childs)]
+      (for [child childd]
+        (reduce concat
+          (for [[k v] (partition 2 fields)]
+            [k (-> childs (conj-not-nil child) (concat v))])))))
