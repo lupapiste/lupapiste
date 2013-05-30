@@ -2,7 +2,8 @@
   (:use [sade.util :only [deep-merge-with]]
         [sade.strings :only [numeric?]])
   (:require [clojure.java.io :as io]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [clojure.walk :as walk])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
@@ -59,6 +60,18 @@
     str
     read-value
     true?))
+
+(defn features
+  "returns a list of all enabled features"
+  []
+  (walk/prewalk
+  (fn [x]
+    (if (map? x)
+      (into {}
+        (for [[k v] x]
+          [k (if (map? v) v (-> v str read-value true?))]))
+      x))
+  (:feature (get-config))))
 
 (defn- get-prop [prop-name default]
   (or

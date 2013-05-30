@@ -38,3 +38,17 @@
 
     (feature? :a) => false
     (provided (get-config) => {})))
+
+(facts "features"
+  (features) => {:a true
+                 :b false
+                 :c {:c1 true
+                     :c2 true
+                     :c3 false}}
+  (provided
+    (get-config) => {:feature {:a "true"
+                               :b false
+                               :c {:c1 "true"
+                                   :c2 true
+                                   :c3 nil}}}))
+
