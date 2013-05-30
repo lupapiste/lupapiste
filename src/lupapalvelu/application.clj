@@ -46,14 +46,6 @@
         (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
           (str (:value first-name) \space (:value last-name)))))))
 
-(defn get-unseen-comment-count [user app]
-  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
-    (count (filter (fn [comment]
-                     (and (> (:created comment) last-seen)
-                          (not= (get-in comment [:user :id]) (:id user))
-                          (not (blank? (:text comment)))))
-                   (:comments app)))))
-
 (defn get-application-operation [app]
   (first (:operations app)))
 
@@ -100,9 +92,34 @@
 ;; Fetch some fields drom the depths of documents and put them to top level
 ;; so that yhey are easy to find in UI.
 
-(def meta-fields [{:field :applicant :fn get-applicant-name}
-                  {:field :unseenComments :fn get-unseen-comment-count}])
+(defn get-applicant-name [_ app]
+  (if (:infoRequest app)
+    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
+      (str first-name \space last-name))
+    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
+      (if (= (get-in body [:_selected :value]) "yritys")
+        (get-in body [:yritys :yritysnimi :value])
+        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
+          (str (:value first-name) \space (:value last-name)))))))
 
+(defn count-unseen-comment [user app]
+  (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
+    (count (filter (fn [comment]
+                     (and (> (:created comment) last-seen)
+                          (not= (get-in comment [:user :id]) (:id user))
+                          (not (blank? (:text comment)))))
+                   (:comments app)))))
+
+(defn count-attachments-requiring-action [user app]
+  (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
+    (case (keyword (:role user))
+      :applicant (count-attachments "requires_user_action")
+      :authority (count-attachments "requires_authority_action")
+      0)))
+
+(def meta-fields [{:field :applicant :fn get-applicant-name}
+                  {:field :unseenComments :fn count-unseen-comment}
+                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}])
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
@@ -651,6 +668,7 @@
                   get-application-operation
                   :applicant
                   :submitted
+                  :attachmentsRequiringAction
                   :unseenComments
                   :modified
                   :state
@@ -661,7 +679,8 @@
                      1 :address
                      2 nil
                      3 nil
-                     5 nil))
+                     5 nil
+                     6 nil))
 
 (def col-map (zipmap col-sources (map str (range))))
 

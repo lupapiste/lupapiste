@@ -62,3 +62,4 @@ application.filter.search: etsi:
 
 kaupunkikuvatoimenpide.kokonaisala: Kokonaisala
 applications.unseenComments:
+applications.attachmentsRequiringAction:
