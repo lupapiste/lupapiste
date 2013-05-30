@@ -673,14 +673,12 @@
   });
 
   var neighborActions = {
-    sendNeighborEmail: function(neighbor) {
-      ajax.command("send-neighbor-invite", {propertyId: neighbor.propertyId}).call();
-      return false;
-    },
     manage: function(application) {
       window.location.hash = "!/neighbors/" + application.id();
       return false;
-    }
+    },
+    upload: function(neighbor) { console.log("upload:", neighbor); },
+    markDone: function(neighbor) { console.log("markDone:", neighbor); },
   };
 
   function SendNeighborEmailModel() {

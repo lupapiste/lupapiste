@@ -392,8 +392,8 @@
                   </td>
                   <td>
                     <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('send-neighbor-invite'), ltext: 'neighbors.actions.sendEmail'" href="#"></a>
-                    <a href="#">Lisää skannattu lausunto</a>
-                    <a href="#">Merkitse kuulluksi</a>
+                    <a data-bind="click: $root.neighbor.upload, ltext: 'neighbors.actions.upload', clickBubble: false" href="#"></a>
+                    <a data-bind="click: $root.neighbor.markDone, ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>
                   </td>
                 </tr>
               </tbody>

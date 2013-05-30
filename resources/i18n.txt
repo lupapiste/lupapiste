@@ -20,6 +20,7 @@ neighbors.owner.address.zip: Postinumero:
 neighbors.owner.address.zip.placeholder: postinumero
 neighbors.owner.address.city: Postitoimipaikka
 neighbors.owner.address.city.placeholder: postitoimipaikka
+neighbors.done: Palaa hakemukseen
 
 neighbors.status: Tila
 
@@ -27,6 +28,8 @@ neighbors.actions: Toiminnot
 neighbors.actions.edit: muokkaa
 neighbors.actions.remove: poista
 neighbors.actions.sendEmail: Lähetä sähköposti kutsu
+neighbors.actions.upload: Lisää skannattu lausunto
+neighbors.actions.markDone: Merkitse kuulluksi
 
 neighbors.sendEmail.title: Kutsu naapuri
 neighbors.sendEmail.name: Naapurin nimi:
