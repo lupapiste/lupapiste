@@ -36,7 +36,8 @@
    :yhteystiedot {:puhelin {:value "+358401234567"}
                   :email {:value "pena@example.com"}
                   :fax {:value "+358401234568"}}
-   :osoite osoite})
+   :osoite osoite
+   :turvakieltoKytkin {:value true}})
 
 (def suunnittelija-henkilo
   (assoc henkilo :henkilotiedot nimi))
@@ -186,7 +187,8 @@
                          :poistumanAjankohta { :value "17.04.2013" },
                          :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
 
-(def aidan-rakentaminen { :data { :kuvaus { :value "Aidan rakentaminen rajalle"}}
+(def aidan-rakentaminen { :data {:kokonaisala {:value "0"}
+                                 :kuvaus { :value "Aidan rakentaminen rajalle"}}
                          :id "aidan-rakentaminen"
                          :created 5
                          :schema {:info { :removable true
@@ -363,11 +365,12 @@
 (facts "Canonical hakija/henkilo model is correct"
   (let [hakija-model (get-osapuoli-data (:data hakija1) :hakija)
         henkilo (:henkilo hakija-model)
+        ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
     (fact hakija-model => truthy)
-
     (fact (:kuntaRooliKoodi hakija-model) => "Rakennusvalvonta-asian hakija")
     (fact (:VRKrooliKoodi hakija-model) => "hakija")
+    (fact (:turvakieltoKytkin hakija-model) => true)
     (validate-person henkilo)
     (fact yritys => nil)))
 
@@ -624,5 +627,5 @@
     (fact "lausunto teksti osa" lausuntoTeksti => "Savupiippu pit\u00e4\u00e4 olla.")
     (fact  "Puolto" puolto => "ehdoilla")
 
-    ;(clojure.pprint/pprint kaupunkikuva-t)
+    ;(clojure.pprint/pprint canonical)
     ))

@@ -20,11 +20,7 @@
 
           ; Prevents other sites from embedding pages from this
           ; site as frames. This defends against clickjacking attacks.
-          (assoc-in [:headers "X-Frame-Options"] "sameorigin")
-
-          ; Prevents MSIE from interpreting files as something
-          ; else than declared by the content type in the HTTP headers.
-          (assoc-in [:headers "X-Content-Type-Options"] "nosniff"))))))
+          (assoc-in [:headers "X-Frame-Options"] "sameorigin"))))))
 
 (defn session-id-to-mdc
   "Ring middleware. Sets 'sessionId' mdc-key with ring-sessionId."

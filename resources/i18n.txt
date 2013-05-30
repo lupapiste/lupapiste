@@ -1,10 +1,5 @@
-session-dead.title: Istunto vanhentunut
-session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
-session-dead.logout: Kirjaudu
-connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
-attachmentType.empty._group_label:
-
-application.filter.search: etsi:
+kaupunkikuvatoimenpide.kokonaisala: Kokonaisala
+applications.unseenComments:
 
 operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
 rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
