@@ -46,8 +46,8 @@
                              :data (read-config prop-file)}))
 
 (defn get-config
-  "If value autoreload=true, rereads the file, otherwise
-   Returns cached dereffed configuration."
+  "If value autoreload=true, rereads the configuration file,
+   otherwise returns cached configuration. Cache time 10s."
   []
   (let [modified   (-> config deref :last)
         now        (java.lang.System/currentTimeMillis)
@@ -58,12 +58,12 @@
       @config)))
 
 (defn value
-  "returns a value from config directly."
+  "Returns a value from config."
   [& keys]
   (get-in (get-config) (flatten [keys])))
 
 (defn feature?
-  "checks if a feature is enabled"
+  "Checks if a feature is enabled."
   [& keys]
   (->
     (get-config)
@@ -73,7 +73,7 @@
     true?))
 
 (defn features
-  "returns a list of all enabled features"
+  "Returns a list of all enabled features."
   []
   (walk/prewalk
   (fn [x]
