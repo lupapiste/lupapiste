@@ -8,12 +8,12 @@
 
 (apply-remote-minimal)
 
-(facts "Applicant invites designer"
+(facts* "Applicant invites designer"
   (doseq [user-key [mikko teppo veikko sonja sipoo]]
-    (factlet [resp (query user-key :invites) => ok?]
+    (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (factlet [resp  (create-app mikko :municipality sonja-muni) => ok?
+  (let [resp  (create-app mikko :municipality sonja-muni) => ok?
             id    (:id resp) => truthy]
 
     (fact "Teppo must not be able to invite himself!"
@@ -56,11 +56,11 @@
     (fact "Sonja must NOT be able to remove authz from Teppo!"
       (command sonja :remove-auth :id id :email "teppo@example.com") => unauthorized?)))
 
-(facts "Auhtority invites designer"
+(facts* "Auhtority invites designer"
   (doseq [user-key [sonja mikko teppo]]
-    (factlet [resp (query user-key :invites) => ok?]
+    (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
-    (factlet [resp  (create-app sonja :municipality sonja-muni) => ok?
+    (let [resp  (create-app sonja :municipality sonja-muni) => ok?
               id    (:id resp) => truthy]
       (fact "Sonja must be able to invite Teppo!"
          (invite sonja id "teppo@example.com") => ok?

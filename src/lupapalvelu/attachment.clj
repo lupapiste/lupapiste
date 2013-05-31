@@ -394,7 +394,10 @@
     (let [response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:content-length attachment))}}]
+                              "Content-Length" (str (:content-length attachment))
+                              ; Prevents MSIE and Chrome from interpreting files as
+                              ; something else than declared by the Content-Type.
+                              "X-Content-Type-Options" "nosniff"}}]
       (if download?
         (assoc-in response
                   [:headers "Content-Disposition"]

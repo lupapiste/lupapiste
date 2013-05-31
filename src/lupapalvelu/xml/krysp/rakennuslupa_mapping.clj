@@ -16,26 +16,21 @@
 ;RakVal
 
 (def ^:private huoneisto {:tag :huoneisto
-                :child [{:tag :huoneluku}
-                        {:tag :keittionTyyppi}
-                        {:tag :huoneistoala}
-                        {:tag :varusteet
-                         :child [{:tag :WCKytkin}
-                                 {:tag :ammeTaiSuihkuKytkin}
-                                 {:tag :saunaKytkin}
-                                 {:tag :parvekeTaiTerassiKytkin}
-                                 {:tag :lamminvesiKytkin}]}
-                        {:tag :huoneistonTyyppi}
-                        {:tag :huoneistotunnus
-                         :child [{:tag :porras}
-                                 {:tag :huoneistonumero}
-                                 {:tag :jakokirjain}]}]})
+                          :child [{:tag :huoneluku}
+                                  {:tag :keittionTyyppi}
+                                  {:tag :huoneistoala}
+                                  {:tag :varusteet
+                                   :child [{:tag :WCKytkin}
+                                           {:tag :ammeTaiSuihkuKytkin}
+                                           {:tag :saunaKytkin}
+                                           {:tag :parvekeTaiTerassiKytkin}
+                                           {:tag :lamminvesiKytkin}]}
+                                  {:tag :huoneistonTyyppi}
+                                  {:tag :huoneistotunnus
+                                   :child [{:tag :porras}
+                                           {:tag :huoneistonumero}
+                                           {:tag :jakokirjain}]}]})
 
-
-(def rakennelma (conj [{:tag :kuvaus
-                        :child [{:tag :kuvaus}]}]
-                      sijantitieto
-                      {:tag :tunnus :child tunnus-children}))
 
 (def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
                    {:tag :alkuHetki :ns "yht"}
@@ -138,7 +133,8 @@
                                                {:tag :rakennelmatieto :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
                                                                                                         {:tag :alkuHetki :ns "yht"}
                                                                                                         sijantitieto
-                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}]}]}
+                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}
+                                                                                                        {:tag :kokonaisala}]}]}
                                                ]}]}
                              {:tag :lausuntotieto :child [{:tag :Lausunto :ns "yht" :child [{:tag :pyydetty :child [{:tag :viranomainen}
                                                                                                           {:tag :pyyntoPvm}]}

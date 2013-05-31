@@ -138,7 +138,8 @@
                          :omistajalaji
                          (-> osapuoli :omistajalaji :value))
         role-codes     {:VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolicode)
-                        :kuntaRooliKoodi kuntaRoolicode}
+                        :kuntaRooliKoodi kuntaRoolicode
+                        :turvakieltoKytkin (true? (-> henkilo :turvakieltoKytkin :value))}
         codes          (if omistajalaji
                          (merge role-codes {:omistajalaji omistajalaji})
                          role-codes)]
@@ -200,7 +201,9 @@
   (for [huoneisto (vals huoneistot)
         :let [tyyppi (:huoneistonTyyppi huoneisto)
               varusteet (:varusteet huoneisto)
-              huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero :value)]
+              huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero :value)
+              huoneistoPorras (-> huoneisto :huoneistoTunnus :porras :value)
+              jakokirjain (-> huoneisto :huoneistoTunnus :jakokirjain :value)]
         :when (seq huoneisto)]
     (merge {:huoneluku (-> tyyppi :huoneluku :value)
             :keittionTyyppi (-> huoneisto :keittionTyyppi :value)
@@ -213,13 +216,9 @@
             :huoneistonTyyppi (-> tyyppi :huoneistoTyyppi :value)}
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
-              {:porras (clojure.string/upper-case
-                         (-> huoneisto :huoneistoTunnus :porras :value))
-               :huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))
-               :jakokirjain (clojure.string/lower-case
-                              (-> huoneisto :huoneistoTunnus :jakokirjain :value))}}))
-    )
-  )
+              (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
+                     (when (not-empty huoneistoPorras) {:porras (clojure.string/upper-case huoneistoPorras)})
+                     (when (not-empty jakokirjain) {:jakokirjain (clojure.string/lower-case jakokirjain)}))}))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
   {:Omistaja (merge (get-osapuoli-data omistaja :rakennuksenomistaja))})
@@ -241,7 +240,8 @@
                                           (str (-> lammitys :lammonlahde :value) ".")
                                           (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)
-                                      :julkisivumateriaali (-> rakenne :julkisivu :value))]
+                                      :julkisivumateriaali (-> rakenne :julkisivu :value))
+        lammitystapa (-> lammitys :lammitystapa :value)]
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
@@ -265,7 +265,9 @@
                                 :energiatehokkuusluku (-> luokitus :energiatehokkuusluku :value)
                                 :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko :value)
                                 :paloluokka (-> luokitus :paloluokka :value)
-                                :lammitystapa (-> lammitys :lammitystapa :value)
+                                :lammitystapa (if (= lammitystapa "suorasahk\u00f6")
+                                                "suora s\u00e4hk\u00f6"
+                                                lammitystapa)
                                 :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
                                             :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin :value))
                                             :viemariKytkin (true? (-> toimenpide :varusteet :sahkoKytkin :value))
@@ -276,7 +278,7 @@
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}
-                                :asuinhuoneisto {:huoneisto (get-huoneisto-data huoneistot)}}
+                                :asuinhuoneistot {:huoneisto (get-huoneisto-data huoneistot)}}
                                (when (-> toimenpide :rakennusnro :value)
                                    {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value)
                                                     :kiinttun (:propertyId application)}})
@@ -336,6 +338,7 @@
                   :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
                                                  :alkuHetki (to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
                                                  :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                                                 :kokonaisala (-> toimenpide :kokonaisala :value)
                                                  :kuvaus {:kuvaus (-> toimenpide :kuvaus :value)}}}}
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
@@ -430,4 +433,4 @@
                       :kayttotapaus (get-kayttotapaus documents)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
-    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto ] (get-operations documents application))))
+    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] (get-operations documents application))))

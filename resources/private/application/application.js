@@ -305,6 +305,11 @@
     assignee: ko.observable(),
     neighbors: ko.observable(),
     
+    attachmentsRequiringAction: ko.observable(),
+    unseenStatements: ko.observable(),
+    unseenVerdicts: ko.observable(),
+    unseenComments: ko.observable(),
+
     // new stuff
     invites: ko.observableArray(),
 
@@ -436,12 +441,13 @@
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
     },
 
-
     changeTab: function(model,event) {
       var $target = $(event.target);
-      if ($target.is("span")) { $target = $target.parent(); }
-      window.location.hash = "#!/application/" + application.id() + "/" + $target.attr("data-target");
-      window.scrollTo(0,0);
+      while ($target.is("span")) {
+        $target = $target.parent();
+      }
+      var targetTab = $target.attr("data-target");
+      window.location.hash = "#!/application/" + application.id() + "/" + targetTab;
     }
   };
 
@@ -569,6 +575,10 @@
         inforequestMap.drawShape(application.shapes()[0]);
       }
 
+      if (application.infoRequest()) {
+        ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
+      }
+
       docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
       docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
@@ -613,6 +623,16 @@
     markTabActive(tab);
     openTab(tab);
     selectedTab = tab; // remove after tab-spike
+
+    setTimeout(function() {
+      var tabMeta = {"conversation": {type: "comments", model: application.unseenComments},
+                      "statement":   {type: "statements", model: application.unseenStatements}};
+      // Mark comments seen after a second
+      if (tabMeta[tab] && currentId) {
+        ajax.command("mark-seen", {id: currentId, type: tabMeta[tab].type})
+          .success(function() {tabMeta[tab].model(0);})
+          .call();
+      }}, 1000);
   }
 
   var accordian = function(data, event) { accordion.toggle(event); };
@@ -654,13 +674,13 @@
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
-    selectTab(tab || "info");
     if (newId !== currentId || !tab) {
       pageutil.showAjaxWait();
       currentId = newId;
       ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
       repository.load(currentId);
     }
+    selectTab(tab || "info");
   }
 
   hub.onPageChange("application", _.partial(initPage, "application"));
