@@ -311,15 +311,26 @@
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
+(defn authority-attachments-by-authorities [{{:keys [attachmentId]} :data user :user :as command} application]
+  (when (and
+          (-> (get-attachment-info application attachmentId) :authority true?)
+          (not (security/authority? user)))
+    (fail :error.authority-attachment)))
+
 (defcommand "delete-attachment"
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
+   :validators  [authority-attachments-by-authorities]
    :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
     (fn [application]
       (delete-attachment application attachmentId)
       (ok))))
+
+(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
+  (when (-> (get-attachment-info application attachmentId) :locked true?)
+    (fail :error.attachment-is-locked)))
 
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
@@ -332,10 +343,6 @@
       (if (file-id-in-application? application attachmentId fileId)
         (delete-attachment-version application attachmentId fileId)
         (fail :file_not_linked_to_the_document)))))
-
-(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (when (-> (get-attachment-info application attachmentId) :locked (= true))
-    (fail :error.attachment-is-locked)))
 
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
