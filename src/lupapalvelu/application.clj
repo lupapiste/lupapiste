@@ -112,14 +112,16 @@
                    (:comments app)))))
 
 (defn count-unseen-statements [user app]
-  (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
-    (count (filter (fn [statement]
-                     (and (> (or (:given statement) 0) last-seen)
-                          (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
-                   (:statements app)))))
+  (if-not (:infoRequest app)
+    (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
+      (count (filter (fn [statement]
+                       (and (> (or (:given statement) 0) last-seen)
+                            (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
+                     (:statements app))))
+    0))
 
 (defn count-unseen-verdicts [user app]
-  (if (= (:role user) "applicant")
+  (if (and (= (:role user) "applicant") (not (:infoRequest app)))
     (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [verdict] (> (or (:given verdict) 0) last-seen)) (:verdict app))))
     0))
@@ -134,7 +136,7 @@
     0))
 
 (defn indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :attachmentsRequiringAction :unseenVerdicts} k) v 0)) app)))
+  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :unseenComments :fn count-unseen-comment}
