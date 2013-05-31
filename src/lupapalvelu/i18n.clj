@@ -9,7 +9,7 @@
 (defn- add-term [row result lang]
   (let [k (get row "key")
         t (get row lang)]
-    (if (and k t (not (s/blank? t)))
+    (if (and k t (> (.length t) 0))
       (assoc-in result [lang k] (s/trim t))
       result)))
 
