@@ -13,6 +13,7 @@
     self.statuses = ['yes', 'no', 'condition'];
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
+    self.submitting = ko.observable(false);
 
     self.clear = function() {
       self.data(null);
@@ -46,6 +47,7 @@
     };
 
     self.submit = function() {
+      self.submitting(true);
       ajax
         .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text()})
         .success(function() {
@@ -53,12 +55,13 @@
           repository.load(applicationId);
           return false;
         })
+        .complete(function() { self.submitting(false); })
         .call();
       return false;
     };
 
     self.disabled = ko.computed(function() {
-      return !self.selectedStatus() || !self.text();
+      return !self.selectedStatus() || !self.text() || self.submitting();
     });
   }
 
