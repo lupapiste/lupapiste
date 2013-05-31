@@ -31,12 +31,12 @@
   (count-unseen-verdicts {} {}) => 0
   (count-unseen-verdicts {} {:verdict [{}]}) => 0
   (count-unseen-verdicts {:role "applicant"} {:verdict [{}]}) => 0
-  (count-unseen-verdicts {:role "applicant"} {:verdict [{:given 1}]}) => 1
-  (count-unseen-verdicts {:role "applicant"} {:verdict [{:given 1} {:given 2}]}) => 2
-  (count-unseen-verdicts {:role "applicant"} {:verdict [{:given 0}]}) => 0
-  (count-unseen-verdicts {:role "authority"} {:verdict [{:given 0}]}) => 0
-  (count-unseen-verdicts {:role "authority"} {:verdict [{:given 1}]}) => 0
-  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdict [{:given 1}] :_verdicts-seen-by {:user1 1}}) => 0)
+  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 1}]}) => 1
+  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 1} {:timestamp 2}]}) => 2
+  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 0}]}) => 0
+  (count-unseen-verdicts {:role "authority"} {:verdict [{:timestamp 0}]}) => 0
+  (count-unseen-verdicts {:role "authority"} {:verdict [{:timestamp 1}]}) => 0
+  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdict [{:timestamp 1}] :_verdicts-seen-by {:user1 1}}) => 0)
 
 (facts "count-attachments-requiring-action"
   (count-attachments-requiring-action nil nil) => 0
