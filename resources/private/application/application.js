@@ -303,6 +303,8 @@
     applicant: ko.observable(),
     assignee: ko.observable(),
     attachmentsRequiringAction: ko.observable(),
+    unseenStatements: ko.observable(),
+    unseenVerdicts: ko.observable(),
     unseenComments: ko.observable(),
 
     // new stuff
