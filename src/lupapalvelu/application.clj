@@ -309,11 +309,12 @@
       ;; TODO: details should come from updated state!
       (notifications/send-notifications-on-new-comment! application user text host))))
 
-(defcommand "mark-comments-seen"
-  {:parameters [:id]
+(defcommand "mark-seen"
+  {:parameters [:id :type]
+   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements"} type) (fail :error.unknown-type)))]
    :authenticated true}
-  [{:keys [user created] :as command}]
-  (update-application command {$set {(str "_comments-seen-by." (:id user)) created}}))
+  [{:keys [data user created] :as command}]
+  (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId :userId :path]

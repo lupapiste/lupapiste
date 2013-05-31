@@ -617,10 +617,12 @@
     selectedTab = tab; // remove after tab-spike
 
     setTimeout(function() {
+      var tabMeta = {"conversation": {type: "comments", model: application.unseenComments},
+                      "statement":   {type: "statements", model: application.unseenStatements}};
       // Mark comments seen after a second
-      if (tab === "conversation" && currentId) {
-        ajax.command("mark-comments-seen", {id:currentId})
-          .success(function() {application.unseenComments(0);})
+      if (tabMeta[tab] && currentId) {
+        ajax.command("mark-seen", {id: currentId, type: tabMeta[tab].type})
+          .success(function() {tabMeta[tab].model(0);})
           .call();
       }}, 1000);
   }
