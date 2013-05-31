@@ -103,12 +103,10 @@
     };
 
     self.canDeleteAttachment = function(attachment) {
-      console.log("del?", authorizationModel.ok("delete-attachment"), !attachment.authority, user.isAuthority());
       return authorizationModel.ok("delete-attachment") && (!attachment.authority || user.isAuthority());
     };
 
     self.canAddAttachment = function() {
-      console.log("can?");
       return authorizationModel.ok("upload-attachment") && user.isAuthority();
     };
 
