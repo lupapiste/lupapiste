@@ -103,7 +103,7 @@
     };
 
     self.deleteAttachment = function(attachmentId) {
-      deleteAttachmentFromServerProxy = function() { console.log("here"); deleteAttachmentFromServer(attachmentId); };
+      deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement-attachment");
     };
 
@@ -145,7 +145,7 @@
       loc("statement.delete.header"), loc("statement.delete.message"), loc("yes"), deleteStatementFromServer, loc("no"));
 
     LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement-attachment",
-      loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() { console.log("here"); deleteAttachmentFromServerProxy(); }, loc("no"));
+      loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() { deleteAttachmentFromServerProxy(); }, loc("no"));
   });
 
 })();
