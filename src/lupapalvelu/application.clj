@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join trim]]
+        [clojure.string :only [blank? join trim lower-case]]
         [sade.strings :only [numeric? decimal-number?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
@@ -114,7 +114,7 @@
   (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
     (count (filter (fn [statement]
                      (and (> (or (:given statement) 0) last-seen)
-                          (not= (get-in statement [:person :id]) (:id user))))
+                          (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
                    (:statements app)))))
 
 (defn count-attachments-requiring-action [user app]

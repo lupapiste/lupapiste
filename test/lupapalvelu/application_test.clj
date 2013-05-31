@@ -14,13 +14,14 @@
 
 (facts "count-unseen-statements"
   (count-unseen-statements {} {}) => 0
-  (count-unseen-statements {:id "user1"} {:statements []}) => 0
-  (count-unseen-statements {:id "user1"} {:statements [{}]}) => 0
-  (count-unseen-statements {:id "user1"} {:statements [{:given 0}]}) => 0
-  (count-unseen-statements {:id "user1"} {:statements [{:given 0 :person {:id "user2"}}]}) => 0
-  (count-unseen-statements {:id "user1"} {:statements [{:given 1 :person {:id "user2"}}]}) => 1
-  (count-unseen-statements {:id ..id..}  {:statements [{:given 1 :person {:id ..id..}}]}) => 0
-  (count-unseen-statements {:id "user1"} {:statements [{:given 1 :person {:id "user2"}}] :_statements-seen-by {:user1 1}}) => 0)
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements []}) => 0
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{}]}) => 0
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 0}]}) => 0
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 0 :person {:email "person2@example.com"}}]}) => 0
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 1 :person {:email "person2@example.com"}}]}) => 1
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 1 :person {:email "person1@example.com"}}]}) => 0
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 1 :person {:email "PERSON1@example.com"}}]}) => 0
+  (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 1 :person {:email "person2@example.com"}}] :_statements-seen-by {:user1 1}}) => 0)
 
 (facts "count-attachments-requiring-action"
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action"}]}) => 0
