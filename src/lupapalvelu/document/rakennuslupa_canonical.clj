@@ -201,7 +201,9 @@
   (for [huoneisto (vals huoneistot)
         :let [tyyppi (:huoneistonTyyppi huoneisto)
               varusteet (:varusteet huoneisto)
-              huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero :value)]
+              huoneistonumero (-> huoneisto :huoneistoTunnus :huoneistonumero :value)
+              huoneistoPorras (-> huoneisto :huoneistoTunnus :porras :value)
+              jakokirjain (-> huoneisto :huoneistoTunnus :jakokirjain :value)]
         :when (seq huoneisto)]
     (merge {:huoneluku (-> tyyppi :huoneluku :value)
             :keittionTyyppi (-> huoneisto :keittionTyyppi :value)
@@ -214,13 +216,9 @@
             :huoneistonTyyppi (-> tyyppi :huoneistoTyyppi :value)}
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
-              {:porras (clojure.string/upper-case
-                         (-> huoneisto :huoneistoTunnus :porras :value))
-               :huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))
-               :jakokirjain (clojure.string/lower-case
-                              (-> huoneisto :huoneistoTunnus :jakokirjain :value))}}))
-    )
-  )
+              (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
+                     (when (not-empty huoneistoPorras) {:porras (clojure.string/upper-case huoneistoPorras)})
+                     (when (not-empty jakokirjain) {:jakokirjain (clojure.string/lower-case jakokirjain)}))}))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
   {:Omistaja (merge (get-osapuoli-data omistaja :rakennuksenomistaja))})
