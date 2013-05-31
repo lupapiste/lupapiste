@@ -102,13 +102,24 @@
       }));
     };
 
+    self.canDeleteAttachment = function(attachment) {
+      console.log("del?", authorizationModel.ok("delete-attachment"), !attachment.authority, user.isAuthority());
+      return authorizationModel.ok("delete-attachment") && (!attachment.authority || user.isAuthority());
+    };
+
+    self.canAddAttachment = function() {
+      console.log("can?");
+      return authorizationModel.ok("upload-attachment") && user.isAuthority();
+    };
+
     self.deleteAttachment = function(attachmentId) {
       deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement-attachment");
     };
 
     self.newAttachment = function() {
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, true);
+      // created file is authority-file if created by authority
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, user.isAuthority());
     };
   }
 
