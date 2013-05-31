@@ -41,6 +41,7 @@ Sonja logs in and throws in a verdict
 Mikko sees that the application has verdict
   [Tags]  fail
   Mikko logs in
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  1
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Verdict is given
