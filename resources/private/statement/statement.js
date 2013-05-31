@@ -49,8 +49,8 @@
       ajax
         .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text()})
         .success(function() {
-          repository.load(applicationId);
           window.location.hash = "!/application/"+applicationId+"/statement";
+          repository.load(applicationId);
           return false;
         })
         .call();
