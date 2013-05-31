@@ -323,6 +323,7 @@
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
+   :validators  [attachment-is-not-locked]
    :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
