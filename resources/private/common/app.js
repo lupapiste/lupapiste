@@ -67,7 +67,7 @@ var LUPAPISTE = LUPAPISTE || {};
       ajax.query("user")
         .success(function (e) {
           self.session = true;
-          user.current(e.user);
+          currentUser.set(e.user);
           hub.send("login", e);
           self.hashChanged();
         })

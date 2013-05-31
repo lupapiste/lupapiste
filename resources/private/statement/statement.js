@@ -107,7 +107,7 @@
     };
 
     self.canAddAttachment = function() {
-      return authorizationModel.ok("upload-attachment") && user.isAuthority();
+      return authorizationModel.ok("upload-attachment") && currentUser.isAuthority();
     };
 
     self.deleteAttachment = function(attachmentId) {
