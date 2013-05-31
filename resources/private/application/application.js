@@ -182,7 +182,11 @@
     var self = this;
     self.data = ko.observableArray();
     self.personIds = ko.observableArray([]);
-    self.disabled = ko.computed(function() { return _.isEmpty(self.personIds()); });
+    self.submitting = ko.observable(false);
+
+    self.disabled = ko.computed(function() {
+      return _.isEmpty(self.personIds()) || self.submitting();
+    });
 
     self.load = function() {
       ajax
@@ -197,12 +201,15 @@
     };
 
     self.send = function() {
+      self.submitting(true);
       ajax.command("request-for-statement", {id: currentId, personIds: self.personIds()})
         .success(function() {
           self.personIds([]);
           repository.load(currentId);
           LUPAPISTE.ModalDialog.close();
-        }).call();
+        })
+        .complete(function() { self.submitting(false); })
+        .call();
     };
 
     self.openStatement = function(model) {
@@ -303,6 +310,8 @@
     applicant: ko.observable(),
     assignee: ko.observable(),
     attachmentsRequiringAction: ko.observable(),
+    unseenStatements: ko.observable(),
+    unseenVerdicts: ko.observable(),
     unseenComments: ko.observable(),
 
     // new stuff
@@ -570,6 +579,10 @@
         inforequestMap.drawShape(application.shapes()[0]);
       }
 
+      if (application.infoRequest()) {
+        ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
+      }
+
       docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
       docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
@@ -615,10 +628,13 @@
     selectedTab = tab; // remove after tab-spike
 
     setTimeout(function() {
+      var tabMeta = {"conversation": {type: "comments",   model: application.unseenComments},
+                      "statement":   {type: "statements", model: application.unseenStatements},
+                      "verdict":     {type: "verdicts",   model: application.unseenVerdicts}};
       // Mark comments seen after a second
-      if (tab === "conversation" && currentId) {
-        ajax.command("mark-comments-seen", {id:currentId})
-          .success(function() {application.unseenComments(0);})
+      if (tabMeta[tab] && currentId) {
+        ajax.command("mark-seen", {id: currentId, type: tabMeta[tab].type})
+          .success(function() {tabMeta[tab].model(0);})
           .call();
       }}, 1000);
   }
@@ -674,7 +690,7 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment", "statement"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }

@@ -90,11 +90,12 @@
 (defn organization-attachments [organization]
   attachment-types)
 
-(defn make-attachment [now target locked op attachement-type]
+(defn make-attachment [now target locked authority op attachement-type]
   {:id (mongo/create-id)
    :type attachement-type
    :modified now
    :locked locked
+   :authority authority
    :state :requires_user_action
    :target target
    :op op
@@ -103,10 +104,10 @@
 (defn make-attachments
   "creates attachments with nil target"
   [now attachement-types]
-  (map (partial make-attachment now nil false nil) attachement-types))
+  (map (partial make-attachment now nil false false nil) attachement-types))
 
-(defn create-attachment [application-id attachement-type now target locked]
-  (let [attachment (make-attachment now target locked nil attachement-type)]
+(defn create-attachment [application-id attachement-type now target locked authority]
+  (let [attachment (make-attachment now target locked authority nil attachement-type)]
     (mongo/update-by-id
       :applications application-id
       {$set {:modified now}
@@ -185,9 +186,9 @@
         (error "Concurrancy issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked]
+(defn update-or-create-attachment [id attachment-id attachement-type file-id filename content-type size created user target locked authority]
   (let [attachment-id (if (empty? attachment-id)
-                        (create-attachment id attachement-type created target locked)
+                        (create-attachment id attachement-type created target locked authority)
                         attachment-id)]
     (set-attachment-version id attachment-id file-id filename content-type size created user false)))
 
@@ -310,9 +311,16 @@
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
+(defn authority-attachments-by-authorities [{{:keys [attachmentId]} :data user :user :as command} application]
+  (when (and
+          (-> (get-attachment-info application attachmentId) :authority true?)
+          (not (security/authority? user)))
+    (fail :error.authority-attachment)))
+
 (defcommand "delete-attachment"
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
+   :validators  [authority-attachments-by-authorities]
    :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
@@ -320,9 +328,14 @@
       (delete-attachment application attachmentId)
       (ok))))
 
+(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
+  (when (-> (get-attachment-info application attachmentId) :locked true?)
+    (fail :error.attachment-is-locked)))
+
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
+   :validators  [attachment-is-not-locked]
    :states      [:draft :info :open :complement-needed]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
@@ -331,17 +344,13 @@
         (delete-attachment-version application attachmentId fileId)
         (fail :file_not_linked_to_the_document)))))
 
-(defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (when (-> (get-attachment-info application attachmentId) :locked (= true))
-    (fail :error.attachment-is-locked)))
-
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
    :validators [attachment-is-not-locked]
    :states     [:draft :info :open :submitted :complement-needed :answered]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
-  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
+  [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked authority]} :data :as command}]
   (if (> size 0)
     (let [file-id (mongo/create-id)
           sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
@@ -351,7 +360,7 @@
           (let [content-type (mime/mime-type sanitazed-filename)]
             (mongo/upload id file-id sanitazed-filename content-type tempfile created)
             (.delete (io/file tempfile))
-            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
+            (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target (or locked false) (or authority false))]
               (executed "add-comment"
                 (-> command
                   (assoc :data {:id id

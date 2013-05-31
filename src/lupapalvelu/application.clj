@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join trim]]
+        [clojure.string :only [blank? join trim lower-case]]
         [sade.strings :only [numeric? decimal-number?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
@@ -60,6 +60,9 @@
         {:_id id}
         changes))))
 
+(defn- without-system-keys [application]
+  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
+
 ;; Validators
 
 (defn- property-id? [^String s]
@@ -85,9 +88,6 @@
   (when (and y (not (<= 6610000 (->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
-(defn- without-system-keys [application]
-  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
-
 ;; Meta-fields:
 ;;
 ;; Fetch some fields drom the depths of documents and put them to top level
@@ -111,16 +111,39 @@
                           (not (blank? (:text comment)))))
                    (:comments app)))))
 
+(defn count-unseen-statements [user app]
+  (if-not (:infoRequest app)
+    (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
+      (count (filter (fn [statement]
+                       (and (> (or (:given statement) 0) last-seen)
+                            (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
+                     (:statements app))))
+    0))
+
+(defn count-unseen-verdicts [user app]
+  (if (and (= (:role user) "applicant") (not (:infoRequest app)))
+    (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
+      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdict app))))
+    0))
+
 (defn count-attachments-requiring-action [user app]
-  (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
-    (case (keyword (:role user))
-      :applicant (count-attachments "requires_user_action")
-      :authority (count-attachments "requires_authority_action")
-      0)))
+  (if-not (:infoRequest app)
+    (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
+      (case (keyword (:role user))
+        :applicant (count-attachments "requires_user_action")
+        :authority (count-attachments "requires_authority_action")
+        0))
+    0))
+
+(defn indicator-sum [_ app]
+  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :unseenComments :fn count-unseen-comment}
-                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}])
+                  {:field :unseenStatements :fn count-unseen-statements}
+                  {:field :unseenVerdicts :fn count-unseen-verdicts}
+                  {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
+                  {:field :indicators :fn indicator-sum}])
 (defn with-meta-fields [user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app meta-fields))
 
@@ -297,11 +320,12 @@
       ;; TODO: details should come from updated state!
       (notifications/send-notifications-on-new-comment! application user text host))))
 
-(defcommand "mark-comments-seen"
-  {:parameters [:id]
+(defcommand "mark-seen"
+  {:parameters [:id :type]
+   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements" "verdicts"} type) (fail :error.unknown-type)))]
    :authenticated true}
-  [{:keys [user created] :as command}]
-  (update-application command {$set {(str "_comments-seen-by." (:id user)) created}}))
+  [{:keys [data user created] :as command}]
+  (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId :userId :path]
@@ -429,7 +453,7 @@
 (defn- make-attachments [created op organization-id & {:keys [target]}]
   (let [organization (mongo/select-one :organizations {:_id organization-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
-      (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
+      (attachment/make-attachment created target false false op {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data]
   (reduce
@@ -613,6 +637,7 @@
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdict  {:id verdictId
+                       :timestamp created
                        :name name
                        :given given
                        :status status
@@ -669,7 +694,7 @@
                   get-application-operation
                   :applicant
                   :submitted
-                  :attachmentsRequiringAction
+                  :indicators
                   :unseenComments
                   :modified
                   :state

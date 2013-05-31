@@ -69,6 +69,7 @@
 (fact "make attachments"
   (make-attachments 999 [:a :b]) => [{:id "123"
                                       :locked false
+                                      :authority false
                                       :modified 999
                                       :op nil
                                       :state :requires_user_action
@@ -77,6 +78,7 @@
                                       :versions []}
                                      {:id "123"
                                       :locked false
+                                      :authority false
                                       :modified 999
                                       :op nil
                                       :state :requires_user_action

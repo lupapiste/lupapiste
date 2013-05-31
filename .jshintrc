@@ -35,6 +35,7 @@
     "authorization",
     "comments",
     "attachment",
+    "currentUser",
     "trace",
     "error",
     "warn",

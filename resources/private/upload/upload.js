@@ -9,10 +9,11 @@ LUPAPISTE.Upload = {
   errorMessage: ko.observable(),
   targetType: ko.observable(),
   targetId: ko.observable(),
-  locked: ko.observable()
+  locked: ko.observable(),
+  authority: ko.observable()
 };
 
-LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage, target, locked) {
+LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType, typeSelector, errorMessage, target, locked, authority) {
   "use strict";
   LUPAPISTE.Upload.applicationId(applicationId);
   LUPAPISTE.Upload.attachmentId(attachmentId);
@@ -22,6 +23,7 @@ LUPAPISTE.Upload.setModel = function(applicationId, attachmentId, attachmentType
   LUPAPISTE.Upload.targetType(target ? target.type : null);
   LUPAPISTE.Upload.targetId(target ? target.id : null);
   LUPAPISTE.Upload.locked(locked || false);
+  LUPAPISTE.Upload.authority(authority || false);
 };
 
 LUPAPISTE.Upload.loadTypes = function(applicationId) {
@@ -47,9 +49,9 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
   }
 };
 
-LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector, target, locked) {
+LUPAPISTE.Upload.init = function(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority) {
   "use strict";
-  LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null, target, locked);
+  LUPAPISTE.Upload.setModel(applicationId, attachmentId, attachmentType, typeSelector, null, target, locked, authority);
   LUPAPISTE.Upload.loadTypes(applicationId);
 };
 
@@ -63,7 +65,8 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       pageutil.getURLParameter("typeSelector"),
       pageutil.getURLParameter("errorMessage"),
       {type: pageutil.getURLParameter("targetType"), id: pageutil.getURLParameter("targetId")},
-      pageutil.getURLParameter("locked"));
+      pageutil.getURLParameter("locked"),
+      pageutil.getURLParameter("authority"));
     LUPAPISTE.Upload.loadTypes(applicationId);
   }
 };

@@ -61,7 +61,7 @@
                                          :email email
                                          :name (str firstName " " lastName)}}})
             (notifications/send-create-statement-person! email text organization)))))))
-  
+
 (defcommand "delete-statement-person"
   {:parameters [:personId]
    :roles      [:authorityAdmin]}
@@ -75,6 +75,9 @@
 ;;
 ;; Authority operations
 ;;
+
+(defcommand "should-see-unsubmitted-statements"
+  {:roles       [:authority]} [_])
 
 (defcommand "request-for-statement"
   {:parameters  [:id :personIds]
