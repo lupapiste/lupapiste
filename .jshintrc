@@ -35,6 +35,7 @@
     "authorization",
     "comments",
     "attachment",
+    "user",
     "trace",
     "error",
     "warn",
