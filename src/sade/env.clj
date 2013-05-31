@@ -52,10 +52,11 @@
   (let [modified   (-> config deref :last)
         now        (java.lang.System/currentTimeMillis)
         autoreload (-> config deref :data :autoreload str read-value true?)]
-    (if (and autoreload (> now (+ 10000 modified)))
-      (reset! config {:last now
-                      :data (read-config prop-file)})
-      @config)))
+    (:data
+      (if (and autoreload (> now (+ 10000 modified)))
+        (reset! config {:last now
+                        :data (read-config prop-file)})
+        @config))))
 
 (defn value
   "Returns a value from config."
