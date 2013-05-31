@@ -118,6 +118,12 @@
                           (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
                    (:statements app)))))
 
+(defn count-unseen-verdicts [user app]
+  (if (= (:role user) "applicant")
+    (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
+      (count (filter (fn [verdict] (> (or (:given verdict) 0) last-seen)) (:verdict app))))
+    0))
+
 (defn count-attachments-requiring-action [user app]
   (if-not (:infoRequest app)
     (let [count-attachments (fn [state] (count (filter #(and (= (:state %) state) (seq (:versions %))) (:attachments app))))]
@@ -128,11 +134,12 @@
     0))
 
 (defn indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :attachmentsRequiringAction} k) v 0)) app)))
+  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :attachmentsRequiringAction :unseenVerdicts} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :unseenComments :fn count-unseen-comment}
                   {:field :unseenStatements :fn count-unseen-statements}
+                  {:field :unseenVerdicts :fn count-unseen-verdicts}
                   {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
                   {:field :indicators :fn indicator-sum}])
 (defn with-meta-fields [user app]
