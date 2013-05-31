@@ -572,6 +572,10 @@
         inforequestMap.drawShape(application.shapes()[0]);
       }
 
+      if (application.infoRequest()) {
+        ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
+      }
+
       docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
       docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
