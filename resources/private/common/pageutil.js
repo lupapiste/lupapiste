@@ -35,6 +35,16 @@ var pageutil = (function() {
     ajaxLoaderContainer.hide();
   }
 
+  function makePendingAjaxWait(message) {
+    return function(show) {
+      if (show) {
+        showAjaxWaitNow(message);
+      } else {
+        hideAjaxWait();
+      }
+    };
+  }
+  
   $(function() {
     ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
       .append($("<div>"))
@@ -43,10 +53,11 @@ var pageutil = (function() {
   });
 
   return {
-    getURLParameter:  getURLParameter,
-    getPage:          getPage,
-    showAjaxWait:     showAjaxWait,
-    hideAjaxWait:     hideAjaxWait
+    getURLParameter:      getURLParameter,
+    getPage:              getPage,
+    showAjaxWait:         showAjaxWait,
+    hideAjaxWait:         hideAjaxWait,
+    makePendingAjaxWait:  makePendingAjaxWait
   };
 
 })();

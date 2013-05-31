@@ -1,3 +1,65 @@
+session-dead.title: Istunto vanhentunut
+session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
+session-dead.logout: Kirjaudu
+connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
+attachmentType.empty._group_label:
+
+application.filter.search: etsi:
+
+neighbors.add: Lisää naapuri
+neighbors.propertyId: Kiinteistötunnus
+neighbors.owner: Omistaja
+neighbors.owner.name: Nimi
+neighbors.owner.name.placeholder: nimi
+neighbors.owner.email: Sähköpostiosoite
+neighbors.owner.email.placeholder: email
+neighbors.owner.address: Osoite
+neighbors.owner.address.street: Katu
+neighbors.owner.address.street.placeholder: katu
+neighbors.owner.address.zip: Postinumero:
+neighbors.owner.address.zip.placeholder: postinumero
+neighbors.owner.address.city: Postitoimipaikka
+neighbors.owner.address.city.placeholder: postitoimipaikka
+neighbors.done: Palaa hakemukseen
+
+neighbors.status: Tila
+
+neighbor.state.open: Avoin
+neighbor.state.mark-done: Merkitty kuulluksi
+neighbor.state.email-sent: Sähköposti lähetetty
+
+neighbors.actions: Toiminnot
+neighbors.actions.edit: muokkaa
+neighbors.actions.remove: poista
+neighbors.actions.sendEmail: Lähetä sähköposti kutsu
+neighbors.actions.upload: Lisää skannattu lausunto
+neighbors.actions.markDone: Merkitse kuulluksi
+
+neighbors.sendEmail.title: Kutsu naapuri
+neighbors.sendEmail.name: Naapurin nimi:
+neighbors.sendEmail.email: Sähköpostiosoite:
+neighbors.sendEmail.email.placeholder: matti.meikalainen@osoite.fi
+neighbors.sendEmail.message: Viesti:
+neighbors.sendEmail.message.placeholder: Viestisi naapurille
+neighbors.sendEmail.ok: Lähetä
+neighbors.sendEmail.cancel: Peruuta
+neighbors.sendEmail.sending: Sähköpostia lähetetään
+neighbors.sendEmail.reloading: Päivitetään tilaa
+neighbors.manage: Hallitse naapureita
+
+neighbors.edit.title: Naapurin tiedot:
+neighbors.edit.propertyId: Kiinteistötunnus
+neighbors.edit.propertyId.placeholder: kiinteistötunnus 
+neighbors.edit.name: Nimi
+neighbors.edit.ok: Tallenna
+neighbors.edit.cancel: Peruuta
+neighbors.edit.status.0: Odota
+neighbors.edit.status.1: Etsitään tietoja
+neighbors.edit.status.2: Naapurin tiedot
+neighbors.edit.status.3: Tietoja ei löydy
+
+neighbor.show.welcome: Tervetuloa tutustumaan naapurisi haknkkeeseen.
+
 operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
 rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
 rakennushanke.kaytettykerrosala._append_label: Lisää olemassaolevaa

@@ -34,7 +34,8 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery])
+            [ring.middleware.anti-forgery :as anti-forgery]
+            [lupapalvelu.neighbors])
   (:import [java.io ByteArrayInputStream]))
 
 ;;
@@ -152,7 +153,8 @@
                    :applicant logged-in?
                    :authority authority?
                    :authority-admin authority-admin?
-                   :admin admin?})
+                   :admin admin?
+                   :neighbor anyone})
 
 (defn cache-headers [resource-type]
   (if (env/dev-mode?)
@@ -185,7 +187,7 @@
 
 ;; Single Page App HTML
 (def apps-pattern
-  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
+  (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
 (defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
 
@@ -351,11 +353,10 @@
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (if (logged-in?)
-    (if @env/proxy-off
-      {:status 503}
-      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
-    {:status 401}))
+  (println "PROXY:" srv)
+  (if @env/proxy-off
+    {:status 503}
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
 
 ;;
 ;; Token consuming:
