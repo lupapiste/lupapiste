@@ -262,7 +262,7 @@
 (defjson "/system/ping" [] {:ok true})
 (defjson "/system/status" [] (status/status))
 
-(def activation-route (str (-> env/config :activation :path) ":activation-key"))
+(def activation-route (str (env/value :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do

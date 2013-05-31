@@ -55,7 +55,7 @@
 
 ; length should match the length in util.js
 (defn valid-password? [password]
-  (>= (count password) (get-in env/config [:password :minlength])))
+  (>= (count password) (env/value :password :minlength)))
 
 (defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
   (let [salt              (dispense-salt)

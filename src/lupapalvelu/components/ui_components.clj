@@ -12,9 +12,9 @@
               :name "common"})
 
 (defn- conf []
-  (let [js-conf {:maps              (:maps env/config)
+  (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
-                 :passwordMinLength (get-in env/config [:password :minlength])
+                 :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
