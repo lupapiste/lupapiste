@@ -56,3 +56,5 @@ poikkeuslupa._group_label: Poikkeamishakemuksen lisäosa
 poikkeamishakemuksen-lisaosa.perustelut: Perustelut
 poikkeamishakemuksen-lisaosa.vaikutukset: Vaikutukset
 poikkeamishakemuksen-lisaosa.lisätiedot: Lisätiedot
+
+attachment.delete.version.header: Poista liitetiedosto
