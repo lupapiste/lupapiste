@@ -24,6 +24,7 @@
               <tr>
                 <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                <th data-bind="ltext: 'attachment.actions'">Toiminnot</th>
                 <th></th>
               </tr>
             </thead>
@@ -40,6 +41,7 @@
                 </td>
                 <td>
                 </td>
+                <td><a data-bind="ltext: 'remove', click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id), visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" ></a></td>
               </tr>
             </tbody>
           </table>

@@ -4,6 +4,20 @@
   var applicationId = null;
   var statementId = null;
 
+  // this function is mutated over in the attachement.deleteVersion
+  var deleteAttachmentFromServerProxy;
+
+  function deleteAttachmentFromServer(attachmentId) {
+    ajax
+      .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
+      .success(function() {
+        repository.load(applicationId);
+        return false;
+      })
+      .call();
+    return false;
+  }
+
   function StatementModel() {
     var self = this;
 
@@ -88,11 +102,15 @@
       }));
     };
 
+    self.deleteAttachment = function(attachmentId) {
+      deleteAttachmentFromServerProxy = function() { console.log("here"); deleteAttachmentFromServer(attachmentId); };
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement-attachment");
+    };
+
     self.newAttachment = function() {
       attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true);
     };
   }
-
 
   var statementModel = new StatementModel();
   var authorizationModel = authorization.create();
@@ -126,6 +144,8 @@
     LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement",
       loc("statement.delete.header"), loc("statement.delete.message"), loc("yes"), deleteStatementFromServer, loc("no"));
 
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement-attachment",
+      loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() { console.log("here"); deleteAttachmentFromServerProxy(); }, loc("no"));
   });
 
 })();
