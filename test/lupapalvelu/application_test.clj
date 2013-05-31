@@ -35,7 +35,8 @@
   (count-unseen-verdicts {:role "applicant"} {:verdict [{:given 1} {:given 2}]}) => 2
   (count-unseen-verdicts {:role "applicant"} {:verdict [{:given 0}]}) => 0
   (count-unseen-verdicts {:role "authority"} {:verdict [{:given 0}]}) => 0
-  (count-unseen-verdicts {:role "authority"} {:verdict [{:given 1}]}) => 0)
+  (count-unseen-verdicts {:role "authority"} {:verdict [{:given 1}]}) => 0
+  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdict [{:given 1}] :_verdicts-seen-by {:user1 1}}) => 0)
 
 (facts "count-attachments-requiring-action"
   (count-attachments-requiring-action nil nil) => 0
@@ -54,6 +55,15 @@
   (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0)
+
+(facts "indicator-sum"
+  (indicator-sum nil nil) => 0
+  (indicator-sum {} {}) => 0
+  (indicator-sum nil {:unseenStatements 1}) => 1
+  (indicator-sum nil {:unseenVerdicts 1}) => 1
+  (indicator-sum nil {:attachmentsRequiringAction 1}) => 1
+  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5}) => 9
+  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5 :unseenComments 7}) => 9)
 
 (facts "sorting parameter parsing"
   (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {:infoRequest 1}
