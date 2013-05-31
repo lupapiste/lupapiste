@@ -444,7 +444,7 @@
 (defn- make-attachments [created op organization-id & {:keys [target]}]
   (let [organization (mongo/select-one :organizations {:_id organization-id} {:operations-attachments 1})]
     (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
-      (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
+      (attachment/make-attachment created target false false op {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data]
   (reduce

@@ -3,9 +3,9 @@
   (:require [clj-http.client :as client]
             [clojure.string :as s]
             [clojure.xml :as xml]
-            [clojure.zip :as zip])
+            [clojure.zip :as zip]
+            [sade.env :as env])
   (:use [clojure.data.zip.xml :only [xml-> text]]
-        [sade.env :only [config]]
         [sade.strings :only [starts-with-i]]
         [clojure.tools.logging]))
 
@@ -20,7 +20,7 @@
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
 (def ^:private auth
-  (let [conf (:nls config)]
+  (let [conf (env/value :nls)]
     {:raster        [(:username (:raster conf))     (:password (:raster conf))]
      :kiinteisto    [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
      ktjkii         [(:username (:ktjkii conf))     (:password (:ktjkii conf))]

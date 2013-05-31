@@ -4,6 +4,20 @@
   var applicationId = null;
   var statementId = null;
 
+  // this function is mutated over in the attachement.deleteVersion
+  var deleteAttachmentFromServerProxy;
+
+  function deleteAttachmentFromServer(attachmentId) {
+    ajax
+      .command("delete-attachment", {id: applicationId, attachmentId: attachmentId})
+      .success(function() {
+        repository.load(applicationId);
+        return false;
+      })
+      .call();
+    return false;
+  }
+
   function StatementModel() {
     var self = this;
 
@@ -13,6 +27,7 @@
     self.statuses = ['yes', 'no', 'condition'];
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
+    self.submitting = ko.observable(false);
 
     self.clear = function() {
       self.data(null);
@@ -46,19 +61,21 @@
     };
 
     self.submit = function() {
+      self.submitting(true);
       ajax
         .command("give-statement", {id: applicationId, statementId: statementId, status: self.selectedStatus(), text: self.text()})
         .success(function() {
-          repository.load(applicationId);
           window.location.hash = "!/application/"+applicationId+"/statement";
+          repository.load(applicationId);
           return false;
         })
+        .complete(function() { self.submitting(false); })
         .call();
       return false;
     };
 
     self.disabled = ko.computed(function() {
-      return !self.selectedStatus() || !self.text();
+      return !self.selectedStatus() || !self.text() || self.submitting();
     });
   }
 
@@ -85,11 +102,24 @@
       }));
     };
 
+    self.canDeleteAttachment = function(attachment) {
+      return authorizationModel.ok("delete-attachment") && (!attachment.authority || user.isAuthority());
+    };
+
+    self.canAddAttachment = function() {
+      return authorizationModel.ok("upload-attachment") && user.isAuthority();
+    };
+
+    self.deleteAttachment = function(attachmentId) {
+      deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-statement-attachment");
+    };
+
     self.newAttachment = function() {
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true);
+      // created file is authority-file if created by authority
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, user.isAuthority());
     };
   }
-
 
   var statementModel = new StatementModel();
   var authorizationModel = authorization.create();
@@ -123,6 +153,8 @@
     LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement",
       loc("statement.delete.header"), loc("statement.delete.message"), loc("yes"), deleteStatementFromServer, loc("no"));
 
+    LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-statement-attachment",
+      loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() { deleteAttachmentFromServerProxy(); }, loc("no"));
   });
 
 })();

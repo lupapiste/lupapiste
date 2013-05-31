@@ -262,7 +262,7 @@
 (defjson "/system/ping" [] {:ok true})
 (defjson "/system/status" [] (status/status))
 
-(def activation-route (str (-> env/config :activation :path) ":activation-key"))
+(def activation-route (str (env/value :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do
@@ -303,14 +303,15 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
-  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
                            :target target
                            :locked (java.lang.Boolean/parseBoolean locked)
+                           :authority (java.lang.Boolean/parseBoolean authority)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
@@ -319,11 +320,12 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.4.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
                                             :locked (or locked "false")
+                                            :authority (or authority "false")
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
