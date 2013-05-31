@@ -77,13 +77,13 @@
   "Returns a list of all enabled features."
   []
   (walk/prewalk
-  (fn [x]
-    (if (map? x)
-      (into {}
-        (for [[k v] x]
-          [k (if (map? v) v (-> v str read-value true?))]))
-      x))
-  (:feature (get-config))))
+    (fn [x]
+      (if (map? x)
+        (into {}
+          (for [[k v] x]
+            [k (if (map? v) v (-> v str read-value true?))]))
+        x))
+    (:feature (get-config))))
 
 (defn- get-prop [prop-name default]
   (or
