@@ -182,7 +182,11 @@
     var self = this;
     self.data = ko.observableArray();
     self.personIds = ko.observableArray([]);
-    self.disabled = ko.computed(function() { return _.isEmpty(self.personIds()); });
+    self.submitting = ko.observable(false);
+
+    self.disabled = ko.computed(function() {
+      return _.isEmpty(self.personIds()) || self.submitting();
+    });
 
     self.load = function() {
       ajax
@@ -197,12 +201,15 @@
     };
 
     self.send = function() {
+      self.submitting(true);
       ajax.command("request-for-statement", {id: currentId, personIds: self.personIds()})
         .success(function() {
           self.personIds([]);
           repository.load(currentId);
           LUPAPISTE.ModalDialog.close();
-        }).call();
+        })
+        .complete(function() { self.submitting(false); })
+        .call();
     };
 
     self.openStatement = function(model) {
