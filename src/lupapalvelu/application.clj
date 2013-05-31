@@ -112,11 +112,19 @@
                    (:comments app)))))
 
 (defn count-unseen-statements [user app]
-  (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
-    (count (filter (fn [statement]
-                     (and (> (or (:given statement) 0) last-seen)
-                          (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
-                   (:statements app)))))
+  (if-not (:infoRequest app)
+    (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
+      (count (filter (fn [statement]
+                       (and (> (or (:given statement) 0) last-seen)
+                            (not= (lower-case (get-in statement [:person :email])) (lower-case (:email user)))))
+                     (:statements app))))
+    0))
+
+(defn count-unseen-verdicts [user app]
+  (if (and (= (:role user) "applicant") (not (:infoRequest app)))
+    (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
+      (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdict app))))
+    0))
 
 (defn count-attachments-requiring-action [user app]
   (if-not (:infoRequest app)
@@ -128,11 +136,12 @@
     0))
 
 (defn indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :attachmentsRequiringAction} k) v 0)) app)))
+  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :unseenComments :fn count-unseen-comment}
                   {:field :unseenStatements :fn count-unseen-statements}
+                  {:field :unseenVerdicts :fn count-unseen-verdicts}
                   {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
                   {:field :indicators :fn indicator-sum}])
 (defn with-meta-fields [user app]
@@ -313,7 +322,7 @@
 
 (defcommand "mark-seen"
   {:parameters [:id :type]
-   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements"} type) (fail :error.unknown-type)))]
+   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements" "verdicts"} type) (fail :error.unknown-type)))]
    :authenticated true}
   [{:keys [data user created] :as command}]
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
@@ -628,6 +637,7 @@
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdict  {:id verdictId
+                       :timestamp created
                        :name name
                        :given given
                        :status status
