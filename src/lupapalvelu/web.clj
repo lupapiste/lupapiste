@@ -353,11 +353,10 @@
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (if (logged-in?)
-    (if @env/proxy-off
-      {:status 503}
-      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
-    {:status 401}))
+  (println "PROXY:" srv)
+  (if @env/proxy-off
+    {:status 503}
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
 
 ;;
 ;; Token consuming:
