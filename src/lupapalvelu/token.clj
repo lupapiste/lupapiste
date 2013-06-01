@@ -14,7 +14,7 @@
 
 (def ^:private default-ttl (* 24 60 60 1000))
     
-(def ^:private make-token-id (partial random-password 48))
+(def make-token-id (partial random-password 48))
 
 (defn make-token [token-type data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
   (let [token-id (make-token-id)
