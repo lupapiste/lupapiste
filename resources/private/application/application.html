@@ -521,59 +521,123 @@
 
       <div id="dialog-stamp-attachments" class="window autosized">
         <div data-bind="with: $root.stampModel">
+
           <div class="dialog-header">
             <p data-bind="ltext: 'stamp.title'"></p>
             <p class="dialog-close close">X</p>
           </div>
+
           <div class="dialog-content">
-            <div data-bind="visible: status() < statusRunning">
-              <div>
-                <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
-                <span data-bind="ltext: 'stamp.status.no-files', visible: status() === statusNoFiles"></span>
-              </div>
-              <table data-bind="visible: status() === statusInit" class="stamp-margin">
+          
+            <div class="stamp-margin">
+              <table>
                 <tbody>
                   <tr>
                     <td data-bind="ltext: 'stamp.margin'" colspan="3"></td>
                   </tr>
                   <tr>
                     <td data-bind="ltext: 'stamp.xMargin'" class="label"></td>
-                    <td><input data-bind="value: xMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !xMarginOk()}" id="stamp.xMargin" type="text" class="form-input text"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          value: xMargin,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown',
+                          css: {'invalid-margin': !xMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
                     <td>mm</td>
                   </tr>
                   <tr>
                     <td data-bind="ltext: 'stamp.yMargin'" class="label"></td>
-                    <td><input data-bind="value: yMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !yMarginOk()}" id="stamp.yMargin" type="text" class="form-input text"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          value: yMargin,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown',
+                          css: {'invalid-margin': !yMarginOk()}"
+                        type="text"
+                        class="form-input text">
+                      </td>
                     <td>mm</td>
                   </tr>
                 </tbody>
               </table>
-              <button data-bind="click: start, ltext: 'stamp.start', enable: xMarginOk() && yMarginOk() && status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
-              <button data-bind="ltext: 'stamp.cancel', enable: status() === statusInit" class="btn btn-dialog close"></button>
             </div>
-            <div data-bind="visible: status() >= statusRunning">
-              <div>
-                <span data-bind="ltext: 'stamp.status.running', visible: status() === statusRunning"></span>
-                <span data-bind="ltext: 'stamp.status.done', visible: status() === statusDone"></span>
-              </div>
+            
+            <div class="stamp-files">
               <table>
                 <thead>
                   <tr>
-                    <td data-bind="ltext: 'stamp.filename'"></td>
-                    <td data-bind="ltext: 'stamp.size'"></td>
-                    <td data-bind="ltext: 'stamp.status'"></td>
+                    <th data-bind="ltext: 'stamp.filename'"></th>
+                    <th data-bind="ltext: 'stamp.version'"></th>
+                    <th data-bind="ltext: 'stamp.size'"></th>
+                    <th data-bind="ltext: status() <= statusReady ? 'stamp.select' : 'stamp.status'"></th>
                   </tr>
                 </thead>
-                <tbody data-bind="foreach: filesTable">
+                <tbody data-bind="foreach: files">
                   <tr>
                     <td data-bind="text: filename"></td>
+                    <td>
+                      <span data-bind="version: version"></span>
+                      <span data-bind="visible: restamp">*</span>
+                    </td>
                     <td data-bind="size: size"></td>
-                    <td data-bind="text: status"></td>
+                    <td>
+                      <input type="checkbox" data-bind="
+                          checked: selected,
+                          visible: $parent.status() < $parent.statusRunning,
+                          enable: $parent.status() === $parent.statusReady" />
+                      <span data-bind="
+                          text: loc('stamp.file.status', status()),
+                          visible: $parent.status() >= $parent.statusRunning"></span>
+                    </td>
                   </tr>
                 </tbody>
+                <tfoot>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th>
+                      <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
+                      <span>/</span>
+                      <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
+                    </th>
+                  </tr>
+                </tfoot>
               </table>
-              <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
+              <form class="stamp-files-select-all-none">
+              </form>
             </div>
+            
+            <div class="stamp-status">
+              <span data-bind="text: loc('stamp.status', status().toString())"></span>
+            </div>
+            
+            <div class="stamp-buttons">
+              <button data-bind="
+                  click: start,
+                  ltext: 'stamp.start',
+                  enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
+                  visible: status() <= statusReady"
+                class="btn btn-primary btn-dialog">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.cancel',
+                  enable: status() === statusReady,
+                  visible: status() <= statusReady"
+                class="btn btn-dialog close">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.ok',
+                  visible: status() > statusRunning"
+                class="btn btn-primary btn-dialog close">
+              </button>
+            </div>
+            
           </div>
         </div>
       </div>

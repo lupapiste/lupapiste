@@ -15,31 +15,58 @@
   var stampModel = new function() {
     var self = this;
 
-    self.statusInit      = 0;
-    self.statusStarting  = 1;
-    self.statusNoFiles   = 2;
-    self.statusRunning   = 3;
-    self.statusDone      = 4;
+                               // Start:  Cancel:  Ok:
+    self.statusInit      = 0;  //   -       -       -
+    self.statusReady     = 1;  //   +       +       -
+    self.statusStarting  = 2;  //   -       -       -
+    self.statusRunning   = 3;  //   -       -       -
+    self.statusDone      = 4;  //   -       -       +
+    self.statusNoFiles   = 5;  //   -       -       +
 
+    self.status = ko.observable(self.statusStarting);
+    self.application = null;
     self.applicationId = null;
+    self.files = ko.observable(null);
+    self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
     self.jobId = null;
-    self.version = null;
-    self.files = null;
+    self.jobVersion = null;
 
     self.xMargin = ko.observable("");
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
-
     self.yMargin = ko.observable("");
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
 
-    self.status = ko.observable();
-    self.filesTable = ko.observable();
-
-    self.init = function(applicationId) {
-      self.applicationId = applicationId;
-      self.jobId = null;
-      self.files = {};
-      self.status(self.statusInit).filesTable([]).xMargin("10").yMargin("85");
+    function stampableAttachment(a) {
+      var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
+      return ct == "application/pdf" || ct.search(/^image\//) == 0;
+    }
+    
+    function normalizeAttachment(a) {
+      var versions = _(a.versions()).reverse().value(),
+          restamp = versions[0].stamped(),
+          selected = restamp ? versions[1] : versions[0];
+      return {
+        id:           a.id(),
+        type:         { "type-group": a.type["type-group"](), "type-id": a.type["type-id"]() },
+        contentType:  selected.contentType(),
+        filename:     selected.filename(),
+        version:      { major: selected.version.major(), minor: selected.version.minor() },
+        size:         selected.size(),
+        selected:     ko.observable(true),
+        status:       ko.observable(""),
+        restamp:      restamp
+      };
+    }
+    
+    self.init = function(application) {
+      self.application = application;
+      
+      self
+        .files(_(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value())
+        .status(self.files().length > 0 ? self.statusReady : self.statusNoFiles)
+        .xMargin("10")
+        .yMargin("85");
+      
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
@@ -47,29 +74,20 @@
     self.start = function() {
       self.status(self.statusStarting);
       ajax
-        .command("stamp-attachments", {id: self.applicationId, xMargin: _.parseInt(self.xMargin(), 10), yMargin: _.parseInt(self.yMargin(), 10)})
+        .command("stamp-attachments", {
+          id: self.application.id(),
+          files: _.map(self.selectedFiles(), "id"),
+          xMargin: _.parseInt(self.xMargin(), 10),
+          yMargin: _.parseInt(self.yMargin(), 10)})
         .success(self.started)
         .call();
       return false;
     };
 
-    function withObservableStatus(job, key) {
-      var s = job.status;
-      job.status = ko.observable(loc("stamp.file.status", s));
-      return [key, job];
-    }
-
     self.started = function(data) {
-      if (data.count === 0) {
-        self.status(self.statusNoFiles);
-      } else {
-        self.status(self.statusRunning);
-        self.jobId = data.job.id;
-        self.files = _(data.job.value).map(withObservableStatus).zipObject().value();
-        self.filesTable(_.values(self.files));
-        self.version = 0;
-        self.queryUpdate();
-      }
+      self.jobId = data.job.id;
+      self.jobVersion = 0;
+      self.status(self.statusRunning).queryUpdate();
       return false;
     };
 
@@ -77,24 +95,33 @@
       ajax
         .query("stamp-attachments-job")
         .param("job-id", self.jobId)
-        .param("version", self.version)
+        .param("version", self.jobVersion)
         .success(self.update)
         .call();
       return self;
     };
 
     self.update = function(data) {
-      if (data.result === "timeout") { return self.queryUpdate(); }
-      var job = data.job;
-      self.version = job.version;
-      _.each(job.value, function(v, k) { self.files[k].status(loc("stamp.file.status", v.status)); });
-      if (job.status === "done") {
-        repository.load(self.applicationId);
-        self.status(self.statusDone);
-      } else {
-        self.queryUpdate();
+      if (data.result === "update") {
+        var update = data.job;
+        
+        self.jobVersion = update.version;
+        _.each(update.value, function (newStatus, fileId) {
+          _(self.files()).filter({id: fileId}).each(function(f) { f.status(newStatus); });
+        });
+       
+        if (update.status === "done") {
+          repository.load(self.application.id());
+          return self.status(self.statusDone);
+        }
       }
+        
+      return self.queryUpdate();
     };
+
+    function selectAllFiles(value) { _.each(self.files(), function(f) { f.selected(value); }); }
+    self.selectAll = _.partial(selectAllFiles, true);
+    self.selectNone = _.partial(selectAllFiles, false);
 
   }();
 
@@ -436,7 +463,7 @@
     },
 
     stampAttachments: function() {
-      stampModel.init(application.id());
+      stampModel.init(application);
       return false;
     },
 

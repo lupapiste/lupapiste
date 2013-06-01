@@ -65,10 +65,10 @@
 
 (declare stamp-pdf stamp-image)
 
-(defn stamp [stamp content-type in out x-margin y-margin]
+(defn stamp [stamp content-type in out x-margin y-margin transparency]
   (cond
-    (= content-type "application/pdf")      (do (stamp-pdf stamp in out x-margin y-margin) nil)
-    (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin) nil)
+    (= content-type "application/pdf")      (do (stamp-pdf stamp in out x-margin y-margin transparency) nil)
+    (ss/starts-with content-type "image/")  (do (stamp-image stamp content-type in out x-margin y-margin transparency) nil)
     :else                                   nil))
 
 ;;
@@ -78,15 +78,19 @@
 ; iText uses points as units, 1 mm is 2.835 points 
 (defn- mm->u [mm] (* 2.835 mm))
 
-(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin]
+(defn- transparency->opacity [transparency]
+  (- 1.0 (/ (double transparency) 255.0)))
+
+(defn- stamp-pdf [^Image stamp-image ^InputStream in ^OutputStream out x-margin y-margin transparency]
   (with-open [reader (PdfReader. in)
               stamper (PdfStamper. reader out)]
     (let [stamp (com.lowagie.text.Image/getInstance stamp-image nil false)
           stamp-width (.getPlainWidth stamp)
           stamp-height (.getPlainHeight stamp)
+          opacity (transparency->opacity transparency)
           gstate (doto (PdfGState.)
-                   (.setFillOpacity 0.25)
-                   (.setStrokeOpacity 0.25))]
+                   (.setFillOpacity opacity)
+                   (.setStrokeOpacity opacity))]
       (doseq [page (range (.getNumberOfPages reader))]
         (let [page-size (.getPageSizeWithRotation reader (inc page))
               page-width (.getWidth page-size)
@@ -103,7 +107,7 @@
 
 (declare read-image write-image add-stamp mm->p)
 
-(defn- stamp-image [stamp-image content-type in out x-margin y-margin]
+(defn- stamp-image [stamp-image content-type in out x-margin y-margin transparency]
   (doto (read-image in)
     (add-stamp stamp-image x-margin y-margin)
     (write-image (second (s/split content-type #"/")) out)))
