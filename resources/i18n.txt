@@ -120,3 +120,42 @@ poikkeamishakemuksen-lisaosa.vaikutukset: Vaikutukset
 poikkeamishakemuksen-lisaosa.lisätiedot: Lisätiedot
 
 attachment.delete.version.header: Poista liitetiedosto
+
+#
+# Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
+#
+
+stamp.status.0: Odota...
+stamp.status.1: Valmiina leimaamaan liiteet
+stamp.status.2: Leimaus käynnistyy...
+stamp.status.3: Leimaus käynnissä...
+stamp.status.4: Leimaus valmis
+stamp.status.5: Ei leimaus kelpoisia liitteitä
+
+stamp.filename: Tiedosto
+stamp.version: Versio
+stamp.size: Koko
+stamp.select: Leimaa
+stamp.status: Tila
+
+stamp.start: Aloita
+stamp.cancel: Peruuta
+stamp.ok: Ok
+
+stamp.file.status.pending: Odottaa
+stamp.file.status.working: Leimaa
+stamp.file.status.done: Valmis
+stamp.file.status.error: Virhe
+
+stamp.all: kaikki
+stamp.none: poista
+
+stamp.comment: Leimattu
+stamp.comment.restamp: Uudelleen leimattu
+
+stamp.transparency: Taustan läpinäkyvyys
+stamp.transparency.0: 0% (valkoinen tausta)
+stamp.transparency.64: 25%
+stamp.transparency.128: 50% (läpikuultava)
+stamp.transparency.192: 75%
+stamp.transparency.255: 100% (läpinäkyvä)
