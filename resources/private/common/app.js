@@ -1,5 +1,8 @@
 var LUPAPISTE = LUPAPISTE || {};
 
+// Hax. Should depend on currentUser.js
+var currentUser = currentUser || {set: function() {}, get: function() {}, isAuthority: function() {return false;}};
+
 /**
  * Prototype for Lupapiste Single Page Apps.
  *
