@@ -12,9 +12,9 @@
               :name "common"})
 
 (defn- conf []
-  (let [js-conf {:maps              (:maps env/config)
+  (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
-                 :passwordMinLength (get-in env/config [:password :minlength])
+                 :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -54,7 +54,7 @@
                   :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js"]
+                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js" "currentUser.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]

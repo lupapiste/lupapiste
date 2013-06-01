@@ -67,6 +67,7 @@ var LUPAPISTE = LUPAPISTE || {};
       ajax.query("user")
         .success(function (e) {
           self.session = true;
+          currentUser.set(e.user);
           hub.send("login", e);
           self.hashChanged();
         })
@@ -99,7 +100,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
   var offline = false;
   var wasLoggedIn = false;
-  
+
   hub.subscribe("login", function() { wasLoggedIn = true; });
 
   hub.subscribe({type: "connection", status: "online"}, function () {
@@ -156,9 +157,9 @@ var LUPAPISTE = LUPAPISTE || {};
        startPage: self.startPage,
        allowAnonymous: self.allowAnonymous
      };
-     
+
      $("nav").applyBindings(model);
-     
+
      function showApplicationList() {
        pageutil.hideAjaxWait();
        window.location.hash = "!/applications";
