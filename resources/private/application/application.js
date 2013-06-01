@@ -705,9 +705,8 @@
       window.location.hash = "!/neighbors/" + application.id();
       return false;
     },
-    upload: function(neighbor) { console.log("upload:", neighbor); },
+    upload: function(neighbor) { /* TODO: */ },
     markDone: function(neighbor) {
-      console.log("makrDone:", neighbor, neighbor.neighborId());
       ajax
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
         .complete(_.partial(repository.load, currentId, util.nop))
@@ -744,7 +743,6 @@
     function paramValue(paramName) { return self[paramName](); }
 
     self.send = function() {
-      console.log("params", _.zipObject(paramNames, _.map(paramNames, paramValue)));
       ajax
         .command("neighbor-send-invite", _.zipObject(paramNames, _.map(paramNames, paramValue)))
         .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending")))
