@@ -65,8 +65,6 @@ var currentUser = currentUser || {set: function() {}, get: function() {}, isAuth
 
     var path = hash.split("/");
 
-    console.log("SELF:", self);
-    
     if (!self.allowAnonymous && self.session === undefined) {
       trace("session === undefined", hash, path);
       ajax.query("user")
