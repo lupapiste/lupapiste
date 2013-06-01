@@ -559,9 +559,21 @@
                           valueUpdate: 'afterkeydown',
                           css: {'invalid-margin': !yMarginOk()}"
                         type="text"
-                        class="form-input text">
+                        class="form-input text"/>
                       </td>
                     <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.transparency'" class="label"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          checked: transparency,
+                          enable: status() === statusReady"
+                        type="checkbox"
+                        class="form-input"/>
+                      </td>
+                    <td></td>
                   </tr>
                 </tbody>
               </table>

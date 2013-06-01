@@ -35,6 +35,7 @@
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
     self.yMargin = ko.observable("");
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
+    self.transparency = ko.observable(false);
 
     function stampableAttachment(a) {
       var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
@@ -65,7 +66,8 @@
         .files(_(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value())
         .status(self.files().length > 0 ? self.statusReady : self.statusNoFiles)
         .xMargin("10")
-        .yMargin("85");
+        .yMargin("85")
+        .transparency(false);
       
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
@@ -78,7 +80,8 @@
           id: self.application.id(),
           files: _.map(self.selectedFiles(), "id"),
           xMargin: _.parseInt(self.xMargin(), 10),
-          yMargin: _.parseInt(self.yMargin(), 10)})
+          yMargin: _.parseInt(self.yMargin(), 10),
+          transparency: (self.transparency() ? 255 : 0)})
         .success(self.started)
         .call();
       return false;

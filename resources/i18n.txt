@@ -152,3 +152,5 @@ stamp.none: poista
 
 stamp.comment: Leimattu
 stamp.comment.restamp: Uudelleen leimattu
+
+stamp.transparency: Läpinäkyvä pohja?
