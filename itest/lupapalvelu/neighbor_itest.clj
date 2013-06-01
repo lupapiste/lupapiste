@@ -14,9 +14,12 @@
         neighbors (:neighbors application)]
     [application neighbors neighborId]))
 
+(defn- find-by-id [neighborId neighbors]
+  (some (fn [neighbor] (when (= neighborId (keyword (:neighborId neighbor))) neighbor)) neighbors))
+
 (facts "create app, add neighbor"
   (let [[application neighbors neighborId] (create-app-with-neighbor)
-        neighbor (neighborId neighbors)]
+        neighbor (find-by-id neighborId neighbors)]
     (fact (:neighbor neighbor) => {:propertyId "p"
                                    :owner {:name "n"
                                            :address {:street "s" :city "c" :zip "z"}
