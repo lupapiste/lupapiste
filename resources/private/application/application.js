@@ -12,6 +12,10 @@
 
   function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
 
+  var transparencies = _.map([0,64,128,192,255], function(t) {
+    return {text: loc("stamp.transparency", t.toString()), value: t};
+  });
+  
   var stampModel = new function() {
     var self = this;
 
@@ -35,8 +39,9 @@
     self.xMarginOk = ko.computed(function() { return isNum(self.xMargin()); });
     self.yMargin = ko.observable("");
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
-    self.transparency = ko.observable(false);
-
+    self.transparency = ko.observable();
+    self.transparencies = transparencies;
+    
     function stampableAttachment(a) {
       var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
       return ct == "application/pdf" || ct.search(/^image\//) == 0;
@@ -67,7 +72,7 @@
         .status(self.files().length > 0 ? self.statusReady : self.statusNoFiles)
         .xMargin("10")
         .yMargin("85")
-        .transparency(false);
+        .transparency(self.transparencies[0]);
       
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
@@ -81,7 +86,7 @@
           files: _.map(self.selectedFiles(), "id"),
           xMargin: _.parseInt(self.xMargin(), 10),
           yMargin: _.parseInt(self.yMargin(), 10),
-          transparency: (self.transparency() ? 255 : 0)})
+          transparency: self.transparency().value})
         .success(self.started)
         .call();
       return false;
