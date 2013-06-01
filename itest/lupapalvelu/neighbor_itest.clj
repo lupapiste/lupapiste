@@ -34,7 +34,7 @@
         _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :type :person :email "e2")
         application (:application (query pena :application :id application-id))
         neighbors (:neighbors application)
-        neighbor (neighborId neighbors)]
+        neighbor (find-by-id neighborId neighbors)]
     (fact (count neighbors) => 1)
     (fact (:neighbor neighbor) => {:propertyId "p2"
                                    :owner {:name "n2"
