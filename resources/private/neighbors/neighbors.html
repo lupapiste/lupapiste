@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="neighbors">
+
+    <div id="neighbors-content">
+
+      <div class="map map-large" id="neighbors-map"></div>
+      
+      <table class="application-neighbors">
+        <thead>
+          <tr>
+            <th data-bind="ltext: 'neighbors.propertyId'"></th>
+            <th data-bind="ltext: 'neighbors.owner'"></th>
+            <th data-bind="ltext: 'neighbors.status'"></th>
+            <th data-bind="ltext: 'neighbors.actions'"></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: neighbors">
+          <tr>
+            <td data-bind="text: neighbor.propertyId"></td>
+            <td data-bind="with: neighbor.owner">
+              <span data-bind="text: name" class="owner-name"></span>
+              <span data-bind="text: address.street" class="owner-street"></span>
+              <span data-bind="text: address.zip" class="owner-zip"></span>
+              <span data-bind="text: address.city" class="owner-city"></span>
+              <span data-bind="text: email" class="owner-email"></span>
+            </td>
+            <td data-bind="with: _.last(status)">
+              <span data-bind="text: state" class="status-state"></span>
+              <span data-bind="dateTimeString: created" class="status-time"></span>
+            </td>
+            <td>
+              <a data-bind="click: $root.edit, clickBubble: false, ltext: 'neighbors.actions.edit'" href="#"></a>
+              <a data-bind="click: $root.remove, clickBubble: false, ltext: 'neighbors.actions.remove'" href="#"></a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <button data-bind="click: $root.add, ltext: 'neighbors.add'" class="btn btn-primary modal"></button>
+      <button data-bind="click: $root.done, ltext: 'neighbors.done'" class="btn"></button>
+      
+    </div>
+
+    <div id="dialog-edit-neighbor" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="ltext: 'neighbors.edit.title'"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+        
+        <div>
+          <span data-bind="text: loc('neighbors.edit.status', status())"></span>
+          <img data-bind="visible: status() === statusSearch" src="/img/ajax-loader-16.gif"/>
+        </div>
+        <form>
+          <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
+          <input data-bind="value: propertyId, enable: status() > statusSearch, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" />
+
+          <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors.owner.name"></label>
+          <input data-bind="value: name, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.name" />
+
+          <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors.owner.address.street"></label>
+          <input data-bind="value: street, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.street" />
+
+          <label data-bind="ltext: 'neighbors.owner.address.city'" class="form-label" for="neighbors.owner.address.city"></label>
+          <input data-bind="value: city, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.city" />
+
+          <label data-bind="ltext: 'neighbors.owner.address.zip'" class="form-label" for="neighbors.owner.address.zip"></label>
+          <input data-bind="value: zip, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
+          
+          <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
+          <input data-bind="value: email, enable: status() > statusSearch, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" />
+        </form>
+        
+        <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog"></button>
+        <button data-bind="ltext: 'neighbors.edit.cancel'" class="btn btn-dialog close"></button>
+         
+      </div>
+    </div>
+    
+  </section>
+  
+</body>
+</html>

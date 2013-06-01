@@ -289,6 +289,7 @@
       return false;
     };
   }();
+  
 
   var application = {};
   application = {
@@ -309,6 +310,8 @@
     operationsCount: ko.observable(),
     applicant: ko.observable(),
     assignee: ko.observable(),
+    neighbors: ko.observable(),
+    
     attachmentsRequiringAction: ko.observable(),
     unseenStatements: ko.observable(),
     unseenVerdicts: ko.observable(),
@@ -593,10 +596,11 @@
 
       isInitializing = false;
       pageutil.hideAjaxWait();
+      
     });
   }
 
-  hub.subscribe({type: "dialog-close", id : "dialog-valtuutus"}, function() {
+  hub.subscribe({type: "dialog-close", id: "dialog-valtuutus"}, function() {
     inviteModel.reset();
   });
 
@@ -690,12 +694,67 @@
   hub.onPageChange("application", _.partial(initPage, "application"));
   hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment", "statement"], function(application, applicationDetails) {
+  repository.loaded(["application","inforequest","attachment","statement","neighbors"], function(application, applicationDetails) {
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
   });
 
+  var neighborActions = {
+    manage: function(application) {
+      window.location.hash = "!/neighbors/" + application.id();
+      return false;
+    },
+    upload: function(neighbor) { /* TODO: */ },
+    markDone: function(neighbor) {
+      ajax
+        .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
+        .complete(_.partial(repository.load, currentId, util.nop))
+        .call();
+    }
+  };
+
+  function SendNeighborEmailModel() {
+    var self = this;
+    
+    self.id = ko.observable();
+    self.neighborId = ko.observable();
+    self.propertyId = ko.observable();
+    self.name = ko.observable();
+    self.email = ko.observable();
+    self.message = ko.observable();
+    
+    self.ok = ko.computed(function() {
+      return util.isValidEmailAddress(self.email()) && !_.isBlank(self.message());
+    });
+    
+    self.open = function(neighbor) {
+      self
+        .id(application.id())
+        .neighborId(neighbor.neighborId())
+        .propertyId(neighbor.neighbor.propertyId())
+        .name(neighbor.neighbor.owner.name())
+        .email(neighbor.neighbor.owner.email())
+        .message("");
+      LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
+    };
+
+    var paramNames = ["id", "neighborId", "propertyId", "name", "email", "message"];
+    function paramValue(paramName) { return self[paramName](); }
+
+    self.send = function() {
+      ajax
+        .command("neighbor-send-invite", _.zipObject(paramNames, _.map(paramNames, paramValue)))
+        .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending")))
+        .complete(LUPAPISTE.ModalDialog.close)
+        .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
+        .call();
+      return false;
+    };
+  }
+  
+  var sendNeighborEmailModel = new SendNeighborEmailModel();
+  
   $(function() {
     applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
     inforequestMap = gis.makeMap("inforequest-map", false).center([{x: 404168, y: 6693765}], 12);
@@ -717,7 +776,9 @@
       requestForStatementModel: requestForStatementModel,
       verdictModel: verdictModel,
       stampModel: stampModel,
-      changeLocationModel: changeLocationModel
+      changeLocationModel: changeLocationModel,
+      neighbor: neighborActions,
+      sendNeighborEmailModel: sendNeighborEmailModel
     };
 
     $("#application").applyBindings(bindings);
