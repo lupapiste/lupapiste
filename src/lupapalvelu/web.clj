@@ -355,7 +355,6 @@
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (println "PROXY:" srv)
   (if @env/proxy-off
     {:status 503}
     ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
