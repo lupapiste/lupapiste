@@ -29,7 +29,7 @@
 (defn draw-text [g text x y]
   (.draw text g x y))
 
-(defn make-stamp [verdict created username municipality]
+(defn make-stamp [verdict created username municipality transparency]
   (let [font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (map (fn [text] (TextLayout. text font frc))
@@ -42,7 +42,7 @@
         height (int (+ 110 45))
         i (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)]
     (doto (.createGraphics i)
-      (.setColor (Color. 0 0 0 0))
+      (.setColor (Color. 255 255 255 (- 255 transparency)))
       (.fillRect 0 0 width height)
       (.drawImage (qrcode "http://lupapiste.fi" 70) (- width 70) (int 5) nil)
       (.translate 0 70)
@@ -130,66 +130,13 @@
 ;;
 
 (comment
-
-  (defn- stamp-test-image []
-    (with-open [in (io/input-stream "/Volumes/HD2/Users/jarppe/Downloads/in.png")
-                out (io/output-stream "/Volumes/HD2/Users/jarppe/Downloads/out.png")]
-      (try
-        (stamp-image (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") "image/png" in out 10 85)
-        (catch Exception e
-          (println "Oh shit!")
-          (.printStackTrace e)))))
-  
-  (doseq [v [#'make-stamp #'stamp-image #'add-stamp #'stamp-test-image]]
-    (add-watch v :test-stamp (fn [_ _ _ _] (stamp-test-image))))
-  
-  (doseq [v [#'make-stamp #'stamp-image #'add-stamp #'stamp-test-image]]
-    (remove-watch v :test-stamp))
-  
-  (defn- stamp-test-pdf []
-    (with-open [in (io/input-stream "/Volumes/HD2/Users/jarppe/Downloads/in.pdf")
-                out (io/output-stream "/Volumes/HD2/Users/jarppe/Downloads/out.pdf")]
-      (try
-        (stamp-pdf (make-stamp "FOZZAA" (System/currentTimeMillis) "Jarppe" "Ikuri") in out 10 85)
-        (catch Exception e
-          (println "Oh shit!")
-          (.printStackTrace e)))))
-  
-  (doseq [v [#'make-stamp #'stamp-pdf #'stamp-test-pdf]]
-    (add-watch v :test-stamp (fn [_ _ _ _] (stamp-test-pdf))))
-  
-  (doseq [v [#'make-stamp #'stamp-pdf #'stamp-test-pdf]]
-    (remove-watch v :test-stamp))
-  
-  (defn- lorem-line [c]
-    (let [sb (StringBuilder.)]
-      (while (< (.length sb) c)
-        (.append sb (rand-nth ["lorem" "ipsum" "dolor" "sit" "amet" "consectetur" "adipisicing" "elit" "sed" "do" "eiusmod" "tempor" "incididunt" "ut" "labore" "et" "dolore" "magna" "aliqua"]))
-        (.append sb \space))
-      (str sb)))
-  
-  (defn lorem-ipsum [g w h]
-    (.setFont g (Font. Font/SERIF Font/PLAIN 18))
-    (let [fm (.getFontMetrics g)
-          cw (.stringWidth fm "l")
-          ch (+ (.getAscent fm) (.getDescent fm))]
-      (doseq [[y text] (map vector (range ch h ch) (repeatedly (partial lorem-line (int (/ w cw)))))]
-        (.drawString g text cw y))))
   
   (defn- paint-component [g w h]
-    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "Veikko Viranomainen" "SIPOO")
+    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "Veikko Viranomainen" "SIPOO" 255)
           iw (.getWidth i)
           ih (.getHeight i)]
-      #_(doto g
-          (.setColor Color/GRAY)
-          (.fillRect 0 0 (int (/ w 2)) (int (/ h 2)))
-          (.setColor Color/WHITE)
-          (.fillRect (int (/ w 2)) 0 w (int (/ h 2)))
-          (.setColor Color/RED)
-          (.fillRect 0 (int (/ h 2)) (int (/ w 2)) h)
-          (.setColor Color/BLACK)
-          (.fillRect (int (/ w 2)) (int (/ h 2)) w h))
-      #_(lorem-ipsum g w h)
+      (.setColor g Color/GRAY)
+      (.fillRect g 0 0 w h)
       (.drawImage g i (int (/ (- w iw) 2)) (int (/ (- h ih) 2)) nil)))
   
   (defn make-frame []

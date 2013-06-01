@@ -523,12 +523,13 @@
        (mongo/by-id :organizations <> [:name])
        (loc-organization-name <>)))
 
-(defn- stamp-attachments [file-infos application-id job-id user created x-margin y-margin]
+(defn- stamp-attachments [file-infos application-id job-id user created x-margin y-margin transparency]
   (let [stamp (stamper/make-stamp
                 (i18n/loc "stamp.verdict")
                 created
                 (str (:firstName user) \space (:lastName user))
-                (get-organization-name application-id))]
+                (get-organization-name application-id)
+                transparency)]
     (doseq [file-info (vals file-infos)]
       (job/update job-id assoc-in [(:id file-info) :status] :working)
       (try
@@ -541,11 +542,11 @@
 (defn- key-by [f coll]
   (into {} (for [e coll] [(f e) e])))
 
-(defn- make-stamp-job [file-infos application-id user created x-margin y-margin]
+(defn- make-stamp-job [file-infos application-id user created x-margin y-margin transparency]
   (let [job (job/start file-infos stamp-job-status)
         job-id (:id job)]
     (future
-      (stamp-attachments file-infos application-id job-id user created x-margin y-margin))
+      (stamp-attachments file-infos application-id job-id user created x-margin y-margin transparency))
     job))
 
 (defn ->long [v]
@@ -556,14 +557,14 @@
    :roles      [:authority]
    :states     [:verdictGiven]
    :description "Stamps all attachments of given application"}
-  [{{x-margin :xMargin y-margin :yMargin} :data :as command}]
+  [{{x-margin :xMargin y-margin :yMargin transparency :transparency :or {transparency 0}} :data :as command}]
   (with-application command
     (fn [application]
       (let [file-infos (key-by :id (map ->file-info (filter stampable? (:attachments application))))
             file-count (count file-infos)]
         (ok :count file-count
             :job (when-not (zero? file-count)
-                   (make-stamp-job file-infos (:id application) (:user command) (:created command) (->long x-margin) (->long y-margin))))))))
+                   (make-stamp-job file-infos (:id application) (:user command) (:created command) (->long x-margin) (->long y-margin) (->long transparency))))))))
 
 (defquery "stamp-attachments-job"
   {:parameters [:job-id :version]
