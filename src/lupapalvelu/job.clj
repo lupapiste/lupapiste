@@ -42,9 +42,9 @@
     (let [old-job (find-job id)
           new-value (apply f (cons (:value old-job) args))
           new-job (assoc old-job :version (inc (:version old-job))
-                                 :value new-value
-                                 :status ((:status-fn old-job) new-value)
-                                 :next (promise))]
+                         :value new-value
+                         :status ((:status-fn old-job) new-value)
+                         :next (promise))]
       (alter jobs assoc id new-job)
       (send deliverer job-changed old-job new-job)
       (:version new-job))))
@@ -59,5 +59,4 @@
   (let [v (deref (get-update-promise id version) timeout :timeout)]
     (if (= v :timeout)
       {:result :timeout}
-      {:result :update
-       :job (trim v)})))
+      {:result :update :job (trim v)})))
