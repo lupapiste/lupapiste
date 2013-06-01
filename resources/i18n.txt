@@ -153,9 +153,9 @@ stamp.none: poista
 stamp.comment: Leimattu
 stamp.comment.restamp: Uudelleen leimattu
 
-stamp.transparency: Taustan läpinäkyvyys
+stamp.transparency: Leiman tausta
 stamp.transparency.0: 0% (valkoinen tausta)
-stamp.transparency.64: 25%
-stamp.transparency.128: 50% (läpikuultava)
-stamp.transparency.192: 75%
-stamp.transparency.255: 100% (läpinäkyvä)
+stamp.transparency.25: 25%
+stamp.transparency.50: 50% (läpikuultava)
+stamp.transparency.75: 75%
+stamp.transparency.100: 100% (läpinäkyvä)
