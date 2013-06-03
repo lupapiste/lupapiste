@@ -186,6 +186,9 @@
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
 
+(defn approve [document path value]
+  (apply-update document (conj path :_approved) value))
+
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]

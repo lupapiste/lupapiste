@@ -239,6 +239,30 @@
     (-> document
       (apply-update [:yritys :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:warn "illegal-value:required"])))
 
+
+(def approvable-schema {:info {:name "approval-model" :version 1 :appovable true}
+                        :body [{:name "s" :type :string}]})
+
+(facts "approve whole document"
+  (let [document (new-document approvable-schema ..now..)
+        approved (approve document [] ..status..)]
+    (get-in approved [:data :_approved :value]) => ..status..
+    approved => valid?))
+
+(def schema-with-approvals {:info {:name "approval-model" :version 1}
+                            :body [{:name "single" :type :string :appovable true}
+                                   {:name "repeats" :type :group :repeating true :appovable true
+                                    :body [{:name "single2" :type :string}]}]})
+
+(facts "approve document part"
+  (let [document (new-document schema-with-approvals ..now..)
+        approved-single (approve document [:single] ..status..)
+        approved-rep (approve document [:repeats :1] ..status..)]
+    (get-in approved-single [:data :single :_approved :value]) => ..status..
+    approved-single => valid?
+    (get-in approved-rep [:data :repeats :1 :_approved :value]) => ..status..
+    approved-rep => valid?))
+
 ;;
 ;; Updates
 ;;
