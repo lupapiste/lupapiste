@@ -12,14 +12,10 @@
 
   function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
 
-  var transparencies = _.map([0,64,128,192,255], function(t) {
-    return {text: loc("stamp.transparency", t.toString()), value: t};
-  });
-  
   var transparencies = _.map([0,25,50,75,100], function(v) {
     return {text: loc("stamp.transparency", v.toString()), value: Math.round(255 * v / 100.0)};
   });
-  
+
   var stampModel = new function() {
     var self = this;
 
@@ -45,12 +41,12 @@
     self.yMarginOk = ko.computed(function() { return isNum(self.yMargin()); });
     self.transparency = ko.observable();
     self.transparencies = transparencies;
-    
+
     function stampableAttachment(a) {
       var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
-      return ct == "application/pdf" || ct.search(/^image\//) == 0;
+      return ct === "application/pdf" || ct.search(/^image\//) === 0;
     }
-    
+
     function normalizeAttachment(a) {
       var versions = _(a.versions()).reverse().value(),
           restamp = versions[0].stamped(),
@@ -67,17 +63,17 @@
         restamp:      restamp
       };
     }
-    
+
     self.init = function(application) {
       self.application = application;
-      
+
       self
         .files(_(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value())
         .status(self.files().length > 0 ? self.statusReady : self.statusNoFiles)
         .xMargin("10")
         .yMargin("85")
         .transparency(self.transparencies[0]);
-      
+
       LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
       return self;
     };
@@ -90,7 +86,8 @@
           files: _.map(self.selectedFiles(), "id"),
           xMargin: _.parseInt(self.xMargin(), 10),
           yMargin: _.parseInt(self.yMargin(), 10),
-          transparency: self.transparency().value})
+          transparency: self.transparency().value
+        })
         .success(self.started)
         .call();
       return false;
@@ -116,18 +113,18 @@
     self.update = function(data) {
       if (data.result === "update") {
         var update = data.job;
-        
+
         self.jobVersion = update.version;
         _.each(update.value, function (newStatus, fileId) {
           _(self.files()).filter({id: fileId}).each(function(f) { f.status(newStatus); });
         });
-       
+
         if (update.status === "done") {
           repository.load(self.application.id());
           return self.status(self.statusDone);
         }
       }
-        
+
       return self.queryUpdate();
     };
 
@@ -328,7 +325,7 @@
       return false;
     };
   }();
-  
+
 
   var application = {};
   application = {
@@ -350,7 +347,7 @@
     applicant: ko.observable(),
     assignee: ko.observable(),
     neighbors: ko.observable(),
-    
+
     attachmentsRequiringAction: ko.observable(),
     unseenStatements: ko.observable(),
     unseenVerdicts: ko.observable(),
@@ -635,7 +632,7 @@
 
       isInitializing = false;
       pageutil.hideAjaxWait();
-      
+
     });
   }
 
@@ -755,18 +752,18 @@
 
   function SendNeighborEmailModel() {
     var self = this;
-    
+
     self.id = ko.observable();
     self.neighborId = ko.observable();
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
     self.message = ko.observable();
-    
+
     self.ok = ko.computed(function() {
       return util.isValidEmailAddress(self.email()) && !_.isBlank(self.message());
     });
-    
+
     self.open = function(neighbor) {
       self
         .id(application.id())
@@ -791,9 +788,9 @@
       return false;
     };
   }
-  
+
   var sendNeighborEmailModel = new SendNeighborEmailModel();
-  
+
   $(function() {
     applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
     inforequestMap = gis.makeMap("inforequest-map", false).center([{x: 404168, y: 6693765}], 12);
