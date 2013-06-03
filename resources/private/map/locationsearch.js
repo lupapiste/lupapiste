@@ -1,3 +1,4 @@
+// FIXME: SELF
 var locationSearch = (function() {
 
   var serchPointByAddress = function(requestContext, address, onSuccess, onFail) {
