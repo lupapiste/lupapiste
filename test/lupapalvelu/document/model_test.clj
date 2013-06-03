@@ -245,8 +245,8 @@
 
 (facts "approve whole document"
   (let [document (new-document approvable-schema ..now..)
-        approved (approve document [] "rejected")]
-    (get-in approved [:data :_approved :value]) => "rejected"
+        approved (approve document [] "rejected" {:id ..id..} ..now..)]
+    (get-in approved [:meta :_approved :value]) => "rejected"
     approved => valid?))
 
 (def schema-with-approvals {:info {:name "approval-model" :version 1}
@@ -256,11 +256,11 @@
 
 (facts "approve document part"
   (let [document (new-document schema-with-approvals ..now..)
-        approved-single (approve document [:single] "rejected")
-        approved-rep (approve document [:repeats :1] "rejected")]
-    (get-in approved-single [:data :single :_approved :value]) => "rejected"
+        approved-single (approve document [:single] "rejected" {:id ..id..} ..now..)
+        approved-rep (approve document [:repeats :1] "rejected" {:id ..id..} ..now..)]
+    (get-in approved-single [:meta :single :_approved :value]) => "rejected"
     approved-single => valid?
-    (get-in approved-rep [:data :repeats :1 :_approved :value]) => "rejected"
+    (get-in approved-rep [:meta :repeats :1 :_approved :value]) => "rejected"
     approved-rep => valid?))
 
 ;;

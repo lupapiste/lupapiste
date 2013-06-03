@@ -186,8 +186,10 @@
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
 
-(defn approve [document path value]
-  (apply-update document (conj path :_approved) value))
+(defn approve [document path value user when]
+  (assoc-in document (flatten [:meta path :_approved]) {:value value
+                                                        :user-id (:id user)
+                                                        :timestamp when}))
 
 (defn new-document
   "Creates an empty document out of schema"
