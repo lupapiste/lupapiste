@@ -7,12 +7,15 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (facts "count-unseen-comment"
+  (count-unseen-comment nil nil) => 0
+  (count-unseen-comment {} {}) => 0
   (count-unseen-comment {:id "user1"} {:comments [{:created 10 :text "a" :user {:id "user2"}}]}) => 1
   (count-unseen-comment {:id ..id..} {:comments [{:created 10 :text "a" :user {:id ..id..}}]}) => 0
   (count-unseen-comment {:id "user1"} {:comments [{:created 0 :text "a" :user {:id "user2"}}]}) => 0
   (count-unseen-comment {:id "user1"} {:comments [{:created 10 :text "" :user {:id "user2"}}]}) => 0)
 
 (facts "count-unseen-statements"
+  (count-unseen-statements nil nil) => 0
   (count-unseen-statements {} {}) => 0
   (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements []}) => 0
   (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{}]}) => 0
@@ -23,7 +26,21 @@
   (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 1 :person {:email "PERSON1@example.com"}}]}) => 0
   (count-unseen-statements {:id "user1" :email "person1@example.com"} {:statements [{:given 1 :person {:email "person2@example.com"}}] :_statements-seen-by {:user1 1}}) => 0)
 
+(facts "count-unseen-verdicts"
+  (count-unseen-verdicts nil nil) => 0
+  (count-unseen-verdicts {} {}) => 0
+  (count-unseen-verdicts {} {:verdict [{}]}) => 0
+  (count-unseen-verdicts {:role "applicant"} {:verdict [{}]}) => 0
+  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 1}]}) => 1
+  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 1} {:timestamp 2}]}) => 2
+  (count-unseen-verdicts {:role "applicant"} {:verdict [{:timestamp 0}]}) => 0
+  (count-unseen-verdicts {:role "authority"} {:verdict [{:timestamp 0}]}) => 0
+  (count-unseen-verdicts {:role "authority"} {:verdict [{:timestamp 1}]}) => 0
+  (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdict [{:timestamp 1}] :_verdicts-seen-by {:user1 1}}) => 0)
+
 (facts "count-attachments-requiring-action"
+  (count-attachments-requiring-action nil nil) => 0
+  (count-attachments-requiring-action {} {}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action"}]}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions []}]}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 1
@@ -38,6 +55,15 @@
   (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0)
+
+(facts "indicator-sum"
+  (indicator-sum nil nil) => 0
+  (indicator-sum {} {}) => 0
+  (indicator-sum nil {:unseenStatements 1}) => 1
+  (indicator-sum nil {:unseenVerdicts 1}) => 1
+  (indicator-sum nil {:attachmentsRequiringAction 1}) => 1
+  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5}) => 9
+  (indicator-sum nil {:unseenStatements 1 :unseenVerdicts 3 :attachmentsRequiringAction 5 :unseenComments 7}) => 9)
 
 (facts "sorting parameter parsing"
   (make-sort {:iSortCol_0 0 :sSortDir_0 "asc"})  => {:infoRequest 1}

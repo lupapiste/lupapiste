@@ -13,7 +13,7 @@ var ajax = (function() {
       }
       self.completeHandler(jqXHR, textStatus);
     };
-    
+
     self.callId = callId++;
     self.request = {
       url:       url,
@@ -119,7 +119,7 @@ var ajax = (function() {
       self.pendingListener(false);
       return self;
     };
-    
+
     self.call = function() {
       if (self.pendingListener) {
         self.pendingHandler = setTimeout(_.partial(self.pendingListener, true), self.pendingTimeout);

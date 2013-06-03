@@ -80,7 +80,7 @@
     (when-let [in (io/resource "i18n.txt")]
       (with-open [in (io/reader in)]
         (reduce (fn [m line]
-                  (if-let [[_ k v] (re-matches #"^(.+[^:]):\s*(.*)$" line)]
+                  (if-let [[_ k v] (re-matches #"^([^:]+):\s*(.*)$" line)]
                     (assoc m (s/trim k) (s/trim v))
                     m))
                 {}

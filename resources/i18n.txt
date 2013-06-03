@@ -1,3 +1,65 @@
+session-dead.title: Istunto vanhentunut
+session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
+session-dead.logout: Kirjaudu
+connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
+attachmentType.empty._group_label:
+
+application.filter.search: etsi:
+
+neighbors.add: Lisää naapuri
+neighbors.propertyId: Kiinteistötunnus
+neighbors.owner: Omistaja
+neighbors.owner.name: Nimi
+neighbors.owner.name.placeholder: nimi
+neighbors.owner.email: Sähköpostiosoite
+neighbors.owner.email.placeholder: email
+neighbors.owner.address: Osoite
+neighbors.owner.address.street: Katu
+neighbors.owner.address.street.placeholder: katu
+neighbors.owner.address.zip: Postinumero:
+neighbors.owner.address.zip.placeholder: postinumero
+neighbors.owner.address.city: Postitoimipaikka
+neighbors.owner.address.city.placeholder: postitoimipaikka
+neighbors.done: Palaa hakemukseen
+
+neighbors.status: Tila
+
+neighbor.state.open: Avoin
+neighbor.state.mark-done: Merkitty kuulluksi
+neighbor.state.email-sent: Sähköposti lähetetty
+
+neighbors.actions: Toiminnot
+neighbors.actions.edit: muokkaa
+neighbors.actions.remove: poista
+neighbors.actions.sendEmail: Lähetä sähköposti kutsu
+neighbors.actions.upload: Lisää skannattu lausunto
+neighbors.actions.markDone: Merkitse kuulluksi
+
+neighbors.sendEmail.title: Kutsu naapuri
+neighbors.sendEmail.name: Naapurin nimi:
+neighbors.sendEmail.email: Sähköpostiosoite:
+neighbors.sendEmail.email.placeholder: matti.meikalainen@osoite.fi
+neighbors.sendEmail.message: Viesti:
+neighbors.sendEmail.message.placeholder: Viestisi naapurille
+neighbors.sendEmail.ok: Lähetä
+neighbors.sendEmail.cancel: Peruuta
+neighbors.sendEmail.sending: Sähköpostia lähetetään
+neighbors.sendEmail.reloading: Päivitetään tilaa
+neighbors.manage: Hallitse naapureita
+
+neighbors.edit.title: Naapurin tiedot:
+neighbors.edit.propertyId: Kiinteistötunnus
+neighbors.edit.propertyId.placeholder: kiinteistötunnus 
+neighbors.edit.name: Nimi
+neighbors.edit.ok: Tallenna
+neighbors.edit.cancel: Peruuta
+neighbors.edit.status.0: Odota
+neighbors.edit.status.1: Etsitään tietoja
+neighbors.edit.status.2: Naapurin tiedot
+neighbors.edit.status.3: Tietoja ei löydy
+
+neighbor.show.welcome: Tervetuloa tutustumaan naapurisi haknkkeeseen.
+
 operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
 rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
 rakennushanke.kaytettykerrosala._append_label: Lisää olemassaolevaa
@@ -56,3 +118,44 @@ poikkeuslupa._group_label: Poikkeamishakemuksen lisäosa
 poikkeamishakemuksen-lisaosa.perustelut: Perustelut
 poikkeamishakemuksen-lisaosa.vaikutukset: Vaikutukset
 poikkeamishakemuksen-lisaosa.lisätiedot: Lisätiedot
+
+attachment.delete.version.header: Poista liitetiedosto
+
+#
+# Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
+#
+
+stamp.status.0: Odota...
+stamp.status.1: Valmiina leimaamaan liiteet
+stamp.status.2: Leimaus käynnistyy...
+stamp.status.3: Leimaus käynnissä...
+stamp.status.4: Leimaus valmis
+stamp.status.5: Ei leimaus kelpoisia liitteitä
+
+stamp.filename: Tiedosto
+stamp.version: Versio
+stamp.size: Koko
+stamp.select: Leimaa
+stamp.status: Tila
+
+stamp.start: Aloita
+stamp.cancel: Peruuta
+stamp.ok: Ok
+
+stamp.file.status.pending: Odottaa
+stamp.file.status.working: Leimaa
+stamp.file.status.done: Valmis
+stamp.file.status.error: Virhe
+
+stamp.all: kaikki
+stamp.none: poista
+
+stamp.comment: Leimattu
+stamp.comment.restamp: Uudelleen leimattu
+
+stamp.transparency: Leiman tausta
+stamp.transparency.0: 0% (valkoinen tausta)
+stamp.transparency.25: 25%
+stamp.transparency.50: 50% (läpikuultava)
+stamp.transparency.75: 75%
+stamp.transparency.100: 100% (läpinäkyvä)
