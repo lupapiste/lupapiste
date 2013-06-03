@@ -103,7 +103,7 @@
     };
 
     self.canDeleteAttachment = function(attachment) {
-      return authorizationModel.ok("delete-attachment") && (!attachment.authority || user.isAuthority());
+      return authorizationModel.ok("delete-attachment") && (!attachment.authority || currentUser.isAuthority());
     };
 
     self.canAddAttachment = function() {
@@ -117,7 +117,7 @@
 
     self.newAttachment = function() {
       // created file is authority-file if created by authority
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, user.isAuthority());
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, currentUser.isAuthority());
     };
   }
 
