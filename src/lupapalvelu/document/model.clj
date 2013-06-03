@@ -191,6 +191,16 @@
                                                         :user-id (:id user)
                                                         :timestamp when}))
 
+(defn approvable?
+  ([document] (approvable? document nil))
+  ([document path]
+  (if (seq path)
+    (let [schema-body (get-in document [:schema :body])
+          str-path    (map #(if (keyword? %) (name %) %) path)
+          element     (keywordize-keys (find-by-name schema-body str-path))]
+      (true? (:approvable element)))
+    (true? (get-in document [:schema :info :approvable])))))
+
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]

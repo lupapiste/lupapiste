@@ -240,26 +240,35 @@
       (apply-update [:yritys :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:warn "illegal-value:required"])))
 
 
-(def approvable-schema {:info {:name "approval-model" :version 1 :appovable true}
+(def approvable-schema {:info {:name "approval-model" :version 1 :approvable true}
                         :body [{:name "s" :type :string}]})
 
 (facts "approve whole document"
   (let [document (new-document approvable-schema ..now..)
         approved (approve document [] "rejected" {:id ..id..} ..now..)]
+    (approvable? document []) => true
     (get-in approved [:meta :_approved :value]) => "rejected"
     approved => valid?))
 
+(facts "non-approvable schema"
+  (approvable? (new-document schema ..now..)) => false)
+
 (def schema-with-approvals {:info {:name "approval-model" :version 1}
-                            :body [{:name "single" :type :string :appovable true}
-                                   {:name "repeats" :type :group :repeating true :appovable true
-                                    :body [{:name "single2" :type :string}]}]})
+                            :body [{:name "single" :type :string :approvable true}
+                                   {:name "single2" :type :string}
+                                   {:name "repeats" :type :group :repeating true :approvable true
+                                    :body [{:name "single3" :type :string}]}]})
 
 (facts "approve document part"
   (let [document (new-document schema-with-approvals ..now..)
         approved-single (approve document [:single] "rejected" {:id ..id..} ..now..)
         approved-rep (approve document [:repeats :1] "rejected" {:id ..id..} ..now..)]
+    (approvable? document [:single]) => true
+    (approvable? document [:single2]) => false
     (get-in approved-single [:meta :single :_approved :value]) => "rejected"
     approved-single => valid?
+    (approvable? document [:repeats :1]) => true
+    (approvable? document [:repeats :0 :single3]) => false
     (get-in approved-rep [:meta :repeats :1 :_approved :value]) => "rejected"
     approved-rep => valid?))
 
