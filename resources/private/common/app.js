@@ -1,12 +1,8 @@
-/**
- * Prototype for Lupapiste Single Page Apps
- */
-
-if (typeof LUPAPISTE === "undefined") {
-  var LUPAPISTE = {};
-}
+var LUPAPISTE = LUPAPISTE || {};
 
 /**
+ * Prototype for Lupapiste Single Page Apps.
+ *
  * @param {String} startPage   ID of the landing page
  * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
  */
@@ -19,82 +15,6 @@ if (typeof LUPAPISTE === "undefined") {
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
-
-  self.createLogo = function () {
-    var href = "#!/" + self.startPage;
-    var link$ = $("<a class='brand' href='" + href + "'></a>");
-    link$.append("<img src='/img/logo.png' alt='Lupapiste.fi' width='251' height='24''>");
-
-    var naviLinks$ = $("<span>").attr("id", "navi-right");
-    _.each(loc.getSupportedLanguages(), function (lang) {
-      if (lang !== loc.getCurrentLanguage()) {
-        naviLinks$.append(
-            $('<a>')
-            .attr("data-test-id", "lang-" + lang).attr("href", "#")
-            .text(loc("in_" + lang) + " >>")
-            .click(function (e) {
-              hub.send("change-lang", { lang: lang });
-              e.preventDefault();
-            }));
-      }
-    });
-    link$.append(naviLinks$);
-    return link$;
-  };
-
-  self.createConnectionErrorContainer = function () {
-    var span$ = $("<span class='connection-error' style='display: none;'></span>");
-    return span$.text(loc("connection-error"));
-  };
-
-  self.createUserMenu = function () {
-    var userMenu$ = $("<div class='user-menu'><a href='#!/mypage'><span id='user-name'></span></a>");
-    if (!self.allowAnonymous) {
-      userMenu$.append(" ");
-      userMenu$.append($("<a>")
-        .attr("href", "/app/" + loc.getCurrentLanguage() + "/logout")
-        .text(loc("logout")));
-    }
-    return userMenu$;
-  };
-
-  self.createNaviLinks = function () {
-    var icon$ = $('<span>').attr("class", "icon document-white");
-    var navi$ = $('<span>').attr("href", "#").text(loc('navigation'));
-    var naviBox$ = $('<a>').attr("class", "main-nav").attr("href", "#");
-    naviBox$.append(icon$);
-    naviBox$.append(navi$);
-    return naviBox$;
-  };
-
-  /**
-  * Complete the App initialization after DOM is loaded.
-  */
-  self.domReady = function () {
-    $(window)
-      .hashchange(self.hashChanged)
-      .hashchange()
-      .unload(self.unload);
-
-    self.connectionCheck();
-
-    if (typeof LUPAPISTE.ModalDialog !== "undefined") {
-      LUPAPISTE.ModalDialog.init();
-    }
-
-    $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
-
-    var navWrapper = $("<div class='nav-wrapper'></div>");
-    navWrapper.append(self.createLogo()).append(self.createConnectionErrorContainer());
-    if (!self.allowAnonymous) {
-      navWrapper.append(self.createUserMenu());
-      navWrapper.append(self.createNaviLinks());
-    }
-    $("nav").append(navWrapper);
-  };
-  $(self.domReady);
-
-  hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
 
   /**
   * Window unload event handler
@@ -147,6 +67,7 @@ if (typeof LUPAPISTE === "undefined") {
       ajax.query("user")
         .success(function (e) {
           self.session = true;
+          currentUser.set(e.user);
           hub.send("login", e);
           self.hashChanged();
         })
@@ -162,30 +83,102 @@ if (typeof LUPAPISTE === "undefined") {
   };
 
   self.connectionCheck = function () {
-    /*
-    ajax.get("/api/ping")
-    .success(function() {
-    hub.send("connection-online");
-    setTimeout(self.connectionCheck, 15000);
-    })
-    .fail(function() {
-    hub.send("connection-offline");
-    setTimeout(self.connectionCheck, 5000);
-    })
-    .call();
-    */
+    ajax.get("/api/alive").raw(false)
+      .success(function() {
+        hub.send("connection", {status: "online"});
+        setTimeout(self.connectionCheck, 10000);
+      })
+      .error(function() {
+        hub.send("connection", {status: "session-dead"});
+      })
+      .fail(function() {
+        hub.send("connection", {status: "offline"});
+        setTimeout(self.connectionCheck, 2000);
+      })
+      .call();
   };
 
-  hub.subscribe("connection-online", function () {
-    $(".connection-error").hide();
+  var offline = false;
+  var wasLoggedIn = false;
+
+  hub.subscribe("login", function() { wasLoggedIn = true; });
+
+  hub.subscribe({type: "connection", status: "online"}, function () {
+    if (offline) {
+      offline = false;
+      pageutil.hideAjaxWait();
+    }
   });
 
-  hub.subscribe("connection-offline", function () {
-    $(".connection-error").show();
+  hub.subscribe({type: "connection", status: "offline"}, function () {
+    if (!offline) {
+      offline = true;
+      pageutil.showAjaxWait(loc("connection.offline"));
+    }
   });
 
-  hub.subscribe("logout", function () {
-    window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
+  hub.subscribe({type: "connection", status: "session-dead"}, function () {
+    if (wasLoggedIn) {
+      LUPAPISTE.ModalDialog.mask.unbind("click");
+      LUPAPISTE.ModalDialog.open("#session-dead-dialog");
+    }
   });
+
+  self.initSubscribtions = function() {
+    hub.subscribe({type: "keyup", keyCode: 27}, LUPAPISTE.ModalDialog.close);
+    hub.subscribe("logout", function () {
+      window.location = "/app/" + loc.getCurrentLanguage() + "/logout";
+    });
+  };
+
+  /**
+   * Complete the App initialization after DOM is loaded.
+   */
+   self.domReady = function () {
+     self.initSubscribtions();
+
+     $(window)
+       .hashchange(self.hashChanged)
+       .hashchange()
+       .unload(self.unload);
+
+     self.connectionCheck();
+
+     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
+       LUPAPISTE.ModalDialog.init();
+     }
+
+     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
+
+     var model = {
+       languages: loc.getSupportedLanguages(),
+       currentLanguage: loc.getCurrentLanguage(),
+       changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
+       startPage: self.startPage,
+       allowAnonymous: self.allowAnonymous
+     };
+
+     $("nav").applyBindings(model);
+
+     function showApplicationList() {
+       pageutil.hideAjaxWait();
+       window.location.hash = "!/applications";
+     }
+
+     $("<div id='session-dead-dialog' class='window autosized-yes-no'>" +
+         "<div class='dialog-header'>" +
+           "<p class='dialog-title'></p>" +
+         "</div>" +
+         "<div class='dialog-content'>" +
+           "<p></p>" +
+           "<button class='btn btn-primary btn-dialog logout'></button>" +
+         "</div>" +
+       "</div>")
+       .find(".dialog-title").text(loc("session-dead.title")).end()
+       .find(".dialog-content p").text(loc("session-dead.message")).end()
+       .find(".dialog-content button").text(loc("session-dead.logout")).end()
+       .find(".logout").click(function() { hub.send("logout"); return false; }).end()
+       .appendTo($("body"));
+   };
 
 };

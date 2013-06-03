@@ -8,11 +8,12 @@
 
 (apply-remote-minimal)
 
-(fact "can't inject js in 'x' or 'y' params"
+#_(fact "can't inject js in 'x' or 'y' params"
   (create-app pena :x ";alert(\"foo\");" :y "what ever") => not-ok?
   (create-app pena :x "0.1x" :y "1.0")                   => not-ok?
   (create-app pena :x "1x2" :y "1.0")                    => not-ok?
-  (create-app pena :x "2" :y "1.0")                      => ok?)
+  (create-app pena :x "2" :y "1.0")                      => not-ok?
+  (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
 
 (fact "creating application without message"
   (let [resp  (create-app pena)
@@ -22,7 +23,7 @@
     app => (contains {:id id
                       :state "draft"
                       :location {:x 444444.0 :y 6666666.0}
-                      :municipality "753"})
+                      :organization "753-R"})
     (count (:comments app)) => 0
     (first (:auth app)) => (contains
                              {:firstName "Pena"
@@ -43,12 +44,36 @@
     (-> (:comments application) first :text) => "hello"
     (-> hakija :data :henkilo :henkilotiedot) => (contains {:etunimi {:value "Pena"} :sukunimi {:value "Panaani"}})))
 
+(fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
+  (let [resp            (create-app pena :municipality "753")
+        application-id  (:id resp)
+        resp            (query pena :application :id application-id)
+        application     (:application resp)
+        hakija (domain/get-document-by-name application "hakija")]
+    (:organization application) => "753-R"))
+
+(fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
+  (let [resp            (create-app pena :municipality "837")
+        application-id  (:id resp)
+        resp            (query pena :application :id application-id)
+        application     (:application resp)
+        hakija (domain/get-document-by-name application "hakija")]
+    (:organization application) => "837-R"))
+
+(fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
+  (let [resp            (create-app pena :municipality "626")
+        application-id  (:id resp)
+        resp            (query pena :application :id application-id)
+        application     (:application resp)
+        hakija (domain/get-document-by-name application "hakija")]
+    (:organization application) => "069-R"))
+
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
   (let [created-resp (create-app pena :municipality sonja-muni)
         id (:id created-resp)]
     (success created-resp) => true
     (comment-application id pena)
-    (let [query-resp   (query sonja :authorities-in-applications-municipality :id id)]
+    (let [query-resp   (query sonja :authorities-in-applications-organization :id id)]
       (success query-resp) => true
       (count (:authorityInfo query-resp)) => 2)))
 
@@ -58,7 +83,7 @@
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
         authority-before-assignation (:authority application)
-        authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+        authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         assigned-app (:application (query sonja :application :id application-id))
@@ -80,7 +105,7 @@
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
         authority-before-assignation (:authority application)
-        authorities (:authorityInfo (query sonja :authorities-in-applications-municipality :id application-id))
+        authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
         authority (first authorities)
         resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
         resp (command sonja :assign-application :id application-id :assigneeId nil)
@@ -97,32 +122,30 @@
         app   (:application resp)]
     (first (:shapes app)) => shape))
 
+(fact "Authority is able to create an application to a municipality in own organization"
+  (let [command-resp    (create-app sonja :municipality sonja-muni)
+        application-id  (:id command-resp)]
+    (success command-resp) => true
+    (fact "Application is open"
+       (let [query-resp      (query sonja :application :id application-id)
+             application     (:application query-resp)]
+         (success query-resp)   => true
+         application => truthy
+         (:state application) => "open"
+         (:opened application) => truthy
+         (:opened application) => (:created application)))
+    (fact "Authority could submit her own application"
+       (let [resp (query sonja :allowed-actions :id application-id)]
+         (success resp) => true
+         (get-in resp [:actions :submit-application :ok]) => true))
+    (fact "Application is submitted"
+      (let [resp        (command sonja :submit-application :id application-id)
+            application (:application (query sonja :application :id application-id))]
+        (success resp) => true
+        (:state application) => "submitted"))))
 
-(fact "Authority is able to create an application to own municipality"
-      (let [command-resp    (create-app sonja :municipality sonja-muni)
-            application-id  (:id command-resp)]
-        (success command-resp) => true
-        (fact "Application is open"
-              (let [query-resp      (query sonja :application :id application-id)
-                    application     (:application query-resp)]
-                (success query-resp)   => true
-                application => truthy
-                (:state application) => "open"
-                (:opened application) => truthy
-                (:opened application) => (:created application)))
-        (fact "Authority could submit her own application"
-              (let [resp (query sonja :allowed-actions :id application-id)]
-                (success resp) => true
-                (get-in resp [:actions :submit-application :ok]) => true))
-        (fact "Application is submitted"
-              (let [resp        (command sonja :submit-application :id application-id)
-                    application (:application (query sonja :application :id application-id))]
-                (success resp) => true
-                (:state application) => "submitted"
-              ))))
-
-(fact "Authority in unable to create an application to other municipality"
-      (unauthorized (create-app sonja :municipality veikko-muni)) => true)
+(fact "Authority in unable to create an application to a municipality in another organization"
+  (unauthorized (create-app sonja :municipality veikko-muni)) => true)
 
 (facts "Add operations"
   (let [command-resp (create-app mikko :municipality veikko-muni)

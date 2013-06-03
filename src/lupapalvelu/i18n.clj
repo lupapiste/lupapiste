@@ -9,7 +9,7 @@
 (defn- add-term [row result lang]
   (let [k (get row "key")
         t (get row lang)]
-    (if (and k t (not (s/blank? t)))
+    (if (and k t (> (.length t) 0))
       (assoc-in result [lang k] (s/trim t))
       result)))
 
@@ -58,7 +58,8 @@
   loc)
 
 (defmacro with-lang [lang & body]
-  `(binding [loc (localizer ~lang)]
+  `(binding [*lang* ~lang
+             loc (localizer ~lang)]
      ~@body))
 
 (defn lang-middleware [handler]
@@ -66,8 +67,7 @@
     (let [lang (or (get-in request [:params :lang])
                    (get-in request [:user :lang])
                    "fi")]
-      (binding [*lang* lang
-                loc (localizer lang)]
+      (with-lang lang
         (handler request)))))
 
 (env/in-dev

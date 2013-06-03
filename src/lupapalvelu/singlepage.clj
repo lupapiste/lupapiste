@@ -70,7 +70,7 @@
       :page   (concat (:page  c)  (enlive/select h [:section.page])))))
 
 (defn- resource-url [component kind]
-  (str (kind (:cdn env/config)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
+  (str (kind (env/value :cdn)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
 
 (def ^:private buildinfo-summary
   (format "%s-%s %3$tF %3$tT [%4$s]"
@@ -83,7 +83,7 @@
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
                   (enlive/transform [:header] (constantly (first header)))
-                  (enlive/transform [:nav] (constantly (first nav)))
+                  (enlive/transform [:nav] (constantly (last nav)))
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (constantly (first footer)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (resource-url component :js)) e)))

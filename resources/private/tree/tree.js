@@ -60,16 +60,19 @@ var tree = (function() {
 
     self.goBack = function() {
       if (self.model.stack().length < 1) return false;
-      if (self.model.selected()) {
-        self.model.selected(null);
-        self.onSelect(null);
-      }
+
       self.stateNop();
       self.model.stack.pop();
       self.content.animate(self.moveRight, setup.speed, function() {
         self.stateGo();
         $(".tree-page", self.content).filter(":last").remove();
       });
+      
+      if (self.model.selected()) {
+        self.model.selected(null);
+        self.onSelect(null);
+      }
+
       return self;
     };
 

@@ -21,7 +21,7 @@ var loc;
 
     if (term === undefined) {
       debug("Missing localization key", key);
-      return "$$NOT_FOUND$$" + key;
+      return LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
     }
 
     return term;
@@ -38,6 +38,7 @@ var loc;
   loc.supported = [];
   loc.currentLanguage = null;
   loc.terms = {};
+  loc.defaultLanguage = "fi";
 
   loc.hasTerm = function(key) {
     return loc.terms[key] !== undefined;
@@ -47,7 +48,7 @@ var loc;
     var url = window.parent ? window.parent.location.pathname : location.pathname;
     var langEndI = url.indexOf("/", 5);
     var lang = langEndI > 0 ? url.substring(5, langEndI) : null;
-    return _.contains(loc.supported, lang) ? lang : "fi";
+    return _.contains(loc.supported, lang) ? lang : loc.defaultLanguage;
   }
 
   loc.setTerms = function(newTerms) {
@@ -72,5 +73,15 @@ var loc;
 
   loc.getCurrentLanguage = function() { return loc.currentLanguage; };
   loc.getSupportedLanguages = function() { return loc.supported; };
+  loc.getNameByCurrentLanguage = function(obj) {
+    if(obj.name) {
+      if(loc.currentLanguage in obj.name) {
+        return obj.name[loc.currentLanguage];
+      } else if(loc.defaultLanguage in obj.name) {
+        return obj.name[loc.defaultLanguage];
+      }
+    }
+    return "$$noname$$";
+  };
 
 })();

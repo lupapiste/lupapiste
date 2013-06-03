@@ -100,7 +100,7 @@ Tab should be visible
   Wait until  Element should be visible  application-${name}-tab
 
 Logout
-  Go to  ${LOGIN URL}
+  Go to  ${LOGOUT URL}
   Wait until page contains element  login-username
 
 #
@@ -250,25 +250,25 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":0,"x":0,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
+  Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Create application
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-application
   Wait Until  Element should be visible  application
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Create inforequest
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}  ${button}
-  Prepare new request  ${address}  ${municipality}  ${propertyId}  ${button}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
+  Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
   # Sleep  1
@@ -280,10 +280,10 @@ Create inforequest
   Wait Until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Prepare new request
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${button}
+  [Arguments]  ${address}  ${municipality}  ${propertyId}
   Go to page  applications
-  Click by test id  ${button}
-  Wait and click  xpath=//button[@data-test-id="create-search-button"]
+  Click by test id  applications-create-new
+  Click by test id  create-search-button
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Input text by test id  create-address  ${address}

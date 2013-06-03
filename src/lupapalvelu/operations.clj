@@ -1,11 +1,13 @@
 (ns lupapalvelu.operations
   (:use [clojure.tools.logging])
-  (:require [lupapalvelu.document.schemas :as schemas]))
+  (:require [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")
 
 (def ^:private operations-tree
-  [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" :asuinrakennus]
+  (concat [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" :asuinrakennus]
                                                                      ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
                                                                      ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
                                                                      ["Julkinen rakennus" :julkinen-rakennus]
@@ -33,7 +35,9 @@
                                   ["Tontti tai korttelialueen jarjestelymuutos" [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
                                                                   ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
-                                                                  ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]])
+                                                                  ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
+          (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
+                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -63,7 +67,8 @@
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
-                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]]
+                                 :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]];FIXME Aftre krysp update change to 000
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
    :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
@@ -81,7 +86,6 @@
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
    :laajentaminen               {:schema "rakennuksen-laajentaminen"
-                                 :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet}
    :perus-tai-kant-rak-muutos   {:schema "rakennuksen-muuttaminen"
@@ -159,8 +163,14 @@
    :kortteli-yht-alue-muutos    {:schema "maisematyo"
                                  :required  common-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :muu-tontti-tai-kort-muutos {:schema "maisematyo"
+   :muu-tontti-tai-kort-muutos  {:schema "maisematyo"
                                  :required  common-schemas
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :suunnittelutarveratkaisu    {:schema "suunnittelutarveratkaisun-lisaosa"
+                                 :required  (conj common-schemas "rakennushanke")
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
+                                 :required  (conj common-schemas "rakennushanke")
                                  :attachments [:paapiirustus [:asemapiirros]]}})
 
 
@@ -168,5 +178,5 @@
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not (schemas/schemas schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
 

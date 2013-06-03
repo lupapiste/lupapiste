@@ -19,7 +19,7 @@
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role :authority
-    :municipality "837"
+    :organizations ["837-R"]
     :firstName "Veikko"
     :lastName "Viranomainen"
     :phone "03121991"
@@ -33,7 +33,7 @@
     :email "sonja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :municipality "753"
+    :organizations ["753-R"]
     :firstName "Sonja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -47,7 +47,7 @@
     :email "ronja.sibbo@sipoo.fi"
     :enabled true
     :role :authority
-    :municipality "753"
+    :organizations ["753-R"]
     :firstName "Ronja"
     :lastName "Sibbo"
     :phone "03121991"
@@ -59,7 +59,7 @@
     :email "pekka.borga@porvoo.fi"
     :enabled true
     :role :authority
-    :municipality "638"
+    :organizations ["638-R"]
     :firstName "Pekka"
     :lastName "Borga"
     :phone "121212"
@@ -71,7 +71,7 @@
     :email "olli.uleaborg@ouka.fi"
     :enabled true
     :role :authority
-    :municipality "564"
+    :organizations ["564-R"]
     :personId "kunta564"
     :firstName "Olli"
     :lastName "Ule\u00E5borg"
@@ -85,7 +85,7 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role :authorityAdmin
-    :municipality "753"
+    :organizations ["753-R"]
     :firstName "Simo"
     :lastName "Suurvisiiri"
     :username "sipoo"
@@ -96,7 +96,7 @@
     :email "admin@naantali.fi"
     :enabled true
     :role :authorityAdmin
-    :municipality "529"
+    :organizations ["529-R"]
     :firstName "Admin"
     :lastName "Naantali"
     :username "admin@naantali.fi"
@@ -107,7 +107,7 @@
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
     :role :authority
-    :municipality "529"
+    :organizations ["529-R"]
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
     :username "rakennustarkastaja@naantali.fi"
@@ -118,7 +118,7 @@
     :email "lupasihteeri@naantali.fi"
     :enabled true
     :role :authority
-    :municipality "529"
+    :organizations ["529-R"]
     :firstName "Lupasihteeri"
     :lastName "Naantali"
     :username "lupasihteeri@naantali.fi"
@@ -129,7 +129,7 @@
     :email "admin@jarvenpaa.fi"
     :enabled true
     :role :authorityAdmin
-    :municipality "186"
+    :organizations ["186-R"]
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "admin@jarvenpaa.fi"
@@ -140,7 +140,7 @@
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
     :role :authority
-    :municipality "186"
+    :organizations ["186-R"]
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "rakennustarkastaja@jarvenpaa.fi"
@@ -151,7 +151,7 @@
     :email "lupasihteeri@jarvenpaa.fi"
     :enabled true
     :role :authority
-    :municipality "186"
+    :organizations ["186-R"]
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "lupasihteeri@jarvenpaa.fi"
@@ -214,6 +214,8 @@
    {:id  "51112424c26b7342d92acf3c"
     :enabled  false
     :username  "dummy"
+    :firstName "Duff"
+    :lastName "Dummy"
     :email  "dummy@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"
@@ -222,6 +224,8 @@
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
     :username  "dummy2"
+    :firstName "Duff"
+    :lastName "Dummy2"
     :email  "dummy2@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
@@ -229,39 +233,24 @@
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
     :username  "dummy3"
+    :firstName "Duff"
+    :lastName "Dummy3"
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy" ; pena
               :salt "$2a$10$hLCt8BvzrJScTOGQcXJ34e"}
     :role  "applicant"}
    ])
 
-(def municipalities [{:id "186"
-                      :name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
-                      :municipalityCode "186"
+(def organizations[{:id "186-R"
+                      :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
+                      :municipalities ["186"]
                       :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
                                :url "http://www.jarvenpaa.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
-                     {:id "529"
-                      :name {:fi "Naantali", :sv "N\u00E5dendahl"}
-                      :municipalityCode "529"}
-                     {:id "564"
-                      :name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                      :municipalityCode "564"
-                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                               :url "http://www.ouka.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
-                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
-                     {:id "638"
-                      :name {:fi "Porvoo", :sv "Borg\u00e5"}
-                      :municipalityCode "638"
-                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
-                               :url "http://www.porvoo.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
-                     {:id "753"
-                      :municipalityCode "753"
-                      :name {:fi "Sipoo" :sv "Sibbo"}
+                     {:id "753-R"
+                      :name {:fi "Sipoon rakennusvalvonta"}
+                      :municipalities ["753"]
                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                :url "http://sipoo.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
@@ -281,74 +270,37 @@
                                           :text "Paloviranomainen",
                                           :email "sonja.sibbo@sipoo.fi",
                                           :name "Sonja Sibbo"}]}
-                     {:id "837"
-                      :name {:fi "Tampere" :sv "Tammerfors"}
-                      :municipalityCode "837"
+                     {:id "837-R"
+                      :name {:fi "Tampereen rakennusvalvonta"}
+                      :municipalities ["837"]
                       :links [{:name {:fi "Tampere" :sv "Tammerfors"}
                                :url "http://tampere.fi"}
                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
                               {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
-                     {:id "047"
-                      :name {:fi "Enonteki\u00F6", :sv "Enontekis"}
-                      :municipalityCode "047"}
-                     {:id "078"
-                      :name {:fi "Hanko", :sv "Hang\u00F6"}
-                      :municipalityCode "078"}
-                     {:id "079"
-                      :name {:fi "Harjavalta", :sv "Harjavalta"}
-                      :municipalityCode "079"}
-                     {:id "090"
-                      :name {:fi "Hein\u00E4vesi", :sv "Hein\u00E4vesi"}
-                      :municipalityCode "090"}
-                     {:id "106"
-                      :name {:fi "Hyvink\u00E4\u00E4", :sv "Hyvinge"}
-                      :municipalityCode "106"}
-                     {:id "109"
-                      :name {:fi "H\u00E4meenlinna", :sv "Tavastehus"}
-                      :municipalityCode "109"}
-                     {:id "165"
-                      :name {:fi "Janakkala", :sv "Janakkala"}
-                      :municipalityCode "165"}
-                     {:id "205"
-                      :name {:fi "Kajaani", :sv "Kajana"}
-                      :municipalityCode "205"}
-                     {:id "244"
-                      :name {:fi "Kempele", :sv "Kempele"}
-                      :municipalityCode "244"}
-                     {:id "257"
-                      :name {:fi "Kirkkonummi", :sv "Kyrksl\u00E4tt"}
-                      :municipalityCode "257"}
-                     {:id "297"
-                      :name {:fi "Kuopio", :sv "Kuopio"}
-                      :municipalityCode "297"}
-                     {:id "491"
-                      :name {:fi "Mikkeli", :sv "St.Michel"}
-                      :municipalityCode "491"}
-                     {:id "499"
-                      :name {:fi "Mustasaari", :sv "Korsholm"}
-                      :municipalityCode "499"}
-                     {:id "535"
-                      :name {:fi "Nivala", :sv "Nivala"}
-                      :municipalityCode "535"}
-                     {:id "050"
-                      :name {:fi "Eura", :sv "Eura"}
-                      :municipalityCode "050"}
-                     {:id "319"
-                      :name {:fi "K\u00F6yli\u00F6", :sv "Kjulo"}
-                      :municipalityCode "319"}
-                     {:id "783"
-                      :name {:fi "S\u00E4kyl\u00E4", :sv "S\u00E4kyl\u00E4"}
-                      :municipalityCode "783"}
-                     {:id "732"
-                      :name {:fi "Salla", :sv "Salla"}
-                      :municipalityCode "732"}
-                     {:id "734"
-                      :name {:fi "Salo", :sv "Salo"}
-                      :municipalityCode "734"}])
+                     {:id "638-R"
+                      :name {:fi "Porvoon rakennusvalvonta"}
+                      :municipalities ["638"]
+                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
+                               :url "http://www.porvoo.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                     {:id "564-R"
+                      :name {:fi "Oulun rakennusvalvonta"}
+                      :municipalities ["564"]
+                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                               :url "http://www.ouka.fi"}
+                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
+                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
+                     {:id "529-R"
+                      :name {:fi "Naantalin rakennusvalvonta"}
+                      :municipalities ["529"]}
+                     {:id "069-R"
+                      :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne "}
+                      :municipalities ["069","317","626","691"]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)
   (dorun (map (partial mongo/insert :users) users))
-  (dorun (map (partial mongo/insert :municipalities) municipalities)))
+  (dorun (map (partial mongo/insert :organizations) organizations)))

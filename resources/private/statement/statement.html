@@ -24,6 +24,7 @@
               <tr>
                 <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                <th data-bind="ltext: 'attachment.actions'">Toiminnot</th>
                 <th></th>
               </tr>
             </thead>
@@ -40,6 +41,7 @@
                 </td>
                 <td>
                 </td>
+                <td><a data-bind="ltext: 'remove', click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id), visible: $root.attachmentsModel.canDeleteAttachment($parent),  enable: $root.attachmentsModel.canDeleteAttachment($parent)" ></a></td>
               </tr>
             </tbody>
           </table>
@@ -51,7 +53,7 @@
 
         <button
           class="btn modal"
-          data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: newAttachment"
+          data-bind="ltext: 'application.attachmentsAdd', visible: canAddAttachment(), enabled: canAddAttachment(), click: newAttachment"
           data-test-id="add-inforequest-attachment"
           data-window-id="upload-dialog">
         </button>
@@ -76,7 +78,7 @@
         </div>
         <label class="form-label" for="attachment.commentText" data-bind="ltext: 'statement.text'"></label>
         <textarea
-          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-statement')"
+          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', readonly: !$root.authorization.ok('give-statement')"
           id="statement-text"
           rows="20"></textarea>
         <button
@@ -86,6 +88,7 @@
           class="btn btn-primary">
           Jätä lausunto
         </button>
+        <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
       </form>
     </div>
   </section>

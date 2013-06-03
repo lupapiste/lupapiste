@@ -49,3 +49,20 @@
     (if checker
       (checker coll)
       false)))
+
+(defn ->int
+  "Reads a integer from input. Returns default if not a integer.
+   Default default is 0"
+  ([x] (->int x 0))
+  ([x default]
+    (try
+      (java.lang.Integer/parseInt (cond
+                                    (keyword? x) (name x)
+                                    (number? x) (str (int x))
+                                    :else (str x)))
+      (catch Exception e
+        default))))
+
+(defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
+(defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
+

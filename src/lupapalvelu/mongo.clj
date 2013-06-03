@@ -62,8 +62,11 @@
   (mc/insert collection (with-_id data))
   nil)
 
-(defn by-id [collection id]
-  (with-id (mc/find-one-as-map collection {:_id id})))
+(defn by-id
+  ([collection id]
+    (with-id (mc/find-one-as-map collection {:_id id})))
+  ([collection id fields]
+    (with-id (mc/find-one-as-map collection {:_id id} fields))))
 
 (defn select
   "returns multiple entries by matching the monger query"
@@ -81,10 +84,18 @@
   ([collection query projection]
     (with-id (mc/find-one-as-map collection query projection))))
 
+(defn any?
+  "check if any"
+  ([collection query]
+    (mc/any? collection query)))
+
 (defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
   [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
   (mc/find-and-modify collection conditions document :return-new true :upsert upsert :remove remove :sort sort :fields fields))
+
+(defn drop-collection [collection]
+  (mc/drop collection))
 
 (defn remove-many
   "Returns all documents matching query."
@@ -165,14 +176,14 @@
     (.build mob)))
 
 (def server-list
-  (let [servers (vals (get-in env/config [:mongodb :servers]))]
+  (let [servers (vals (env/value :mongodb :servers))]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
 
 (def connected (atom false))
 
 (defn connect!
   ([]
-    (let [conf (:mongodb env/config)
+    (let [conf (env/value :mongodb)
           db   (:dbname conf)
           user (-> conf :credentials :username)
           pw   (-> conf :credentials :password)
@@ -193,6 +204,7 @@
         (debug "DB is" (.getName (m/get-db)))))))
 
 (defn disconnect! []
+  (debug "Disconnecting")
   (if @connected
     (do
       (m/disconnect!)
@@ -205,14 +217,15 @@
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:municipality 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
-  (mc/ensure-index "users" {:personId 1} {:unique true :sparse true :dropDups (env/in-dev)})
+  (mc/ensure-index :users {:personId 1} {:unique true :sparse true})
   (mc/ensure-index :applications {:municipality 1})
+  (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :activation {:email 1})
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
-  (mc/ensure-index :municipalities {:municipalityCode 1}))
+  (mc/ensure-index :organizations {:municipalities 1}))
 
 (defn clear! []
   (warn "Clearing MongoDB")

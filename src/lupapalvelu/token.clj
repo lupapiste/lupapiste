@@ -4,6 +4,7 @@
         [sade.security :only [random-password]])
   (:require [lupapalvelu.core :as core]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.security :as security]
             [noir.request :as request]))
 
 (defmulti handle-token (fn [token-data params] (:token-type token-data)))
@@ -15,32 +16,29 @@
     
 (def ^:private make-token-id (partial random-password 48))
 
-(defn make-token [token-type data & {:keys [ttl] :or {ttl default-ttl}}]
-  (let [id (make-token-id)
+(defn make-token [token-type data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
+  (let [token-id (make-token-id)
         now (core/now)
         request (request/ring-request)]
-    (mongo/insert :token {:_id id
+    (mongo/insert :token {:_id token-id
                           :token-type token-type
                           :data data
-                          :used false
+                          :used nil
+                          :auto-consume auto-consume
                           :created now
                           :expires (+ now ttl)
                           :ip (:remote-addr request)
-                          :user-id (get-in request [:session "noir" "user" "id"])})
-    id))
+                          :user-id (:id (security/current-user))})
+    token-id))
 
-(defn get-token [id consume]
-  (let [query {:_id id
-               :used false
-               :expires {$gt (core/now)}}]
-    (when-let [token (if consume
-                       (mongo/update-one-and-return :token query {$set {:used true}})
-                       (mongo/select-one :token query))]
-      (assoc token :token-type (keyword (:token-type token))))))
+(defn get-token [id & {:keys [consume] :or {consume false}}]
+  (when-let [token (mongo/select-one :token {:_id id
+                                             :used nil
+                                             :expires {$gt (core/now)}})]
+    (when (or consume (:auto-consume token))
+      (mongo/update-by-id :token id {$set {:used (core/now)}}))
+    (assoc token :token-type (keyword (:token-type token)))))
 
-(defn get-and-consume-token [id]
-  (get-token id true))
-
-(defn consume-token [id params]
-  (when-let [token-data (get-and-consume-token id)]
+(defn consume-token [id params & {:keys [consume] :or {consume false}}]
+  (when-let [token-data (get-token id :consume consume)]
     (handle-token token-data params)))

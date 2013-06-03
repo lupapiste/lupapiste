@@ -175,4 +175,21 @@
     return this;
   };
 
+  ko.bindingHandlers.readonly = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      element.readOnly = value;
+    }
+  };
+
+  $.fn.placeholderize = function() {
+    this.find("input").each(function(i, element) {
+      var e = $(element),
+          id = e.attr("id"),
+          p = loc(id, "placeholder");
+      if (p) e.attr("placeholder", p);
+    });
+    return this;
+  };
+  
 })(jQuery);

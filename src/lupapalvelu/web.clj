@@ -6,7 +6,8 @@
         [clojure.tools.logging]
         [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
-        [clojure.string :only [blank?]])
+        [clojure.string :only [blank?]]
+        [lupapalvelu.security :only [current-user]])
   (:require [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
@@ -19,7 +20,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
-            [lupapalvelu.municipality]
+            [lupapalvelu.organization]
             [lupapalvelu.application :as application]
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.mongo :as mongo]
@@ -33,7 +34,8 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery])
+            [ring.middleware.anti-forgery :as anti-forgery]
+            [lupapalvelu.neighbors])
   (:import [java.io ByteArrayInputStream]))
 
 ;;
@@ -68,11 +70,6 @@
 
 (defn from-query []
   (keywordize-keys (:query-params (request/ring-request))))
-
-(defn current-user
-  "fetches the current user from 1) http-session 2) apikey from headers"
-  ([] (current-user (request/ring-request)))
-  ([request] (or (session/get :user) (request :user))))
 
 (defn host [request]
   (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
@@ -125,8 +122,8 @@
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (get-in action [:data :id] "")
-     :userId        (get-in action [:user :id] "")}
+    {:applicationId (or (get-in action [:data :id]) "")
+     :userId        (or (get-in action [:user :id]) "")}
     (core/execute action)))
 
 (defn- execute-command [name]
@@ -149,12 +146,15 @@
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
                    :welcome anyone
+                   :login-frame anyone
+                   :oskari anyone
                    :about anyone
                    :upload logged-in?
                    :applicant logged-in?
                    :authority authority?
                    :authority-admin authority-admin?
-                   :admin admin?})
+                   :admin admin?
+                   :neighbor anyone})
 
 (defn cache-headers [resource-type]
   (if (env/dev-mode?)
@@ -187,7 +187,7 @@
 
 ;; Single Page App HTML
 (def apps-pattern
-  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
+  (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
 (defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
 
@@ -213,6 +213,20 @@
   (when (and hashbang (local? hashbang))
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+
+(defcommand "frontend-error" {}
+  [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
+  (let [limit    1000
+        sanitize (fn [s] (let [line (s/replace s #"[\r\n]" "\\n")]
+                           (if (> (.length line) limit)
+                             (str (.substring line 0 limit) "... (truncated)")
+                             line)))
+        sanitized-page (sanitize (or page "(unknown)"))
+        user           (or email "(anonymous)")
+        sanitized-ua   (sanitize user-agent)
+        sanitized-msg  (sanitize (str message))]
+    (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
+            user sanitized-ua sanitized-page sanitized-msg)))
 
 ;;
 ;; Login/logout:
@@ -250,7 +264,7 @@
 (defjson "/system/ping" [] {:ok true})
 (defjson "/system/status" [] (status/status))
 
-(def activation-route (str (-> env/config :activation :path) ":activation-key"))
+(def activation-route (str (env/value :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do
@@ -274,13 +288,14 @@
   (let [authorization (get-in request [:headers "authorization"])]
     (parse "apikey" authorization)))
 
-(defn apikey-authentication
-  "Reads apikey from 'Auhtorization' headers, pushed it to :user request attribute
-   'curl -H \"Authorization: apikey APIKEY\" http://localhost:8000/api/application"
+(defn authentication
+  "Middleware that adds :user to request. If request has apikey authentication header then
+   that is used for authentication. If not, then use user information from session."
   [handler]
   (fn [request]
-    (let [apikey (get-apikey request)]
-      (handler (assoc request :user (security/login-with-apikey apikey))))))
+    (handler (assoc request :user
+                    (or (security/login-with-apikey (get-apikey request))
+                        (session/get :user))))))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
@@ -290,14 +305,15 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
-  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
                            :target target
                            :locked (java.lang.Boolean/parseBoolean locked)
+                           :authority (java.lang.Boolean/parseBoolean authority)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
@@ -306,11 +322,12 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.4.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
                                             :locked (or locked "false")
+                                            :authority (or authority "false")
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
@@ -325,22 +342,22 @@
 (defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
   (output-attachment attachment-id true))
 
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (attachment/output-all-attachments application-id (current-user) lang))
+(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
+  (attachment/output-all-attachments application-id (current-user)))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id lang :lang :or {lang "fi"}}
-  (ke6666/export application-id (current-user) lang))
+(defpage "/api/pdf-export/:application-id" {application-id :application-id}
+  (ke6666/export application-id (current-user) *lang*))
+
+(defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
 ;; Proxy
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (if (logged-in?)
-    (if @env/proxy-off
-      {:status 503}
-      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
-    {:status 401}))
+  (if @env/proxy-off
+    {:status 503}
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
 
 ;;
 ;; Token consuming:
@@ -387,6 +404,9 @@
   (defjson [:any "/dev/spy"] []
     (dissoc (request/ring-request) :body))
 
+  (defjson "/dev/user" []
+    (current-user))
+
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
@@ -412,14 +432,4 @@
                "true" true
                "on"   true
                false)]
-      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
-
-  (defquery "qlang"
-    {:authenticated false}
-    [c]
-    (ok :lang *lang*))
-
-  (defcommand "clang"
-    {:authenticated false}
-    [c]
-    (ok :lang *lang*)))
+      (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))}))))

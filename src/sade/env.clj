@@ -2,7 +2,8 @@
   (:use [sade.util :only [deep-merge-with]]
         [sade.strings :only [numeric?]])
   (:require [clojure.java.io :as io]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [clojure.walk :as walk])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
@@ -25,31 +26,68 @@
     (numeric? s) (Long/parseLong s)
     :default s))
 
-(defn read-config [file-name password]
-  (let [decryptor (EncryptableProperties. (doto (StandardPBEStringEncryptor.)
-                                            (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
-                                            (.setPassword password)))]
-    (with-open [resource (clojure.lang.RT/resourceAsStream nil file-name)]
-      (.load decryptor resource)
-      (clojure.walk/keywordize-keys
-        (apply deep-merge-with into
-               (for [[k _] decryptor
-                     ; _ contains "ENC(...)" value, decryption using getProperty
-                     :let [v (.getProperty decryptor k)]]
-                 (assoc-in {} (clojure.string/split k #"\.") (read-value v))))))))
+(defn read-config
+  ([file-name]
+    (read-config file-name (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")))
+  ([file-name password]
+    (let [decryptor (EncryptableProperties. (doto (StandardPBEStringEncryptor.)
+                                              (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
+                                              (.setPassword password)))]
+      (with-open [resource (clojure.lang.RT/resourceAsStream nil file-name)]
+        (.load decryptor resource)
+        (clojure.walk/keywordize-keys
+          (apply deep-merge-with into
+            (for [[k _] decryptor
+                  ; _ contains "ENC(...)" value, decryption using getProperty
+                  :let [v (.getProperty decryptor k)]]
+              (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))))))
 
-(def config
-  (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
-    (read-config prop-file password)))
+(def ^:private config (atom {:last (java.lang.System/currentTimeMillis)
+                             :data (read-config prop-file)}))
+
+(defn get-config
+  "If value autoreload=true, rereads the configuration file,
+   otherwise returns cached configuration. Cache time 10s."
+  []
+  (let [modified   (-> config deref :last)
+        now        (java.lang.System/currentTimeMillis)
+        autoreload (-> config deref :data :autoreload str read-value true?)]
+    (:data
+      (if (and autoreload (> now (+ 10000 modified)))
+        (reset! config {:last now
+                        :data (read-config prop-file)})
+        @config))))
 
 (defn value
-  "returns a value from config directly."
+  "Returns a value from config."
   [& keys]
-  (get-in config (flatten [keys])))
+  (get-in (get-config) (flatten [keys])))
+
+(defn feature?
+  "Checks if a feature is enabled."
+  [& keys]
+  (->
+    (get-config)
+    (get-in (cons :feature (into [] keys)))
+    str
+    read-value
+    true?))
+
+(defn features
+  "Returns a list of all enabled features."
+  []
+  (walk/prewalk
+    (fn [x]
+      (if (map? x)
+        (into {}
+          (for [[k v] x]
+            [k (if (map? v) v (-> v str read-value true?))]))
+        x))
+    (:feature (get-config))))
 
 (defn- get-prop [prop-name default]
   (or
-    (get-in config (map keyword (s/split prop-name #"\.")))
+    (get-in (get-config) (map keyword (s/split prop-name #"\.")))
     (System/getProperty prop-name)
     (System/getenv (-> prop-name (s/replace \. \_) (s/upper-case)))
     default))

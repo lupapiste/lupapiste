@@ -20,12 +20,13 @@ var locationSearch = (function() {
     return self;
   };
 
-  var searchPropertyId = function(requestContext, x, y, onSuccess) {
+  var searchPropertyId = function(requestContext, x, y, onSuccess, onFail) {
     ajax
       .get("/proxy/property-id-by-point")
       .param("x", x)
       .param("y", y)
       .success(requestContext.onResponse(onSuccess))
+      .fail(requestContext.onResponse(onFail))
       .call();
     return self;
   };

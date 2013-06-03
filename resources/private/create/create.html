@@ -16,7 +16,7 @@
       </div>
       <div class="selected-location">
         <div class="map-select-info">
-          <h3 data-bind="ltext: 'newRequest.chosenLocation'">Valittu sijainti:</h3>
+          <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
           <p data-bind="ltext: 'create.search-check-prompt'"></p>
           
           <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
@@ -131,9 +131,9 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', operation())"></div>
       <div data-bind="html: loc('operations', operation(), 'desc')"></div>
       
-      <div class="municipality-links" data-bind="visible: municipalityLinks">
-        <div data-bind="ltext: 'municipality.links'"></div>
-        <ul data-bind="foreach: municipalityLinks">
+      <div class="municipality-links" data-bind="visible: organizationLinks">
+        <div data-bind="ltext: 'organization.links'"></div>
+        <ul data-bind="foreach: organizationLinks">
           <li>
             <a data-bind="text: name.fi, attr: {href: url}" href="#" target="_blank"></a>
           </li>

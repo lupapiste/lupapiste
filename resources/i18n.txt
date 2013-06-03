@@ -1,69 +1,161 @@
-error.invalid-property-id:Tarkasta kiinteistötunnus
-error.property-in-other-muinicipality:Kiinteistö ei ole valitun kunnan alueella
-stamp.margin:  Leiman sijainti:
-stamp.xMargin: Oikeasta reunasta
-stamp.yMargin: Ala reunasta
+session-dead.title: Istunto vanhentunut
+session-dead.message: Istunto on vanhentunut ja sinun tulee kirjautua järjestelmään uudelleen.
+session-dead.logout: Kirjaudu
+connection.offline: Yhteys palvelimeen on katkennut.<br/>Yhteyttä yritetään muodostaa uudelleen...
+attachmentType.empty._group_label:
 
-hankkeen-kuvaus.kuvaus.help: Esimerkkejä hyvistä kuvauksista: Omakotitalo - Rakennetaan kaksikerroksinen, puuverhoiltu omakotitalo ja talousrakennus sekä maalämpökaivo; Rivitalo - Rakennetaan rivitaloa sekä väestönsuoja/varastorakennus. Asuntoja on 20 kpl; Kerrostalo - Rakennetaan neljäkerroksinen kerrostalo, josta osa on kellaritilaa ja tukimuuri. Asuntoja on 12 kpl. Anomus aloittaa rakennustyöt valitusaikana; Puunkaato - Kaadetaan n. 50 kuusta. Kiinteistöltä kaadetaan puita ja pintamaat poistetaan. Täyttöä on n. 10 000 m3.
-rakennuspaikka.kiinteisto.maaraalaTunnus.help:Jos rakennuspaikkana on määräala, syötä määräalan tunnus tähän. Muuten voit jättää kentän tyhjäksi.
-purku.kaytto.rakentajaTyyppi.help:Liiketaloudellinen rakentaminen merkitään rakentajaksi  silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella  rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu  rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
-rakennuksen-laajentaminen.rakentajaTyyppi.help:Liiketaloudellinen rakentaminen merkitään rakentajaksi  silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella  rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu  rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
-rakennuksen-muuttaminen.rakentajaTyyppi.help:Liiketaloudellinen rakentaminen merkitään rakentajaksi  silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella  rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu  rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
-uusiRakennus.rakentajaTyyppi.help:Liiketaloudellinen rakentaminen merkitään rakentajaksi  silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella  rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu  rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
-purku.kaytto.kayttotarkoitus.help:Rakennuksen pääasiallinen käyttötarkoitus ilmoitetaan sen  mukaan, mihin suurinta osaa rakennuksen kerrosalasta käytetään.  Asuinrakennuksiksi katsotaan kuitenkin sellaiset rakennukset, joiden  kerrosalasta vähintään puolet on asuinhuoneistoalaa. Laajennuksessa ilmoitetaan koko rakennuksen käyttötarkoitus, eikä  vain laajennusosan. 
-rakennuksen-laajentaminen.kaytto.kayttotarkoitus.help:Rakennuksen pääasiallinen käyttötarkoitus ilmoitetaan sen  mukaan, mihin suurinta osaa rakennuksen kerrosalasta käytetään.  Asuinrakennuksiksi katsotaan kuitenkin sellaiset rakennukset, joiden  kerrosalasta vähintään puolet on asuinhuoneistoalaa. Laajennuksessa ilmoitetaan koko rakennuksen käyttötarkoitus, eikä  vain laajennusosan. 
-rakennuksen-muuttaminen.kaytto.kayttotarkoitus.help:Rakennuksen pääasiallinen käyttötarkoitus ilmoitetaan sen  mukaan, mihin suurinta osaa rakennuksen kerrosalasta käytetään.  Asuinrakennuksiksi katsotaan kuitenkin sellaiset rakennukset, joiden  kerrosalasta vähintään puolet on asuinhuoneistoalaa. Laajennuksessa ilmoitetaan koko rakennuksen käyttötarkoitus, eikä  vain laajennusosan. 
-uusiRakennus.kaytto.kayttotarkoitus.help:Rakennuksen pääasiallinen käyttötarkoitus ilmoitetaan sen  mukaan, mihin suurinta osaa rakennuksen kerrosalasta käytetään.  Asuinrakennuksiksi katsotaan kuitenkin sellaiset rakennukset, joiden  kerrosalasta vähintään puolet on asuinhuoneistoalaa. Laajennuksessa ilmoitetaan koko rakennuksen käyttötarkoitus, eikä  vain laajennusosan. 
-rakennuksen-laajentaminen.mitat.tilavuus.help:Rakennuksen tilavuus on tila, jota rajoittavat ulkoseinien ulkopinnat, alapohjan (rakennuksen alimman tilan pohja lämmöneristyksineen) alapinta ja yläpohjan (rakennuksen ylintä lämmintä tilaa  yläpuolelta rajoittava rakennusosa, johon kuuluu lämmöneristys suojauksineen) yläpinta.
-purku.mitat.tilavuus.help:Rakennuksen tilavuus on tila, jota rajoittavat ulkoseinien ulkopinnat, alapohjan (rakennuksen alimman tilan pohja lämmöneristyksineen) alapinta ja yläpohjan (rakennuksen ylintä lämmintä tilaa  yläpuolelta rajoittava rakennusosa, johon kuuluu lämmöneristys suojauksineen) yläpinta.
-rakennuksen-muuttaminen.mitat.tilavuus.help:Rakennuksen tilavuus on tila, jota rajoittavat ulkoseinien ulkopinnat, alapohjan (rakennuksen alimman tilan pohja lämmöneristyksineen) alapinta ja yläpohjan (rakennuksen ylintä lämmintä tilaa  yläpuolelta rajoittava rakennusosa, johon kuuluu lämmöneristys suojauksineen) yläpinta.
-uusiRakennus.mitat.tilavuus.help:Rakennuksen tilavuus on tila, jota rajoittavat ulkoseinien ulkopinnat, alapohjan (rakennuksen alimman tilan pohja lämmöneristyksineen) alapinta ja yläpohjan (rakennuksen ylintä lämmintä tilaa  yläpuolelta rajoittava rakennusosa, johon kuuluu lämmöneristys suojauksineen) yläpinta.
+application.filter.search: etsi:
 
-purku.mitat.kerrosala.help:Kerrosalaan luetaan kerrosten alat ulkoseinien ulkopinnan mukaan  laskettuina ja se kellarikerroksen tai ullakon ala, johon sijoitetaan tai  voidaan näiden tilojen sijainnista, yhteyksistä, koosta, valoisuudesta ja  muista ominaisuuksista päätellen sijoittaa rakennuksen pääasiallisen  käyttötarkoituksen mukaisia tiloja (maankäyttö- ja rakennuslaki 115  § 3 mom.).
-rakennuksen-muuttaminen.mitat.kerrosala.help:Kerrosalaan luetaan kerrosten alat ulkoseinien ulkopinnan mukaan  laskettuina ja se kellarikerroksen tai ullakon ala, johon sijoitetaan tai  voidaan näiden tilojen sijainnista, yhteyksistä, koosta, valoisuudesta ja  muista ominaisuuksista päätellen sijoittaa rakennuksen pääasiallisen  käyttötarkoituksen mukaisia tiloja (maankäyttö- ja rakennuslaki 115  § 3 mom.).
-uusiRakennus.mitat.kerrosala.help:Kerrosalaan luetaan kerrosten alat ulkoseinien ulkopinnan mukaan  laskettuina ja se kellarikerroksen tai ullakon ala, johon sijoitetaan tai  voidaan näiden tilojen sijainnista, yhteyksistä, koosta, valoisuudesta ja  muista ominaisuuksista päätellen sijoittaa rakennuksen pääasiallisen  käyttötarkoituksen mukaisia tiloja (maankäyttö- ja rakennuslaki 115  § 3 mom.).
-rakennuksen-laajentaminen.mitat.kerrosala.help:Kerrosalaan luetaan kerrosten alat ulkoseinien ulkopinnan mukaan  laskettuina ja se kellarikerroksen tai ullakon ala, johon sijoitetaan tai  voidaan näiden tilojen sijainnista, yhteyksistä, koosta, valoisuudesta ja  muista ominaisuuksista päätellen sijoittaa rakennuksen pääasiallisen  käyttötarkoituksen mukaisia tiloja (maankäyttö- ja rakennuslaki 115  § 3 mom.).
+neighbors.add: Lisää naapuri
+neighbors.propertyId: Kiinteistötunnus
+neighbors.owner: Omistaja
+neighbors.owner.name: Nimi
+neighbors.owner.name.placeholder: nimi
+neighbors.owner.email: Sähköpostiosoite
+neighbors.owner.email.placeholder: email
+neighbors.owner.address: Osoite
+neighbors.owner.address.street: Katu
+neighbors.owner.address.street.placeholder: katu
+neighbors.owner.address.zip: Postinumero:
+neighbors.owner.address.zip.placeholder: postinumero
+neighbors.owner.address.city: Postitoimipaikka
+neighbors.owner.address.city.placeholder: postitoimipaikka
+neighbors.done: Palaa hakemukseen
 
-purku.mitat.kokonaisala.help:Kokonaisalaan lasketaan kaikkien kerrosten, kellareiden ja lämpöeristettyjen ullakoiden pinta-ala yhteensä ulkomitoin. Mukaan ei lasketa parvekkeita, katoksia eikä 160 cm matalampia tiloja. 
-rakennuksen-muuttaminen.mitat.kokonaisala.help:Kokonaisalaan lasketaan kaikkien kerrosten, kellareiden ja lämpöeristettyjen ullakoiden pinta-ala yhteensä ulkomitoin. Mukaan ei lasketa parvekkeita, katoksia eikä 160 cm matalampia tiloja. 
-uusiRakennus.mitat.kokonaisala.help:Kokonaisalaan lasketaan kaikkien kerrosten, kellareiden ja lämpöeristettyjen ullakoiden pinta-ala yhteensä ulkomitoin. Mukaan ei lasketa parvekkeita, katoksia eikä 160 cm matalampia tiloja. 
-rakennuksen-laajentaminen.mitat.kokonaisala.help:Kokonaisalaan lasketaan kaikkien kerrosten, kellareiden ja lämpöeristettyjen ullakoiden pinta-ala yhteensä ulkomitoin. Mukaan ei lasketa parvekkeita, katoksia eikä 160 cm matalampia tiloja. 
+neighbors.status: Tila
 
-purku.mitat.kerrosluku.help:Kerroslukuun lasketaan kaikki ne kokonaan tai pääasiallisesti  maanpinnan yläpuolella olevat kerrokset, joissa on asuin- tai työ-huoneita tai rakennuksen pääasiallisen käyttötarkoituksen mukaisia  tiloja. Kerrosluku ilmoitetaan kokonaislukuna. Jos kerrosten lukumäärä  vaihtelee rakennuksen eri osissa, ilmoitetaan se kerrosten lukumäärä,  joka on suurimmassa osassa rakennusta.
-rakennuksen-muuttaminen.mitat.kerrosluku.help:Kerroslukuun lasketaan kaikki ne kokonaan tai pääasiallisesti  maanpinnan yläpuolella olevat kerrokset, joissa on asuin- tai työ-huoneita tai rakennuksen pääasiallisen käyttötarkoituksen mukaisia  tiloja. Kerrosluku ilmoitetaan kokonaislukuna. Jos kerrosten lukumäärä  vaihtelee rakennuksen eri osissa, ilmoitetaan se kerrosten lukumäärä,  joka on suurimmassa osassa rakennusta.
-uusiRakennus.mitat.kerrosluku.help:Kerroslukuun lasketaan kaikki ne kokonaan tai pääasiallisesti  maanpinnan yläpuolella olevat kerrokset, joissa on asuin- tai työ-huoneita tai rakennuksen pääasiallisen käyttötarkoituksen mukaisia  tiloja. Kerrosluku ilmoitetaan kokonaislukuna. Jos kerrosten lukumäärä  vaihtelee rakennuksen eri osissa, ilmoitetaan se kerrosten lukumäärä,  joka on suurimmassa osassa rakennusta.
-rakennuksen-laajentaminen.mitat.kerrosluku.help:Kerroslukuun lasketaan kaikki ne kokonaan tai pääasiallisesti  maanpinnan yläpuolella olevat kerrokset, joissa on asuin- tai työ-huoneita tai rakennuksen pääasiallisen käyttötarkoituksen mukaisia  tiloja. Kerrosluku ilmoitetaan kokonaislukuna. Jos kerrosten lukumäärä  vaihtelee rakennuksen eri osissa, ilmoitetaan se kerrosten lukumäärä,  joka on suurimmassa osassa rakennusta.
+neighbor.state.open: Avoin
+neighbor.state.mark-done: Merkitty kuulluksi
+neighbor.state.email-sent: Sähköposti lähetetty
 
-purku.mitat.kellarinpinta-ala.help:Kellarin pinta-ala on kellarikerrosten yhteenlaskettu pinta-ala. Kellarikerroksen pinta-ala on kellarikerrosta ympäröivien seinien ulkopintojen rajoittama ala. Mukaan ei lasketa 160 cm matalampia tiloja. Kellarikerroksiksi luetaan kaikki kokonaan tai pääasiallisesti maanpinnan alapuolella olevat kerrokset (maankäyttö- ja rakennuslaki 115 §  3 mom.). 
-rakennuksen-muuttaminen.mitat.kellarinpinta-ala.help:Kellarin pinta-ala on kellarikerrosten yhteenlaskettu pinta-ala. Kellarikerroksen pinta-ala on kellarikerrosta ympäröivien seinien ulkopintojen rajoittama ala. Mukaan ei lasketa 160 cm matalampia tiloja. Kellarikerroksiksi luetaan kaikki kokonaan tai pääasiallisesti maanpinnan alapuolella olevat kerrokset (maankäyttö- ja rakennuslaki 115 §  3 mom.).
-uusiRakennus.mitat.kellarinpinta-ala.help:Kellarin pinta-ala on kellarikerrosten yhteenlaskettu pinta-ala. Kellarikerroksen pinta-ala on kellarikerrosta ympäröivien seinien ulkopintojen rajoittama ala. Mukaan ei lasketa 160 cm matalampia tiloja. Kellarikerroksiksi luetaan kaikki kokonaan tai pääasiallisesti maanpinnan alapuolella olevat kerrokset (maankäyttö- ja rakennuslaki 115 §  3 mom.).
-rakennuksen-laajentaminen.mitat.kellarinpinta-ala.help:Kellarin pinta-ala on kellarikerrosten yhteenlaskettu pinta-ala. Kellarikerroksen pinta-ala on kellarikerrosta ympäröivien seinien ulkopintojen rajoittama ala. Mukaan ei lasketa 160 cm matalampia tiloja. Kellarikerroksiksi luetaan kaikki kokonaan tai pääasiallisesti maanpinnan alapuolella olevat kerrokset (maankäyttö- ja rakennuslaki 115 §  3 mom.).
+neighbors.actions: Toiminnot
+neighbors.actions.edit: muokkaa
+neighbors.actions.remove: poista
+neighbors.actions.sendEmail: Lähetä sähköposti kutsu
+neighbors.actions.upload: Lisää skannattu lausunto
+neighbors.actions.markDone: Merkitse kuulluksi
 
-rakennuksen-laajentaminen.rakenne.rakentamistapa.help:Elementtirakennuksessa tilavuudeltaan yli puolet kantavista rakenteista, kuten pilarit, palkit, välipohjat ja seinät ovat tehdasvalmisteisia. Paikalla tehdyssä rakennuksessa enintään hormit, porrassyöksyt, parvekkeet ja kylpyhuoneet ovat tehdasvalmisteisia.
-purku.rakenne.rakentamistapa.help:Elementtirakennuksessa tilavuudeltaan yli puolet kantavista rakenteista, kuten pilarit, palkit, välipohjat ja seinät ovat tehdasvalmisteisia. Paikalla tehdyssä rakennuksessa enintään hormit, porrassyöksyt, parvekkeet ja kylpyhuoneet ovat tehdasvalmisteisia.
-uusiRakennus.rakenne.rakentamistapa.help:Elementtirakennuksessa tilavuudeltaan yli puolet kantavista rakenteista, kuten pilarit, palkit, välipohjat ja seinät ovat tehdasvalmisteisia. Paikalla tehdyssä rakennuksessa enintään hormit, porrassyöksyt, parvekkeet ja kylpyhuoneet ovat tehdasvalmisteisia.
-rakennuksen-muuttaminen.rakenne.rakentamistapa.help:Elementtirakennuksessa tilavuudeltaan yli puolet kantavista rakenteista, kuten pilarit, palkit, välipohjat ja seinät ovat tehdasvalmisteisia. Paikalla tehdyssä rakennuksessa enintään hormit, porrassyöksyt, parvekkeet ja kylpyhuoneet ovat tehdasvalmisteisia.
+neighbors.sendEmail.title: Kutsu naapuri
+neighbors.sendEmail.name: Naapurin nimi:
+neighbors.sendEmail.email: Sähköpostiosoite:
+neighbors.sendEmail.email.placeholder: matti.meikalainen@osoite.fi
+neighbors.sendEmail.message: Viesti:
+neighbors.sendEmail.message.placeholder: Viestisi naapurille
+neighbors.sendEmail.ok: Lähetä
+neighbors.sendEmail.cancel: Peruuta
+neighbors.sendEmail.sending: Sähköpostia lähetetään
+neighbors.sendEmail.reloading: Päivitetään tilaa
+neighbors.manage: Hallitse naapureita
 
-rakennuksen-laajentaminen.rakenne.kantavaRakennusaine.help:Betoniksi luetaan myöskin siporex-, kevytsora-, kuonajäte- ja  kaasubetoni ym. kevyet betonivalmisteet. 
-purku.rakenne.kantavaRakennusaine.help:Betoniksi luetaan myöskin siporex-, kevytsora-, kuonajäte- ja  kaasubetoni ym. kevyet betonivalmisteet. 
-uusiRakennus.rakenne.kantavaRakennusaine.help:Betoniksi luetaan myöskin siporex-, kevytsora-, kuonajäte- ja  kaasubetoni ym. kevyet betonivalmisteet. 
-rakennuksen-muuttaminen.rakenne.kantavaRakennusaine.help:Betoniksi luetaan myöskin siporex-, kevytsora-, kuonajäte- ja  kaasubetoni ym. kevyet betonivalmisteet. 
+neighbors.edit.title: Naapurin tiedot:
+neighbors.edit.propertyId: Kiinteistötunnus
+neighbors.edit.propertyId.placeholder: kiinteistötunnus 
+neighbors.edit.name: Nimi
+neighbors.edit.ok: Tallenna
+neighbors.edit.cancel: Peruuta
+neighbors.edit.status.0: Odota
+neighbors.edit.status.1: Etsitään tietoja
+neighbors.edit.status.2: Naapurin tiedot
+neighbors.edit.status.3: Tietoja ei löydy
 
+neighbor.show.welcome: Tervetuloa tutustumaan naapurisi haknkkeeseen.
 
-purku.lammitys.lammitystapa.help:Ilmoitetaan ainoastaan pääasiallinen lämmitystapa. Vesikeskuslämmityksessä rakennusta lämmitetään kiertävän  veden avulla. Ilmakeskuslämmityksessä rakennusta lämmitetään kiertävän  ilman avulla. Suorassa sähkölämmityksessä rakennusta lämmitetään sähkö-verkkoon kytketyn kiinteän lämpöpatterin tms. avulla. Uunilämmitykseksi luetaan myös muurin sisään asennetut sähköllä toimivat lämpövaraajat, erilliset kiinteät öljylämmittimet sekä lämpöä varaavat takat.
-rakennuksen-muuttaminen.lammitys.lammitystapa.help:Ilmoitetaan ainoastaan pääasiallinen lämmitystapa. Vesikeskuslämmityksessä rakennusta lämmitetään kiertävän  veden avulla. Ilmakeskuslämmityksessä rakennusta lämmitetään kiertävän  ilman avulla. Suorassa sähkölämmityksessä rakennusta lämmitetään sähkö-verkkoon kytketyn kiinteän lämpöpatterin tms. avulla. Uunilämmitykseksi luetaan myös muurin sisään asennetut sähköllä toimivat lämpövaraajat, erilliset kiinteät öljylämmittimet sekä lämpöä varaavat takat.
-uusiRakennus.lammitys.lammitystapa.help:Ilmoitetaan ainoastaan pääasiallinen lämmitystapa. Vesikeskuslämmityksessä rakennusta lämmitetään kiertävän  veden avulla. Ilmakeskuslämmityksessä rakennusta lämmitetään kiertävän  ilman avulla. Suorassa sähkölämmityksessä rakennusta lämmitetään sähkö-verkkoon kytketyn kiinteän lämpöpatterin tms. avulla. Uunilämmitykseksi luetaan myös muurin sisään asennetut sähköllä toimivat lämpövaraajat, erilliset kiinteät öljylämmittimet sekä lämpöä varaavat takat.
-rakennuksen-laajentaminen.lammitys.lammitystapa.help:Ilmoitetaan ainoastaan pääasiallinen lämmitystapa. Vesikeskuslämmityksessä rakennusta lämmitetään kiertävän  veden avulla. Ilmakeskuslämmityksessä rakennusta lämmitetään kiertävän  ilman avulla. Suorassa sähkölämmityksessä rakennusta lämmitetään sähkö-verkkoon kytketyn kiinteän lämpöpatterin tms. avulla. Uunilämmitykseksi luetaan myös muurin sisään asennetut sähköllä toimivat lämpövaraajat, erilliset kiinteät öljylämmittimet sekä lämpöä varaavat takat.
+operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
+rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
+rakennushanke.kaytettykerrosala._append_label: Lisää olemassaolevaa
+rakennushanke.kaytettykerrosala._group_label: Olemassaolevat rakennukset
+rakennushanke.kaytettykerrosala.kayttotarkoitusKoodi._group_label: Käyttötarkoitus
+rakennushanke.kaytettykerrosala.pintaAla: Käytetty pinta-ala
+rakennushanke.toimenpiteet._append_label: Lisää toimenpide
+rakennushanke.toimenpiteet._group_label: Suunnitellut toimenpiteet
+rakennushanke.toimenpiteet.huoneistoja: Huoneistoja
+rakennushanke.toimenpiteet.kerroksia: Kerroksia
+rakennushanke.toimenpiteet.kerrosala: Kerrosala
+rakennushanke.toimenpiteet.kokonaisala: Kokonaisala
+rakennushanke.toimenpiteet.Toimenpide._group_label: Toimenpide
+rakennushanke.toimenpiteet.Toimenpide.laajennus: Laajennus
+rakennushanke.toimenpiteet.Toimenpide.muu muutostyö: Muu muutostyö
+rakennushanke.toimenpiteet.Toimenpide.purku: Purku
+rakennushanke.toimenpiteet.Toimenpide.uudelleenrakentamiseen verrattava muutos: Uudelleenrakentamiseen verratava muutos
+rakennushanke.toimenpiteet.Toimenpide.uusi: Uusi
+suunnittelutarveratkaisu._group_label: Suunnitelutarveratkaisuhakemuksen lisäosa
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne._group_label: Kaavoituksen ja alueiden tilanne
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.asemakaavaluonnos: Asemakaavaluonnos
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.rajoittuuko_tiehen: Rajoittuuko tiehen
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.tienkayttooikeus: Tienkäyttöoikeus
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.vesijohto: Vesijohto
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.viemarijohto: Viemärijohto
+suunnittelutarveratkaisun-lisaosa.kaavoituksen_ja_alueiden_tilanne.yleiskaavaa: Yleiskaava
+suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri._group_label: Luonto ja kulttuuri
+suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri.kulttuurisesti_merkittava: Rakennuspaikka on kulttuurihistoriallisesti merkittävällä alueella tai arvokkaassa maisemassa
+suunnittelutarveratkaisun-lisaosa.luonto_ja_kulttuuri.suojelukohteita: Rakennuspaikan läheisyydessä on suojelukohteita tai -alueita
+suunnittelutarveratkaisun-lisaosa.maisema._group_label: Maisema - rakennuspaikka sijaitsee
+suunnittelutarveratkaisun-lisaosa.maisema.metsan_reunassa: Metsän reunassa
+suunnittelutarveratkaisun-lisaosa.maisema.metsassa:Metsässä
+suunnittelutarveratkaisun-lisaosa.maisema.nykyisen_rakennuspaikan_vieressa: Nykyisen rakennuspaikan vieressä
+suunnittelutarveratkaisun-lisaosa.maisema.pellolla: Pellolla
+suunnittelutarveratkaisun-lisaosa.maisema.vanhalla_rakennuspaikalla: Vanhalla rakennuspaikalla
+suunnittelutarveratkaisun-lisaosa.merkittavyys._group_label: Merkittävyys
+suunnittelutarveratkaisun-lisaosa.merkittavyys.rakentamisen_vaikutusten_merkittavyys: Rakentamisen vaikutusten merkittävyys
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset._group_label: Muut vaikutukset
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset.etaisyys_viemariverkosta: Etäisyys nykyisestä viemäriverkosta
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset.liitytaanko_viemariverkostoon: Liitytään rakennusaikana viemäriverkostoon
+suunnittelutarveratkaisun-lisaosa.muut_vaikutukset.pohjavesialuetta: Rakennuspaikka on pohjavesialueella
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle._group_label: Vaikutukset yhdyskuntakehykselle
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyys_kauppaan: Etäisyys kauppaan
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyys_paivakotiin:Etäisyys päiväkotiin
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyyys_kouluun: Etäisyys kouluun
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.muita_vaikutuksia: Muita vaikutuksia
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.turvallinen_polkupyoratie_kouluun: Turvallinen polkupyörätie kouluun
+suunnittelutarveratkaisun-lisaosa.vaikutukset_yhdyskuntakehykselle.etaisyys_kuntakeskuksen_palveluihin: Etäisyys kuntakeskuksen palveluihin
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet._group_label: Vaikutukset alueen virkistystarpeisiin
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet.ulkoilu_ja_virkistysaluetta_varattu:  Emätilalta varattu virkistys- ja ulkoilutarpeisiin rakennuspaikan viereltä vähintään saman verran aluetta kuin rakennuspaikoiksi
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet.vaikeuttaako_ulkoilureittia: Vaikuttaa yleiskaavassa osoitetun ulkoilureitin toteuttamiseen
+suunnittelutarveratkaisun-lisaosa.virkistys_tarpeet.virkistysalueella: Rakennuspaikka sijaitsee maakuntakaavan tai yleiskaavan virkistysalueella
+unit.km: km
+unit.m: m
+poikkeuslupa._group_label: Poikkeamishakemuksen lisäosa
+poikkeamishakemuksen-lisaosa.perustelut: Perustelut
+poikkeamishakemuksen-lisaosa.vaikutukset: Vaikutukset
+poikkeamishakemuksen-lisaosa.lisätiedot: Lisätiedot
 
-purku.lammitys.lammonlahde.help:Ilmoitetaan pääasiallisesti käytettävä polttoaine. Kauko- ja aluelämmön yhteydessä ei polttoainetta tarvitse ilmoittaa. Maalämpö tms. edellyttää lämpöpumppua. 
-rakennuksen-muuttaminen.lammitys.lammonlahde.help:Ilmoitetaan pääasiallisesti käytettävä polttoaine. Kauko- ja aluelämmön yhteydessä ei polttoainetta tarvitse ilmoittaa. Maalämpö tms. edellyttää lämpöpumppua. 
-uusiRakennus.lammitys.lammonlahde.help:Ilmoitetaan pääasiallisesti käytettävä polttoaine. Kauko- ja aluelämmön yhteydessä ei polttoainetta tarvitse ilmoittaa. Maalämpö tms. edellyttää lämpöpumppua. 
-rakennuksen-laajentaminen.lammitys.lammonlahde.help:Ilmoitetaan pääasiallisesti käytettävä polttoaine. Kauko- ja aluelämmön yhteydessä ei polttoainetta tarvitse ilmoittaa. Maalämpö tms. edellyttää lämpöpumppua. 
+attachment.delete.version.header: Poista liitetiedosto
 
-rakennuksen-laajentaminen.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
-purku.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
-rakennuksen-muuttaminen.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
-uusiRakennus.huoneistot.huoneistonTyyppi.huoneistoala.help:Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat.
+#
+# Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
+#
 
+stamp.status.0: Odota...
+stamp.status.1: Valmiina leimaamaan liiteet
+stamp.status.2: Leimaus käynnistyy...
+stamp.status.3: Leimaus käynnissä...
+stamp.status.4: Leimaus valmis
+stamp.status.5: Ei leimaus kelpoisia liitteitä
 
-invite.default-text:Hei! Sinut on kutsuttu osallistumaan lupahakemuksen tekemiseen Lupapisteessä. 
+stamp.filename: Tiedosto
+stamp.version: Versio
+stamp.size: Koko
+stamp.select: Leimaa
+stamp.status: Tila
+
+stamp.start: Aloita
+stamp.cancel: Peruuta
+stamp.ok: Ok
+
+stamp.file.status.pending: Odottaa
+stamp.file.status.working: Leimaa
+stamp.file.status.done: Valmis
+stamp.file.status.error: Virhe
+
+stamp.all: kaikki
+stamp.none: poista
+
+stamp.comment: Leimattu
+stamp.comment.restamp: Uudelleen leimattu
+
+stamp.transparency: Leiman tausta
+stamp.transparency.0: 0% (valkoinen tausta)
+stamp.transparency.25: 25%
+stamp.transparency.50: 50% (läpikuultava)
+stamp.transparency.75: 75%
+stamp.transparency.100: 100% (läpinäkyvä)

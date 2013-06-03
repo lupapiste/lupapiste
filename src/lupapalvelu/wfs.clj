@@ -3,25 +3,33 @@
   (:require [clj-http.client :as client]
             [clojure.string :as s]
             [clojure.xml :as xml]
-            [clojure.zip :as zip])
+            [clojure.zip :as zip]
+            [sade.env :as env])
   (:use [clojure.data.zip.xml :only [xml-> text]]
-        [sade.env :only [config]]
-        [sade.strings :only [starts-with-i]]))
+        [sade.strings :only [starts-with-i]]
+        [clojure.tools.logging]))
 
-(def timeout 5000)
+;;
+;; config:
+;;
+
+(def ^:private timeout 10000)
 
 (def ktjkii "https://ws.nls.fi/ktjkii/wfs/wfs")
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
 (def ^:private auth
-  (let [conf (:nls config)]
-    {:raster     [(:username (:raster conf)) (:password (:raster conf))]
-     ktjkii      [(:username (:ktjkii conf)) (:password (:ktjkii conf))]
-     maasto      [(:username (:maasto conf)) (:password (:maasto conf))]
-     nearestfeature [(:username (:maasto conf)) (:password (:maasto conf))]}))
+  (let [conf (env/value :nls)]
+    {:raster        [(:username (:raster conf))     (:password (:raster conf))]
+     :kiinteisto    [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
+     ktjkii         [(:username (:ktjkii conf))     (:password (:ktjkii conf))]
+     maasto         [(:username (:maasto conf))     (:password (:maasto conf))]
+     nearestfeature [(:username (:maasto conf))     (:password (:maasto conf))]}))
 
-(def ^:private timeout 30000)
+;;
+;; DSL to WFS queries:
+;;
 
 (defn query [attrs & e]
   (str "<?xml version='1.0' encoding='UTF-8'?>
@@ -39,15 +47,14 @@
         </wfs:GetFeature>"))
 
 (defn sort-by
-  ([property-name]
-    (sort-by property-name "desc"))
-  ([property-name order]
-    (str "<ogc:SortBy>
-            <ogc:SortProperty>
-              <ogc:PropertyName>" property-name "</ogc:PropertyName>
-            </ogc:SortProperty>
-            <ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>
-          </ogc:SortBy>")))
+  ([property-names]
+    (sort-by property-names "desc"))
+  ([property-names order]
+    (let [sort-properties (apply str (map #(str "<ogc:SortProperty><ogc:PropertyName>" % "</ogc:PropertyName></ogc:SortProperty>") property-names))]
+      (str "<ogc:SortBy>"
+           sort-properties
+           "<ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>"
+           "</ogc:SortBy>"))))
 
 (defn filter [& e]
   (str "<ogc:Filter>" (apply str e) "</ogc:Filter>"))
@@ -94,6 +101,10 @@
     "  <ogc:UpperBoundary>" property-upper-value "</ogc:UpperBoundary>
      </ogc:PropertyIsBetween>"))
 
+;;
+;; Helpers for result parsing:
+;;
+
 (defn- address-part [feature part]
   (first (xml-> feature :oso:Osoitenimi part text)))
 
@@ -104,8 +115,8 @@
      :municipality (address-part feature :oso:kuntatunnus)
      :name {:fi (address-part feature :oso:kuntanimiFin)
             :sv (address-part feature :oso:kuntanimiSwe)}
-     :x x
-     :y y}))
+     :location {:x x
+                :y y}}))
 
 (defn feature-to-simple-address-string [feature]
   (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
@@ -137,67 +148,89 @@
      :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
             :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}}))
 
-(defn response->features [response]
-  (let [input-xml (:body response)
-       features (-> input-xml
-                  (s/replace "UTF-8" "ISO-8859-1")
-                  (.getBytes "ISO-8859-1")
-                  java.io.ByteArrayInputStream.
-                  xml/parse
-                  zip/xml-zip)]
-    (xml-> features :gml:featureMember)))
+(defn response->features [input-xml]
+  (when input-xml
+    (let [features (-> input-xml
+                     (s/replace "UTF-8" "ISO-8859-1")
+                     (.getBytes "ISO-8859-1")
+                     java.io.ByteArrayInputStream.
+                     xml/parse
+                     zip/xml-zip)]
+      (xml-> features :gml:featureMember))))
 
-(defn execute
-  "Takes a query (in XML) and returns a vector. If the first element of that
-   vector is :ok, then the next element is a list of features that match the
-   query. If the first element is :error, the next element is the HTTP response.
-   Finally, in case of time-out, a vector [:timeout] is returned."
-  [url q]
-  (deref
-    (future
-      (let [response (client/post url {:body q
-                                       :basic-auth (get auth url)
-                                       :socket-timeout timeout
-                                       :conn-timeout timeout
-                                       :throw-exceptions false})]
-        (if (= (:status response) 200)
-          [:ok (response->features response)]
-          [:error response])))
-    timeout
-    [:timeout]))
+;;
+;; Executing HTTP calls to Maanmittauslaitos:
+;;
 
-(defn http-get
-  [url q]
-  (deref
-    (future
-      (let [response (client/get url
-                                 {:query-params q
-                                  :basic-auth (get auth url)
-                                  :socket-timeout timeout
-                                  :conn-timeout timeout
-                                  :throw-exceptions false})]
-        (if (= (:status response) 200)
-          [:ok (response->features response)]
-          [:error response])))
-    timeout
-    [:timeout]))
+(def ^:private base-request {:socket-timeout timeout
+                             :conn-timeout timeout
+                             :throw-exceptions false})
 
-(defn nearest-query-params [x y]
-  {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
-   :TYPENAME "oso:Osoitepiste"
-   :COORDS (str x "," y ",EPSG:3067")
-   :SRSNAME "EPSG:3067"
-   :MAXFEATURES "1"
-   :BUFFER "500"})
+(def ^:private http-method {:post [client/post :body]
+                            :get  [client/get  :query-params]})
 
+(defn- exec-http [http-fn url request]
+  (try
+    (let [{status :status body :body} (http-fn url request)]
+      (if (= status 200)
+        [:ok body]
+        [:error status]))
+    (catch Exception e
+      [:failure e])))
+
+(defn- exec [method url q]
+  (let [[http-fn param-key] (method http-method)
+        request (assoc base-request
+                       :basic-auth (auth url)
+                       param-key q)
+        task (future (exec-http http-fn url request))
+        [status data] (deref task timeout [:timeout])]
+    (condp = status
+      :timeout (do (errorf "wfs timeout: url=%s" url) nil)
+      :error   (do (errorf "wfs status %s: url=%s" data url) nil)
+      :failure (do (errorf data "wfs failure: url=%s" url) nil)
+      :ok      (response->features data))))
+
+(defn post [url q]
+  (exec :post url q))
+
+;;
+;; Public queries:
+;;
+
+(defn address-by-point [x y]
+  (exec :get nearestfeature {:NAMESPACE "xmlns(oso=http://xml.nls.fi/Osoitteet/Osoitepiste/2011/02)"
+                             :TYPENAME "oso:Osoitepiste"
+                             :COORDS (str x "," y ",EPSG:3067")
+                             :SRSNAME "EPSG:3067"
+                             :MAXFEATURES "1"
+                             :BUFFER "500"}))
+
+(defn property-id-by-point [x y]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (filter
+        (intersects
+          (property-name "ktjkiiwfs:sijainti")
+          (point x y))))))
+
+(defn point-by-property-id [property-id]
+  (post ktjkii
+    (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
+      (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
+      (property-name "ktjkiiwfs:tunnuspisteSijainti")
+      (filter
+        (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 ;;
 ;; Raster images:
 ;;
 
 (defn raster-images [request]
-  (let [layer (get-in request [:query-params "LAYERS"])]
+  (let [layer (get-in request [:params "LAYERS"])]
     (client/get "https://ws.nls.fi/rasteriaineistot/image"
-                {:query-params (:query-params request)
+                {:query-params (:params request)
                  :headers {"accept-encoding" (get-in [:headers "accept-encoding"] request)}
                  :basic-auth (:raster auth)
                  :as :stream})))
