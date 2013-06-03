@@ -146,8 +146,7 @@
                      {:name "patevyys" :type :group
                       :body (body
                               kuntaroolikoodi
-                              patevyys)
-                      }))
+                              patevyys)}))
 
 (def huoneisto [{:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
@@ -522,10 +521,9 @@
                      {:name "eiKaavaa"}
                      {:name "ei tiedossa"}]}]}
 
-       {:info {:name "lisatiedot"
-               :order 100}
-        :body [{:name "suoramarkkinointikielto"
-                :type :checkbox
-                :layout :full-width}]}]))
-
+     {:info {:name "lisatiedot"
+             :order 100}
+      :body [{:name "suoramarkkinointikielto"
+              :type :checkbox
+              :layout :full-width}]}]))
 
