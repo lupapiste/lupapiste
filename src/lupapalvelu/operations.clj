@@ -2,6 +2,7 @@
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")
@@ -37,7 +38,8 @@
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
-                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])))
+                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]
+                                          ["Yleisten alueiden luvat" [["Kaivuulupa" :yleiset-alueet-kaivuulupa]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -47,6 +49,9 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
+
+;; TODO: Tee yleisille alueille oma commons!
+;(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -171,12 +176,18 @@
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
-                                 :attachments [:paapiirustus [:asemapiirros]]}})
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :yleiset-alueet-kaivuulupa   {:schema "yleiset-alueet-kaivuu"
+                                 :required  common-schemas}})
 
 
 ; Sanity checks:
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas yleiset-alueet/yleiset-alueet-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
+  )
+
+
+
 
