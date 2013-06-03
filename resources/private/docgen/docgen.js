@@ -50,7 +50,7 @@ var docgen = (function () {
     // ID utilities
 
     function pathStrToID(pathStr) {
-      return self.docId + "-" + pathStr.replace(/\./g, "-");;
+      return self.docId + "-" + pathStr.replace(/\./g, "-"); ;
     }
 
     function pathStrToLabelID(pathStr) {
@@ -528,6 +528,8 @@ var docgen = (function () {
           var myModel = {};
           myModel[myName] = {};
           $(this).before(makeElem(myModel, count));
+          console.log(parent$.parent());
+          accordion.setHeight(parent$);
         };
 
         $(appendButton).click(appender);
@@ -609,11 +611,11 @@ var docgen = (function () {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
         .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
-        // Server returns empty array (all ok), or array containing an array with three
-        // elements: [key status message]. Here we use just the status.
+      // Server returns empty array (all ok), or array containing an array with three
+      // elements: [key status message]. Here we use just the status.
         .success(function (e) {
           var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
-          callback(status,e.results);
+          callback(status, e.results);
         })
         .error(function (e) { error(e); callback("err"); })
         .fail(function (e) { error(e); callback("err"); })
@@ -621,15 +623,15 @@ var docgen = (function () {
     }
 
     function showValidationResults(results) {
-      $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
-      if(results && results.length > 0) {
-        _.each(results,function(result) { $("#"+docId+"-"+result.path.join("-")).addClass("warning"); });
+      $("#document-" + docId + " :input").removeClass("warning").removeClass("error");
+      if (results && results.length > 0) {
+        _.each(results, function (result) { $("#" + docId + "-" + result.path.join("-")).addClass("warning"); });
       }
     }
 
     function validate() {
       ajax
-        .query("validate-doc", { id: self.appId, doc: self.docId})
+        .query("validate-doc", { id: self.appId, doc: self.docId })
         .success(function (e) { showValidationResults(e.results); })
         .call();
     }
@@ -663,7 +665,7 @@ var docgen = (function () {
         }, 2000);
       }
 
-      saveForReal(path, value, function (status,results) {
+      saveForReal(path, value, function (status, results) {
         showValidationResults(results);
         if (label) {
           label.removeChild(loader);
@@ -731,7 +733,7 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
-      sectionContainer.id = "document-"+docId;
+      sectionContainer.id = "document-" + docId;
 
       appendElements(elements, self.schema, self.model, []);
 
