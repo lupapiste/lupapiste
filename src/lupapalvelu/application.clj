@@ -320,7 +320,7 @@
 
 (defcommand "mark-seen"
   {:parameters [:id :type]
-   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements"} type) (fail :error.unknown-type)))]
+   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements" "verdicts"} type) (fail :error.unknown-type)))]
    :authenticated true}
   [{:keys [data user created] :as command}]
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
@@ -635,6 +635,7 @@
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdict  {:id verdictId
+                       :timestamp created
                        :name name
                        :given given
                        :status status
