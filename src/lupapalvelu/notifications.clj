@@ -86,14 +86,6 @@
     (template "application-new-comment.html")
     (replace-application-links "#conversation-link" application "/conversation" host)))
 
-(defn send-invite! [email text application user host]
-  (let [title (get-email-title application "invite")
-        msg   (message
-                (template "invite.html")
-                (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
-                (replace-application-links "#link" application "" host))]
-    (send-mail-to-recipients! [email] title msg)))
-
 (defn send-create-statement-person! [email text organization]
   (let [title (get-email-title {:title "Lausunnot"})
         msg   (message
@@ -130,7 +122,7 @@
     (template "application-verdict.html")
     (replace-application-links "#verdict-link" application "/verdict" host)))
 
-(defn send-notifications-on-verdict! [application-id host]
+#_(defn send-notifications-on-verdict! [application-id host]
   (let [application (mongo/by-id :applications application-id)
         recipients  (get-email-recipients-for-application application)
         msg         (get-message-for-verdict application host)
@@ -157,8 +149,19 @@
           title      (get-email-title application "new-comment")]
       (send-mail-to-recipients! recipients title msg))))
 
+(defn send-invite! [email text application user host]
+  (println email text (:id application) (:id user) host)
+  (let [title (get-email-title application "invite")
+        msg   (message
+                (template "invite.html")
+                (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
+                (replace-application-links "#link" application "" host))]
+    (send-mail-to-recipients! [email] title msg)))
+
 (defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
   (println "notify:" template)
   (condp = (keyword template)
-    :new-comment (send-notifications-on-new-comment! application user (:text data) host))
+    :new-comment (send-notifications-on-new-comment! application user (:text data) host)
+    :invite      (send-invite! (:email data) (:text data) application user host)
+    )
   )

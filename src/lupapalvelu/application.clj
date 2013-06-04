@@ -208,6 +208,7 @@
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
    :validators [validate-owner-or-writer]
+   :notify     "invite"
    :verified   true}
   [{created :created
     user    :user
@@ -231,13 +232,11 @@
               auth    (assoc writer :invite invite)]
           (if (domain/has-auth? application (:id invited))
             (fail :invite.already-has-auth)
-            (do
-              (mongo/update
-                :applications
-                {:_id application-id
-                 :auth {$not {$elemMatch {:invite.user.username email}}}}
-                {$push {:auth auth}})
-              (notifications/send-invite! email text application user host))))))))
+            (mongo/update
+              :applications
+              {:_id application-id
+               :auth {$not {$elemMatch {:invite.user.username email}}}}
+              {$push {:auth auth}})))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
