@@ -624,6 +624,7 @@
 (defcommand "give-verdict"
   {:parameters [:id :verdictId :status :name :given :official]
    :states     [:submitted :complement-needed :sent]
+   :notify     "verdict"
    :roles      [:authority]}
   [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
   (mongo/update
