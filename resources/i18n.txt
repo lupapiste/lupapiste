@@ -70,6 +70,7 @@ neighbor.show.response.pending: Odota, vastaustasi käsitellään...
 neighbor.show.response.done: Kiitos vastauksestasi!
 
 neighbors.missing: Hakemukseen ei liity naapureita
+application.tabStatement: Lausunnot ja kuulemiset
 
 operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
 rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
