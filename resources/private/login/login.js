@@ -14,7 +14,8 @@
         ajax.get("/api/hashbang")
           .success(function(e) {
             var bang = (e.bang.indexOf("#") !== 0) ? "#" + e.bang : e.bang;
-            window.parent.location = redirectLocation + bang;})
+            window.parent.location = redirectLocation + bang;
+          })
           .error(function() { window.parent.location = redirectLocation; })
           .call();
       })
@@ -45,11 +46,11 @@
   }
 
   function quality(pw) {
-    if (!pw) return null;
-    if (pw.length < 6) return "poor";
-    if (pw.length < 9) return "low";
-    if (pw.length < 11) return "med";
-    if (pw.length < 13) return "hi";
+    if (!pw)            { return null;   }
+    if (pw.length < 6)  { return "poor"; }
+    if (pw.length < 9)  { return "low";  }
+    if (pw.length < 11) { return "med";  }
+    if (pw.length < 13) { return "hi";   }
     return "excellent";
   }
 
@@ -73,7 +74,7 @@
       ajax
         .post("/api/token/" + self.token())
         .json({password: self.password1()})
-        .success(function(e) { self.success(true).fail(false).password1("").password2(""); })
+        .success(function() { self.success(true).fail(false).password1("").password2(""); })
         .fail(function() { self.success(false).fail(true).password1("").password2(""); $("#setpw input:first").focus(); })
         .call();
     };

@@ -68,7 +68,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     }
 
     var human = util.prop.toHumanFormat(id);
-    if (human != id) {
+    if (human !== id) {
       self.propertyId(human);
     } else {
       if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {

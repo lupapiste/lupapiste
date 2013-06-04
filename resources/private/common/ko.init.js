@@ -187,9 +187,9 @@
       var e = $(element),
           id = e.attr("id"),
           p = loc(id, "placeholder");
-      if (p) e.attr("placeholder", p);
+      if (p) { e.attr("placeholder", p); }
     });
     return this;
   };
-  
+
 })(jQuery);
