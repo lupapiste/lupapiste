@@ -1,13 +1,13 @@
 var tree = (function() {
   "use strict";
-  
+
   var setup = new function() {
     var self = this;
     self.speed = 200;
     self.animation = function(enabled) {
       self.speed = enabled ? 200 : 0;
     };
-  };
+  }();
 
   function nop() { return true; }
 
@@ -20,7 +20,7 @@ var tree = (function() {
     var template = args.template || defaultTemplate;
 
     var findTemplate = function(name) {
-      if (args[name]) return args[name];
+      if (args[name]) { return args[name]; }
       var e = $(".tree-" + name, template);
       return (e && e.length) ? e : $(".tree-" + name, defaultTemplate);
     };
@@ -41,7 +41,7 @@ var tree = (function() {
 
     function findTreeData(target) {
       var data = target.data("tree-link-data");
-      if (data) return data;
+      if (data) { return data; }
       var parent = target.parent();
       return (parent.length) ? findTreeData(parent) : null;
     }
@@ -49,7 +49,7 @@ var tree = (function() {
     self.clickGo = function(e) {
       var target = $(e.target),
           link = findTreeData(target);
-      if (!link) return true;
+      if (!link) { return true; }
       var selectedLink = link[0],
           nextElement = link[1],
           next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
@@ -59,7 +59,7 @@ var tree = (function() {
     };
 
     self.goBack = function() {
-      if (self.model.stack().length < 1) return false;
+      if (self.model.stack().length < 1) { return false; }
 
       self.stateNop();
       self.model.stack.pop();
@@ -67,7 +67,7 @@ var tree = (function() {
         self.stateGo();
         $(".tree-page", self.content).filter(":last").remove();
       });
-      
+
       if (self.model.selected()) {
         self.model.selected(null);
         self.onSelect(null);
@@ -145,5 +145,5 @@ var tree = (function() {
   };
 
   return setup;
-  
+
 })();
