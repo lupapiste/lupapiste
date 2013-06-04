@@ -51,16 +51,6 @@
 (defn get-application-operation [app]
   (first (:operations app)))
 
-(defn update-application
-  "get current application from command (or fail) and run changes into it."
-  [command changes]
-  (with-application command
-    (fn [{:keys [id]}]
-      (mongo/update
-        :applications
-        {:_id id}
-        changes))))
-
 (defn- without-system-keys [application]
   (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
 
