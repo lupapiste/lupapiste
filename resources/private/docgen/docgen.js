@@ -497,16 +497,40 @@ var docgen = (function () {
       unknown: buildUnknown
     };
 
+    function removeData(id, doc, path) {
+      ajax
+        .command("remove-data", { doc: doc, id: id, path: path })
+        .success(function (e) {
+          repository.load(id);
+        })
+        .error(function (e) { error(e); callback("err"); })
+        .fail(function (e) { error(e); callback("err"); })
+        .call();
+    }
+
     function build(subSchema, model, path, partOfChoice) {
       var myName = subSchema.name;
       var myPath = path.concat([myName]);
       var builder = builders[subSchema.type] || buildUnknown;
       var repeatingId = myPath.join("-");
 
-      function makeElem(myModel, id) {
+      function makeElem(myModel, id, isDynamicallyAdded) {
         var elem = builder(subSchema, myModel, myPath.concat([id]), partOfChoice);
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
+
+        if(subSchema.repeating && Object.keys(myModel[Object.keys(myModel)[0]]).length || isDynamicallyAdded) {
+          var removeButton = document.createElement("span");
+          removeButton.className = "icon remove-grey inline-right";
+          removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
+          console.log("delete for: " + self.appId + "," + self.docId + "," + myPath.concat([id]).join('.'));
+          removeButton.onclick = function() {
+            removeData(self.appId, self.docId, myPath.concat([id]).join('.'));
+            //LUPAPISTE.ModalConfirmDialog.newConfirmDialog(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), function() { alert("remove called"); }, loc("no"));
+          }
+          elem.insertBefore(removeButton, elem.childNodes[0]);
+        }
+        
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
@@ -520,7 +544,7 @@ var docgen = (function () {
         var elements = _.map(models, function (val, key) {
           var myModel = {};
           myModel[myName] = val;
-          return makeElem(myModel, key);
+          return makeElem(myModel, key, false);
         });
 
         var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaName + "." + myPath.join(".") + "._append_label"));
@@ -533,7 +557,7 @@ var docgen = (function () {
           }
           var myModel = {};
           myModel[myName] = {};
-          $(this).before(makeElem(myModel, count));
+          $(this).before(makeElem(myModel, count, true));
           accordion.setHeight(parent$);
         };
 
