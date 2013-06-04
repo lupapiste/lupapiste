@@ -281,7 +281,8 @@
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
-   :roles      [:applicant :authority]}
+   :roles      [:applicant :authority]
+   :notify     "new-comment"}
   [{{:keys [text target]} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
@@ -313,10 +314,7 @@
                       {$set {:state :info
                              :modified created}}))
 
-        nil)
-
-      ;; TODO: details should come from updated state!
-      (notifications/send-notifications-on-new-comment! application user text host))))
+        nil))))
 
 (defcommand "mark-seen"
   {:parameters [:id :type]
