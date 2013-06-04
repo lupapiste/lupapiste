@@ -55,8 +55,8 @@
       mail-agent
       (fn [_]
         (if (email/send-mail? recipient title msg)
-          (info "email was sent successfully." recipients title message)
-          (error "email could not be delivered." recipients title message))))))
+          (info "email was sent successfully." recipients title msg)
+          (error "email could not be delivered." recipients title msg))))))
 
 (defn get-email-title [{:keys [title]} & [title-key]]
   (i18n/with-lang "fi"
@@ -141,7 +141,6 @@
     (send-mail-to-recipients! [email] title msg)))
 
 (defn send-notifications-on-application-state-change! [{:keys [id]} host]
-  (println id host)
   (let [application (mongo/by-id :applications id)
         recipients  (get-email-recipients-for-application application)
         msg         (get-message-for-application-state-change application host)
@@ -157,7 +156,6 @@
     (send-mail-to-recipients! recipients title msg)))
 
 (defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
-  (println "notify:" template)
   (condp = (keyword template)
     :new-comment  (send-notifications-on-new-comment! application user (:text data) host)
     :invite       (send-invite! (:email data) (:text data) application user host)
