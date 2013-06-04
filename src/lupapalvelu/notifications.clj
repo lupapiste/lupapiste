@@ -51,10 +51,12 @@
 
 (defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
-    (send-off mail-agent (fn [_]
-                           (if (email/send-mail? recipient title msg)
-                             (info "email was sent successfully")
-                             (error "email could not be delivered."))))))
+    (send-off
+      mail-agent
+      (fn [_]
+        (if (email/send-mail? recipient title msg)
+          (info "email was sent successfully")
+          (error "email could not be delivered."))))))
 
 (defn get-email-title [{:keys [title]} & [title-key]]
   (i18n/with-lang "fi"
@@ -110,13 +112,6 @@
     (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
     (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application))))))))
 
-(defn send-notifications-on-application-state-change! [application-id host]
-  (let [application (mongo/by-id :applications application-id)
-        recipients  (get-email-recipients-for-application application)
-        msg         (get-message-for-application-state-change application host)
-        title       (get-email-title application "state-change")]
-    (send-mail-to-recipients! recipients title msg)))
-
 (defn get-message-for-verdict [application host]
   (message
     (template "application-verdict.html")
@@ -150,7 +145,6 @@
       (send-mail-to-recipients! recipients title msg))))
 
 (defn send-invite! [email text application user host]
-  (println email text (:id application) (:id user) host)
   (let [title (get-email-title application "invite")
         msg   (message
                 (template "invite.html")
@@ -158,10 +152,18 @@
                 (replace-application-links "#link" application "" host))]
     (send-mail-to-recipients! [email] title msg)))
 
+(defn send-notifications-on-application-state-change! [{:keys [id]} host]
+  (println id host)
+  (let [application (mongo/by-id :applications id)
+        recipients  (get-email-recipients-for-application application)
+        msg         (get-message-for-application-state-change application host)
+        title       (get-email-title application "state-change")]
+    (send-mail-to-recipients! recipients title msg)))
+
 (defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
   (println "notify:" template)
   (condp = (keyword template)
-    :new-comment (send-notifications-on-new-comment! application user (:text data) host)
-    :invite      (send-invite! (:email data) (:text data) application user host)
-    )
-  )
+    :new-comment  (send-notifications-on-new-comment! application user (:text data) host)
+    :invite       (send-invite! (:email data) (:text data) application user host)
+    :state-change (send-notifications-on-application-state-change! application host)
+    ))
