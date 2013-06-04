@@ -109,7 +109,7 @@
     (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
 
 ;;
-;; New mechanism
+;; New stuff
 ;;
 
 (defn get-message-for-application-state-change [application host]
@@ -119,7 +119,6 @@
     (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
     (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application))))))))
 
-; new comment
 (defn get-message-for-new-comment [application host]
   (message
     (template "application-new-comment.html")

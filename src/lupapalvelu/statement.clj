@@ -44,10 +44,11 @@
 
 (defcommand "create-statement-person"
   {:parameters [:email :text]
+   :notified   true
    :roles      [:authorityAdmin]}
   [{{:keys [email text]} :data {:keys [organizations] :as user} :user}]
   (let [organization-id (first organizations)
-        organization (mongo/select-one :organizations {:_id organization-id})]
+        organization    (mongo/select-one :organizations {:_id organization-id})]
     (with-user email
       (fn [{:keys [firstName lastName] :as user}]
         (if-not (security/authority? user)
@@ -82,6 +83,7 @@
 (defcommand "request-for-statement"
   {:parameters  [:id :personIds]
    :roles       [:authority]
+   :notified    true
    :states      [:draft :info :open :submitted :complement-needed]
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
   [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
