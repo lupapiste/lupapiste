@@ -6,7 +6,11 @@
 ;;; Processings let bindings in facts
 
 (defn let? [form]
-  (and (list? form) (= 'clojure.core/let (first form))))
+  (and
+    (list? form)
+    (or
+      (= 'let (first form))
+      (= 'clojure.core/let (first form)))))
 
 (defn checkables-to-facts-in-let-bindings
   "Rewrites let-bindings by adding facts for all checkables.
