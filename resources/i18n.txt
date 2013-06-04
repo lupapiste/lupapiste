@@ -49,7 +49,7 @@ neighbors.manage: Hallitse naapureita
 
 neighbors.edit.title: Naapurin tiedot:
 neighbors.edit.propertyId: Kiinteistötunnus
-neighbors.edit.propertyId.placeholder: kiinteistötunnus 
+neighbors.edit.propertyId.placeholder: kiinteistötunnus
 neighbors.edit.name: Nimi
 neighbors.edit.ok: Tallenna
 neighbors.edit.cancel: Peruuta
@@ -120,6 +120,8 @@ poikkeamishakemuksen-lisaosa.vaikutukset: Vaikutukset
 poikkeamishakemuksen-lisaosa.lisätiedot: Lisätiedot
 
 attachment.delete.version.header: Poista liitetiedosto
+
+error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
 
 #
 # Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
