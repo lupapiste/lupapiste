@@ -13,7 +13,7 @@
   (errorf "consumed token: token-type %s does not have handler: id=%s" (:token-type token-data) (:_id token-data)))
 
 (def ^:private default-ttl (* 24 60 60 1000))
-    
+
 (def make-token-id (partial random-password 48))
 
 (defn make-token [token-type data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
