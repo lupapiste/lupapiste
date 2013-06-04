@@ -251,6 +251,8 @@
     approved => valid?))
 
 (facts "non-approvable schema"
+  (approvable? nil) => false
+  (approvable? {}) => false
   (approvable? (new-document schema ..now..)) => false)
 
 (def schema-with-approvals {:info {:name "approval-model" :version 1}
