@@ -417,7 +417,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
-   :verify     "state-change"
+   :notify     "state-change"
    :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :as command}]
   (with-application command
