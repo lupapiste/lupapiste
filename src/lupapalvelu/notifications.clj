@@ -82,12 +82,6 @@
 ;; Sending
 ;;
 
-; new comment
-(defn get-message-for-new-comment [application host]
-  (message
-    (template "application-new-comment.html")
-    (replace-application-links "#conversation-link" application "/conversation" host)))
-
 (defn send-create-statement-person! [email text organization]
   (let [title (get-email-title {:title "Lausunnot"})
         msg   (message
@@ -105,14 +99,7 @@
                   (replace-application-links "#link" application "" host))]
       (send-mail-to-recipients! [email] title msg))))
 
-(defn get-message-for-application-state-change [application host]
-  (message
-    (template "application-state-change.html")
-    (replace-application-links "#application-link" application "" host)
-    (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
-    (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application))))))))
-
-(defn get-message-for-verdict [application host]
+#_(defn get-message-for-verdict [application host]
   (message
     (template "application-verdict.html")
     (replace-application-links "#verdict-link" application "/verdict" host)))
@@ -136,6 +123,19 @@
 ;;
 ;; New mechanism
 ;;
+
+(defn get-message-for-application-state-change [application host]
+  (message
+    (template "application-state-change.html")
+    (replace-application-links "#application-link" application "" host)
+    (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
+    (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application))))))))
+
+; new comment
+(defn get-message-for-new-comment [application host]
+  (message
+    (template "application-new-comment.html")
+    (replace-application-links "#conversation-link" application "/conversation" host)))
 
 (defn send-notifications-on-new-comment! [application user comment-text host]
   (when (security/authority? user)
