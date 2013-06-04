@@ -20,7 +20,8 @@ jQuery(function($){
       isRTL: false,
       buttonImage: '/img/calendar.gif',
       showMonthAfterYear: false,
-      yearSuffix: ''};
+      yearSuffix: ''
+    };
 
   $.datepicker.regional.sv = {
       closeText: 'St&auml;ng',
@@ -38,7 +39,8 @@ jQuery(function($){
       isRTL: false,
       buttonImage: '/img/calendar.gif',
       showMonthAfterYear: false,
-      yearSuffix: ''};
+      yearSuffix: ''
+    };
 
   $.datepicker.setDefaults($.datepicker.regional.fi);
 });

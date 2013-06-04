@@ -74,7 +74,7 @@ $(function() {
         .append($("<input type='checkbox' data-id='proxy'>").click(function(e) { ajax.post("/api/proxy-ctrl/" + ($(e.target).prop("checked") ? "on" : "off")).call(); }))
         .append($("<label>").text("Proxy enabled"))
         .append($("<br>"))
-        .append($("<input type='checkbox' data-id='anim' checked='checked'>").click(function(e) { tree.animation($(this).prop("checked")); }))
+        .append($("<input type='checkbox' data-id='anim' checked='checked'>").click(function() { tree.animation($(this).prop("checked")); }))
         .append($("<label>").text("Animations"))
         .append($("<p>").text("Apply:")
           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
