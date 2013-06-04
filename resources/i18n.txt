@@ -50,7 +50,7 @@ neighbors.manage: Hallitse naapureita
 
 neighbors.edit.title: Naapurin tiedot:
 neighbors.edit.propertyId: Kiinteistötunnus
-neighbors.edit.propertyId.placeholder: kiinteistötunnus 
+neighbors.edit.propertyId.placeholder: kiinteistötunnus
 neighbors.edit.name: Nimi
 neighbors.edit.ok: Tallenna
 neighbors.edit.cancel: Peruuta
@@ -68,6 +68,8 @@ neighbor.show.message.placeholder: Kuvaile moitteesi tähän kenttään
 neighbor.show.ok: Lähetä
 neighbor.show.response.pending: Odota, vastaustasi käsitellään...
 neighbor.show.response.done: Kiitos vastauksestasi!
+
+neighbors.missing: Hakemukseen ei liity naapureita
 
 operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
 rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
