@@ -2,7 +2,6 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [sade.strings :only [suffix]]
-        [lupapalvelu.core]
         [lupapalvelu.i18n :only [loc]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
@@ -87,13 +86,6 @@
     (template "application-new-comment.html")
     (replace-application-links "#conversation-link" application "/conversation" host)))
 
-(defn send-notifications-on-new-comment! [application user-commenting comment-text host]
-  (when (security/authority? user-commenting)
-    (let [recipients (get-email-recipients-for-application application)
-          msg        (get-message-for-new-comment application host)
-          title      (get-email-title application "new-comment")]
-      (send-mail-to-recipients! recipients title msg))))
-
 (defn send-invite! [email text application user host]
   (let [title (get-email-title application "invite")
         msg   (message
@@ -153,3 +145,20 @@
               (enlive/transform [:#link-fi] (fn [a] (assoc-in a [:attrs :href] link-fi)))
               (enlive/transform [:#link-sv] (fn [a] (assoc-in a [:attrs :href] link-sv))))]
     (send-mail-to-recipients! [to] (loc "reset.email.title") msg)))
+
+;;
+;; New mechanism
+;;
+
+(defn send-notifications-on-new-comment! [application user comment-text host]
+  (when (security/authority? user)
+    (let [recipients (get-email-recipients-for-application application)
+          msg        (get-message-for-new-comment application host)
+          title      (get-email-title application "new-comment")]
+      (send-mail-to-recipients! recipients title msg))))
+
+(defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
+  (println "notify:" template)
+  (condp = (keyword template)
+    :new-comment (send-notifications-on-new-comment! application user (:text data) host))
+  )
