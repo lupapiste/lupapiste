@@ -393,6 +393,9 @@
 
           </div>
 
+          <!-- feature flaggin' -->
+          <div data-bind="if: features.enabled('neigbors')">
+
           <div data-bind="with: application" class="application-neighbors">
 
             <h1>Naapurit</h1>
@@ -438,6 +441,10 @@
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage',visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal"></button>
 
           </div>
+
+          <!-- feature flaggin' -->
+          </div>
+
 
         </div>
 
