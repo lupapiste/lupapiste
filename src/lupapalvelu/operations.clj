@@ -38,8 +38,8 @@
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
-                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]
-                                          ["Yleisten alueiden luvat" [["Kaivuulupa" :yleiset-alueet-kaivuulupa]]]])))
+                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
+          (when (env/feature? :yleiset-alueet) [["Yleisten alueiden luvat" [["Kaivuulupa" :yleiset-alueet-kaivuulupa]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
