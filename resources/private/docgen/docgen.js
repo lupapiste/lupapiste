@@ -534,6 +534,7 @@ var docgen = (function () {
           var myModel = {};
           myModel[myName] = {};
           $(this).before(makeElem(myModel, count));
+          accordion.setHeight(parent$);
         };
 
         $(appendButton).click(appender);
@@ -643,7 +644,7 @@ var docgen = (function () {
 
     function validate() {
       ajax
-        .query("validate-doc", { id: self.appId, doc: self.docId})
+        .query("validate-doc", { id: self.appId, doc: self.docId })
         .success(function (e) { showValidationResults(e.results); })
         .call();
     }
@@ -677,7 +678,7 @@ var docgen = (function () {
         }, 2000);
       }
 
-      saveForReal(path, value, function (status,results) {
+      saveForReal(path, value, function (status, results) {
         showValidationResults(results);
         if (label) {
           label.removeChild(loader);
@@ -745,7 +746,7 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
-      sectionContainer.id = "document-"+docId;
+      sectionContainer.id = "document-" + docId;
 
       appendElements(elements, self.schema, self.model, []);
 
