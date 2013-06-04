@@ -528,7 +528,6 @@ var docgen = (function () {
           var myModel = {};
           myModel[myName] = {};
           $(this).before(makeElem(myModel, count));
-          console.log(parent$.parent());
           accordion.setHeight(parent$);
         };
 
