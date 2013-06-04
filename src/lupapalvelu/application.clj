@@ -374,26 +374,27 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
+   :notify     "state-change"
    :states     [:draft :info :open :submitted]}
   [{{id :id} :data {:keys [host]} :web created :created :as command}]
   (update-application command
     {$set {:modified  created
-           :state     :canceled}})
-  (notifications/send-notifications-on-application-state-change! id host))
+           :state     :canceled}}))
 
 (defcommand "request-for-complement"
   {:parameters [:id]
    :roles      [:authority]
+   :notify     "state-change"
    :states     [:sent]}
   [{{id :id} :data {host :host} :web created :created :as command}]
   (update-application command
     {$set {:modified  created
-           :state :complement-needed}})
-  (notifications/send-notifications-on-application-state-change! id host))
+           :state :complement-needed}}))
 
 (defcommand "approve-application"
   {:parameters [:id :lang]
    :roles      [:authority]
+   :notify     "state-change"
    :states     [:submitted :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
@@ -408,7 +409,6 @@
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
-          (notifications/send-notifications-on-application-state-change! application-id host)
           (catch org.xml.sax.SAXParseException e
             (.printStackTrace e)
             (fail (.getMessage e))))))))
@@ -417,6 +417,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
+   :verify     "state-change"
    :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :as command}]
   (with-application command
@@ -434,8 +435,7 @@
             (assoc (dissoc application :id) :_id application-id))
           (catch com.mongodb.MongoException$DuplicateKey e
             ; This is ok. Only the first submit is saved.
-            ))
-        (notifications/send-notifications-on-application-state-change! application-id host)))))
+            ))))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
