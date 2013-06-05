@@ -124,7 +124,7 @@
    :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
    :description "authrority-roled statement owners can give statements that are not given already"}
-  [{{:keys [id statementId status text]} :data :keys [application]}]
+  [{{:keys [id statementId status text]} :data :keys [application] :as command}]
   (mongo/update
     :applications
     {:_id id
@@ -134,11 +134,11 @@
            :statements.$.text text}})
   (let [text (if (statement-given? application statementId)
                "Hakemuksen lausuntoa on p\u00e4ivitetty."
-               "Hakemukselle lis\u00e4tty lausunto.")])
-  (executed "add-comment"
-    (-> command
-      (assoc :data {:id id
-                    :text   text
-                    :type   :system
-                    :target {:type :statement
-                             :id   statementId}}))))
+               "Hakemukselle lis\u00e4tty lausunto.")]
+    (executed "add-comment"
+      (-> command
+        (assoc :data {:id id
+                      :text   text
+                      :type   :system
+                      :target {:type :statement
+                               :id   statementId}})))))
