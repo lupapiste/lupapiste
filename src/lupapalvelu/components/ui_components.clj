@@ -46,7 +46,7 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js"]
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"]
                   :css ["css/main.css"]
                   :html ["error.html" "nav.html"]}
 

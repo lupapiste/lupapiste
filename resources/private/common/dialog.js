@@ -46,7 +46,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
         winWidth = $(window).width(),
         maskHeight = $(document).height(),
         maskWidth = winWidth;
-    
+
     self.mask
       .css({"width": maskWidth, "height": maskHeight})
       .fadeIn(300)
@@ -62,7 +62,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
       .find("input:enabled")
         .first()
         .focus();
-    
+
     return false;
   };
 

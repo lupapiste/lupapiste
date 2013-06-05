@@ -208,6 +208,7 @@
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
    :validators [validate-owner-or-writer]
+   :notify     "invite"
    :verified   true}
   [{created :created
     user    :user
@@ -231,13 +232,11 @@
               auth    (assoc writer :invite invite)]
           (if (domain/has-auth? application (:id invited))
             (fail :invite.already-has-auth)
-            (do
-              (mongo/update
-                :applications
-                {:_id application-id
-                 :auth {$not {$elemMatch {:invite.user.username email}}}}
-                {$push {:auth auth}})
-              (notifications/send-invite! email text application user host))))))))
+            (mongo/update
+              :applications
+              {:_id application-id
+               :auth {$not {$elemMatch {:invite.user.username email}}}}
+              {$push {:auth auth}})))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -281,7 +280,8 @@
 
 (defcommand "add-comment"
   {:parameters [:id :text :target]
-   :roles      [:applicant :authority]}
+   :roles      [:applicant :authority]
+   :notify     "new-comment"}
   [{{:keys [text target]} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
@@ -313,14 +313,11 @@
                       {$set {:state :info
                              :modified created}}))
 
-        nil)
-
-      ;; TODO: details should come from updated state!
-      (notifications/send-notifications-on-new-comment! application user text host))))
+        nil))))
 
 (defcommand "mark-seen"
   {:parameters [:id :type]
-   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements"} type) (fail :error.unknown-type)))]
+   :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements" "verdicts"} type) (fail :error.unknown-type)))]
    :authenticated true}
   [{:keys [data user created] :as command}]
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
@@ -377,26 +374,27 @@
 (defcommand "cancel-application"
   {:parameters [:id]
    :roles      [:applicant]
+   :notify     "state-change"
    :states     [:draft :info :open :submitted]}
   [{{id :id} :data {:keys [host]} :web created :created :as command}]
   (update-application command
     {$set {:modified  created
-           :state     :canceled}})
-  (notifications/send-notifications-on-application-state-change! id host))
+           :state     :canceled}}))
 
 (defcommand "request-for-complement"
   {:parameters [:id]
    :roles      [:authority]
+   :notify     "state-change"
    :states     [:sent]}
   [{{id :id} :data {host :host} :web created :created :as command}]
   (update-application command
     {$set {:modified  created
-           :state :complement-needed}})
-  (notifications/send-notifications-on-application-state-change! id host))
+           :state :complement-needed}}))
 
 (defcommand "approve-application"
   {:parameters [:id :lang]
    :roles      [:authority]
+   :notify     "state-change"
    :states     [:submitted :complement-needed]}
   [{{:keys [host]} :web :as command}]
   (with-application command
@@ -411,7 +409,6 @@
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
-          (notifications/send-notifications-on-application-state-change! application-id host)
           (catch org.xml.sax.SAXParseException e
             (.printStackTrace e)
             (fail (.getMessage e))))))))
@@ -420,6 +417,7 @@
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
+   :notify     "state-change"
    :validators [validate-owner-or-writer]}
   [{{:keys [host]} :web :as command}]
   (with-application command
@@ -437,8 +435,7 @@
             (assoc (dissoc application :id) :_id application-id))
           (catch com.mongodb.MongoException$DuplicateKey e
             ; This is ok. Only the first submit is saved.
-            ))
-        (notifications/send-notifications-on-application-state-change! application-id host)))))
+            ))))))
 
 (defcommand "save-application-shape"
   {:parameters [:id :shape]
@@ -627,6 +624,7 @@
 (defcommand "give-verdict"
   {:parameters [:id :verdictId :status :name :given :official]
    :states     [:submitted :complement-needed :sent]
+   :notify     "verdict"
    :roles      [:authority]}
   [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
   (mongo/update
@@ -635,6 +633,7 @@
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdict  {:id verdictId
+                       :timestamp created
                        :name name
                        :given given
                        :status status

@@ -6,7 +6,7 @@ var currentUser = (function() {
   return {
     set: function(u) { user = u; },
     get: function() { return user; },
-    isAuthority: function() { return user.role === "authority"; }
+    isAuthority: function() { return user.role === "authority"; },
     isApplicant: function() { return user.role === "applicant"; }
   };
 
