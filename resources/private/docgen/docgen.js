@@ -10,7 +10,7 @@ var docgen = (function () {
     return appendButton;
   }
 
-  LUPAPISTE.DocModel = function (schema, model, removeCallback, docId, application) {
+  var DocModel = function (schema, model, removeCallback, docId, application, authorizationModel) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -25,6 +25,7 @@ var docgen = (function () {
     self.docId = docId;
     self.appId = application.id;
     self.application = application;
+    self.authorizationModel = authorizationModel;
     self.eventData = { doc: docId, app: self.appId };
 
     self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
@@ -745,6 +746,10 @@ var docgen = (function () {
             .click(removeDoc));
       }
 
+      if (self.schema.info.approvable) {
+        elements.appendChild(document.createTextNode("(approvable)"));
+      }
+
       sectionContainer.className = "accordion_content expanded";
       sectionContainer.id = "document-" + docId;
 
@@ -769,7 +774,7 @@ var docgen = (function () {
     validate();
   };
 
-  function displayDocuments(containerSelector, removeDocModel, application, documents) {
+  function displayDocuments(containerSelector, removeDocModel, application, documents, authorizationModel) {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
@@ -782,7 +787,7 @@ var docgen = (function () {
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.data, removeDocModel.init, doc.id, application).element);
+      docgenDiv.append(new DocModel(schema, doc.data, removeDocModel.init, doc.id, application, authorizationModel).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -793,7 +798,7 @@ var docgen = (function () {
             .command("create-doc", { schemaName: schema.info.name, id: application.id })
             .success(function (data) {
               var newDocId = data.doc;
-              var newElem = new LUPAPISTE.DocModel(schema, {}, removeDocModel.init, newDocId, application).element;
+              var newElem = new DocModel(schema, {}, removeDocModel.init, newDocId, application, authorizationModel).element;
               $(self).before(newElem);
             })
             .call();
