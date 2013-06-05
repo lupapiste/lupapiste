@@ -123,7 +123,7 @@
    :validators  [statement-exists statement-owner #_statement-not-given]
    :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
-   :description "authrority-roled statement owners can give statements that are not given already"}
+   :description "authrority-roled statement owners can give statements - notifies via comment."}
   [{{:keys [id statementId status text]} :data :keys [application] :as command}]
   (mongo/update
     :applications
@@ -133,8 +133,8 @@
            :statements.$.given (now)
            :statements.$.text text}})
   (let [text (if (statement-given? application statementId)
-               "Hakemuksen lausuntoa on p\u00e4ivitetty."
-               "Hakemukselle lis\u00e4tty lausunto.")]
+                 "Hakemuksen lausuntoa on p\u00e4ivitetty."
+                 "Hakemukselle lis\u00e4tty lausunto.")]
     (executed "add-comment"
       (-> command
         (assoc :data {:id id
