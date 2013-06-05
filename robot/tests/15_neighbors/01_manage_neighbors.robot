@@ -19,3 +19,10 @@ New applications does not have neighbors
 User cant manage neighbors
   Element should not be visible  xpath=//*[@data-test-id='manage-neighbors']
   [Teardown]  logout
+
+Sonja can manage neigbors
+  Sonja logs in
+  Open application  ${appname}  753-416-25-22
+  Open tab  statement
+  Element should be visible  xpath=//*[@data-test-id='application-no-neigbors']
+  Element should be visible  xpath=//*[@data-test-id='manage-neighbors']
