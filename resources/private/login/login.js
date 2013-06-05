@@ -49,7 +49,7 @@
     if (!pw)            { return null;   }
     if (pw.length < 6)  { return "poor"; }
     if (pw.length < 9)  { return "low";  }
-    if (pw.length < 11) { return "med";  }
+    if (pw.length < 11) { return "med";  }
     if (pw.length < 13) { return "hi";   }
     return "excellent";
   }
