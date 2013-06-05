@@ -50,8 +50,7 @@
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
 
-;; TODO: Tee yleisille alueille oma commons!
-;(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
+(def ^:private yleiset-alueet-common-schemas ["tyomaastaVastaava" "laskutustiedot" "kohteenTiedot" ])
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -177,8 +176,8 @@
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :yleiset-alueet-kaivuulupa   {:schema "yleiset-alueet-kaivuu"
-                                 :required  common-schemas}})
+   :yleiset-alueet-kaivuulupa   {:schema "tyo-/vuokra-aika"
+                                 :required  yleiset-alueet-common-schemas}})
 
 
 ; Sanity checks:

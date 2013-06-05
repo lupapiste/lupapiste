@@ -1,36 +1,70 @@
 (ns lupapalvelu.document.yleiset-alueet-schemas
   (:use [lupapalvelu.document.schemas]))
 
-;; TODO: Tämä on vain esimerkki, tee oikea sisältö!
+;; TODO: Laitetaanko tämä "ammattipatevyys" liityteeksi, kuten parissa lomakkeessa on?
 
-(def yleiset-alueet-kaivuu {:info {:name "yleiset-alueet-kaivuu"
-                                   :order 60}
-                            :body [{:name "huoneistoTunnus" :type :group
-                                    :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                                           {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
-                                           {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}
-                                   {:name "huoneistonTyyppi"
-                                    :type :group
-                                    :body [{:name "huoneistoTyyppi" :type :select
-                                            :body [{:name "asuinhuoneisto"}
-                                                   {:name "toimitila"}
-                                                   {:name "ei tiedossa"}]}
-                                           {:name "huoneistoala" :type :string :unit "m2" :subtype :number :size "s" :min 1 :max 9999999 :required true}
-                                           {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "s"}]}
-                                   {:name "keittionTyyppi" :type :select :required true
-                                    :body [{:name "keittio"}
-                                           {:name "keittokomero"}
-                                           {:name "keittotila"}
-                                           {:name "tupakeittio"}
-                                           {:name "ei tiedossa"}]}
-                                   {:name "varusteet"
-                                    :type :group
-                                    :layout :vertical
-                                    :body [{:name "WCKytkin" :type :checkbox}
-                                           {:name "ammeTaiSuihkuKytkin" :type :checkbox}
-                                           {:name "saunaKytkin" :type :checkbox}
-                                           {:name "parvekeTaiTerassiKytkin" :type :checkbox}
-                                           {:name "lamminvesiKytkin" :type :checkbox}]}]})
+(def ammattipatevyys [{:name "koulutus" :type :string}
+                      {:name "ammattipatevyysluokka" :type :select
+                       :body [{:name "Tieturva1"}
+                              {:name "Tieturva2"}]}])
+
+(def tyomaasta-vastaava (body
+                      henkilo-valitsin
+                      designer-basic
+                      {:name "patevyys" :type :group
+                       :body ammattipatevyys}))
+
+(def kohteen-tiedot (body
+                      rakennuksen-kayttotarkoitus
+                      {:name "kaupunginosa" :type :string}
+                      {:name "kortteli" :type :string}
+                      {:name "tontti" :type :string}
+                      simple-osoite))
 
 (def yleiset-alueet-schemas
-  (to-map-by-name [yleiset-alueet-kaivuu]))
+  (to-map-by-name
+    [{:info {:name "tyomaastaVastaava"
+             :type :group
+             :order 60}
+      :body tyomaasta-vastaava}
+     {:info {:name "laskutustiedot"
+             :type :group
+             :order 61}
+                  :body party-with-required-hetu}
+     {:info {:name "kohteenTiedot"
+             :type :group
+             :order 62}
+      :body kohteen-tiedot}
+     {:info {:name "tyo-/vuokra-aika"
+             :type :group
+             :order 63}
+      :body [{:name "alkaa-pvm" :type :date}
+             {:name "paattyy-pvm" :type :date}]}
+
+     ;; TODO: LIITTEET
+     ]))
+
+
+;; -- Oma ehdotus --
+
+;(def kaivuulupa {:info {:name "yleiset-alueet-kaivuu" :order 60}
+;                 :body [{:name "tyomaastaVastaava"
+;                         :type :group
+;                         :body tyomaasta-vastaava}
+;                        {:name "laskutustiedot"
+;                         :type :group
+;                         :body party-with-required-hetu}
+;                        {:name "kohteenTiedot"
+;                         :type :group
+;                         :body kohteen-tiedot}
+;                        {:name "tyo-/vuokra-aika"
+;                         :type :group
+;                         :body [{:name "alkaa-pvm" :type :date}
+;                                {:name "paattyy-pvm" :type :date}]}
+;
+;                        ;; TODO: LIITTEET
+;                        ]})
+;
+;(def yleiset-alueet-schemas
+;  (to-map-by-name kaivuulupa))
+

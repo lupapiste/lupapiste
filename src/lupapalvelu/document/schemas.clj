@@ -101,14 +101,15 @@
                        henkilotiedot-minimal
                        yhteystiedot)}))
 
-(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-            {:name "henkilo" :type :group :body henkilo}
-            {:name "yritys" :type :group :body yritys}])
+(def party (body
+             [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+              {:name "henkilo" :type :group :body henkilo}
+              {:name "yritys" :type :group :body yritys}]))
 
-(def party-with-required-hetu
-  [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-   {:name "henkilo" :type :group :body henkilo-with-required-hetu}
-   {:name "yritys" :type :group :body yritys}])
+(def party-with-required-hetu (body
+                                [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                                 {:name "henkilo" :type :group :body henkilo-with-required-hetu}
+                                 {:name "yritys" :type :group :body yritys}]))
 
 
 (def patevyys [{:name "koulutus" :type :string}
@@ -178,14 +179,7 @@
 (def yhden-asunnon-talot "011 yhden asunnon talot")
 (def vapaa-ajan-asuinrakennus "041 vapaa-ajan asuinrakennukset")
 (def talousrakennus "941 talousrakennukset")
-(def rakennuksen-tiedot [{:name "kaytto"
-                          :type :group
-                          :body [{:name "rakentajaTyyppi" :type :select :required true
-                                  :body [{:name "liiketaloudellinen"}
-                                         {:name "muu"}
-                                         {:name "ei tiedossa"}]}
-                                 {:name "kayttotarkoitus" :type :select
-                                  :body [{:name yhden-asunnon-talot}
+(def rakennuksen-kayttotarkoitus [{:name yhden-asunnon-talot}
                                          {:name "012 kahden asunnon talot"}
                                          {:name "013 muut erilliset talot"}
                                          {:name "021 rivitalot"}
@@ -262,7 +256,15 @@
                                          {:name "931 saunarakennukset"}
                                          {:name talousrakennus}
                                          {:name "999 muualla luokittelemattomat rakennukset"}
-                                         {:name "ei tiedossa"}]}]}
+                                         {:name "ei tiedossa"}])
+(def rakennuksen-tiedot [{:name "kaytto"
+                          :type :group
+                          :body [{:name "rakentajaTyyppi" :type :select :required true
+                                  :body [{:name "liiketaloudellinen"}
+                                         {:name "muu"}
+                                         {:name "ei tiedossa"}]}
+                                 {:name "kayttotarkoitus" :type :select
+                                  :body rakennuksen-kayttotarkoitus}]}
                          {:name "mitat"
                           :type :group
                           :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
