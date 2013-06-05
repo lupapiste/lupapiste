@@ -639,7 +639,6 @@ var docgen = (function () {
               level = r.result[0],
               code  = r.result[1];
           if(level !== "tip") {
-            //console.log(path.join("."), level, code, loc("error."+code));
             var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
             errorPanel.html("<span class='"+level+"'>"+errorPanel.html()+loc("error."+code)+"</span>").show();
           }
@@ -689,7 +688,7 @@ var docgen = (function () {
         if (label) {
           label.removeChild(loader);
         }
-        if (status === "warn" || status === "tip") {
+        if (status === "warn" || status === "tip") {
           showIndicator("form-input-saved", "form.saved");
         } else if (status === "err") {
           showIndicator("form-input-err", "form.err");
