@@ -366,6 +366,7 @@
 (defvalidator :vrk:CR333:tilavuus
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia"
    :schema  "uusiRakennus"
+   :level   :tip
    :fields  [tilavuus [:mitat :tilavuus ->int]]
    :facts   {:ok   [[10]]
              :fail [[0]]}}
@@ -375,6 +376,7 @@
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
              - Kerrosala voi olla 0, jos kayttotarkoitus on 162, 163, 169, 611, 613, 712, 719, 722 tai 941."
    :schema  "uusiRakennus"
+   :level   :tip
    :fields  [kerrosala       [:mitat :kerrosala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
    :facts   {:ok   [[9 "032 luhtitalot"]
@@ -388,6 +390,7 @@
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
              Kokonaisala voi olla 0 , jos kayttotarkoitus >729."
    :schema  "uusiRakennus"
+   :level   :tip
    :fields  [kokonaisala     [:mitat :kokonaisala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
    :facts   {:ok   [[9 "032 luhtitalot"]
@@ -402,6 +405,7 @@
   {:doc     "Jos rakentamistoimenpide on 1, ovat tilavuus,kerrosala,kokonaisala ja kerrosluku pakollisia.
              Kerrosluku voi olla 0, jos kayttotarkoitus = 162, 163, 169, 611, 613, 712, 719, 722 tai >729."
    :schema  "uusiRakennus"
+   :level   :tip
    :fields  [kerrosluku      [:mitat :kerrosluku ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]]
    :facts   {:ok   [[9 "032 luhtitalot"]
@@ -447,6 +451,7 @@
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
          Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
+   :level  :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             julkisivu       [:rakenne :julkisivu]]
    :facts  {:ok    [["032 luhtitalot"       "tiili"]
@@ -462,6 +467,7 @@
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
          Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
+   :level   :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             lammitustapa    [:lammitys :lammitystapa]]
    :facts  {:ok    [["032 luhtitalot"       "uuni"]
