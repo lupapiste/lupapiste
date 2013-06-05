@@ -503,8 +503,6 @@ var docgen = (function () {
         .success(function (e) {
           repository.load(id);
         })
-        .error(function (e) { error(e); callback("err"); })
-        .fail(function (e) { error(e); callback("err"); })
         .call();
     }
 
@@ -514,19 +512,17 @@ var docgen = (function () {
       var builder = builders[subSchema.type] || buildUnknown;
       var repeatingId = myPath.join("-");
 
-      function makeElem(myModel, id, isDynamicallyAdded) {
+      function makeElem(myModel, id) {
         var elem = builder(subSchema, myModel, myPath.concat([id]), partOfChoice);
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if(subSchema.repeating && Object.keys(myModel[Object.keys(myModel)[0]]).length || isDynamicallyAdded) {
+        if(subSchema.repeating) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
-          console.log("delete for: " + self.appId + "," + self.docId + "," + myPath.concat([id]).join('.'));
           removeButton.onclick = function() {
-            //removeData(self.appId, self.docId, myPath.concat([id]).join('.'));
-            LUPAPISTE.ModalDialog.newConfirmDialog(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), function() { alert("remove called"); }, loc("no"));
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), function() { removeData(self.appId, self.docId, myPath.concat([id]).join('.')); }, loc("no"));
           }
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
@@ -544,7 +540,7 @@ var docgen = (function () {
         var elements = _.map(models, function (val, key) {
           var myModel = {};
           myModel[myName] = val;
-          return makeElem(myModel, key, false);
+          return makeElem(myModel, key);
         });
 
         var appendButton = makeButton(myPath.join("_") + "_append", loc(self.schemaName + "." + myPath.join(".") + "._append_label"));
@@ -557,7 +553,7 @@ var docgen = (function () {
           }
           var myModel = {};
           myModel[myName] = {};
-          $(this).before(makeElem(myModel, count, true));
+          $(this).before(makeElem(myModel, count));
           accordion.setHeight(parent$);
         };
 
