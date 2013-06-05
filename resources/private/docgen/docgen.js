@@ -639,6 +639,7 @@ var docgen = (function () {
               level = r.result[0],
               code  = r.result[1];
           if(level !== "tip") {
+            //console.log(path.join("."), level, code, loc("error."+code));
             var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
             errorPanel.html(errorPanel.html()+loc("error."+code)+"<br/>").show();
           }
