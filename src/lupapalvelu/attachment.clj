@@ -366,6 +366,7 @@
                 (-> command
                   (assoc :data {:id id
                                 :text text,
+                                :type :system
                                 :target {:type :attachment
                                          :id (:id attachment-version)
                                          :version (:version attachment-version)

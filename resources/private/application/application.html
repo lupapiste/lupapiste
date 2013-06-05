@@ -346,15 +346,15 @@
         </div>
 
         <div id="application-statement-tab" class="tab-content">
-          
+
           <div data-bind="with: $root.application.data" class="application-statements">
-            
+
             <h1>Lausunnot</h1>
-  
+
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
-            
+
             <div data-bind="if: $data.statements && statements().length>0">
               <table class="table table-striped tablesorter">
                 <thead>
@@ -384,17 +384,17 @@
                 </tbody>
               </table>
             </div>
-            
+
             <button
                 data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
                 class="btn btn-primary modal"
                 data-test-id="add-statement">
             </button>
-            
+
           </div>
-          
+
           <div data-bind="with: application" class="application-neighbors">
-  
+
             <h1>Naapurit</h1>
 
             <table>
@@ -428,11 +428,11 @@
                 </tr>
               </tbody>
             </table>
-            
+
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage'" class="btn btn-primary modal"></button>
-            
+
           </div>
-          
+
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
@@ -526,7 +526,7 @@
           </div>
 
           <div class="dialog-content">
-          
+
             <div class="stamp-margin">
               <table>
                 <tbody>
@@ -570,7 +570,7 @@
                 </tbody>
               </table>
             </div>
-            
+
             <div class="stamp-files">
               <table>
                 <thead>
@@ -616,11 +616,11 @@
               <form class="stamp-files-select-all-none">
               </form>
             </div>
-            
+
             <div class="stamp-status">
               <span data-bind="text: loc('stamp.status', status().toString())"></span>
             </div>
-            
+
             <div class="stamp-buttons">
               <button data-bind="
                   click: start,
@@ -641,7 +641,7 @@
                 class="btn btn-primary btn-dialog close">
               </button>
             </div>
-            
+
           </div>
         </div>
       </div>
@@ -653,14 +653,14 @@
             <p class="dialog-close close">X</p>
           </div>
           <div class="dialog-content">
-            
+
             <form>
               <label data-bind="ltext: 'neighbors.sendEmail.name'" class="form-label" for="neighbors-sendemail-name"></label>
               <span data-bind="text: name" class="form-input text long" id="neighbors-sendemail-name" ></span>
-              
+
               <label data-bind="ltext: 'neighbors.sendEmail.email'" class="form-label" for="neighbors-sendemail-email"></label>
               <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}" class="form-input text long" id="neighbors-sendemail-email" />
-              
+
               <label data-bind="ltext: 'neighbors.sendEmail.message'" class="form-label" for="neighbors-sendemail-message"></label>
               <textarea
                 data-bind="value: message, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.message.placeholder')}"
@@ -670,10 +670,10 @@
                 maxlength="4000">
               </textarea>
             </form>
-            
+
             <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok" class="btn btn-primary btn-dialog"></button>
             <button data-bind="ltext: 'neighbors.sendEmail.cancel'" class="btn btn-dialog close"></button>
-            
+
           </div>
         </div>
       </div>
