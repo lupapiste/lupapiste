@@ -628,7 +628,6 @@ var docgen = (function () {
     }
 
     function showValidationResults(results) {
-      console.log("Here");
       // remove warning and error highlights
       $("#document-"+docId+" :input").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
@@ -642,7 +641,7 @@ var docgen = (function () {
           if(level !== "tip") {
             //console.log(path.join("."), level, code, loc("error."+code));
             var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
-            errorPanel.html(errorPanel.html()+loc("error."+code)+"<br/>").show();
+            errorPanel.html("<span class='"+level+"'>"+errorPanel.html()+loc("error."+code)+"</span>").show();
           }
           $("#"+docId+"-"+path.join("-")).addClass(level);
         });

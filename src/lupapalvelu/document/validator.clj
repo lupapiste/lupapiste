@@ -31,13 +31,13 @@
 
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
-  [code {:keys [doc schema level fields facts]} & body]
+  [code {:keys [doc schema level fields facts] :or {level :warn}} & body]
   (let [paths (->> fields (partition 2) (map last) (map starting-keywords) vec)]
     `(swap! validators assoc ~code
        {:code ~code
         :doc ~doc
         :paths ~paths
-        :level (or ~level :warn)
+        :level ~level
         :schema ~schema
         :facts ~facts
         :fn (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
@@ -50,8 +50,8 @@
                     (try
                       (when-let [resp# (do ~@body)]
                         (map (fn [path#] {:path   path#
-                                          :result [:warn ~(name code)]}) ~paths))
+                                          :result [~level ~(name code)]}) ~paths))
                       (catch Exception e#
                         [{:path   []
-                          :result [~level (str "validator")]
+                          :result [:warn (str "validator")]
                           :reason (str e#)}]))))))})))
