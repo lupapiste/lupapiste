@@ -218,13 +218,13 @@
                    (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
     document => valid?
     (-> document
-      (apply-update [:_selected] nil)) => valid?
+      (apply-update [:_selected])) => valid?
     (-> document
-      (apply-update [:henkilo :osoite :katu] nil)) => missing-required-fields?
+      (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
     (-> document
-      (apply-update [:henkilo :osoite :postinumero] nil)) => missing-required-fields?
+      (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
     (-> document
-      (apply-update [:henkilo :osoite :postitoimipaikannimi] nil)) => missing-required-fields?))
+      (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?))
 
 (facts "with real schemas - required fields for yritys hakija"
   (let [document (-> (new-document (schemas "hakija") ..now..)
@@ -235,11 +235,11 @@
                    (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
     document => valid?
     (-> document
-      (apply-update [:yritys :osoite :katu] nil)) => missing-required-fields?
+      (apply-update [:yritys :osoite :katu])) => missing-required-fields?
     (-> document
-      (apply-update [:yritys :osoite :postinumero] nil)) => missing-required-fields?
+      (apply-update [:yritys :osoite :postinumero])) => missing-required-fields?
     (-> document
-      (apply-update [:yritys :osoite :postitoimipaikannimi] nil)) => missing-required-fields?))
+      (apply-update [:yritys :osoite :postitoimipaikannimi])) => missing-required-fields?))
 
 ;;
 ;; Updates
