@@ -525,8 +525,8 @@ var docgen = (function () {
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
           console.log("delete for: " + self.appId + "," + self.docId + "," + myPath.concat([id]).join('.'));
           removeButton.onclick = function() {
-            removeData(self.appId, self.docId, myPath.concat([id]).join('.'));
-            //LUPAPISTE.ModalConfirmDialog.newConfirmDialog(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), function() { alert("remove called"); }, loc("no"));
+            //removeData(self.appId, self.docId, myPath.concat([id]).join('.'));
+            LUPAPISTE.ModalDialog.newConfirmDialog(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), function() { alert("remove called"); }, loc("no"));
           }
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
