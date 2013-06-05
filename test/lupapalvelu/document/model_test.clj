@@ -151,14 +151,16 @@
                                                           {:name "rd" :type :string :required true}
                                                           {:name "od2" :type :string}]}]}]}]})
 
+(def missing-required-fields? (invalid-with? [:tip "illegal-value:required"]))
+
 (facts "Required fields"
   (let [document (new-document schema-with-required ..now..)]
 
-    document => (invalid-with? [:tip "illegal-value:required"])
+    document => missing-required-fields?
 
     (-> document
       (apply-update [:a :b :aa] " ")
-      (apply-update [:a :b :ab] " ")) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:a :b :ab] " ")) => missing-required-fields?
 
     (-> document
       (apply-update [:a :b :aa] "value")
@@ -167,7 +169,7 @@
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :raa] "value")) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:a :c :0 :raa] "value")) => missing-required-fields?
 
     (-> document
       (apply-update [:a :b :aa] "value")
@@ -179,14 +181,14 @@
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
       (apply-update [:a :c :0 :rab] "value")
-      (apply-update [:a :d :0 :d2 :0 :od1] "value")) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:a :d :0 :d2 :0 :od1] "value")) => missing-required-fields?
 
     (-> document
       (apply-update [:a :b :aa] "value")
       (apply-update [:a :b :ab] "value")
       (apply-update [:a :c :0 :rab] "value")
       (apply-update [:a :d :0 :d2 :0 :od1] "value")
-      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => missing-required-fields?
 
     (-> document
       (apply-update [:a :b :aa] "value")
@@ -218,11 +220,11 @@
     (-> document
       (apply-update [:_selected] nil)) => valid?
     (-> document
-      (apply-update [:henkilo :osoite :katu] nil)) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:henkilo :osoite :katu] nil)) => missing-required-fields?
     (-> document
-      (apply-update [:henkilo :osoite :postinumero] nil)) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:henkilo :osoite :postinumero] nil)) => missing-required-fields?
     (-> document
-      (apply-update [:henkilo :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:tip "illegal-value:required"])))
+      (apply-update [:henkilo :osoite :postitoimipaikannimi] nil)) => missing-required-fields?))
 
 (facts "with real schemas - required fields for yritys hakija"
   (let [document (-> (new-document (schemas "hakija") ..now..)
@@ -233,11 +235,11 @@
                    (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
     document => valid?
     (-> document
-      (apply-update [:yritys :osoite :katu] nil)) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:yritys :osoite :katu] nil)) => missing-required-fields?
     (-> document
-      (apply-update [:yritys :osoite :postinumero] nil)) => (invalid-with? [:tip "illegal-value:required"])
+      (apply-update [:yritys :osoite :postinumero] nil)) => missing-required-fields?
     (-> document
-      (apply-update [:yritys :osoite :postitoimipaikannimi] nil)) => (invalid-with? [:tip "illegal-value:required"])))
+      (apply-update [:yritys :osoite :postitoimipaikannimi] nil)) => missing-required-fields?))
 
 ;;
 ;; Updates
