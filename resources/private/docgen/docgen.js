@@ -628,8 +628,9 @@ var docgen = (function () {
     }
 
     function showValidationResults(results) {
+      console.log("Here");
       // remove warning and error highlights
-      $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
+      $("#document-"+docId+" :input").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
       $("#document-"+docId+" .errorPanel").html("").hide();
       // apply new errors & highlights
@@ -689,7 +690,7 @@ var docgen = (function () {
         if (label) {
           label.removeChild(loader);
         }
-        if (status === "warn") {
+        if (status === "warn" || status === "tip") {
           showIndicator("form-input-saved", "form.saved");
         } else if (status === "err") {
           showIndicator("form-input-err", "form.err");
