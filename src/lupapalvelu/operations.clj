@@ -37,7 +37,8 @@
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
-                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])))
+                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
+          (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -47,6 +48,8 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
+
+(def ^:private common-ymp-schemas [])
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
