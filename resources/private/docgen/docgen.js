@@ -2,12 +2,11 @@ var docgen = (function () {
   "use strict";
 
   function makeButton(id, label) {
-
-    var appendButton = document.createElement("button");
-    appendButton.id = id;
-    appendButton.className = "btn";
-    appendButton.innerHTML = label;
-    return appendButton;
+    var button = document.createElement("button");
+    button.id = id;
+    button.className = "btn";
+    button.innerHTML = label;
+    return button;
   }
 
   var DocModel = function (schema, model, removeCallback, docId, application, authorizationModel) {
@@ -747,7 +746,21 @@ var docgen = (function () {
       }
 
       if (self.schema.info.approvable) {
-        elements.appendChild(document.createTextNode("(approvable)"));
+        var btnContainer = document.createElement("div");
+        btnContainer.className = "form-buttons";
+        if (self.authorizationModel.ok("approve-doc")) {
+          var approveButton = makeButton(self.docId + "_approve", loc("document.approve"));
+          approveButton.className += " btn-primary";
+          btnContainer.appendChild(approveButton);
+        }
+        if (self.authorizationModel.ok("reject-doc")) {
+          var rejectButton = makeButton(self.docId + "_reject", loc("document.reject"));
+          rejectButton.className += " btn-secondary";
+          btnContainer.appendChild(rejectButton);
+        } else {
+          console.log(self.authorizationModel.data());
+        }
+        elements.appendChild(btnContainer);
       }
 
       sectionContainer.className = "accordion_content expanded";
