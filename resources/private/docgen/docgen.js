@@ -634,10 +634,15 @@ var docgen = (function () {
       $("#document-"+docId+" .errorPanel").html("").hide();
       // apply new errors & highlights
       if(results && results.length > 0) {
-        _.each(results,function(result) {
-          var errorPanel = $("#"+docId+"-"+result.path.join("-")+"-errorPanel");
-          errorPanel.html(errorPanel.html()+loc("error."+result.result[1])+"<br/>").show();
-          $("#"+docId+"-"+result.path.join("-")).addClass("warning");
+        _.each(results,function(r) {
+          var path  = r.path,
+              level = r.result[0],
+              code  = r.result[1];
+          if(level !== "tip") {
+            var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
+            errorPanel.html(errorPanel.html()+loc("error."+code)+"<br/>").show();
+          }
+          $("#"+docId+"-"+path.join("-")).addClass(level);
         });
       }
     }
