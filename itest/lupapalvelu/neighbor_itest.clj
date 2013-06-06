@@ -81,7 +81,7 @@
       (fact "application query returns set document info"
         (let [application (-> (query pena :application :id application-id) :application)
               hakija-doc  (domain/get-document-by-id application hakija-doc-id)
-              hakija-doc  (tools/un-wrapped hakija-doc)]
+              hakija-doc  (tools/unwrapped hakija-doc)]
 
           (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
           (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
@@ -93,7 +93,7 @@
                                 :neighborId (name neighborId)
                                 :token token) :application)
               hakija-doc  (domain/get-document-by-id application hakija-doc-id)
-              hakija-doc  (tools/un-wrapped hakija-doc)]
+              hakija-doc  (tools/unwrapped hakija-doc)]
 
           application => truthy
 
