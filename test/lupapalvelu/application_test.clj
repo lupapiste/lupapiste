@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-test
   (:use [lupapalvelu.application]
+        [lupapalvelu.core]
         [midje.sweet])
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]

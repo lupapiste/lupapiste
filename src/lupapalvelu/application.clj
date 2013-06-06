@@ -3,7 +3,6 @@
         [clojure.tools.logging]
         [lupapalvelu.core]
         [clojure.string :only [blank? join trim lower-case]]
-        [sade.strings :only [numeric? decimal-number?]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
@@ -30,30 +29,6 @@
             [lupapalvelu.neighbors :as neighbors]
             [clj-time.format :as tf]))
 
-;;
-;; Common helpers:
-;;
-
-(defn- ->double [v]
-  (let [s (str v)]
-    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
-
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
-
-(defn get-application-operation [app]
-  (first (:operations app)))
-
-(defn- without-system-keys [application]
-  (into {} (filter (fn [[k v]] (not (.startsWith (name k) "_"))) application)))
-
 ;; Validators
 
 (defn- property-id? [^String s]
@@ -78,16 +53,6 @@
 (defn- validate-y [{{:keys [y]} :data}]
   (when (and y (not (<= 6610000 (->double y) 7779999)))
     (fail :error.illegal-coordinates)))
-
-(defn get-applicant-name [_ app]
-  (if (:infoRequest app)
-    (let [{first-name :firstName last-name :lastName} (first (domain/get-auths-by-role app :owner))]
-      (str first-name \space last-name))
-    (when-let [body (:data (domain/get-document-by-name app "hakija"))]
-      (if (= (get-in body [:_selected :value]) "yritys")
-        (get-in body [:yritys :yritysnimi :value])
-        (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-          (str (:value first-name) \space (:value last-name)))))))
 
 (defn count-unseen-comment [user app]
   (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
@@ -465,10 +430,6 @@
     (if user
       (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
-
-(defn- ->double [v]
-  (let [v (str v)]
-    (if (blank? v) 0.0 (Double/parseDouble v))))
 
 (defn- ->location [x y]
   {:x (->double x) :y (->double y)})

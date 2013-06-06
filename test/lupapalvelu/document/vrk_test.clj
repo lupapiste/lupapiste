@@ -10,7 +10,7 @@
 
 (defn check-validator
   "Runs generated facts of a single validator."
-  [{:keys [code doc schema paths] validate-fn :fn {:keys [ok fail]} :facts}]
+  [{:keys [code doc schema level paths] validate-fn :fn {:keys [ok fail]} :facts}]
   (when (and ok fail)
     (let [dummy  (dummy-doc schema)
           doc    (s/replace doc #"\s+" " ")
@@ -25,7 +25,7 @@
         (doseq [values ok]
           (validate-fn (update values)) => nil?)
         (doseq [values fail]
-          (validate-fn (update values)) => (has some (contains {:result [:warn (name code)]})))))))
+          (validate-fn (update values)) => (has some (contains {:result [level (name code)]})))))))
 
 (defn check-all-validators []
   (let [validators (->> v/validators deref vals (filter (fn-> :facts nil? not)))]

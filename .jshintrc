@@ -40,6 +40,7 @@
     "currentUser",
     "user",
     "users",
+    "features",
     "trace",
     "error",
     "warn",

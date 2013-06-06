@@ -115,7 +115,7 @@
           (let [kw (keyword name)
                 current-path (conj path kw)
                 validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
-                                   (->validation-result nil current-path element [:warn "illegal-value:required"]))
+                                   (->validation-result nil current-path element [:tip "illegal-value:required"]))
                 current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
             (concat current-validation-errors
                     (if body
