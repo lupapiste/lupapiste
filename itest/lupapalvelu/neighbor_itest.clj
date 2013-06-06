@@ -5,6 +5,8 @@
   (:require [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]))
 
+(defn invalid-token? [resp] (= resp {:ok false, :text "token-not-found"}))
+
 (defn- create-app-with-neighbor []
   (let [resp (create-app pena)
         application-id (:id resp)
@@ -106,6 +108,14 @@
             (:attachments application) => empty? ; we could put some paapiirustus in there
             (:auth application) => nil)))
 
+      (fact "neighbor cant give ill response"
+        (command pena :neighbor-response
+          :applicationId application-id
+          :neighborId (name neighborId)
+          :token token
+          :response "ime parsaa!"
+          :message "kehno suunta") => {:ok false, :response "ime parsaa!", :text "invalid-response"})
+
       (fact "neighbor can give response"
         (command pena :neighbor-response
           :applicationId application-id
@@ -120,10 +130,10 @@
             :neighborId (name neighborId)
             :token token
             :response "disapprove"
-            :message "kehno suunta") => {:ok false, :text "token-not-found"})
+            :message "kehno suunta") => invalid-token?)
 
         (fact "neighbour cant see application anymore"
           (query pena :neighbor-application
             :applicationId application-id
             :neighborId (name neighborId)
-            :token token) => {:ok false, :text "token-not-found"})))))
+            :token token) => invalid-token?)))))
