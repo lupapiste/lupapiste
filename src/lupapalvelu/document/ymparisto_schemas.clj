@@ -2,8 +2,13 @@
   (:use [lupapalvelu.document.schemas]))
 
 
-;ilmoittaja
 
+(def sijainti (body simple-osoite {:name "karttapiirto" :type :text}))
+
+
+
+(def ympschemas
+  (to-map-by-name [sijainti]))
 ;sijainti
 
 ;aiheuttava toiminta

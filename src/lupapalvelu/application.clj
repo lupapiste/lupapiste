@@ -19,6 +19,7 @@
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
@@ -456,7 +457,7 @@
 (defn- make-documents [user created existing-documents op]
   (let [op-info               (operations/operations (keyword (:name op)))
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema-name)
+                                                 :schema ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas ympschemas/ympschemas) schema-name)
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info))

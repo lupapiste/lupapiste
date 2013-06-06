@@ -2,7 +2,8 @@
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [lupapalvelu.document.ymparisto-schemas :as ympschemas]))
 
 (def default-description "operations.tree.default-description")
 
@@ -181,5 +182,5 @@
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas ympschemas/ympschemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
 
