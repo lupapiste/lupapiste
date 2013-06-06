@@ -57,3 +57,15 @@
 
 (fact "create-dummy-document-data"
   (create-document-data schema) => expected-wrapped-simple-document)
+
+(def expected-wrapped-simple-document-with-timestamp
+  {:band {:name {:value nil :modified nil}
+          :genre {:value nil :modified nil}
+          :members {:0 {:name {:value nil :modified nil}
+                        :instrument {:value nil :modified nil}}}}})
+
+(fact "with-timestamps"
+  (with-timestamp nil nil) => nil
+  (with-timestamp {} nil) => {}
+  (with-timestamp expected-wrapped-simple-document nil) => expected-wrapped-simple-document-with-timestamp)
+

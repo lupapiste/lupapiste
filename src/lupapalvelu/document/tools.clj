@@ -89,6 +89,14 @@
       (fn [x] (if (contains? x k) (k x) x))
       m)))
 
+(defn with-timestamp
+  "Assocs timestamp besides every value-key"
+  ([m timestamp] (with-timestamp m timestamp :value :modified))
+  ([m timestamp value-key timestamp-key]
+  (walk/postwalk
+    (fn [x] (if (contains? x value-key) (assoc x timestamp-key timestamp) x))
+    m)))
+
 (defn create-document-data
   "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"
   ([schema]
