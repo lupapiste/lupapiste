@@ -155,7 +155,7 @@ var docgen = (function () {
       return span;
     }
 
-    self.makeApprovalButtons = function(path) {
+    self.makeApprovalButtons = function(path, model) {
       var btnContainer$ = $("<div>").addClass("form-buttons");
       var approveButton$ = null;
       var rejectButton$ = null;
@@ -169,8 +169,17 @@ var docgen = (function () {
 
       if (self.authorizationModel.ok("approve-doc") && self.authorizationModel.ok("reject-doc")) {
         var meta = self.getMeta(path);
+        var status = null;
+        var approvedOn = null;
+        if (meta && meta._approved) {
+          status = meta._approved.value;
+          approvedOn = meta._approved.timestamp;
+        }
 
-console.log(meta);
+        if (status && model) {
+          console.log(status);
+          console.log(model);
+        }
 
         approveButton$ = makeApprovalButton("approve-doc", "btn-primary", loc("document.approve"));
         btnContainer$.append(approveButton$);
@@ -351,7 +360,7 @@ console.log(meta);
       // TODO refactor
       if (subSchema.approvable) {
 console.log("group path: " + path);
-        div.appendChild(self.makeApprovalButtons(path));
+        div.appendChild(self.makeApprovalButtons(path, myModel));
       }
 
       div.appendChild(partsDiv);
@@ -801,7 +810,7 @@ console.log("group path: " + path);
       // TODO WIP
       if (self.schema.info.approvable) {
 
-        elements.appendChild(self.makeApprovalButtons([]));
+        elements.appendChild(self.makeApprovalButtons([], self.model));
       }
 
       sectionContainer.className = "accordion_content expanded";
