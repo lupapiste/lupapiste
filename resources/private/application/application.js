@@ -388,7 +388,7 @@
     data: ko.observable(),
 
     openOskariMap: function() {
-      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=12' + '&addPoint=0' + '&addArea=0';
+      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
       window.open(url);
       var applicationId = application.id();
 
