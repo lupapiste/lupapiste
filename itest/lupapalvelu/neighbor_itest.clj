@@ -99,4 +99,9 @@
 
           (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
           (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil)))))
+          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
+
+          (facts "random testing about content"
+            (:comments application) => nil
+            (:attachments application) => empty? ; we could put some paapiirustus in there
+            (:auth application) => nil))))))
