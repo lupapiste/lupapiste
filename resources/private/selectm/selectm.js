@@ -5,8 +5,8 @@
   function nop() {}
 
   function toCallback(f) {
-    if (!f) return nop;
-    if (!_.isFunction(f)) throw "callback must be a function: " + f;
+    if (!f) { return nop; }
+    if (!_.isFunction(f)) { throw "callback must be a function: " + f; }
     return f;
   }
 
@@ -14,7 +14,7 @@
     var e = $(this),
         t = e.attr("data-loc");
     if (t) {
-      if (e.is("input")) { e.attr("placeholder", loc(t)); } else { e.text(loc(t)); };
+      if (e.is("input")) { e.attr("placeholder", loc(t)); } else { e.text(loc(t)); }
     }
   }
 
@@ -46,18 +46,18 @@
 
     self.filterData = function(filterValue) {
       var f = _.trim(filterValue).toLowerCase();
-      if (_.isBlank(f)) return self.data;
+      if (_.isBlank(f)) { return self.data; }
       var newData = [];
       _.each(self.data, function(group) {
         var options = _.filter(group[1], function(o) { return o.text.toLowerCase().indexOf(f) >= 0; });
-        if (options.length > 0) newData.push([group[0], options]);
+        if (options.length > 0) { newData.push([group[0], options]); }
       });
       return newData;
     };
 
     self.updateFilter = function() {
       var newVisible = self.filterData(self.$filter.val());
-      if (_.isEqual(self.visible, newVisible)) return;
+      if (_.isEqual(self.visible, newVisible)) { return; }
       self.$source.empty();
       self.visible = newVisible;
       _.each(self.visible, function(group) {
@@ -73,7 +73,7 @@
     self.inTarget    = function(id) { return $("option", self.$target).filter(function() { return _.isEqual($(this).data("id"), id); }).length; };
     self.canAdd      = function(id) { return id && (self.duplicates || !self.inTarget(id)); };
     self.makeTarget  = function(d)  { return $("<option>").data("id", d.id).text(d.text); };
-    self.addTarget   = function(d)  { if (d && self.canAdd(d.id)) self.$target.append(self.makeTarget(d)); return self; };
+    self.addTarget   = function(d)  { if (d && self.canAdd(d.id)) { self.$target.append(self.makeTarget(d)); return self; }};
 
     self.add = function() { self.addTarget(self.getSelected()); self.check(); };
     self.remove = function() { $("option:selected", self.$target).remove(); self.check(); };
@@ -96,12 +96,12 @@
     self.$filter.keyup(self.updateFilter);
 
     self.$source
-      .keydown(function(e) { if (e.keyCode === 13) self.add(); })
+      .keydown(function(e) { if (e.keyCode === 13) { self.add(); }})
       .dblclick(self.add)
       .on("change focus blur", self.check);
 
     self.$target
-      .keydown(function(e) { if (e.keyCode === 13) self.remove(); })
+      .keydown(function(e) { if (e.keyCode === 13) { self.remove(); }})
       .dblclick(self.remove)
       .on("change focus blur", self.check);
 

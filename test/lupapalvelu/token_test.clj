@@ -1,7 +1,7 @@
 (ns lupapalvelu.token-test
   (:use [midje.sweet]
-        [midje.util :only [testable-privates]]
-        [lupapalvelu.token]))
+        [midje.util :only [testable-privates]])
+  (:require [lupapalvelu.token]))
 
 (testable-privates lupapalvelu.token make-token-id)
 

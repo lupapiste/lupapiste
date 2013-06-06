@@ -13,7 +13,7 @@ var ajax = (function() {
       }
       self.completeHandler(jqXHR, textStatus);
     };
-    
+
     self.callId = callId++;
     self.request = {
       url:       url,
@@ -65,7 +65,7 @@ var ajax = (function() {
     };
 
     self.json = function(data) {
-      self.request.data = data ? JSON.stringify(data) : null;
+      self.request.data = data ? JSON.stringify(data) : {};
       self.request.contentType = "application/json";
       return self;
     };
@@ -112,14 +112,14 @@ var ajax = (function() {
     };
 
     self.pending = function(listener, timeout) {
-      if (!listener) return self;
-      if (!_.isFunction(listener)) throw "Argument must be a function: " + listener;
+      if (!listener) { return self; }
+      if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
       self.pendingListener = listener;
       self.pendingTimeout = timeout || 100;
       self.pendingListener(false);
       return self;
     };
-    
+
     self.call = function() {
       if (self.pendingListener) {
         self.pendingHandler = setTimeout(_.partial(self.pendingListener, true), self.pendingTimeout);

@@ -8,7 +8,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]
             [lupapalvelu.document.tools :as tools]
-            [sade.env :refer [feature?]]
+            [sade.env :as env]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]))
 
@@ -115,7 +115,7 @@
           (let [kw (keyword name)
                 current-path (conj path kw)
                 validation-error (when (and required (s/blank? (get-in data (conj current-path :value))))
-                                   (->validation-result nil current-path element [:warn "illegal-value:required"]))
+                                   (->validation-result nil current-path element [:tip "illegal-value:required"]))
                 current-validation-errors (if validation-error (conj validation-errors validation-error) validation-errors)]
             (concat current-validation-errors
                     (if body
@@ -136,7 +136,7 @@
       (concat
         (validate-fields schema-body nil data [])
         (validate-required-fields schema-body [] data [])
-        (when (feature? :vrk) (validator/validate document))))))
+        (when (env/feature? :vrk) (validator/validate document))))))
 
 (defn valid-document?
   "Checks weather document is valid."

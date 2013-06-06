@@ -67,6 +67,7 @@ var LUPAPISTE = LUPAPISTE || {};
       ajax.query("user")
         .success(function (e) {
           self.session = true;
+          currentUser.set(e.user);
           hub.send("login", e);
           self.hashChanged();
         })
@@ -77,7 +78,7 @@ var LUPAPISTE = LUPAPISTE || {};
         .call();
       return;
     }
-
+    
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
   };
 
@@ -99,7 +100,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
   var offline = false;
   var wasLoggedIn = false;
-  
+
   hub.subscribe("login", function() { wasLoggedIn = true; });
 
   hub.subscribe({type: "connection", status: "online"}, function () {
@@ -134,50 +135,51 @@ var LUPAPISTE = LUPAPISTE || {};
    * Complete the App initialization after DOM is loaded.
    */
    self.domReady = function () {
-     self.initSubscribtions();
+    self.initSubscribtions();
 
-     $(window)
-       .hashchange(self.hashChanged)
-       .hashchange()
-       .unload(self.unload);
+    $(window)
+      .hashchange(self.hashChanged)
+      .hashchange()
+      .unload(self.unload);
 
-     self.connectionCheck();
+    self.connectionCheck();
 
-     if (typeof LUPAPISTE.ModalDialog !== "undefined") {
-       LUPAPISTE.ModalDialog.init();
-     }
+    if (typeof LUPAPISTE.ModalDialog !== "undefined") {
+      LUPAPISTE.ModalDialog.init();
+    }
 
-     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
+    $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
-     var model = {
-       languages: loc.getSupportedLanguages(),
-       currentLanguage: loc.getCurrentLanguage(),
-       changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-       startPage: self.startPage,
-       allowAnonymous: self.allowAnonymous
-     };
-     
-     $("nav").applyBindings(model);
-     
-     function showApplicationList() {
-       pageutil.hideAjaxWait();
-       window.location.hash = "!/applications";
-     }
+    var model = {
+      languages: loc.getSupportedLanguages(),
+      currentLanguage: loc.getCurrentLanguage(),
+      changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
+      startPage: self.startPage,
+      allowAnonymous: self.allowAnonymous
+    };
 
-     $("<div id='session-dead-dialog' class='window autosized-yes-no'>" +
-         "<div class='dialog-header'>" +
-           "<p class='dialog-title'></p>" +
-         "</div>" +
-         "<div class='dialog-content'>" +
-           "<p></p>" +
-           "<button class='btn btn-primary btn-dialog logout'></button>" +
-         "</div>" +
-       "</div>")
-       .find(".dialog-title").text(loc("session-dead.title")).end()
-       .find(".dialog-content p").text(loc("session-dead.message")).end()
-       .find(".dialog-content button").text(loc("session-dead.logout")).end()
-       .find(".logout").click(function() { hub.send("logout"); return false; }).end()
-       .appendTo($("body"));
+    $("nav").applyBindings(model);
+
+    //TODO: not used
+    function showApplicationList() {
+      pageutil.hideAjaxWait();
+      window.location.hash = "!/applications";
+    }
+
+    $("<div id='session-dead-dialog' class='window autosized-yes-no'>" +
+        "<div class='dialog-header'>" +
+          "<p class='dialog-title'></p>" +
+        "</div>" +
+        "<div class='dialog-content'>" +
+          "<p></p>" +
+          "<button class='btn btn-primary btn-dialog logout'></button>" +
+        "</div>" +
+      "</div>")
+      .find(".dialog-title").text(loc("session-dead.title")).end()
+      .find(".dialog-content p").text(loc("session-dead.message")).end()
+      .find(".dialog-content button").text(loc("session-dead.logout")).end()
+      .find(".logout").click(function() { hub.send("logout"); return false; }).end()
+      .appendTo($("body"));
    };
 
 };

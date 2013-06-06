@@ -33,8 +33,14 @@
     "accordion",
     "docgen",
     "authorization",
+    "municipalities",
+    "organizations",
     "comments",
     "attachment",
+    "currentUser",
+    "user",
+    "users",
+    "features",
     "trace",
     "error",
     "warn",
@@ -46,9 +52,11 @@
     "LUPAPISTE",
     "util",
     "invites",
+    "tree",
     "applicationsConfig",
     "selectionTree",
     "inforequestsConfig",
-    "attachmentTypeSelect"
+    "attachmentTypeSelect",
+    "RequestContext"
   ]
 }

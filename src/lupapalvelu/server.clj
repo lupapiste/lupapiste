@@ -62,7 +62,7 @@
                                               :keystore "./keystore"
                                               :key-password "lupapiste"}
                                              {})
-                            :session-cookie-attrs (:cookie env/config)}))
+                            :session-cookie-attrs (env/value :cookie)}))
   "ok")
 
 (comment

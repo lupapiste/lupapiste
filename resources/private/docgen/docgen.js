@@ -534,6 +534,7 @@ var docgen = (function () {
           var myModel = {};
           myModel[myName] = {};
           $(this).before(makeElem(myModel, count));
+          accordion.setHeight(parent$);
         };
 
         $(appendButton).click(appender);
@@ -628,22 +629,27 @@ var docgen = (function () {
 
     function showValidationResults(results) {
       // remove warning and error highlights
-      $("#document-"+docId+" :input").removeClass("warning").removeClass("error");
+      $("#document-"+docId+" :input").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
       $("#document-"+docId+" .errorPanel").html("").hide();
       // apply new errors & highlights
       if(results && results.length > 0) {
-        _.each(results,function(result) {
-          var errorPanel = $("#"+docId+"-"+result.path.join("-")+"-errorPanel");
-          errorPanel.html(errorPanel.html()+loc("error."+result.result[1])+"<br/>").show();
-          $("#"+docId+"-"+result.path.join("-")).addClass("warning");
+        _.each(results,function(r) {
+          var path  = r.path,
+              level = r.result[0],
+              code  = r.result[1];
+          if(level !== "tip") {
+            var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
+            errorPanel.html("<span class='"+level+"'>"+errorPanel.html()+loc("error."+code)+"</span>").show();
+          }
+          $("#"+docId+"-"+path.join("-")).addClass(level);
         });
       }
     }
 
     function validate() {
       ajax
-        .query("validate-doc", { id: self.appId, doc: self.docId})
+        .query("validate-doc", { id: self.appId, doc: self.docId })
         .success(function (e) { showValidationResults(e.results); })
         .call();
     }
@@ -677,12 +683,12 @@ var docgen = (function () {
         }, 2000);
       }
 
-      saveForReal(path, value, function (status,results) {
+      saveForReal(path, value, function (status, results) {
         showValidationResults(results);
         if (label) {
           label.removeChild(loader);
         }
-        if (status === "warn") {
+        if (status === "warn" || status === "tip") {
           showIndicator("form-input-saved", "form.saved");
         } else if (status === "err") {
           showIndicator("form-input-err", "form.err");
@@ -745,7 +751,7 @@ var docgen = (function () {
       }
 
       sectionContainer.className = "accordion_content expanded";
-      sectionContainer.id = "document-"+docId;
+      sectionContainer.id = "document-" + docId;
 
       appendElements(elements, self.schema, self.model, []);
 

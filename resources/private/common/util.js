@@ -1,6 +1,8 @@
 var util = (function() {
   "use strict";
 
+  function nop() {}
+
   function zeropad(len, val) {
     return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
   }
@@ -10,7 +12,7 @@ var util = (function() {
                     function(m, pair) {
                       var k = pair[0],
                           f = pair[1];
-                      if (!_.isFunction(f)) throw "The value of key '" + k + "' is not a function: " + f;
+                      if (!_.isFunction(f)) { throw "The value of key '" + k + "' is not a function: " + f; }
                       m[k] = function() { f.apply(context || m, arguments); return m; };
                       return m; },
                     {});
@@ -30,7 +32,7 @@ var util = (function() {
   }
 
   function isValidEmailAddress(val) {
-    return val.indexOf("@") != -1;
+    return /\S+@\S+\.\S+/.test(val);
   }
 
   var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/;
@@ -45,19 +47,19 @@ var util = (function() {
   }
 
   function propertyIdToHumanFormat(id) {
-    if (!id) return null;
-    if (propertyIdHumanFormat.test(id)) return id;
+    if (!id) { return null; }
+    if (propertyIdHumanFormat.test(id)) { return id; }
     var p = propertyIdDbFormat.exec(id);
-    if (!p) return id;
+    if (!p) { return id; }
     return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
   }
 
   function zp(e) { return zeropad.apply(null, e); }
 
   function propertyIdToDbFormat(id) {
-    if (!id) return null;
-    if (propertyIdDbFormat.test(id)) return id;
-    if (!propertyIdHumanFormat.test(id)) throw "Invalid property ID: " + id;
+    if (!id) { return null; }
+    if (propertyIdDbFormat.test(id)) { return id; }
+    if (!propertyIdHumanFormat.test(id)) { throw "Invalid property ID: " + id; }
     return _.partial(_.join, "").apply(null, _.map(_.zip([3, 3, 4, 4], id.split("-")), zp));
   }
 
@@ -94,7 +96,8 @@ var util = (function() {
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
       toHumanFormat: propertyIdToHumanFormat,
       toDbFormat: propertyIdToDbFormat
-    }
+    },
+    nop: nop
   };
 
 })();
