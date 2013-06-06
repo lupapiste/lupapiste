@@ -159,14 +159,12 @@ var docgen = (function () {
       var btnContainer$ = $("<div>").addClass("form-buttons");
       var approveButton$ = null;
       var rejectButton$ = null;
-      var cmdArgs = {id: self.appId, doc: self.docId, path: path};
+      var cmdArgs = {id: self.appId, doc: self.docId, path: path.join(".")};
       function makeApprovalButton(cmd, cssClass, title) {
         return $(makeButton(self.docId + "_" + cmd, title))
         .addClass(cssClass).addClass("btn-narrow")
         .click(function() {
-console.log(path);
-console.log(cmdArgs);
-          ajax.command("reject-doc", cmdArgs).success(function() {approveButton$.hide();rejectButton$.hide();}).call();});
+          ajax.command(cmd, cmdArgs).success(function() {approveButton$.hide();rejectButton$.hide();}).call();});
       }
 
       if (self.authorizationModel.ok("approve-doc") && self.authorizationModel.ok("reject-doc")) {
