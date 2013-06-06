@@ -104,4 +104,26 @@
           (facts "random testing about content"
             (:comments application) => nil
             (:attachments application) => empty? ; we could put some paapiirustus in there
-            (:auth application) => nil))))))
+            (:auth application) => nil)))
+
+      (fact "neighbor can give response"
+        (command pena :neighbor-response
+          :applicationId application-id
+          :neighborId (name neighborId)
+          :token token
+          :response "disapprove"
+          :message "kehno suunta") => ok?
+
+        (fact "neighbour cant regive response"
+          (command pena :neighbor-response
+            :applicationId application-id
+            :neighborId (name neighborId)
+            :token token
+            :response "disapprove"
+            :message "kehno suunta") => {:ok false, :text "token-not-found"})
+
+        (fact "neighbour cant see application anymore"
+          (query pena :neighbor-application
+            :applicationId application-id
+            :neighborId (name neighborId)
+            :token token) => {:ok false, :text "token-not-found"})))))
