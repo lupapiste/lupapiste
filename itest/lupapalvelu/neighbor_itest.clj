@@ -123,18 +123,18 @@
           :neighborId (name neighborId)
           :token token
           :response "disapprove"
-          :message "kehno suunta") => ok?
+          :message "kehno suunta") => ok?)
 
-        (fact "neighbour cant regive response"
-          (command pena :neighbor-response
-            :applicationId application-id
-            :neighborId (name neighborId)
-            :token token
-            :response "disapprove"
-            :message "kehno suunta") => invalid-token?)
+      (fact "neighbour cant regive response"
+        (command pena :neighbor-response
+          :applicationId application-id
+          :neighborId (name neighborId)
+          :token token
+          :response "disapprove"
+          :message "kehno suunta") => invalid-token?)
 
-        (fact "neighbour cant see application anymore"
-          (query pena :neighbor-application
-            :applicationId application-id
-            :neighborId (name neighborId)
-            :token token) => invalid-token?)))))
+      (fact "neighbour cant see application anymore"
+        (query pena :neighbor-application
+          :applicationId application-id
+          :neighborId (name neighborId)
+          :token token) => invalid-token?))))
