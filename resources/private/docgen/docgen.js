@@ -9,7 +9,7 @@ var docgen = (function () {
     return button;
   }
 
-  var DocModel = function (schema, model, removeCallback, docId, application, authorizationModel) {
+  var DocModel = function (schema, model, meta, removeCallback, docId, application, authorizationModel) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -20,12 +20,28 @@ var docgen = (function () {
     self.schema = schema;
     self.schemaName = schema.info.name;
     self.model = model;
+    self.meta = meta;
     self.removeCallback = removeCallback;
     self.docId = docId;
     self.appId = application.id;
     self.application = application;
     self.authorizationModel = authorizationModel;
     self.eventData = { doc: docId, app: self.appId };
+
+    self.getMeta = function(path, m) {
+      var meta = m ? m : self.meta;
+      if (!path || !path.length) {
+        return meta;
+      }
+      if (meta) {
+        var key = path[0];
+        var val = meta[key];
+        if (path.length === 1) {
+          return val;
+        }
+        return  self.getMeta(path.splice(1, path.length - 1), val);
+      }
+    };
 
     self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
 
@@ -138,6 +154,33 @@ var docgen = (function () {
 
       return span;
     }
+
+    self.makeApprovalButtons = function(path) {
+      var btnContainer$ = $("<div>").addClass("form-buttons");
+      var approveButton$ = null;
+      var rejectButton$ = null;
+      var cmdArgs = {id: self.appId, doc: self.docId, path: path};
+      function makeApprovalButton(cmd, cssClass, title) {
+        return $(makeButton(self.docId + "_" + cmd, title))
+        .addClass(cssClass).addClass("btn-narrow")
+        .click(function() {
+console.log(path);
+console.log(cmdArgs);
+          ajax.command("reject-doc", cmdArgs).success(function() {approveButton$.hide();rejectButton$.hide();}).call();});
+      }
+
+      if (self.authorizationModel.ok("approve-doc") && self.authorizationModel.ok("reject-doc")) {
+        var meta = self.getMeta(path);
+
+console.log(meta);
+
+        approveButton$ = makeApprovalButton("approve-doc", "btn-primary", loc("document.approve"));
+        btnContainer$.append(approveButton$);
+        rejectButton$ = makeApprovalButton("reject-doc", "btn-secondary", loc("document.reject"));
+        btnContainer$.append(rejectButton$);
+      }
+      return btnContainer$[0];
+    };
 
     // Form field builders
 
@@ -306,6 +349,13 @@ var docgen = (function () {
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
       clearDiv.className = "clear";
       div.appendChild(makeLabel("group", myPath, true));
+
+      // TODO refactor
+      if (subSchema.approvable) {
+console.log("group path: " + path);
+        div.appendChild(self.makeApprovalButtons(path));
+      }
+
       div.appendChild(partsDiv);
       div.appendChild(clearDiv);
       return div;
@@ -745,22 +795,10 @@ var docgen = (function () {
             .click(removeDoc));
       }
 
+      // TODO WIP
       if (self.schema.info.approvable) {
-        var btnContainer = document.createElement("div");
-        btnContainer.className = "form-buttons";
-        if (self.authorizationModel.ok("approve-doc")) {
-          var approveButton = makeButton(self.docId + "_approve", loc("document.approve"));
-          approveButton.className += " btn-primary";
-          btnContainer.appendChild(approveButton);
-        }
-        if (self.authorizationModel.ok("reject-doc")) {
-          var rejectButton = makeButton(self.docId + "_reject", loc("document.reject"));
-          rejectButton.className += " btn-secondary";
-          btnContainer.appendChild(rejectButton);
-        } else {
-          console.log(self.authorizationModel.data());
-        }
-        elements.appendChild(btnContainer);
+
+        elements.appendChild(self.makeApprovalButtons([]));
       }
 
       sectionContainer.className = "accordion_content expanded";
@@ -800,7 +838,7 @@ var docgen = (function () {
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new DocModel(schema, doc.data, removeDocModel.init, doc.id, application, authorizationModel).element);
+      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, removeDocModel.init, doc.id, application, authorizationModel).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -811,7 +849,7 @@ var docgen = (function () {
             .command("create-doc", { schemaName: schema.info.name, id: application.id })
             .success(function (data) {
               var newDocId = data.doc;
-              var newElem = new DocModel(schema, {}, removeDocModel.init, newDocId, application, authorizationModel).element;
+              var newElem = new DocModel(schema, {}, {}, removeDocModel.init, newDocId, application, authorizationModel).element;
               $(self).before(newElem);
             })
             .call();
