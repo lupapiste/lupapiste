@@ -32,7 +32,7 @@
 (defn get-styles []
   (slurp (io/resource "email-templates/styles.css")))
 
-(defn get-application-link [{:keys [infoRequest id]} lang suffix host]
+(defn get-application-link [{:keys [infoRequest id]} suffix host lang]
   (let [permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
     (str host "/app/" lang "/applicant?hashbang=!" full-path "#!" full-path)))
@@ -40,14 +40,17 @@
 (defn replace-style [e style]
   (enlive/transform e [:style] (enlive/content style)))
 
-(defn replace-application-link [e selector application lang suffix host]
+(defn replace-application-link [e selector lang f]
   (enlive/transform e [(keyword (str selector lang))]
-    (fn [e] (assoc-in e [:attrs :href] (get-application-link application lang suffix host)))))
+    (fn [e] (assoc-in e [:attrs :href] (f lang)))))
+
+(defn replace-links-in-fi-sv [e selector f]
+  (-> e
+    (replace-application-link (str selector "-") "fi" f)
+    (replace-application-link (str selector "-") "sv" f)))
 
 (defn replace-application-links [e selector application suffix host]
-  (-> e
-    (replace-application-link (str selector "-") application "fi" suffix host)
-    (replace-application-link (str selector "-") application "sv" suffix host)))
+  (replace-links-in-fi-sv e selector (partial get-application-link application suffix host)))
 
 (defn send-mail-to-recipients! [recipients title msg]
   (doseq [recipient recipients]
@@ -55,7 +58,7 @@
       mail-agent
       (fn [_]
         (if (email/send-mail? recipient title msg)
-          (info "email was sent successfully." recipients title)
+          (info "email was sent successfully." recipients title msg)
           (error "email could not be delivered." recipients title msg))))))
 
 (defn get-email-title [{:keys [title]} & [title-key]]
@@ -112,6 +115,15 @@
 ;; New stuff
 ;;
 
+(defn send-neighbor-invite! [email token neighbor-id application host]
+  (let [title     (get-email-title application "neighbor")
+        full-path (str "/neighbor-show/" (:id application) "/" neighbor-id "/" token)
+        msg       (message
+                    (template "neighbor.html")
+                    (replace-links-in-fi-sv "#link" (fn [lang]
+                                                      (str host "/app/" lang "/neighbor?hashbang=!" full-path "#!" full-path))))]
+    (send-mail-to-recipients! [email] title msg)))
+
 (defn get-message-for-application-state-change [application host]
   (message
     (template "application-state-change.html")
@@ -131,11 +143,10 @@
           title      (get-email-title application "new-comment")]
       (send-mail-to-recipients! recipients title msg))))
 
-(defn send-invite! [email text application user host]
+(defn send-invite! [email text application host]
   (let [title (get-email-title application "invite")
         msg   (message
                 (template "invite.html")
-                (enlive/transform [:.name] (enlive/content (str (:firstName user) " " (:lastName user))))
                 (replace-application-links "#link" application "" host))]
     (send-mail-to-recipients! [email] title msg)))
 
@@ -157,6 +168,6 @@
 (defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
   (condp = (keyword template)
     :new-comment  (send-notifications-on-new-comment! application user (:text data) host)
-    :invite       (send-invite! (:email data) (:text data) application user host)
+    :invite       (send-invite! (:email data) (:text data) application host)
     :state-change (send-notifications-on-application-state-change! application host)
     :verdict      (send-notifications-on-verdict! application host)))
