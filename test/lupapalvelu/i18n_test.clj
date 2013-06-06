@@ -14,3 +14,8 @@
     (provided
       (env/dev-mode?) => false
       (log/log* anything :error anything "unknown localization term 'kikka'") => irrelevant)))
+
+(facts "regression test for line parsing"
+  (read-lines ["error.vrk:BR319:lammitustapa: this: should: work!"
+               "kukka: kakka"]) => {"error.vrk:BR319:lammitustapa" "this: should: work!"
+                                    "kukka" "kakka"})
