@@ -155,6 +155,7 @@ var docgen = (function () {
       return span;
     }
 
+    // TODO WIP
     self.makeApprovalButtons = function(path, model) {
       var btnContainer$ = $("<div>").addClass("form-buttons");
       var approveButton$ = null;
@@ -167,14 +168,15 @@ var docgen = (function () {
           ajax.command(cmd, cmdArgs).success(function() {approveButton$.hide();rejectButton$.hide();}).call();});
       }
 
+      var meta = self.getMeta(path);
+      var status = null;
+      var approvedOn = null;
+      if (meta && meta._approved) {
+        status = meta._approved.value;
+        approvedOn = meta._approved.timestamp;
+      }
+
       if (self.authorizationModel.ok("approve-doc") && self.authorizationModel.ok("reject-doc")) {
-        var meta = self.getMeta(path);
-        var status = null;
-        var approvedOn = null;
-        if (meta && meta._approved) {
-          status = meta._approved.value;
-          approvedOn = meta._approved.timestamp;
-        }
 
         if (status && model) {
           console.log(status);
@@ -185,6 +187,8 @@ var docgen = (function () {
         btnContainer$.append(approveButton$);
         rejectButton$ = makeApprovalButton("reject-doc", "btn-secondary", loc("document.reject"));
         btnContainer$.append(rejectButton$);
+      } else if (status){
+        btnContainer$.text(loc("document." + status));
       }
       return btnContainer$[0];
     };

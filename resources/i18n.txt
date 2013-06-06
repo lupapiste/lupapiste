@@ -139,7 +139,8 @@ document.approve: OK
 document.reject: Tarkennettavaa
 document.group.approve: OK
 document.group.reject: Tarkennettavaa
-
+document.approved: Tiedot OK
+document.rejected: Tarkennettavaa
 
 #
 # Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
