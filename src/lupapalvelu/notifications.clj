@@ -115,11 +115,13 @@
 ;; New stuff
 ;;
 
-(defn send-neighbor-invite! [email token application host]
-  (let [title (get-email-title application "neighbor")
-        msg   (message
-                (template "neighbor.html")
-                (replace-application-links "#link" application "" host))]
+(defn send-neighbor-invite! [email token neighbor-id application host]
+  (let [title     (get-email-title application "neighbor")
+        full-path (str "/neighbor-show/" (:id application) "/" neighbor-id "/" token)
+        msg       (message
+                    (template "neighbor.html")
+                    (replace-links-in-fi-sv "#link" (fn [lang]
+                                                      (str host "/app/" lang "/neighbor?hashbang=!" full-path "#!" full-path))))]
     (send-mail-to-recipients! [email] title msg)))
 
 (defn get-message-for-application-state-change [application host]
