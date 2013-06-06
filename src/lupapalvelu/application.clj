@@ -18,6 +18,7 @@
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
@@ -280,14 +281,14 @@
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId :userId :path]
    :authenticated true}
-  [{{:keys [documentId userId path]} :data user :user :as command}]
+  [{{:keys [documentId userId path]} :data user :user created :created :as command}]
   (with-application command
     (fn [application]
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (domain/->henkilo subject)
+            henkilo      (tools/with-timestamp (domain/->henkilo subject) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
@@ -299,7 +300,7 @@
               {:_id (:id application)
                :documents {$elemMatch {:id documentId}}}
               {$set {full-path henkilo
-                     :modified (:created command)}})))))))
+                     :modified created}})))))))
 
 
 ;;
@@ -600,7 +601,7 @@
 (defcommand "merge-details-from-krysp"
   {:parameters [:id :documentId :buildingId]
    :roles      [:applicant :authority]}
-  [{{:keys [id documentId buildingId]} :data :as command}]
+  [{{:keys [id documentId buildingId]} :data created :created :as command}]
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy (organization/get-legacy organization)]
@@ -609,14 +610,14 @@
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (add-value-metadata new-body {:source :krysp})]
+              with-value-metadata (tools/with-timestamp (add-value-metadata new-body {:source :krysp}) created)]
           ;; TODO: update via model
           (mongo/update
             :applications
             {:_id (:id application)
              :documents {$elemMatch {:id documentId}}}
             {$set {:documents.$.data with-value-metadata
-                   :modified (:created command)}})
+                   :modified created}})
           (ok))
         (fail :no-legacy-available)))))
 
