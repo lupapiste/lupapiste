@@ -1,7 +1,8 @@
 (ns lupapalvelu.neighbor-itest
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
-        [clojure.pprint :only [pprint]]))
+        [clojure.pprint :only [pprint]])
+  (:require [lupapalvelu.domain :as domain]))
 
 (defn- create-app-with-neighbor []
   (let [resp (create-app pena)
@@ -12,13 +13,13 @@
         resp (query pena :application :id application-id)
         application (:application resp)
         neighbors (:neighbors application)]
-    [application neighbors neighborId]))
+    [application neighborId neighbors]))
 
 (defn- find-by-id [neighborId neighbors]
   (some (fn [neighbor] (when (= neighborId (keyword (:neighborId neighbor))) neighbor)) neighbors))
 
 (facts "create app, add neighbor"
-  (let [[application neighbors neighborId] (create-app-with-neighbor)
+  (let [[application neighborId neighbors] (create-app-with-neighbor)
         neighbor (find-by-id neighborId neighbors)]
     (fact (:neighbor neighbor) => {:propertyId "p"
                                    :owner {:name "n"
@@ -29,7 +30,7 @@
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
 
 (facts "create app, update neighbor"
-  (let [[application _ neighborId] (create-app-with-neighbor)
+  (let [[application neighborId] (create-app-with-neighbor)
         application-id (:id application)
         _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :type :person :email "e2")
         application (:application (query pena :application :id application-id))
@@ -45,9 +46,53 @@
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
 
 (facts "create app, remove neighbor"
-  (let [[application _ neighborId] (create-app-with-neighbor)
+  (let [[application neighborId] (create-app-with-neighbor)
         application-id (:id application)
         _ (command sonja "neighbor-remove" :id application-id :neighborId neighborId)
         application (:application (query pena :application :id application-id))
         neighbors (:neighbors application)]
     (fact (count neighbors) => 0)))
+
+(facts "neighbour invite & view on application"
+  (let [[{application-id :id} neighborId] (create-app-with-neighbor)
+        _               (command pena :neighbor-send-invite
+                          :id application-id
+                          :neighborId neighborId
+                          :email "abba@example.com"
+                          :message "welcome!")
+        application     (-> (query pena :application :id application-id) :application)
+        hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
+        _               (command pena :update-doc
+                          :id application-id
+                          :doc hakija-doc-id
+                          :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
+                                    ["henkilo.henkilotiedot.sukunimi" "Zorro"]
+                                    ["henkilo.henkilotiedot.hetu"     "123456789"]])]
+
+    application => truthy
+
+    (let [response  (query pena :last-email)
+          message   (-> response :message)
+          token     (->> message :body (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
+
+      token => truthy
+
+      (fact "application query returns set document info"
+        (let [application (-> (query pena :application :id application-id) :application)
+              hakija-doc  (domain/get-document-by-id application hakija-doc-id)]
+
+          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi :value) => "Zebra"
+          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi :value) => "Zorro"
+          (-> hakija-doc :data :henkilo :henkilotiedot :hetu :value) => "123456789"))
+
+      (fact "neighbor applicaiton query does not return hetu"
+        (let [neighbor-application (-> (query pena :neighbor-application
+                                         :applicationId application-id
+                                         :neighborId (name neighborId)
+                                         :token token) :application)]
+          neighbor-application => {})))))
+
+
+
+
+
