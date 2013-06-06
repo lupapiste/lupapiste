@@ -123,6 +123,12 @@ attachment.delete.version.header: Poista liitetiedosto
 
 error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
 
+document.approve: OK
+document.reject: Tarkennettavaa
+document.group.approve: OK
+document.group.reject: Tarkennettavaa
+
+
 #
 # Warning: Before transferring these to excel, make sure to remove old "stamp.*" keys.
 #
