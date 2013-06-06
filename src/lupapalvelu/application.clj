@@ -162,7 +162,6 @@
 (defcommand "invite"
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
-   :validators [validate-owner-or-writer]
    :notify     "invite"
    :verified   true}
   [{created :created
