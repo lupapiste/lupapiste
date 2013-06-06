@@ -6,6 +6,7 @@
             [lupapalvelu.document.tools :as tools]))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "token-not-found"}))
+(defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-response"}))
 
 (defn- create-app-with-neighbor []
   (let [resp (create-app pena)
@@ -114,7 +115,7 @@
           :neighborId (name neighborId)
           :token token
           :response "ime parsaa!"
-          :message "kehno suunta") => {:ok false, :response "ime parsaa!", :text "invalid-response"})
+          :message "kehno suunta") => invalid-response?)
 
       (fact "neighbor can give response"
         (command pena :neighbor-response
