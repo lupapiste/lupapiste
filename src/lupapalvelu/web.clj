@@ -423,33 +423,10 @@
       (resp/status 200 (resp/json {:ok true  :data r}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
-  (defn ->public [application]
-    (-> application
-      (select-keys [:meta
-                    #_:auth
-                    :state
-                    :location
-                    #_:attachments
-                    :organization
-                    :title
-                    :operations
-                    :infoRequest
-                    :opened
-                    :created
-                    :propertyId
-                    #_:documents
-                    :modified
-                    #_:allowedAttachmentTypes
-                    #_:comments
-                    :address
-                    :permitType
-                    :id
-                    :municipality])
-      (assoc :attachments (filter (comp not nil?) (:attachments application)))))
-
+  (require 'lupapalvelu.neighbors)
   (defpage "/dev/public/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
-      (resp/status 200 (resp/json {:ok true  :data (->public r)}))
+      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
   (defpage [:get "/api/proxy-ctrl"] []
