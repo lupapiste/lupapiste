@@ -172,4 +172,5 @@ stamp.transparency.50: 50% (läpikuultava)
 stamp.transparency.75: 75%
 stamp.transparency.100: 100% (läpinäkyvä)
 
-error.vrk:BR319:lammitustapa: Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine, rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom! Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua.
+error.vrk:BR319:lammitustapa: Jos kyseessä on uusi asuinrakennus ovat kantavien rakenteiden rakennusaine, rakennuksen rakentamistapa, julkisivumateriaali ja lämmitystapa pakollisia tietoja. Kuitenkin, jos kayttotarkoitus on > 729 saavat pääsiallinen julkisivumateriaali ja lammitystapa puuttua.
+error.vrk:CR327: Tilavuus ylittää käyttötarkoituksen salliman rajan
