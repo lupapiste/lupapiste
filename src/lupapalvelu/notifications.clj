@@ -58,7 +58,7 @@
       mail-agent
       (fn [_]
         (if (email/send-mail? recipient title msg)
-          (info "email was sent successfully." recipients title msg)
+          (info "email was sent successfully." recipients title)
           (error "email could not be delivered." recipients title msg))))))
 
 (defn get-email-title [{:keys [title]} & [title-key]]
