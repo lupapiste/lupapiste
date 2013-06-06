@@ -2,7 +2,8 @@
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
         [clojure.pprint :only [pprint]])
-  (:require [lupapalvelu.domain :as domain]))
+  (:require [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.tools :as tools]))
 
 (defn- create-app-with-neighbor []
   (let [resp (create-app pena)
@@ -79,20 +80,23 @@
 
       (fact "application query returns set document info"
         (let [application (-> (query pena :application :id application-id) :application)
-              hakija-doc  (domain/get-document-by-id application hakija-doc-id)]
+              hakija-doc  (domain/get-document-by-id application hakija-doc-id)
+              hakija-doc  (tools/un-wrapped hakija-doc)]
 
-          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi :value) => "Zebra"
-          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi :value) => "Zorro"
-          (-> hakija-doc :data :henkilo :henkilotiedot :hetu :value) => "123456789"))
+          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
+          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
+          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"))
 
       (fact "neighbor applicaiton query does not return hetu"
-        (let [neighbor-application (-> (query pena :neighbor-application
-                                         :applicationId application-id
-                                         :neighborId (name neighborId)
-                                         :token token) :application)]
-          neighbor-application => {})))))
+        (let [application (-> (query pena :neighbor-application
+                                :applicationId application-id
+                                :neighborId (name neighborId)
+                                :token token) :application)
+              hakija-doc  (domain/get-document-by-id application hakija-doc-id)
+              hakija-doc  (tools/un-wrapped hakija-doc)]
 
+          application => truthy
 
-
-
-
+          (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
+          (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
+          (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil)))))
