@@ -820,14 +820,6 @@ console.log("group path: " + path);
 
       sectionContainer.appendChild(elements);
       section.appendChild(title);
-
-/*
-      $("<div>", {
-        "class": "errorPanel",
-        "id": docId+"--errorPanel"
-      }).text("kosh").show().appendTo(section);
-*/
-
       section.appendChild(sectionContainer);
 
       return section;
