@@ -53,8 +53,8 @@
         (-> actions :submit-application :ok) => true
         (-> actions :cancel-application :ok) => true))
 
-    (fact "Sonja must NOT be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :email "teppo@example.com") => unauthorized?)))
+    (fact "Sonja must be able to remove authz from Teppo!"
+      (command sonja :remove-auth :id id :email "teppo@example.com") => ok?)))
 
 (facts* "Auhtority invites designer"
   (doseq [user-key [sonja mikko teppo]]
