@@ -8,6 +8,7 @@
         [swiss-arrows.core :only [-<> -<>>]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
+            [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [sade.strings :as ss]
@@ -215,6 +216,14 @@
   [{:keys [attachments]} attachmentId]
   (first (filter #(= (:id %) attachmentId) attachments)))
 
+(defn get-attachment-info-by-file-id
+  "gets an attachment from application or nil"
+  [{:keys [attachments]} file-id]
+  (first
+    (filter
+      (fn->> :versions (some (fn-> :fileId (= file-id))))
+      attachments)))
+
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
   [application attachmentId]
@@ -224,7 +233,7 @@
   "tests that file-id is referenced from application"
   [application attachmentId file-id]
   (let [file-ids (attachment-file-ids application attachmentId)]
-    (if (some #{file-id} file-ids) true false)))
+    (boolean (some #{file-id} file-ids))))
 
 (defn delete-attachment
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."

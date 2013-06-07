@@ -87,9 +87,9 @@
   (provided
     (mongo/create-id) => "123"))
 
-
-
-
-
-
-
+(fact "attachment can be found with file-id"
+  (get-attachment-info-by-file-id {:attachments [{:versions [{:fileId "123"}
+                                                             {:fileId "234"}]}
+                                                 {:versions [{:fileId "345"}
+                                                             {:fileId "456"}]}]} "456") => {:versions [{:fileId "345"}
+                                                                                                       {:fileId "456"}]})
