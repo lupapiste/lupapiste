@@ -388,6 +388,13 @@
     (when-let [application (get-application-as (:application attachment) user)]
       (when (seq application) attachment))))
 
+(defn get-attachment
+  "Returns the attachment without access checking, otherwise nil."
+  [file-id]
+  (when-let [attachment (mongo/download file-id)]
+    (when-let [application (get-application-no-access-checking (:application attachment))]
+      (when (seq application) attachment))))
+
 (def windows-filename-max-length 255)
 
 (defn encode-filename
