@@ -2,7 +2,7 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [clojure.tools.logging]
-        [lupapalvelu.domain :only [get-application-as application-query-for]]
+        [lupapalvelu.domain :only [get-application-as get-application-no-access-checking application-query-for]]
         [lupapalvelu.i18n :only [loc *lang* with-lang]]
         [clojure.string :only [split join trim]]
         [swiss-arrows.core :only [-<> -<>>]])
