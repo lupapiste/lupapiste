@@ -192,22 +192,16 @@ var docgen = (function () {
       }
 
       function modelModifiedSince(model, timestamp) {
-
         if (model) {
           if (!timestamp) {
             return true;
           }
-          //console.log(timestamp);
 
-          // Leaf?
           if (model.value) {
+            // Leaf
             return model.modified && model.modified > timestamp;
           }
-
-          return _.find(model, function(myModel) {
-            //console.log(myModel);
-            return modelModifiedSince(myModel, timestamp);
-          }, false);
+          return _.find(model, function(myModel) {return modelModifiedSince(myModel, timestamp);});
         }
         return false;
       }
@@ -396,9 +390,7 @@ var docgen = (function () {
       clearDiv.className = "clear";
       div.appendChild(makeLabel("group", myPath, true));
 
-      // TODO refactor
       if (subSchema.approvable) {
-console.log("group path: " + path);
         div.appendChild(self.makeApprovalButtons(path, myModel));
       }
 
@@ -846,9 +838,7 @@ console.log("group path: " + path);
             .click(removeDoc));
       }
 
-      // TODO WIP
       if (self.schema.info.approvable) {
-
         elements.appendChild(self.makeApprovalButtons([], self.model));
       }
 
