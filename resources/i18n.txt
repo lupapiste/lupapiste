@@ -175,3 +175,5 @@ stamp.transparency.100: 100% (läpinäkyvä)
 error.vrk:BR319:lammitustapa: Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine, rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom! Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua.
 
 email.title.neighbor: naapurin kuuleminen
+
+statement.submit-again: Päivitä lausuntoa
