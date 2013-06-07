@@ -106,6 +106,7 @@
 
           (facts "random testing about content"
             (:comments application) => nil
+            (count (:documents application)) => 5
             (:attachments application) => empty? ; we could put some paapiirustus in there
             (:auth application) => nil)))
 
