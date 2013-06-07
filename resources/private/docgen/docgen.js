@@ -161,6 +161,11 @@ var docgen = (function () {
       var approveButton$ = null;
       var rejectButton$ = null;
       var cmdArgs = {id: self.appId, doc: self.docId, path: path.join(".")};
+
+      if (!features.enabled('docIndicators')) {
+        return btnContainer$[0];
+      }
+
       function makeApprovalButton(cmd, cssClass, title) {
         return $(makeButton(self.docId + "_" + cmd, title))
         .addClass(cssClass).addClass("btn-narrow")
