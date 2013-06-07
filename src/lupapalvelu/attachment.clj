@@ -265,7 +265,7 @@
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :complement-needed]}
+   :states     [:draft :info :open :submitted :complement-needed]}
   [{{:keys [id attachmentId attachmentType]} :data :as command}]
   (with-application command
     (fn [application]
@@ -323,7 +323,7 @@
 (defcommand "delete-attachment"
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
-   :states      [:draft :info :open :complement-needed]}
+   :states      [:draft :info :open :submitted :complement-needed]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -333,7 +333,7 @@
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
-   :states      [:draft :info :open :complement-needed]}
+   :states      [:draft :info :open :submitted :complement-needed]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
     (fn [application]
