@@ -38,22 +38,7 @@
 (def ympschemas
   (to-map-by-name [{:info {:name "meluilmoitus"
                            :order 50}
-                    :body meluilmoitus}
-
-                    ]))
+                    :body meluilmoitus}]))
 
 
-;aiheuttava toiminta
-
-;kesto
-
-
-;paastot
-
-
-;leviaminen
-
-;tiedoittaminen seuranat torjunta
-
-;lisätietodeot
 
