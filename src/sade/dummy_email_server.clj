@@ -48,6 +48,11 @@
     [{{reset :reset} :data}]
     (ok :messages (messages :reset reset)))
 
+  (defquery "last-email"
+    {}
+    [{{reset :reset} :data}]
+    (ok :message (last (messages :reset reset))))
+
   (defpage "/api/last-email" []
     (if-let [msg (last (messages))]
       (let [html     (first (re-find #"(?ms)<html>(.*)</html>" (:body msg)))

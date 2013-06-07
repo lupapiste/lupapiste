@@ -65,7 +65,7 @@ var ajax = (function() {
     };
 
     self.json = function(data) {
-      self.request.data = data ? JSON.stringify(data) : null;
+      self.request.data = data ? JSON.stringify(data) : {};
       self.request.contentType = "application/json";
       return self;
     };

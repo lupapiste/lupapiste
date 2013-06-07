@@ -27,6 +27,7 @@ neighbors.status: Tila
 neighbor.state.open: Avoin
 neighbor.state.mark-done: Merkitty kuulluksi
 neighbor.state.email-sent: Sähköposti lähetetty
+neighbor.state.response-given: Vastattu
 
 neighbors.actions: Toiminnot
 neighbors.actions.edit: muokkaa
@@ -49,7 +50,7 @@ neighbors.manage: Hallitse naapureita
 
 neighbors.edit.title: Naapurin tiedot:
 neighbors.edit.propertyId: Kiinteistötunnus
-neighbors.edit.propertyId.placeholder: kiinteistötunnus 
+neighbors.edit.propertyId.placeholder: kiinteistötunnus
 neighbors.edit.name: Nimi
 neighbors.edit.ok: Tallenna
 neighbors.edit.cancel: Peruuta
@@ -59,6 +60,17 @@ neighbors.edit.status.2: Naapurin tiedot
 neighbors.edit.status.3: Tietoja ei löydy
 
 neighbor.show.welcome: Tervetuloa tutustumaan naapurisi haknkkeeseen.
+neighbor.show.response.empty: Valitse...
+neighbor.show.response.approve: Ei moitittavaa
+neighbor.show.response.disapprove: Moitin
+neighbor.show.message: Moitteet:
+neighbor.show.message.placeholder: Kuvaile moitteesi tähän kenttään
+neighbor.show.ok: Lähetä
+neighbor.show.response.pending: Odota, vastaustasi käsitellään...
+neighbor.show.response.done: Kiitos vastauksestasi!
+
+neighbors.missing: Hakemukseen ei liity naapureita
+application.tabStatement: Lausunnot ja kuulemiset
 
 operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
 rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
@@ -159,6 +171,12 @@ stamp.transparency.25: 25%
 stamp.transparency.50: 50% (läpikuultava)
 stamp.transparency.75: 75%
 stamp.transparency.100: 100% (läpinäkyvä)
+
+error.vrk:BR319:lammitustapa: Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine, rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom! Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua.
+
+email.title.neighbor: naapurin kuuleminen
+
+statement.submit-again: Päivitä lausuntoa
 
 #
 # Yleiset alueet
