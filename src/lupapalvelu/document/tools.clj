@@ -80,9 +80,9 @@
       (fn [x] (if (or (keyword? x) (coll? x)) x {k x}))
       m)))
 
-(defn un-wrapped
-  "(un-wrapped (wrapped original)) => original"
-  ([m] (un-wrapped m :value))
+(defn unwrapped
+  "(unwrapped (wrapped original)) => original"
+  ([m] (unwrapped m :value))
   ([m k]
     (assert (keyword? k))
     (walk/postwalk

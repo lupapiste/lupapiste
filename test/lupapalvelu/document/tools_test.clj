@@ -50,10 +50,10 @@
   (wrapped nil) => {:value nil}
   (wrapped {:value nil}) => {:value {:value nil}})
 
-(fact "un-wrapped"
-  (un-wrapped {:k {:value nil}}) => {:k nil}
-  (un-wrapped expected-wrapped-simple-document :value) => expected-simple-document
-  (un-wrapped (wrapped expected-simple-document)) => expected-simple-document)
+(fact "unwrapped"
+  (unwrapped {:k {:value nil}}) => {:k nil}
+  (unwrapped expected-wrapped-simple-document :value) => expected-simple-document
+  (unwrapped (wrapped expected-simple-document)) => expected-simple-document)
 
 (fact "create-dummy-document-data"
   (create-document-data schema) => expected-wrapped-simple-document)

@@ -333,7 +333,7 @@
 
 (defn- output-attachment [attachment-id download?]
   (if (logged-in?)
-    (attachment/output-attachment attachment-id (current-user) download?)
+    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
     (resp/status 401 "Unauthorized\r\n")))
 
 (defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
@@ -421,6 +421,12 @@
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"}))))
+
+  (require 'lupapalvelu.neighbors)
+  (defpage "/dev/public/:collection/:id" {:keys [collection id]}
+    (if-let [r (mongo/by-id collection id)]
+      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
   (defpage [:get "/api/proxy-ctrl"] []

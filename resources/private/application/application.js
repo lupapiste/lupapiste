@@ -214,6 +214,34 @@
     });
   }();
 
+  var removeAuthModel = new function() {
+    var self = this;
+
+    self.applicationId = null;
+    self.username = null;
+
+    self.init = function(applicationId, username) {
+      self.applicationId = applicationId;
+      self.username = username;
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-remove-auth");
+      return self;
+    };
+
+    self.ok = function() {
+      ajax.command("remove-auth", { id : self.applicationId, email : self.username})
+        .success(function() {
+          notify.success("oikeus poistettu", self.username);
+          repository.load(self.applicationId);
+        })
+        .call();
+      return false;
+    };
+
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-remove-auth", loc("areyousure"), loc("areyousure.message"), loc("yes"), self.ok, loc("no"));
+    });
+  }();
+
   var requestForStatementModel = new function() {
     var self = this;
     self.data = ko.observableArray();
@@ -435,13 +463,7 @@
     },
 
     removeAuth: function(model) {
-      var applicationId = application.id();
-      ajax.command("remove-auth", { id : applicationId, email : model.username()})
-        .success(function() {
-          notify.success("oikeus poistettu", model);
-          repository.load(applicationId);
-        })
-        .call();
+      removeAuthModel.init(application.id(), model.username());
       return false;
     },
 
