@@ -381,9 +381,9 @@
 ;; Download
 ;;
 
-(defn- get-attachment
+(defn get-attachment-as
   "Returns the attachment if user has access to application, otherwise nil."
-  [file-id user]
+  [user file-id]
   (when-let [attachment (mongo/download file-id)]
     (when-let [application (get-application-as (:application attachment) user)]
       (when (seq application) attachment))))
@@ -399,17 +399,18 @@
         (ss/last-n windows-filename-max-length de-accented)
         #"[^a-zA-Z0-9\.\-_ ]" "-")))
 
-(defn output-attachment [attachment-id user download?]
+(defn output-attachment
+  [attachment-id download? attachment-fn]
   (debugf "file download: attachment-id=%s" attachment-id)
-  (if-let [attachment (get-attachment attachment-id user)]
+  (if-let [attachment (attachment-fn attachment-id)]
     (let [response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
                               "Content-Length" (str (:content-length attachment))}}]
       (if download?
         (assoc-in response
-                  [:headers "Content-Disposition"]
-                  (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
+          [:headers "Content-Disposition"]
+          (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))))
         response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
