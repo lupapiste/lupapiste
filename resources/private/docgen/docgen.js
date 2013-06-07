@@ -155,9 +155,9 @@ var docgen = (function () {
       return span;
     }
 
-    // TODO WIP
     self.makeApprovalButtons = function(path, model) {
-      var btnContainer$ = $("<div>").addClass("form-buttons");
+      var statusContainer$ = $("<span>");
+      var btnContainer$ = $("<div>").addClass("form-buttons").append(statusContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
       var cmdArgs = {id: self.appId, doc: self.docId, path: path.join(".")};
@@ -166,34 +166,64 @@ var docgen = (function () {
         return btnContainer$[0];
       }
 
-      function makeApprovalButton(cmd, cssClass, title) {
-        return $(makeButton(self.docId + "_" + cmd, title))
+      function setStatus(approval) {
+        if (approval) {
+          var text = loc("document." + approval.value);
+          if (approval.user && approval.timestamp) {
+            text += " (" + approval.user.firstName + " " + approval.user.lastName;
+            text += " " + moment(approval.timestamp).format("D.M.YYYY") + ")";
+          }
+          statusContainer$.text(text);
+        }
+      }
+
+      function makeApprovalButton(verb, noun, cssClass) {
+        var cmd = verb + "-doc";
+        var title = loc("document." + verb);
+        return $(makeButton(self.docId + "_" + verb, title))
         .addClass(cssClass).addClass("btn-narrow")
         .click(function() {
-          ajax.command(cmd, cmdArgs).success(function() {approveButton$.hide();rejectButton$.hide();}).call();});
+          ajax.command(cmd, cmdArgs)
+          .success(function() {
+            approveButton$.hide();
+            rejectButton$.hide();
+            setStatus({value:noun});})
+          .call();});
+      }
+
+      function modelModifiedSince(model, timestamp) {
+
+        if (model) {
+          if (!timestamp) {
+            return true;
+          }
+          //console.log(timestamp);
+
+          // Leaf?
+          if (model.value) {
+            return model.modified && model.modified > timestamp;
+          }
+
+          return _.find(model, function(myModel) {
+            //console.log(myModel);
+            return modelModifiedSince(myModel, timestamp);
+          }, false);
+        }
+        return false;
       }
 
       var meta = self.getMeta(path);
-      var status = null;
-      var approvedOn = null;
-      if (meta && meta._approved) {
-        status = meta._approved.value;
-        approvedOn = meta._approved.timestamp;
-      }
+      var approval = meta ? meta._approved : null;
 
-      if (self.authorizationModel.ok("approve-doc") && self.authorizationModel.ok("reject-doc")) {
-
-        if (status && model) {
-          console.log(status);
-          console.log(model);
-        }
-
-        approveButton$ = makeApprovalButton("approve-doc", "btn-primary", loc("document.approve"));
+      if (self.authorizationModel.ok("approve-doc") &&
+          self.authorizationModel.ok("reject-doc") &&
+          (!approval || modelModifiedSince(model, approval.timestamp))) {
+        approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
         btnContainer$.append(approveButton$);
-        rejectButton$ = makeApprovalButton("reject-doc", "btn-secondary", loc("document.reject"));
+        rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
         btnContainer$.append(rejectButton$);
-      } else if (status){
-        btnContainer$.text(loc("document." + status));
+      } else {
+        setStatus(approval);
       }
       return btnContainer$[0];
     };
