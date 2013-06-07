@@ -31,6 +31,9 @@
 (defn get-application-as [application-id user]
   (when user (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})))
 
+(defn get-application-no-access-checking [application-id]
+  (mongo/select-one :applications {:_id application-id}))
+
 ;;
 ;; authorization
 ;;

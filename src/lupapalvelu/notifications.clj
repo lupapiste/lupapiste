@@ -122,6 +122,7 @@
                     (template "neighbor.html")
                     (replace-links-in-fi-sv "#link" (fn [lang]
                                                       (str host "/app/" lang "/neighbor?hashbang=!" full-path "#!" full-path))))]
+    (println full-path)
     (send-mail-to-recipients! [email] title msg)))
 
 (defn get-message-for-application-state-change [application host]

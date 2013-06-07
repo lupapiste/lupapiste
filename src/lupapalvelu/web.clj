@@ -333,7 +333,7 @@
 
 (defn- output-attachment [attachment-id download?]
   (if (logged-in?)
-    (attachment/output-attachment attachment-id (current-user) download?)
+    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
     (resp/status 401 "Unauthorized\r\n")))
 
 (defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
