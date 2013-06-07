@@ -451,20 +451,25 @@
     (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
       (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
 
-(defn- schema-data-to-body [schema-data]
+(defn- schema-data-to-body [schema-data application]
   (reduce
-    (fn [body [data-path value]]
-      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))]
-        (update-in body path (constantly value))))
+    (fn [body [data-path data-value]]
+      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
+            val (if (fn? data-value) (data-value application) data-value)]
+        (update-in body path (constantly val))))
     {} schema-data))
 
-(defn- make-documents [user created existing-documents op]
+(defn- make-documents [user created existing-documents op application]
   (let [op-info               (operations/operations (keyword (:name op)))
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas yleiset-alueet/yleiset-alueet-schemas) schema-name)
+                                                 ;; TODO: Yhdistä (nämä kaikki) schemat jossain järkevämmässä paikassa
+                                                 :schema ((merge schemas/schemas
+                                                            poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
+                                                            yleiset-alueet/yleiset-alueet-kaivuulupa
+                                                            #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
-                                                         (schema-data-to-body (:schema-data op-info))
+                                                         (schema-data-to-body (:schema-data op-info) application)
                                                          {})})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
@@ -554,13 +559,13 @@
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
-                         :documents     (if info-request? [] (make-documents user created nil op))
                          :attachments   (if info-request? [] (make-attachments created op organization))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (partition 2 attachment/attachment-types))
                          :comments      (map make-comment messages)
                          :permitType    (permit-type-from-operation op)}
+          application   (assoc application :documents (if info-request? [] (make-documents user created nil op application)))
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
       (autofill-rakennuspaikka app-with-ver created)
@@ -579,7 +584,7 @@
             documents  (:documents application)
             op-id      (mongo/create-id)
             op         (make-op (get-in command [:data :operation]) created)
-            new-docs   (make-documents nil created documents op)]
+            new-docs   (make-documents nil created documents op nil)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
@@ -614,7 +619,7 @@
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
-                                                    :documents (make-documents (-> command :user security/summary) created nil op)
+                                                    :documents (make-documents (-> command :user security/summary) created nil op nil)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
 

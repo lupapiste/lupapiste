@@ -39,7 +39,8 @@
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
                                                                                         ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
-          (when (env/feature? :yleiset-alueet) [["Yleisten alueiden luvat" [["Kaivuulupa" :yleiset-alueet-kaivuulupa]]]])))
+          (when (env/feature? :yleiset-alueet) [["Yleisten alueiden luvat" [["Kaivuulupa" :yleiset-alueet-kaivuulupa]
+                                                                            #_["Liikennetta haittaavan tyon lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -50,7 +51,7 @@
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
 
-(def ^:private yleiset-alueet-common-schemas ["tyomaastaVastaava" "laskutustiedot" "kohteenTiedot" ])
+(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-hankkeen-kuvaus" "yleiset-alueet-maksaja"])
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -72,7 +73,7 @@
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
                                  :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]];FIXME Aftre krysp update change to 000
+                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]] ;FIXME Aftre krysp update change to 000
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
    :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
@@ -176,15 +177,24 @@
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :yleiset-alueet-kaivuulupa   {:schema "tyo-/vuokra-aika"
-                                 :required  yleiset-alueet-common-schemas}})
+   :yleiset-alueet-kaivuulupa   {:schema "kohteenTiedot"                                   ;; Mikä nimi tässä kuuluu olla?
+                                 ;; TODO: Settaa schema-data:lla Hakijan _selected tyyppi arvoon "yritys"
+                                 :schema-data [[["osoite" "katu"] #(:address %)]]
+                                 :required (conj yleiset-alueet-common-schemas "tyomaastaVastaava" "tyo-/vuokra-aika")}
+;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mikä nimi tässä kuuluu olla?
+;                                                       :required (conj yleiset-alueet-common-schemas [])}
+   })
 
 
 ; Sanity checks:
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas yleiset-alueet/yleiset-alueet-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
+  (if-not ((merge schemas/schemas
+             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
+             yleiset-alueet/yleiset-alueet-kaivuulupa
+             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema)
+    (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
   )
 
 
