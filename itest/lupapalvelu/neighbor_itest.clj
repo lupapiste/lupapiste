@@ -110,8 +110,6 @@
             (:attachments application) => empty? ; we could put some paapiirustus in there
             (:auth application) => nil)))
 
-      (println neighborId token)
-
       (fact "neighbor cant give ill response"
         (command pena :neighbor-response
           :applicationId application-id
