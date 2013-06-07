@@ -175,7 +175,10 @@
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
-                                 :attachments [:paapiirustus [:asemapiirros]]}})
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :meluilmoitus               {:schema "meluilmoitus"
+                                 :required []
+                                 :attachments []}})
 
 
 ; Sanity checks:

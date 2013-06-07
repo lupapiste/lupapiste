@@ -173,3 +173,42 @@ stamp.transparency.75: 75%
 stamp.transparency.100: 100% (läpinäkyvä)
 
 error.vrk:BR319:lammitustapa: Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine, rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom! Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua.
+
+
+
+
+
+
+
+
+
+meluilmoitus._group_label: Meluilmoitus
+meluilmoitus.karttapiirto:  Tähän karttapiirto
+meluilmoitus.kesto._group_label: Toiminnan kesto
+meluilmoitus.kesto.alku: Toiminnan aloituspäivä
+meluilmoitus.kesto.kello._group_label: Toiminnan kellonajat
+meluilmoitus.kesto.kello.arkisin: Arkisin
+meluilmoitus.kesto.kello.lauantait: Lauantaisin
+meluilmoitus.kesto.kello.pyhat: Pyhisin
+meluilmoitus.kesto.loppu: Toiminnan viimeinen päivä
+meluilmoitus.melu._group_label:Meluilmoitus
+meluilmoitus.melu.melu10mdBa: Melutaso 10m päässä
+meluilmoitus.melu.mittaus: Mittaus
+meluilmoitus.melu.paivalla: Päivällä
+meluilmoitus.melu.yolla:Yöllä
+meluilmoitus.osoite._group_label:Osoite
+meluilmoitus.osoite.katu: Katuosoite
+meluilmoitus.osoite.postinumero: Postinumero
+meluilmoitus.osoite.postitoimipaikannimi: Postitoimipaikka
+meluilmoitus.rakentaminen._group_label:Rakentaminen
+meluilmoitus.rakentaminen.koneet: Koneet, laitteet ja niiden etäisyys toimintapaikalta
+meluilmoitus.rakentaminen.kuvaus: Tiedot rakennustyöstä
+meluilmoitus.rakentaminen.melua-aihettava-toiminta._group_label:Melua aiheuttava toiminta
+meluilmoitus.rakentaminen.melua-aihettava-toiminta.louhinta: Louhinta
+meluilmoitus.rakentaminen.melua-aihettava-toiminta.murskaus: Murskaus
+meluilmoitus.rakentaminen.melua-aihettava-toiminta.paalutus: Paalutus
+meluilmoitus.tapahtuma._group_label: Tapahtuma
+meluilmoitus.tapahtuma.kuvaus: Tapahtuman kuvaus
+meluilmoitus.tapahtuma.nimi: Tapahtuman nimi
+meluilmoitus.tapahtuma.ulkoilmakonsertti: Ulkoilmakonstertti
+operations.meluilmoitus: Meluilmoitus
