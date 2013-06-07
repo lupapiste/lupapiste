@@ -522,7 +522,8 @@ var docgen = (function () {
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
           removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), function() { removeData(self.appId, self.docId, myPath.concat([id]).join('.')); }, loc("no"));
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), 
+                function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
           }
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
