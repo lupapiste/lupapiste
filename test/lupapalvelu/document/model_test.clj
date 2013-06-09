@@ -266,6 +266,30 @@
     (approvable? document [:repeats :1]) => true
     (approvable? document [:repeats :0 :single3]) => false))
 
+(facts "modifications-since-approvals"
+  (modifications-since-approvals nil) => 0
+  (modifications-since-approvals {}) => 0
+  (let [base-doc (-> (new-document schema-with-approvals 0)
+                   (assoc-in [:data :single] {:value "''" :modified 10}))]
+    (modifications-since-approvals base-doc) => 1
+    (modifications-since-approvals
+      (assoc-in base-doc [:meta :single :_approved] {:value "approved" :timestamp 9})) => 1
+    (modifications-since-approvals
+      (assoc-in base-doc [:meta :single :_approved] {:value "approved" :timestamp 10})) => 0
+    (modifications-since-approvals
+      (assoc-in base-doc [:meta :_approved] {:value "approved" :timestamp 9})) => 1
+    (modifications-since-approvals
+      (assoc-in base-doc [:meta :_approved] {:value "approved" :timestamp 10})) => 0
+    (modifications-since-approvals
+      (-> base-doc
+        (assoc-in [:schema :info :approvable] true)
+        (assoc-in [:meta :_approved] {:value "approved" :timestamp 9})
+        (assoc-in [:data :single2] {:value "" :modified 10})
+        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
+        )) => 4
+  ))
+
 ;;
 ;; Updates
 ;;

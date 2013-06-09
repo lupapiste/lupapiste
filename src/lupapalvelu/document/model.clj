@@ -186,6 +186,10 @@
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
 
+;;
+;; Approvals
+;;
+
 (defn approvable?
   ([document] (approvable? document nil))
   ([document path]
@@ -195,6 +199,29 @@
           element     (keywordize-keys (find-by-name schema-body str-path))]
       (true? (:approvable element)))
     (true? (get-in document [:schema :info :approvable])))))
+
+(defn modifications-since-approvals
+  ([{:keys [schema data meta]}]
+    (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0)))
+  ([schema-body path data meta approvable-parent timestamp]
+    (reduce
+      +
+      0
+      (map
+        (fn [{:keys [name approvable repeating body] :as element}]
+          (let [current-path (conj path (keyword name))
+                max-timestamp (max timestamp (get-in meta (concat current-path [:_approved :timestamp]) 0))
+                current-approvable (or approvable-parent approvable)]
+            (if body
+              (if repeating
+                (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable max-timestamp)) (keys (get-in data current-path))))
+                (modifications-since-approvals body current-path data meta current-approvable max-timestamp))
+              (if (and current-approvable (> (get-in data (conj current-path :modified) 0) max-timestamp)) 1 0))))
+        schema-body))))
+
+;;
+;; Create
+;;
 
 (defn new-document
   "Creates an empty document out of schema"
