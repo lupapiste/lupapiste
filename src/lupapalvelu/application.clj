@@ -86,11 +86,17 @@
         0))
     0))
 
+(defn count-document-modifications [user app]
+  (if (and (= (:role user) "authority") (not (:infoRequest app)))
+    (reduce + 0 (map model/modifications-since-approvals (:documents app)))
+    0))
+
 (defn indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
+  (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :neighbors :fn neighbors/normalize-negighbors}
+                  {:field :documentModifications :fn count-document-modifications}
                   {:field :unseenComments :fn count-unseen-comment}
                   {:field :unseenStatements :fn count-unseen-statements}
                   {:field :unseenVerdicts :fn count-unseen-verdicts}
