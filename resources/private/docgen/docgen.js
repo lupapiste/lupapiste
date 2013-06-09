@@ -162,7 +162,7 @@ var docgen = (function () {
       var rejectButton$ = null;
       var cmdArgs = {id: self.appId, doc: self.docId, path: path.join(".")};
 
-      if (!features.enabled('docIndicators')) {
+      if (_.isEmpty(model) || !features.enabled('docIndicators')) {
         return btnContainer$[0];
       }
 
@@ -610,12 +610,12 @@ var docgen = (function () {
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
           removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), 
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"),
                 function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
           }
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-        
+
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
