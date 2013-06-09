@@ -86,9 +86,15 @@
         0))
     0))
 
+(defn count-document-modifications-per-doc [user app]
+  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
+    (into {} (map (fn [doc] [(:id doc) (model/modifications-since-approvals doc)]) (:documents app)))
+    {}))
+
+
 (defn count-document-modifications [user app]
-  (if (and (= (:role user) "authority") (not (:infoRequest app)))
-    (reduce + 0 (map model/modifications-since-approvals (:documents app)))
+  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
+    (reduce + 0 (vals (:documentModificationsPerDoc app)))
     0))
 
 (defn indicator-sum [_ app]
@@ -96,6 +102,7 @@
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :neighbors :fn neighbors/normalize-negighbors}
+                  {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                   {:field :documentModifications :fn count-document-modifications}
                   {:field :unseenComments :fn count-unseen-comment}
                   {:field :unseenStatements :fn count-unseen-statements}
