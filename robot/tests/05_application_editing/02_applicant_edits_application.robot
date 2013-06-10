@@ -5,7 +5,7 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko goes to parties tab of an application
+Mikko opens an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  create-app${secs}
@@ -14,6 +14,15 @@ Mikko goes to parties tab of an application
   Set Suite Variable  ${newId}  753-416-17-14
   Create application the fast way  ${appname}  753  ${propertyId}
   Open application  ${appname}  ${propertyId}
+
+Mikko removes apartment
+  Wait Until  Element Should Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
+  Click Element  //span[@data-test-class="delete-schemas.huoneistot"]
+  Wait Until  Element Should Be Visible  xpath=//button[@data-test-id='confirm-yes']
+  Click Element  xpath=//button[@data-test-id='confirm-yes']
+  Wait Until  Element Should Not Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
+
+Mikko goes to parties tab of an application
   Open tab  parties
 
 Mikko decides to delete maksaja
