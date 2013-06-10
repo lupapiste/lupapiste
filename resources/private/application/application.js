@@ -513,6 +513,13 @@
       }
       var targetTab = $target.attr("data-target");
       window.location.hash = "#!/application/" + application.id() + "/" + targetTab;
+    },
+
+    exportButtonVisible: function() {
+      return !application.operations()
+             || application.operations().length === 0
+             || application.operations()[application.operations().length-1]['operation-type'] === undefined
+             || application.operations()[application.operations().length-1]['operation-type']() != 'publicArea';
     }
   };
 
