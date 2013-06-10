@@ -34,7 +34,8 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery])
+            [ring.middleware.anti-forgery :as anti-forgery]
+            [lupapalvelu.neighbors])
   (:import [java.io ByteArrayInputStream]))
 
 ;;
@@ -152,7 +153,8 @@
                    :applicant logged-in?
                    :authority authority?
                    :authority-admin authority-admin?
-                   :admin admin?})
+                   :admin admin?
+                   :neighbor anyone})
 
 (defn cache-headers [resource-type]
   (if (env/dev-mode?)
@@ -185,7 +187,7 @@
 
 ;; Single Page App HTML
 (def apps-pattern
-  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
+  (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
 (defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
 
@@ -331,7 +333,7 @@
 
 (defn- output-attachment [attachment-id download?]
   (if (logged-in?)
-    (attachment/output-attachment attachment-id (current-user) download?)
+    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
     (resp/status 401 "Unauthorized\r\n")))
 
 (defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
@@ -353,11 +355,9 @@
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (if (logged-in?)
-    (if @env/proxy-off
-      {:status 503}
-      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
-    {:status 401}))
+  (if @env/proxy-off
+    {:status 503}
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
 
 ;;
 ;; Token consuming:
@@ -421,6 +421,12 @@
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"}))))
+
+  (require 'lupapalvelu.neighbors)
+  (defpage "/dev/public/:collection/:id" {:keys [collection id]}
+    (if-let [r (mongo/by-id collection id)]
+      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
   (defpage [:get "/api/proxy-ctrl"] []

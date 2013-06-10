@@ -72,7 +72,8 @@
         (fail :mypage.old-password-does-not-match)))))
 
 (defcommand "reset-password"
-  {:parameters [:email]
+  {:parameters    [:email]
+   :notified      true
    :authenticated false}
   [{{email :email} :data}]
   (infof "Password resert request: email=%s" email)

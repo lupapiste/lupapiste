@@ -26,10 +26,12 @@
     (when-not (= statement-email user-email)
       (fail :error.not-statement-owner))))
 
-(defn statement-not-given [{{:keys [statementId]} :data {user-email :email} :user} application]
-  (let [{:keys [given]} (get-statement application statementId)]
-    (when given
-      (fail :error.statement-already-given))))
+(defn statement-given? [application statementId]
+  (boolean (->> statementId (get-statement application) :given)))
+
+(defn statement-not-given [{{:keys [statementId]} :data} application]
+  (when (statement-given? application statementId)
+    (fail :error.statement-already-given)))
 
 ;;
 ;; Authority Admin operations
@@ -44,10 +46,11 @@
 
 (defcommand "create-statement-person"
   {:parameters [:email :text]
+   :notified   true
    :roles      [:authorityAdmin]}
   [{{:keys [email text]} :data {:keys [organizations] :as user} :user}]
   (let [organization-id (first organizations)
-        organization (mongo/select-one :organizations {:_id organization-id})]
+        organization    (mongo/select-one :organizations {:_id organization-id})]
     (with-user email
       (fn [{:keys [firstName lastName] :as user}]
         (if-not (security/authority? user)
@@ -82,6 +85,7 @@
 (defcommand "request-for-statement"
   {:parameters  [:id :personIds]
    :roles       [:authority]
+   :notified    true
    :states      [:draft :info :open :submitted :complement-needed]
    :description "Adds statement-requests to the application and ensures writer-permission to all new users."}
   [{user :user {:keys [id personIds]} :data {:keys [host]} :web :as command}]
@@ -116,15 +120,25 @@
 
 (defcommand "give-statement"
   {:parameters  [:id :statementId :status :text]
-   :validators  [statement-exists statement-owner statement-not-given]
+   :validators  [statement-exists statement-owner #_statement-not-given]
    :states      [:draft :info :open :submitted :complement-needed]
    :roles       [:authority]
-   :description "authrority-roled statement owners can give statements that are not given already"}
-  [{{:keys [id statementId status text]} :data}]
+   :description "authrority-roled statement owners can give statements - notifies via comment."}
+  [{{:keys [id statementId status text]} :data :keys [application] :as command}]
   (mongo/update
     :applications
     {:_id id
      :statements {$elemMatch {:id statementId}}}
     {$set {:statements.$.status status
            :statements.$.given (now)
-           :statements.$.text text}}))
+           :statements.$.text text}})
+  (let [text (if (statement-given? application statementId)
+                 "Hakemuksen lausuntoa on p\u00e4ivitetty."
+                 "Hakemukselle lis\u00e4tty lausunto.")]
+    (executed "add-comment"
+      (-> command
+        (assoc :data {:id id
+                      :text   text
+                      :type   :system
+                      :target {:type :statement
+                               :id   statementId}})))))

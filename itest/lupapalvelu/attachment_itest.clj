@@ -3,17 +3,17 @@
         [lupapalvelu.itest-util]
         [midje.sweet]))
 
-(defn- get-attachment [application-id attachment-id]
+(defn- get-attachment-by-id [application-id attachment-id]
   (let [application     (:application (query pena :application :id application-id))]
     (some #(when (= (:id %) attachment-id) %) (:attachments application))))
 
 (defn- approve-attachment [application-id attachment-id]
   (command veikko :approve-attachment :id application-id :attachmentId attachment-id) => ok?
-  (get-attachment application-id attachment-id) => (in-state? "ok"))
+  (get-attachment-by-id application-id attachment-id) => (in-state? "ok"))
 
 (defn- reject-attachment [application-id attachment-id]
   (command veikko :reject-attachment :id application-id :attachmentId attachment-id) => ok?
-  (get-attachment application-id attachment-id) => (in-state? "requires_user_action"))
+  (get-attachment-by-id application-id attachment-id) => (in-state? "requires_user_action"))
 
 (facts "attachments"
   (let [{application-id :id :as response} (create-app pena :municipality veikko-muni)]
@@ -36,14 +36,14 @@
         (fact (count attachment-ids) => 2))
 
       (fact "attachment has been saved to application"
-        (get-attachment application-id (first attachment-ids)) => (contains
-                                                                    {:type {:type-group "tg" :type-id "tid-1"}
-                                                                     :state "requires_user_action"
-                                                                     :versions []})
-        (get-attachment application-id (second attachment-ids)) => (contains
-                                                                     {:type {:type-group "tg" :type-id "tid-2"}
-                                                                      :state "requires_user_action"
-                                                                      :versions []}))
+        (get-attachment-by-id application-id (first attachment-ids)) => (contains
+                                                                          {:type {:type-group "tg" :type-id "tid-1"}
+                                                                           :state "requires_user_action"
+                                                                           :versions []})
+        (get-attachment-by-id application-id (second attachment-ids)) => (contains
+                                                                           {:type {:type-group "tg" :type-id "tid-2"}
+                                                                            :state "requires_user_action"
+                                                                            :versions []}))
 
       (fact "Veikko can approve attachment"
         (approve-attachment application-id (first attachment-ids)))

@@ -46,7 +46,7 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js"]
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"]
                   :css ["css/main.css"]
                   :html ["error.html" "nav.html"]}
 
@@ -54,7 +54,7 @@
                   :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js" "currentUser.js"]
+                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]
@@ -87,6 +87,10 @@
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
+   :neighbors    {:depends [:common :repository]
+                  :js ["neighbors.js"]
+                  :html ["neighbors.html"]}
+
    :register     {:depends [:common]
                   :css ["register.css"]
                   :js ["register.js"]
@@ -106,7 +110,7 @@
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :application :attachment
-                            :statement :verdict :docgen :create :mypage :debug]
+                            :statement :verdict :neighbors :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -153,7 +157,11 @@
 
    :about {:depends [:common :debug]
            :js ["about.js"]
-           :html ["terms.html" "index.html"]}})
+           :html ["terms.html" "index.html"]}
+
+   :neighbor {:depends [:common :map :debug]
+              :html ["neighbor.html"]
+              :js ["neighbor.js" "begin.js" "show.js"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

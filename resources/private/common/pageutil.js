@@ -21,18 +21,28 @@ var pageutil = (function() {
 
   var ajaxLoaderContainer;
   var ajaxLoaderTask;
-  
+
   function showAjaxWaitNow(message) { ajaxLoaderContainer.find("p").html(message || "").end().show(); }
-  
+
   function showAjaxWait(message) {
-    if (ajaxLoaderTask) clearTimeout(ajaxLoaderTask);
+    if (ajaxLoaderTask) { clearTimeout(ajaxLoaderTask); }
     ajaxLoaderTask = _.delay(showAjaxWaitNow, 300, message);
   }
 
   function hideAjaxWait() {
-    if (ajaxLoaderTask) clearTimeout(ajaxLoaderTask);
+    if (ajaxLoaderTask) { clearTimeout(ajaxLoaderTask); }
     ajaxLoaderTask = undefined;
     ajaxLoaderContainer.hide();
+  }
+
+  function makePendingAjaxWait(message) {
+    return function(show) {
+      if (show) {
+        showAjaxWaitNow(message);
+      } else {
+        hideAjaxWait();
+      }
+    };
   }
 
   $(function() {
@@ -43,10 +53,11 @@ var pageutil = (function() {
   });
 
   return {
-    getURLParameter:  getURLParameter,
-    getPage:          getPage,
-    showAjaxWait:     showAjaxWait,
-    hideAjaxWait:     hideAjaxWait
+    getURLParameter:      getURLParameter,
+    getPage:              getPage,
+    showAjaxWait:         showAjaxWait,
+    hideAjaxWait:         hideAjaxWait,
+    makePendingAjaxWait:  makePendingAjaxWait
   };
 
 })();

@@ -25,7 +25,6 @@
 
   function submit(m) {
     var error$ = $('#register-email-error');
-    var loader$ = $("#registerLoader");
     error$.text('');
 
     ajax.command('register-user', json(m))

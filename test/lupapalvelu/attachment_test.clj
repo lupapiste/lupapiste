@@ -67,24 +67,29 @@
                                                                              :fileId :file2}))
 
 (fact "make attachments"
-  (make-attachments 999 [:a :b]) => [{:id "123"
-                                      :locked false
-                                      :authority false
-                                      :modified 999
-                                      :op nil
-                                      :state :requires_user_action
-                                      :target nil
-                                      :type :a
-                                      :versions []}
-                                     {:id "123"
-                                      :locked false
-                                      :authority false
-                                      :modified 999
-                                      :op nil
-                                      :state :requires_user_action
-                                      :target nil
-                                      :type :b
-                                      :versions []}]
+  (make-attachments 999 [:a :b]) => (just
+                                      [{:id "123"
+                                        :locked false
+                                        :modified 999
+                                        :op nil
+                                        :state :requires_user_action
+                                        :target nil
+                                        :type :a
+                                        :versions []}
+                                       {:id "123"
+                                        :locked false
+                                        :modified 999
+                                        :op nil
+                                        :state :requires_user_action
+                                        :target nil
+                                        :type :b
+                                        :versions []}])
   (provided
     (mongo/create-id) => "123"))
 
+(fact "attachment can be found with file-id"
+  (get-attachment-info-by-file-id {:attachments [{:versions [{:fileId "123"}
+                                                             {:fileId "234"}]}
+                                                 {:versions [{:fileId "345"}
+                                                             {:fileId "456"}]}]} "456") => {:versions [{:fileId "345"}
+                                                                                                       {:fileId "456"}]})

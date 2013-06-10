@@ -35,6 +35,8 @@
           <th>roolit</th>
           <th>tilat</th>
           <th>parametrit</th>
+          <th>email</th>
+          <th>feature</th>
           <th>l&auml;hdekoodi</th>
           <th>kuvaus</th>
         </thead>
@@ -64,6 +66,12 @@
                 <li data-bind="text: $data"></li>
               </ul>
               <!-- /ko -->
+            </td>
+            <td data-bind="attr: {'class': $data.notify ? 'btn-primary' : $data.notified ? 'btn-decline' : ''}">
+              <span data-bind="text: $data.notify || ''"></span>
+            </td>
+            <td data-bind="attr: {'class': $data.feature ? features.enabled($data.feature.join(',')) ? 'btn-primary' : 'btn-decline' : ''}">
+              <span data-bind="text: $data.feature || ''"></span>
             </td>
             <td>
               <span data-bind="text: ns"></span>: <span data-bind="text: line"></span>

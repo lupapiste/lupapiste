@@ -28,12 +28,29 @@
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
+    self.dirty = ko.observable(false);
+    self.submitLtext = ko.computed(function() {
+      if(self.data() && self.data().status()) {
+        return 'statement.submit-again';
+      } else {
+        return 'statement.submit';
+      }
+    });
+
+    self.text.subscribe(function(value) {
+      if(self.data() && self.data().text && self.data().text() !== value) { self.dirty(true); }
+    });
+
+    self.selectedStatus.subscribe(function(value) {
+      if(self.data() && self.data().status && self.data().status() !== value) { self.dirty(true); }
+    });
 
     self.clear = function() {
       self.data(null);
       self.application(null);
       self.selectedStatus(null);
       self.text(null);
+      self.dirty(false);
       return self;
     };
 
@@ -43,12 +60,14 @@
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
 
-        // LUPA-482
-        if (statement.status) {
+        // LUPA-482 part II
+        if (statement.status && !self.dirty()) {
           self.selectedStatus(statement.status);
+          self.dirty(false);
         }
-        if (statement.text) {
+        if (statement.text && !self.dirty()) {
           self.text(statement.text);
+          self.dirty(false);
         }
 
       } else {
@@ -75,7 +94,7 @@
     };
 
     self.disabled = ko.computed(function() {
-      return !self.selectedStatus() || !self.text() || self.submitting();
+      return !self.selectedStatus() || !self.text() || self.submitting() || !self.dirty();
     });
   }
 
@@ -103,7 +122,7 @@
     };
 
     self.canDeleteAttachment = function(attachment) {
-      return authorizationModel.ok("delete-attachment") && (!attachment.authority || user.isAuthority());
+      return authorizationModel.ok("delete-attachment") && (!attachment.authority || currentUser.isAuthority());
     };
 
     self.canAddAttachment = function() {
@@ -117,7 +136,7 @@
 
     self.newAttachment = function() {
       // created file is authority-file if created by authority
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, user.isAuthority());
+      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, currentUser.isAuthority());
     };
   }
 
