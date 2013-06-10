@@ -265,4 +265,4 @@ attachmentType.yleiset-alueet._group_label: Yleisten alueiden luvat
 attachmentType.yleiset-alueet.aiemmin-hankittu-sijoituspaatos: Aiemmin hankittu sijoituspäätös
 attachmentType.yleiset-alueet.tilapainen-liikennejarjestelysuunnitelma: Tilapäinen liikennejärjestelysuunnitelma
 attachmentType.yleiset-alueet.tyyppiratkaisu: Tyyppiratkaisu
-attachmentType.yleiset-alueet.tieto-kaivupaikkaan-liittyvistä-johtotiedoista: Tieto kaivupaikkaan liittyvistä johtotiedoista
+attachmentType.yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista: Tieto kaivupaikkaan liittyvistä johtotiedoista
