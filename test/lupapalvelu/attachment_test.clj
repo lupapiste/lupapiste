@@ -56,15 +56,19 @@
   (version-number {:version {:major 1 :minor 16}}) => 1016)
 
 (fact "Find latest version"
-  (let [attachments [{:id :attachment1
-                      :versions []}
-                     {:id :attachment2
-                      :versions [{:version { :major 1 :minor 0 }
-                                  :fileId :file1}
-                                 {:version { :major 1 :minor 1 }
-                                  :fileId :file2}]}]]
+  (let [application {:attachments [{:id :attachment1
+                                    :versions []}
+                                   {:id :attachment2
+                                    :versions [{:version { :major 1 :minor 0 }
+                                                :fileId :file1}
+                                               {:version { :major 1 :minor 1 }
+                                                :fileId :file2}]}]}
+        attachments (:attachments application)]
     (latest-version-after-removing-file attachments :attachment2 :file1) => {:version { :major 1 :minor 1}
-                                                                             :fileId :file2}))
+                                                                             :fileId :file2}
+
+    (attachment-file-ids application :attachment2) => [:file1 :file2]
+    (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
   (make-attachments 999 [:a :b]) => (just

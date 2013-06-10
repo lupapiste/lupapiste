@@ -591,7 +591,7 @@ var docgen = (function () {
 
     function removeData(id, doc, path) {
       ajax
-        .command("remove-data", { doc: doc, id: id, path: path })
+        .command("remove-document-data", { doc: doc, id: id, path: path })
         .success(function (e) {
           repository.load(id);
         })
@@ -612,14 +612,14 @@ var docgen = (function () {
         if (subSchema.repeating) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
-          removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
+          removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
           removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"),
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"), loc("yes"), 
                 function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
           };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-
+        
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";

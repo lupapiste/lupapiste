@@ -184,3 +184,7 @@ error.vrk:BR319:lammitustapa: Jos rakentamistoimenpide on 1, ovat kantavien rake
 email.title.neighbor: naapurin kuuleminen
 
 statement.submit-again: Päivitä lausuntoa
+
+
+document.delete.header: Poista hakemuksen osa
+document.delete.message: Oletko varma, että haluat poistaa hakemuksen osan?

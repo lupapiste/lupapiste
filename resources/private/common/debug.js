@@ -76,6 +76,7 @@ $(function() {
         .append($("<br>"))
         .append($("<input type='checkbox' data-id='anim' checked='checked'>").click(function() { tree.animation($(this).prop("checked")); }))
         .append($("<label>").text("Animations"))
+        .append($("<h3><a href='/api/last-email'>Last Email</a></h3>"))
         .append($("<p>").text("Apply:")
           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
           .append($("<br>"))
