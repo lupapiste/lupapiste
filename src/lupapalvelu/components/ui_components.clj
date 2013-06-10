@@ -160,8 +160,8 @@
            :html ["terms.html" "index.html"]}
 
    :neighbor {:depends [:common :map :debug]
-              :html ["neighbor.html"]
-              :js ["neighbor.js" "begin.js" "show.js"]}})
+              :html ["neighbor-show.html"]
+              :js ["neighbor-app.js" "begin.js" "neighbor-show.js"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+
+    <section id="neighbor-show" class="page">
+      <div class="container">
+
+        <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
+
+        <ul>
+          <li>Application ID: <span data-bind="text: applicationId"></span></li>
+          <li>Neighbor ID: <span data-bind="text: neighborId"></span></li>
+          <li>token: <span data-bind="text: token"></span></li>
+        </ul>
+
+        <div data-bind="visible: pending" class="pending"></div>
+
+        <div data-bind="visible: application" class="neighbor-map-container">
+          <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+        </div>
+
+        <div class="neighbor-reply-form">
+          <form>
+            <select
+                data-bind="
+                  options: responses,
+                  optionsText: 'text',
+                  value: response,
+                  optionsCaption: loc('neighbor.show.response.empty')">
+            </select>
+            <label data-bind="ltext: 'neighbor.show.message'" for="response-message"></label>
+            <textarea
+                data-bind="
+                  value: message,
+                  enable: messageEnabled,
+                  valueUpdate: 'afterkeydown',
+                  attr: {placeholder: loc('neighbor.show.message.placeholder')}"
+                id="response-message"
+                class="form-input textarea really-long high"
+                rows=10></textarea>
+            <button
+                data-bind="
+                  click: send,
+                  enable: response() && !saving() && !done(),
+                  ltext: 'neighbor.show.ok'">
+            </button>
+            <span data-bind="visible: saving">
+              <img src="/img/ajax-loader-12.gif"/>
+              <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
+            </span>
+            <div data-bind="visible: done, ltext: 'neighbor.show.response.done'"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </body>
+</html>
