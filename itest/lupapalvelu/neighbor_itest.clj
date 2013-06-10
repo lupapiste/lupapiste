@@ -3,7 +3,8 @@
         [midje.sweet]
         [clojure.pprint :only [pprint]])
   (:require [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.tools :as tools]
+            [sade.util :refer [fn->]]))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "token-not-found"}))
 (defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-response"}))
@@ -58,7 +59,9 @@
     (fact (count neighbors) => 0)))
 
 (facts "neighbour invite & view on application"
-  (let [[{application-id :id} neighborId] (create-app-with-neighbor)
+  (let [[{application-id :id :as application}
+         neighborId]    (create-app-with-neighbor)
+        _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
                           :id application-id
                           :neighborId neighborId
@@ -107,7 +110,13 @@
           (facts "random testing about content"
             (:comments application) => nil
             (count (:documents application)) => 5 ; evil
-            (:attachments application) => empty? ; we could put some paapiirustus in there
+
+            (fact "attachments"
+              (fact "there are some attachments"
+                (->> application :attachments count) => pos?)
+              (fact "everyone is paapiirustus"
+                (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey))
+
             (:auth application) => nil)))
 
       (fact "neighbor cant give ill response"
