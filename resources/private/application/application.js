@@ -436,10 +436,11 @@
     };
 
     self.approveApplication = function(model) {
+      var applicationId = self.id();
       ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
-          repository.load(self.id());
+          repository.load(applicationId);
         })//FIXME parempi/tyylikaampi virheilmoitus
         .error(function(resp) {alert(resp.text);})
         .call();
