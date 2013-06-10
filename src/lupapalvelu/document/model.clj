@@ -209,8 +209,6 @@
               [{:keys [name approvable repeating body] :as element}]
               (let [current-path (conj path (keyword name))
                     current-approvable (or approvable-parent approvable)]
-
-;(println current-path current-approvable timestamp)
                 (if body
                   (if repeating
                     (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
