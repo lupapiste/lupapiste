@@ -58,7 +58,7 @@
                        :yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                                         :tilapainen-liikennejarjestelysuunnitelma
                                         :tyyppiratkaisu
-                                        :tieto-kaivupaikkaan-liittyvistä-johtotiedoista]
+                                        :tieto-kaivupaikkaan-liittyvista-johtotiedoista]
                        :muut [:selvitys_rakennuspaikan_terveellisyydesta
                               :selvitys_rakennuspaikan_korkeusasemasta
                               :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
