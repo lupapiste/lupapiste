@@ -1,7 +1,8 @@
 (ns lupapalvelu.attachment-itest
   (:use [lupapalvelu.attachment]
         [lupapalvelu.itest-util]
-        [midje.sweet]))
+        [midje.sweet])
+  (:require [clj-http.client :as c]))
 
 (defn- get-attachment-by-id [application-id attachment-id]
   (let [application     (:application (query pena :application :id application-id))]
@@ -44,6 +45,26 @@
                                                                            {:type {:type-group "tg" :type-id "tid-2"}
                                                                             :state "requires_user_action"
                                                                             :versions []}))
+
+      (fact "uploading files"
+        (let [application (:application (query pena :application :id application-id))
+              _           (upload-attachment-to-all-placeholders pena application)
+              application (:application (query pena :application :id application-id))
+              auth-get    (fn [file-id action]
+                            (c/get (str (server-address) action "/" file-id)
+                              {:headers {"authorization" (str "apikey=" pena)}}))]
+          (doseq [attachment-id (get-attachment-ids application)
+                  :let [file-id  (attachment-latest-file-id application attachment-id)
+                        auth-get (partial auth-get file-id)]]
+
+            (fact "view-attachment"
+              (auth-get "/api/view-attachment"))
+
+            (fact "download-attachment"
+              (auth-get "/api/download-attachment"))
+
+
+            )))
 
       (fact "Veikko can approve attachment"
         (approve-attachment application-id (first attachment-ids)))
