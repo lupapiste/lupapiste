@@ -439,7 +439,7 @@
 
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
-    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
     (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 

@@ -60,7 +60,7 @@
             (fact "download-attachment"
               (auth-get "/api/download-attachment/" file-id)))
 
-          #_(fact "download all"
+          (fact "download all"
             (auth-get "/api/download-all-attachments/" application-id))
 
           (fact "pdf export"
