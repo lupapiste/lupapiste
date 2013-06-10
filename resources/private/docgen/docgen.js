@@ -747,10 +747,9 @@ var docgen = (function () {
         return false;
       }
 
-      var message = loc("removeDoc.message1") + " "+ documentName + ". " +  loc("removeDoc.message2");
+      var message = "<div>" + loc("removeDoc.message1") + " <strong>"+ documentName + ".</strong></div><div>" +  loc("removeDoc.message2") + "</div>";
       LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message,
-          {title: loc("removeDoc.ok"), fn: onRemovalConfirmed},
-          {title: loc("removeDoc.cancel")});
+          {title: loc("removeDoc.ok"), fn: onRemovalConfirmed}, {title: loc("removeDoc.cancel")}, {html: true});
 
       return false;
     }
