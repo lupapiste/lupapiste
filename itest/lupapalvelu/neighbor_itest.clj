@@ -13,14 +13,14 @@
         application-id (:id resp)
         resp (command pena :add-comment :id application-id :text "foo" :target "application")
         resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :type :person :email "e")
-        neighborId (keyword (:neighborId resp))
+        neighborId (:neighborId resp)
         resp (query pena :application :id application-id)
         application (:application resp)
         neighbors (:neighbors application)]
     [application neighborId neighbors]))
 
 (defn- find-by-id [neighborId neighbors]
-  (some (fn [neighbor] (when (= neighborId (keyword (:neighborId neighbor))) neighbor)) neighbors))
+  (some (fn [neighbor] (when (= neighborId (:neighborId neighbor)) neighbor)) neighbors))
 
 (facts "create app, add neighbor"
   (let [[application neighborId neighbors] (create-app-with-neighbor)
@@ -93,7 +93,7 @@
       (fact "neighbor applicaiton query does not return hetu"
         (let [application (-> (query pena :neighbor-application
                                 :applicationId application-id
-                                :neighborId (name neighborId)
+                                :neighborId neighborId
                                 :token token) :application)
               hakija-doc  (domain/get-document-by-id application hakija-doc-id)
               hakija-doc  (tools/unwrapped hakija-doc)]
@@ -106,6 +106,7 @@
 
           (facts "random testing about content"
             (:comments application) => nil
+            (count (:documents application)) => 5 ; evil
             (:attachments application) => empty? ; we could put some paapiirustus in there
             (:auth application) => nil)))
 
