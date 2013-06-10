@@ -121,10 +121,18 @@
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="ltext: 'application.tabInfo', click: $root.application.changeTab"
-                   href="#" data-target="info" data-test-id="application-open-info-tab"></a></li>
-            <li><a data-bind="ltext: 'application.tabParties', click: $root.application.changeTab"
-                   href="#" data-target="parties" data-test-id="application-open-parties-tab"></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="info" data-test-id="application-open-info-tab">
+                  <span data-bind="ltext: 'application.tabInfo'"></span>
+                  <span data-bind="if: $root.application.nonpartyDocumentIndicator">
+                    <span data-bind="text: $root.application.nonpartyDocumentIndicator"
+                        id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="parties" data-test-id="application-open-parties-tab">
+                  <span data-bind="ltext: 'application.tabParties'"></span>
+                  <span data-bind="if: $root.application.partyDocumentIndicator">
+                    <span data-bind="text: $root.application.partyDocumentIndicator"
+                          id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
             <li><a data-bind="click: $root.application.changeTab"
                    href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
                 <span data-bind="ltext: 'application.tabAttachments'"></span>
@@ -145,10 +153,10 @@
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></a></li>
             <li><a data-bind="click: $root.application.changeTab"
                    href="#" data-target="conversation" data-test-id="application-open-conversation-tab" >
-                <span data-bind="ltext: 'application.tabConversation'"></span>
-                <span data-bind="if: $root.application.unseenComments">
-                  <span data-bind="text: $root.application.unseenComments"
-                        id="applicationUnseenComments" class="indicator"></span></span></a></li>
+                  <span data-bind="ltext: 'application.tabConversation'"></span>
+                  <span data-bind="if: $root.application.unseenComments">
+                    <span data-bind="text: $root.application.unseenComments"
+                          id="applicationUnseenComments" class="indicator"></span></span></a></li>
           </ul>
         </div>
       </div>

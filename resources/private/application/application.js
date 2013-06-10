@@ -353,6 +353,8 @@
     applicant: ko.observable(),
     assignee: ko.observable(),
     neighbors: ko.observable(),
+    nonpartyDocumentIndicator: ko.observable(0),
+    partyDocumentIndicator: ko.observable(0),
 
     attachmentsRequiringAction: ko.observable(),
     unseenStatements: ko.observable(),
@@ -573,8 +575,6 @@
     isInitializing = true;
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
-      // new data mapping
-
       var app = applicationDetails.application;
       var documents = app.documents;
 
@@ -642,8 +642,17 @@
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
       }
 
-      docgen.displayDocuments("#applicationDocgen", removeDocModel, app, _.filter(documents, function(doc) {return doc.schema.info.type !== "party"; }), authorizationModel);
-      docgen.displayDocuments("#partiesDocgen",     removeDocModel, app, _.filter(documents, function(doc) {return doc.schema.info.type === "party"; }), authorizationModel);
+      // Documents
+      var nonpartyDocs = _.filter(documents, function(doc) {return doc.schema.info.type !== "party"; });
+      var partyDocs = _.filter(documents, function(doc) {return doc.schema.info.type === "party"; });
+      docgen.displayDocuments("#applicationDocgen", removeDocModel, app, nonpartyDocs, authorizationModel);
+      docgen.displayDocuments("#partiesDocgen",     removeDocModel, app, partyDocs, authorizationModel);
+
+      function sumDocIndicators(sum, doc) {
+        return sum + app.documentModificationsPerDoc[doc.id];
+      }
+      application.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
+      application.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
