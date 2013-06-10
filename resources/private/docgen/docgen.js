@@ -499,7 +499,7 @@ var docgen = (function () {
 
     function removeData(id, doc, path) {
       ajax
-        .command("remove-data", { doc: doc, id: id, path: path })
+        .command("remove-document-data", { doc: doc, id: id, path: path })
         .success(function (e) {
           repository.load(id);
         })
