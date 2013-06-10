@@ -155,15 +155,17 @@ var docgen = (function () {
       return span;
     }
 
+    // TODO WIP
     self.makeApprovalButtons = function(path, model) {
+      var btnContainer$ = $("<span>").addClass("form-buttons");
       var statusContainer$ = $("<span>");
-      var btnContainer$ = $("<div>").addClass("form-buttons").append(statusContainer$);
+      var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
       var cmdArgs = {id: self.appId, doc: self.docId, path: path.join(".")};
 
       if (_.isEmpty(model) || !features.enabled('docIndicators')) {
-        return btnContainer$[0];
+        return approvalContainer$[0];
       }
 
       function setStatus(approval) {
@@ -219,7 +221,7 @@ var docgen = (function () {
       } else {
         setStatus(approval);
       }
-      return btnContainer$[0];
+      return approvalContainer$[0];
     };
 
     // Form field builders
@@ -382,16 +384,18 @@ var docgen = (function () {
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
       var clearDiv = document.createElement("div");
+      var label = makeLabel("group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
       clearDiv.className = "clear";
-      div.appendChild(makeLabel("group", myPath, true));
+
+      div.appendChild(label);
 
       if (subSchema.approvable) {
-        div.appendChild(self.makeApprovalButtons(path, myModel));
+        label.appendChild(self.makeApprovalButtons(path, myModel));
       }
 
       div.appendChild(partsDiv);
