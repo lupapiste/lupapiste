@@ -520,8 +520,9 @@ var docgen = (function () {
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
           removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"),
-                function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"),
+                {title: loc("yes"), fn: function() { removeData(self.appId, self.docId, myPath.concat([id])); }},
+                {title: loc("no")});
           }
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
@@ -747,7 +748,9 @@ var docgen = (function () {
       }
 
       var message = loc("removeDoc.message1") + " "+ documentName + ". " +  loc("removeDoc.message2");
-      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message, loc("removeDoc.ok"), onRemovalConfirmed, loc("removeDoc.cancel"));
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message,
+          {title: loc("removeDoc.ok"), fn: onRemovalConfirmed},
+          {title: loc("removeDoc.cancel")});
 
       return false;
     }
