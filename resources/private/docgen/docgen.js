@@ -173,7 +173,7 @@ var docgen = (function () {
           var text = loc("document." + approval.value);
           if (approval.user && approval.timestamp) {
             text += " (" + approval.user.firstName + " " + approval.user.lastName;
-            text += " " + moment(approval.timestamp).format("D.M.YYYY") + ")";
+            text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
           }
           statusContainer$.text(text);
         }
@@ -614,12 +614,12 @@ var docgen = (function () {
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
           removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"), loc("yes"), 
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"), loc("yes"),
                 function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
           };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-        
+
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
