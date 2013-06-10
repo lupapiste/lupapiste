@@ -7,6 +7,13 @@
                               simple-osoite
                               {:name "laskuviite" :type :string :subtype :number :max-len 30 :layout :full-width}))  ;;TODO: Mikä :max-len tälle kentälle?
 
+(def hankeesta-vastaava (body
+                          {:name "userId" :type :personSelector} ;henkilo-valitsin
+                          designer-basic
+                          [{:name "patevyys" :type :group
+                            :body [{:name "ammattipatevyys" :type :text :max-len 4000 :layout :full-width}
+                                   {:name "voimassa-pvm" :type :date}]}]))
+
 (def tyomaasta-vastaava (body
                           {:name "userId" :type :personSelector} ;henkilo-valitsin
                           designer-basic
@@ -30,17 +37,21 @@
              :type :party
              :order 61}
       :body yleiset-alueet-maksaja}
-     {:info {:name "tyomaastaVastaava"
+     {:info {:name "hankeestaVastaava"
              :type :party
              :order 62}
+      :body hankeesta-vastaava}
+     {:info {:name "tyomaastaVastaava"
+             :type :party
+             :order 63}
       :body tyomaasta-vastaava}
      {:info {:name "kohteenTiedot"
              :type :group
-             :order 63}
+             :order 64}
       :body kohteen-tiedot}
      {:info {:name "tyo-/vuokra-aika"
              :type :group
-             :order 64}
+             :order 65}
       :body [{:name "alkaa-pvm" :type :date}
              {:name "paattyy-pvm" :type :date}]}
 
