@@ -50,21 +50,21 @@
         (let [application (:application (query pena :application :id application-id))
               _           (upload-attachment-to-all-placeholders pena application)
               application (:application (query pena :application :id application-id))
-              auth-get    (fn [file-id action]
-                            (c/get (str (server-address) action "/" file-id)
-                              {:headers {"authorization" (str "apikey=" pena)}}))]
+              auth-get    (fn [& uri] (c/get (apply str (server-address) uri) {:headers {"authorization" (str "apikey=" pena)}}))]
           (doseq [attachment-id (get-attachment-ids application)
-                  :let [file-id  (attachment-latest-file-id application attachment-id)
-                        auth-get (partial auth-get file-id)]]
+                  :let [file-id  (attachment-latest-file-id application attachment-id)]]
 
             (fact "view-attachment"
-              (auth-get "/api/view-attachment"))
+              (auth-get "/api/view-attachment/" file-id))
 
             (fact "download-attachment"
-              (auth-get "/api/download-attachment"))
+              (auth-get "/api/download-attachment/" file-id)))
 
+          #_(fact "download all"
+            (auth-get "/api/download-all-attachments/" application-id))
 
-            )))
+          (fact "pdf export"
+            (auth-get "/api/pdf-export/" application-id))))
 
       (fact "Veikko can approve attachment"
         (approve-attachment application-id (first attachment-ids)))

@@ -155,6 +155,8 @@
       (fact "Status code" (:status resp) => 302)
       (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))))
 
-(defn upload-attachment-to-all-placeholders [apikey {id :id :as application}]
-  (doseq [attachment-id (->> application :attachments (map :id))]
-    (upload-attachment pena id attachment-id)))
+(defn get-attachment-ids [application] (->> application :attachments (map :id)))
+
+(defn upload-attachment-to-all-placeholders [apikey application]
+  (doseq [attachment-id (get-attachment-ids application)]
+    (upload-attachment pena (:id application) attachment-id)))
