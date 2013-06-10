@@ -287,14 +287,46 @@
         (assoc-in [:data :single2] {:value "" :modified 10})
         (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
         (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
-        )) => 4)
+        )) => 4
+    (modifications-since-approvals
+      (-> base-doc
+        (assoc-in [:schema :info :approvable] true)
+        (assoc-in [:meta :_approved] {:value "approved" :timestamp 11})
+        (assoc-in [:data :single2] {:value "" :modified 10})
+        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
+        )) => 0
+    (modifications-since-approvals
+      (-> base-doc
+        (dissoc :data)
+        (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 9})
+        (assoc-in [:data :single2] {:value "" :modified 10})
+        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
+        )) => 2
+    (modifications-since-approvals
+      (-> base-doc
+        (dissoc :data)
+        (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 11})
+        (assoc-in [:data :single2] {:value "" :modified 10})
+        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
+        )) => 1)
 
-  (let [real-doc (clojure.walk/keywordize-keys
-                   {"id" "51b59c112438736b8f1b9d0e"
-                    "data" {"huoneistot" {"0" {"huoneistoTunnus" {"huoneistonumero" {"value" "001"}}}}, "kaytto" {"kayttotarkoitus" {"value" "011 yhden asunnon talot"}}, "rakennuksenOmistajat" {"0" {"henkilo" {"henkilotiedot" {"etunimi" {"modified" 1370856477455, "value" "Pena"}, "sukunimi" {"modified" 1370856477455, "value" "Panaani"}}, "osoite" {"katu" {"modified" 1370856477455, "value" "Paapankuja 12"}, "postinumero" {"value" "10203", "modified" 1370856487304}, "postitoimipaikannimi" {"modified" 1370856477455, "value" "Piippola"}}, "userId" {"value" "777777777777777777000020", "modified" 1370856477473}, "yhteystiedot" {"email" {"modified" 1370856477455, "value" "pena@example.com"}, "puhelin" {"modified" 1370856477455, "value" "0102030405"}}}}}}
-                    "meta" {"rakennuksenOmistajat" {"0" {"_approved" {"value" "rejected", "user" {"lastName" "Sibbo", "firstName" "Sonja", "id" "777777777777777777000023"}, "timestamp" 1370856511356}}}}
-                    "schema" {"info" {"approvable" true, "op" {"id" "51b59c112438736b8f1b9d0d", "name" "asuinrakennus", "created" 1370856465069}, "name" "uusiRakennus", "removable" true}, "body" (schemas "uusiRakennus")}})]
-(clojure.pprint/pprint real-doc)
+  (let [real-doc {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
+                         :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
+                         :rakennuksenOmistajat {:0 {:henkilo {:henkilotiedot {:etunimi {:modified 1370856477455, :value "Pena"}
+                                                                              :sukunimi {:modified 1370856477455, :value "Panaani"}}
+                                                              :osoite {:katu {:modified 1370856477455, :value "Paapankuja 12"}
+                                                                       :postinumero {:value "10203", :modified 1370856487304}
+                                                                       :postitoimipaikannimi {:modified 1370856477455, :value "Piippola"}}
+                                                              :userId {:value "777777777777777777000020", :modified 1370856477473}
+                                                              :yhteystiedot {:email {:modified 1370856477455, :value "pena@example.com"}
+                                                                             :puhelin {:modified 1370856477455, :value "0102030405"}}}}}},
+                  :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
+                                                                :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
+                                                                :timestamp 1370856511356}}}}
+                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas "uusiRakennus"))}}]
     (modifications-since-approvals real-doc) => 0
     )
 

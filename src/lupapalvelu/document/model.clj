@@ -204,20 +204,19 @@
   ([{:keys [schema data meta]}]
     (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0)))
   ([schema-body path data meta approvable-parent timestamp]
-    (reduce
-      +
-      0
-      (map
-        (fn [{:keys [name approvable repeating body] :as element}]
-          (let [current-path (conj path (keyword name))
-                max-timestamp (max timestamp (get-in meta (concat current-path [:_approved :timestamp]) 0))
-                current-approvable (or approvable-parent approvable)]
-            (if body
-              (if repeating
-                (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable max-timestamp)) (keys (get-in data current-path))))
-                (modifications-since-approvals body current-path data meta current-approvable max-timestamp))
-              (if (and current-approvable (> (get-in data (conj current-path :modified) 0) max-timestamp)) 1 0))))
-        schema-body))))
+    (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
+            (count-mods
+              [{:keys [name approvable repeating body] :as element}]
+              (let [current-path (conj path (keyword name))
+                    current-approvable (or approvable-parent approvable)]
+
+;(println current-path current-approvable timestamp)
+                (if body
+                  (if repeating
+                    (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
+                    (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
+                  (if (and current-approvable (> (get-in data (conj current-path :modified) 0) (max-timestamp current-path))) 1 0))))]
+      (reduce + 0 (map count-mods schema-body)))))
 
 ;;
 ;; Create
