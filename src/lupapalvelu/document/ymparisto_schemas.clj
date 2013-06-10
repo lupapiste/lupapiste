@@ -32,13 +32,18 @@
                             {:name "mittaus" :type :string :size "m"}]}
                     ))
 
+(def pima (body {}))
+
 
 
 
 (def ympschemas
   (to-map-by-name [{:info {:name "meluilmoitus"
                            :order 50}
-                    :body meluilmoitus}]))
+                    :body meluilmoitus}
+                   {:info {:name "pilaatumista-koskevat-tiedot"
+                           :order 50}
+                    :body pima}]))
 
 
 
