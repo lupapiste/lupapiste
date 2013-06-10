@@ -134,39 +134,6 @@
 
   }();
 
-  var removeDocModel = new function() {
-    var self = this;
-
-    self.appId = ko.observable();
-    self.docId = ko.observable();
-    self.docName = ko.observable();
-    self.callback = null;
-
-    self.init = function(appId, docId, docName, callback) {
-      self.appId(appId).docId(docId).docName(docName);
-      self.callback = callback;
-      LUPAPISTE.ModalDialog.open("#dialog-remove-doc");
-      return self;
-    };
-
-    self.ok = function() {
-      ajax
-        .command("remove-doc", {id: self.appId(), docId: self.docId()})
-        .success(function() {
-          self.callback();
-          // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
-          // The docgen already has code to remove actual document (that's the self.callback() above), just the
-          // "operations" list should be changed.
-          repository.load(self.appId);
-        })
-        .call();
-      return false;
-    };
-
-    self.cancel = function() { return true; };
-
-  }();
-
   var applicationModel = new function() {
     var self = this;
 
@@ -644,8 +611,8 @@
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
       }
 
-      docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
-      docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
+      docgen.displayDocuments("#applicationDocgen", applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
+      docgen.displayDocuments("#partiesDocgen",     applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
@@ -827,7 +794,6 @@
       invite: inviteModel,
       authorization: authorizationModel,
       accordian: accordian,
-      removeDocModel: removeDocModel,
       addPartyModel: addPartyModel,
       removeApplicationModel: removeApplicationModel,
       attachmentTemplatesModel: attachmentTemplatesModel,

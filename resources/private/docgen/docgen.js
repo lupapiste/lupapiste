@@ -2,7 +2,6 @@ var docgen = (function () {
   "use strict";
 
   function makeButton(id, label) {
-
     var appendButton = document.createElement("button");
     appendButton.id = id;
     appendButton.className = "btn";
@@ -10,7 +9,7 @@ var docgen = (function () {
     return appendButton;
   }
 
-  LUPAPISTE.DocModel = function (schema, model, removeCallback, docId, application) {
+  LUPAPISTE.DocModel = function (schema, model, docId, application) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -21,7 +20,6 @@ var docgen = (function () {
     self.schema = schema;
     self.schemaName = schema.info.name;
     self.model = model;
-    self.removeCallback = removeCallback;
     self.docId = docId;
     self.appId = application.id;
     self.application = application;
@@ -522,12 +520,12 @@ var docgen = (function () {
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.schemaName);
           removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), 
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"),
                 function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
           }
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-        
+
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
@@ -724,12 +722,11 @@ var docgen = (function () {
       });
     }
 
-    function removeThis() {
-      this.parent().slideUp(function () { $(this).remove(); });
-    }
-
     function removeDoc(e) {
-      var n = $(e.target).parent();
+      var n$ = $(e.target).parent();
+      while (!n$.is("section")) {
+        n$ = n$.parent();
+      }
       var op = self.schema.info.op;
 
       var documentName = loc(self.schemaName + "._group_label");
@@ -737,7 +734,21 @@ var docgen = (function () {
         documentName = loc(op.name + "._group_label");
       }
 
-      self.removeCallback(self.appId, self.docId, documentName, removeThis.bind(n));
+      function onRemovalConfirmed() {
+        ajax.command("remove-doc", {id: self.appId, docId: self.docId})
+          .success(function() {
+            n$.slideUp(function () {n$.remove();});
+            // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
+            // Just the "operations" list should be changed.
+            repository.load(self.appId);
+          })
+          .call();
+        return false;
+      }
+
+      var message = loc("removeDoc.message1") + " "+ documentName + ". " +  loc("removeDoc.message2");
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message, loc("removeDoc.ok"), onRemovalConfirmed, loc("removeDoc.cancel"));
+
       return false;
     }
 
@@ -795,7 +806,7 @@ var docgen = (function () {
     validate();
   };
 
-  function displayDocuments(containerSelector, removeDocModel, application, documents) {
+  function displayDocuments(containerSelector, application, documents) {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
@@ -808,7 +819,7 @@ var docgen = (function () {
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.data, removeDocModel.init, doc.id, application).element);
+      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.data, doc.id, application).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -819,7 +830,7 @@ var docgen = (function () {
             .command("create-doc", { schemaName: schema.info.name, id: application.id })
             .success(function (data) {
               var newDocId = data.doc;
-              var newElem = new LUPAPISTE.DocModel(schema, {}, removeDocModel.init, newDocId, application).element;
+              var newElem = new LUPAPISTE.DocModel(schema, {}, newDocId, application).element;
               $(self).before(newElem);
             })
             .call();
