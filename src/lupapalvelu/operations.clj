@@ -50,7 +50,7 @@
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
 
-(def ^:private common-ymp-schemas [])
+(def ^:private common-ymp-schemas ["ymp-ilm-sijainti"])
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -177,7 +177,7 @@
                                  :required  (conj common-schemas "rakennushanke")
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :meluilmoitus               {:schema "meluilmoitus"
-                                 :required []
+                                 :required common-ymp-schemas
                                  :attachments []}})
 
 

@@ -3,8 +3,10 @@
 
 
 
-(def meluilmoitus (body simple-osoite
-                    {:name "karttapiirto" :type :text :max-len 4000}
+(def sijainti (body simple-osoite
+                    {:name "karttapiirto" :type :text :max-len 4000}))
+
+(def meluilmoitus (body
                     {:name "rakentaminen" :type :group
                      :body [{:name "melua-aihettava-toiminta" :type :select
                              :body [{:name "louhinta"}
@@ -41,8 +43,11 @@
   (to-map-by-name [{:info {:name "meluilmoitus"
                            :order 50}
                     :body meluilmoitus}
+                   {:info {:name "ymp-ilm-sijainti"
+                           :order 40}
+                    :body sijainti}
                    {:info {:name "pilaatumista-koskevat-tiedot"
-                           :order 50}
+                           :order 51}
                     :body pima}]))
 
 
