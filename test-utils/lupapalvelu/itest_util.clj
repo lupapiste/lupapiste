@@ -4,6 +4,7 @@
         [midje.sweet])
   (:require [clj-http.client :as c]
             [lupapalvelu.logging]
+            [clojure.java.io :as io]
             [cheshire.core :as json]))
 
 (defn- find-user [username] (some #(when (= (:username %) username) %) users))
@@ -133,3 +134,29 @@
   (let [{application :application :as response} (query apikey :application :id id)]
     response => ok?
     application))
+
+;;
+;; Stuffin' data in
+;;
+
+(defn upload-attachment [apikey application-id attachment-id]
+  (let [filename    "dev-resources/test-attachment.txt"
+        uploadfile  (io/file filename)
+        application (query apikey :application :id application-id)
+        uri         (str (server-address) "/api/upload")
+        resp        (c/post uri
+                      {:headers {"authorization" (str "apikey=" apikey)}
+                       :multipart [{:name "applicationId"  :content application-id}
+                                   {:name "Content/type"   :content "text/plain"}
+                                   {:name "attachmentType" :content "paapiirustus.asemapiirros"}
+                                   {:name "attachmentId"   :content attachment-id}
+                                   {:name "upload"         :content uploadfile}]})]
+    (facts "Upload succesfully"
+      (fact "Status code" (:status resp) => 302)
+      (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))))
+
+(defn get-attachment-ids [application] (->> application :attachments (map :id)))
+
+(defn upload-attachment-to-all-placeholders [apikey application]
+  (doseq [attachment-id (get-attachment-ids application)]
+    (upload-attachment pena (:id application) attachment-id)))
