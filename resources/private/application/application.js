@@ -576,6 +576,11 @@
       // new data mapping
 
       var app = applicationDetails.application;
+      var documents = app.documents;
+
+      // Performance improvement: documents should not be mapped with ko.mapping
+      delete app.documents;
+
       application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
@@ -637,8 +642,8 @@
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
       }
 
-      docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }), authorizationModel);
-      docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }), authorizationModel);
+      docgen.displayDocuments("#applicationDocgen", removeDocModel, app, _.filter(documents, function(doc) {return doc.schema.info.type !== "party"; }), authorizationModel);
+      docgen.displayDocuments("#partiesDocgen",     removeDocModel, app, _.filter(documents, function(doc) {return doc.schema.info.type === "party"; }), authorizationModel);
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
