@@ -229,6 +229,11 @@
   [application attachmentId]
   (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
+(defn attachment-latest-file-id
+  "Gets latest file-ids from attachment."
+  [application attachmentId]
+  (->> (attachment-file-ids application attachmentId) last))
+
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
   [application attachmentId file-id]
