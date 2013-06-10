@@ -178,6 +178,11 @@ email.title.neighbor: naapurin kuuleminen
 
 statement.submit-again: Päivitä lausuntoa
 
+
+document.delete.header: Poista hakemuksen osa
+document.delete.message: Oletko varma, että haluat poistaa hakemuksen osan?
+
+
 #
 # Yleiset alueet
 #
