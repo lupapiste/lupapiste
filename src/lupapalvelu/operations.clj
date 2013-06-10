@@ -39,8 +39,8 @@
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
                                                                                         ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
-          (when (env/feature? :yleiset-alueet) [["Yleisten alueiden luvat" [["Kaivuulupa" :yleiset-alueet-kaivuulupa]
-                                                                            #_["Liikennetta haittaavan tyon lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
+          (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
+                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
