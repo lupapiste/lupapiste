@@ -515,7 +515,7 @@ var docgen = (function () {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if(subSchema.repeating) {
+        if (subSchema.repeating) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
@@ -523,10 +523,10 @@ var docgen = (function () {
             LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
                 {title: loc("yes"), fn: function() { removeData(self.appId, self.docId, myPath.concat([id])); }},
                 {title: loc("no")});
-          }
+          };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-        
+
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
@@ -727,7 +727,7 @@ var docgen = (function () {
       var n$ = $(e.target).parent();
       while (!n$.is("section")) {
         n$ = n$.parent();
-    }
+      }
       var op = self.schema.info.op;
 
       var documentName = loc(self.schemaName + "._group_label");
@@ -791,16 +791,7 @@ var docgen = (function () {
 
       sectionContainer.appendChild(elements);
       section.appendChild(title);
-
-/*
-      $("<div>", {
-        "class": "errorPanel",
-        "id": docId+"--errorPanel"
-      }).text("kosh").show().appendTo(section);
-*/
-
       section.appendChild(sectionContainer);
-
       return section;
     }
 
