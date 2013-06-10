@@ -33,7 +33,7 @@
             </span>
           </div>
           <!-- Submitted: -->
-          <div data-bind="with: $root.applicationModel.data">
+          <div data-bind="with: $root.application.data">
             <p data-bind="ltext: 'application.submissionDate'"></p>
             <span data-bind="if: $data.submitted">
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
@@ -184,8 +184,8 @@
             <div class="application_section_content content_expanded">
               <div>
                 <h3 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h3>
-                <div data-bind="with: $root.applicationModel">
-                  <ul data-bind="foreach: auth">
+                <div data-bind="with: $root.application">
+                  <ul data-bind="foreach: roles">
                     <li>
                       <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                       (<span data-bind="text: username"></span>)

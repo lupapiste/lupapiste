@@ -167,28 +167,6 @@
 
   }();
 
-  var applicationModel = new function() {
-    var self = this;
-
-    self.data = ko.observable();
-
-    self.auth = ko.computed(function() {
-      var value = [];
-      if (self.data() !== undefined) {
-        var auth = ko.utils.unwrapObservable(self.data().auth());
-        var withRoles = function(r, i) {
-          var a = r[i.id()] || (i.roles = [], i);
-          a.roles.push(i.role());
-          r[i.id()] = a;
-          return r;
-        };
-        var pimped = _.reduce(auth, withRoles, {});
-        value = _.values(pimped);
-      }
-      return value;
-    }, self);
-  }();
-
   var removeApplicationModel = new function() {
     var self = this;
 
@@ -387,6 +365,22 @@
     // all data in here
     data: ko.observable(),
 
+    roles: ko.computed(function() {
+      var value = [];
+      if (application.data && application.data() !== undefined) {
+        var auth = ko.utils.unwrapObservable(application.data().auth());
+        var withRoles = function(r, i) {
+          var a = r[i.id()] || (i.roles = [], i);
+          a.roles.push(i.role());
+          r[i.id()] = a;
+          return r;
+        };
+        var pimped = _.reduce(auth, withRoles, {});
+        value = _.values(pimped);
+      }
+      return value;
+    }, application),
+
     openOskariMap: function() {
       var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
       window.open(url);
@@ -582,7 +576,6 @@
       // new data mapping
 
       var app = applicationDetails.application;
-      applicationModel.data(ko.mapping.fromJS(app));
       application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
@@ -822,7 +815,6 @@
       authorities: authorities,
       attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
-      applicationModel: applicationModel,
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,
