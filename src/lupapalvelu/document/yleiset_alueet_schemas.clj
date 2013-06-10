@@ -26,37 +26,34 @@
                        {:name "kortteli" :type :string}]
                       simple-osoite))
 
+(def vuokra-ja-tyo-aika (body
+                          [{:name "vuokra-aika-alkaa-pvm" :type :date}
+                           {:name "vuokra-aika-paattyy-pvm" :type :date}]
+                          [{:name "tyoaika-alkaa-pvm" :type :date}
+                           {:name "tyoaika-paattyy-pvm" :type :date}]))
+
 (def yleiset-alueet-kaivuulupa
   (to-map-by-name
     [{:info {:name "yleiset-alueet-hankkeen-kuvaus"
              :order 60}
-      :body [kuvaus
-             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
-             #_{:name "luvanTunniste" :type :text :max-len 4000 :layout :full-width}]}   ;; TODO: Lisää tämä sijoituslupaan!
-     {:info {:name "yleiset-alueet-maksaja"
-             :type :party
-             :order 61}
-      :body yleiset-alueet-maksaja}
-     {:info {:name "hankeestaVastaava"
-             :type :party
-             :order 62}
-      :body hankeesta-vastaava}
+      :body [{:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}
+             {:name "luvanTunniste" :type :string}]}
      {:info {:name "tyomaastaVastaava"
              :type :party
-             :order 63}
+             :order 61}
       :body tyomaasta-vastaava}
+     {:info {:name "yleiset-alueet-maksaja"
+             :type :party
+             :order 62}
+      :body yleiset-alueet-maksaja}
      {:info {:name "kohteenTiedot"
              :type :group
-             :order 64}
+             :order 63}
       :body kohteen-tiedot}
      {:info {:name "tyo-/vuokra-aika"
              :type :group
-             :order 65}
-      :body [{:name "alkaa-pvm" :type :date}
-             {:name "paattyy-pvm" :type :date}]}
-
-     ;; TODO: LIITTEET
-     ]))
+             :order 64}
+      :body vuokra-ja-tyo-aika}]))
 
 ;;
 ;; TODO: Liikennettä haittavan työn lupa

@@ -181,7 +181,7 @@
                                  ;; TODO: Settaa schema-data:lla Hakijan _selected tyyppi arvoon "yritys"
                                  :schema-data [[["osoite" "katu"] #(:address %)]]
                                  :operation-type :publicArea
-                                 :required (conj yleiset-alueet-common-schemas "hankeestaVastaava" "tyomaastaVastaava" "tyo-/vuokra-aika")}
+                                 :required (conj yleiset-alueet-common-schemas "tyomaastaVastaava" "tyo-/vuokra-aika")}
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mikä nimi tässä kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })

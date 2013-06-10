@@ -73,7 +73,7 @@ neighbors.missing: Hakemukseen ei liity naapureita
 application.tabStatement: Lausunnot ja kuulemiset
 
 operations.suunnittelutarveratkaisu: Suunnitelutarveratkaisu
-rakennushanke._group_label: Hankeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
+rakennushanke._group_label: Hankkeen kuvaus suunnittelutarveratkaisua tai poikkeamista varten
 rakennushanke.kaytettykerrosala._append_label: Lisää olemassaolevaa
 rakennushanke.kaytettykerrosala._group_label: Olemassaolevat rakennukset
 rakennushanke.kaytettykerrosala.kayttotarkoitusKoodi._group_label: Käyttötarkoitus
@@ -242,10 +242,9 @@ tyomaastaVastaava.patevyys._group_label: Pätevyys
 tyomaastaVastaava.patevyys.ammattipatevyys: Ammattipätevyys
 tyomaastaVastaava.patevyys.voimassa-pvm: Voimassaolopäivämäärä
 
-yleiset-alueet-hankkeen-kuvaus._group_label: Hankeen kuvaus
-yleiset-alueet-hankkeen-kuvaus.kuvaus: Kuvaus
-yleiset-alueet-hankkeen-kuvaus.poikkeamat: Poikkeamat
-# yleiset-alueet-hankkeen-kuvaus.luvanTunniste: Sijoitusluvan tunniste  # Tämä sijoituslupaan!
+yleiset-alueet-hankkeen-kuvaus._group_label: Hankkeen kuvaus
+yleiset-alueet-hankkeen-kuvaus.kayttotarkoitus: Kuvausalueen käyttötarkoitus
+yleiset-alueet-hankkeen-kuvaus.luvanTunniste: Luvan tunniste
 
 # TODO: Miksi "kohteenTiedot"-schema saa tällaisen group titlen?
 # Koska se on määritelty operation.clj:n operations-mapissa :yleiset-alueet-kaivuulupa:n schemaksi? Miten tämä kierretään?
@@ -258,8 +257,10 @@ kohteenTiedot.osoite.postinumero: Postinumero
 kohteenTiedot.osoite.postitoimipaikannimi: Postitoimipaikka
 
 tyo-/vuokra-aika._group_label: Työ-/vuokra-aika
-tyo-/vuokra-aika.alkaa-pvm: Alkaa
-tyo-/vuokra-aika.paattyy-pvm: Päättyy
+tyo-/vuokra-aika.vuokra-aika-alkaa-pvm: Vuokra-aika alkaa
+tyo-/vuokra-aika.vuokra-aika-paattyy-pvm: Vuokra-aika päättyy
+tyo-/vuokra-aika.tyoaika-alkaa-pvm: Työaika alkaa
+tyo-/vuokra-aika.tyoaika-paattyy-pvm: Työaika päättyy
 
 attachmentType.yleiset-alueet._group_label: Yleisten alueiden luvat
 attachmentType.yleiset-alueet.aiemmin-hankittu-sijoituspaatos: Aiemmin hankittu sijoituspäätös
