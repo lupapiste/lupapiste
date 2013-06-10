@@ -44,6 +44,8 @@
           x = l.x,
           y = l.y;
       self.application(a).map.updateSize().clear().center(x, y, 12).add(x, y);
+      docgen.displayDocuments("#neighborDocgen", a, _.filter(a.documents, null, function(doc) {return doc.schema.info.type !== "party"; }));
+      docgen.displayDocuments("#neighborPartiesDocgen",     a, _.filter(a.documents, null, function(doc) {return doc.schema.info.type === "party"; }));
       return self;
     };
 

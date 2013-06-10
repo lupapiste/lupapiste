@@ -8,8 +8,8 @@
     <section id="neighbor-show" class="page">
       <div class="application_summary">
       <div class="container">
-        <div class="application-map-container">
-          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+        <div data-bind="visible: application" class="application-map-container">
+          <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
         </div>
         <div data-bind="with: application" class="application_summary_info">
           <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
@@ -48,12 +48,12 @@
       <div class="container">
 
         <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
-
-        <ul>
-          <li>Application ID: <span data-bind="text: applicationId"></span></li>
-          <li>Neighbor ID: <span data-bind="text: neighborId"></span></li>
-          <li>token: <span data-bind="text: token"></span></li>
-        </ul>
+         <!-- docgen generated content: -->
+          <div class="application_section">
+            <div id="neighborDocgen">
+              <!-- This is where generated document will be placed. -->
+            </div>
+          </div>
 
         <div data-bind="visible: pending" class="pending"></div>
 

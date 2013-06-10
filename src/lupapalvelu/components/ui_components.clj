@@ -159,7 +159,7 @@
            :js ["about.js"]
            :html ["terms.html" "index.html"]}
 
-   :neighbor {:depends [:common :map :debug]
+   :neighbor {:depends [:common :map :debug :docgen]
               :html ["neighbor-show.html"]
               :js ["neighbor-app.js" "begin.js" "neighbor-show.js"]}})
 
