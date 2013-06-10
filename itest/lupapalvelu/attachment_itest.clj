@@ -51,6 +51,13 @@
               _           (upload-attachment-to-all-placeholders pena application)
               application (:application (query pena :application :id application-id))
               auth-get    (fn [& uri] (c/get (apply str (server-address) uri) {:headers {"authorization" (str "apikey=" pena)}}))]
+
+          (fact "download all"
+            (auth-get "/api/download-all-attachments/" application-id))
+
+          (fact "pdf export"
+            (auth-get "/api/pdf-export/" application-id))
+
           (doseq [attachment-id (get-attachment-ids application)
                   :let [file-id  (attachment-latest-file-id application attachment-id)]]
 
@@ -58,13 +65,7 @@
               (auth-get "/api/view-attachment/" file-id))
 
             (fact "download-attachment"
-              (auth-get "/api/download-attachment/" file-id)))
-
-          (fact "download all"
-            (auth-get "/api/download-all-attachments/" application-id))
-
-          (fact "pdf export"
-            (auth-get "/api/pdf-export/" application-id))))
+              (auth-get "/api/download-attachment/" file-id)))))
 
       (fact "Veikko can approve attachment"
         (approve-attachment application-id (first attachment-ids)))
