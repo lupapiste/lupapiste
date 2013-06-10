@@ -15,10 +15,16 @@ Mikko goes to empty attachments tab
   Create application the fast way  ${appname}  753  753-416-25-30
   Open tab  attachments
 
+Download all attachments should be disabled
+  Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
+
 Mikko adds txt attachment without comment
   [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
   Application state should be  draft
+
+Download all attachments should be enabled
+  Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
 
 Mikko opens attachment details
   [Tags]  attachments
