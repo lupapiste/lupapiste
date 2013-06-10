@@ -429,7 +429,8 @@
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)
-        hakija                (make "hakija")]
+        hakija                (assoc-in (make "hakija") [:data :_selected :value]
+                                (if (= (:operation-type op-info) :publicArea) "yritys" "henkilo"))]
     (if user
       (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
@@ -450,7 +451,8 @@
 (defn- make-op [op-name created]
   {:id (mongo/create-id)
    :name (keyword op-name)
-   :created created})
+   :created created
+   :operation-type (:operation-type (operations/operations (keyword op-name)))})
 
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
@@ -475,12 +477,16 @@
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
+(defn operation-validator [{{operation :operation} :data}]
+  (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-                      (partial property-id-parameters [:propertyId])]
+                      (partial property-id-parameters [:propertyId])
+                      operation-validator]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
@@ -523,7 +529,8 @@
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :complement-needed]
+   :input-validators [operation-validator]}
   [command]
   (with-application command
     (fn [application]
