@@ -286,32 +286,28 @@
         (assoc-in [:meta :_approved] {:value "approved" :timestamp 9})
         (assoc-in [:data :single2] {:value "" :modified 10})
         (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
-        )) => 4
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 4
     (modifications-since-approvals
       (-> base-doc
         (assoc-in [:schema :info :approvable] true)
         (assoc-in [:meta :_approved] {:value "approved" :timestamp 11})
         (assoc-in [:data :single2] {:value "" :modified 10})
         (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
-        )) => 0
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 0
     (modifications-since-approvals
       (-> base-doc
         (dissoc :data)
         (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 9})
         (assoc-in [:data :single2] {:value "" :modified 10})
         (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
-        )) => 2
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 2
     (modifications-since-approvals
       (-> base-doc
         (dissoc :data)
         (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 11})
         (assoc-in [:data :single2] {:value "" :modified 10})
         (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10})
-        )) => 1)
+        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 1)
 
   (let [real-doc {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
                          :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
@@ -327,10 +323,7 @@
                                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
                                                                 :timestamp 1370856511356}}}}
                   :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas "uusiRakennus"))}}]
-    (modifications-since-approvals real-doc) => 0
-    )
-
-  )
+    (modifications-since-approvals real-doc) => 0))
 
 ;;
 ;; Updates
