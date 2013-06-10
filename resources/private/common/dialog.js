@@ -91,19 +91,38 @@ LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
 LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
 LUPAPISTE.ModalDialog.dynamicDialogs = [];
 
+LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesTitle, yesHandler, noTitle, noHandler) {
+  function bindButton(elem$, text, f) {
+    elem$.unbind("click").text(text);
+    if (f) {
+      elem$.click(f);
+    }
+  }
+  
+  dialog$.find(".dialog-title").text(title);
+  dialog$.find(".dialog-content p").text(content);
+  bindButton(dialog$.find("[data-test-id='confirm-yes']"), yesTitle, yesHandler);
+  bindButton(dialog$.find("[data-test-id='confirm-no']"), noTitle, noHandler);
+}
+
 LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle, noHandler) {
   "use strict";
   var dialog$ = $(LUPAPISTE.Modal.YesNoTemplate).attr("id", id);
-  dialog$.find(".dialog-title").text(title);
-  dialog$.find(".dialog-content p").text(content);
-  dialog$.find("[data-test-id='confirm-yes']").click(yesHandler).text(yesTitle);
-  dialog$.find("[data-test-id='confirm-no']").text(noTitle);
-  if (noHandler) {
-    dialog$.find("[data-test-id='confirm-no']").click(noHandler);
-  }
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesTitle, yesHandler, noTitle, noHandler);  
   LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
   return dialog$;
 };
+
+LUPAPISTE.ModalDialog.dynamicYesNoId = "dynamic-yes-no-confirm-dialog";
+LUPAPISTE.ModalDialog.newYesNoDialog(LUPAPISTE.ModalDialog.dynamicYesNoId);
+
+LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesTitle, yesHandler, noTitle, noHandler) {
+  "use strict";
+  var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicYesNoId);
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesTitle, yesHandler, noTitle, noHandler);  
+  LUPAPISTE.ModalDialog.open(dialog$);  
+  return dialog$;
+}
 
 /**
  * Initializes modal dialog elements

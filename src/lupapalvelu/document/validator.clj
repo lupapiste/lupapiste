@@ -41,7 +41,7 @@
         :schema ~schema
         :facts ~facts
         :fn (fn [{~'data :data {{~'doc-schema :name} :info} :schema}]
-              (let [~'data (tools/un-wrapped ~'data)]
+              (let [~'data (tools/unwrapped ~'data)]
                 (when (or (not ~schema) (= ~schema ~'doc-schema))
                   (let
                     ~(reduce into
