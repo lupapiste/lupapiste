@@ -68,7 +68,10 @@
                       {text: loc("neighbor.show.response.disapprove"), value: "disapprove"}];
     self.response = ko.observable();
     self.message = ko.observable();
+    self.operations = ko.observable();
+    self.operationsCount = ko.observable();
     self.messageEnabled = ko.computed(function() { var c = self.response(); return c && c.value === "disapprove"; });
+    
     self.send = function() {
       ajax
         .command("neighbor-response", {

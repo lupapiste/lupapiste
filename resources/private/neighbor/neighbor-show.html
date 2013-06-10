@@ -6,6 +6,45 @@
   <body>
 
     <section id="neighbor-show" class="page">
+      <div class="application_summary">
+      <div class="container">
+        <div class="application-map-container">
+          <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+        </div>
+        <div data-bind="with: application" class="application_summary_info">
+          <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
+          <!-- Property ID: -->
+          <div>
+            <p data-bind="ltext: 'application.property'"></p>
+            <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
+          </div>
+          <!-- State: -->
+          <div>
+            <p data-bind="ltext: 'application.state'">Tila:</p>
+            <span
+              data-bind="ltext: state, attr: {'data-test-state': state}"
+              data-test-id="application-state"
+              class="application_summary_text">
+            </span>
+          </div>
+          <!-- Submitted: -->
+          <!-- ID: -->
+          <div>
+            <p data-bind="ltext: 'application.id'"></p>
+            <span
+              data-bind="text: id, attr: {'data-test-value': id}"
+              data-test-id="application-id"
+              class="application_summary_text">
+            </span>
+          </div>
+         
+          <!-- Operations: -->
+          <div>
+            <p data-bind="ltext: 'application.operations'"></p>
+          </div>
+        </div>      
+      </div>
+    </div>
       <div class="container">
 
         <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
@@ -17,10 +56,6 @@
         </ul>
 
         <div data-bind="visible: pending" class="pending"></div>
-
-        <div data-bind="visible: application" class="neighbor-map-container">
-          <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
-        </div>
 
         <div class="neighbor-reply-form">
           <form>
@@ -48,7 +83,7 @@
                   ltext: 'neighbor.show.ok'">
             </button>
             <span data-bind="visible: saving">
-              <img src="/img/ajax-loader-12.gif"/>
+              <img src="/img/ajax-loader-12.gif" alt="loader"/>
               <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
             </span>
             <div data-bind="visible: done, ltext: 'neighbor.show.response.done'"></div>
