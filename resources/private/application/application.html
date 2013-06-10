@@ -279,7 +279,7 @@
                 </tbody>
               </table>
 
-              <a data-bind="attr: {href: '/api/download-all-attachments/' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" href="#" target="_blank"></a>
+              <a data-bind="attr: {href: '/api/download-all-attachments/' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
             </div>
             <div data-bind="ifnot: attachmentsByGroup().length">
