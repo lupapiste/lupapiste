@@ -55,6 +55,10 @@
                                                    :elyn_tai_kunnan_poikkeamapaatos
                                                    :suunnittelutarveratkaisu
                                                    :ymparistolupa]
+                       :yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
+                                        :tilapainen-liikennejarjestelysuunnitelma
+                                        :tyyppiratkaisu
+                                        :tieto-kaivupaikkaan-liittyvistä-johtotiedoista]
                        :muut [:selvitys_rakennuspaikan_terveellisyydesta
                               :selvitys_rakennuspaikan_korkeusasemasta
                               :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
