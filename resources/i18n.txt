@@ -199,6 +199,25 @@ yleiset-alueet-maksaja.osoite.postinumero: Postinumero
 yleiset-alueet-maksaja.osoite.postitoimipaikannimi: Postitoimipaikka
 yleiset-alueet-maksaja.laskuviite: Laskuviite
 
+hankeestaVastaava._group_label: Hankeesta vastaava
+hankeestaVastaava.henkilotiedot._group_label: Henkilötiedot
+hankeestaVastaava.henkilotiedot.etunimi: Etunimi
+hankeestaVastaava.henkilotiedot.sukunimi: Sukunimi
+hankeestaVastaava.yritys._group_label: Yritys
+hankeestaVastaava.yritys.yritysnimi: Yrityksen nimi
+hankeestaVastaava.yritys.liikeJaYhteisoTunnus: Y-tunnus
+hankeestaVastaava.osoite._group_label: Osoite
+hankeestaVastaava.osoite.katu: Katu
+hankeestaVastaava.osoite.postinumero: Postinumero
+hankeestaVastaava.osoite.postitoimipaikannimi: Postitoimipaikka
+hankeestaVastaava.yhteystiedot._group_label: Yhteystiedot
+hankeestaVastaava.yhteystiedot.puhelin: Puhelin
+hankeestaVastaava.yhteystiedot.email: Email
+hankeestaVastaava.yhteystiedot.fax: Fax
+hankeestaVastaava.patevyys._group_label: Pätevyys
+hankeestaVastaava.patevyys.ammattipatevyys: Ammattipätevyys
+hankeestaVastaava.patevyys.voimassa-pvm: Voimassaolopäivämäärä
+
 tyomaastaVastaava._group_label: Työmaasta vastaava
 tyomaastaVastaava.henkilotiedot._group_label: Henkilötiedot
 tyomaastaVastaava.henkilotiedot.etunimi: Etunimi
@@ -236,3 +255,9 @@ kohteenTiedot.osoite.postitoimipaikannimi: Postitoimipaikka
 tyo-/vuokra-aika._group_label: Työ-/vuokra-aika
 tyo-/vuokra-aika.alkaa-pvm: Alkaa
 tyo-/vuokra-aika.paattyy-pvm: Päättyy
+
+attachmentType.yleiset-alueet._group_label: Yleisten alueiden luvat
+attachmentType.yleiset-alueet.aiemmin-hankittu-sijoituspaatos: Aiemmin hankittu sijoituspäätös
+attachmentType.yleiset-alueet.tilapainen-liikennejarjestelysuunnitelma: Tilapäinen liikennejärjestelysuunnitelma
+attachmentType.yleiset-alueet.tyyppiratkaisu: Tyyppiratkaisu
+attachmentType.yleiset-alueet.tieto-kaivupaikkaan-liittyvistä-johtotiedoista: Tieto kaivupaikkaan liittyvistä johtotiedoista
