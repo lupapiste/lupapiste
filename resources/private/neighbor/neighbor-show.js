@@ -121,7 +121,28 @@
   }
   var model = new Model();
 
-  hub.onPageChange("neighbor-show", model.init);
+  hub.onPageChange("neighbor-show", function(e) {
+    model.init(e);
+    ajax
+      .get('/api/vetuma/user')
+      .raw(true)
+      .success(function(user) {
+        if(user) {
+          console.log("SUCCESS!", user);
+        } else {
+          var url = window.location.pathname + window.location.search + window.location.hash;
+          $.get('/api/vetuma', {success: url,
+                                cancel:  url,
+                                error:   url}, function(d) {
+            $('#vetuma-neighbor')
+              .html(d).find(':submit').addClass('btn btn-primary')
+                                      .attr('value',loc("register.action"))
+                                      .attr('id', 'vetuma-init');
+          });
+        }
+      })
+      .call();
+  });
 
   $(function() {
     model.map = gis.makeMap("neighbor-map", false).updateSize().center(404168, 6693765, 12);
