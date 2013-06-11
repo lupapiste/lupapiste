@@ -63,8 +63,8 @@
         <!-- attachments: -->
         <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <table class="table">
-            <tbody data-bind="foreach: attachmentsByGroup">
+          <table class="table" data-bind="foreach: attachmentsByGroup">
+            <thead>
               <tr class="attachment-group-header">
                 <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
               </tr>
@@ -74,8 +74,8 @@
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                 <th></th>
               </tr>
-
-              <!-- ko foreach: attachments -->
+            </thead>
+            <tbody data-bind="foreach: attachments">
               <tr style="cursor: pointer;">
                 <td>
                   <a>
@@ -103,8 +103,6 @@
                 <td>
                 </td>
               </tr>
-              <!-- /ko -->
-
             </tbody>
           </table>
         </div>
