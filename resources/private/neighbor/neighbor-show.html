@@ -122,13 +122,13 @@
               <div id="vetuma-neighbor2"></div>
               <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
               <form>
-                <input type="radio" name="response" data-bind="checked: response" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
-                <input type="radio" name="response" data-bind="checked: response" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
+                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
+                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
 
                 <textarea
                   data-bind="
                     value: message,
-                    enable: response() === 'comments',
+                    enable: response() === 'comments' && !done(),
                     valueUpdate: 'afterkeydown',
                     attr: {placeholder: loc('neighbor.show.message.placeholder')}"
                   id="response-message"
@@ -138,6 +138,7 @@
                   data-bind="
                     click: send,
                     enable: response() && !saving() && !done(),
+                    visible: !done(),
                     ltext: 'neighbor.show.ok'">
                 </button>
                 <span data-bind="visible: saving">
