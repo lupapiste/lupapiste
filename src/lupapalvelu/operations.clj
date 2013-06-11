@@ -181,7 +181,7 @@
                                  :schema-data [[["osoite" "katu"] #(:address %)]]
                                  :operation-type :publicArea
                                  :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
-;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mikä nimi tässä kuuluu olla?
+;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })
 

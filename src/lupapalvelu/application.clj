@@ -427,7 +427,7 @@
 (defn- make-documents [user created existing-documents op application]
   (let [op-info               (operations/operations (keyword (:name op)))
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 ;; TODO: Yhdistä (nämä kaikki) schemat jossain järkevämmässä paikassa
+                                                 ;; TODO: Yhdista (nama kaikki) schemat jossain jarkevammassa paikassa
                                                  :schema ((merge schemas/schemas
                                                             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
                                                             yleiset-alueet/yleiset-alueet-kaivuulupa
