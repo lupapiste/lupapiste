@@ -4,6 +4,8 @@
         [lupapalvelu.document.validators]
         [midje.sweet]))
 
+(def some-time 123456789)
+
 ;; Simple test schema:
 
 (def schema {:info {:name "test-model"
@@ -74,68 +76,71 @@
 ;; Validation tests:
 
 (facts "Simple validations"
-  (let [document (new-document schema ..now..)]
-    (-> document
-      (apply-update [:a :ab] "foo"))   => valid?
-    (-> document
-      (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
-    (-> document
-      (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])
-    (-> document
-      (apply-update [:a :ab] "\u00d6\u00e9\u00c8")) => valid?
-    (-> document
-      (apply-update [:a :ab] "\u047e\u0471")) => (invalid-with? [:warn "illegal-value:not-latin1-string"])))
+  (with-timestamp some-time
+    (let [document (new-document schema ..now..)]
+      (-> document
+        (apply-update [:a :ab] "foo"))   => valid?
+      (-> document
+        (apply-update [:a :ab] "f"))     => (invalid-with? [:warn "illegal-value:too-short"])
+      (-> document
+        (apply-update [:a :ab] "foooo")) => (invalid-with? [:err "illegal-value:too-long"])
+      (-> document
+        (apply-update [:a :ab] "\u00d6\u00e9\u00c8")) => valid?
+      (-> document
+        (apply-update [:a :ab] "\u047e\u0471")) => (invalid-with? [:warn "illegal-value:not-latin1-string"]))))
 
 (facts "Select"
-  (let [document (new-document schema ..now..)]
-    (-> document
-      (apply-update [:a :d] "A")) => valid?
-    (-> document
-      (apply-update [:a :d] "")) => valid?
-    (-> document
-      (apply-update [:a :d] "D")) => (invalid-with? [:warn "illegal-value:select"])))
+  (with-timestamp some-time
+    (let [document (new-document schema ..now..)]
+      (-> document
+        (apply-update [:a :d] "A")) => valid?
+      (-> document
+        (apply-update [:a :d] "")) => valid?
+      (-> document
+        (apply-update [:a :d] "D")) => (invalid-with? [:warn "illegal-value:select"]))))
 
 (facts "with real schemas - important field for paasuunnittelija"
-  (let [document (new-document (schemas "paasuunnittelija") ..now..)]
-    (-> document
-      (apply-update [:henkilotiedot :etunimi] "Tauno")
-      (apply-update [:henkilotiedot :sukunimi] "Palo")
-      (apply-update [:osoite :katu] "katu")
-      (apply-update [:osoite :postinumero] "12345")
-      (apply-update [:osoite :postitoimipaikannimi] "Demola")
-      (apply-update [:yhteystiedot :email] "tauno@example.com")
-      (apply-update [:yhteystiedot :puhelin] "050")) => valid?
-    (-> document
-      (apply-update [:henkilotiedot :etunimiz] "Tauno")) => (invalid-with? [:err "illegal-key"])
-    (-> document
-      (apply-update [:henkilotiedot :sukunimiz] "Palo")) => (invalid-with? [:err "illegal-key"])))
+  (with-timestamp some-time
+    (let [document (new-document (schemas "paasuunnittelija") ..now..)]
+      (-> document
+        (apply-update [:henkilotiedot :etunimi] "Tauno")
+        (apply-update [:henkilotiedot :sukunimi] "Palo")
+        (apply-update [:osoite :katu] "katu")
+        (apply-update [:osoite :postinumero] "12345")
+        (apply-update [:osoite :postitoimipaikannimi] "Demola")
+        (apply-update [:yhteystiedot :email] "tauno@example.com")
+        (apply-update [:yhteystiedot :puhelin] "050")) => valid?
+      (-> document
+        (apply-update [:henkilotiedot :etunimiz] "Tauno")) => (invalid-with? [:err "illegal-key"])
+      (-> document
+        (apply-update [:henkilotiedot :sukunimiz] "Palo")) => (invalid-with? [:err "illegal-key"]))))
 
 (facts "Repeating section"
-  (let [document (new-document schema-with-repetition ..now..)]
+  (with-timestamp some-time
+    (let [document (new-document schema-with-repetition ..now..)]
+      (fact "Single value contains no nested sections"
+        (-> document
+          (apply-update [:single :1 :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
 
-    (fact "Single value contains no nested sections"
-      (-> document
-        (apply-update [:single :1 :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
+      (fact "Repeating section happy case"
+        (-> document
+          (apply-update [:repeats :1 :single2] "foo")) => valid?)
 
-    (fact "Repeating section happy case"
-      (-> document
-        (apply-update [:repeats :1 :single2] "foo")) => valid?)
+      (fact "Invalid key under nested section"
+        (-> document
+          (apply-update [:repeats :1 :single3] "foo")) => (invalid-with? [:err "illegal-key"]))
 
-    (fact "Invalid key under nested section"
-      (-> document
-        (apply-update [:repeats :1 :single3] "foo")) => (invalid-with? [:err "illegal-key"]))
+      (fact "Unindexed repeating section"
+        (-> document
+          (apply-update [:repeats :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
 
-    (fact "Unindexed repeating section"
-      (-> document
-        (apply-update [:repeats :single2] "foo")) => (invalid-with? [:err "illegal-key"]))
+      (fact "Repeating string, 0"
+        (-> document
+          (apply-update [:repeats :1 :repeats2 :0] "1")) => valid?)
 
-    (fact "Repeating string, 0"
-      (-> document
-        (apply-update [:repeats :1 :repeats2 :0] "1")) => valid?)
-
-    (fact "Repeating string, 1"
-      (-> document
-        (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"]))))
+      (fact "Repeating string, 1"
+        (-> document
+          (apply-update [:repeats :1 :repeats2 :1] "foo")) => (invalid-with? [:warn "illegal-number"])))))
 
 (def schema-with-required {:info {:name "with-required" :version 1}
                            :body [{:name "a" :type :group
@@ -154,60 +159,62 @@
 (def missing-required-fields? (invalid-with? [:tip "illegal-value:required"]))
 
 (facts "Required fields"
-  (let [document (new-document schema-with-required ..now..)]
+  (with-timestamp some-time
+    (let [document (new-document schema-with-required ..now..)]
 
-    document => missing-required-fields?
+      document => missing-required-fields?
 
-    (-> document
-      (apply-update [:a :b :aa] " ")
-      (apply-update [:a :b :ab] " ")) => missing-required-fields?
+      (-> document
+        (apply-update [:a :b :aa] " ")
+        (apply-update [:a :b :ab] " ")) => missing-required-fields?
 
-    (-> document
-      (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")) => valid?
+      (-> document
+        (apply-update [:a :b :aa] "value")
+        (apply-update [:a :b :ab] "value")) => valid?
 
-    (-> document
-      (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :raa] "value")) => missing-required-fields?
+      (-> document
+        (apply-update [:a :b :aa] "value")
+        (apply-update [:a :b :ab] "value")
+        (apply-update [:a :c :0 :raa] "value")) => missing-required-fields?
 
-    (-> document
-      (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :rab] "value")
-      (apply-update [:a :c :6 :rab] "value")) => valid?
+      (-> document
+        (apply-update [:a :b :aa] "value")
+        (apply-update [:a :b :ab] "value")
+        (apply-update [:a :c :0 :rab] "value")
+        (apply-update [:a :c :6 :rab] "value")) => valid?
 
-    (-> document
-      (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :rab] "value")
-      (apply-update [:a :d :0 :d2 :0 :od1] "value")) => missing-required-fields?
+      (-> document
+        (apply-update [:a :b :aa] "value")
+        (apply-update [:a :b :ab] "value")
+        (apply-update [:a :c :0 :rab] "value")
+        (apply-update [:a :d :0 :d2 :0 :od1] "value")) => missing-required-fields?
 
-    (-> document
-      (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :rab] "value")
-      (apply-update [:a :d :0 :d2 :0 :od1] "value")
-      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => missing-required-fields?
+      (-> document
+        (apply-update [:a :b :aa] "value")
+        (apply-update [:a :b :ab] "value")
+        (apply-update [:a :c :0 :rab] "value")
+        (apply-update [:a :d :0 :d2 :0 :od1] "value")
+        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => missing-required-fields?
 
-    (-> document
-      (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :rab] "value")
-      (apply-update [:a :d :0 :d2 :0 :od1] "value")
-      (apply-update [:a :d :0 :d2 :0 :rd] "value")
-      (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?
+      (-> document
+        (apply-update [:a :b :aa] "value")
+        (apply-update [:a :b :ab] "value")
+        (apply-update [:a :c :0 :rab] "value")
+        (apply-update [:a :d :0 :d2 :0 :od1] "value")
+        (apply-update [:a :d :0 :d2 :0 :rd] "value")
+        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => valid?
 
-    (-> document
-      (apply-update [:a :b :aa] "value")
-      (apply-update [:a :b :ab] "value")
-      (apply-update [:a :c :0 :rab] "value")
-      (apply-update [:a :d :0 :d2 :0 :od1] "value")
-      (apply-update [:a :d :0 :d2 :0 :rd] "value")
-      (apply-update [:a :d :1 :d2 :6 :rd] "value")) => valid?))
+      (-> document
+        (apply-update [:a :b :aa] "value")
+        (apply-update [:a :b :ab] "value")
+        (apply-update [:a :c :0 :rab] "value")
+        (apply-update [:a :d :0 :d2 :0 :od1] "value")
+        (apply-update [:a :d :0 :d2 :0 :rd] "value")
+        (apply-update [:a :d :1 :d2 :6 :rd] "value")) => valid?)))
 
 (facts "with real schemas - required fields for henkilo hakija"
-  (let [document (-> (new-document (schemas "hakija") ..now..)
+  (with-timestamp some-time
+    (let [document (-> (new-document (schemas "hakija") ..now..)
                    (apply-update [:_selected] "henkilo")
                    (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
                    (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
@@ -216,30 +223,31 @@
                    (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
                    (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
                    (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
-    document => valid?
-    (-> document
-      (apply-update [:_selected])) => valid?
-    (-> document
-      (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
-    (-> document
-      (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
-    (-> document
-      (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?))
+      document => valid?
+      (-> document
+        (apply-update [:_selected])) => valid?
+      (-> document
+        (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
+      (-> document
+        (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
+      (-> document
+        (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?)))
 
 (facts "with real schemas - required fields for yritys hakija"
-  (let [document (-> (new-document (schemas "hakija") ..now..)
-                   (apply-update [:_selected] "yritys")
-                   (apply-update [:yritys :yritysnimi] "Solita")
-                   (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
-                   (apply-update [:yritys :osoite :postinumero] "33720")
-                   (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
-    document => valid?
-    (-> document
-      (apply-update [:yritys :osoite :katu])) => missing-required-fields?
-    (-> document
-      (apply-update [:yritys :osoite :postinumero])) => missing-required-fields?
-    (-> document
-      (apply-update [:yritys :osoite :postitoimipaikannimi])) => missing-required-fields?))
+  (with-timestamp some-time
+    (let [document (-> (new-document (schemas "hakija") ..now..)
+                     (apply-update [:_selected] "yritys")
+                     (apply-update [:yritys :yritysnimi] "Solita")
+                     (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
+                     (apply-update [:yritys :osoite :postinumero] "33720")
+                     (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
+      document => valid?
+      (-> document
+        (apply-update [:yritys :osoite :katu])) => missing-required-fields?
+      (-> document
+        (apply-update [:yritys :osoite :postinumero])) => missing-required-fields?
+      (-> document
+        (apply-update [:yritys :osoite :postitoimipaikannimi])) => missing-required-fields?)))
 
 
 (def approvable-schema {:info {:name "approval-model" :version 1 :approvable true}
@@ -329,23 +337,23 @@
 ;; Updates
 ;;
 
-(fact "updating document"
+(facts "updating document"
+  (with-timestamp some-time
+    (fact "single value"
+      (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka" :modified some-time}}}})
 
-  (fact "single value"
-    (apply-update  {} [:b :c] "kikka") => {:data {:b {:c {:value "kikka"}}}})
+    (fact "unsetting value"
+      (-> {}
+        (apply-update [:b :c] "kikka")
+        (apply-update [:b :c])) => {:data {:b {:c {:value "" :modified some-time}}}})
 
-  (fact "unsetting value"
-    (-> {}
-      (apply-update [:b :c] "kikka")
-      (apply-update [:b :c])) => {:data {:b {:c {:value ""}}}})
-
-  (fact "updates"
-    (apply-updates {} [[[:b :c] "kikka"]
-                       [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka"}
-                                                          :d {:value "kukka"}}}})
-  (fact "update a map value"
-    (apply-update {} [:a :b] {:c 1 :d {:e 2}}) => {:data {:a {:b {:c {:value 1}
-                                                                  :d {:e {:value 2}}}}}}))
+    (fact "updates"
+      (apply-updates {} [[[:b :c] "kikka"]
+                         [[:b :d] "kukka"]]) => {:data {:b {:c {:value "kikka" :modified some-time}
+                                                            :d {:value "kukka" :modified some-time}}}})
+    (fact "update a map value"
+      (apply-update {} [:a :b] {:c 1 :d {:e 2}}) => {:data {:a {:b {:c {:value 1 :modified some-time}
+                                                                    :d {:e {:value 2 :modified some-time}}}}}})))
 
 (fact "map2updates"
   (map2updates [:a :b] {:c 1 :d {:e 2}}) => (just [[[:a :b :c] 1]

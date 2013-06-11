@@ -162,6 +162,15 @@
 ;; Updates
 ;;
 
+(def ^:dynamic *timestamp* nil)
+(defn current-timestamp
+  "Returns the current timestamp to be used in document modifications."
+  [] *timestamp*)
+
+(defmacro with-timestamp [timestamp & body]
+  `(binding [*timestamp* ~timestamp]
+     ~@body))
+
 (declare apply-updates)
 
 (defn map2updates
@@ -172,16 +181,21 @@
 (defn apply-update
   "Updates a document returning the modified document.
    Value defaults to \"\", e.g. unsetting the value.
+   To be used within with-timestamp.
    Example: (apply-update document [:mitat :koko] 12)"
   ([document path]
     (apply-update document path ""))
   ([document path value]
     (if (map? value)
       (apply-updates document (map2updates path value))
-      (assoc-in document (flatten [:data path :value]) value))))
+      (let [data-path (into [] (flatten [:data path]))]
+        (-> document
+          (assoc-in (conj data-path :value) value)
+          (assoc-in (conj data-path :modified) (current-timestamp)))))))
 
 (defn apply-updates
   "Updates a document returning the modified document.
+   To be used within with-timestamp.
    Example: (apply-updates document [[:mitat :koko] 12])"
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
