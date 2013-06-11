@@ -89,9 +89,9 @@
       (fn [x] (if (contains? x k) (k x) x))
       m)))
 
-(defn with-timestamp
+(defn timestamped
   "Assocs timestamp besides every value-key"
-  ([m timestamp] (with-timestamp m timestamp :value :modified))
+  ([m timestamp] (timestamped m timestamp :value :modified))
   ([m timestamp value-key timestamp-key]
   (walk/postwalk
     (fn [x] (if (contains? x value-key) (assoc x timestamp-key timestamp) x))

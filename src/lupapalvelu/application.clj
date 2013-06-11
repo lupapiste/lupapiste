@@ -297,7 +297,7 @@
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (tools/with-timestamp (domain/->henkilo subject) created)
+            henkilo      (tools/timestamped (domain/->henkilo subject) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
@@ -619,7 +619,7 @@
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (tools/with-timestamp (add-value-metadata new-body {:source :krysp}) created)]
+              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)]
           ;; TODO: update via model
           (mongo/update
             :applications
