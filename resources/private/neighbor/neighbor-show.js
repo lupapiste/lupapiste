@@ -1,6 +1,8 @@
 ;(function() {
   "use strict";
 
+  var authorizationModel = authorization.create();
+
   function Model() {
     var self = this;
 
@@ -44,8 +46,12 @@
           x = l.x,
           y = l.y;
       self.application(a).map.updateSize().clear().center(x, y, 12).add(x, y);
-      docgen.displayDocuments("#neighborDocgen", a, _.filter(a.documents, null, function(doc) {return doc.schema.info.type !== "party"; }));
-      docgen.displayDocuments("#neighborPartiesDocgen",     a, _.filter(a.documents, null, function(doc) {return doc.schema.info.type === "party"; }));
+
+      var nonpartyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type !== "party"; });
+      var partyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type === "party"; });
+      docgen.displayDocuments("#neighborDocgen", a, nonpartyDocs, authorizationModel);
+      docgen.displayDocuments("#neighborPartiesDocgen", a, partyDocs, authorizationModel);
+
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
       self.attachments(_.map(a.attachments || [], function(a) {
         a.latestVersion = _.last(a.versions);
@@ -80,7 +86,7 @@
     self.operations = ko.observable();
     self.operationsCount = ko.observable();
     self.messageEnabled = ko.computed(function() { var c = self.response(); return c && c.value === "disapprove"; });
-    
+
     self.send = function() {
       ajax
         .command("neighbor-response", {
