@@ -920,7 +920,7 @@ var docgen = (function () {
 
       docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options).element);
 
-      if (schema.info.repeating) {
+      if (schema.info.repeating && !isDisabled(options)) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
         $(btn).click(function () {
@@ -938,6 +938,9 @@ var docgen = (function () {
       }
     });
   }
+
+  function isDisabled(options) { return options && options.disabled; }
+  function doValidate(options) { return !options || options.validate; }
 
   return {
     displayDocuments: displayDocuments
