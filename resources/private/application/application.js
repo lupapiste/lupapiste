@@ -475,6 +475,13 @@
       var targetTab = $target.attr("data-target");
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
     };
+
+    self.addOperationButtonVisible = function() {
+      return !self.operations()
+             || self.operations().length === 0
+             || self.operations()[self.operations().length-1]['operation-type'] === undefined
+             || self.operations()[self.operations().length-1]['operation-type']() != 'publicArea';
+    };
   };
   var application = new ApplicationModel();
 

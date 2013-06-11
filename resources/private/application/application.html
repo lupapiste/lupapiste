@@ -96,15 +96,15 @@
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
-          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement"             >
+          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
             <span data-bind="ltext: 'application.requestForComplement'"></span>
             <span class="icon complement left-align"></span>
           </button>
-          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: $root.authorization.ok('add-operation')"          data-test-id="add-operation"                      >
+          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation') && addOperationButtonVisible(),  enable: $root.authorization.ok('add-operation')"  data-test-id="add-operation">
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: exportPdf"                                                                                                                                 data-test-id="application-pdf-btn"                >
+          <button data-bind="click: exportPdf"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>
           </button>
