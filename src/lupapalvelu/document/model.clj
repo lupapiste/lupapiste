@@ -162,6 +162,15 @@
 ;; Updates
 ;;
 
+(def ^:dynamic *timestamp* nil)
+(defn current-timestamp
+  "Returns the current timestamp to be used in document modifications."
+  [] *timestamp*)
+
+(defmacro with-timestamp [timestamp & body]
+  `(binding [*timestamp* ~timestamp]
+     ~@body))
+
 (declare apply-updates)
 
 (defn map2updates
@@ -172,19 +181,73 @@
 (defn apply-update
   "Updates a document returning the modified document.
    Value defaults to \"\", e.g. unsetting the value.
+   To be used within with-timestamp.
    Example: (apply-update document [:mitat :koko] 12)"
   ([document path]
     (apply-update document path ""))
   ([document path value]
     (if (map? value)
       (apply-updates document (map2updates path value))
-      (assoc-in document (flatten [:data path :value]) value))))
+      (let [data-path (into [] (flatten [:data path]))]
+        (-> document
+          (assoc-in (conj data-path :value) value)
+          (assoc-in (conj data-path :modified) (current-timestamp)))))))
 
 (defn apply-updates
   "Updates a document returning the modified document.
+   To be used within with-timestamp.
    Example: (apply-updates document [[:mitat :koko] 12])"
   [document updates]
   (reduce (fn [document [path value]] (apply-update document path value)) document updates))
+
+;;
+;; Approvals
+;;
+
+(defn ->approved [status user]
+  "Approval meta data model. To be used within with-timestamp."
+  {:value status
+   :user (select-keys user [:id :firstName :lastName])
+   :timestamp (current-timestamp)})
+
+
+(defn apply-approval
+  "Merges approval meta data into a map.
+   To be used within with-timestamp or with a given timestamp."
+  ([document path status user]
+    (assoc-in document (filter (comp not nil?) (flatten [:meta path :_approved])) (->approved status user)))
+  ([document path status user timestamp]
+    (with-timestamp timestamp (apply-approval document path status user))))
+
+(defn approvable?
+  ([document] (approvable? document nil))
+  ([document path]
+  (if (seq path)
+    (let [schema-body (get-in document [:schema :body])
+          str-path    (map #(if (keyword? %) (name %) %) path)
+          element     (keywordize-keys (find-by-name schema-body str-path))]
+      (true? (:approvable element)))
+    (true? (get-in document [:schema :info :approvable])))))
+
+(defn modifications-since-approvals
+  ([{:keys [schema data meta]}]
+    (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) (get-in meta [:_approved :timestamp] 0)))
+  ([schema-body path data meta approvable-parent timestamp]
+    (letfn [(max-timestamp [p] (max timestamp (get-in meta (concat p [:_approved :timestamp]) 0)))
+            (count-mods
+              [{:keys [name approvable repeating body] :as element}]
+              (let [current-path (conj path (keyword name))
+                    current-approvable (or approvable-parent approvable)]
+                (if body
+                  (if repeating
+                    (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
+                    (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
+                  (if (and current-approvable (> (get-in data (conj current-path :modified) 0) (max-timestamp current-path))) 1 0))))]
+      (reduce + 0 (map count-mods schema-body)))))
+
+;;
+;; Create
+;;
 
 (defn new-document
   "Creates an empty document out of schema"
