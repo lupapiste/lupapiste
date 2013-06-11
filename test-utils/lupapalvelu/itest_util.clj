@@ -126,6 +126,13 @@
 ;; DSLs
 ;;
 
+(defn create-app-id [apikey & args]
+  (let [resp (apply create-app apikey args)
+        id   (:id resp)]
+    resp => ok?
+    id => truthy
+    id))
+
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))

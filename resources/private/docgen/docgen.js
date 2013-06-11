@@ -2,14 +2,14 @@ var docgen = (function () {
   "use strict";
 
   function makeButton(id, label) {
-    var appendButton = document.createElement("button");
-    appendButton.id = id;
-    appendButton.className = "btn";
-    appendButton.innerHTML = label;
-    return appendButton;
+    var button = document.createElement("button");
+    button.id = id;
+    button.className = "btn";
+    button.innerHTML = label;
+    return button;
   }
 
-  LUPAPISTE.DocModel = function (schema, model, docId, application) {
+  var DocModel = function (schema, model, meta, docId, application, authorizationModel) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -20,10 +20,27 @@ var docgen = (function () {
     self.schema = schema;
     self.schemaName = schema.info.name;
     self.model = model;
+    self.meta = meta;
     self.docId = docId;
     self.appId = application.id;
     self.application = application;
+    self.authorizationModel = authorizationModel;
     self.eventData = { doc: docId, app: self.appId };
+
+    self.getMeta = function(path, m) {
+      var meta = m ? m : self.meta;
+      if (!path || !path.length) {
+        return meta;
+      }
+      if (meta) {
+        var key = path[0];
+        var val = meta[key];
+        if (path.length === 1) {
+          return val;
+        }
+        return  self.getMeta(path.splice(1, path.length - 1), val);
+      }
+    };
 
     self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
 
@@ -136,6 +153,75 @@ var docgen = (function () {
 
       return span;
     }
+
+    // TODO WIP
+    self.makeApprovalButtons = function(path, model) {
+      var btnContainer$ = $("<span>").addClass("form-buttons");
+      var statusContainer$ = $("<span>");
+      var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
+      var approveButton$ = null;
+      var rejectButton$ = null;
+      var cmdArgs = {id: self.appId, doc: self.docId, path: path.join(".")};
+
+      if (_.isEmpty(model) || !features.enabled('docIndicators')) {
+        return approvalContainer$[0];
+      }
+
+      function setStatus(approval) {
+        if (approval) {
+          var text = loc("document." + approval.value);
+          if (approval.user && approval.timestamp) {
+            text += " (" + approval.user.firstName + " " + approval.user.lastName;
+            text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
+          }
+          statusContainer$.text(text);
+        }
+      }
+
+      function makeApprovalButton(verb, noun, cssClass) {
+        var cmd = verb + "-doc";
+        var title = loc("document." + verb);
+        return $(makeButton(self.docId + "_" + verb, title))
+        .addClass(cssClass).addClass("btn-narrow")
+        .click(function() {
+          ajax.command(cmd, cmdArgs)
+          .success(function() {
+            approveButton$.hide();
+            rejectButton$.hide();
+            setStatus({value:noun});})
+          .call();});
+      }
+
+      function modelModifiedSince(model, timestamp) {
+        if (model) {
+          if (!timestamp) {
+            return true;
+          }
+
+          if (model.value) {
+            // Leaf
+            return model.modified && model.modified > timestamp;
+          }
+          return _.find(model, function(myModel) {return modelModifiedSince(myModel, timestamp);});
+        }
+        return false;
+      }
+
+      var meta = self.getMeta(path);
+      var approval = meta ? meta._approved : null;
+
+      if (self.authorizationModel.ok("approve-doc") &&
+          self.authorizationModel.ok("reject-doc") &&
+          (!approval || modelModifiedSince(model, approval.timestamp))) {
+        approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
+        btnContainer$.append(approveButton$);
+        rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
+        btnContainer$.append(rejectButton$);
+      } else {
+        setStatus(approval);
+      }
+      return approvalContainer$[0];
+    };
 
     // Form field builders
 
@@ -297,13 +383,20 @@ var docgen = (function () {
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
       var clearDiv = document.createElement("div");
+      var label = makeLabel("group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
       clearDiv.className = "clear";
-      div.appendChild(makeLabel("group", myPath, true));
+
+      div.appendChild(label);
+
+      if (subSchema.approvable) {
+        label.appendChild(self.makeApprovalButtons(path, myModel));
+      }
+
       div.appendChild(partsDiv);
       div.appendChild(clearDiv);
       return div;
@@ -526,7 +619,7 @@ var docgen = (function () {
           };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-
+        
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
@@ -727,7 +820,7 @@ var docgen = (function () {
       var n$ = $(e.target).parent();
       while (!n$.is("section")) {
         n$ = n$.parent();
-      }
+    }
       var op = self.schema.info.op;
 
       var documentName = loc(self.schemaName + "._group_label");
@@ -744,8 +837,8 @@ var docgen = (function () {
             repository.load(self.appId);
           })
           .call();
-        return false;
-      }
+      return false;
+    }
 
       var message = "<div>" + loc("removeDoc.message1") + " <strong>"+ documentName + ".</strong></div><div>" +  loc("removeDoc.message2") + "</div>";
       LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message,
@@ -784,6 +877,10 @@ var docgen = (function () {
             .click(removeDoc));
       }
 
+      if (self.schema.info.approvable) {
+        elements.appendChild(self.makeApprovalButtons([], self.model));
+      }
+
       sectionContainer.className = "accordion_content expanded";
       sectionContainer.id = "document-" + docId;
 
@@ -799,7 +896,7 @@ var docgen = (function () {
     validate();
   };
 
-  function displayDocuments(containerSelector, application, documents) {
+  function displayDocuments(containerSelector, application, documents, authorizationModel) {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
@@ -812,7 +909,7 @@ var docgen = (function () {
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.data, doc.id, application).element);
+      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
@@ -823,7 +920,7 @@ var docgen = (function () {
             .command("create-doc", { schemaName: schema.info.name, id: application.id })
             .success(function (data) {
               var newDocId = data.doc;
-              var newElem = new LUPAPISTE.DocModel(schema, {}, newDocId, application).element;
+              var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;
               $(self).before(newElem);
             })
             .call();
