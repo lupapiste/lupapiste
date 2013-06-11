@@ -104,7 +104,7 @@
         .pending(self.saving)
         .success(self.sendOk)
         .fail(self.fail)
-        .error(function(e) { console.log(e); self.sendError(e.text); })
+        .error(function(e) { self.sendError(e.text); })
         .call();
     };
 
