@@ -167,28 +167,6 @@
 
   }();
 
-  var applicationModel = new function() {
-    var self = this;
-
-    self.data = ko.observable();
-
-    self.auth = ko.computed(function() {
-      var value = [];
-      if (self.data() !== undefined) {
-        var auth = ko.utils.unwrapObservable(self.data().auth());
-        var withRoles = function(r, i) {
-          var a = r[i.id()] || (i.roles = [], i);
-          a.roles.push(i.role());
-          r[i.id()] = a;
-          return r;
-        };
-        var pimped = _.reduce(auth, withRoles, {});
-        value = _.values(pimped);
-      }
-      return value;
-    }, self);
-  }();
-
   var removeApplicationModel = new function() {
     var self = this;
 
@@ -354,51 +332,69 @@
     };
   }();
 
+  function ApplicationModel() {
+    var self = this;
+    self.id = ko.observable();
+    self.infoRequest = ko.observable();
+    self.state = ko.observable();
+    self.location = ko.observable();
+    self.municipality = ko.observable();
+    self.permitType = ko.observable();
+    self.propertyId = ko.observable();
+    self.title = ko.observable();
+    self.created = ko.observable();
+    self.documents = ko.observable();
+    self.attachments = ko.observableArray();
+    self.hasAttachment = ko.observable(false);
+    self.address = ko.observable();
+    self.operations = ko.observable();
+    self.operationsCount = ko.observable();
+    self.applicant = ko.observable();
+    self.assignee = ko.observable();
+    self.neighbors = ko.observable();
+    self.nonpartyDocumentIndicator = ko.observable(0);
+    self.partyDocumentIndicator = ko.observable(0);
 
-  var application = {};
-  application = {
-    id: ko.observable(),
-    infoRequest: ko.observable(),
-    state: ko.observable(),
-    location: ko.observable(),
-    municipality: ko.observable(),
-    permitType: ko.observable(),
-    propertyId: ko.observable(),
-    title: ko.observable(),
-    created: ko.observable(),
-    documents: ko.observable(),
-    attachments: ko.observableArray(),
-    hasAttachment: ko.observable(false),
-    address: ko.observable(),
-    operations: ko.observable(),
-    operationsCount: ko.observable(),
-    applicant: ko.observable(),
-    assignee: ko.observable(),
-    neighbors: ko.observable(),
-
-    attachmentsRequiringAction: ko.observable(),
-    unseenStatements: ko.observable(),
-    unseenVerdicts: ko.observable(),
-    unseenComments: ko.observable(),
+    self.attachmentsRequiringAction = ko.observable();
+    self.unseenStatements = ko.observable();
+    self.unseenVerdicts = ko.observable();
+    self.unseenComments = ko.observable();
 
     // new stuff
-    invites: ko.observableArray(),
+    self.invites = ko.observableArray();
 
     // all data in here
-    data: ko.observable(),
+    self.data = ko.observable();
 
-    openOskariMap: function() {
-      var url = '/oskari/fullmap.html?coord=' + application.location().x() + '_' + application.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
+    self.roles = ko.computed(function() {
+      var value = [];
+
+      if (self.data() !== undefined) {
+        var auth = ko.utils.unwrapObservable(self.data().auth());
+        var withRoles = function(r, i) {
+          var a = r[i.id()] || (i.roles = [], i);
+          a.roles.push(i.role());
+          r[i.id()] = a;
+          return r;
+        };
+        var pimped = _.reduce(auth, withRoles, {});
+        value = _.values(pimped);
+      }
+      return value;
+    });
+
+    self.openOskariMap = function() {
+      var url = '/oskari/fullmap.html?coord=' + self.location().x() + '_' + self.location().y() + '&zoomLevel=12' + '&addPoint=1' + '&addArea=1';
       window.open(url);
-      var applicationId = application.id();
+      var applicationId = self.id();
 
       // FIXME: Can't just subscribe repeatedly.
       hub.subscribe("map-initialized", function() {
-        if(application.shapes && application.shapes().length > 0) {
-          oskariDrawShape(application.shapes()[0]);
+        if(self.shapes && self.shapes().length > 0) {
+          oskariDrawShape(self.shapes()[0]);
         }
 
-        oskariSetMarker(application.location().x(), application.location().y());
+        oskariSetMarker(self.location().x(), self.location().y());
       });
 
       // FIXME: Can't just subscribe repeatedly.
@@ -410,15 +406,15 @@
         })
         .call();
       });
-    },
+    };
 
-    submitApplication: function() {
-      submitApplicationModel.init(application.id());
+    self.submitApplication = function() {
+      submitApplicationModel.init(self.id());
       return false;
-    },
+    };
 
-    requestForComplement: function(model) {
-      var applicationId = application.id();
+    self.requestForComplement = function(model) {
+      var applicationId = self.id();
       ajax.command("request-for-complement", { id: applicationId})
         .success(function() {
           notify.success("pyynt\u00F6 l\u00E4hetetty",model);
@@ -426,10 +422,10 @@
         })
         .call();
       return false;
-    },
+    };
 
-    convertToApplication: function() {
-      var id = application.id();
+    self.convertToApplication = function() {
+      var id = self.id();
       ajax.command("convert-to-application", {id: id})
         .success(function() {
           repository.load(id);
@@ -437,10 +433,10 @@
         })
         .call();
       return false;
-    },
+    };
 
-    approveApplication: function(model) {
-      var applicationId = application.id();
+    self.approveApplication = function(model) {
+      var applicationId = self.id();
       ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
           notify.success("hakemus hyv\u00E4ksytty",model);
@@ -449,10 +445,10 @@
         .error(function(resp) {alert(resp.text);})
         .call();
       return false;
-    },
+    };
 
-    removeInvite: function(model) {
-      var applicationId = application.id();
+    self.removeInvite = function(model) {
+      var applicationId = self.id();
       ajax.command("remove-invite", { id : applicationId, email : model.user.username()})
         .success(function() {
           notify.success("kutsu poistettu", model);
@@ -460,61 +456,67 @@
         })
         .call();
       return false;
-    },
+    };
 
-    removeAuth: function(model) {
-      removeAuthModel.init(application.id(), model.username());
+    self.removeAuth = function(model) {
+      removeAuthModel.init(self.id(), model.username());
       return false;
-    },
+    };
 
-    isNotOwner: function(model) {
+    self.isNotOwner = function(model) {
       return model.role() !== "owner";
-    },
+    };
 
-    addOperation: function() {
-      window.location.hash = "#!/add-operation/" + application.id();
+    self.addOperation = function() {
+      window.location.hash = "#!/add-operation/" + self.id();
       return false;
-    },
+    };
 
-    addParty: function() {
-      var id = application.id();
-      addPartyModel.init(id);
+    self.addParty = function() {
+      addPartyModel.init(self.id());
       return false;
-    },
+    };
 
-    cancelApplication: function() {
-      var id = application.id();
-      removeApplicationModel.init(id);
+    self.cancelApplication = function() {
+      removeApplicationModel.init(self.id());
       return false;
-    },
+    };
 
-    exportPdf: function() {
-      window.open("/api/pdf-export/" + application.id() + "?lang=" + loc.currentLanguage, "_blank");
+    self.exportPdf = function() {
+      window.open("/api/pdf-export/" + self.id() + "?lang=" + loc.currentLanguage, "_blank");
       return false;
-    },
+    };
 
-    stampAttachments: function() {
-      stampModel.init(application);
+    self.stampAttachments = function() {
+      stampModel.init(self);
       return false;
-    },
+    };
 
-    newAttachment: function() {
+    self.newAttachment = function() {
       attachment.initFileUpload(currentId, null, null, true);
-    },
+    };
 
-    newOtherAttachment: function() {
+    self.newOtherAttachment = function() {
       attachment.initFileUpload(currentId, null, 'muut.muu', false);
-    },
+    };
 
-    changeTab: function(model,event) {
+    self.changeTab = function(model,event) {
       var $target = $(event.target);
       while ($target.is("span")) {
         $target = $target.parent();
       }
       var targetTab = $target.attr("data-target");
-      window.location.hash = "#!/application/" + application.id() + "/" + targetTab;
-    }
+      window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
+    };
+
+    self.addOperationButtonVisible = function() {
+      return !self.operations()
+             || self.operations().length === 0
+             || self.operations()[self.operations().length-1]['operation-type'] === undefined
+             || self.operations()[self.operations().length-1]['operation-type']() != 'publicArea';
+    };
   };
+  var application = new ApplicationModel();
 
   var authorities = ko.observableArray([]);
   var attachments = ko.observableArray([]);
@@ -579,10 +581,12 @@
     isInitializing = true;
 
     authorizationModel.refreshWithCallback({id: applicationDetails.application.id}, function() {
-      // new data mapping
-
       var app = applicationDetails.application;
-      applicationModel.data(ko.mapping.fromJS(app));
+      var documents = app.documents;
+
+      // Performance improvement: documents should not be mapped with ko.mapping
+      delete app.documents;
+
       application.data(ko.mapping.fromJS(app));
       ko.mapping.fromJS(app, {}, application);
 
@@ -644,8 +648,17 @@
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
       }
 
-      docgen.displayDocuments("#applicationDocgen", removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type !== "party"; }));
-      docgen.displayDocuments("#partiesDocgen",     removeDocModel, applicationDetails.application, _.filter(app.documents, function(doc) {return doc.schema.info.type === "party"; }));
+      // Documents
+      var nonpartyDocs = _.filter(documents, function(doc) {return doc.schema.info.type !== "party"; });
+      var partyDocs = _.filter(documents, function(doc) {return doc.schema.info.type === "party"; });
+      docgen.displayDocuments("#applicationDocgen", removeDocModel, app, nonpartyDocs, authorizationModel);
+      docgen.displayDocuments("#partiesDocgen",     removeDocModel, app, partyDocs, authorizationModel);
+
+      function sumDocIndicators(sum, doc) {
+        return sum + app.documentModificationsPerDoc[doc.id];
+      }
+      application.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
+      application.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
       // set the value behind assignee selection list
       var assignee = resolveApplicationAssignee(app.authority);
@@ -822,7 +835,6 @@
       authorities: authorities,
       attachments: attachments,
       attachmentsByGroup: attachmentsByGroup,
-      applicationModel: applicationModel,
       comment: commentModel,
       invite: inviteModel,
       authorization: authorizationModel,

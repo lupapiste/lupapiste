@@ -241,6 +241,7 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
+  Focus  xpath=//*[@data-test-id='${id}']
   Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
   Click by test id  ${id}
 

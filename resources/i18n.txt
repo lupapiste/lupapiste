@@ -1,0 +1,67 @@
+
+#
+# Yleiset alueet
+#
+
+operations.tree.yleisten-alueiden-luvat: Yleisten alueiden luvat
+operations.tree.kaivuulupa: Kaivulupa
+operations.tree.liikennetta-haittaavan-tyon-lupa: Liikennettä haittaavan työn lupa
+
+operations.yleiset-alueet-kaivuulupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+
+operations.yleiset-alueet-kaivuulupa: Kaivulupa
+
+yleiset-alueet-maksaja._group_label: Maksaja
+yleiset-alueet-maksaja.yritysnimi: Yrityksen nimi
+yleiset-alueet-maksaja.liikeJaYhteisoTunnus: Y-tunnus
+yleiset-alueet-maksaja.osoite._group_label: Osoite
+yleiset-alueet-maksaja.osoite.katu: Katu
+yleiset-alueet-maksaja.osoite.postinumero: Postinumero
+yleiset-alueet-maksaja.osoite.postitoimipaikannimi: Postitoimipaikka
+yleiset-alueet-maksaja.laskuviite: Laskuviite
+
+# TODO: Miksi "kohteenTiedot"-schema saa tällaisen group titlen?
+# Koska se on määritelty operation.clj:n operations-mapissa :yleiset-alueet-kaivuulupa:n schemaksi? Miten tämä kierretään?
+yleiset-alueet-kaivuulupa._group_label: Työmaasta vastaava
+tyomaastaVastaava.henkilotiedot._group_label: Henkilötiedot
+tyomaastaVastaava.henkilotiedot.etunimi: Etunimi
+tyomaastaVastaava.henkilotiedot.sukunimi: Sukunimi
+tyomaastaVastaava.yritys._group_label: Yritys
+tyomaastaVastaava.yritys.yritysnimi: Yrityksen nimi
+tyomaastaVastaava.yritys.liikeJaYhteisoTunnus: Y-tunnus
+tyomaastaVastaava.osoite._group_label: Osoite
+tyomaastaVastaava.osoite.katu: Katu
+tyomaastaVastaava.osoite.postinumero: Postinumero
+tyomaastaVastaava.osoite.postitoimipaikannimi: Postitoimipaikka
+tyomaastaVastaava.yhteystiedot._group_label: Yhteystiedot
+tyomaastaVastaava.yhteystiedot.puhelin: Puhelin
+tyomaastaVastaava.yhteystiedot.email: Email
+tyomaastaVastaava.yhteystiedot.fax: Fax
+tyomaastaVastaava.patevyys._group_label: Pätevyys
+tyomaastaVastaava.patevyys.ammattipatevyys: Ammattipätevyys
+tyomaastaVastaava.patevyys.voimassa-pvm: Voimassaolopäivämäärä
+
+yleiset-alueet-hankkeen-kuvaus._group_label: Hankkeen kuvaus
+yleiset-alueet-hankkeen-kuvaus.kayttotarkoitus: Kuvausalueen käyttötarkoitus
+yleiset-alueet-hankkeen-kuvaus.luvanTunniste: Sijoitusluvan tunniste
+
+tyo-/vuokra-aika._group_label: Työ-/vuokra-aika
+tyo-/vuokra-aika.vuokra-aika-alkaa-pvm: Vuokra-aika alkaa
+tyo-/vuokra-aika.vuokra-aika-paattyy-pvm: Vuokra-aika päättyy
+tyo-/vuokra-aika.tyoaika-alkaa-pvm: Työaika alkaa
+tyo-/vuokra-aika.tyoaika-paattyy-pvm: Työaika päättyy
+
+attachmentType.yleiset-alueet._group_label: Yleisten alueiden luvat
+attachmentType.yleiset-alueet.aiemmin-hankittu-sijoituspaatos: Aiemmin hankittu sijoituspäätös
+attachmentType.yleiset-alueet.tilapainen-liikennejarjestelysuunnitelma: Tilapäinen liikennejärjestelysuunnitelma
+attachmentType.yleiset-alueet.tyyppiratkaisu: Tyyppiratkaisu
+attachmentType.yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista: Tieto kaivupaikkaan liittyvistä johtotiedoista
+
+
+
+error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
+
+document.approve: OK
+document.reject: Tarkennettavaa
+document.approved: Tiedot OK
+document.rejected: Tarkennettavaa
