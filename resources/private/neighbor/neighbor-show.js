@@ -91,6 +91,7 @@
     self.messageEnabled = ko.computed(function() { var c = self.response(); return c && c.value === "disapprove"; });
     self.inError = ko.observable(false);
     self.errorText = ko.observable("");
+    self.tupasUser = ko.observable();
 
     self.send = function() {
       ajax
@@ -128,7 +129,7 @@
       .raw(true)
       .success(function(user) {
         if(user) {
-          console.log("SUCCESS!", user);
+          model.tupasUser(user);
         } else {
           var url = window.location.pathname + window.location.search + window.location.hash;
           $.get('/api/vetuma', {success: url,

@@ -114,12 +114,16 @@
           <div data-bind="visible: pending" class="pending"></div>
           <h1 data-bind="ltext: 'neighbor.show.form'"></h1>
           <div class="neighbor-reply-form">
-            <div id="vetuma-neighbor"></div>
-            <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
-            <form>
-              <input type="radio" name="response" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
-              <input type="radio" name="response" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
-              <textarea
+            <div data-bind="ifnot: tupasUser">
+              <!-- generated vetuma-form comes here -->
+              <div id="vetuma-neighbor"></div>
+            </div>
+            <div data-bind="if: tupasUser">
+              <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
+              <form>
+                <input type="radio" name="response" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
+                <input type="radio" name="response" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
+                <textarea
                   data-bind="
                     value: message,
                     enable: messageEnabled,
@@ -128,18 +132,19 @@
                   id="response-message"
                   class="form-input textarea really-long high"
                   rows=10></textarea>
-              <button
+                <button
                   data-bind="
                     click: send,
                     enable: response() && !saving() && !done(),
                     ltext: 'neighbor.show.ok'">
-              </button>
-              <span data-bind="visible: saving">
-                <img src="/img/ajax-loader-12.gif" alt="loader"/>
-                <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
-              </span>
-              <div data-bind="visible: done, ltext: 'neighbor.show.response.done'"></div>
-            </form>
+                </button>
+                <span data-bind="visible: saving">
+                  <img src="/img/ajax-loader-12.gif" alt="loader"/>
+                  <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
+                </span>
+                <div data-bind="visible: done, ltext: 'neighbor.show.response.done'"></div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
