@@ -771,7 +771,8 @@ var docgen = (function () {
 
     function disableBasedOnOptions() {
       if(options && options.disabled) {
-        $(self.element).find('input, textarea, button, select').attr("disabled", true);
+        $(self.element).find('input, textarea, select').attr("disabled", true);
+        $(self.element).find('button').hide();
       }
     }
 
