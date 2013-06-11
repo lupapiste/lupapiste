@@ -1,0 +1,5 @@
+neighbor.show.form: Vastauksesi
+neighbor.show.welcome.desc: Naapurisi on tiedottanut sinua hankkeestaan. Ole hyva ja tutustu alla oleviin hankkeen tietoihin. Muistathan kuitata saaneesiin tiedot verkkopankkitunnuksillasi.
+neighbor.show.reply.text: Olemme saaneet tiedon rakennushankkeesta. Olemme tutustuneet hankkkeen suunnitelmiin/ piirustuksiin.
+neighbor.show.responce.comments: Esitamme rakennushankkeen johdosta seuraavan huomautuksen:
+neighbor.show.responce.ok: Naapurina meilla ei ole huomautettavaa rakennushankkeen johdosta.
