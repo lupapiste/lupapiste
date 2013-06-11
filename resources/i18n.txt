@@ -5,6 +5,9 @@ neighbor.show.responce.comments: Esitamme rakennushankkeen johdosta seuraavan hu
 neighbor.show.responce.ok: Naapurina meilla ei ole huomautettavaa rakennushankkeen johdosta.
 error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
 
+error.token-not-found: Kutsusi ei ole enää voimassa.
+neighbor.invite.failed.long: Ota yhteyttä ...
+
 document.approve: OK
 document.reject: Tarkennettavaa
 document.approved: Tiedot OK

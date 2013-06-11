@@ -70,7 +70,7 @@
     self.error = function(data) {
       var error = data.text;
       self.inError(true);
-      self.errorText(data.text);
+      self.errorText("error."+data.text);
     };
 
     self.attachments = ko.observableArray([]);

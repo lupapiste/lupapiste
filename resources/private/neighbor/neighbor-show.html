@@ -5,7 +5,11 @@
   </head>
   <body>
     <section id="neighbor-show" class="page">
-      <div>
+      <div data-bind="if: inError">
+        <h1 data-bind="ltext: errorText"></h1>
+        <p data-bind="ltext: 'neighbor.invite.failed.long'"></p>
+      </div>
+      <div data-bind="ifnot: inError">
         <div class="application_summary">
           <div class="container">
             <div data-bind="visible: application" class="application-map-container">
