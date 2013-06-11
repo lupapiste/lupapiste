@@ -841,8 +841,7 @@
       stampModel: stampModel,
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
-      sendNeighborEmailModel: sendNeighborEmailModel,
-      features: features
+      sendNeighborEmailModel: sendNeighborEmailModel
     };
 
     $("#application").applyBindings(bindings);
