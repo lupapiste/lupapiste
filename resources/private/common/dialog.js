@@ -49,8 +49,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
     self.mask
       .css({"width": maskWidth, "height": maskHeight})
-      .fadeIn(300)
-      .fadeTo("fast", 0.8);
+      .fadeTo("fast", 0.5);
 
     element
       .css("top",  winHeight / 2 - elementHeight / 2)
