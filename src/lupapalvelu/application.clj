@@ -10,23 +10,23 @@
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
+            [sade.util :as util]
             [lupapalvelu.tepa :as tepa]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
-            [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.document.commands :as commands]
             [lupapalvelu.neighbors :as neighbors]
             [clj-time.format :as tf]))
 
@@ -87,11 +87,24 @@
         0))
     0))
 
+(defn count-document-modifications-per-doc [user app]
+  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
+    (into {} (map (fn [doc] [(:id doc) (model/modifications-since-approvals doc)]) (:documents app)))
+    {}))
+
+
+(defn count-document-modifications [user app]
+  (if (and (env/feature? :docIndicators) (= (:role user) "authority") (not (:infoRequest app)))
+    (reduce + 0 (vals (:documentModificationsPerDoc app)))
+    0))
+
 (defn indicator-sum [_ app]
-  (reduce + (map (fn [[k v]] (if (#{:unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
+  (reduce + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts :attachmentsRequiringAction} k) v 0)) app)))
 
 (def meta-fields [{:field :applicant :fn get-applicant-name}
                   {:field :neighbors :fn neighbors/normalize-negighbors}
+                  {:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
+                  {:field :documentModifications :fn count-document-modifications}
                   {:field :unseenComments :fn count-unseen-comment}
                   {:field :unseenStatements :fn count-unseen-statements}
                   {:field :unseenVerdicts :fn count-unseen-verdicts}
@@ -278,14 +291,14 @@
 (defcommand "set-user-to-document"
   {:parameters [:id :documentId :userId :path]
    :authenticated true}
-  [{{:keys [documentId userId path]} :data user :user :as command}]
+  [{{:keys [documentId userId path]} :data user :user created :created :as command}]
   (with-application command
     (fn [application]
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (domain/->henkilo subject)
+            henkilo      (tools/timestamped (domain/->henkilo subject) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (if (nil? document)
           (fail :error.document-not-found)
@@ -297,7 +310,7 @@
               {:_id (:id application)
                :documents {$elemMatch {:id documentId}}}
               {$set {full-path henkilo
-                     :modified (:created command)}})))))))
+                     :modified created}})))))))
 
 
 ;;
@@ -610,7 +623,7 @@
 (defcommand "merge-details-from-krysp"
   {:parameters [:id :documentId :buildingId]
    :roles      [:applicant :authority]}
-  [{{:keys [id documentId buildingId]} :data :as command}]
+  [{{:keys [id documentId buildingId]} :data created :created :as command}]
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy (organization/get-legacy organization)]
@@ -619,14 +632,14 @@
               old-body     (:data document)
               kryspxml     (krysp/building-xml legacy propertyId)
               new-body     (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {})
-              with-value-metadata (add-value-metadata new-body {:source :krysp})]
+              with-value-metadata (tools/timestamped (add-value-metadata new-body {:source :krysp}) created)]
           ;; TODO: update via model
           (mongo/update
             :applications
             {:_id (:id application)
              :documents {$elemMatch {:id documentId}}}
             {$set {:documents.$.data with-value-metadata
-                   :modified (:created command)}})
+                   :modified created}})
           (ok))
         (fail :no-legacy-available)))))
 

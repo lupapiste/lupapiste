@@ -363,6 +363,7 @@
                          {:name "huoneistot"
                           :type :group
                           :repeating true
+                          :approvable true
                           :body huoneisto}])
 
 
@@ -372,6 +373,7 @@
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
                              :type :group
                              :repeating true
+                             :approvable true
                              :body (body party-with-required-hetu
                                          [{:name "omistajalaji" :type :select
                                            :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
@@ -455,7 +457,7 @@
       :body [kuvaus
              {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
-     {:info {:name "uusiRakennus"}
+     {:info {:name "uusiRakennus" :approvable true}
       :body (body rakennuksen-omistajat rakennuksen-tiedot)}
 
      {:info {:name "rakennuksen-muuttaminen"}

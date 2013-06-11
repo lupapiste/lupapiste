@@ -56,3 +56,12 @@ attachmentType.yleiset-alueet.aiemmin-hankittu-sijoituspaatos: Aiemmin hankittu 
 attachmentType.yleiset-alueet.tilapainen-liikennejarjestelysuunnitelma: Tilapäinen liikennejärjestelysuunnitelma
 attachmentType.yleiset-alueet.tyyppiratkaisu: Tyyppiratkaisu
 attachmentType.yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista: Tieto kaivupaikkaan liittyvistä johtotiedoista
+
+
+
+error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
+
+document.approve: OK
+document.reject: Tarkennettavaa
+document.approved: Tiedot OK
+document.rejected: Tarkennettavaa
