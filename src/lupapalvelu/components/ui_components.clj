@@ -49,7 +49,7 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "authorization.js"]
                   :css ["css/main.css"]
-                  :html ["error.html" "nav.html"]}
+                  :html ["404.html" "nav.html"]}
 
    :map          {:depends [:common]
                   :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
