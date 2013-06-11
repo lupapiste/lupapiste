@@ -7,103 +7,107 @@
 
     <section id="neighbor-show" class="page">
       <div class="application_summary">
-      <div class="container">
-        <div data-bind="visible: application" class="application-map-container">
-          <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
-        </div>
-        <div data-bind="with: application" class="application_summary_info">
-          <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
-          <!-- Property ID: -->
-          <div>
-            <p data-bind="ltext: 'application.property'"></p>
-            <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
+        <div class="container">
+          <div data-bind="visible: application" class="application-map-container">
+            <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           </div>
-          <!-- State: -->
-          <div>
-            <p data-bind="ltext: 'application.state'">Tila:</p>
-            <span
-              data-bind="ltext: state, attr: {'data-test-state': state}"
-              data-test-id="application-state"
-              class="application_summary_text">
-            </span>
-          </div>
-          <!-- Submitted: -->
-          <!-- ID: -->
-          <div>
-            <p data-bind="ltext: 'application.id'"></p>
-            <span
-              data-bind="text: id, attr: {'data-test-value': id}"
-              data-test-id="application-id"
-              class="application_summary_text">
-            </span>
-          </div>
+          <div data-bind="with: application" class="application_summary_info">
+            <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
 
-          <!-- Operations: -->
-          <div>
-            <p data-bind="ltext: 'application.operations'"></p>
+            <!-- Property ID: -->
+            <div>
+              <p data-bind="ltext: 'application.property'"></p>
+              <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
+            </div>
+
+            <!-- State: -->
+            <div>
+              <p data-bind="ltext: 'application.state'">Tila:</p>
+              <span
+                data-bind="ltext: state, attr: {'data-test-state': state}"
+                data-test-id="application-state"
+                class="application_summary_text">
+              </span>
+            </div>
+            <!-- Submitted: -->
+
+            <!-- ID: -->
+            <div>
+              <p data-bind="ltext: 'application.id'"></p>
+              <span
+                data-bind="text: id, attr: {'data-test-value': id}"
+                data-test-id="application-id"
+                class="application_summary_text">
+              </span>
+            </div>
+
+            <!-- Operations: -->
+            <div>
+              <p data-bind="ltext: 'application.operations'"></p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
       <div class="container">
 
         <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
         <p data-bind="ltext: 'neighbor.show.welcome.desc'" class="tab-info"></p>
-       <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-         <!-- docgen generated content: -->
-          <div class="application_section">
-            <div id="neighborDocgen"/>
-            <div id="neighborPartiesDocgen"/>
-          </div>
+        <h1 data-bind="ltext: 'application.tabInfo'"></h1>
 
+        <!-- docgen generated content: -->
+        <div class="application_section">
+          <div id="neighborDocgen"/>
+          <div id="neighborPartiesDocgen"/>
+        </div>
 
+        <!-- attachments: -->
         <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
-            <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-              <table class="table">
-                <tbody data-bind="foreach: attachmentsByGroup">
-                  <tr class="attachment-group-header">
-                    <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
-                  </tr>
-                  <tr>
-                    <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
-                    <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-                    <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-                    <th></th>
-                  </tr>
+          <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
+          <table class="table">
+            <tbody data-bind="foreach: attachmentsByGroup">
+              <tr class="attachment-group-header">
+                <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
+              </tr>
+              <tr>
+                <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                <th></th>
+              </tr>
 
-                  <!-- ko foreach: attachments -->
-                  <tr style="cursor: pointer;">
-                    <td>
-                      <a>
-                        <span data-bind="if: type">
-                          <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
-                        </span>
-                        <span data-bind="if: !type">
-                          <i data-bind="ltext: 'attachment.noName'"></i>
-                        </span>
-                      </a>
-                    </td>
-                    <td>
-                      <span data-bind="if: $data.latestVersion">
-                        <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
-                        <i data-bind="ltext: latestVersion.contentType"></i>
-                        <i data-bind="size: latestVersion.size"></i>
-                      </span>
-                    </td>
-                    <td>
-                      <span data-bind="if: $data.latestVersion">
-                      <span data-bind="dateString: modified"></span>
-                        <span data-bind="fullName: latestVersion.user"></span>
-                      </span>
-                    </td>
-                    <td>
-                    </td>
-                  </tr>
-                <!-- /ko -->
+              <!-- ko foreach: attachments -->
+              <tr style="cursor: pointer;">
+                <td>
+                  <a>
+                    <span data-bind="if: type">
+                      <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                    </span>
+                    <span data-bind="if: !type">
+                      <i data-bind="ltext: 'attachment.noName'"></i>
+                    </span>
+                  </a>
+                </td>
+                <td>
+                  <span data-bind="if: $data.latestVersion">
+                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
+                    <i data-bind="ltext: latestVersion.contentType"></i>
+                    <i data-bind="size: latestVersion.size"></i>
+                  </span>
+                </td>
+                <td>
+                  <span data-bind="if: $data.latestVersion">
+                  <span data-bind="dateString: modified"></span>
+                    <span data-bind="fullName: latestVersion.user"></span>
+                  </span>
+                </td>
+                <td>
+                </td>
+              </tr>
+              <!-- /ko -->
 
-                </tbody>
-              </table>
-            </div>
+            </tbody>
+          </table>
+        </div>
 
         <div data-bind="visible: pending" class="pending"></div>
         <h1 data-bind="ltext: 'neighbor.show.form'"></h1>

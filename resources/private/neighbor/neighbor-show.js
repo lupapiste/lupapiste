@@ -63,12 +63,14 @@
 
     self.fail = function(data) {
       // TODO: Show information about application not found, or closed, or sumthing.
+      info("fail", data);
       window.location.hash = "!/404";
     };
 
     self.error = function(data) {
-      // TODO: Show error page
-      window.location.hash = "!/404";
+      var error = data.text;
+      self.inError(true);
+      self.errorText(data.text);
     };
 
     self.attachments = ko.observableArray([]);
@@ -87,6 +89,8 @@
     self.operations = ko.observable();
     self.operationsCount = ko.observable();
     self.messageEnabled = ko.computed(function() { var c = self.response(); return c && c.value === "disapprove"; });
+    self.inError = ko.observable(false);
+    self.errorText = ko.observable("");
 
     self.send = function() {
       ajax
