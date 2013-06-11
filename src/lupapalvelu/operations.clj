@@ -39,7 +39,8 @@
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
                                                                                         ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
-          (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]])))
+          (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]
+                                                                        ["Pima" :pima]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -50,7 +51,7 @@
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
 
-(def ^:private common-ymp-schemas ["ymp-ilm-sijainti"])
+(def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -176,8 +177,11 @@
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :meluilmoitus               {:schema "meluilmoitus"
+   :meluilmoitus                {:schema "meluilmoitus"
                                  :required common-ymp-schemas
+                                 :attachments []}
+   :pima                        {:schema "pima"
+                                 :required ["ymp-ilm-kesto-mini"]
                                  :attachments []}})
 
 

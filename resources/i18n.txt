@@ -184,22 +184,11 @@ email.title.neighbor: naapurin kuuleminen
 
 meluilmoitus._group_label: Meluilmoitus
 meluilmoitus.karttapiirto:  Tähän karttapiirto
-meluilmoitus.kesto._group_label: Toiminnan kesto
-meluilmoitus.kesto.alku: Toiminnan aloituspäivä
-meluilmoitus.kesto.kello._group_label: Toiminnan kellonajat
-meluilmoitus.kesto.kello.arkisin: Arkisin
-meluilmoitus.kesto.kello.lauantait: Lauantaisin
-meluilmoitus.kesto.kello.pyhat: Pyhisin
-meluilmoitus.kesto.loppu: Toiminnan viimeinen päivä
-meluilmoitus.melu._group_label:Meluilmoitus
+meluilmoitus.melu._group_label:Melupäästöt
 meluilmoitus.melu.melu10mdBa: Melutaso 10m päässä
 meluilmoitus.melu.mittaus: Mittaus
 meluilmoitus.melu.paivalla: Päivällä
 meluilmoitus.melu.yolla:Yöllä
-meluilmoitus.osoite._group_label:Osoite
-meluilmoitus.osoite.katu: Katuosoite
-meluilmoitus.osoite.postinumero: Postinumero
-meluilmoitus.osoite.postitoimipaikannimi: Postitoimipaikka
 meluilmoitus.rakentaminen._group_label:Rakentaminen
 meluilmoitus.rakentaminen.koneet: Koneet, laitteet ja niiden etäisyys toimintapaikalta
 meluilmoitus.rakentaminen.kuvaus: Tiedot rakennustyöstä
@@ -212,3 +201,26 @@ meluilmoitus.tapahtuma.kuvaus: Tapahtuman kuvaus
 meluilmoitus.tapahtuma.nimi: Tapahtuman nimi
 meluilmoitus.tapahtuma.ulkoilmakonsertti: Ulkoilmakonstertti
 operations.meluilmoitus: Meluilmoitus
+
+
+meluilmoitus.rakentaminen.muu-rakentaminen: Muu rakentaminen
+operations.pima: Ilmoitus pilaantuneen maaperän puhdistamisesta
+pima._group_label: Ilmoitus pilaantuneen maaperän puhdistamisesta
+pima.kuvaus: Yleiskuvaus hankkeesta
+ymp-ilm-kesto-mini._group_label: Kesto
+ymp-ilm-kesto-mini.kesto._group_label: Kesto
+ymp-ilm-kesto-mini.kesto.alku: Aloitus
+ymp-ilm-kesto-mini.kesto.loppu: Lopetus
+ymp-ilm-kesto._group_label: Kesto
+ymp-ilm-kesto.kesto._group_label: Kesto
+ymp-ilm-kesto.kesto.alku:  Aloitus
+ymp-ilm-kesto.kesto.kello._group_label: Kello
+ymp-ilm-kesto.kesto.kello.arkisin: Arkisin
+ymp-ilm-kesto.kesto.kello.lauantait: Launantaisin
+ymp-ilm-kesto.kesto.kello.pyhat: Sunnuntaisin
+ymp-ilm-kesto.kesto.loppu: Lopetus
+ymp-ilm-sijainti._group_label: Sijainti
+ymp-ilm-sijainti.osoite._group_label: Osoite
+ymp-ilm-sijainti.osoite.katu: Katusosoite
+ymp-ilm-sijainti.osoite.postinumero: Postinumero
+ymp-ilm-sijainti.osoite.postitoimipaikannimi: Postitoimipaikka
