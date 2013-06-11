@@ -4,140 +4,140 @@
     <meta charset="utf-8" />
   </head>
   <body>
-
     <section id="neighbor-show" class="page">
-      <div class="application_summary">
+      <div>
+        <div class="application_summary">
+          <div class="container">
+            <div data-bind="visible: application" class="application-map-container">
+              <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+            </div>
+            <div data-bind="with: application" class="application_summary_info">
+              <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
+
+              <!-- Property ID: -->
+              <div>
+                <p data-bind="ltext: 'application.property'"></p>
+                <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
+              </div>
+
+              <!-- State: -->
+              <div>
+                <p data-bind="ltext: 'application.state'">Tila:</p>
+                <span
+                  data-bind="ltext: state, attr: {'data-test-state': state}"
+                  data-test-id="application-state"
+                  class="application_summary_text">
+                </span>
+              </div>
+              <!-- Submitted: -->
+
+              <!-- ID: -->
+              <div>
+                <p data-bind="ltext: 'application.id'"></p>
+                <span
+                  data-bind="text: id, attr: {'data-test-value': id}"
+                  data-test-id="application-id"
+                  class="application_summary_text">
+                </span>
+              </div>
+
+              <!-- Operations: -->
+              <div>
+                <p data-bind="ltext: 'application.operations'"></p>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="container">
-          <div data-bind="visible: application" class="application-map-container">
-            <div id="neighbor-map" class="map map-large" style="width: 320px; height: 280px;"></div>
+
+          <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
+          <p data-bind="ltext: 'neighbor.show.welcome.desc'" class="tab-info"></p>
+          <h1 data-bind="ltext: 'application.tabInfo'"></h1>
+
+          <!-- docgen generated content: -->
+          <div class="application_section">
+            <div id="neighborDocgen"/>
+            <div id="neighborPartiesDocgen"/>
           </div>
-          <div data-bind="with: application" class="application_summary_info">
-            <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
 
-            <!-- Property ID: -->
-            <div>
-              <p data-bind="ltext: 'application.property'"></p>
-              <span class="application_summary_text" data-bind="propertyId: propertyId" data-test-id="application-property-id"></span>
-            </div>
-
-            <!-- State: -->
-            <div>
-              <p data-bind="ltext: 'application.state'">Tila:</p>
-              <span
-                data-bind="ltext: state, attr: {'data-test-state': state}"
-                data-test-id="application-state"
-                class="application_summary_text">
-              </span>
-            </div>
-            <!-- Submitted: -->
-
-            <!-- ID: -->
-            <div>
-              <p data-bind="ltext: 'application.id'"></p>
-              <span
-                data-bind="text: id, attr: {'data-test-value': id}"
-                data-test-id="application-id"
-                class="application_summary_text">
-              </span>
-            </div>
-
-            <!-- Operations: -->
-            <div>
-              <p data-bind="ltext: 'application.operations'"></p>
-            </div>
+          <!-- attachments: -->
+          <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
+            <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
+            <table class="table" data-bind="foreach: attachmentsByGroup">
+              <thead>
+                <tr class="attachment-group-header">
+                  <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
+                </tr>
+                <tr>
+                  <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+                  <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+                  <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: attachments">
+                <tr style="cursor: pointer;">
+                  <td>
+                    <a>
+                      <span data-bind="if: type">
+                        <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                      </span>
+                      <span data-bind="if: !type">
+                        <i data-bind="ltext: 'attachment.noName'"></i>
+                      </span>
+                    </a>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion">
+                      <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
+                      <i data-bind="ltext: latestVersion.contentType"></i>
+                      <i data-bind="size: latestVersion.size"></i>
+                    </span>
+                  </td>
+                  <td>
+                    <span data-bind="if: $data.latestVersion">
+                    <span data-bind="dateString: modified"></span>
+                      <span data-bind="fullName: latestVersion.user"></span>
+                    </span>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
-      </div>
-      <div class="container">
 
-        <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
-        <p data-bind="ltext: 'neighbor.show.welcome.desc'" class="tab-info"></p>
-        <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-
-        <!-- docgen generated content: -->
-        <div class="application_section">
-          <div id="neighborDocgen"/>
-          <div id="neighborPartiesDocgen"/>
-        </div>
-
-        <!-- attachments: -->
-        <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
-          <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-          <table class="table" data-bind="foreach: attachmentsByGroup">
-            <thead>
-              <tr class="attachment-group-header">
-                <td data-bind="text: loc('attachmentType.' + group + '._group_label')" colspan="6"></td>
-              </tr>
-              <tr>
-                <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
-                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: attachments">
-              <tr style="cursor: pointer;">
-                <td>
-                  <a>
-                    <span data-bind="if: type">
-                      <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
-                    </span>
-                    <span data-bind="if: !type">
-                      <i data-bind="ltext: 'attachment.noName'"></i>
-                    </span>
-                  </a>
-                </td>
-                <td>
-                  <span data-bind="if: $data.latestVersion">
-                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
-                    <i data-bind="ltext: latestVersion.contentType"></i>
-                    <i data-bind="size: latestVersion.size"></i>
-                  </span>
-                </td>
-                <td>
-                  <span data-bind="if: $data.latestVersion">
-                  <span data-bind="dateString: modified"></span>
-                    <span data-bind="fullName: latestVersion.user"></span>
-                  </span>
-                </td>
-                <td>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div data-bind="visible: pending" class="pending"></div>
-        <h1 data-bind="ltext: 'neighbor.show.form'"></h1>
-        <div class="neighbor-reply-form">
-          <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
-          <form>
-            <input type="radio" name="response" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
-            <input type="radio" name="response" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
-            <textarea
-                data-bind="
-                  value: message,
-                  enable: messageEnabled,
-                  valueUpdate: 'afterkeydown',
-                  attr: {placeholder: loc('neighbor.show.message.placeholder')}"
-                id="response-message"
-                class="form-input textarea really-long high"
-                rows=10></textarea>
-            <button
-                data-bind="
-                  click: send,
-                  enable: response() && !saving() && !done(),
-                  ltext: 'neighbor.show.ok'">
-            </button>
-            <span data-bind="visible: saving">
-              <img src="/img/ajax-loader-12.gif" alt="loader"/>
-              <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
-            </span>
-            <div data-bind="visible: done, ltext: 'neighbor.show.response.done'"></div>
-          </form>
+          <div data-bind="visible: pending" class="pending"></div>
+          <h1 data-bind="ltext: 'neighbor.show.form'"></h1>
+          <div class="neighbor-reply-form">
+            <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
+            <form>
+              <input type="radio" name="response" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
+              <input type="radio" name="response" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
+              <textarea
+                  data-bind="
+                    value: message,
+                    enable: messageEnabled,
+                    valueUpdate: 'afterkeydown',
+                    attr: {placeholder: loc('neighbor.show.message.placeholder')}"
+                  id="response-message"
+                  class="form-input textarea really-long high"
+                  rows=10></textarea>
+              <button
+                  data-bind="
+                    click: send,
+                    enable: response() && !saving() && !done(),
+                    ltext: 'neighbor.show.ok'">
+              </button>
+              <span data-bind="visible: saving">
+                <img src="/img/ajax-loader-12.gif" alt="loader"/>
+                <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
+              </span>
+              <div data-bind="visible: done, ltext: 'neighbor.show.response.done'"></div>
+            </form>
+          </div>
         </div>
       </div>
     </section>
-
   </body>
 </html>
