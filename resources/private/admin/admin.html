@@ -15,7 +15,7 @@
       <h2>Fixturet <span data-bind="visible: fixtures.ok" data-test-id="fixture-done">Done</span></h2>
       <ul data-bind="foreach: fixtures.data()">
         <li>
-          <a href="#" data-bind="text: $data, click: $root.fixtures.apply"></a>
+          <a href="#" data-bind="text: $data, click: $root.fixtures.apply, attr: {id:$data}"></a>
         </li>
       </ul><br/>
       <h2>Aktivoi tili</h2>
