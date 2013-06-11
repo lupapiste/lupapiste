@@ -660,7 +660,7 @@ var docgen = (function () {
               code  = r.result[1];
           if(level !== "tip") {
             var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
-            errorPanel.html("<span class='"+level+"'>"+errorPanel.html()+loc("error."+code)+"</span>").show();
+            errorPanel.html(errorPanel.html()+"<span class='"+level+"'>"+loc("error."+code)+"</span>").show();
           }
           $("#"+docId+"-"+path.join("-")).addClass(level);
         });
