@@ -515,7 +515,7 @@
       window.location.hash = "#!/application/" + application.id() + "/" + targetTab;
     },
 
-    exportButtonVisible: function() {
+    addOperationButtonVisible: function() {
       return !application.operations()
              || application.operations().length === 0
              || application.operations()[application.operations().length-1]['operation-type'] === undefined
