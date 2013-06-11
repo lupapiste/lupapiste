@@ -6,6 +6,9 @@ neighbor.show.responce.ok: Naapurina meilla ei ole huomautettavaa rakennushankke
 error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
 
 error.token-not-found: Kutsusi ei ole enää voimassa.
+error.invalid-response: Virheellinen vastaus
+error.invalid-vetuma-user: Virheellinen Vetuma-kirjautuminen
+
 neighbor.invite.failed.long: Ota yhteyttä ...
 
 document.approve: OK

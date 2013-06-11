@@ -82,16 +82,14 @@
     self.application = ko.observable();
     self.saving = ko.observable();
     self.done = ko.observable();
-    self.responses = [{text: loc("neighbor.show.response.approve"), value: "approve"},
-                      {text: loc("neighbor.show.response.disapprove"), value: "disapprove"}];
     self.response = ko.observable();
     self.message = ko.observable();
     self.operations = ko.observable();
     self.operationsCount = ko.observable();
-    self.messageEnabled = ko.computed(function() { var c = self.response(); return c && c.value === "disapprove"; });
     self.inError = ko.observable(false);
     self.errorText = ko.observable("");
     self.tupasUser = ko.observable();
+    self.sendError = ko.observable();
 
     self.send = function() {
       ajax
@@ -99,13 +97,14 @@
           applicationId: self.applicationId(),
           neighborId: self.neighborId(),
           token: self.token(),
-          response: self.response().value,
+          stamp: self.tupasUser().stamp,
+          response: self.response(),
           message: self.message()
         })
         .pending(self.saving)
         .success(self.sendOk)
         .fail(self.fail)
-        .error(self.error)
+        .error(function(e) { console.log(e); self.sendError(e.text); })
         .call();
     };
 
@@ -130,6 +129,7 @@
       .success(function(user) {
         if(user) {
           model.tupasUser(user);
+          $('html, body').animate({ scrollTop: 10000});
         } else {
           var url = window.location.pathname + window.location.search + window.location.hash;
           $.get('/api/vetuma', {success: url,

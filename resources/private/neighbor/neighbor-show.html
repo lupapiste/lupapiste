@@ -119,14 +119,16 @@
               <div id="vetuma-neighbor"></div>
             </div>
             <div data-bind="if: tupasUser">
+              <div id="vetuma-neighbor2"></div>
               <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
               <form>
-                <input type="radio" name="response" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
-                <input type="radio" name="response" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
+                <input type="radio" name="response" data-bind="checked: response" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
+                <input type="radio" name="response" data-bind="checked: response" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
+
                 <textarea
                   data-bind="
                     value: message,
-                    enable: messageEnabled,
+                    enable: response() === 'comments',
                     valueUpdate: 'afterkeydown',
                     attr: {placeholder: loc('neighbor.show.message.placeholder')}"
                   id="response-message"
@@ -142,7 +144,7 @@
                   <img src="/img/ajax-loader-12.gif" alt="loader"/>
                   <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
                 </span>
-                <div data-bind="visible: done, ltext: 'neighbor.show.response.done'"></div>
+                <h1 data-bind="visible: done, ltext: 'neighbor.show.response.done'"></h1>
               </form>
             </div>
           </div>
