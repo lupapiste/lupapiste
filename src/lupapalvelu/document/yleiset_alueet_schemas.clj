@@ -5,55 +5,40 @@
 (def yleiset-alueet-maksaja (body
                               yritys-minimal
                               simple-osoite
-                              {:name "laskuviite" :type :string :subtype :number :max-len 30 :layout :full-width}))  ;;TODO: Mikä :max-len tälle kentälle?
-
-(def hankeesta-vastaava (body
-                          {:name "userId" :type :personSelector} ;henkilo-valitsin
-                          designer-basic
-                          [{:name "patevyys" :type :group
-                            :body [{:name "ammattipatevyys" :type :text :max-len 4000 :layout :full-width}
-                                   {:name "voimassa-pvm" :type :date}]}]))
+                              {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def tyomaasta-vastaava (body
-                          {:name "userId" :type :personSelector} ;henkilo-valitsin
+                          {:name "userId" :type :personSelector}
                           designer-basic
                           [{:name "patevyys" :type :group
                             :body [{:name "ammattipatevyys" :type :text :max-len 4000 :layout :full-width}
                                    {:name "voimassa-pvm" :type :date}]}]))
 
-(def kohteen-tiedot (body
-                      [{:name "kaupunginosa" :type :string}
-                       {:name "kortteli" :type :string}]
-                      simple-osoite))
-
 (def vuokra-ja-tyo-aika (body
-                          [{:name "vuokra-aika-alkaa-pvm" :type :date}
+                          [{:name "vuokra-aika-alkaa-pvm" :type :date}      ;; kayttojaksotietoType
                            {:name "vuokra-aika-paattyy-pvm" :type :date}]
-                          [{:name "tyoaika-alkaa-pvm" :type :date}
+                          [{:name "tyoaika-alkaa-pvm" :type :date}          ;; toimintajaksotietoType
                            {:name "tyoaika-paattyy-pvm" :type :date}]))
 
 (def yleiset-alueet-kaivuulupa
   (to-map-by-name
     [{:info {:name "yleiset-alueet-hankkeen-kuvaus"
              :order 60}
-      :body [{:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}
-             {:name "luvanTunniste" :type :string}]}
-     {:info {:name "tyomaastaVastaava"
+      :body [{:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+             {:name "luvanTunniste" :type :string}]}                                     ;; sijoituslupaviitetietoType
+     {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
              :type :party
              :order 61}
       :body tyomaasta-vastaava}
-     {:info {:name "yleiset-alueet-maksaja"
+     {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
              :type :party
              :order 62}
       :body yleiset-alueet-maksaja}
-     {:info {:name "kohteenTiedot"
+     {:info {:name "tyo-/vuokra-aika"                                        ;; kayttojaksotietoType ja toimintajaksotietoType (kts. yllä)
              :type :group
              :order 63}
-      :body kohteen-tiedot}
-     {:info {:name "tyo-/vuokra-aika"
-             :type :group
-             :order 64}
       :body vuokra-ja-tyo-aika}]))
+
 
 ;;
 ;; TODO: Liikennettä haittavan työn lupa

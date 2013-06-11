@@ -177,11 +177,10 @@
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
                                  :attachments [:paapiirustus [:asemapiirros]]}
-   :yleiset-alueet-kaivuulupa   {:schema "kohteenTiedot"                                   ;; Mikä nimi tässä kuuluu olla?
-                                 ;; TODO: Settaa schema-data:lla Hakijan _selected tyyppi arvoon "yritys"
+   :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
                                  :schema-data [[["osoite" "katu"] #(:address %)]]
                                  :operation-type :publicArea
-                                 :required (conj yleiset-alueet-common-schemas "tyomaastaVastaava" "tyo-/vuokra-aika")}
+                                 :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mikä nimi tässä kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })

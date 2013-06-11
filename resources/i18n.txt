@@ -20,26 +20,9 @@ yleiset-alueet-maksaja.osoite.postinumero: Postinumero
 yleiset-alueet-maksaja.osoite.postitoimipaikannimi: Postitoimipaikka
 yleiset-alueet-maksaja.laskuviite: Laskuviite
 
-hankeestaVastaava._group_label: Hankeesta vastaava
-hankeestaVastaava.henkilotiedot._group_label: Henkilötiedot
-hankeestaVastaava.henkilotiedot.etunimi: Etunimi
-hankeestaVastaava.henkilotiedot.sukunimi: Sukunimi
-hankeestaVastaava.yritys._group_label: Yritys
-hankeestaVastaava.yritys.yritysnimi: Yrityksen nimi
-hankeestaVastaava.yritys.liikeJaYhteisoTunnus: Y-tunnus
-hankeestaVastaava.osoite._group_label: Osoite
-hankeestaVastaava.osoite.katu: Katu
-hankeestaVastaava.osoite.postinumero: Postinumero
-hankeestaVastaava.osoite.postitoimipaikannimi: Postitoimipaikka
-hankeestaVastaava.yhteystiedot._group_label: Yhteystiedot
-hankeestaVastaava.yhteystiedot.puhelin: Puhelin
-hankeestaVastaava.yhteystiedot.email: Email
-hankeestaVastaava.yhteystiedot.fax: Fax
-hankeestaVastaava.patevyys._group_label: Pätevyys
-hankeestaVastaava.patevyys.ammattipatevyys: Ammattipätevyys
-hankeestaVastaava.patevyys.voimassa-pvm: Voimassaolopäivämäärä
-
-tyomaastaVastaava._group_label: Työmaasta vastaava
+# TODO: Miksi "kohteenTiedot"-schema saa tällaisen group titlen?
+# Koska se on määritelty operation.clj:n operations-mapissa :yleiset-alueet-kaivuulupa:n schemaksi? Miten tämä kierretään?
+yleiset-alueet-kaivuulupa._group_label: Työmaasta vastaava
 tyomaastaVastaava.henkilotiedot._group_label: Henkilötiedot
 tyomaastaVastaava.henkilotiedot.etunimi: Etunimi
 tyomaastaVastaava.henkilotiedot.sukunimi: Sukunimi
@@ -60,17 +43,7 @@ tyomaastaVastaava.patevyys.voimassa-pvm: Voimassaolopäivämäärä
 
 yleiset-alueet-hankkeen-kuvaus._group_label: Hankkeen kuvaus
 yleiset-alueet-hankkeen-kuvaus.kayttotarkoitus: Kuvausalueen käyttötarkoitus
-yleiset-alueet-hankkeen-kuvaus.luvanTunniste: Luvan tunniste
-
-# TODO: Miksi "kohteenTiedot"-schema saa tällaisen group titlen?
-# Koska se on määritelty operation.clj:n operations-mapissa :yleiset-alueet-kaivuulupa:n schemaksi? Miten tämä kierretään?
-yleiset-alueet-kaivuulupa._group_label: Kohteen tiedot
-kohteenTiedot.kaupunginosa: Kaupunginosa
-kohteenTiedot.kortteli: Kortteli
-kohteenTiedot.osoite._group_label: Osoite
-kohteenTiedot.osoite.katu: Katu
-kohteenTiedot.osoite.postinumero: Postinumero
-kohteenTiedot.osoite.postitoimipaikannimi: Postitoimipaikka
+yleiset-alueet-hankkeen-kuvaus.luvanTunniste: Sijoitusluvan tunniste
 
 tyo-/vuokra-aika._group_label: Työ-/vuokra-aika
 tyo-/vuokra-aika.vuokra-aika-alkaa-pvm: Vuokra-aika alkaa
