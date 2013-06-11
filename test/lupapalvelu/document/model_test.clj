@@ -4,6 +4,8 @@
         [lupapalvelu.document.validators]
         [midje.sweet]))
 
+;; Define a "random" timestamp used in test.
+;; Midje metaconstraints seems to mess with tools/unwrapped.
 (def some-time 123456789)
 
 ;; Simple test schema:
@@ -288,34 +290,39 @@
       (assoc-in base-doc [:meta :_approved] {:value "approved" :timestamp 9})) => 1
     (modifications-since-approvals
       (assoc-in base-doc [:meta :_approved] {:value "approved" :timestamp 10})) => 0
+    (with-timestamp 10
+      (modifications-since-approvals
+        (-> base-doc
+          (assoc-in [:schema :info :approvable] true)
+          (assoc-in [:meta :_approved] {:value "approved" :timestamp 9})
+          (apply-update [:single2] "")
+          (apply-update [:repeats :0 :single3] "")
+          (apply-update [:repeats :1 :single3] ""))) => 4)
+  (with-timestamp 10
     (modifications-since-approvals
-      (-> base-doc
-        (assoc-in [:schema :info :approvable] true)
-        (assoc-in [:meta :_approved] {:value "approved" :timestamp 9})
-        (assoc-in [:data :single2] {:value "" :modified 10})
-        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 4
-    (modifications-since-approvals
-      (-> base-doc
-        (assoc-in [:schema :info :approvable] true)
-        (assoc-in [:meta :_approved] {:value "approved" :timestamp 11})
-        (assoc-in [:data :single2] {:value "" :modified 10})
-        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 0
-    (modifications-since-approvals
-      (-> base-doc
-        (dissoc :data)
-        (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 9})
-        (assoc-in [:data :single2] {:value "" :modified 10})
-        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 2
-    (modifications-since-approvals
-      (-> base-doc
-        (dissoc :data)
-        (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 11})
-        (assoc-in [:data :single2] {:value "" :modified 10})
-        (assoc-in [:data :repeats :0 :single3] {:value "" :modified 10})
-        (assoc-in [:data :repeats :1 :single3] {:value "" :modified 10}))) => 1)
+        (-> base-doc
+          (assoc-in [:schema :info :approvable] true)
+          (assoc-in [:meta :_approved] {:value "approved" :timestamp 11})
+          (apply-update [:single2] "")
+          (apply-update [:repeats :0 :single3] "")
+          (apply-update [:repeats :1 :single3] ""))) => 0)
+      (with-timestamp 10
+      (modifications-since-approvals
+        (-> base-doc
+          (dissoc :data)
+          (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 9})
+          (apply-update [:single2] "")
+          (apply-update [:repeats :0 :single3] "")
+          (apply-update [:repeats :1 :single3] ""))) => 2)
+    (with-timestamp 10
+      (modifications-since-approvals
+        (-> base-doc
+          (dissoc :data)
+          (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 11})
+          (apply-update [:single2] "")
+          (apply-update [:repeats :0 :single3] "")
+          (apply-update [:repeats :1 :single3] ""))) => 1)
+    )
 
   (let [real-doc {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
                          :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}
