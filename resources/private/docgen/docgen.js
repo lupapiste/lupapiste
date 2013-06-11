@@ -9,7 +9,7 @@ var docgen = (function () {
     return button;
   }
 
-  var DocModel = function (schema, model, meta, docId, application, authorizationModel) {
+  var DocModel = function (schema, model, meta, docId, application, authorizationModel, options) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -619,7 +619,7 @@ var docgen = (function () {
           };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-        
+
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
@@ -761,10 +761,12 @@ var docgen = (function () {
     }
 
     function validate() {
-      ajax
-        .query("validate-doc", { id: self.appId, doc: self.docId })
-        .success(function (e) { showValidationResults(e.results); })
-        .call();
+      if(!options || options.validate) {
+        ajax
+          .query("validate-doc", { id: self.appId, doc: self.docId })
+          .success(function (e) { showValidationResults(e.results); })
+          .call();
+      }
     }
 
     function save(e, callback) {
@@ -896,7 +898,7 @@ var docgen = (function () {
     validate();
   };
 
-  function displayDocuments(containerSelector, application, documents, authorizationModel) {
+  function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
@@ -909,7 +911,7 @@ var docgen = (function () {
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel).element);
+      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options).element);
 
       if (schema.info.repeating) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));

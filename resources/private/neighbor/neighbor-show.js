@@ -49,8 +49,8 @@
 
       var nonpartyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type !== "party"; });
       var partyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type === "party"; });
-      docgen.displayDocuments("#neighborDocgen", a, nonpartyDocs, authorizationModel);
-      docgen.displayDocuments("#neighborPartiesDocgen", a, partyDocs, authorizationModel);
+      docgen.displayDocuments("#neighborDocgen", a, nonpartyDocs, authorizationModel, {readonly: true, validate: false});
+      docgen.displayDocuments("#neighborPartiesDocgen", a, partyDocs, authorizationModel, {readonly: true, validate: false});
 
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
       self.attachments(_.map(a.attachments || [], function(a) {
