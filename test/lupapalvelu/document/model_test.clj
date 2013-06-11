@@ -252,6 +252,28 @@
         (apply-update [:yritys :osoite :postitoimipaikannimi])) => missing-required-fields?)))
 
 
+(fact "apply-approval"
+  (apply-approval {} nil ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
+  =>
+  {:meta {:_approved {:value ..status..
+                      :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
+                      :timestamp ..now..}}}
+  (apply-approval {} [] ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
+  =>
+  {:meta {:_approved {:value ..status..
+                      :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
+                      :timestamp ..now..}}}
+  (apply-approval {} [:a] ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
+  =>
+  {:meta {:a {:_approved {:value ..status..
+                          :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
+                          :timestamp ..now..}}}}
+  (apply-approval {} [:a :b] ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
+  =>
+  {:meta {:a {:b {:_approved {:value ..status..
+                              :user {:id ..id.. :firstName ..fn.. :lastName ..ln..}
+                              :timestamp ..now..}}}}})
+
 (def approvable-schema {:info {:name "approval-model" :version 1 :approvable true}
                         :body [{:name "s" :type :string}]})
 
@@ -277,52 +299,48 @@
     (approvable? document [:repeats :0 :single3]) => false))
 
 (facts "modifications-since-approvals"
-  (modifications-since-approvals nil) => 0
-  (modifications-since-approvals {}) => 0
-  (let [base-doc (-> (new-document schema-with-approvals 0)
-                   (assoc-in [:data :single] {:value "''" :modified 10}))]
-    (modifications-since-approvals base-doc) => 1
-    (modifications-since-approvals
-      (assoc-in base-doc [:meta :single :_approved] {:value "approved" :timestamp 9})) => 1
-    (modifications-since-approvals
-      (assoc-in base-doc [:meta :single :_approved] {:value "approved" :timestamp 10})) => 0
-    (modifications-since-approvals
-      (assoc-in base-doc [:meta :_approved] {:value "approved" :timestamp 9})) => 1
-    (modifications-since-approvals
-      (assoc-in base-doc [:meta :_approved] {:value "approved" :timestamp 10})) => 0
-    (with-timestamp 10
-      (modifications-since-approvals
-        (-> base-doc
-          (assoc-in [:schema :info :approvable] true)
-          (assoc-in [:meta :_approved] {:value "approved" :timestamp 9})
-          (apply-update [:single2] "")
-          (apply-update [:repeats :0 :single3] "")
-          (apply-update [:repeats :1 :single3] ""))) => 4)
   (with-timestamp 10
-    (modifications-since-approvals
+    (modifications-since-approvals nil) => 0
+    (modifications-since-approvals {}) => 0
+    (let [base-doc (-> (new-document schema-with-approvals 0)
+                   (apply-update [:single] "''"))]
+      (modifications-since-approvals base-doc) => 1
+      (modifications-since-approvals
+        (apply-approval base-doc [:single] "approved" {} 9)) => 1
+      (modifications-since-approvals
+        (apply-approval base-doc [:single] "approved" {} 10)) => 0
+      (modifications-since-approvals
+        (apply-approval base-doc [] "approved" {} 9)) => 1
+      (modifications-since-approvals
+        (apply-approval base-doc [] "approved" {} 10)) => 0
+      (modifications-since-approvals
         (-> base-doc
           (assoc-in [:schema :info :approvable] true)
-          (assoc-in [:meta :_approved] {:value "approved" :timestamp 11})
+          (apply-approval [] "approved" {} 9)
           (apply-update [:single2] "")
           (apply-update [:repeats :0 :single3] "")
-          (apply-update [:repeats :1 :single3] ""))) => 0)
-      (with-timestamp 10
+          (apply-update [:repeats :1 :single3] ""))) => 4
+      (modifications-since-approvals
+        (-> base-doc
+          (assoc-in [:schema :info :approvable] true)
+          (apply-approval [] "approved" {} 11)
+          (apply-update [:single2] "")
+          (apply-update [:repeats :0 :single3] "")
+          (apply-update [:repeats :1 :single3] ""))) => 0
       (modifications-since-approvals
         (-> base-doc
           (dissoc :data)
-          (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 9})
+          (apply-approval [:repeats :0] "approved" {} 9)
           (apply-update [:single2] "")
           (apply-update [:repeats :0 :single3] "")
-          (apply-update [:repeats :1 :single3] ""))) => 2)
-    (with-timestamp 10
+          (apply-update [:repeats :1 :single3] ""))) => 2
       (modifications-since-approvals
         (-> base-doc
           (dissoc :data)
-          (assoc-in [:meta :repeats :0 :_approved] {:value "approved" :timestamp 11})
+          (apply-approval [:repeats :0] "approved" {} 11)
           (apply-update [:single2] "")
           (apply-update [:repeats :0 :single3] "")
-          (apply-update [:repeats :1 :single3] ""))) => 1)
-    )
+          (apply-update [:repeats :1 :single3] ""))) => 1))
 
   (let [real-doc {:data {:huoneistot {:0 {:huoneistoTunnus {:huoneistonumero {:value "001"}}}}
                          :kaytto {:kayttotarkoitus {:value "011 yhden asunnon talot"}}

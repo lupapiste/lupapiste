@@ -204,6 +204,21 @@
 ;; Approvals
 ;;
 
+(defn ->approved [status user]
+  "Approval meta data model. To be used within with-timestamp."
+  {:value status
+   :user (select-keys user [:id :firstName :lastName])
+   :timestamp (current-timestamp)})
+
+
+(defn apply-approval
+  "Merges approval meta data into a map.
+   To be used within with-timestamp or with a given timestamp."
+  ([document path status user]
+    (assoc-in document (filter (comp not nil?) (flatten [:meta path :_approved])) (->approved status user)))
+  ([document path status user timestamp]
+    (with-timestamp timestamp (apply-approval document path status user))))
+
 (defn approvable?
   ([document] (approvable? document nil))
   ([document path]
