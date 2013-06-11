@@ -160,8 +160,8 @@
            :js ["about.js"]
            :html ["terms.html" "index.html"]}
 
-   :neighbor {:depends [:common :map :debug :docgen]
-              :html ["neighbor-show.html"]
+   :neighbor {:depends [:common :map :debug :docgen :debug]
+              :html ["neighbor-show.html" "index.html"]
               :js ["neighbor-app.js" "begin.js" "neighbor-show.js"]}})
 
 ; Make sure all dependencies are resolvable:
