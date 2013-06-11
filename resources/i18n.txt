@@ -1,0 +1,18 @@
+uusiRakennus.kaytto.rakentajaTyyppi.help: Liiketaloudellinen rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
+purku.kaytto.rakentajaTyyppi.help: Liiketaloudellinen rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
+rakennuksen-laajentaminen.kaytto.rakentajaTyyppi.help: Liiketaloudellinen rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
+rakennuksen-muuttaminen.kaytto.rakentajaTyyppi.help: Liiketaloudellinen rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
+
+uusiRakennus.varusteet.kaasuKytkin.help: Kaasulla tarkoitetaan myös nestekaasua, mikäli rakennus on tätä varten varustettu pysyvällä verkolla.
+purku.varusteet.kaasuKytkin.help: Kaasulla tarkoitetaan myös nestekaasua, mikäli rakennus on tätä varten varustettu pysyvällä verkolla.
+rakennuksen-laajentaminen.varusteet.kaasuKytkin.help: Kaasulla tarkoitetaan myös nestekaasua, mikäli rakennus on tätä varten varustettu pysyvällä verkolla.
+rakennuksen-muuttaminen.varusteet.kaasuKytkin.help: Kaasulla tarkoitetaan myös nestekaasua, mikäli rakennus on tätä varten varustettu pysyvällä verkolla.
+
+
+varusteet.viemariKytkin
+
+
+uusiRakennus.
+purku.
+rakennuksen-laajentaminen.
+rakennuksen-muuttaminen.
