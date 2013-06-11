@@ -34,14 +34,14 @@
              :type :party
              :order 62}
       :body yleiset-alueet-maksaja}
-     {:info {:name "tyo-/vuokra-aika"                                        ;; kayttojaksotietoType ja toimintajaksotietoType (kts. yllä)
+     {:info {:name "tyo-/vuokra-aika"                                        ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
              :type :group
              :order 63}
       :body vuokra-ja-tyo-aika}]))
 
 
 ;;
-;; TODO: Liikennettä haittavan työn lupa
+;; TODO: Liikennetta haittavan tyon lupa
 ;;
 #_(def liikennetta-haittaavan-tyon-lupa
   {:info {:name "yleisetAlueetLiikennettaHaittaava" :order 65}
