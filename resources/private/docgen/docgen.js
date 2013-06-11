@@ -769,6 +769,12 @@ var docgen = (function () {
       }
     }
 
+    function disableBasedOnOptions() {
+      if(options && options.disabled) {
+        $(self.element).find('input, textarea, button, select').attr("disabled", true);
+      }
+    }
+
     function save(e, callback) {
       var event = getEvent(e);
       var target = event.target;
@@ -896,6 +902,7 @@ var docgen = (function () {
 
     self.element = buildElement();
     validate();
+    disableBasedOnOptions();
   };
 
   function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
