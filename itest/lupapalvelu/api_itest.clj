@@ -9,6 +9,10 @@
   (fact "Disabled user must not be able to create an application!"
     (create-app dummy) => invalid-csrf-token?)
 
+  (fact "non-admin users should not be able to get actions"
+    (query pena :actions) => unauthorized?
+    (query sonja :actions) => unauthorized?)
+
   (let [resp  (create-app mikko :municipality sonja-muni)
         id    (:id resp)]
     (fact "Mikko must be able to create an application!"

@@ -162,7 +162,6 @@
 (defcommand "invite"
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
-   :validators [validate-owner-or-writer]
    :notify     "invite"
    :verified   true}
   [{created :created
@@ -223,11 +222,9 @@
             {$pull {:auth {$and [{:username email}
                                  {:type {$ne :owner}}]}}}))))))
 
-;; TODO: we need a) custom validator to tell weathet this is ok and/or b) return effected rows (0 if owner)
 (defcommand "remove-auth"
   {:parameters [:id :email]
-   :roles      [:applicant :authority]
-   :validators [validate-owner-or-writer]}
+   :roles      [:applicant :authority]}
   [{{:keys [email]} :data :as command}]
   (update-application command
     {$pull {:auth {$and [{:username email}

@@ -78,7 +78,7 @@ var LUPAPISTE = LUPAPISTE || {};
         .call();
       return;
     }
-    
+
     self.openPage((self.allowAnonymous || self.session) ? path : ["login"]);
   };
 
@@ -134,7 +134,7 @@ var LUPAPISTE = LUPAPISTE || {};
   /**
    * Complete the App initialization after DOM is loaded.
    */
-   self.domReady = function () {
+  self.domReady = function () {
     self.initSubscribtions();
 
     $(window)
@@ -160,12 +160,6 @@ var LUPAPISTE = LUPAPISTE || {};
 
     $("nav").applyBindings(model);
 
-    //TODO: not used
-    function showApplicationList() {
-      pageutil.hideAjaxWait();
-      window.location.hash = "!/applications";
-    }
-
     $("<div id='session-dead-dialog' class='window autosized-yes-no'>" +
         "<div class='dialog-header'>" +
           "<p class='dialog-title'></p>" +
@@ -180,6 +174,5 @@ var LUPAPISTE = LUPAPISTE || {};
       .find(".dialog-content button").text(loc("session-dead.logout")).end()
       .find(".logout").click(function() { hub.send("logout"); return false; }).end()
       .appendTo($("body"));
-   };
-
+  };
 };

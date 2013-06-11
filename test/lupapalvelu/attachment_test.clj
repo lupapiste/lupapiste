@@ -56,41 +56,44 @@
   (version-number {:version {:major 1 :minor 16}}) => 1016)
 
 (fact "Find latest version"
-  (let [attachments [{:id :attachment1
-                      :versions []}
-                     {:id :attachment2
-                      :versions [{:version { :major 1 :minor 0 }
-                                  :fileId :file1}
-                                 {:version { :major 1 :minor 1 }
-                                  :fileId :file2}]}]]
+  (let [application {:attachments [{:id :attachment1
+                                    :versions []}
+                                   {:id :attachment2
+                                    :versions [{:version { :major 1 :minor 0 }
+                                                :fileId :file1}
+                                               {:version { :major 1 :minor 1 }
+                                                :fileId :file2}]}]}
+        attachments (:attachments application)]
     (latest-version-after-removing-file attachments :attachment2 :file1) => {:version { :major 1 :minor 1}
-                                                                             :fileId :file2}))
+                                                                             :fileId :file2}
 
-#_(fact "make attachments"
-  (make-attachments 999 [:a :b]) => [{:id "123"
-                                      :locked false
-                                      :authority false
-                                      :modified 999
-                                      :op nil
-                                      :state :requires_user_action
-                                      :target nil
-                                      :type :a
-                                      :versions []}
-                                     {:id "123"
-                                      :locked false
-                                      :authority false
-                                      :modified 999
-                                      :op nil
-                                      :state :requires_user_action
-                                      :target nil
-                                      :type :b
-                                      :versions []}]
+    (attachment-file-ids application :attachment2) => [:file1 :file2]
+    (attachment-latest-file-id application :attachment2) => :file2))
+
+(fact "make attachments"
+  (make-attachments 999 [:a :b]) => (just
+                                      [{:id "123"
+                                        :locked false
+                                        :modified 999
+                                        :op nil
+                                        :state :requires_user_action
+                                        :target nil
+                                        :type :a
+                                        :versions []}
+                                       {:id "123"
+                                        :locked false
+                                        :modified 999
+                                        :op nil
+                                        :state :requires_user_action
+                                        :target nil
+                                        :type :b
+                                        :versions []}])
   (provided
     (mongo/create-id) => "123"))
 
-
-
-
-
-
-
+(fact "attachment can be found with file-id"
+  (get-attachment-info-by-file-id {:attachments [{:versions [{:fileId "123"}
+                                                             {:fileId "234"}]}
+                                                 {:versions [{:fileId "345"}
+                                                             {:fileId "456"}]}]} "456") => {:versions [{:fileId "345"}
+                                                                                                       {:fileId "456"}]})

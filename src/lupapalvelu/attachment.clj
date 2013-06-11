@@ -2,12 +2,13 @@
   (:use [monger.operators]
         [lupapalvelu.core]
         [clojure.tools.logging]
-        [lupapalvelu.domain :only [get-application-as application-query-for]]
+        [lupapalvelu.domain :only [get-application-as get-application-no-access-checking application-query-for]]
         [lupapalvelu.i18n :only [loc *lang* with-lang]]
         [clojure.string :only [split join trim]]
         [swiss-arrows.core :only [-<> -<>>]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
+            [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [sade.strings :as ss]
@@ -215,16 +216,29 @@
   [{:keys [attachments]} attachmentId]
   (first (filter #(= (:id %) attachmentId) attachments)))
 
+(defn get-attachment-info-by-file-id
+  "gets an attachment from application or nil"
+  [{:keys [attachments]} file-id]
+  (first
+    (filter
+      (fn->> :versions (some (fn-> :fileId (= file-id))))
+      attachments)))
+
 (defn attachment-file-ids
   "Gets all file-ids from attachment."
   [application attachmentId]
   (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
 
+(defn attachment-latest-file-id
+  "Gets latest file-ids from attachment."
+  [application attachmentId]
+  (->> (attachment-file-ids application attachmentId) last))
+
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
   [application attachmentId file-id]
   (let [file-ids (attachment-file-ids application attachmentId)]
-    (if (some #{file-id} file-ids) true false)))
+    (boolean (some #{file-id} file-ids))))
 
 (defn delete-attachment
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
@@ -265,7 +279,7 @@
 (defcommand "set-attachment-type"
   {:parameters [:id :attachmentId :attachmentType]
    :roles      [:applicant :authority]
-   :states     [:draft :info :open :complement-needed]}
+   :states     [:draft :info :open :submitted :complement-needed]}
   [{{:keys [id attachmentId attachmentType]} :data :as command}]
   (with-application command
     (fn [application]
@@ -323,7 +337,7 @@
 (defcommand "delete-attachment"
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [:id :attachmentId]
-   :states      [:draft :info :open :complement-needed]}
+   :states      [:draft :info :open :submitted :complement-needed]}
   [{{:keys [id attachmentId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -333,7 +347,7 @@
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id :attachmentId :fileId]
-   :states      [:draft :info :open :complement-needed]}
+   :states      [:draft :info :open :submitted :complement-needed]}
   [{{:keys [id attachmentId fileId]} :data :as command}]
   (with-application command
     (fn [application]
@@ -381,11 +395,18 @@
 ;; Download
 ;;
 
-(defn- get-attachment
+(defn get-attachment-as
   "Returns the attachment if user has access to application, otherwise nil."
-  [file-id user]
+  [user file-id]
   (when-let [attachment (mongo/download file-id)]
     (when-let [application (get-application-as (:application attachment) user)]
+      (when (seq application) attachment))))
+
+(defn get-attachment
+  "Returns the attachment without access checking, otherwise nil."
+  [file-id]
+  (when-let [attachment (mongo/download file-id)]
+    (when-let [application (get-application-no-access-checking (:application attachment))]
       (when (seq application) attachment))))
 
 (def windows-filename-max-length 255)
@@ -399,17 +420,18 @@
         (ss/last-n windows-filename-max-length de-accented)
         #"[^a-zA-Z0-9\.\-_ ]" "-")))
 
-(defn output-attachment [attachment-id user download?]
+(defn output-attachment
+  [attachment-id download? attachment-fn]
   (debugf "file download: attachment-id=%s" attachment-id)
-  (if-let [attachment (get-attachment attachment-id user)]
+  (if-let [attachment (attachment-fn attachment-id)]
     (let [response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
                               "Content-Length" (str (:content-length attachment))}}]
       (if download?
         (assoc-in response
-                  [:headers "Content-Disposition"]
-                  (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))) )
+          [:headers "Content-Disposition"]
+          (format "attachment;filename=\"%s\"" (encode-filename (:file-name attachment))))
         response))
     {:status 404
      :headers {"Content-Type" "text/plain"}
@@ -417,7 +439,7 @@
 
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
-    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
     (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
@@ -429,7 +451,7 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc]
+(defn- get-all-attachments [application loc lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
@@ -439,9 +461,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application)))
+          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application))
+        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
