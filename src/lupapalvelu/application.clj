@@ -21,6 +21,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -415,20 +416,25 @@
     (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
       (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
 
-(defn- schema-data-to-body [schema-data]
+(defn- schema-data-to-body [schema-data application]
   (reduce
-    (fn [body [data-path value]]
-      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))]
-        (update-in body path (constantly value))))
+    (fn [body [data-path data-value]]
+      (let [path (if (= :value (last data-path)) data-path (conj (vec data-path) :value))
+            val (if (fn? data-value) (data-value application) data-value)]
+        (update-in body path (constantly val))))
     {} schema-data))
 
-(defn- make-documents [user created existing-documents op]
+(defn- make-documents [user created existing-documents op application]
   (let [op-info               (operations/operations (keyword (:name op)))
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema-name)
+                                                 ;; TODO: Yhdistä (nämä kaikki) schemat jossain järkevämmässä paikassa
+                                                 :schema ((merge schemas/schemas
+                                                            poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
+                                                            yleiset-alueet/yleiset-alueet-kaivuulupa
+                                                            #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
-                                                         (schema-data-to-body (:schema-data op-info))
+                                                         (schema-data-to-body (:schema-data op-info) application)
                                                          {})})
         existing-schema-names (set (map (comp :name :info :schema) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
@@ -436,7 +442,8 @@
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)
-        hakija                (make "hakija")]
+        hakija                (assoc-in (make "hakija") [:data :_selected :value]
+                                (if (= (:operation-type op-info) :publicArea) "yritys" "henkilo"))]
     (if user
       (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
       new-docs)))
@@ -457,7 +464,8 @@
 (defn- make-op [op-name created]
   {:id (mongo/create-id)
    :name (keyword op-name)
-   :created created})
+   :created created
+   :operation-type (:operation-type (operations/operations (keyword op-name)))})
 
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
@@ -482,12 +490,16 @@
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
+(defn operation-validator [{{operation :operation} :data}]
+  (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
-                      (partial property-id-parameters [:propertyId])]
+                      (partial property-id-parameters [:propertyId])
+                      operation-validator]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
@@ -514,13 +526,13 @@
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
-                         :documents     (if info-request? [] (make-documents user created nil op))
                          :attachments   (if info-request? [] (make-attachments created op organization))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (partition 2 attachment/attachment-types))
                          :comments      (map make-comment messages)
                          :permitType    (permit-type-from-operation op)}
+          application   (assoc application :documents (if info-request? [] (make-documents user created nil op application)))
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
       (autofill-rakennuspaikka app-with-ver created)
@@ -530,7 +542,8 @@
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
-   :states     [:draft :open :complement-needed]}
+   :states     [:draft :open :complement-needed]
+   :input-validators [operation-validator]}
   [command]
   (with-application command
     (fn [application]
@@ -539,7 +552,7 @@
             documents  (:documents application)
             op-id      (mongo/create-id)
             op         (make-op (get-in command [:data :operation]) created)
-            new-docs   (make-documents nil created documents op)]
+            new-docs   (make-documents nil created documents op nil)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
@@ -574,7 +587,7 @@
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
                                                     :allowedAttachmentTypes (partition 2 attachment/attachment-types)
-                                                    :documents (make-documents (-> command :user security/summary) created nil op)
+                                                    :documents (make-documents (-> command :user security/summary) created nil op nil)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
 
