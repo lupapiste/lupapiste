@@ -509,7 +509,7 @@
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
     };
 
-    self.addOperationButtonVisible: function() {
+    self.addOperationButtonVisible = function() {
       return !self.operations()
              || self.operations().length === 0
              || self.operations()[self.operations().length-1]['operation-type'] === undefined
