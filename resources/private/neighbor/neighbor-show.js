@@ -63,12 +63,12 @@
 
     self.fail = function(data) {
       // TODO: Show information about application not found, or closed, or sumthing.
-      return self;
+      window.location.hash = "!/404";
     };
 
     self.error = function(data) {
       // TODO: Show error page
-      return self;
+      window.location.hash = "!/404";
     };
 
     self.attachments = ko.observableArray([]);
