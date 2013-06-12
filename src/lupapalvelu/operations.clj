@@ -2,8 +2,9 @@
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
-            [sade.env :as env]
-            [lupapalvelu.document.ymparisto-schemas :as ympschemas]))
+            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
+            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
+            [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")
 
@@ -41,7 +42,10 @@
                                                                                         ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
           (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]
                                                                         ["Pima" :pima]
-                                                                        ["Lupahakemus maa-ainesten ottamiseen" :maa-aineslupa]]]])))
+                                                                        ["Lupahakemus maa-ainesten ottamiseen" :maa-aineslupa]]]])
+          (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
+                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
+
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -52,7 +56,12 @@
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
 
+
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
+
+
+(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-hankkeen-kuvaus" "yleiset-alueet-maksaja"])
+
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -74,7 +83,7 @@
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
                                  :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]];FIXME Aftre krysp update change to 000
+                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]] ;FIXME Aftre krysp update change to 000
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
    :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
@@ -186,13 +195,28 @@
                                  :attachments []}
    :maa-aineslupa               {:schema "ottamismaara"
                                  :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
-                                           "ottamis-suunnitelman-laatija" "ottamis-suunnitelma" ]
-                                 :attachments []}})
+                                           "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
+                                 :attachments []}
+:yleiset-alueet-kaivuulupa      {:schema "tyomaastaVastaava"
+                                 :schema-data [[["osoite" "katu"] #(:address %)]]
+                                 :operation-type :publicArea
+                                 :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
+;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
+;                                                       :required (conj yleiset-alueet-common-schemas [])}
+   })
+
 
 
 ; Sanity checks:
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas ympschemas/ympschemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+  (if-not ((merge schemas/schemas
+             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
+             yleiset-alueet/yleiset-alueet-kaivuulupa
+             ympschemas/ympschemas
+             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema)
+    (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
+  )
+
 

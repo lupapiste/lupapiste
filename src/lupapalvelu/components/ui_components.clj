@@ -46,15 +46,16 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"]
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
+                       "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
-                  :html ["error.html" "nav.html"]}
+                  :html ["404.html" "nav.html"]}
 
    :map          {:depends [:common]
                   :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js"]
+                   :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]
@@ -159,9 +160,9 @@
            :js ["about.js"]
            :html ["terms.html" "index.html"]}
 
-   :neighbor {:depends [:common :map :debug]
-              :html ["neighbor.html"]
-              :js ["neighbor.js" "begin.js" "show.js"]}})
+   :neighbor {:depends [:common :map :debug :docgen :debug]
+              :html ["neighbor-show.html" "index.html"]
+              :js ["neighbor-app.js" "begin.js" "neighbor-show.js"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

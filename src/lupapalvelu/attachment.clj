@@ -55,6 +55,10 @@
                                                    :elyn_tai_kunnan_poikkeamapaatos
                                                    :suunnittelutarveratkaisu
                                                    :ymparistolupa]
+                       :yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
+                                        :tilapainen-liikennejarjestelysuunnitelma
+                                        :tyyppiratkaisu
+                                        :tieto-kaivupaikkaan-liittyvista-johtotiedoista]
                        :muut [:selvitys_rakennuspaikan_terveellisyydesta
                               :selvitys_rakennuspaikan_korkeusasemasta
                               :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
@@ -228,6 +232,11 @@
   "Gets all file-ids from attachment."
   [application attachmentId]
   (->> (get-attachment-info application attachmentId) :versions (map :fileId)))
+
+(defn attachment-latest-file-id
+  "Gets latest file-ids from attachment."
+  [application attachmentId]
+  (->> (attachment-file-ids application attachmentId) last))
 
 (defn file-id-in-application?
   "tests that file-id is referenced from application"
@@ -434,7 +443,7 @@
 
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
-    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
+    (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
     (with-open [in ((:content (mongo/download file-id)))]
       (io/copy in zip))))
 
@@ -446,7 +455,7 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc]
+(defn- get-all-attachments [application loc lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
@@ -456,9 +465,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application)))
+          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application))
+        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 

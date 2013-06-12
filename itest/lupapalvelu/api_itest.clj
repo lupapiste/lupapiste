@@ -9,6 +9,10 @@
   (fact "Disabled user must not be able to create an application!"
     (create-app dummy) => invalid-csrf-token?)
 
+  (fact "non-admin users should not be able to get actions"
+    (query pena :actions) => unauthorized?
+    (query sonja :actions) => unauthorized?)
+
   (let [resp  (create-app mikko :municipality sonja-muni)
         id    (:id resp)]
     (fact "Mikko must be able to create an application!"
@@ -22,7 +26,8 @@
         (:text rest)
         application => truthy
         (:username (first (:auth application))) => "mikko@example.com"
-        (get-in hakija [:data :henkilo :henkilotiedot]) => {:etunimi {:value "Mikko"} :sukunimi {:value "Intonen"}}
+        (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Mikko"
+        (get-in hakija [:data :henkilo :henkilotiedot :sukunimi :value]) => "Intonen"
 
         (let [listing (query mikko :applications)]
           listing => ok?
@@ -77,4 +82,5 @@
                 new-paasuunnittelija (domain/get-document-by-name new-application "paasuunnittelija")]
 
             (fact "new paasuunnittelija is set"
-              (get-in new-paasuunnittelija [:data :henkilotiedot]) => {:etunimi {:value "Mikko"} :sukunimi {:value "Intonen"}})))))))
+              (get-in new-paasuunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
+              (get-in new-paasuunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen")))))))

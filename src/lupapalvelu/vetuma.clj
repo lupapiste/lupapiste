@@ -202,10 +202,9 @@
 
 (defpage [:any "/api/vetuma/:status"] {status :status}
   (let [data       (mongo/select-one :vetuma {:sessionid (session-id)})
-        return-uri (get-in data [:paths (keyword status)])]
-    (if return-uri
-      (redirect return-uri)
-      (redirect (str (host) "/app/fi/welcome#!/register/" status)))))
+        return-uri (get-in data [:paths (keyword status)])
+        return-uri (or return-uri "/")]
+    (redirect return-uri)))
 
 (defpage "/api/vetuma/user" []
   (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
@@ -226,3 +225,15 @@
   (when-let [user (get-data stamp)]
     (mongo/remove-many :vetuma {:_id (:id user)})
     (:user user)))
+
+;;
+;; dev test api
+;;
+
+(env/in-dev
+  (defpage "/dev/api/vetuma" {:as data}
+    (let [stamp (generate-stamp)
+          user  (select-keys data [:userid :firstname :lastname])
+          user  (assoc user :stamp stamp)]
+      (mongo/insert :vetuma {:user user})
+      (json user))))
