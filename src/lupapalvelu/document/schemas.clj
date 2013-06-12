@@ -30,7 +30,7 @@
 ;; schema sniplets
 ;;
 
-(def kuvaus {:name "kuvaus" :type :text :max-len 4000 :layout :full-width})
+(def kuvaus {:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width})
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector}
                        {:name "turvakieltoKytkin" :type :checkbox}])

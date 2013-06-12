@@ -1,3 +1,20 @@
+neighbor.show.form: Vastauksesi
+neighbor.show.welcome.desc: Naapurisi on tiedottanut sinua hankkeestaan. Ole hyva ja tutustu alla oleviin hankkeen tietoihin. Muistathan kuitata saaneesiin tiedot verkkopankkitunnuksillasi.
+neighbor.show.reply.text: Olemme saaneet tiedon rakennushankkeesta. Olemme tutustuneet hankkkeen suunnitelmiin/ piirustuksiin.
+neighbor.show.responce.comments: Esitamme rakennushankkeen johdosta seuraavan huomautuksen:
+neighbor.show.responce.ok: Naapurina meilla ei ole huomautettavaa rakennushankkeen johdosta.
+error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
+
+error.token-not-found: Kutsusi ei ole enää voimassa.
+error.invalid-response: Virheellinen vastaus
+error.invalid-vetuma-user: Virheellinen Vetuma-kirjautuminen
+
+neighbor.invite.failed.long: Ota yhteyttä ...
+
+document.approve: OK
+document.reject: Tarkennettavaa
+document.approved: Tiedot OK
+document.rejected: Tarkennettavaa
 
 #
 # Yleiset alueet
@@ -56,12 +73,3 @@ attachmentType.yleiset-alueet.aiemmin-hankittu-sijoituspaatos: Aiemmin hankittu 
 attachmentType.yleiset-alueet.tilapainen-liikennejarjestelysuunnitelma: Tilapäinen liikennejärjestelysuunnitelma
 attachmentType.yleiset-alueet.tyyppiratkaisu: Tyyppiratkaisu
 attachmentType.yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista: Tieto kaivupaikkaan liittyvistä johtotiedoista
-
-
-
-error.document-not-approvable: Lomakkeen hyväksyntä ei ole mahdollista
-
-document.approve: OK
-document.reject: Tarkennettavaa
-document.approved: Tiedot OK
-document.rejected: Tarkennettavaa

@@ -9,7 +9,7 @@ var docgen = (function () {
     return button;
   }
 
-  var DocModel = function (schema, model, meta, removeCallback, docId, application, authorizationModel) {
+  var DocModel = function (schema, model, meta, docId, application, authorizationModel, options) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -21,7 +21,6 @@ var docgen = (function () {
     self.schemaName = schema.info.name;
     self.model = model;
     self.meta = meta;
-    self.removeCallback = removeCallback;
     self.docId = docId;
     self.appId = application.id;
     self.application = application;
@@ -609,13 +608,14 @@ var docgen = (function () {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating) {
+        if (subSchema.repeating && !isDisabled(options)) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
           removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"), loc("yes"),
-                function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
+                {title: loc("yes"), fn: function() { removeData(self.appId, self.docId, myPath.concat([id])); }},
+                {title: loc("no")});
           };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
@@ -761,10 +761,19 @@ var docgen = (function () {
     }
 
     function validate() {
-      ajax
-        .query("validate-doc", { id: self.appId, doc: self.docId })
-        .success(function (e) { showValidationResults(e.results); })
-        .call();
+      if(!options || options.validate) {
+        ajax
+          .query("validate-doc", { id: self.appId, doc: self.docId })
+          .success(function (e) { showValidationResults(e.results); })
+          .call();
+      }
+    }
+
+    function disableBasedOnOptions() {
+      if(options && options.disabled) {
+        $(self.element).find('input, textarea, select').attr("disabled", true); //.attr("readonly",true);
+        $(self.element).find('button').hide();
+      }
     }
 
     function save(e, callback) {
@@ -816,12 +825,11 @@ var docgen = (function () {
       });
     }
 
-    function removeThis() {
-      this.parent().slideUp(function () { $(this).remove(); });
-    }
-
     function removeDoc(e) {
-      var n = $(e.target).parent();
+      var n$ = $(e.target).parent();
+      while (!n$.is("section")) {
+        n$ = n$.parent();
+    }
       var op = self.schema.info.op;
 
       var documentName = loc(self.schemaName + "._group_label");
@@ -829,7 +837,22 @@ var docgen = (function () {
         documentName = loc(op.name + "._group_label");
       }
 
-      self.removeCallback(self.appId, self.docId, documentName, removeThis.bind(n));
+      function onRemovalConfirmed() {
+        ajax.command("remove-doc", {id: self.appId, docId: self.docId})
+          .success(function() {
+            n$.slideUp(function () {n$.remove();});
+            // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
+            // Just the "operations" list should be changed.
+            repository.load(self.appId);
+          })
+          .call();
+      return false;
+    }
+
+      var message = "<div>" + loc("removeDoc.message1") + " <strong>"+ documentName + ".</strong></div><div>" +  loc("removeDoc.message2") + "</div>";
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message,
+          {title: loc("removeDoc.ok"), fn: onRemovalConfirmed}, {title: loc("removeDoc.cancel")}, {html: true});
+
       return false;
     }
 
@@ -855,7 +878,7 @@ var docgen = (function () {
       title.setAttribute("data-doc-id", self.docId);
       title.setAttribute("data-app-id", self.appId);
       title.onclick = accordion.click;
-      if (self.schema.info.removable) {
+      if (self.schema.info.removable && !isDisabled(options)) {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
@@ -875,15 +898,15 @@ var docgen = (function () {
       sectionContainer.appendChild(elements);
       section.appendChild(title);
       section.appendChild(sectionContainer);
-
       return section;
     }
 
     self.element = buildElement();
     validate();
+    disableBasedOnOptions();
   };
 
-  function displayDocuments(containerSelector, removeDocModel, application, documents, authorizationModel) {
+  function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
@@ -896,9 +919,9 @@ var docgen = (function () {
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, removeDocModel.init, doc.id, application, authorizationModel).element);
+      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options).element);
 
-      if (schema.info.repeating) {
+      if (schema.info.repeating && !isDisabled(options)) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
         $(btn).click(function () {
@@ -907,7 +930,7 @@ var docgen = (function () {
             .command("create-doc", { schemaName: schema.info.name, id: application.id })
             .success(function (data) {
               var newDocId = data.doc;
-              var newElem = new DocModel(schema, {}, {}, removeDocModel.init, newDocId, application, authorizationModel).element;
+              var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;
               $(self).before(newElem);
             })
             .call();
@@ -916,6 +939,9 @@ var docgen = (function () {
       }
     });
   }
+
+  function isDisabled(options) { return options && options.disabled; }
+  function doValidate(options) { return !options || options.validate; }
 
   return {
     displayDocuments: displayDocuments

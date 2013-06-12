@@ -49,8 +49,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
     self.mask
       .css({"width": maskWidth, "height": maskHeight})
-      .fadeIn(300)
-      .fadeTo("fast", 0.8);
+      .fadeTo("fast", 0.5);
 
     element
       .css("top",  winHeight / 2 - elementHeight / 2)
@@ -80,7 +79,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
 LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
   '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
-  '<div class="dialog-content"><p></p>' +
+  '<div class="dialog-content"><div class="dialog-user-content"></div>' +
   '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>' +
   '<button class="btn btn-dialog close" data-test-id="confirm-no"></button></div></div>';
 
@@ -91,24 +90,38 @@ LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
 LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
 LUPAPISTE.ModalDialog.dynamicDialogs = [];
 
-LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesTitle, yesHandler, noTitle, noHandler) {
-  function bindButton(elem$, text, f) {
-    elem$.unbind("click").text(text);
-    if (f) {
-      elem$.click(f);
+/**
+ * Expected keys on yesButton and noButton:
+ *  - title
+ *  - fn
+ * Expected keys renderOptions
+ *  - html: bind html instead of plain text. Default to false.
+ */
+LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesButton, noButton, renderOptions) {
+  function bindButton(elem$, button) {
+    elem$.unbind("click").text(button.title);
+    if (button.fn) {
+      elem$.click(button.fn);
     }
   }
-  
+
   dialog$.find(".dialog-title").text(title);
-  dialog$.find(".dialog-content p").text(content);
-  bindButton(dialog$.find("[data-test-id='confirm-yes']"), yesTitle, yesHandler);
-  bindButton(dialog$.find("[data-test-id='confirm-no']"), noTitle, noHandler);
-}
+
+  var contentContainer$ = dialog$.find(".dialog-user-content");
+  if (renderOptions && renderOptions.html) {
+    contentContainer$.html(content);
+  } else {
+    contentContainer$.html($("<p>").text(content));
+  }
+
+  bindButton(dialog$.find("[data-test-id='confirm-yes']"), yesButton);
+  bindButton(dialog$.find("[data-test-id='confirm-no']"), noButton);
+};
 
 LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle, noHandler) {
   "use strict";
   var dialog$ = $(LUPAPISTE.Modal.YesNoTemplate).attr("id", id);
-  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesTitle, yesHandler, noTitle, noHandler);  
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, {title: yesTitle, fn: yesHandler}, {title: noTitle, fn: noHandler});
   LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
   return dialog$;
 };
@@ -116,13 +129,18 @@ LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, ye
 LUPAPISTE.ModalDialog.dynamicYesNoId = "dynamic-yes-no-confirm-dialog";
 LUPAPISTE.ModalDialog.newYesNoDialog(LUPAPISTE.ModalDialog.dynamicYesNoId);
 
-LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesTitle, yesHandler, noTitle, noHandler) {
+/**
+ * Expected keys on yesButton and noButton:
+ *  - title
+ *  - fn
+ */
+LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesButton, noButton, renderOptions) {
   "use strict";
   var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicYesNoId);
-  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesTitle, yesHandler, noTitle, noHandler);  
-  LUPAPISTE.ModalDialog.open(dialog$);  
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesButton, noButton, renderOptions);
+  LUPAPISTE.ModalDialog.open(dialog$);
   return dialog$;
-}
+};
 
 /**
  * Initializes modal dialog elements
