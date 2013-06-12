@@ -42,7 +42,7 @@
                                                                                         ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
           (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]
                                                                         ["Pima" :pima]
-                                                                        ["Lupahakemus maa-ainesten ottamiseen" :maa-aineslupa]]]])
+                                                                        ["maa-ainesten_ottaminen" :maa-aineslupa]]]])
           (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
                                                                             #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
 
@@ -197,10 +197,10 @@
                                  :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                            "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                  :attachments []}
-:yleiset-alueet-kaivuulupa      {:schema "tyomaastaVastaava"
-                                 :schema-data [[["osoite" "katu"] #(:address %)]]
-                                 :operation-type :publicArea
-                                 :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
+   :yleiset-alueet-kaivuulupa      {:schema "tyomaastaVastaava"
+                                    :schema-data [[["osoite" "katu"] #(:address %)]]
+                                    :operation-type :publicArea
+                                    :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })
