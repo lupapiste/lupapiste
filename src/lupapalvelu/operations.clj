@@ -40,7 +40,8 @@
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
                                                                                         ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
           (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]
-                                                                        ["Pima" :pima]]]])))
+                                                                        ["Pima" :pima]
+                                                                        ["Lupahakemus maa-ainesten ottamiseen" :maa-aineslupa]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -182,6 +183,10 @@
                                  :attachments []}
    :pima                        {:schema "pima"
                                  :required ["ymp-ilm-kesto-mini"]
+                                 :attachments []}
+   :maa-aineslupa               {:schema "ottamismaara"
+                                 :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
+                                           "ottamis-suunnitelman-laatija" "ottamis-suunnitelma" ]
                                  :attachments []}})
 
 
