@@ -29,7 +29,7 @@
             <span id="test-inforequest-state" class="application_summary_text" data-bind="ltext: state"></span>
           </div>
 
-          <div data-bind="with: $root.applicationModel.data">
+          <div data-bind="with: $root.application.data">
             <p data-bind="ltext: 'inforequest.created'"></p>
             <span data-bind="if: $data.created">
               <span class="application_summary_text" data-bind="dateString: created"></span>

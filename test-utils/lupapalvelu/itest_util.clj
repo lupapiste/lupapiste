@@ -4,6 +4,7 @@
         [midje.sweet])
   (:require [clj-http.client :as c]
             [lupapalvelu.logging]
+            [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
             [cheshire.core :as json]))
 
@@ -126,6 +127,13 @@
 ;; DSLs
 ;;
 
+(defn create-app-id [apikey & args]
+  (let [resp (apply create-app apikey args)
+        id   (:id resp)]
+    resp => ok?
+    id => truthy
+    id))
+
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
@@ -160,3 +168,18 @@
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment-id (get-attachment-ids application)]
     (upload-attachment pena (:id application) attachment-id)))
+
+;;
+;; Vetuma
+;;
+
+(defn vetuma! [{:keys [userid firstname lastname] :as data}]
+  (decode-response
+    (c/get
+      (str (server-address) "/dev/api/vetuma")
+      {:query-params (select-keys data [:userid :firstname :lastname])})))
+
+(defn vetuma-stamp! []
+  (-> {:userid "123"
+       :firstname "Pekka"
+       :lastname "Banaani"} vetuma! :stamp))

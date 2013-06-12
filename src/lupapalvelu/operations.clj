@@ -2,6 +2,7 @@
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")
@@ -37,7 +38,9 @@
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
-                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])))
+                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
+          (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
+                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -47,6 +50,8 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
+
+(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-hankkeen-kuvaus" "yleiset-alueet-maksaja"])
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -68,7 +73,7 @@
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
                                  :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]];FIXME Aftre krysp update change to 000
+                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]] ;FIXME Aftre krysp update change to 000
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
    :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
@@ -171,12 +176,27 @@
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
-                                 :attachments [:paapiirustus [:asemapiirros]]}})
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
+                                 :schema-data [[["osoite" "katu"] #(:address %)]]
+                                 :operation-type :publicArea
+                                 :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
+;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
+;                                                       :required (conj yleiset-alueet-common-schemas [])}
+   })
 
 
 ; Sanity checks:
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+  (if-not ((merge schemas/schemas
+             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
+             yleiset-alueet/yleiset-alueet-kaivuulupa
+             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema)
+    (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
+  )
+
+
+
 
