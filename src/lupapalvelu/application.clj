@@ -20,6 +20,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.security :as security]
@@ -431,7 +432,9 @@
                                                  :schema ((merge schemas/schemas
                                                             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
                                                             yleiset-alueet/yleiset-alueet-kaivuulupa
+                                                            ympschemas/ympschemas
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
+
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
