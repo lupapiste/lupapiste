@@ -197,10 +197,10 @@
                                  :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
                                            "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                  :attachments []}
-:yleiset-alueet-kaivuulupa      {:schema "tyomaastaVastaava"
-                                 :schema-data [[["osoite" "katu"] #(:address %)]]
-                                 :operation-type :publicArea
-                                 :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
+   :yleiset-alueet-kaivuulupa      {:schema "tyomaastaVastaava"
+                                    :schema-data [[["osoite" "katu"] #(:address %)]]
+                                    :operation-type :publicArea
+                                    :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })
