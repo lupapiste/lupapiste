@@ -59,7 +59,7 @@
                                        {:name "suojavyohykkeet" :type :text :max-len 4000}]}
                                {:name "vedenottamot" :type :text :max-len 4000}
                                {:name "vakuus" :type :select
-                                :body [{:name "Ei haeta lupaa aloittaa toimintaa ennen lainvoimaisuutta"}
+                                :body [{:name "EiAloiteta"}
                                        {:name "Rahaa"}
                                        {:name "Pankkitakaus"}]}))
 

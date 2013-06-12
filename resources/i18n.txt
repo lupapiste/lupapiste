@@ -272,7 +272,7 @@ ottamis-suunnitelma.selvitykset.ainesMaara: Maa-ainesten määrät
 ottamis-suunnitelma.selvitykset.toimenpiteet: Toimenpiteet
 ottamis-suunnitelma.selvitykset.tutkimukset: Tutkimukset
 ottamis-suunnitelma.vakuus._group_label: Vakuus
-ottamis-suunnitelma.vakuus.Ei haeta lupaa aloittaa toimintaa ennen lainvoimaisuutta: Ei haeta lupaa aloittaa toimintaa ennen lainvoimaisuutta
+ottamis-suunnitelma.vakuus.EiAloiteta: Ei haeta lupaa aloittaa toimintaa ennen lainvoimaisuutta
 ottamis-suunnitelma.vakuus.Pankkitakaus: Pankkitakaus
 ottamis-suunnitelma.vakuus.Rahaa: Rahaa
 ottamis-suunnitelma.vedenottamot: Vedenottamot
