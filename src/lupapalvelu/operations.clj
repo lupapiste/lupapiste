@@ -42,7 +42,7 @@
                                                                                         ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
           (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]
                                                                         ["Pima" :pima]
-                                                                        ["Lupahakemus maa-ainesten ottamiseen" :maa-aineslupa]]]])
+                                                                        ["maa-ainesten_ottaminen" :maa-aineslupa]]]])
           (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
                                                                             #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
 
