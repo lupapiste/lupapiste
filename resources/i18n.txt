@@ -1,0 +1,6 @@
+operations.tree.kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
+operations.yleiset-alueet-kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
+operations.yleiset-alueet-kayttolupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+
+# TODO: Miten ratkaistaan? Tämä on sama kuin 'tyo-/vuokra-aika._group_label'...
+yleiset-alueet-kayttolupa._group_label: Työ-/vuokra-aika

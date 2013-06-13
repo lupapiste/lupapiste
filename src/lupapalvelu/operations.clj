@@ -44,7 +44,8 @@
                                                                         ["Pima" :pima]
                                                                         ["maa-ainesten_ottaminen" :maa-aineslupa]]]])
           (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
-                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]]]])))
+                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]
+                                                                            ["kayttolupa" :yleiset-alueet-kayttolupa]]]])))
 
 
 (defn municipality-operations [municipality]
@@ -195,12 +196,18 @@
                                  :attachments []}
    :maa-aineslupa               {:schema "ottamismaara"
                                  :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
-                                           "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
+                                            "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                  :attachments []}
-   :yleiset-alueet-kaivuulupa      {:schema "tyomaastaVastaava"
-                                    :schema-data [[["osoite" "katu"] #(:address %)]]
-                                    :operation-type :publicArea
-                                    :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")}
+   :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
+                                 :schema-data [[["osoite" "katu"] #(:address %)]]
+                                 :operation-type :publicArea
+                                 :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")
+                                 :attachments []}                                                     ;; TODO: Mitä attachmentteihin?
+   :yleiset-alueet-kayttolupa   {:schema "tyo-/vuokra-aika"
+                                 :operation-type :publicArea
+                                 :required yleiset-alueet-common-schemas
+                                 :attachments []}                                                     ;; TODO: Mitä attachmentteihin?
+
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })
@@ -214,6 +221,7 @@
   (if-not ((merge schemas/schemas
              poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
              yleiset-alueet/yleiset-alueet-kaivuulupa
+             yleiset-alueet/yleiset-alueet-kayttolupa
              ympschemas/ympschemas
              #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema)
     (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))

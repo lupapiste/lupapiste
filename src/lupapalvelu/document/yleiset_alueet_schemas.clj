@@ -40,6 +40,21 @@
       :body vuokra-ja-tyo-aika}]))
 
 
+(def yleiset-alueet-kayttolupa
+  (to-map-by-name
+    [{:info {:name "yleiset-alueet-hankkeen-kuvaus"
+             :order 64}
+      :body [{:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+             {:name "luvanTunniste" :type :string}]}                                     ;; sijoituslupaviitetietoType
+     {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
+             :type :party
+             :order 65}
+      :body yleiset-alueet-maksaja}
+     {:info {:name "tyo-/vuokra-aika"                                        ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
+             :type :group
+             :order 66}
+      :body vuokra-ja-tyo-aika}]))
+
 ;;
 ;; TODO: Liikennetta haittavan tyon lupa
 ;;
