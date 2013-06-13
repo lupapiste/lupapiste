@@ -57,7 +57,7 @@
 (defn valid-password? [password]
   (>= (count password) (env/value :password :minlength)))
 
-(defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
+(defn create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)
         new-user-base     {:username     email
