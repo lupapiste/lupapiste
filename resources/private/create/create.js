@@ -41,7 +41,7 @@
     self.map = null;
 
     self.search = ko.observable("");
-    self.x = ko.observable(0.0);
+    self.x = ko.observable(0);
     self.y = ko.observable(0.0);
     self.addressData = ko.observable(null);
     self.addressString = ko.observable(null);
@@ -54,7 +54,7 @@
     self.municipalitySupported = ko.observable(true);
 
     self.municipalityCode.subscribe(function(code) {
-      if (self.useManualEntry()) municipalities.findById(code, self.municipality);
+      if (self.useManualEntry()) { municipalities.findById(code, self.municipality); }
     });
 
     self.findMunicipality = function(code) {
@@ -72,7 +72,7 @@
 
     self.propertyId.subscribe(function(id) {
       var human = util.prop.toHumanFormat(id);
-      if (human != id) {
+      if (human !== id) {
         self.propertyId(human);
       } else {
         var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
@@ -145,7 +145,6 @@
     // Search activation:
 
     self.searchNow = function() {
-      // $('.selected-location').show();
       self
         .resetXY()
         .addressData(null)
@@ -154,13 +153,13 @@
         .searchPointByAddressOrPropertyId(self.search());
       return false;
     };
-    
+
     var zoomLevel = {
-        "540": 6,
-        "550": 7,
-        "560": 9
+      "540": 6,
+      "550": 7,
+      "560": 9
     };
-    
+
     // Return function that calls every function provided as arguments to 'comp'.
     function comp() {
       var fs = arguments;
@@ -172,20 +171,30 @@
         });
       };
     }
-    
-    function zoom(item) { self.center(item.location.x, item.location.y, zoomLevel[item.type] || 8); }
+
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevel[item.type] || 8); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
-    function fillMunicipality(item) { $("#create-search").val(", " + loc("municipality", item.municipality)).caretToStart(); }
-    function fillAddress(item) { $("#create-search").val(item.street + " " + item.number + ", " + loc("municipality", item.municipality)).caretTo(item.street.length + 1); }
+    function fillMunicipality(item) {
+      self.search(", " + loc("municipality", item.municipality));
+      $("#create-search").caretToStart();
+    }
+    function fillAddress(item) {
+      self.search(item.street + " " + item.number + ", " + loc("municipality", item.municipality));
+      $("#create-search").caretTo(item.street.length + item.number.toString().length + 1);
+    }
 
     function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
     function toHandler(value) { return value[1]; }
-    function invoker(item) { return function(handler) { return handler(item); }; } 
-    
+    function invoker(item) { return function(handler) { return handler(item); }; }
+
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
-      [{kind: "address"}, comp(zoomer(12), fillAddress)],
-      [{kind: "property-id"}, zoomer(12)]
+      [{kind: "address"}, comp(fillAddress, self.searchNow)],
+      [{kind: "address", type: "street"}, zoomer(10)],
+      [{kind: "address", type: "street-city"}, zoomer(10)],
+      [{kind: "address", type: "street-number"}, zoomer(11)],
+      [{kind: "address", type: "street-number-city"}, zoomer(11)],
+      [{kind: "property-id"}, comp(zoomer(12), self.searchNow)]
     ];
 
     var renderers = [
@@ -202,8 +211,8 @@
           .addClass("create-find")
           .addClass("address")
           .append($("<span>").addClass("street").text(item.street));
-        if ((item.type != "street-city") && (item.type != "street")) a.append($("<span>").addClass("number").text(item.number));
-        if (item.type != "street-number") a.append($("<span>").addClass("municipality").text(loc("municipality", item.municipality)));
+        if ((item.type !== "street-city") && (item.type !== "street")) { a.append($("<span>").addClass("number").text(item.number)); }
+        if (item.type !== "street-number") { a.append($("<span>").addClass("municipality").text(loc("municipality", item.municipality))); }
         return a;
       }],
       [{kind: "property-id"}, function(item) {
@@ -213,13 +222,13 @@
           .append($("<span>").text(util.prop.toHumanFormat(item["property-id"])));
       }]
     ];
-    
+
     self.autocompleteSelect = function(e, data) {
       var item = data.item;
       _(handlers).filter(selector(item)).map(toHandler).each(invoker(item));
       return false;
-    }
-    
+    };
+
     self.autocompleteRender = function(ul, data) {
       var element = _(renderers).filter(selector(data)).first(1).map(toHandler).map(invoker(data)).value();
       return $("<li>")
@@ -233,8 +242,8 @@
       locationSearch.pointByAddress(self.requestContext, address, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
-                x = data.x,
-                y = data.y;
+                x = data.location.x,
+                y = data.location.y;
             self
               .useManualEntry(false)
               .setXY(x, y)
@@ -306,7 +315,7 @@
     $("#create").applyBindings(model);
 
     $("#create-search")
-      .keypress(function(e) { if (e.which === 13) model.searchNow(); })
+      .keypress(function(e) { if (e.which === 13) { model.searchNow(); }})
       .autocomplete({
         source:     "/proxy/find-address",
         delay:      500,
@@ -318,10 +327,15 @@
     tree = $("#create .operation-tree").selectTree({
       template: $("#create-templates"),
       onSelect: function(v) {
-        model.operation(v ? v.op : null);
-        ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
-          model.organization(d);
-        }).call();
+        if (v) {
+          model.operation(v.op);
+          ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+            model.organization(d);
+          }).call();
+        } else {
+          model.operation(null);
+          model.organization(null);
+        }
       },
       baseModel: model
     });

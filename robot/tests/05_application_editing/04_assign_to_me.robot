@@ -13,16 +13,23 @@ Mikko creates an application
   Set Suite Variable  ${propertyId}  753-416-25-30
   Create application the fast way  ${appname}  753  ${propertyId}
   Add comment  hojo-hojo
+  Element should not be visible  applicationUnseenComments
 
 # LUPA-23
 Mikko could add an operation
   It is possible to add operation
   Logout
 
-Application is not assigned
+Sonja sees comment indicator on applications list
   Sonja logs in
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-comments']  1
+
+Application is not assigned
   Open application  ${appname}  ${propertyId}
   Application is not assigned
+
+Sonja sees comment indicator on application
+  Element text should be  applicationUnseenComments  1
 
 Sonja assign application to herself
   Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sonja Sibbo
@@ -57,6 +64,7 @@ Clicking the first link in email should redirect to front page
 Application is shown after login
   User logs in  mikko@example.com  mikko123  Mikko Intonen
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
+
 
 *** Keywords ***
 

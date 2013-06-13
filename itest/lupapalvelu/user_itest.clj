@@ -3,27 +3,41 @@
         [midje.sweet]
         [clojure.pprint :only [pprint]]))
 
-(fact
+(fact "changing user info"
   (apply-remote-minimal)
-  (let [resp (query pena :user)]
-    (success resp) => true
-    (:user resp) => (contains {:enabled true
-                               :firstName "Pena"
-                               :lastName "Panaani"
-                               :username "pena"
-                               :street "Paapankuja 12"
-                               :city "Piippola"
-                               :zip "010203"
-                               :phone "0102030405"
-                               :email "pena@example.com"
-                               :personId "010203-0405"
-                               :role "applicant"}))
+  (let [resp (query teppo :user)]
+    resp => ok?
+    resp => (contains
+              {:user
+               (just
+                 {:city "Tampere"
+                  :email "teppo@example.com"
+                  :enabled true
+                  :firstName "Teppo"
+                  :id "5073c0a1c2e6c470aef589a5"
+                  :lastName "Nieminen"
+                  :personId "210281-0001"
+                  :phone "0505503171"
+                  :postalCode "33200"
+                  :role "applicant"
+                  :street "Mutakatu 7"
+                  :username "teppo@example.com"
+                  :zip "33560"})}))
 
-  (success (command pena :save-user-info :firstName "f" :lastName "l" :street "s" :city "c" :zip "z" :phone "p")) => true
+  (command teppo :save-user-info
+    :firstName "Seppo"
+    :lastName "Sieninen"
+    :street "Sutakatu 7"
+    :city "Sampere"
+    :zip "33200"
+    :phone "0505503171") => ok?
 
-  (:user (query pena :user)) => (contains {:firstName "f"
-                                           :lastName "l"
-                                           :street "s"
-                                           :city "c"
-                                           :zip "z"
-                                           :phone "p"}))
+  (query teppo :user) => (contains
+                           {:user
+                            (contains
+                              {:firstName "Seppo"
+                               :lastName "Sieninen"
+                               :street "Sutakatu 7"
+                               :city "Sampere"
+                               :zip "33200"
+                               :phone "0505503171"})}))

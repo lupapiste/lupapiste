@@ -9,7 +9,7 @@
 (defn- add-term [row result lang]
   (let [k (get row "key")
         t (get row lang)]
-    (if (and k t (not (s/blank? t)))
+    (if (and k t (> (.length t) 0))
       (assoc-in result [lang k] (s/trim t))
       result)))
 
@@ -70,6 +70,14 @@
       (with-lang lang
         (handler request)))))
 
+(defn read-lines [lines]
+  (reduce (fn [m line]
+            (if-let [[_ k v] (re-matches #"^(.[^\s]*):\s*(.*)$" line)]
+              (assoc m (s/trim k) (s/trim v))
+              m))
+    {}
+    lines))
+
 (env/in-dev
 
   ;;
@@ -79,12 +87,7 @@
   (defn- load-add-ons []
     (when-let [in (io/resource "i18n.txt")]
       (with-open [in (io/reader in)]
-        (reduce (fn [m line]
-                  (if-let [[_ k v] (re-matches #"^([^:]+):\s*(.*)$" line)]
-                    (assoc m (s/trim k) (s/trim v))
-                    m))
-                {}
-                (line-seq in)))))
+        (read-lines (line-seq in)))))
 
   (defn get-localizations []
     (assoc excel-data "fi" (merge (get excel-data "fi") (load-add-ons)))))

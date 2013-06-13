@@ -34,7 +34,8 @@
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
-            [ring.middleware.anti-forgery :as anti-forgery])
+            [ring.middleware.anti-forgery :as anti-forgery]
+            [lupapalvelu.neighbors])
   (:import [java.io ByteArrayInputStream]))
 
 ;;
@@ -121,8 +122,8 @@
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (get-in action [:data :id] "")
-     :userId        (get-in action [:user :id] "")}
+    {:applicationId (or (get-in action [:data :id]) "")
+     :userId        (or (get-in action [:user :id]) "")}
     (core/execute action)))
 
 (defn- execute-command [name]
@@ -152,7 +153,8 @@
                    :applicant logged-in?
                    :authority authority?
                    :authority-admin authority-admin?
-                   :admin admin?})
+                   :admin admin?
+                   :neighbor anyone})
 
 (defn cache-headers [resource-type]
   (if (env/dev-mode?)
@@ -185,7 +187,7 @@
 
 ;; Single Page App HTML
 (def apps-pattern
-  (re-pattern (str "(" (clojure.string/join "|" (map #(name %) (keys auth-methods))) ")")))
+  (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
 (defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
 
@@ -262,7 +264,7 @@
 (defjson "/system/ping" [] {:ok true})
 (defjson "/system/status" [] (status/status))
 
-(def activation-route (str (-> env/config :activation :path) ":activation-key"))
+(def activation-route (str (env/value :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}
   (if-let [user (sadesecurity/activate-account key)]
     (do
@@ -303,14 +305,15 @@
 ;;
 
 (defpage [:post "/api/upload"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked] :as data}
-  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s" data upload attachmentType typeSelector locked)
+  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
+  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
                            :attachmentId attachmentId
                            :target target
                            :locked (java.lang.Boolean/parseBoolean locked)
+                           :authority (java.lang.Boolean/parseBoolean authority)
                            :text text)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
@@ -319,17 +322,18 @@
         result (execute (enriched (core/command "upload-attachment" upload-data)))]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.4.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
                                            {:applicationId (or applicationId "")
                                             :attachmentId (or attachmentId "")
                                             :attachmentType (or attachmentType "")
                                             :locked (or locked "false")
+                                            :authority (or authority "false")
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
 (defn- output-attachment [attachment-id download?]
   (if (logged-in?)
-    (attachment/output-attachment attachment-id (current-user) download?)
+    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
     (resp/status 401 "Unauthorized\r\n")))
 
 (defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
@@ -339,21 +343,21 @@
   (output-attachment attachment-id true))
 
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
-  (attachment/output-all-attachments application-id (current-user)))
+  (attachment/output-all-attachments application-id (current-user) *lang*))
 
 (defpage "/api/pdf-export/:application-id" {application-id :application-id}
   (ke6666/export application-id (current-user) *lang*))
+
+(defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
 ;; Proxy
 ;;
 
 (defpage [:any "/proxy/:srv"] {srv :srv}
-  (if (logged-in?)
-    (if @env/proxy-off
-      {:status 503}
-      ((proxy-services/services srv (constantly {:status 404})) (request/ring-request)))
-    {:status 401}))
+  (if @env/proxy-off
+    {:status 503}
+    ((proxy-services/services srv (constantly {:status 404})) (request/ring-request))))
 
 ;;
 ;; Token consuming:
@@ -411,12 +415,15 @@
 
   (defjson "/dev/hgnotes" [] (env/hgnotes))
 
-  (defjson "/dev/actions" []
-    (execute (enriched (core/query "actions" (from-query)))))
-
   (defpage "/dev/by-id/:collection/:id" {:keys [collection id]}
     (if-let [r (mongo/by-id collection id)]
       (resp/status 200 (resp/json {:ok true  :data r}))
+      (resp/status 404 (resp/json {:ok false :text "not found"}))))
+
+  (require 'lupapalvelu.neighbors)
+  (defpage "/dev/public/:collection/:id" {:keys [collection id]}
+    (if-let [r (mongo/by-id collection id)]
+      (resp/status 200 (resp/json {:ok true  :data (lupapalvelu.neighbors/->public r)}))
       (resp/status 404 (resp/json {:ok false :text "not found"}))))
 
   (defpage [:get "/api/proxy-ctrl"] []

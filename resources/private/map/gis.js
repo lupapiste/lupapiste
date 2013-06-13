@@ -69,7 +69,7 @@ var gis = (function() {
       self.map.setCenter(new OpenLayers.LonLat(x, y), zoom);
       return self;
     };
-    
+
     self.zoomTo = function(zoom) {
       self.map.zoomTo(zoom);
       return self;
@@ -108,7 +108,7 @@ var gis = (function() {
           "stopDouble": false
         },
 
-        initialize: function(options) {
+        initialize: function() {
           this.handlerOptions = OpenLayers.Util.extend({}, this.defaultHandlerOptions);
           OpenLayers.Control.prototype.initialize.apply(this, arguments);
           this.handler = new OpenLayers.Handler.Click(this, {"click": this.trigger}, this.handlerOptions);

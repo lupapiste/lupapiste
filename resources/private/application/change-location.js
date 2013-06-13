@@ -68,7 +68,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     }
 
     var human = util.prop.toHumanFormat(id);
-    if (human != id) {
+    if (human !== id) {
       self.propertyId(human);
     } else {
       if (!self.propertyIdAutoUpdated && util.prop.isPropertyId(id)) {
@@ -156,7 +156,7 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   // DOM ready
   $(function() {
-    self.map = gis.makeMap("change-location-map").center([{x: 404168, y: 6693765}], 10);
+    self.map = gis.makeMap("change-location-map").center(404168, 6693765, 10);
     self.map.addClickHandler(self.click);
   });
 };

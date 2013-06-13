@@ -176,14 +176,14 @@
     (.build mob)))
 
 (def server-list
-  (let [servers (vals (get-in env/config [:mongodb :servers]))]
+  (let [servers (vals (env/value :mongodb :servers))]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
 
 (def connected (atom false))
 
 (defn connect!
   ([]
-    (let [conf (:mongodb env/config)
+    (let [conf (env/value :mongodb)
           db   (:dbname conf)
           user (-> conf :credentials :username)
           pw   (-> conf :credentials :password)

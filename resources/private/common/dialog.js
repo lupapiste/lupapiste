@@ -38,26 +38,29 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
    * Opens a modal window.
    * @param {String}  Modal window container jQuery selector
    */
-  self.open = function(selector) {
-    var maskHeight = $(document).height();
-    var maskWidth = $(window).width();
-    self.mask.css({'width':maskWidth,'height':maskHeight});
-    self.mask.fadeIn(300);
-    self.mask.fadeTo("fast",0.8);
+  self.open = function(arg) {
+    var element = _.isString(arg) ? $(arg) : arg,
+        elementWidth = element.width(),
+        elementHeight = element.height(),
+        winHeight = $(window).height(),
+        winWidth = $(window).width(),
+        maskHeight = $(document).height(),
+        maskWidth = winWidth;
 
-    var winHeight = $(window).height();
-    var winWidth = $(window).width();
-    $(selector)
-      .css('top',  winHeight/2-$(selector).height()/2)
-      .css('left', winWidth/2-$(selector).width()/2)
+    self.mask
+      .css({"width": maskWidth, "height": maskHeight})
+      .fadeTo("fast", 0.5);
+
+    element
+      .css("top",  winHeight / 2 - elementHeight / 2)
+      .css("left", winWidth / 2 - elementWidth / 2)
       .fadeIn(600)
-      // Register modal window closing handlers
-      .find('.close').click(self.close);
-
-    var inputs = $(selector + ' input:enabled');
-    if (inputs.length) {
-        inputs[0].focus();
-    }
+      .find(".close")
+        .click(self.close)
+        .end()
+      .find("input:enabled")
+        .first()
+        .focus();
 
     return false;
   };
@@ -76,7 +79,7 @@ LUPAPISTE.Modal = function(maskId, maskColor) {
 
 LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
   '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
-  '<div class="dialog-content"><p></p>' +
+  '<div class="dialog-content"><div class="dialog-user-content"></div>' +
   '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>' +
   '<button class="btn btn-dialog close" data-test-id="confirm-no"></button></div></div>';
 
@@ -87,17 +90,55 @@ LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
 LUPAPISTE.ModalDialog = new LUPAPISTE.Modal("ModalDialogMask", "black");
 LUPAPISTE.ModalDialog.dynamicDialogs = [];
 
+/**
+ * Expected keys on yesButton and noButton:
+ *  - title
+ *  - fn
+ * Expected keys renderOptions
+ *  - html: bind html instead of plain text. Default to false.
+ */
+LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesButton, noButton, renderOptions) {
+  function bindButton(elem$, button) {
+    elem$.unbind("click").text(button.title);
+    if (button.fn) {
+      elem$.click(button.fn);
+    }
+  }
+
+  dialog$.find(".dialog-title").text(title);
+
+  var contentContainer$ = dialog$.find(".dialog-user-content");
+  if (renderOptions && renderOptions.html) {
+    contentContainer$.html(content);
+  } else {
+    contentContainer$.html($("<p>").text(content));
+  }
+
+  bindButton(dialog$.find("[data-test-id='confirm-yes']"), yesButton);
+  bindButton(dialog$.find("[data-test-id='confirm-no']"), noButton);
+};
+
 LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle, noHandler) {
   "use strict";
   var dialog$ = $(LUPAPISTE.Modal.YesNoTemplate).attr("id", id);
-  dialog$.find(".dialog-title").text(title);
-  dialog$.find(".dialog-content p").text(content);
-  dialog$.find("[data-test-id='confirm-yes']").click(yesHandler).text(yesTitle);
-  dialog$.find("[data-test-id='confirm-no']").text(noTitle);
-  if (noHandler) {
-    dialog$.find("[data-test-id='confirm-no']").click(noHandler);
-  }
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, {title: yesTitle, fn: yesHandler}, {title: noTitle, fn: noHandler});
   LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
+  return dialog$;
+};
+
+LUPAPISTE.ModalDialog.dynamicYesNoId = "dynamic-yes-no-confirm-dialog";
+LUPAPISTE.ModalDialog.newYesNoDialog(LUPAPISTE.ModalDialog.dynamicYesNoId);
+
+/**
+ * Expected keys on yesButton and noButton:
+ *  - title
+ *  - fn
+ */
+LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesButton, noButton, renderOptions) {
+  "use strict";
+  var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicYesNoId);
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesButton, noButton, renderOptions);
+  LUPAPISTE.ModalDialog.open(dialog$);
   return dialog$;
 };
 

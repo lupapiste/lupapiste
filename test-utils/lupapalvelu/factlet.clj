@@ -1,15 +1,45 @@
 (ns lupapalvelu.factlet
-  (:use [midje.sweet]))
+  (:use midje.sweet
+        clojure.walk)
+  (:require [midje.parsing.util.recognizing :as recognize]))
 
-(defn create-facts
-  [c]
+;;; Processings let bindings in facts
+
+(defn let? [form]
+  (and
+    (list? form)
+    (or
+      (= 'let (first form))
+      (= 'clojure.core/let (first form)))))
+
+(defn checkables-to-facts-in-let-bindings
+  "Rewrites let-bindings by adding facts for all checkables.
+   Form (let [a 1 => 1]) gets rewritten to:
+        (let a 1
+             _ (fact ... a => 1)])."
+  [bindings]
   (reduce
     (fn [form [k v]]
-      (if (= k (symbol =>))
-        (conj form '_ `(fact ~(str (-> form butlast last)) ~(last form) => ~v))
+      (if (recognize/all-arrows (str k))
+        (conj form '_ `(midje.sweet/fact
+                         ~(str (-> form butlast last) " " k " in let-bindings")
+                         ~(-> form butlast last) ~k ~v))
         (conj form k v)))
-    [] (partition 2 c)))
+    [] (partition 2 bindings)))
 
-(defmacro factlet [letform & body]
-  `(let ~(create-facts letform)
-     ~@body))
+(defn checkables-to-facts-in-lets
+  "Rewrites the let-bindings from the form recursively to support
+   using checkables in bindings. See bind-facts-to-checkables for details."
+  [form]
+  (prewalk
+    (fn [x]
+      (if (let? x)
+        `(let ~(checkables-to-facts-in-let-bindings (second x)) ~@(nnext x))
+        x))
+    form))
+
+(defmacro fact* [& form]
+  `(do ~@(checkables-to-facts-in-lets form)))
+
+(defmacro facts* [& form]
+  `(fact* ~@form))

@@ -4,6 +4,8 @@
         [midje.sweet])
   (:require [clj-http.client :as c]
             [lupapalvelu.logging]
+            [lupapalvelu.vetuma :as vetuma]
+            [clojure.java.io :as io]
             [cheshire.core :as json]))
 
 (defn- find-user [username] (some #(when (= (:username %) username) %) users))
@@ -125,6 +127,13 @@
 ;; DSLs
 ;;
 
+(defn create-app-id [apikey & args]
+  (let [resp (apply create-app apikey args)
+        id   (:id resp)]
+    resp => ok?
+    id => truthy
+    id))
+
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
@@ -133,3 +142,44 @@
   (let [{application :application :as response} (query apikey :application :id id)]
     response => ok?
     application))
+
+;;
+;; Stuffin' data in
+;;
+
+(defn upload-attachment [apikey application-id attachment-id]
+  (let [filename    "dev-resources/test-attachment.txt"
+        uploadfile  (io/file filename)
+        application (query apikey :application :id application-id)
+        uri         (str (server-address) "/api/upload")
+        resp        (c/post uri
+                      {:headers {"authorization" (str "apikey=" apikey)}
+                       :multipart [{:name "applicationId"  :content application-id}
+                                   {:name "Content/type"   :content "text/plain"}
+                                   {:name "attachmentType" :content "paapiirustus.asemapiirros"}
+                                   {:name "attachmentId"   :content attachment-id}
+                                   {:name "upload"         :content uploadfile}]})]
+    (facts "Upload succesfully"
+      (fact "Status code" (:status resp) => 302)
+      (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))))
+
+(defn get-attachment-ids [application] (->> application :attachments (map :id)))
+
+(defn upload-attachment-to-all-placeholders [apikey application]
+  (doseq [attachment-id (get-attachment-ids application)]
+    (upload-attachment pena (:id application) attachment-id)))
+
+;;
+;; Vetuma
+;;
+
+(defn vetuma! [{:keys [userid firstname lastname] :as data}]
+  (decode-response
+    (c/get
+      (str (server-address) "/dev/api/vetuma")
+      {:query-params (select-keys data [:userid :firstname :lastname])})))
+
+(defn vetuma-stamp! []
+  (-> {:userid "123"
+       :firstname "Pekka"
+       :lastname "Banaani"} vetuma! :stamp))

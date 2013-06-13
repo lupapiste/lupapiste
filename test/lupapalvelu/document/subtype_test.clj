@@ -37,15 +37,45 @@
   (subtype-validation {:subtype :letter} "a") => nil?
   (subtype-validation {:subtype :letter} "A") => nil?
   (subtype-validation {:subtype :letter} "\u00e4") => nil?
-  (subtype-validation {:subtype :letter} "1") => [:warn "illegal-letter"]
-  (subtype-validation {:subtype :letter} "@") => [:warn "illegal-letter"]
+  (subtype-validation {:subtype :letter} "1") => [:warn "illegal-letter:any"]
+  (subtype-validation {:subtype :letter} "@") => [:warn "illegal-letter:any"]
   (fact "with upper & lower case definitions"
     (subtype-validation {:subtype :letter :case :upper} "A") => nil?
-    (subtype-validation {:subtype :letter :case :upper} "a") => [:warn "illegal-letter"]
+    (subtype-validation {:subtype :letter :case :upper} "a") => [:warn "illegal-letter:upper"]
     (subtype-validation {:subtype :letter :case :lower} "a") => nil?
-    (subtype-validation {:subtype :letter :case :lower} "A") => [:warn "illegal-letter"]))
+    (subtype-validation {:subtype :letter :case :lower} "A") => [:warn "illegal-letter:lower"]))
 
 (facts "Facts about zip validation"
   (fact (subtype-validation {:subtype :zip} "") => nil?)
   (fact (subtype-validation {:subtype :zip} "33800") => nil?)
   (fact (subtype-validation {:subtype :zip} "123") => [:warn "illegal-zip"]))
+
+(facts "hetu validation"
+  (subtype-validation {:subtype :hetu} "") => nil?
+  (subtype-validation {:subtype :hetu} "210281-9988") => nil?
+  (subtype-validation {:subtype :hetu} "010170-960F") => nil?
+  (subtype-validation {:subtype :hetu} "210281_9988") => [:warn "illegal-hetu"]
+  (subtype-validation {:subtype :hetu} "210281-9987") => [:warn "illegal-hetu"]
+  (subtype-validation {:subtype :hetu} "300281-998V") => [:warn "illegal-hetu"])
+
+(facts "VRK compliant name validation"
+  (subtype-validation {:subtype :vrk-name} "") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha-Matti Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha/Matti Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Juha *Matti* Jokim\u00e4ki") => nil?
+  (subtype-validation {:subtype :vrk-name} "Pertti \"Veltto\" Virtanen") => [:warn "illegal-name"]
+  (subtype-validation {:subtype :vrk-name} "Carl the 16th Gustav") => [:warn "illegal-name"]
+  (subtype-validation {:subtype :vrk-name} "Carl XVI Gustav") => nil?)
+
+(facts "VRK compliant address validation"
+  (subtype-validation {:subtype :vrk-address} "") => nil?
+  (subtype-validation {:subtype :vrk-address} "\u00e4h\u00e4kutti74: ()-/ &.,:*") => nil?
+  (subtype-validation {:subtype :vrk-address} "Suur-\"Halli\" 66") => [:warn "illegal-address"])
+
+(facts "y-tunnus validation"
+  (subtype-validation {:subtype :y-tunnus} "") => nil?
+  (subtype-validation {:subtype :y-tunnus} "2341528-4") => nil?
+  (subtype-validation {:subtype :y-tunnus} "2341528-1") => [:warn "illegal-y-tunnus"])
+
+

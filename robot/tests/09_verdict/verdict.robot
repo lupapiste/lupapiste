@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Application gets verdict
-Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -9,7 +8,9 @@ Resource        ../../common_resource.robot
 
 Mikko want to build Olutteltta
   Mikko logs in
-  Create application the fast way  Olutteltta  753  753-416-25-30
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  Olutteltta${secs}
+  Create application the fast way  ${appname}  753  753-416-25-30
 
 Application does not have verdict
   Open tab  verdict
@@ -22,7 +23,7 @@ Mikko submits application & goes for lunch
 Sonja logs in and throws in a verdict
   [Tags]  fail
   Sonja logs in
-  Open application  Olutteltta  753-416-25-30
+  Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Open verdict
   Wait Until  Element Should Be Enabled  verdict-id
@@ -40,7 +41,8 @@ Sonja logs in and throws in a verdict
 Mikko sees that the application has verdict
   [Tags]  fail
   Mikko logs in
-  Open application  Olutteltta  753-416-25-30
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  1
+  Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Verdict is given
 

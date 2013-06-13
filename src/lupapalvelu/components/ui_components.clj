@@ -12,9 +12,9 @@
               :name "common"})
 
 (defn- conf []
-  (let [js-conf {:maps              (:maps env/config)
+  (let [js-conf {:maps              (env/value :maps)
                  :fileExtensions    mime/allowed-extensions
-                 :passwordMinLength (get-in env/config [:password :minlength])
+                 :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -27,7 +27,7 @@
                   :css ["jquery-ui.css"]}
 
    :knockout     {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
-   :lo-dash      {:js ["lodash-1.1.1.min.js"]}
+   :lo-dash      {:js ["lodash-1.2.1.min.js"]}
    :underscore   {:depends [:lo-dash]
                   :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment       {:js ["moment.min.js"]}
@@ -46,15 +46,16 @@
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js"]
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
+                       "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
-                  :html ["error.html" "nav.html"]}
+                  :html ["404.html" "nav.html"]}
 
    :map          {:depends [:common]
                   :js ["openlayers.2.12.min.lupapiste.js" "gis.js" "locationsearch.js"]}
 
    :authenticated {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                   :js ["comment.js" "authorization.js" "municipalities.js" "organizations.js"]
+                   :js ["comment.js" "municipalities.js" "organizations.js"]
                    :html ["comments.html"]}
 
    :invites      {:depends [:common]
@@ -87,6 +88,10 @@
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
+   :neighbors    {:depends [:common :repository]
+                  :js ["neighbors.js"]
+                  :html ["neighbors.html"]}
+
    :register     {:depends [:common]
                   :css ["register.css"]
                   :js ["register.js"]
@@ -106,7 +111,7 @@
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :application :attachment
-                            :statement :verdict :docgen :create :mypage :debug]
+                            :statement :verdict :neighbors :docgen :create :mypage :debug]
                   :js ["authority.js"]
                   :html ["index.html"]}
 
@@ -153,7 +158,11 @@
 
    :about {:depends [:common :debug]
            :js ["about.js"]
-           :html ["terms.html" "index.html"]}})
+           :html ["terms.html" "index.html"]}
+
+   :neighbor {:depends [:common :map :debug :docgen :debug]
+              :html ["neighbor-show.html" "index.html"]
+              :js ["neighbor-app.js" "begin.js" "neighbor-show.js"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

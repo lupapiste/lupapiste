@@ -21,10 +21,14 @@
     :string           (condp = (keyword subtype)
                         :email            "example@example.com"
                         :tel              "012 123 4567"
-                        :number           "42"
+                        :number           "4"
                         :digit            "1"
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"
+                        :hetu             "210281-9988"
+                        :vrk-address      "Ranta\"tie\" 66:*"
+                        :vrk-name         "Ilkka"
+                        :y-tunnus         "2341528-4"
                         nil               "string"
                         :letter           (condp = (keyword case)
                                             :lower "a"
@@ -76,14 +80,22 @@
       (fn [x] (if (or (keyword? x) (coll? x)) x {k x}))
       m)))
 
-(defn un-wrapped
-  "(un-wrapped (wrapped original)) => original"
-  ([m] (un-wrapped m :value))
+(defn unwrapped
+  "(unwrapped (wrapped original)) => original"
+  ([m] (unwrapped m :value))
   ([m k]
     (assert (keyword? k))
     (walk/postwalk
       (fn [x] (if (contains? x k) (k x) x))
       m)))
+
+(defn timestamped
+  "Assocs timestamp besides every value-key"
+  ([m timestamp] (timestamped m timestamp :value :modified))
+  ([m timestamp value-key timestamp-key]
+  (walk/postwalk
+    (fn [x] (if (contains? x value-key) (assoc x timestamp-key timestamp) x))
+    m)))
 
 (defn create-document-data
   "Creates document data from schema using function f as input-creator. f defaults to 'nil-valus'"

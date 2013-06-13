@@ -8,13 +8,13 @@
 
 (apply-remote-minimal)
 
-(facts "Applicant invites designer"
+(facts* "Applicant invites designer"
   (doseq [user-key [mikko teppo veikko sonja sipoo]]
-    (factlet [resp (query user-key :invites) => ok?]
+    (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (factlet [resp  (create-app mikko :municipality sonja-muni) => ok?
-            id    (:id resp) => truthy]
+  (let [resp  (create-app mikko :municipality sonja-muni) => ok?
+        id    (:id resp) => truthy]
 
     (fact "Teppo must not be able to invite himself!"
       (invite teppo id "teppo@example.com") => unauthorized?)
@@ -53,33 +53,33 @@
         (-> actions :submit-application :ok) => true
         (-> actions :cancel-application :ok) => true))
 
-    (fact "Sonja must NOT be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :email "teppo@example.com") => unauthorized?)))
+    (fact "Sonja must be able to remove authz from Teppo!"
+      (command sonja :remove-auth :id id :email "teppo@example.com") => ok?)))
 
-(facts "Auhtority invites designer"
+(facts* "Auhtority invites designer"
   (doseq [user-key [sonja mikko teppo]]
-    (factlet [resp (query user-key :invites) => ok?]
+    (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
-    (factlet [resp  (create-app sonja :municipality sonja-muni) => ok?
-              id    (:id resp) => truthy]
-      (fact "Sonja must be able to invite Teppo!"
-         (invite sonja id "teppo@example.com") => ok?
-         (count (:invites (query teppo :invites))) => 1)
+  (let [resp  (create-app sonja :municipality sonja-muni) => ok?
+        id    (:id resp) => truthy]
+    (fact "Sonja must be able to invite Teppo!"
+      (invite sonja id "teppo@example.com") => ok?
+      (count (:invites (query teppo :invites))) => 1)
 
-      (fact "Sonja must be able to uninvite Teppo!"
-        (command sonja :remove-invite :id id :email "teppo@example.com") => ok?
-        (count (:invites (query teppo :invites))) => 0)
+    (fact "Sonja must be able to uninvite Teppo!"
+      (command sonja :remove-invite :id id :email "teppo@example.com") => ok?
+      (count (:invites (query teppo :invites))) => 0)
 
-      (fact "Reinvite & accept"
-        (invite sonja id "teppo@example.com") => ok?
-        (count (:invites (query teppo :invites))) => 1
-        (command teppo :approve-invite :id id) => ok?)
+    (fact "Reinvite & accept"
+      (invite sonja id "teppo@example.com") => ok?
+      (count (:invites (query teppo :invites))) => 1
+      (command teppo :approve-invite :id id) => ok?)
 
-      (fact "Teppo must be able to comment!"
-        (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => ok?)
+    (fact "Teppo must be able to comment!"
+      (command teppo :add-comment :id id :text "teppo@example.com" :target "application") => ok?)
 
-      (fact "Teppo must be able to invite another designer, Mikko!"
+    (fact "Teppo must be able to invite another designer, Mikko!"
       (invite teppo id "mikko@example.com") => ok?)
 
-      (fact "Sonja must be able to remove authz from Teppo!"
-        (command sonja :remove-auth :id id :email "teppo@example.com") => ok?)))
+    (fact "Sonja must be able to remove authz from Teppo!"
+      (command sonja :remove-auth :id id :email "teppo@example.com") => ok?)))

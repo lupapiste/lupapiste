@@ -54,15 +54,17 @@
       (require 'sade.dummy-email-server)
       ((resolve 'sade.dummy-email-server/start))))
   (with-logs "lupapalvelu"
-    (server/start env/port {:mode env/mode
-                            :ns 'lupapalvelu.web
-                            :jetty-options (if (env/dev-mode?)
-                                             {:ssl? true
-                                              :ssl-port 8443
-                                              :keystore "./keystore"
-                                              :key-password "lupapiste"}
-                                             {})
-                            :session-cookie-attrs (:cookie env/config)}))
+    (let [jetty-opts (into
+                       {:max-threads 250}
+                       (when (env/dev-mode?)
+                         {:ssl? true
+                          :ssl-port 8443
+                          :keystore "./keystore"
+                          :key-password "lupapiste"}))]
+      (server/start env/port {:mode env/mode
+                              :ns 'lupapalvelu.web
+                              :jetty-options jetty-opts
+                              :session-cookie-attrs (env/value :cookie)})))
   "ok")
 
 (comment

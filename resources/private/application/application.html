@@ -33,7 +33,7 @@
             </span>
           </div>
           <!-- Submitted: -->
-          <div data-bind="with: $root.applicationModel.data">
+          <div data-bind="with: $root.application.data">
             <p data-bind="ltext: 'application.submissionDate'"></p>
             <span data-bind="if: $data.submitted">
               <span data-bind="dateString: submitted" data-test-id="application-submitted-date" class="application_summary_text"></span>
@@ -96,15 +96,15 @@
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
-          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement"             >
+          <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
             <span data-bind="ltext: 'application.requestForComplement'"></span>
             <span class="icon complement left-align"></span>
           </button>
-          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),          enable: $root.authorization.ok('add-operation')"          data-test-id="add-operation"                      >
+          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation') && addOperationButtonVisible(),  enable: $root.authorization.ok('add-operation')"  data-test-id="add-operation">
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: exportPdf"                                                                                                                                 data-test-id="application-pdf-btn"                >
+          <button data-bind="click: exportPdf"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>
           </button>
@@ -121,12 +121,42 @@
         <!-- Tabs: -->
         <div class="tabs-container">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="ltext: 'application.tabInfo',         click: $root.application.changeTab" href="#" data-target="info"         data-test-id="application-open-info-tab"         ></a></li>
-            <li><a data-bind="ltext: 'application.tabParties',      click: $root.application.changeTab" href="#" data-target="parties"      data-test-id="application-open-parties-tab"      ></a></li>
-            <li><a data-bind="ltext: 'application.tabAttachments',  click: $root.application.changeTab" href="#" data-target="attachments"  data-test-id="application-open-attachments-tab"  ></a></li>
-            <li><a data-bind="ltext: 'application.tabStatement',    click: $root.application.changeTab" href="#" data-target="statement"    data-test-id="application-open-statement-tab"    ></a></li>
-            <li><a data-bind="ltext: 'application.tabVerdict',      click: $root.application.changeTab" href="#" data-target="verdict"      data-test-id="application-open-verdict-tab"      ></a></li>
-            <li><a data-bind="ltext: 'application.tabConversation', click: $root.application.changeTab" href="#" data-target="conversation" data-test-id="application-open-conversation-tab" ></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="info" data-test-id="application-open-info-tab">
+                  <span data-bind="ltext: 'application.tabInfo'"></span>
+                  <span data-bind="if: $root.application.nonpartyDocumentIndicator">
+                    <span data-bind="text: $root.application.nonpartyDocumentIndicator"
+                        id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="parties" data-test-id="application-open-parties-tab">
+                  <span data-bind="ltext: 'application.tabParties'"></span>
+                  <span data-bind="if: $root.application.partyDocumentIndicator">
+                    <span data-bind="text: $root.application.partyDocumentIndicator"
+                          id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
+                <span data-bind="ltext: 'application.tabAttachments'"></span>
+                <span data-bind="if: $root.application.attachmentsRequiringAction">
+                  <span data-bind="text: $root.application.attachmentsRequiringAction"
+                        id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="statement" data-test-id="application-open-statement-tab">
+                  <span data-bind="ltext: 'application.tabStatement'"></span>
+                  <span data-bind="if: $root.application.unseenStatements">
+                    <span data-bind="text: $root.application.unseenStatements"
+                          id="applicationUnseenStatements" class="indicator"></span></span></a></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
+                   <span data-bind="ltext: 'application.tabVerdict'"></span>
+                <span data-bind="if: $root.application.unseenVerdicts">
+                  <span data-bind="text: $root.application.unseenVerdicts"
+                        id="applicationUnseenVerdists" class="indicator"></span></span></a></a></li>
+            <li><a data-bind="click: $root.application.changeTab"
+                   href="#" data-target="conversation" data-test-id="application-open-conversation-tab" >
+                  <span data-bind="ltext: 'application.tabConversation'"></span>
+                  <span data-bind="if: $root.application.unseenComments">
+                    <span data-bind="text: $root.application.unseenComments"
+                          id="applicationUnseenComments" class="indicator"></span></span></a></li>
           </ul>
         </div>
       </div>
@@ -162,8 +192,8 @@
             <div class="application_section_content content_expanded">
               <div>
                 <h3 data-bind="ltext: 'application.authorizedParties'">Valtuutetut</h3>
-                <div data-bind="with: $root.applicationModel">
-                  <ul data-bind="foreach: auth">
+                <div data-bind="with: $root.application">
+                  <ul data-bind="foreach: roles">
                     <li>
                       <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
                       (<span data-bind="text: username"></span>)
@@ -257,7 +287,7 @@
                 </tbody>
               </table>
 
-              <a data-bind="attr: {href: '/api/download-all-attachments/' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" href="#" target="_blank"></a>
+              <a data-bind="attr: {href: '/api/download-all-attachments/' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
             </div>
             <div data-bind="ifnot: attachmentsByGroup().length">
@@ -323,37 +353,106 @@
           </div>
         </div>
 
-        <div id="application-statement-tab" class="tab-content" data-bind="with: $root.application.data">
-          <div data-bind="ifnot: $data.statements && statements().length>0">
-            <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
+        <div id="application-statement-tab" class="tab-content">
+
+          <div data-bind="with: $root.application.data" class="application-statements">
+
+            <h1>Lausunnot</h1>
+
+            <div data-bind="ifnot: $data.statements && statements().length>0">
+              <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
+            </div>
+
+            <div data-bind="if: $data.statements && statements().length>0">
+              <table class="table table-striped tablesorter">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.statement.desc'"></th>
+                    <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                    <th data-bind="ltext: 'application.statement.requested'"></th>
+                    <th data-bind="ltext: 'application.statement.given'"></th>
+                    <th data-bind="ltext: 'application.statement.status'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: $data.statements()">
+                  <tr class="statement-row">
+                    <td>
+                      <span data-bind="if: status() || $root.authorization.ok('should-see-unsubmitted-statements')")>
+                        <a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement, attr: {'data-test-id' : 'open-statement-' + $index()}"></a>
+                      </span>
+                      <span data-bind="ifnot: status() || $root.authorization.ok('should-see-unsubmitted-statements')")>
+                        <span data-bind="text: person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
+                      </span>
+                    </td>
+                    <td data-bind="text: person.name"></td>
+                    <td data-bind="dateString: requested"></td>
+                    <td data-bind="dateString: given"></td>
+                    <td data-bind="text: status() && loc('statement.'+status())"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <button
+                data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
+                class="btn btn-primary modal"
+                data-test-id="add-statement">
+            </button>
+
           </div>
-          <div data-bind="if: $data.statements && statements().length>0">
-            <table class="table table-striped tablesorter">
-              <thead>
-                <tr>
-                  <th data-bind="ltext: 'application.statement.desc'"></th>
-                  <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
-                  <th data-bind="ltext: 'application.statement.requested'"></th>
-                  <th data-bind="ltext: 'application.statement.given'"></th>
-                  <th data-bind="ltext: 'application.statement.status'"></th>
-                </tr>
-              </thead>
-              <tbody data-bind="foreach: $data.statements()">
-                <tr class="statement-row">
-                  <td><a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement, attr: {'data-test-id' : 'open-statement-' + $index()}"></a></td>
-                  <td data-bind="text: person.name"></td>
-                  <td data-bind="dateString: requested"></td>
-                  <td data-bind="dateString: given"></td>
-                  <td data-bind="text: status() && loc('statement.'+status())"></td>
-                </tr>
-              </tbody>
-            </table>
+
+          <!-- feature flaggin' -->
+          <div data-bind="if: features.enabled('neighbors')"><div class="feature"><span class="legend">neighbors</span>
+
+          <div data-bind="with: application" class="application-neighbors">
+
+            <h1>Naapurit</h1>
+
+            <div data-bind="ifnot: neighbors() && neighbors().length>0">
+              <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
+            </div>
+
+            <div data-bind="if: neighbors() && neighbors().length>0">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'neighbors.propertyId'"></th>
+                    <th data-bind="ltext: 'neighbors.owner'"></th>
+                    <th data-bind="ltext: 'neighbors.status'"></th>
+                    <th data-bind="ltext: 'neighbors.actions'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: neighbors">
+                  <tr>
+                    <td data-bind="text: neighbor.propertyId"></td>
+                    <td data-bind="with: neighbor.owner">
+                      <span data-bind="text: name" class="owner-name"></span>
+                      <span data-bind="text: address.street" class="owner-street"></span>
+                      <span data-bind="text: address.zip" class="owner-zip"></span>
+                      <span data-bind="text: address.city" class="owner-city"></span>
+                      <span data-bind="text: email" class="owner-email"></span>
+                    </td>
+                    <td data-bind="with: lastStatus">
+                      <span data-bind="text: loc('neighbor.state', state())" class="status-state"></span>
+                      <span data-bind="dateTimeString: created" class="status-time"></span>
+                    </td>
+                    <td>
+                      <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('neighbor-send-invite'), ltext: 'neighbors.actions.sendEmail'" href="#"></a>
+                      <a data-bind="click: $root.neighbor.upload, ltext: 'neighbors.actions.upload', clickBubble: false" href="#"></a>
+                      <a data-bind="click: $root.neighbor.markDone, visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'), ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage',visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
+
           </div>
-          <button
-              data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
-              class="btn btn-primary modal"
-              data-test-id="add-statement">
-          </button>
+
+          <!-- feature flaggin' -->
+          </div></div>
+
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
@@ -404,26 +503,7 @@
               class="btn btn-primary modal"
               data-test-id="add-statement-person">
           </button>
-        </div>
-      </div>
-
-      <div id="dialog-remove-doc" class="window autosized">
-        <div data-bind="with: $root.removeDocModel">
-          <div class="dialog-header">
-            <p data-bind="ltext: 'removeDoc.sure'"></p>
-            <p class="dialog-close close">X</p>
-          </div>
-          <div class="dialog-content">
-            <div>
-              <span data-bind="ltext: 'removeDoc.message1'"></span>
-              <strong data-bind="text: docName"></strong>
-            </div>
-            <div>
-              <span data-bind="ltext: 'removeDoc.message2'"></span>
-            </div>
-            <button data-bind="click: ok, ltext: 'removeDoc.ok'" class="btn btn-primary btn-dialog close" data-test-id="remove-ok"></button>
-            <button data-bind="click: cancel, ltext: 'removeDoc.cancel'" class="btn btn-dialog close"></button>
-          </div>
+          <img class="own-info-ajax-loader" data-bind="visible: submitting" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
         </div>
       </div>
 
@@ -439,59 +519,161 @@
 
       <div id="dialog-stamp-attachments" class="window autosized">
         <div data-bind="with: $root.stampModel">
+
           <div class="dialog-header">
             <p data-bind="ltext: 'stamp.title'"></p>
             <p class="dialog-close close">X</p>
           </div>
+
           <div class="dialog-content">
-            <div data-bind="visible: status() < statusRunning">
-              <div>
-                <span data-bind="ltext: 'stamp.status.starting', visible: status() === statusStarting"></span>
-                <span data-bind="ltext: 'stamp.status.no-files', visible: status() === statusNoFiles"></span>
-              </div>
-              <table data-bind="visible: status() === statusInit" class="stamp-margin">
+
+            <div class="stamp-margin">
+              <table>
                 <tbody>
                   <tr>
                     <td data-bind="ltext: 'stamp.margin'" colspan="3"></td>
                   </tr>
                   <tr>
                     <td data-bind="ltext: 'stamp.xMargin'" class="label"></td>
-                    <td><input data-bind="value: xMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !xMarginOk()}" id="stamp.xMargin" type="text" class="form-input text"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          value: xMargin,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown',
+                          css: {'invalid-margin': !xMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
                     <td>mm</td>
                   </tr>
                   <tr>
                     <td data-bind="ltext: 'stamp.yMargin'" class="label"></td>
-                    <td><input data-bind="value: yMargin, valueUpdate: 'afterkeydown', css: {'invalid-margin': !yMarginOk()}" id="stamp.yMargin" type="text" class="form-input text"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          value: yMargin,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown',
+                          css: {'invalid-margin': !yMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
                     <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.transparency'" class="label"></td>
+                    <td colspan="2">
+                      <select data-bind="options: transparencies, optionsText: 'text', value: transparency" class="form-input"></select>
+                    </td>
                   </tr>
                 </tbody>
               </table>
-              <button data-bind="click: start, ltext: 'stamp.start', enable: xMarginOk() && yMarginOk() && status() === statusInit, visible: status() != statusNoFiles" class="btn btn-primary btn-dialog"></button>
-              <button data-bind="ltext: 'stamp.cancel', enable: status() === statusInit" class="btn btn-dialog close"></button>
             </div>
-            <div data-bind="visible: status() >= statusRunning">
-              <div>
-                <span data-bind="ltext: 'stamp.status.running', visible: status() === statusRunning"></span>
-                <span data-bind="ltext: 'stamp.status.done', visible: status() === statusDone"></span>
-              </div>
+
+            <div class="stamp-files">
               <table>
                 <thead>
                   <tr>
-                    <td data-bind="ltext: 'stamp.filename'"></td>
-                    <td data-bind="ltext: 'stamp.size'"></td>
-                    <td data-bind="ltext: 'stamp.status'"></td>
+                    <th data-bind="ltext: 'stamp.filename'"></th>
+                    <th data-bind="ltext: 'stamp.version'"></th>
+                    <th data-bind="ltext: 'stamp.size'"></th>
+                    <th data-bind="ltext: status() <= statusReady ? 'stamp.select' : 'stamp.status'"></th>
                   </tr>
                 </thead>
-                <tbody data-bind="foreach: filesTable">
+                <tbody data-bind="foreach: files">
                   <tr>
                     <td data-bind="text: filename"></td>
+                    <td>
+                      <span data-bind="version: version"></span>
+                      <span data-bind="visible: restamp">*</span>
+                    </td>
                     <td data-bind="size: size"></td>
-                    <td data-bind="text: status"></td>
+                    <td>
+                      <input type="checkbox" data-bind="
+                          checked: selected,
+                          visible: $parent.status() < $parent.statusRunning,
+                          enable: $parent.status() === $parent.statusReady" />
+                      <span data-bind="
+                          text: loc('stamp.file.status', status()),
+                          visible: $parent.status() >= $parent.statusRunning"></span>
+                    </td>
                   </tr>
                 </tbody>
+                <tfoot>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th>
+                      <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
+                      <span>/</span>
+                      <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
+                    </th>
+                  </tr>
+                </tfoot>
               </table>
-              <button data-bind="ltext: 'stamp.ok', visible: status() === statusDone" class="btn btn-primary btn-dialog close"></button>
+              <form class="stamp-files-select-all-none">
+              </form>
             </div>
+
+            <div class="stamp-status">
+              <span data-bind="text: loc('stamp.status', status().toString())"></span>
+            </div>
+
+            <div class="stamp-buttons">
+              <button data-bind="
+                  click: start,
+                  ltext: 'stamp.start',
+                  enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
+                  visible: status() <= statusReady"
+                class="btn btn-primary btn-dialog">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.cancel',
+                  enable: status() === statusReady,
+                  visible: status() <= statusReady"
+                class="btn btn-dialog close">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.ok',
+                  visible: status() > statusRunning"
+                class="btn btn-primary btn-dialog close">
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div id="dialog-send-neighbor-email" class="window autosized">
+        <div data-bind="with: $root.sendNeighborEmailModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'neighbors.sendEmail.title'"></p>
+            <p class="dialog-close close">X</p>
+          </div>
+          <div class="dialog-content">
+
+            <form>
+              <label data-bind="ltext: 'neighbors.sendEmail.name'" class="form-label" for="neighbors-sendemail-name"></label>
+              <span data-bind="text: name" class="form-input text long" id="neighbors-sendemail-name" ></span>
+
+              <label data-bind="ltext: 'neighbors.sendEmail.email'" class="form-label" for="neighbors-sendemail-email"></label>
+              <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}" class="form-input text long" id="neighbors-sendemail-email" />
+
+              <label data-bind="ltext: 'neighbors.sendEmail.message'" class="form-label" for="neighbors-sendemail-message"></label>
+              <textarea
+                data-bind="value: message, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.message.placeholder')}"
+                class="form-input textarea"
+                id="neighbors-sendemail-message"
+                rows="3"
+                maxlength="4000">
+              </textarea>
+            </form>
+
+            <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok" class="btn btn-primary btn-dialog"></button>
+            <button data-bind="ltext: 'neighbors.sendEmail.cancel'" class="btn btn-dialog close"></button>
+
           </div>
         </div>
       </div>

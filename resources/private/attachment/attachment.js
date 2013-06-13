@@ -42,7 +42,7 @@ var attachment = (function() {
     loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
 
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
-    loc("attachment.delete.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
+    loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
 
   function ApproveModel(authorizationModel) {
     var self = this;
@@ -277,11 +277,11 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked) {
+  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority) {
     uploadingApplicationId = applicationId;
     var iframeId = 'uploadFrame';
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked);
+    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
   }
 
   function regroupAttachmentTypeList(types) {

@@ -32,7 +32,22 @@
   (fact (contains-value? [false [false false [false [false {"false" true}]]]] true?) => true)
   (fact (contains-value? [false [false false [false [false {"true" false}]]]] true?) => false))
 
-(fact "safe-int"
-  (safe-int "010")  => 10
-  (safe-int "-010") => -10
-  (safe-int "1.2")  => nil)
+(fact "->int"
+  (->int "010")  => 10
+  (->int "-010") => -10
+  (->int :-10)   => -10
+  (->int -10)    => -10
+  (->int -60/6)  => -10
+  (->int "1.2")  => 0
+  (->int "1.2")  => 0
+  (->int "1.2" nil)  => nil)
+
+(fact "fn->"
+  (map (fn-> :a :b even?) [{:a {:b 2}}
+                           {:a {:b 3}}
+                           {:a {:b 4}}]) => [true false true])
+
+(fact "fn->>"
+  (map (fn->> :a (reduce +)) [{:a [1 2 3]}
+                              {:a [2 3 4]}
+                              {:a [3 4 5]}]) => [6 9 12])

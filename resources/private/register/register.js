@@ -25,7 +25,6 @@
 
   function submit(m) {
     var error$ = $('#register-email-error');
-    var loader$ = $("#registerLoader");
     error$.text('');
 
     ajax.command('register-user', json(m))
@@ -103,8 +102,8 @@
   hub.onPageChange('register', function() {
     var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
     $.get('/api/vetuma', {success: urlPrefix + '#!/register2',
-                      cancel:  urlPrefix + '#!/register/cancel',
-                      error:   urlPrefix + '#!/register/error'}, function(d) {
+                          cancel:  urlPrefix + '#!/register/cancel',
+                          error:   urlPrefix + '#!/register/error'}, function(d) {
       $('#vetuma-register')
         .html(d).find(':submit').addClass('btn btn-primary')
                                 .attr('value',loc("register.action"))
