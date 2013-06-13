@@ -1,10 +1,6 @@
 (ns lupapalvelu.security-test
-  (:use clojure.test
-        midje.sweet
-        lupapalvelu.security)
-  (:require [noir.session :as session]
-            [lupapalvelu.security :as security]))
-
+  (:use [midje.sweet]
+        [lupapalvelu.security]))
 
 (facts "non-private"
   (fact "strips away private keys from map"
@@ -32,3 +28,41 @@
     (applicant? {:role :applicant}) => true
     (applicant? {}) => false))
 
+;; Metaconstant cannot be cast to java.lang.String
+(def ^:private some-password "p4sswodr")
+
+(facts "user entity mongo model"
+  (fact "is a map with all the data"
+     (create-use-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     => (contains {:email        ..email..
+                   :personId     ..userid..
+                   :role         ..role..
+                   :firstName    ..firstname..
+                   :lastName     ..lastname..
+                   :phone        ..phone..
+                   :city         ..city..
+                   :street       ..street..
+                   :zip          ..zip..
+                   :enabled      ..enabled..}))
+
+  (fact "does not contain plaintext password"
+     (let [entity   (create-use-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+           password (get-in entity [:private :password])]
+       password => truthy
+       (.contains password some-password) => false
+       (.contains (str entity) some-password) => false))
+
+  (fact "applicant does not have organizations"
+     (:organizations
+       (create-use-entity ..email.. some-password ..userid.. :applicant ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..))
+     => nil)
+
+  (fact "authority does have organizations"
+     (create-use-entity ..email.. some-password ..userid.. :authority ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     => (contains {:organizations ..organizations..}))
+
+  (fact "authorityAdmin does have organizations"
+     (create-use-entity ..email.. some-password ..userid.. "authorityAdmin" ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     => (contains {:organizations ..organizations..}))
+
+  )
