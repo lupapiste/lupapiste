@@ -57,22 +57,22 @@
 (defn valid-password? [password]
   (>= (count password) (env/value :password :minlength)))
 
-(defn- create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
+(defn create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
   (let [salt              (dispense-salt)
-        hashed-password   (get-hash password salt)
-        new-user-base     {:username     email
-                           :email        email
-                           :role         role
-                           :firstName    firstname
-                           :lastName     lastname
-                           :phone        phone
-                           :city         city
-                           :street       street
-                           :zip          zip
-                           :organizations organizations
-                           :enabled      enabled
-                           :private      {:salt salt :password hashed-password}}]
-    (if userid (assoc new-user-base :personId userid) new-user-base)))
+        hashed-password   (get-hash password salt)]
+    (-> {:username     email
+         :email        email
+         :role         role
+         :firstName    firstname
+         :lastName     lastname
+         :phone        phone
+         :city         city
+         :street       street
+         :zip          zip
+         :enabled      enabled
+         :private      {:salt salt :password hashed-password}}
+      (#(if userid (assoc % :personId userid) %))
+      (#(if (#{:authority :authorityAdmin} (keyword role)) (assoc % :organizations organizations) %)))))
 
 (defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled organizations]
                          :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
