@@ -29,7 +29,8 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
-            [clj-time.format :as tf]))
+            [clj-time.format :as tf]
+            [sade.xml :as xml]))
 
 ;; Validators
 
@@ -615,6 +616,21 @@
                        :given given
                        :status status
                        :official official}}}))
+
+(defcommand "check-for-verdict"
+  {:parameters [:id]
+   ;TODO; remove draft and open when this feature ready
+   :states     [:draft :open :submitted :complement-needed :sent]
+   :roles      [:authority]
+   :feature [:paatoksenHaku]}
+  [command]
+  (with-application command
+    (fn [application]
+      (let [organization (:organization application)
+            legacy (organization/get-legacy organization)
+            id (:id application)]
+        (ok :response (xml/xml->edn (krysp/application-xml legacy id)))))))
+
 
 ;;
 ;; krysp enrichment

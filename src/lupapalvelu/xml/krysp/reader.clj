@@ -13,7 +13,7 @@
 ;; Test urls
 ;;
 
-(def logica-test-legacy "http://212.213.116.162/geoserver/wfs")
+(def logica-test-legacy "http://212.213.116.162/geos_facta/wfs")
 
 ;;
 ;; Read the Krysp from Legacy
@@ -29,6 +29,11 @@
 (defn building-xml [server id]
   (let [url (str server "?request=GetFeature&typeName=rakval%3AValmisRakennus&outputFormat=KRYSP&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Erakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun%3C/PropertyName%3E%3CLiteral%3E" id "%3C/Literal%3E%3C/PropertyIsEqualTo%3E")]
     (cr/get-xml url)))
+
+(defn application-xml [server id]
+  (let [url (str server "?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&outputFormat=KRYSP&maxFeatures=1")]
+    (cr/get-xml url)))
+
 
 (defn- ->buildingIds [m]
   {:propertyId (get-in m [:Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun])

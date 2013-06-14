@@ -233,6 +233,7 @@
 
     self.verdicts = ko.observable();
     self.attachments = ko.observable();
+    self.response = ko.observable();
 
     self.refresh = function(application) {
       self.verdicts(application.verdict);
@@ -245,7 +246,13 @@
       window.location.hash = "#!/verdict/" + currentId;
       return false;
     };
-
+    self.checkVerdict = function(){
+      ajax.command("check-for-verdict", {id: application.id()})
+      .success(function(resp) {
+        self.response(JSON.stringify(resp.response));
+      })
+      .call();
+    };
   }();
 
   var submitApplicationModel = new function() {
