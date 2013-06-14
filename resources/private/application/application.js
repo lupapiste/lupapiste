@@ -540,9 +540,11 @@
 
   function initAuthoritiesSelectList(data) {
     authorities.removeAll();
+    var authorityInfos = [];
     _.each(data || [], function(authority) {
-      authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
+      authorityInfos.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
+    authorities(authorityInfos);
   }
 
   function showApplication(applicationDetails) {
