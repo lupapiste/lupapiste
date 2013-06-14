@@ -215,15 +215,15 @@
                                  :schema-data [[["osoite" "katu"] #(:address %)]]
                                  :operation-type :publicArea
                                  :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")
-                                 :attachments []}                                                     ;; TODO: Mitä attachmentteihin?
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :yleiset-alueet-kayttolupa   {:schema "tyo-/vuokra-aika"
                                  :operation-type :publicArea
                                  :required yleiset-alueet-common-schemas
-                                 :attachments []}                                                     ;; TODO: Mitä attachmentteihin?
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                  :operation-type :publicArea
                                  :required ["yleiset-alueet-maksaja"]
-                                 :attachments []}                                                     ;; TODO: Mitä attachmentteihin?
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
 
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}

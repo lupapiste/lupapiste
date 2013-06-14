@@ -51,7 +51,7 @@
           :order 68
           :removable true
           :repeating true}
-   :body <kartalta valitut täpät>})                                            ;; sijainninSelitysteksti, sijaintitieto
+   :body <kartalta valitut paikat>})                                            ;; sijainninSelitysteksti, sijaintitieto
 
 (def mainostus-tapahtuma
   (body
@@ -98,7 +98,7 @@
   (to-map-by-name
     [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
             :type :group
-;            :removable false  ;; TODO: Miten estää raksin tuleminen?
+;            :removable false  ;; TODO: Miten voi poistaa raksin?
             :order 64}
      :body mainostus-tai-viitoitus-tapahtuma-valinta}]))
 
