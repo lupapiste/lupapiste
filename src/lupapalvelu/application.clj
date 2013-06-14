@@ -431,8 +431,9 @@
                                                  ;; TODO: Yhdista (nama kaikki) schemat jossain jarkevammassa paikassa
                                                  :schema ((merge schemas/schemas
                                                             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
-                                                            yleiset-alueet/yleiset-alueet-kaivuulupa
                                                             ympschemas/ympschemas
+                                                            yleiset-alueet/kaivuulupa
+                                                            yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
 
                                                  :created created

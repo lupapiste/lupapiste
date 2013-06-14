@@ -2,30 +2,85 @@
   (:use [lupapalvelu.document.schemas]))
 
 
-(def yleiset-alueet-maksaja (body
-                              yritys-minimal
-                              simple-osoite
-                              {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+(def hankkeen-kuvaus-tunnisteella
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "luvanTunniste" :type :string}))                                     ;; sijoituslupaviitetietoType
 
-(def tyomaasta-vastaava (body
-                          {:name "userId" :type :personSelector}
-                          designer-basic
-                          [{:name "patevyys" :type :group
-                            :body [{:name "ammattipatevyys" :type :text :max-len 4000 :layout :full-width}
-                                   {:name "voimassa-pvm" :type :date}]}]))
+(def yleiset-alueet-maksaja
+  (body
+    yritys-minimal
+    simple-osoite
+    {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def vuokra-ja-tyo-aika (body
-                          [{:name "vuokra-aika-alkaa-pvm" :type :date}      ;; kayttojaksotietoType
-                           {:name "vuokra-aika-paattyy-pvm" :type :date}]
-                          [{:name "tyoaika-alkaa-pvm" :type :date}          ;; toimintajaksotietoType
-                           {:name "tyoaika-paattyy-pvm" :type :date}]))
+(def tyomaasta-vastaava
+  (body
+    {:name "userId" :type :personSelector}
+    designer-basic
+    [{:name "patevyys" :type :group
+      :body [{:name "ammattipatevyys" :type :text :max-len 4000 :layout :full-width}
+             {:name "voimassa-pvm" :type :date}]}]))
 
-(def yleiset-alueet-kaivuulupa
+(def vuokra-ja-tyo-aika
+  (body
+    [{:name "vuokra-aika-alkaa-pvm" :type :date}                               ;; kayttojaksotietoType
+     {:name "vuokra-aika-paattyy-pvm" :type :date}]
+    [{:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
+     {:name "tyoaika-paattyy-pvm" :type :date}]))
+
+(def tapahtuman-tiedot
+  (body
+    {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
+    {:name "tapahtumapaikka" :type :string}
+    [{:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
+     {:name "tapahtuma-aika-paattyy-pvm" :type :date}]))
+
+#_(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+            {:name "henkilo" :type :group :body henkilo}
+            {:name "yritys" :type :group :body yritys}])
+
+#_{:info {:name "hakija"
+          :order 3
+          :removable true
+          :repeating true
+          :type :party}
+   :body party}
+
+#_(def tapahtumien-syotto                                                      ;; merkinnatJaPiirroksettietoType
+  {:info {:name "tapahtumien-syotto"
+          :order 68
+          :removable true
+          :repeating true}
+   :body <kartalta valitut täpät>})                                            ;; sijainninSelitysteksti, sijaintitieto
+
+(def mainostus-tapahtuma
+  (body
+    tapahtuman-tiedot
+    [{:name "mainostus-alkaa-pvm" :type :date}                                 ;; toimintajaksotietoType
+     {:name "mainostus-paattyy-pvm" :type :date}]
+    {:name "haetaan-kausilupaa" :type :checkbox}                               ;; lupakohtainenLisatietoType ?
+    #_tapahtumien-syotto))
+
+(def viitoitus-tapahtuma
+  (body
+    tapahtuman-tiedot
+    #_tapahtumien-syotto))
+
+(def mainostus-tai-viitoitus-tapahtuma-valinta
+  (body
+    [{:name "_selected" :type :radioGroup
+      :body [{:name "mainostus-tapahtuma-valinta"} {:name "viitoitus-tapahtuma-valinta"}]}
+     {:name "mainostus-tapahtuma-valinta" :type :group
+      :body mainostus-tapahtuma}
+     {:name "viitoitus-tapahtuma-valinta" :type :group
+      :body viitoitus-tapahtuma}]))
+
+
+(def kaivuulupa
   (to-map-by-name
     [{:info {:name "yleiset-alueet-hankkeen-kuvaus"
              :order 60}
-      :body [{:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-             {:name "luvanTunniste" :type :string}]}                                     ;; sijoituslupaviitetietoType
+      :body hankkeen-kuvaus-tunnisteella}
      {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
              :type :party
              :order 61}
@@ -39,21 +94,13 @@
              :order 63}
       :body vuokra-ja-tyo-aika}]))
 
-
-(def yleiset-alueet-kayttolupa
+(def kayttolupa-mainoslaitteet-ja-opasteviitat
   (to-map-by-name
-    [{:info {:name "yleiset-alueet-hankkeen-kuvaus"
-             :order 64}
-      :body [{:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-             {:name "luvanTunniste" :type :string}]}                                     ;; sijoituslupaviitetietoType
-     {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
-             :type :party
-             :order 65}
-      :body yleiset-alueet-maksaja}
-     {:info {:name "tyo-/vuokra-aika"                                        ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
-             :type :group
-             :order 66}
-      :body vuokra-ja-tyo-aika}]))
+    [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
+            :type :group
+;            :removable false  ;; TODO: Miten estää raksin tuleminen?
+            :order 64}
+     :body mainostus-tai-viitoitus-tapahtuma-valinta}]))
 
 ;;
 ;; TODO: Liikennetta haittavan tyon lupa

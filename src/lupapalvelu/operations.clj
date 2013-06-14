@@ -45,19 +45,19 @@
                                                                         ["maa-ainesten_ottaminen" :maa-aineslupa]]]])
           (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
                                                                             ["kayttolupa"
-                                                                             [["tyomaasuojat-ja-muut-rakennelmat" :yleiset-alueet-kayttolupa]
-                                                                              ["mainoslaitteet-ja-opasteviitat" :yleiset-alueet-kayttolupa]
-                                                                              ["muut-yleisten-alueiden-tilojen-kaytot" :yleiset-alueet-kayttolupa]
-                                                                              ["messujen-ja-tapahtumien-alueiden-kaytot" :yleiset-alueet-kayttolupa]
-                                                                              ["kadulta-tapahtuvat-nostot" :yleiset-alueet-kayttolupa]
-                                                                              ["kiinteistöjen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi" :yleiset-alueet-kayttolupa]
-                                                                              ["rakennustelineet-kadulla" :yleiset-alueet-kayttolupa]
-                                                                              ["muu-kayttolupa" :yleiset-alueet-kayttolupa]]]
+                                                                             [["tyomaasuojat-ja-muut-rakennelmat" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["mainoslaitteet-ja-opasteviitat" :mainostus-ja-viitoituslupa]
+                                                                              ["muut-yleisten-alueiden-tilojen-kaytot" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["messujen-ja-tapahtumien-alueiden-kaytot" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["kadulta-tapahtuvat-nostot" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["rakennustelineet-kadulla" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["muu-kayttolupa" :yleiset-alueet-kayttolupa]]] ;; TODO
                                                                             ["sijoituslupa"
-                                                                             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa]
-                                                                              ["pysyvien-maanpäällisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa]
-                                                                              ["muu-sijoituslupa" :yleiset-alueet-kayttolupa]]
-                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]
+                                                                             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["muu-sijoituslupa" :yleiset-alueet-kayttolupa]] ;; TODO
+                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa] ;; TODO
                                                                             ]]]])))
 
 
@@ -220,6 +220,10 @@
                                  :operation-type :publicArea
                                  :required yleiset-alueet-common-schemas
                                  :attachments []}                                                     ;; TODO: Mitä attachmentteihin?
+   :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
+                                 :operation-type :publicArea
+                                 :required ["yleiset-alueet-maksaja"]
+                                 :attachments []}                                                     ;; TODO: Mitä attachmentteihin?
 
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
@@ -233,10 +237,10 @@
         schema (cons (:schema info) (:required info))]
   (if-not ((merge schemas/schemas
              poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
-             yleiset-alueet/yleiset-alueet-kaivuulupa
-             yleiset-alueet/yleiset-alueet-kayttolupa
-             ympschemas/ympschemas
-             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema)
+             yleiset-alueet/kaivuulupa
+             yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
+             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa
+             ympschemas/ympschemas) schema)
     (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
   )
 
