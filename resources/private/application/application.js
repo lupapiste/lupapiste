@@ -539,7 +539,6 @@
   }
 
   function initAuthoritiesSelectList(data) {
-    authorities.removeAll();
     var authorityInfos = [];
     _.each(data || [], function(authority) {
       authorityInfos.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
