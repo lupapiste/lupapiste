@@ -4,3 +4,18 @@ operations.yleiset-alueet-kayttolupa.desc: Hankkeesi vaatii luvan. Voit hakea lu
 
 # TODO: Miten ratkaistaan? Tämä on sama kuin 'tyo-/vuokra-aika._group_label'...
 yleiset-alueet-kayttolupa._group_label: Työ-/vuokra-aika
+
+operations.tree.sijoituslupa: Rakenteiden sijoittaminen
+
+operations.tree.tyomaasuojat-ja-muut-rakennelmat: Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle
+operations.tree.mainoslaitteet-ja-opasteviitat: Mainoslaitteiden ja opasteviittojen sijoittaminen
+operations.tree.muut-yleisten-alueiden-tilojen-kaytot: Muut yleiselle alueelle kohdistuvat tilan käytöt
+operations.tree.messujen-ja-tapahtumien-alueiden-kaytot: Erilaiset messujen ja tapahtumien aikaiset alueiden käytöt
+operations.tree.kadulta-tapahtuvat-nostot: Kadulta tapahtuvat nostot
+operations.tree.rakennustelineet-kadulla: Kadulle pystytettävät rakennustelineet
+operations.tree.kiinteistöjen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi: Kiinteistön rakentamis- ja korjaamistyöt, joiden suorittamiseksi rajataan osa kadusta tai yleisestä alueesta työmaaksi (ei kaivutöitä)
+operations.tree.muu-kayttolupa: Muu käyttölupa
+
+operations.tree.pysyvien-maanalaisten-rakenteiden-sijoittaminen: Pysyvien maanalaisten rakenteiden sijoittaminen
+operations.tree.pysyvien-maanpäällisten-rakenteiden-sijoittaminen: Pysyvien maanpäällisten rakenteiden sijoittaminen
+operations.tree.muu-sijoituslupa: Muu sijoituslupa

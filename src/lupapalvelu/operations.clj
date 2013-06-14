@@ -44,8 +44,21 @@
                                                                         ["Pima" :pima]
                                                                         ["maa-ainesten_ottaminen" :maa-aineslupa]]]])
           (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
+                                                                            ["kayttolupa"
+                                                                             [["tyomaasuojat-ja-muut-rakennelmat" :yleiset-alueet-kayttolupa]
+                                                                              ["mainoslaitteet-ja-opasteviitat" :yleiset-alueet-kayttolupa]
+                                                                              ["muut-yleisten-alueiden-tilojen-kaytot" :yleiset-alueet-kayttolupa]
+                                                                              ["messujen-ja-tapahtumien-alueiden-kaytot" :yleiset-alueet-kayttolupa]
+                                                                              ["kadulta-tapahtuvat-nostot" :yleiset-alueet-kayttolupa]
+                                                                              ["kiinteistöjen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi" :yleiset-alueet-kayttolupa]
+                                                                              ["rakennustelineet-kadulla" :yleiset-alueet-kayttolupa]
+                                                                              ["muu-kayttolupa" :yleiset-alueet-kayttolupa]]]
+                                                                            ["sijoituslupa"
+                                                                             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa]
+                                                                              ["pysyvien-maanpäällisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa]
+                                                                              ["muu-sijoituslupa" :yleiset-alueet-kayttolupa]]
                                                                             #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa]
-                                                                            ["kayttolupa" :yleiset-alueet-kayttolupa]]]])))
+                                                                            ]]]])))
 
 
 (defn municipality-operations [municipality]
