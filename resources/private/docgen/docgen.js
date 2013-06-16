@@ -58,8 +58,8 @@ var docgen = (function () {
     self.showHelp = function (e) {
       var element = self.findHelpElement(e);
       element.fadeIn("slow").css("display", "block");
-       var st = $(window).scrollTop(); // Scroll Top
-        var y = element.offset().top;
+      var st = $(window).scrollTop(); // Scroll Top
+      var y = element.offset().top;
       if ((y - 80) < (st)) { $("html, body").animate({ scrollTop: y - 80 + "px" }); };
     };
     self.hideHelp = function (e) {
@@ -508,6 +508,7 @@ var docgen = (function () {
     function buildPersonSelector(subSchema, model, path) {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
+      span.className = span.className + " personSelector";
       var myNs = path.slice(0, path.length - 1).join(".");
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
