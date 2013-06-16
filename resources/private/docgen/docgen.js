@@ -58,8 +58,9 @@ var docgen = (function () {
     self.showHelp = function (e) {
       var element = self.findHelpElement(e);
       element.fadeIn("slow").css("display", "block");
-      var offset = element.offset();  // Get position in viewport coordinates
-      if ($(window).height() < offset.top) {$("html, body").animate({ scrollTop: offset.top - 80 + "px" });};
+       var st = $(window).scrollTop(); // Scroll Top
+        var y = element.offset().top;
+      if ((y - 80) < (st)) { $("html, body").animate({ scrollTop: y - 80 + "px" }); };
     };
     self.hideHelp = function (e) {
       self.findHelpElement(e).fadeOut("slow").css("display", "none");
