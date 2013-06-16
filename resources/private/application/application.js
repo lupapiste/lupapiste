@@ -476,7 +476,8 @@
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
     };
 
-    self.addOperationButtonVisible = function() {
+    // TODO: This needs to be removed and replace its usage in application.html by usage of authorization.ok().
+    self.notPublicAreaTypeOperation = function() {
       return !self.operations()
              || self.operations().length === 0
              || self.operations()[self.operations().length-1]['operation-type'] === undefined
@@ -538,10 +539,11 @@
   }
 
   function initAuthoritiesSelectList(data) {
-    authorities.removeAll();
+    var authorityInfos = [];
     _.each(data || [], function(authority) {
-      authorities.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
+      authorityInfos.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
     });
+    authorities(authorityInfos);
   }
 
   function showApplication(applicationDetails) {

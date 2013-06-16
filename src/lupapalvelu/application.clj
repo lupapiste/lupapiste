@@ -20,6 +20,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.security :as security]
@@ -431,7 +432,9 @@
                                                  :schema ((merge schemas/schemas
                                                             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
                                                             yleiset-alueet/yleiset-alueet-kaivuulupa
+                                                            ympschemas/ympschemas
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
+
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
@@ -490,8 +493,11 @@
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
-(defn operation-validator [{{operation :operation} :data}]
+(defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
+
+(defn- public-area-validator [command application]
+  (when (= (:operation-type (operations/operations (keyword (:name (first (:operations application)))))) :publicArea) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
@@ -543,7 +549,8 @@
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
-   :input-validators [operation-validator]}
+   :input-validators [operation-validator]
+   :validators [public-area-validator]}
   [command]
   (with-application command
     (fn [application]
