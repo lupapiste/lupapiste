@@ -83,14 +83,6 @@ purku.varusteet.kaasuKytkin.help: Kaasulla tarkoitetaan myös nestekaasua, mikä
 rakennuksen-laajentaminen.varusteet.kaasuKytkin.help: Kaasulla tarkoitetaan myös nestekaasua, mikäli rakennus on tätä varten varustettu pysyvällä verkolla.
 rakennuksen-muuttaminen.varusteet.kaasuKytkin.help: Kaasulla tarkoitetaan myös nestekaasua, mikäli rakennus on tätä varten varustettu pysyvällä verkolla.
 
-
-varusteet.viemariKytkin
-
-
-uusiRakennus.
-purku.
-rakennuksen-laajentaminen.
-rakennuksen-muuttaminen.
 neighbor.show.form: Vastauksesi
 neighbor.show.welcome.desc: Naapurisi on tiedottanut sinua hankkeestaan. Ole hyva ja tutustu alla oleviin hankkeen tietoihin. Muistathan kuitata saaneesiin tiedot verkkopankkitunnuksillasi.
 neighbor.show.reply.text: Olemme saaneet tiedon rakennushankkeesta. Olemme tutustuneet hankkkeen suunnitelmiin/ piirustuksiin.

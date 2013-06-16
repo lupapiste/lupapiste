@@ -65,6 +65,11 @@ var docgen = (function () {
     self.hideHelp = function (e) {
       self.findHelpElement(e).fadeOut("slow").css("display", "none");
     };
+    self.addFocus = function (e) {
+      var event = getEvent(e);
+      var input$ = $(event.target);
+      input$.focus();
+    }
 
     // ID utilities
 
@@ -234,7 +239,11 @@ var docgen = (function () {
     function buildCheckbox(subSchema, model, path) {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
-      span.appendChild(makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly));
+      var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
+      input.onclick = self.addFocus;
+      input.onfocus = self.showHelp;
+      input.onblur = self.hideHelp;
+      span.appendChild(input);
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
@@ -751,7 +760,7 @@ var docgen = (function () {
       // remove warning and error highlights
       $("#document-" + docId + " :input").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
-      $("#document-" + docId + " .errorPanel").html("").hide();
+      $("#document-" + docId + " .errorPanel").html("").fadeOut();
       // apply new errors & highlights
       if (results && results.length > 0) {
         _.each(results, function (r) {
@@ -760,7 +769,7 @@ var docgen = (function () {
               code = r.result[1];
           if (level !== "tip") {
             var errorPanel = $("#" + docId + "-" + path.join("-") + "-errorPanel");
-            errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>").show();
+            errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>").fadeIn();
           }
           $("#" + docId + "-" + path.join("-")).addClass(level);
         });
