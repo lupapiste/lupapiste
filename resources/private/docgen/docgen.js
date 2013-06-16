@@ -27,7 +27,7 @@ var docgen = (function () {
     self.authorizationModel = authorizationModel;
     self.eventData = { doc: docId, app: self.appId };
 
-    self.getMeta = function(path, m) {
+    self.getMeta = function (path, m) {
       var meta = m ? m : self.meta;
       if (!path || !path.length) {
         return meta;
@@ -38,7 +38,7 @@ var docgen = (function () {
         if (path.length === 1) {
           return val;
         }
-        return  self.getMeta(path.splice(1, path.length - 1), val);
+        return self.getMeta(path.splice(1, path.length - 1), val);
       }
     };
 
@@ -56,7 +56,10 @@ var docgen = (function () {
     };
 
     self.showHelp = function (e) {
-      self.findHelpElement(e).fadeIn("slow").css("display", "block");
+      var element = self.findHelpElement(e);
+      element.fadeIn("slow").css("display", "block");
+      var offset = element.offset();  // Get position in viewport coordinates
+      $("html, body").animate({ scrollTop: offset.top - 80 + "px" });
     };
     self.hideHelp = function (e) {
       self.findHelpElement(e).fadeOut("slow").css("display", "none");
@@ -155,13 +158,13 @@ var docgen = (function () {
     }
 
     // TODO WIP
-    self.makeApprovalButtons = function(path, model) {
+    self.makeApprovalButtons = function (path, model) {
       var btnContainer$ = $("<span>").addClass("form-buttons");
       var statusContainer$ = $("<span>");
       var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
       var approveButton$ = null;
       var rejectButton$ = null;
-      var cmdArgs = {id: self.appId, doc: self.docId, path: path.join(".")};
+      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join(".") };
 
       if (_.isEmpty(model) || !features.enabled('docIndicators')) {
         return approvalContainer$[0];
@@ -183,13 +186,15 @@ var docgen = (function () {
         var title = loc("document." + verb);
         return $(makeButton(self.docId + "_" + verb, title))
         .addClass(cssClass).addClass("btn-narrow")
-        .click(function() {
+        .click(function () {
           ajax.command(cmd, cmdArgs)
-          .success(function() {
+          .success(function () {
             approveButton$.hide();
             rejectButton$.hide();
-            setStatus({value:noun});})
-          .call();});
+            setStatus({ value: noun });
+          })
+          .call();
+        });
       }
 
       function modelModifiedSince(model, timestamp) {
@@ -202,7 +207,7 @@ var docgen = (function () {
             // Leaf
             return model.modified && model.modified > timestamp;
           }
-          return _.find(model, function(myModel) {return modelModifiedSince(myModel, timestamp);});
+          return _.find(model, function (myModel) { return modelModifiedSince(myModel, timestamp); });
         }
         return false;
       }
@@ -612,10 +617,10 @@ var docgen = (function () {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
-          removeButton.onclick = function() {
+          removeButton.onclick = function () {
             LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-                {title: loc("yes"), fn: function() { removeData(self.appId, self.docId, myPath.concat([id])); }},
-                {title: loc("no")});
+                { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
+                { title: loc("no") });
           };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
@@ -729,8 +734,8 @@ var docgen = (function () {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
         .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
-        // Server returns empty array (all ok), or array containing an array with three
-        // elements: [key status message]. Here we use just the status.
+      // Server returns empty array (all ok), or array containing an array with three
+      // elements: [key status message]. Here we use just the status.
         .success(function (e) {
           var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
           callback(status, e.results);
@@ -742,26 +747,26 @@ var docgen = (function () {
 
     function showValidationResults(results) {
       // remove warning and error highlights
-      $("#document-"+docId+" :input").removeClass("warn").removeClass("error").removeClass("tip");
+      $("#document-" + docId + " :input").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
-      $("#document-"+docId+" .errorPanel").html("").hide();
+      $("#document-" + docId + " .errorPanel").html("").hide();
       // apply new errors & highlights
-      if(results && results.length > 0) {
-        _.each(results,function(r) {
-          var path  = r.path,
+      if (results && results.length > 0) {
+        _.each(results, function (r) {
+          var path = r.path,
               level = r.result[0],
-              code  = r.result[1];
-          if(level !== "tip") {
-            var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
-            errorPanel.html(errorPanel.html()+"<span class='"+level+"'>"+loc("error."+code)+"</span>").show();
+              code = r.result[1];
+          if (level !== "tip") {
+            var errorPanel = $("#" + docId + "-" + path.join("-") + "-errorPanel");
+            errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>").show();
           }
-          $("#"+docId+"-"+path.join("-")).addClass(level);
+          $("#" + docId + "-" + path.join("-")).addClass(level);
         });
       }
     }
 
     function validate() {
-      if(!options || options.validate) {
+      if (!options || options.validate) {
         ajax
           .query("validate-doc", { id: self.appId, doc: self.docId })
           .success(function (e) { showValidationResults(e.results); })
@@ -770,9 +775,9 @@ var docgen = (function () {
     }
 
     function disableBasedOnOptions() {
-      if(options && options.disabled) {
-        $(self.element).find('input, textarea').attr("readonly",true);
-        $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled",true);
+      if (options && options.disabled) {
+        $(self.element).find('input, textarea').attr("readonly", true);
+        $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();
       }
     }
@@ -830,7 +835,7 @@ var docgen = (function () {
       var n$ = $(e.target).parent();
       while (!n$.is("section")) {
         n$ = n$.parent();
-    }
+      }
       var op = self.schema.info.op;
 
       var documentName = loc(self.schemaName + "._group_label");
@@ -839,20 +844,20 @@ var docgen = (function () {
       }
 
       function onRemovalConfirmed() {
-        ajax.command("remove-doc", {id: self.appId, docId: self.docId})
-          .success(function() {
-            n$.slideUp(function () {n$.remove();});
+        ajax.command("remove-doc", { id: self.appId, docId: self.docId })
+          .success(function () {
+            n$.slideUp(function () { n$.remove(); });
             // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
             // Just the "operations" list should be changed.
             repository.load(self.appId);
           })
           .call();
-      return false;
-    }
+        return false;
+      }
 
-      var message = "<div>" + loc("removeDoc.message1") + " <strong>"+ documentName + ".</strong></div><div>" +  loc("removeDoc.message2") + "</div>";
+      var message = "<div>" + loc("removeDoc.message1") + " <strong>" + documentName + ".</strong></div><div>" + loc("removeDoc.message2") + "</div>";
       LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message,
-          {title: loc("removeDoc.ok"), fn: onRemovalConfirmed}, {title: loc("removeDoc.cancel")}, {html: true});
+          { title: loc("removeDoc.ok"), fn: onRemovalConfirmed }, { title: loc("removeDoc.cancel") }, { html: true });
 
       return false;
     }
