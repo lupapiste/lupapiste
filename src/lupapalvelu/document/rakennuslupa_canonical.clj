@@ -351,9 +351,12 @@
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
-(defn- get-lisatiedot [documents]
+(defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first documents))]
-    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}))
+    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
+                  :asioimiskieli (if (= lang "se")
+                                   "ruotsi"
+                                   "suomi")}}))
 
 (defn- get-asian-tiedot [documents maisematyo_documents]
   (let [asian-tiedot (:data (first documents))
@@ -406,7 +409,7 @@
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
-  [application]
+  [application lang]
   (let [documents (by-type (:documents application))
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot
@@ -429,7 +432,7 @@
                         :suunnittelijatieto (get-designers documents)}}
                       :rakennuspaikkatieto (get-bulding-places documents application)
                       :lausuntotieto (get-statements (:statements application))
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents))
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus (get-kayttotapaus documents)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
