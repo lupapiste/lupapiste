@@ -64,6 +64,10 @@ tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot.puhelin: Puhelin
 tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot.email: Sähköposti
 
 
+attachmentType.yleiset-alueet.liitoslausunto: Liitoslausunto
+attachmentType.yleiset-alueet.asemapiirros: Asemapiirros
+
+
 # Muokkaukset Tampere-miitin pohjalta
 #
 # TODO: Poista "vuokra-aika", jos se päätetään poistaa koodista.
