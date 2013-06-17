@@ -18,7 +18,7 @@
     {}))
 
 (defn- parse-target-env [build-tag]
-  (or (re-find #"[PRODEVTS]+" (or build-tag "")) "local"))
+  (or (re-find #"[PRODEVTSQA]+" (or build-tag "")) "local"))
 
 (def target-env (parse-target-env (:build-tag buildinfo)))
 
