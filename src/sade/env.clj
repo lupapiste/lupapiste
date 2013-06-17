@@ -3,13 +3,19 @@
         [sade.strings :only [numeric?]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
-            [clojure.walk :as walk])
+            [clojure.walk :as walk]
+            [me.raynes.fs :as fs])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
 (def buildinfo (read-string (slurp (io/resource "buildinfo.clj"))))
 
 (defn hgnotes [] (read-string (slurp (io/resource "hgnotes.clj"))))
+
+(def mongo-connection-info
+  (if (fs/exists? "mongo-connection.clj")
+    {:mongodb (read-string (slurp (io/file "mongo-connection.clj")))}
+    {}))
 
 (defn- parse-target-env [build-tag]
   (or (re-find #"[PRODEVTS]+" (or build-tag "")) "local"))
@@ -35,12 +41,14 @@
                                               (.setPassword password)))]
       (with-open [resource (clojure.lang.RT/resourceAsStream nil file-name)]
         (.load decryptor resource)
-        (clojure.walk/keywordize-keys
-          (apply deep-merge-with into
-            (for [[k _] decryptor
-                  ; _ contains "ENC(...)" value, decryption using getProperty
-                  :let [v (.getProperty decryptor k)]]
-              (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))))))
+        (merge
+          (clojure.walk/keywordize-keys
+            (apply deep-merge-with into
+                   (for [[k _] decryptor
+                         ; _ contains "ENC(...)" value, decryption using getProperty
+                         :let [v (.getProperty decryptor k)]]
+                     (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))
+          mongo-connection-info)))))
 
 (def ^:private config (atom {:last (java.lang.System/currentTimeMillis)
                              :data (read-config prop-file)}))
