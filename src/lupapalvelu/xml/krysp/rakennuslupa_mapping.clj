@@ -309,7 +309,7 @@
         file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
-        canonical-without-attachments  (application-to-canonical application)
+        canonical-without-attachments  (application-to-canonical application lang)
         fileserver-address (env/value :fileserver-address)
         begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
         statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
