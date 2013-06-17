@@ -510,7 +510,7 @@
     (fact (:muu (:lammonlahde (:rakennuksenTiedot rakennus))) => "fuusioenergialla")))
 
 (facts "Canonical model is correct"
-  (let [canonical (application-to-canonical application)
+  (let [canonical (application-to-canonical application "se")
         rakennusvalvonta (:Rakennusvalvonta canonical)
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta)
         rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto)
@@ -594,6 +594,7 @@
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
     (fact "rakennuksen omistaja laji" (:omistajalaji (:omistajalaji rakennuksen-omistajatieto)) => "muu yksityinen henkil\u00f6 tai perikunta")
     (fact "Lisatiedot suoramarkkinointikielto" (:suoramarkkinointikieltoKytkin Lisatiedot) => true)
+    (fact "Lisatiedot asiointikieli" (:asioimiskieli Lisatiedot) => "ruotsi")
     (fact "asianTiedot" asianTiedot => truthy)
     (fact "Asiantiedot" Asiantiedot => truthy)
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus =>"Uuden rakennuksen rakentaminen tontille.\n\nPuun kaataminen:Puun kaataminen")
