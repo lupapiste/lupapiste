@@ -45,6 +45,12 @@ var docgen = (function () {
     self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
 
     // Context help
+    self.addFocus = function (e) {
+      var event = getEvent(e);
+      var input$ = $(event.target);
+      input$.focus();
+    }
+
     self.findHelpElement = function (e) {
       var event = getEvent(e);
       var input$ = $(event.target);
@@ -52,25 +58,55 @@ var docgen = (function () {
       if (!help$.length) {
         help$ = input$.parent().siblings('.form-help');
       }
+      if (!help$.length) {
+        return false;
+      }
       return help$;
+    };
+    self.findErrorElement = function (e) {
+      var event = getEvent(e);
+      var input$ = $(event.target);
+      var error$ = input$.siblings('.errorPanel');
+      if (!error$.length) {
+        error$ = input$.parent().siblings('.errorPanel');
+      }
+      if (!error$.length) {
+        return false;
+      }
+      return error$;
     };
 
     self.showHelp = function (e) {
       var element = self.findHelpElement(e);
-      element.fadeIn("slow").css("display", "block");
-      var st = $(window).scrollTop(); // Scroll Top
-      var y = element.offset().top;
-      if ((y - 80) < (st)) { $("html, body").animate({ scrollTop: y - 80 + "px" }); };
+      if (element) {
+        element.fadeIn("slow").css("display", "block");
+        var st = $(window).scrollTop(); // Scroll Top
+        var y = element.offset().top;
+        if ((y - 80) < (st)) { $("html, body").animate({ scrollTop: y - 80 + "px" }); };
+      }
+      self.showError(e);
     };
     self.hideHelp = function (e) {
-      self.findHelpElement(e).fadeOut("slow").css("display", "none");
+      var element = self.findHelpElement(e);
+      if (element) {
+        element.fadeOut("slow").css("display", "none");
+      }
+      self.hideError(e);
     };
-    self.addFocus = function (e) {
-      var event = getEvent(e);
-      var input$ = $(event.target);
-      input$.focus();
+
+    self.showError = function (e) {
+      var element = self.findErrorElement(e);
+      if (element) {
+        element.fadeIn("slow").css("display", "block");
+      }
     }
 
+    self.hideError = function (e) {
+      var element = self.findErrorElement(e);
+      if (element) {
+        element.fadeOut("slow").css("display", "none");
+      }
+    };
     // ID utilities
 
     function pathStrToID(pathStr) {
@@ -769,7 +805,7 @@ var docgen = (function () {
               code = r.result[1];
           if (level !== "tip") {
             var errorPanel = $("#" + docId + "-" + path.join("-") + "-errorPanel");
-            errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>").fadeIn();
+            errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>");
           }
           $("#" + docId + "-" + path.join("-")).addClass(level);
         });
