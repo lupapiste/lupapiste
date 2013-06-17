@@ -1,4 +1,69 @@
 
+hakija-public-area._group_label: Hakija
+
+hakija-public-area._selected.henkilo: Henkilö
+hakija-public-area._selected.yritys: Yritys/Yhteisö
+hakija-public-area.henkilo._group_label: Henkilö
+hakija-public-area.henkilo.henkilotiedot._group_label: Henkilötiedot
+hakija-public-area.henkilo.henkilotiedot.etunimi: Etunimi
+hakija-public-area.henkilo.henkilotiedot.sukunimi: Sukunimi
+hakija-public-area.henkilo.henkilotiedot.hetu: Henkilötunnus
+hakija-public-area.henkilo.osoite._group_label: Osoite
+hakija-public-area.henkilo.osoite.katu: Katuosoite
+hakija-public-area.henkilo.osoite.postinumero: Postinumero
+hakija-public-area.henkilo.osoite.postitoimipaikannimi: Postitoimipaikka
+hakija-public-area.henkilo.yhteystiedot._group_label: Yhteystiedot
+hakija-public-area.henkilo.yhteystiedot.puhelin: Puhelin
+hakija-public-area.henkilo.yhteystiedot.email: Sähköposti
+
+hakija-public-area.yritys._group_label: Yritys
+hakija-public-area.yritys.yritysnimi: Yrityksen nimi
+hakija-public-area.yritys.liikeJaYhteisoTunnus: Y-tunnus
+hakija-public-area.yritys.osoite._group_label: Osoite
+hakija-public-area.yritys.osoite.katu: Katuosoite
+hakija-public-area.yritys.osoite.postinumero: Postinumero
+hakija-public-area.yritys.osoite.postitoimipaikannimi: Postitoimipaikka
+hakija-public-area.yritys.vastuuhenkilo._group_label: Vastuuhenkilö
+hakija-public-area.yritys.vastuuhenkilo.henkilotiedot._group_label: Henkilötiedot
+hakija-public-area.yritys.vastuuhenkilo.henkilotiedot.etunimi: Etunimi
+hakija-public-area.yritys.vastuuhenkilo.henkilotiedot.sukunimi: Sukunimi
+hakija-public-area.yritys.vastuuhenkilo.yhteystiedot._group_label: Yhteystiedot
+hakija-public-area.yritys.vastuuhenkilo.yhteystiedot.puhelin: Puhelin
+hakija-public-area.yritys.vastuuhenkilo.yhteystiedot.email: Sähköposti
+
+hakija-public-area._append_label: + Lisää hakija
+
+tyomaastaVastaava._selected.henkilo: Henkilö
+tyomaastaVastaava._selected.yritys: Yritys/Yhteisö
+tyomaastaVastaava.henkilo._group_label: Henkilö
+tyomaastaVastaava.henkilo.henkilotiedot._group_label: Henkilötiedot
+tyomaastaVastaava.henkilo.henkilotiedot.etunimi: Etunimi
+tyomaastaVastaava.henkilo.henkilotiedot.sukunimi: Sukunimi
+tyomaastaVastaava.henkilo.henkilotiedot.hetu: Henkilötunnus
+tyomaastaVastaava.henkilo.osoite._group_label: Osoite
+tyomaastaVastaava.henkilo.osoite.katu: Katuosoite
+tyomaastaVastaava.henkilo.osoite.postinumero: Postinumero
+tyomaastaVastaava.henkilo.osoite.postitoimipaikannimi: Postitoimipaikka
+tyomaastaVastaava.henkilo.yhteystiedot._group_label: Yhteystiedot
+tyomaastaVastaava.henkilo.yhteystiedot.puhelin: Puhelin
+tyomaastaVastaava.henkilo.yhteystiedot.email: Sähköposti
+
+tyomaastaVastaava.yritys._group_label: Yritys
+tyomaastaVastaava.yritys.yritysnimi: Yrityksen nimi
+tyomaastaVastaava.yritys.liikeJaYhteisoTunnus: Y-tunnus
+tyomaastaVastaava.yritys.osoite._group_label: Osoite
+tyomaastaVastaava.yritys.osoite.katu: Katuosoite
+tyomaastaVastaava.yritys.osoite.postinumero: Postinumero
+tyomaastaVastaava.yritys.osoite.postitoimipaikannimi: Postitoimipaikka
+tyomaastaVastaava.yritys.vastuuhenkilo._group_label: Vastuuhenkilö
+tyomaastaVastaava.yritys.vastuuhenkilo.henkilotiedot._group_label: Henkilötiedot
+tyomaastaVastaava.yritys.vastuuhenkilo.henkilotiedot.etunimi: Etunimi
+tyomaastaVastaava.yritys.vastuuhenkilo.henkilotiedot.sukunimi: Sukunimi
+tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot._group_label: Yhteystiedot
+tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot.puhelin: Puhelin
+tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot.email: Sähköposti
+
+
 # Muokkaukset Tampere-miitin pohjalta
 #
 # TODO: Poista "vuokra-aika", jos se päätetään poistaa koodista.
