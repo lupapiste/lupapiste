@@ -430,7 +430,7 @@ var docgen = (function () {
       var clearDiv = document.createElement("div");
       clearDiv.className = "clear";
       var span = makeEntrySpan(subSchema, myPath);
-
+      span.className = span.className + " radioGroup";
       partsDiv.id = pathStrToID(myPath);
 
       $.each(subSchema.body, function (i, o) {
