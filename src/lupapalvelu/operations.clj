@@ -214,9 +214,9 @@
    :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
                                  :schema-data [[["osoite" "katu"] #(:address %)]]
                                  :operation-type :publicArea
-                                 :required (conj yleiset-alueet-common-schemas "tyo-/vuokra-aika")
+                                 :required (conj yleiset-alueet-common-schemas "tyoaika")
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
-   :yleiset-alueet-kayttolupa   {:schema "tyo-/vuokra-aika"
+   :yleiset-alueet-kayttolupa   {:schema "tyoaika"
                                  :operation-type :publicArea
                                  :required yleiset-alueet-common-schemas
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
@@ -225,7 +225,7 @@
                                  :required ["yleiset-alueet-maksaja"]
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
 
-;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyo-/vuokra-aika"              ;; Mika nimi tassa kuuluu olla?
+;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"                              ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })
 

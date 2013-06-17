@@ -1,3 +1,34 @@
+
+# Muokkaukset Tampere-miitin pohjalta
+#
+# TODO: Poista "vuokra-aika", jos se päätetään poistaa koodista.
+#          - tyo-/vuokra-aika._group_label
+#          - tyo-/vuokra-aika.vuokra-aika-alkaa-pvm
+#          - tyo-/vuokra-aika.vuokra-aika-paattyy-pvm
+#          - tyo-/vuokra-aika.tyoaika-alkaa-pvm
+#          - tyo-/vuokra-aika.tyoaika-paattyy-pvm
+# TODO: Yleisten alueiden maksaja yritystiedot menivät grouppiin -> poista vanhat excelistä
+#          - yleiset-alueet-maksaja.yritysnimi
+#          - yleiset-alueet-maksaja.liikeJaYhteisoTunnus
+#
+
+tyoaika._group_label: Työaika
+tyoaika.tyoaika-alkaa-pvm: Työaika alkaa
+tyoaika.tyoaika-paattyy-pvm: Työaika päättyy
+
+yleiset-alueet-maksaja.yritys._group_label: Yritys
+yleiset-alueet-maksaja.yritys.yritysnimi: Nimi
+yleiset-alueet-maksaja.yritys.liikeJaYhteisoTunnus: Y-tunnus
+
+yleiset-alueet-maksaja.yhteystiedot._group_label: Yhteystiedot
+yleiset-alueet-maksaja.yhteystiedot.puhelin: Puhelin
+yleiset-alueet-maksaja.yhteystiedot.email: Email
+yleiset-alueet-maksaja.yhteystiedot.fax: Fax
+
+#
+# Käyttölupa
+#
+
 operations.tree.kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
 operations.yleiset-alueet-kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
 operations.yleiset-alueet-kayttolupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.

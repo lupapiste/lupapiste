@@ -9,22 +9,19 @@
 
 (def yleiset-alueet-maksaja
   (body
-    yritys-minimal
+    {:name "yritys" :type :group :body yritys-minimal}
     simple-osoite
+    yhteystiedot
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def tyomaasta-vastaava
   (body
     {:name "userId" :type :personSelector}
     designer-basic
-    [{:name "patevyys" :type :group
-      :body [{:name "ammattipatevyys" :type :text :max-len 4000 :layout :full-width}
-             {:name "voimassa-pvm" :type :date}]}]))
+    #_party))
 
-(def vuokra-ja-tyo-aika
+(def tyo-aika
   (body
-    [{:name "vuokra-aika-alkaa-pvm" :type :date}                               ;; kayttojaksotietoType
-     {:name "vuokra-aika-paattyy-pvm" :type :date}]
     [{:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
      {:name "tyoaika-paattyy-pvm" :type :date}]))
 
@@ -89,10 +86,10 @@
              :type :party
              :order 62}
       :body yleiset-alueet-maksaja}
-     {:info {:name "tyo-/vuokra-aika"                                        ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
+     {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
              :type :group
              :order 63}
-      :body vuokra-ja-tyo-aika}]))
+            :body tyo-aika}]))
 
 (def kayttolupa-mainoslaitteet-ja-opasteviitat
   (to-map-by-name
