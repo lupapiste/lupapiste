@@ -2,10 +2,9 @@ $(function() {
   "use strict";
 
   function applyFixture(fixture) {
-    ajax.get(window.location.protocol + "//" + window.location.host + "/api/query/apply-fixture")
-      .param("name", fixture)
-      .param("npm", "true")
+    ajax.query("apply-fixture", {"name": fixture})
       .success(function() { $("#debug-apply-done").text(" DONE!").show().delay(1000).fadeOut(); })
+      .error(function(e) {alert(e.text);})
       .call();
     return false;
   }
