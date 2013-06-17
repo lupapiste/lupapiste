@@ -98,6 +98,19 @@
     strip-nils
     strip-empty-maps))
 
+(defn ->yritys-public-area [{:keys [id firstName lastName email phone street zip city]}]
+  (->
+    {;:userId                        {:value id}
+     :vastuuhenkilo {:henkilotiedot {:etunimi       {:value firstName}
+                                     :sukunimi      {:value lastName}}
+                     :yhteystiedot {:email          {:value email}
+                                    :puhelin        {:value phone}}}
+     :osoite {:katu                 {:value street}
+              :postinumero          {:value zip}
+              :postitoimipaikannimi {:value city}}}
+    strip-nils
+    strip-empty-maps))
+
 ;;
 ;; Software version metadata
 ;;

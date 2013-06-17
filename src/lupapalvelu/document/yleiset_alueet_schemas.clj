@@ -16,9 +16,7 @@
 
 (def tyomaasta-vastaava
   (body
-    {:name "userId" :type :personSelector}
-    designer-basic
-    #_party))
+    party-public-area))
 
 (def tyo-aika
   (body

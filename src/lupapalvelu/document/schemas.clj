@@ -63,6 +63,12 @@
                            {:name "email" :type :string :subtype :email}
                            {:name "fax" :type :string :subtype :tel}]}])
 
+(def yhteystiedot-public-area [{:name "yhteystiedot"
+                                :type :group
+                                :body [{:name "puhelin" :type :string :subtype :tel}
+                                       {:name "email" :type :string :subtype :email}
+                                       #_{:name "fax" :type :string :subtype :tel}]}])        ;; TODO: Saako FAX jäädä? Ei kryspissä?
+
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
                              :body [{:name "etunimi" :type :string :subtype :vrk-name}
@@ -80,14 +86,20 @@
                simple-osoite
                yhteystiedot))
 
+(def henkilo-public-area (body
+                           {:name "userId" :type :personSelector}
+                           [henkilotiedot-with-hetu]
+                           simple-osoite
+                           yhteystiedot-public-area))
+
 (def henkilo-with-required-hetu (body
-               henkilo-valitsin
-               [(assoc henkilotiedot-with-hetu
-                       :body
-                       (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
-                            (:body henkilotiedot-with-hetu)))]
-               simple-osoite
-               yhteystiedot))
+                                  henkilo-valitsin
+                                  [(assoc henkilotiedot-with-hetu
+                                     :body
+                                     (map (fn [ht] (if (= (:name ht) "hetu") (merge ht {:required true}) ht))
+                                       (:body henkilotiedot-with-hetu)))]
+                                  simple-osoite
+                                  yhteystiedot))
 
 (def yritys-minimal [{:name "yritysnimi" :type :string}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus}])
@@ -101,9 +113,22 @@
                        henkilotiedot-minimal
                        yhteystiedot)}))
 
+(def yritys-public-area (body
+                          yritys-minimal
+                          simple-osoite
+                          {:name "vastuuhenkilo"
+                           :type :group
+                           :body (body
+                                   henkilotiedot-minimal
+                                   yhteystiedot-public-area)}))
+
 (def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
             {:name "henkilo" :type :group :body henkilo}
             {:name "yritys" :type :group :body yritys}])
+
+(def party-public-area [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+                        {:name "henkilo" :type :group :body henkilo-public-area}
+                        {:name "yritys" :type :group :body yritys-public-area}])
 
 (def party-with-required-hetu (body
                                 [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
@@ -481,6 +506,13 @@
              :repeating true
              :type :party}
       :body party}
+
+     {:info {:name "hakija-public-area"
+             :order 3
+             :removable true
+             :repeating true
+             :type :party}
+      :body party-public-area}
 
      {:info {:name "paasuunnittelija"
              :order 4

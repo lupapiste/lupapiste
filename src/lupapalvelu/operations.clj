@@ -212,7 +212,8 @@
                                             "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
                                  :attachments []}
    :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
-                                 :schema-data [[["osoite" "katu"] #(:address %)]]
+                                 :schema-data [[["osoite" "katu"] #(:address %)]
+                                               [["_selected" :value] "yritys"]]
                                  :operation-type :publicArea
                                  :required (conj yleiset-alueet-common-schemas "tyoaika")
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
