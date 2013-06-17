@@ -96,7 +96,7 @@ var docgen = (function () {
 
     self.showError = function (e) {
       var element = self.findErrorElement(e);
-      if (element) {
+      if (element.children().size()) {
         element.fadeIn("slow").css("display", "block");
       }
     }
