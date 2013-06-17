@@ -181,7 +181,8 @@
     (.build mob)))
 
 (def server-list
-  (let [servers (vals (env/value :mongodb :servers))]
+  (let [conf    (env/value :mongodb :servers)
+        servers (if (map? conf) (vals conf) conf)]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
 
 (def connected (atom false))
