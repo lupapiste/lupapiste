@@ -88,11 +88,13 @@
                                           :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
                                           :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
                                           :muu]]]
-                        (if false #_(env/feature? :yleiset-alueet)
+                        (if (env/feature? :yleiset-alueet)
                           (concat types [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                                                           :tilapainen-liikennejarjestelysuunnitelma
                                                           :tyyppiratkaisu
-                                                          :tieto-kaivupaikkaan-liittyvista-johtotiedoista]] muut)
+                                                          :tieto-kaivupaikkaan-liittyvista-johtotiedoista
+                                                          :liitoslausunto
+                                                          :asemapiirros]] muut)
                           (concat types muut))))
 
 (defn organization-attachments [organization]

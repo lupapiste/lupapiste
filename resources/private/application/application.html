@@ -100,10 +100,11 @@
             <span data-bind="ltext: 'application.requestForComplement'"></span>
             <span class="icon complement left-align"></span>
           </button>
-          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation') && notPublicAreaTypeOperation(),  enable: $root.authorization.ok('add-operation')"  data-test-id="add-operation">
+          <button data-bind="click: addOperation,         visible: $root.authorization.ok('add-operation'),  enable: $root.authorization.ok('add-operation')"  data-test-id="add-operation">
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
+<!--           TODO: notPublicAreaTypeOperation() needs to be replaced by usage of authorization.ok(). -->
           <button data-bind="click: exportPdf,            visible: notPublicAreaTypeOperation()"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>

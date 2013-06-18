@@ -432,8 +432,10 @@
                                                  ;; TODO: Yhdista (nama kaikki) schemat jossain jarkevammassa paikassa
                                                  :schema ((merge schemas/schemas
                                                             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
-                                                            yleiset-alueet/yleiset-alueet-kaivuulupa
                                                             ympschemas/ympschemas
+                                                            yleiset-alueet/kaivuulupa
+                                                            yleiset-alueet/sijoituslupa
+                                                            yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
 
                                                  :created created
@@ -446,10 +448,16 @@
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)
-        hakija                (assoc-in (make "hakija") [:data :_selected :value]
-                                (if (= (:operation-type op-info) :publicArea) "yritys" "henkilo"))]
+        hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
+        hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
     (if user
-      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
+      (if (= (:operation-type op-info) :publicArea)
+        (cons (assoc-in
+                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user))
+                [:data :yritys]
+                (domain/->yritys-public-area user))
+          new-docs)
+        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs))
       new-docs)))
 
 (defn- ->location [x y]
@@ -479,12 +487,12 @@
         kiinteistotunnus (:propertyId application)
         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
     (when ktj-tiedot
-      (let [updates [[[:kiinteisto :tilanNimi]        (:nimi ktj-tiedot)]
-                     [[:kiinteisto :maapintaala]      (:maapintaala ktj-tiedot)]
-                     [[:kiinteisto :vesipintaala]     (:vesipintaala ktj-tiedot)]
-                     [[:kiinteisto :rekisterointipvm] (try
+      (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                     [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                     [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                     [[:kiinteisto :rekisterointipvm] (or (try
                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                        (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+                                                        (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
         (commands/persist-model-updates
           (:id application)
           rakennuspaikka
@@ -494,8 +502,11 @@
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
-(defn operation-validator [{{operation :operation} :data}]
+(defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
+
+(defn- public-area-validator [command application]
+  (when (= (:operation-type (operations/operations (keyword (:name (first (:operations application)))))) :publicArea) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
@@ -547,7 +558,8 @@
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
-   :input-validators [operation-validator]}
+   :input-validators [operation-validator]
+   :validators [public-area-validator]}
   [command]
   (with-application command
     (fn [application]
