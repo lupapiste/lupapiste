@@ -67,7 +67,7 @@
                                 :type :group
                                 :body [{:name "puhelin" :type :string :subtype :tel}
                                        {:name "email" :type :string :subtype :email}
-                                       #_{:name "fax" :type :string :subtype :tel}]}])        ;; TODO: Saako FAX jaada? Ei kryspissä?
+                                       #_{:name "fax" :type :string :subtype :tel}]}])        ;; TODO: Saako FAX jaada? Ei kryspissa?
 
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
