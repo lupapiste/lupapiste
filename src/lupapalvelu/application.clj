@@ -431,8 +431,9 @@
                                                  ;; TODO: Yhdista (nama kaikki) schemat jossain jarkevammassa paikassa
                                                  :schema ((merge schemas/schemas
                                                             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
-                                                            yleiset-alueet/yleiset-alueet-kaivuulupa
                                                             ympschemas/ympschemas
+                                                            yleiset-alueet/kaivuulupa
+                                                            yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
 
                                                  :created created
@@ -445,10 +446,16 @@
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
         new-docs              (cons op-doc required-docs)
-        hakija                (assoc-in (make "hakija") [:data :_selected :value]
-                                (if (= (:operation-type op-info) :publicArea) "yritys" "henkilo"))]
+        hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
+        hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
     (if user
-      (cons #_hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs)
+      (if (= (:operation-type op-info) :publicArea)
+        (cons (assoc-in
+                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user))
+                [:data :yritys]
+                (domain/->yritys-public-area user))
+          new-docs)
+        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs))
       new-docs)))
 
 (defn- ->location [x y]

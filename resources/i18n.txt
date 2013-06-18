@@ -1,0 +1,149 @@
+
+hakija-public-area._group_label: Hakija
+
+hakija-public-area._selected.henkilo: Henkilö
+hakija-public-area._selected.yritys: Yritys/Yhteisö
+hakija-public-area.henkilo._group_label: Henkilö
+hakija-public-area.henkilo.henkilotiedot._group_label: Henkilötiedot
+hakija-public-area.henkilo.henkilotiedot.etunimi: Etunimi
+hakija-public-area.henkilo.henkilotiedot.sukunimi: Sukunimi
+hakija-public-area.henkilo.henkilotiedot.hetu: Henkilötunnus
+hakija-public-area.henkilo.osoite._group_label: Osoite
+hakija-public-area.henkilo.osoite.katu: Katuosoite
+hakija-public-area.henkilo.osoite.postinumero: Postinumero
+hakija-public-area.henkilo.osoite.postitoimipaikannimi: Postitoimipaikka
+hakija-public-area.henkilo.yhteystiedot._group_label: Yhteystiedot
+hakija-public-area.henkilo.yhteystiedot.puhelin: Puhelin
+hakija-public-area.henkilo.yhteystiedot.email: Sähköposti
+
+hakija-public-area.yritys._group_label: Yritys
+hakija-public-area.yritys.yritysnimi: Yrityksen nimi
+hakija-public-area.yritys.liikeJaYhteisoTunnus: Y-tunnus
+hakija-public-area.yritys.osoite._group_label: Osoite
+hakija-public-area.yritys.osoite.katu: Katuosoite
+hakija-public-area.yritys.osoite.postinumero: Postinumero
+hakija-public-area.yritys.osoite.postitoimipaikannimi: Postitoimipaikka
+hakija-public-area.yritys.vastuuhenkilo._group_label: Vastuuhenkilö
+hakija-public-area.yritys.vastuuhenkilo.henkilotiedot._group_label: Henkilötiedot
+hakija-public-area.yritys.vastuuhenkilo.henkilotiedot.etunimi: Etunimi
+hakija-public-area.yritys.vastuuhenkilo.henkilotiedot.sukunimi: Sukunimi
+hakija-public-area.yritys.vastuuhenkilo.yhteystiedot._group_label: Yhteystiedot
+hakija-public-area.yritys.vastuuhenkilo.yhteystiedot.puhelin: Puhelin
+hakija-public-area.yritys.vastuuhenkilo.yhteystiedot.email: Sähköposti
+
+hakija-public-area._append_label: + Lisää hakija
+
+tyomaastaVastaava._selected.henkilo: Henkilö
+tyomaastaVastaava._selected.yritys: Yritys/Yhteisö
+tyomaastaVastaava.henkilo._group_label: Henkilö
+tyomaastaVastaava.henkilo.henkilotiedot._group_label: Henkilötiedot
+tyomaastaVastaava.henkilo.henkilotiedot.etunimi: Etunimi
+tyomaastaVastaava.henkilo.henkilotiedot.sukunimi: Sukunimi
+tyomaastaVastaava.henkilo.henkilotiedot.hetu: Henkilötunnus
+tyomaastaVastaava.henkilo.osoite._group_label: Osoite
+tyomaastaVastaava.henkilo.osoite.katu: Katuosoite
+tyomaastaVastaava.henkilo.osoite.postinumero: Postinumero
+tyomaastaVastaava.henkilo.osoite.postitoimipaikannimi: Postitoimipaikka
+tyomaastaVastaava.henkilo.yhteystiedot._group_label: Yhteystiedot
+tyomaastaVastaava.henkilo.yhteystiedot.puhelin: Puhelin
+tyomaastaVastaava.henkilo.yhteystiedot.email: Sähköposti
+
+tyomaastaVastaava.yritys._group_label: Yritys
+tyomaastaVastaava.yritys.yritysnimi: Yrityksen nimi
+tyomaastaVastaava.yritys.liikeJaYhteisoTunnus: Y-tunnus
+tyomaastaVastaava.yritys.osoite._group_label: Osoite
+tyomaastaVastaava.yritys.osoite.katu: Katuosoite
+tyomaastaVastaava.yritys.osoite.postinumero: Postinumero
+tyomaastaVastaava.yritys.osoite.postitoimipaikannimi: Postitoimipaikka
+tyomaastaVastaava.yritys.vastuuhenkilo._group_label: Vastuuhenkilö
+tyomaastaVastaava.yritys.vastuuhenkilo.henkilotiedot._group_label: Henkilötiedot
+tyomaastaVastaava.yritys.vastuuhenkilo.henkilotiedot.etunimi: Etunimi
+tyomaastaVastaava.yritys.vastuuhenkilo.henkilotiedot.sukunimi: Sukunimi
+tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot._group_label: Yhteystiedot
+tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot.puhelin: Puhelin
+tyomaastaVastaava.yritys.vastuuhenkilo.yhteystiedot.email: Sähköposti
+
+
+attachmentType.yleiset-alueet.liitoslausunto: Liitoslausunto
+attachmentType.yleiset-alueet.asemapiirros: Asemapiirros
+
+
+# Muokkaukset Tampere-miitin pohjalta
+#
+# TODO: Poista "vuokra-aika", jos se päätetään poistaa koodista.
+#          - tyo-/vuokra-aika._group_label
+#          - tyo-/vuokra-aika.vuokra-aika-alkaa-pvm
+#          - tyo-/vuokra-aika.vuokra-aika-paattyy-pvm
+#          - tyo-/vuokra-aika.tyoaika-alkaa-pvm
+#          - tyo-/vuokra-aika.tyoaika-paattyy-pvm
+# TODO: Yleisten alueiden maksaja yritystiedot menivät grouppiin -> poista vanhat excelistä
+#          - yleiset-alueet-maksaja.yritysnimi
+#          - yleiset-alueet-maksaja.liikeJaYhteisoTunnus
+#
+
+tyoaika._group_label: Työaika
+tyoaika.tyoaika-alkaa-pvm: Työaika alkaa
+tyoaika.tyoaika-paattyy-pvm: Työaika päättyy
+
+yleiset-alueet-maksaja.yritys._group_label: Yritys
+yleiset-alueet-maksaja.yritys.yritysnimi: Nimi
+yleiset-alueet-maksaja.yritys.liikeJaYhteisoTunnus: Y-tunnus
+
+yleiset-alueet-maksaja.yhteystiedot._group_label: Yhteystiedot
+yleiset-alueet-maksaja.yhteystiedot.puhelin: Puhelin
+yleiset-alueet-maksaja.yhteystiedot.email: Email
+yleiset-alueet-maksaja.yhteystiedot.fax: Fax
+
+#
+# Käyttölupa
+#
+
+operations.tree.kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
+operations.yleiset-alueet-kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
+operations.yleiset-alueet-kayttolupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+
+# TODO: Miten ratkaistaan? Tämä on sama kuin 'tyo-/vuokra-aika._group_label'...
+yleiset-alueet-kayttolupa._group_label: Työ-/vuokra-aika
+
+operations.mainostus-ja-viitoituslupa: Mainoslaitteiden ja opasteviittojen sijoittaminen
+operations.mainostus-ja-viitoituslupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+
+mainostus-ja-viitoituslupa._group_label: Mainoslaitteiden tai opasteviittojen sijoittaminen
+mainosten-tai-viitoitusten-sijoittaminen._selected.mainostus-tapahtuma-valinta: Olet sijoittamassa mainoslaitteita
+mainosten-tai-viitoitusten-sijoittaminen._selected.viitoitus-tapahtuma-valinta: Olet sijoittamassa opasteviittoja
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta._group_label: Mainostamiseesi liittyvä tapahtuma
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.yritysnimi: Yrityksen nimi
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.liikeJaYhteisoTunnus: Y-tunnus
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.osoite._group_label: Osoite
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.osoite.katu: Katuosoite
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.osoite.postinumero: Postinumero
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.osoite.postitoimipaikannimi: Postitoimipaikka
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.laskuviite: Laskuviite
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.tapahtuman-nimi: Tapahtuman nimi
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.tapahtumapaikka: Tapahtuman paikka
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.tapahtuma-aika-alkaa-pvm: Tapahtuma alkaa
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.tapahtuma-aika-paattyy-pvm: Tapahtuma päättyy
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.mainostus-alkaa-pvm: Mainostaminen alkaa
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.mainostus-paattyy-pvm: Mainostaminen päättyy
+mainosten-tai-viitoitusten-sijoittaminen.mainostus-tapahtuma-valinta.haetaan-kausilupaa: Haen kausilupaa
+mainosten-tai-viitoitusten-sijoittaminen.viitoitus-tapahtuma-valinta._group_label: Opasteviittojen sijoittamiseesi liittyvä tapahtuma
+mainosten-tai-viitoitusten-sijoittaminen.viitoitus-tapahtuma-valinta.tapahtuman-nimi: Tapahtuman nimi
+mainosten-tai-viitoitusten-sijoittaminen.viitoitus-tapahtuma-valinta.tapahtumapaikka: Tapahtuman paikka
+mainosten-tai-viitoitusten-sijoittaminen.viitoitus-tapahtuma-valinta.tapahtuma-aika-alkaa-pvm: Tapahtuma alkaa
+mainosten-tai-viitoitusten-sijoittaminen.viitoitus-tapahtuma-valinta.tapahtuma-aika-paattyy-pvm: Tapahtuma päättyy
+
+
+operations.tree.sijoituslupa: Rakenteiden sijoittaminen
+
+operations.tree.tyomaasuojat-ja-muut-rakennelmat: Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle
+operations.tree.mainoslaitteet-ja-opasteviitat: Mainoslaitteiden ja opasteviittojen sijoittaminen
+operations.tree.muut-yleisten-alueiden-tilojen-kaytot: Muut yleiselle alueelle kohdistuvat tilan käytöt
+operations.tree.messujen-ja-tapahtumien-alueiden-kaytot: Erilaiset messujen ja tapahtumien aikaiset alueiden käytöt
+operations.tree.kadulta-tapahtuvat-nostot: Kadulta tapahtuvat nostot
+operations.tree.rakennustelineet-kadulla: Kadulle pystytettävät rakennustelineet
+operations.tree.kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi: Kiinteistön rakentamis- ja korjaamistyöt, joiden suorittamiseksi rajataan osa kadusta tai yleisestä alueesta työmaaksi (ei kaivutöitä)
+operations.tree.muu-kayttolupa: Muu käyttölupa
+
+operations.tree.pysyvien-maanalaisten-rakenteiden-sijoittaminen: Pysyvien maanalaisten rakenteiden sijoittaminen
+operations.tree.pysyvien-maanpaallisten-rakenteiden-sijoittaminen: Pysyvien maanpäällisten rakenteiden sijoittaminen
+operations.tree.muu-sijoituslupa: Muu sijoituslupa
