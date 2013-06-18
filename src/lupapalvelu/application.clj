@@ -433,6 +433,7 @@
                                                             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
                                                             ympschemas/ympschemas
                                                             yleiset-alueet/kaivuulupa
+                                                            yleiset-alueet/sijoituslupa
                                                             yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
 

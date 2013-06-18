@@ -54,9 +54,9 @@
                                                                               ["rakennustelineet-kadulla" :yleiset-alueet-kayttolupa] ;; TODO
                                                                               ["muu-kayttolupa" :yleiset-alueet-kayttolupa]]] ;; TODO
                                                                             ["sijoituslupa"
-                                                                             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa] ;; TODO
-                                                                              ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :yleiset-alueet-kayttolupa] ;; TODO
-                                                                              ["muu-sijoituslupa" :yleiset-alueet-kayttolupa]] ;; TODO
+                                                                             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :yleiset-alueet-sijoituslupa] ;; TODO
+                                                                              ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :yleiset-alueet-sijoituslupa] ;; TODO
+                                                                              ["muu-sijoituslupa" :yleiset-alueet-sijoituslupa]] ;; TODO
                                                                             #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa] ;; TODO
                                                                             ]]]])))
 
@@ -74,7 +74,7 @@
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
 
 
-(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-hankkeen-kuvaus" "yleiset-alueet-maksaja"])
+(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-maksaja"])
 
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
@@ -214,15 +214,20 @@
    :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
                                  :schema-data [[["_selected" :value] "yritys"]]
                                  :operation-type :publicArea
-                                 :required (conj yleiset-alueet-common-schemas "tyoaika")
+                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa" "tyoaika")
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :yleiset-alueet-kayttolupa   {:schema "tyoaika"
                                  :operation-type :publicArea
-                                 :required yleiset-alueet-common-schemas
+                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                  :operation-type :publicArea
                                  :required ["yleiset-alueet-maksaja"]
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+   :yleiset-alueet-sijoituslupa {:schema "tyomaastaVastaava"
+                                 :schema-data [[["_selected" :value] "yritys"]]
+                                 :operation-type :publicArea
+                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" "tyoaika")
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
 
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"                              ;; Mika nimi tassa kuuluu olla?
@@ -238,6 +243,7 @@
   (if-not ((merge schemas/schemas
              poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
              yleiset-alueet/kaivuulupa
+             yleiset-alueet/sijoituslupa
              yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
              #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa
              ympschemas/ympschemas) schema)
