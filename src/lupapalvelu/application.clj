@@ -486,12 +486,12 @@
         kiinteistotunnus (:propertyId application)
         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
     (when ktj-tiedot
-      (let [updates [[[:kiinteisto :tilanNimi]        (:nimi ktj-tiedot)]
-                     [[:kiinteisto :maapintaala]      (:maapintaala ktj-tiedot)]
-                     [[:kiinteisto :vesipintaala]     (:vesipintaala ktj-tiedot)]
-                     [[:kiinteisto :rekisterointipvm] (try
+      (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                     [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                     [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                     [[:kiinteisto :rekisterointipvm] (or (try
                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                        (catch Exception e (:rekisterointipvm ktj-tiedot)))]]]
+                                                        (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
         (commands/persist-model-updates
           (:id application)
           rakennuspaikka
