@@ -10,7 +10,7 @@
 (def hankkeen-kuvaus-sijoituslupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "kaivuLuvanTunniste" :type :string}))                                ;; sijoituslupaviitetietoType??  TODO: Mikä tähän?
+    {:name "kaivuLuvanTunniste" :type :string}))                                ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
 
 (def yleiset-alueet-maksaja
   (body
