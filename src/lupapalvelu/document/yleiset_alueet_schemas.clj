@@ -2,10 +2,15 @@
   (:use [lupapalvelu.document.schemas]))
 
 
-(def hankkeen-kuvaus-tunnisteella
+(def hankkeen-kuvaus-kaivulupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "luvanTunniste" :type :string}))                                     ;; sijoituslupaviitetietoType
+    {:name "sijoitusLuvanTunniste" :type :string}))                             ;; sijoituslupaviitetietoType
+
+(def hankkeen-kuvaus-sijoituslupa
+  (body
+    {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
+    {:name "kaivuLuvanTunniste" :type :string}))                                ;; sijoituslupaviitetietoType??  TODO: Mikä tähän?
 
 (def yleiset-alueet-maksaja
   (body
@@ -73,9 +78,9 @@
 
 (def kaivuulupa
   (to-map-by-name
-    [{:info {:name "yleiset-alueet-hankkeen-kuvaus"
+    [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
              :order 60}
-      :body hankkeen-kuvaus-tunnisteella}
+      :body hankkeen-kuvaus-kaivulupa}
      {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
              :type :party
              :order 61}
@@ -96,6 +101,12 @@
 ;            :removable false  ;; TODO: Miten voi poistaa raksin?
             :order 64}
      :body mainostus-tai-viitoitus-tapahtuma-valinta}]))
+
+(def sijoituslupa
+  (to-map-by-name
+    [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+             :order 65}
+      :body hankkeen-kuvaus-sijoituslupa}]))
 
 ;;
 ;; TODO: Liikennetta haittavan tyon lupa

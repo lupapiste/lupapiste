@@ -1,3 +1,6 @@
+#
+# Kaivulupa
+#
 
 hakija-public-area._group_label: Hakija
 
@@ -98,8 +101,8 @@ yleiset-alueet-maksaja.yhteystiedot.fax: Fax
 # Käyttölupa
 #
 
-operations.tree.kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
-operations.yleiset-alueet-kayttolupa: Yleisten alueiden käyttäminen (Käyttölupa)
+operations.tree.kayttolupa: Yleisten alueiden käyttäminen
+operations.yleiset-alueet-kayttolupa: Käyttölupa
 operations.yleiset-alueet-kayttolupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
 
 # TODO: Miten ratkaistaan? Tämä on sama kuin 'tyo-/vuokra-aika._group_label'...
@@ -133,8 +136,6 @@ mainosten-tai-viitoitusten-sijoittaminen.viitoitus-tapahtuma-valinta.tapahtuma-a
 mainosten-tai-viitoitusten-sijoittaminen.viitoitus-tapahtuma-valinta.tapahtuma-aika-paattyy-pvm: Tapahtuma päättyy
 
 
-operations.tree.sijoituslupa: Rakenteiden sijoittaminen
-
 operations.tree.tyomaasuojat-ja-muut-rakennelmat: Työmaasuojien ja muiden rakennelmien sijoittaminen yleiselle alueelle
 operations.tree.mainoslaitteet-ja-opasteviitat: Mainoslaitteiden ja opasteviittojen sijoittaminen
 operations.tree.muut-yleisten-alueiden-tilojen-kaytot: Muut yleiselle alueelle kohdistuvat tilan käytöt
@@ -147,3 +148,27 @@ operations.tree.muu-kayttolupa: Muu käyttölupa
 operations.tree.pysyvien-maanalaisten-rakenteiden-sijoittaminen: Pysyvien maanalaisten rakenteiden sijoittaminen
 operations.tree.pysyvien-maanpaallisten-rakenteiden-sijoittaminen: Pysyvien maanpäällisten rakenteiden sijoittaminen
 operations.tree.muu-sijoituslupa: Muu sijoituslupa
+
+
+#
+# Sijoituslupa  ( ja vahan kaivulupakin :) )
+#
+#  TODO: Poista excelistä samalla yleiset-alueet-hankkeen-kuvaus.* (alla korvaavat id:t)
+#
+
+yleiset-alueet-hankkeen-kuvaus-kaivulupa._group_label: Hankkeen kuvaus
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.kayttotarkoitus: Alueen käyttötarkoitus
+yleiset-alueet-hankkeen-kuvaus-kaivulupa.sijoitusLuvanTunniste: Sijoitusluvan tunniste
+
+yleiset-alueet-hankkeen-kuvaus-sijoituslupa._group_label: Hankkeen kuvaus
+yleiset-alueet-hankkeen-kuvaus-sijoituslupa.kayttotarkoitus: Alueen käyttötarkoitus
+yleiset-alueet-hankkeen-kuvaus-sijoituslupa.kaivuLuvanTunniste: Kaivuluvan tunniste
+
+
+operations.tree.sijoituslupa: Rakenteiden sijoittaminen
+operations.yleiset-alueet-sijoituslupa: Sijoituslupa 
+operations.yleiset-alueet-sijoituslupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+
+# Tämä id on tällainen siksi että "työmaavastaava" on schema-nimenä operations.clj:ssä :yleiset-alueet-sijoituslupa:lle.
+# Miten voisi muuttaa järkevämmäksi?
+yleiset-alueet-sijoituslupa._group_label: Työmaasta vastaava
