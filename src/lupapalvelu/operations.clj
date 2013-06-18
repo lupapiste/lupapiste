@@ -74,7 +74,7 @@
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
 
 
-(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-maksaja"])
+(def ^:private yleiset-alueet-common-schemas ["maksaja"])
 
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
@@ -222,7 +222,7 @@
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                  :operation-type :publicArea
-                                 :required ["yleiset-alueet-maksaja"]
+                                 :required yleiset-alueet-common-schemas
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :yleiset-alueet-sijoituslupa {:schema "tyomaastaVastaava"
                                  :schema-data [[["_selected" :value] "yritys"]]

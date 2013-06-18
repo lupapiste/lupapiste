@@ -1,0 +1,6 @@
+
+#
+# TODO: Poista yleiset-alueet-maksaja.*
+#
+
+maksaja.laskuviite: Laskuviite

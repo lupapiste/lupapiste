@@ -532,7 +532,9 @@
              :order 6
              :removable true
              :type :party}
-      :body party}
+      :body (body
+              party
+              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
 
      {:info {:name "rakennuspaikka"
              :order 2}
