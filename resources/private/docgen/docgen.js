@@ -807,6 +807,10 @@ var docgen = (function () {
             var errorPanel = $("#" + docId + "-" + path.join("-") + "-errorPanel");
             errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>");
           }
+          
+          var label$ = $("#label-" + docId + "-" + path.join("-"))[0];
+          label$.className = label$.className + " " + level;
+
           $("#" + docId + "-" + path.join("-")).addClass(level);
         });
       }
