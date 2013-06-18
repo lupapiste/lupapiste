@@ -383,9 +383,6 @@
                                                                                     :maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)}}}}}}))
 
 (defn- get-kayttotapaus [documents toimenpiteet]
-  (println (contains? documents :maisematyo))
-  (println (empty? toimenpiteet))
-  (println toimenpiteet)
   (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
       "Uusi hakemus"))
