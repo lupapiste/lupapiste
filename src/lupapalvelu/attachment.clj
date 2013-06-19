@@ -92,7 +92,9 @@
                           (concat types [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                                                           :tilapainen-liikennejarjestelysuunnitelma
                                                           :tyyppiratkaisu
-                                                          :tieto-kaivupaikkaan-liittyvista-johtotiedoista]] muut)
+                                                          :tieto-kaivupaikkaan-liittyvista-johtotiedoista
+                                                          :liitoslausunto
+                                                          :asemapiirros]] muut)
                           (concat types muut))))
 
 (defn organization-attachments [organization]
