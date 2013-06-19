@@ -382,11 +382,10 @@
                                                                                     :kiinteistotunnus (:propertyId application)
                                                                                     :maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)}}}}}}))
 
-(defn- get-kayttotapaus [documents]
-  (let [maisematyo-docs (:maisematyo documents)]
-    (if (= (count maisematyo-docs) (count documents))
+(defn- get-kayttotapaus [documents toimenpiteet]
+  (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
-      "Uusi hakemus")))
+      "Uusi hakemus"))
 
 (def puolto-mapping {:condition "ehdoilla"
                      :no "ei puolla"
@@ -411,6 +410,7 @@
   "Transforms application mongodb-document to canonical model."
   [application lang]
   (let [documents (by-type (:documents application))
+        toimenpiteet (get-operations documents application)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot
                     {:aineistonnimi (:title application)
@@ -433,7 +433,7 @@
                       :rakennuspaikkatieto (get-bulding-places documents application)
                       :lausuntotieto (get-statements (:statements application))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
-                      :kayttotapaus (get-kayttotapaus documents)
+                      :kayttotapaus (get-kayttotapaus documents toimenpiteet)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
-    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] (get-operations documents application))))
+    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] toimenpiteet)))
