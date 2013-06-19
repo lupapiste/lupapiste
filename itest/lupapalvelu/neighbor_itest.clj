@@ -8,6 +8,8 @@
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "token-not-found"}))
 (defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-response"}))
+(defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-vetuma-user"}))
+
 
 (defn- create-app-with-neighbor []
   (let [resp (create-app pena)
@@ -119,32 +121,57 @@
 
             (:auth application) => nil)))
 
-      (fact "neighbor cant give ill response"
+      (fact "without tupas, neighbor can't give response"
         (command pena :neighbor-response
           :applicationId application-id
           :neighborId (name neighborId)
           :token token
+          :stamp "INVALID"
           :response "ime parsaa!"
-          :message "kehno suunta") => invalid-response?)
+          :message "kehno suunta") => invalid-vetuma?)
 
-      (fact "neighbor can give response"
-        (command pena :neighbor-response
-          :applicationId application-id
-          :neighborId (name neighborId)
-          :token token
-          :response "disapprove"
-          :message "kehno suunta") => ok?)
+      (fact "with vetuma"
+        (let [stamp (vetuma-stamp!)]
 
-      (fact "neighbour cant regive response"
-        (command pena :neighbor-response
-          :applicationId application-id
-          :neighborId (name neighborId)
-          :token token
-          :response "disapprove"
-          :message "kehno suunta") => invalid-token?)
+          (fact "neighbor cant give ill response"
+            (command pena :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp stamp
+              :token token
+              :response "ime parsaa!"
+              :message "kehno suunta") => invalid-response?)
 
-      (fact "neighbour cant see application anymore"
-        (query pena :neighbor-application
-          :applicationId application-id
-          :neighborId (name neighborId)
-          :token token) => invalid-token?))))
+          (fact "neighbor can give response"
+            (command pena :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp stamp
+              :token token
+              :response "comments"
+              :message "kehno suunta") => ok?)
+
+          (fact "neighbour cant regive response 'cos vetuma has expired"
+            (command pena :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp stamp
+              :token token
+              :response "comments"
+              :message "kehno suunta") => invalid-vetuma?)
+
+          (fact "neighbour cant regive response with new tupas 'con token has expired"
+            (command pena :neighbor-response
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :stamp (vetuma-stamp!)
+              :token token
+              :response "comments"
+              :message "kehno suunta") => invalid-token?)
+
+
+          (fact "neighbour cant see application anymore"
+            (query pena :neighbor-application
+              :applicationId application-id
+              :neighborId (name neighborId)
+              :token token) => invalid-token?))))))

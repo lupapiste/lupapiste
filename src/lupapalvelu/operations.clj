@@ -2,6 +2,8 @@
   (:use [clojure.tools.logging])
   (:require [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
+            [lupapalvelu.document.ymparisto-schemas :as ympschemas]
+            [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")
@@ -37,7 +39,27 @@
                                                                   ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
                                                                   ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]]]
           (when (env/feature? :poikkari) [["Poikkeusluvat ja suunnittelutarveratkaisut" [["Poikkeuslupa" :poikkeuslupa]
-                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])))
+                                                                                        ["Suunnittelutarveratkaisu" :suunnittelutarveratkaisu]]]])
+          (when (env/feature? :ymparisto) [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]
+                                                                        ["Pima" :pima]
+                                                                        ["maa-ainesten_ottaminen" :maa-aineslupa]]]])
+          (when (env/feature? :yleiset-alueet) [["yleisten-alueiden-luvat" [["kaivuulupa" :yleiset-alueet-kaivuulupa]
+                                                                            ["kayttolupa"
+                                                                             [["tyomaasuojat-ja-muut-rakennelmat" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["mainoslaitteet-ja-opasteviitat" :mainostus-ja-viitoituslupa]
+                                                                              ["muut-yleisten-alueiden-tilojen-kaytot" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["messujen-ja-tapahtumien-alueiden-kaytot" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["kadulta-tapahtuvat-nostot" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["kiinteistojen-tyot-jotka-varaavat-yleisen-alueen-tyomaaksi" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["rakennustelineet-kadulla" :yleiset-alueet-kayttolupa] ;; TODO
+                                                                              ["muu-kayttolupa" :yleiset-alueet-kayttolupa]]] ;; TODO
+                                                                            ["sijoituslupa"
+                                                                             [["pysyvien-maanalaisten-rakenteiden-sijoittaminen" :yleiset-alueet-sijoituslupa] ;; TODO
+                                                                              ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen" :yleiset-alueet-sijoituslupa] ;; TODO
+                                                                              ["muu-sijoituslupa" :yleiset-alueet-sijoituslupa]] ;; TODO
+                                                                            #_["liikennetta-haittaavan-tyon-lupa" :liikennetta-haittaavan-tyon-lupa] ;; TODO
+                                                                            ]]]])))
+
 
 (defn municipality-operations [municipality]
   ; Same data for all municipalities for now.
@@ -47,6 +69,13 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "lisatiedot" "paasuunnittelija" "suunnittelija"])
+
+
+(def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
+
+
+(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-maksaja"])
+
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
                                                           :pohjapiirros
@@ -68,7 +97,7 @@
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
                                  :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]];FIXME Aftre krysp update change to 000
+                                               [["huoneistot" "0" "huoneistoTunnus" "huoneistonumero"] "001"]] ;FIXME Aftre krysp update change to 000
                                  :required common-schemas
                                  :attachments uuden_rakennuksen_liitteet}
    :vapaa-ajan-asuinrakennus    {:schema "uusiRakennus"
@@ -171,12 +200,54 @@
                                  :attachments [:paapiirustus [:asemapiirros]]}
    :poikkeuslupa                {:schema "poikkeamishakemuksen-lisaosa"
                                  :required  (conj common-schemas "rakennushanke")
-                                 :attachments [:paapiirustus [:asemapiirros]]}})
+                                 :attachments [:paapiirustus [:asemapiirros]]}
+   :meluilmoitus                {:schema "meluilmoitus"
+                                 :required common-ymp-schemas
+                                 :attachments []}
+   :pima                        {:schema "pima"
+                                 :required ["ymp-ilm-kesto-mini"]
+                                 :attachments []}
+   :maa-aineslupa               {:schema "ottamismaara"
+                                 :required ["maa-ainesluvan-omistaja" "paatoksen-toimitus" "maksaja"
+                                            "ottamis-suunnitelman-laatija" "ottamis-suunnitelma"]
+                                 :attachments []}
+   :yleiset-alueet-kaivuulupa   {:schema "tyomaastaVastaava"
+                                 :schema-data [[["_selected" :value] "yritys"]]
+                                 :operation-type :publicArea
+                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa" "tyoaika")
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+   :yleiset-alueet-kayttolupa   {:schema "tyoaika"
+                                 :operation-type :publicArea
+                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+   :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
+                                 :operation-type :publicArea
+                                 :required ["yleiset-alueet-maksaja"]
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+   :yleiset-alueet-sijoituslupa {:schema "tyomaastaVastaava"
+                                 :schema-data [[["_selected" :value] "yritys"]]
+                                 :operation-type :publicArea
+                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" "tyoaika")
+                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+
+;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"                              ;; Mika nimi tassa kuuluu olla?
+;                                                       :required (conj yleiset-alueet-common-schemas [])}
+   })
+
 
 
 ; Sanity checks:
 
 (doseq [[op info] operations
         schema (cons (:schema info) (:required info))]
-  (if-not ((merge schemas/schemas poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas) schema) (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
+  (if-not ((merge schemas/schemas
+             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
+             yleiset-alueet/kaivuulupa
+             yleiset-alueet/sijoituslupa
+             yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
+             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa
+             ympschemas/ympschemas) schema)
+    (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
+  )
+
 

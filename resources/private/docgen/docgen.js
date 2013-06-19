@@ -2,15 +2,14 @@ var docgen = (function () {
   "use strict";
 
   function makeButton(id, label) {
-
-    var appendButton = document.createElement("button");
-    appendButton.id = id;
-    appendButton.className = "btn";
-    appendButton.innerHTML = label;
-    return appendButton;
+    var button = document.createElement("button");
+    button.id = id;
+    button.className = "btn";
+    button.innerHTML = label;
+    return button;
   }
 
-  LUPAPISTE.DocModel = function (schema, model, removeCallback, docId, application) {
+  var DocModel = function (schema, model, meta, docId, application, authorizationModel, options) {
 
     // Magic key: if schema contains "_selected" radioGroup,
     // user can select only one of the schemas named in "_selected" group
@@ -21,15 +20,37 @@ var docgen = (function () {
     self.schema = schema;
     self.schemaName = schema.info.name;
     self.model = model;
-    self.removeCallback = removeCallback;
+    self.meta = meta;
     self.docId = docId;
     self.appId = application.id;
     self.application = application;
+    self.authorizationModel = authorizationModel;
     self.eventData = { doc: docId, app: self.appId };
+
+    self.getMeta = function (path, m) {
+      var meta = m ? m : self.meta;
+      if (!path || !path.length) {
+        return meta;
+      }
+      if (meta) {
+        var key = path[0];
+        var val = meta[key];
+        if (path.length === 1) {
+          return val;
+        }
+        return self.getMeta(path.splice(1, path.length - 1), val);
+      }
+    };
 
     self.sizeClasses = { "s": "form-input short", "m": "form-input medium" };
 
     // Context help
+    self.addFocus = function (e) {
+      var event = getEvent(e);
+      var input$ = $(event.target);
+      input$.focus();
+    }
+
     self.findHelpElement = function (e) {
       var event = getEvent(e);
       var input$ = $(event.target);
@@ -37,16 +58,55 @@ var docgen = (function () {
       if (!help$.length) {
         help$ = input$.parent().siblings('.form-help');
       }
+      if (!help$.length) {
+        return false;
+      }
       return help$;
+    };
+    self.findErrorElement = function (e) {
+      var event = getEvent(e);
+      var input$ = $(event.target);
+      var error$ = input$.siblings('.errorPanel');
+      if (!error$.length) {
+        error$ = input$.parent().siblings('.errorPanel');
+      }
+      if (!error$.length) {
+        return false;
+      }
+      return error$;
     };
 
     self.showHelp = function (e) {
-      self.findHelpElement(e).fadeIn("slow").css("display", "block");
+      var element = self.findHelpElement(e);
+      if (element) {
+        element.fadeIn("slow").css("display", "block");
+        var st = $(window).scrollTop(); // Scroll Top
+        var y = element.offset().top;
+        if ((y - 80) < (st)) { $("html, body").animate({ scrollTop: y - 80 + "px" }); };
+      }
+      self.showError(e);
     };
     self.hideHelp = function (e) {
-      self.findHelpElement(e).fadeOut("slow").css("display", "none");
+      var element = self.findHelpElement(e);
+      if (element) {
+        element.fadeOut("slow").css("display", "none");
+      }
+      self.hideError(e);
     };
 
+    self.showError = function (e) {
+      var element = self.findErrorElement(e);
+      if (element.children().size()) {
+        element.fadeIn("slow").css("display", "block");
+      }
+    }
+
+    self.hideError = function (e) {
+      var element = self.findErrorElement(e);
+      if (element) {
+        element.fadeOut("slow").css("display", "none");
+      }
+    };
     // ID utilities
 
     function pathStrToID(pathStr) {
@@ -139,12 +199,87 @@ var docgen = (function () {
       return span;
     }
 
+    // TODO WIP
+    self.makeApprovalButtons = function (path, model) {
+      var btnContainer$ = $("<span>").addClass("form-buttons");
+      var statusContainer$ = $("<span>");
+      var approvalContainer$ = $("<span>").addClass("form-approval-status").append(statusContainer$).append(btnContainer$);
+      var approveButton$ = null;
+      var rejectButton$ = null;
+      var cmdArgs = { id: self.appId, doc: self.docId, path: path.join(".") };
+
+      if (_.isEmpty(model) || !features.enabled('docIndicators')) {
+        return approvalContainer$[0];
+      }
+
+      function setStatus(approval) {
+        if (approval) {
+          var text = loc("document." + approval.value);
+          if (approval.user && approval.timestamp) {
+            text += " (" + approval.user.firstName + " " + approval.user.lastName;
+            text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
+          }
+          statusContainer$.text(text);
+        }
+      }
+
+      function makeApprovalButton(verb, noun, cssClass) {
+        var cmd = verb + "-doc";
+        var title = loc("document." + verb);
+        return $(makeButton(self.docId + "_" + verb, title))
+        .addClass(cssClass).addClass("btn-narrow")
+        .click(function () {
+          ajax.command(cmd, cmdArgs)
+          .success(function () {
+            approveButton$.hide();
+            rejectButton$.hide();
+            setStatus({ value: noun });
+          })
+          .call();
+        });
+      }
+
+      function modelModifiedSince(model, timestamp) {
+        if (model) {
+          if (!timestamp) {
+            return true;
+          }
+
+          if (model.value) {
+            // Leaf
+            return model.modified && model.modified > timestamp;
+          }
+          return _.find(model, function (myModel) { return modelModifiedSince(myModel, timestamp); });
+        }
+        return false;
+      }
+
+      var meta = self.getMeta(path);
+      var approval = meta ? meta._approved : null;
+
+      if (self.authorizationModel.ok("approve-doc") &&
+          self.authorizationModel.ok("reject-doc") &&
+          (!approval || modelModifiedSince(model, approval.timestamp))) {
+        approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
+        btnContainer$.append(approveButton$);
+        rejectButton$ = makeApprovalButton("reject", "rejected", "btn-secondary");
+        btnContainer$.append(rejectButton$);
+      } else {
+        setStatus(approval);
+      }
+      return approvalContainer$[0];
+    };
+
     // Form field builders
 
     function buildCheckbox(subSchema, model, path) {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
-      span.appendChild(makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly));
+      var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
+      input.onclick = self.addFocus;
+      input.onfocus = self.showHelp;
+      input.onblur = self.hideHelp;
+      span.appendChild(input);
       span.appendChild(makeLabel("checkbox", myPath));
       return span;
     }
@@ -299,13 +434,20 @@ var docgen = (function () {
       var partsDiv = document.createElement("div");
       var div = document.createElement("div");
       var clearDiv = document.createElement("div");
+      var label = makeLabel("group", myPath, true);
 
       appendElements(partsDiv, subSchema, myModel, path, save, partOfChoice);
 
       div.id = pathStrToGroupID(myPath);
       div.className = subSchema.layout === "vertical" ? "form-choice" : "form-group";
       clearDiv.className = "clear";
-      div.appendChild(makeLabel("group", myPath, true));
+
+      div.appendChild(label);
+
+      if (subSchema.approvable) {
+        label.appendChild(self.makeApprovalButtons(path, myModel));
+      }
+
       div.appendChild(partsDiv);
       div.appendChild(clearDiv);
       return div;
@@ -324,7 +466,7 @@ var docgen = (function () {
       var clearDiv = document.createElement("div");
       clearDiv.className = "clear";
       var span = makeEntrySpan(subSchema, myPath);
-
+      span.className = span.className + " radioGroup";
       partsDiv.id = pathStrToID(myPath);
 
       $.each(subSchema.body, function (i, o) {
@@ -411,6 +553,7 @@ var docgen = (function () {
     function buildPersonSelector(subSchema, model, path) {
       var myPath = path.join(".");
       var span = makeEntrySpan(subSchema, myPath);
+      span.className = span.className + " personSelector";
       var myNs = path.slice(0, path.length - 1).join(".");
       var select = document.createElement("select");
       var selectedOption = getModelValue(model, subSchema.name);
@@ -517,17 +660,18 @@ var docgen = (function () {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if(subSchema.repeating) {
+        if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating')) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
-          removeButton.onclick = function() {
-            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"), loc("yes"), 
-                function() { removeData(self.appId, self.docId, myPath.concat([id])); }, loc("no"));
-          }
+          removeButton.onclick = function () {
+            LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
+                { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
+                { title: loc("no") });
+          };
           elem.insertBefore(removeButton, elem.childNodes[0]);
         }
-        
+
         if (subSchema.type === "group") {
           var clearDiv = document.createElement("div");
           clearDiv.className = "clear";
@@ -637,8 +781,8 @@ var docgen = (function () {
       var unPimpedPath = path.replace(new RegExp("^" + self.docId + "."), "");
       ajax
         .command("update-doc", { doc: self.docId, id: self.appId, updates: [[unPimpedPath, value]] })
-        // Server returns empty array (all ok), or array containing an array with three
-        // elements: [key status message]. Here we use just the status.
+      // Server returns empty array (all ok), or array containing an array with three
+      // elements: [key status message]. Here we use just the status.
         .success(function (e) {
           var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
           callback(status, e.results);
@@ -650,29 +794,43 @@ var docgen = (function () {
 
     function showValidationResults(results) {
       // remove warning and error highlights
-      $("#document-"+docId+" :input").removeClass("warn").removeClass("error").removeClass("tip");
+      $("#document-" + docId + " :input").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
-      $("#document-"+docId+" .errorPanel").html("").hide();
+      $("#document-" + docId + " .errorPanel").html("").fadeOut();
       // apply new errors & highlights
-      if(results && results.length > 0) {
-        _.each(results,function(r) {
-          var path  = r.path,
+      if (results && results.length > 0) {
+        _.each(results, function (r) {
+          var path = r.path,
               level = r.result[0],
-              code  = r.result[1];
-          if(level !== "tip") {
-            var errorPanel = $("#"+docId+"-"+path.join("-")+"-errorPanel");
-            errorPanel.html(errorPanel.html()+"<span class='"+level+"'>"+loc("error."+code)+"</span>").show();
+              code = r.result[1];
+          if (level !== "tip") {
+            var errorPanel = $("#" + docId + "-" + path.join("-") + "-errorPanel");
+            errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>");
           }
-          $("#"+docId+"-"+path.join("-")).addClass(level);
+          
+          var label$ = $("#label-" + docId + "-" + path.join("-"))[0];
+          label$.className = label$.className + " " + level;
+
+          $("#" + docId + "-" + path.join("-")).addClass(level);
         });
       }
     }
 
     function validate() {
-      ajax
-        .query("validate-doc", { id: self.appId, doc: self.docId })
-        .success(function (e) { showValidationResults(e.results); })
-        .call();
+      if (!options || options.validate) {
+        ajax
+          .query("validate-doc", { id: self.appId, doc: self.docId })
+          .success(function (e) { showValidationResults(e.results); })
+          .call();
+      }
+    }
+
+    function disableBasedOnOptions() {
+      if (options && options.disabled) {
+        $(self.element).find('input, textarea').attr("readonly", true);
+        $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
+        $(self.element).find('button').hide();
+      }
     }
 
     function save(e, callback) {
@@ -724,12 +882,11 @@ var docgen = (function () {
       });
     }
 
-    function removeThis() {
-      this.parent().slideUp(function () { $(this).remove(); });
-    }
-
     function removeDoc(e) {
-      var n = $(e.target).parent();
+      var n$ = $(e.target).parent();
+      while (!n$.is("section")) {
+        n$ = n$.parent();
+      }
       var op = self.schema.info.op;
 
       var documentName = loc(self.schemaName + "._group_label");
@@ -737,7 +894,22 @@ var docgen = (function () {
         documentName = loc(op.name + "._group_label");
       }
 
-      self.removeCallback(self.appId, self.docId, documentName, removeThis.bind(n));
+      function onRemovalConfirmed() {
+        ajax.command("remove-doc", { id: self.appId, docId: self.docId })
+          .success(function () {
+            n$.slideUp(function () { n$.remove(); });
+            // This causes full re-rendering, all accordions change state etc. Figure a better way to update UI.
+            // Just the "operations" list should be changed.
+            repository.load(self.appId);
+          })
+          .call();
+        return false;
+      }
+
+      var message = "<div>" + loc("removeDoc.message1") + " <strong>" + documentName + ".</strong></div><div>" + loc("removeDoc.message2") + "</div>";
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"), message,
+          { title: loc("removeDoc.ok"), fn: onRemovalConfirmed }, { title: loc("removeDoc.cancel") }, { html: true });
+
       return false;
     }
 
@@ -763,12 +935,16 @@ var docgen = (function () {
       title.setAttribute("data-doc-id", self.docId);
       title.setAttribute("data-app-id", self.appId);
       title.onclick = accordion.click;
-      if (self.schema.info.removable) {
+      if (self.schema.info.removable && !isDisabled(options)) {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
             .attr("data-test-class", "delete-schemas." + self.schemaName)
             .click(removeDoc));
+      }
+
+      if (self.schema.info.approvable) {
+        elements.appendChild(self.makeApprovalButtons([], self.model));
       }
 
       sectionContainer.className = "accordion_content expanded";
@@ -778,24 +954,16 @@ var docgen = (function () {
 
       sectionContainer.appendChild(elements);
       section.appendChild(title);
-
-/*
-      $("<div>", {
-        "class": "errorPanel",
-        "id": docId+"--errorPanel"
-      }).text("kosh").show().appendTo(section);
-*/
-
       section.appendChild(sectionContainer);
-
       return section;
     }
 
     self.element = buildElement();
     validate();
+    disableBasedOnOptions();
   };
 
-  function displayDocuments(containerSelector, removeDocModel, application, documents) {
+  function displayDocuments(containerSelector, application, documents, authorizationModel, options) {
 
     function getDocumentOrder(doc) {
       var num = doc.schema.info.order || 7;
@@ -808,9 +976,9 @@ var docgen = (function () {
     _.each(sortedDocs, function (doc) {
       var schema = doc.schema;
 
-      docgenDiv.append(new LUPAPISTE.DocModel(schema, doc.data, removeDocModel.init, doc.id, application).element);
+      docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options).element);
 
-      if (schema.info.repeating) {
+      if (schema.info.repeating && !isDisabled(options)) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
         $(btn).click(function () {
@@ -819,7 +987,7 @@ var docgen = (function () {
             .command("create-doc", { schemaName: schema.info.name, id: application.id })
             .success(function (data) {
               var newDocId = data.doc;
-              var newElem = new LUPAPISTE.DocModel(schema, {}, removeDocModel.init, newDocId, application).element;
+              var newElem = new DocModel(schema, {}, {}, newDocId, application, authorizationModel).element;
               $(self).before(newElem);
             })
             .call();
@@ -828,6 +996,9 @@ var docgen = (function () {
       }
     });
   }
+
+  function isDisabled(options) { return options && options.disabled; }
+  function doValidate(options) { return !options || options.validate; }
 
   return {
     displayDocuments: displayDocuments
