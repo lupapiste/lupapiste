@@ -14,9 +14,7 @@
 
 (def yleiset-alueet-maksaja
   (body
-    {:name "yritys" :type :group :body yritys-minimal}
-    simple-osoite
-    yhteystiedot
+    party-public-area
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def tyomaasta-vastaava
