@@ -222,7 +222,7 @@
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                  :operation-type :publicArea
-                                 :required ["yleiset-alueet-maksaja"]
+                                 :required yleiset-alueet-common-schemas
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
    :yleiset-alueet-sijoituslupa {:schema "tyomaastaVastaava"
                                  :schema-data [[["_selected" :value] "yritys"]]
