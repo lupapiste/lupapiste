@@ -143,6 +143,17 @@
     response => ok?
     application))
 
+(defn action-allowed [apikey id action]
+  (let [resp (query apikey :allowed-actions :id id)]
+    (success resp) => true
+    (get-in resp [:actions action :ok]) => truthy))
+
+(defn action-not-allowed [apikey id action]
+  (let [resp (query apikey :allowed-actions :id id)]
+    (success resp) => true
+    (get-in resp [:actions action :ok]) => falsey
+    (unauthorized (command apikey action :id id))))
+
 ;;
 ;; Stuffin' data in
 ;;
