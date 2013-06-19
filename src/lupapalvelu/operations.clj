@@ -84,12 +84,12 @@
                                            :rakennuspaikka [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
 
 (def ^:private rakennuksen_muutos_liitteet [:paapiirustus [:pohjapiirros
-                                                          :julkisivupiirros]])
+                                                           :julkisivupiirros]])
 
 (def ^:private rakennuksen_laajennuksen_liitteet [:paapiirustus [:asemapiirros
-                                                          :pohjapiirros
-                                                          :julkisivupiirros
-                                                          :leikkauspiirros]])
+                                                                 :pohjapiirros
+                                                                 :julkisivupiirros
+                                                                 :leikkauspiirros]])
 
 (def ^:private kaupunkikuva_toimenpide_liitteet [:paapiirustus [:asemapiirros
                                                                 :julkisivupiirros]])
@@ -224,10 +224,10 @@
                                  :operation-type :publicArea
                                  :required yleiset-alueet-common-schemas
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
-   :yleiset-alueet-sijoituslupa {:schema "tyomaastaVastaava"
+   :yleiset-alueet-sijoituslupa {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                  :schema-data [[["_selected" :value] "yritys"]]
                                  :operation-type :publicArea
-                                 :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-sijoituslupa" "tyoaika")
+                                 :required ["sijoituslupa-sijoituksen-tarkoitus"]
                                  :attachments []}                                                     ;; TODO: Mita attachmentteihin?
 
 ;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"                              ;; Mika nimi tassa kuuluu olla?
