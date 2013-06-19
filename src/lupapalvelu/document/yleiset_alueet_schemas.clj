@@ -5,12 +5,12 @@
 (def hankkeen-kuvaus-kaivulupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string}))                             ;; sijoituslupaviitetietoType
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
 
 (def hankkeen-kuvaus-sijoituslupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "kaivuLuvanTunniste" :type :string}))                                ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
+    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
 
 (def yleiset-alueet-maksaja
   (body
@@ -29,7 +29,7 @@
 (def tapahtuman-tiedot
   (body
     {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
-    {:name "tapahtumapaikka" :type :string}
+    {:name "tapahtumapaikka" :type :string :size "l"}
     [{:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
      {:name "tapahtuma-aika-paattyy-pvm" :type :date}]))
 
@@ -73,6 +73,24 @@
      {:name "viitoitus-tapahtuma-valinta" :type :group
       :body viitoitus-tapahtuma}]))
 
+(def sijoituslupa-sijoituksen-tarkoitus
+  (body
+    [{:name "sijoituksen-tarkoitus" :type :select
+      :body [{:name "sahko"}
+             {:name "tele"}
+             {:name "kaivo-(tele/sahko)"}
+             {:name "jakokaappi-(tele/sahko)"}
+             {:name "kaukolampo"}
+             {:name "kaivo-(kaukolampo)"}
+             {:name "liikennevalo"}
+             {:name "katuvalo"}
+             {:name "jate--tai-sadevesi"}
+             {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
+             {:name "vesijohto"}
+             {:name "muu"}]}
+     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width} ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
+     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
+
 
 (def kaivuulupa
   (to-map-by-name
@@ -104,7 +122,10 @@
   (to-map-by-name
     [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
              :order 65}
-      :body hankkeen-kuvaus-sijoituslupa}]))
+      :body hankkeen-kuvaus-sijoituslupa}
+     {:info {:name "sijoituslupa-sijoituksen-tarkoitus"
+             :order 66}
+      :body sijoituslupa-sijoituksen-tarkoitus}]))
 
 ;;
 ;; TODO: Liikennetta haittavan tyon lupa
