@@ -158,3 +158,5 @@ attachmentType.yleiset-alueet.aiemmin-hankittu-sijoituspaatos: Aiemmin hankittu 
 attachmentType.yleiset-alueet.tilapainen-liikennejarjestelysuunnitelma: Tilapäinen liikennejärjestelysuunnitelma
 attachmentType.yleiset-alueet.tyyppiratkaisu: Tyyppiratkaisu
 attachmentType.yleiset-alueet.tieto-kaivupaikkaan-liittyvista-johtotiedoista: Tieto kaivupaikkaan liittyvistä johtotiedoista
+
+hankkeen-kuvaus.kuvaus.help: Esimerkkejä hyvistä kuvauksista: Omakotitalo - Rakennetaan kaksikerroksinen, puuverhoiltu omakotitalo ja talousrakennus sekä maalämpökaivo; Rivitalo - Rakennetaan rivitaloa sekä väestönsuoja/varastorakennus. Asuntoja on 20 kpl. Anomus aloittaa rakennustyöt valitusaikana; Puunkaato - Kaadetaan n. 50 kuusta. Kiinteistöltä kaadetaan puita ja pintamaat poistetaan. Täyttöä on n. 10 000 m3.
