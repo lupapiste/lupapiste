@@ -1,33 +1,3 @@
-
-#
-# TODO: Poista vanha "yleiset-alueet-sijoituslupa._group_label"
-#
-yleiset-alueet-sijoituslupa._group_label: Hankkeen kuvaus
-
-sijoituslupa-sijoituksen-tarkoitus._group_label: Sijoituksen tarkoitus
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.sahko: Sähkö
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.tele: Tele
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kaivo-(tele/sahko): Kaivo (tele/sähkö)
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.jakokaappi-(tele/sahko): Jakokaappi (tele/sähkö)
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kaukolampo: Kaukolämpö
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kaivo-(kaukolampo): Kaivo (kaukolämpö)
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.liikennevalo: Liikennevalo
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.katuvalo: Katuvalo
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.jate--tai-sadevesi: Jäte- tai sadevesi
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.kaivo-(vesi,-jate--tai-sadevesi): Kaivo (vesi, jäte- tai sadevesi)
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.vesijohto: Vesijohto
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus.muu: Muu
-
-sijoituslupa-sijoituksen-tarkoitus.sijoituksen-tarkoitus._group_label: Sijoituksen tarkoitus
-sijoituslupa-sijoituksen-tarkoitus.muu-sijoituksen-tarkoitus: Muu sijoituksen tarkoitus, ellei mikään edellisistä
-sijoituslupa-sijoituksen-tarkoitus.lisatietoja-sijoituskohteesta: Lisätietoja kohteesta
-
-
-attachmentType.yleiset-alueet.rakennuspiirros: Rakennuspiirros
-attachmentType.yleiset-alueet.suunnitelmakartta: Suunnitelmakartta
-attachmentType.yleiset-alueet.muu: Muu
-
-
 uusiRakennus.kaytto.rakentajaTyyppi.help: Liiketaloudellinen rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
 purku.kaytto.rakentajaTyyppi.help: Liiketaloudellinen rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
 rakennuksen-laajentaminen.kaytto.rakentajaTyyppi.help: Liiketaloudellinen rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä teetetään ulkopuolisella rakentajalla kuten esim. työkunta, kirvesmiesryhmä, urakoitsija. Muu rakentaminen merkitään rakentajaksi silloin, kun suurin osa rakentamistyöstä tehdään omatoimisesti.
