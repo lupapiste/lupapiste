@@ -74,7 +74,7 @@
 (def ^:private common-ymp-schemas ["ymp-ilm-kesto"])
 
 
-(def ^:private yleiset-alueet-common-schemas ["maksaja"])
+(def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-maksaja"])
 
 
 (def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros

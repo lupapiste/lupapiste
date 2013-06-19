@@ -12,6 +12,11 @@
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
     {:name "kaivuLuvanTunniste" :type :string}))                                ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
 
+(def yleiset-alueet-maksaja
+  (body
+    party-public-area
+    {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+
 (def tyomaasta-vastaava
   (body
     party-public-area))
@@ -78,9 +83,13 @@
              :type :party
              :order 61}
       :body tyomaasta-vastaava}
+     {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
+             :type :party
+             :order 62}
+      :body yleiset-alueet-maksaja}
      {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
              :type :group
-             :order 62}
+             :order 63}
             :body tyo-aika}]))
 
 (def kayttolupa-mainoslaitteet-ja-opasteviitat
@@ -88,13 +97,13 @@
     [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
             :type :group
 ;            :removable false  ;; TODO: Miten voi poistaa raksin?
-            :order 63}
+            :order 64}
      :body mainostus-tai-viitoitus-tapahtuma-valinta}]))
 
 (def sijoituslupa
   (to-map-by-name
     [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
-             :order 64}
+             :order 65}
       :body hankkeen-kuvaus-sijoituslupa}]))
 
 ;;
