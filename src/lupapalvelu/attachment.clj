@@ -97,6 +97,7 @@
                                                      :asemapiirros]])
 
 (defn organization-attachments [organization]
+  ;; TODO: return attachment type based on what types of operations the given organization is having.
   attachment-types)
 
 (defn make-attachment [now target locked op attachement-type]
