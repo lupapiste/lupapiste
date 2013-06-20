@@ -541,9 +541,12 @@
                          :title         address
                          :auth          [owner]
                          :attachments   (if info-request? [] (make-attachments created op organization))
+
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
-                                                   (partition 2 attachment/attachment-types))
+                                                   (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
+                                                     (partition 2 attachment/attachment-types-public-areas)
+                                                     (partition 2 attachment/attachment-types)))
                          :comments      (map make-comment messages)
                          :permitType    (permit-type-from-operation op)}
           application   (assoc application :documents (if info-request? [] (make-documents user created nil op application)))
@@ -601,7 +604,9 @@
             op       (first (:operations inforequest))]
         (mongo/update-by-id :applications id {$set {:infoRequest false
                                                     :state :open
-                                                    :allowedAttachmentTypes (partition 2 attachment/attachment-types)
+                                                    :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
+                                                                              (partition 2 attachment/attachment-types-public-areas)
+                                                                              (partition 2 attachment/attachment-types))
                                                     :documents (make-documents (-> command :user security/summary) created nil op nil)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
