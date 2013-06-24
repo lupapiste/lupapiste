@@ -241,14 +241,14 @@
                                           (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)
                                       :julkisivumateriaali (-> rakenne :julkisivu :value))
-        lammitystapa (-> lammitys :lammitystapa :value)]
+        lammitystapa (-> lammitys :lammitystapa :value)
+        huoneistot {:huoneisto (get-huoneisto-data huoneistot)}]
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
      :rakentajatyyppi (-> kaytto :rakentajaTyyppi :value)
      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
-     :rakennuksenTiedot (merge {
-                                :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
+     :rakennuksenTiedot (merge {:kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
                                 :tilavuus (-> mitat :tilavuus :value)
                                 :kokonaisala (-> mitat :kokonaisala :value)
                                 :kellarinpinta-ala (-> mitat :kellarinpinta-ala :value)
@@ -277,14 +277,16 @@
                                             :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin :value))
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
-                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}
-                                :asuinhuoneistot {:huoneisto (get-huoneisto-data huoneistot)}}
+                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (when (-> toimenpide :rakennusnro :value)
                                    {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value)
                                                     :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
-                               (when julkisivu-map {:julkisivu julkisivu-map}))}))
+                               (when julkisivu-map {:julkisivu julkisivu-map})
+                               (when huoneistot (if (not-empty (:huoneisto huoneistot))
+                                                  {:asuinhuoneistot huoneistot})
+                                 ))}))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
