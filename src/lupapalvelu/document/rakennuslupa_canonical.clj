@@ -365,6 +365,10 @@
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
                    :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
 
+(defn- change-value-to-when [value to_compare new_val]
+  (if (= value to_compare) new_val
+    value))
+
 (defn- get-bulding-places [documents application]
   (for [doc (:rakennuspaikka documents)
         :let [rakennuspaikka (:data doc)
@@ -374,7 +378,7 @@
     {:Rakennuspaikka
      {:yksilointitieto id
       :alkuHetki (to-xml-datetime created)
-      :kaavanaste (-> rakennuspaikka :kaavanaste :value)
+      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste :value) "eiKaavaa" "ei kaavaa")
       :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
                                       {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
                                        :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
