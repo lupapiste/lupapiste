@@ -14,3 +14,4 @@ error.vrk:BR106: Puutalossa saa olla korkeintaan 4 kerrosta
 
 operations.poikkeuslupa: Poikkeuslupa
 operations.poikkeuslupa.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
+operations.suunnittelutarveratkaisu.desc: Hankkeesi vaatii luvan. Voit hakea lupaa Lupapisteen kautta. Sinun kannattaa myös tutustua alla listattuihin sivustoihin, joilta löydät lisää tietoa rakennusvalvonnasta. Voit myös kysyä lisää aiheesta kunnan rakennusvalvonnasta Lupapisteen kautta tekemällä neuvontapyynnön.
