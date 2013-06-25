@@ -220,11 +220,13 @@
                    (apply-update [:_selected] "henkilo")
                    (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
                    (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
+                   (apply-update [:henkilo :henkilotiedot :hetu] "230470-658B")
                    (apply-update [:henkilo :osoite :katu] "katu")
                    (apply-update [:henkilo :osoite :postinumero] "12345")
                    (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
                    (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
                    (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
+
       document => valid?
       (-> document
         (apply-update [:_selected])) => valid?
