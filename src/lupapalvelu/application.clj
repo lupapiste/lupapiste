@@ -579,7 +579,7 @@
 (defcommand "change-location"
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed]
+   :states     [:draft :info :answered :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
@@ -615,8 +615,13 @@
 ;; Verdicts
 ;;
 
+(defn- validate-status [{{:keys [status]} :data}]
+  (when (or (< status 1) (> status 42))
+    (fail :error.false.status.out.of.range.when.giving.verdict)))
+
 (defcommand "give-verdict"
   {:parameters [:id :verdictId :status :name :given :official]
+   :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
    :notify     "verdict"
    :roles      [:authority]}
