@@ -61,7 +61,7 @@
                     :type :group
                     :body [{:name "puhelin" :type :string :subtype :tel}
                            {:name "email" :type :string :subtype :email}
-                           {:name "fax" :type :string :subtype :tel}]}])
+                           #_{:name "fax" :type :string :subtype :tel}]}])
 
 (def yhteystiedot-public-area [{:name "yhteystiedot"
                                 :type :group
@@ -76,9 +76,9 @@
 
 (def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
-                               :body [{:name "etunimi" :type :string :subtype :vrk-name}
-                                      {:name "sukunimi" :type :string :subtype :vrk-name}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11}]})
+                               :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                      {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true}]})
 
 (def henkilo (body
                henkilo-valitsin
