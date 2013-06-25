@@ -370,7 +370,7 @@
 
 (defn authority-viewing-verdictGiven-application [{{:keys [attachmentId]} :data :as command} application]
   (when (and
-          (-> application :state (= :verdictGiven))
+          (-> application :state (= "verdictGiven"))
           (not (-> command :user :role (= "authority"))))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
