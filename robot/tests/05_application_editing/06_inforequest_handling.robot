@@ -13,7 +13,6 @@ Mikko creates two new inforequests
   Set Suite Variable  ${inforequest-cancelling}  inforequest-cancelling${secs}
   Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Set Suite Variable  ${propertyId}  753-416-25-30
-  Set Suite Variable  ${newId}  753-416-25-29
   Create inforequest the fast way  ${inforequest-handling}  753  ${propertyId}  Jiihaa
   Create inforequest the fast way  ${inforequest-cancelling}  753  ${propertyId}  Jiihaa
   Logout
@@ -46,16 +45,14 @@ Mikko should be able to add attachment
 Mikko opens inforequest for renaming and cancellation
   Open inforequest  ${inforequest-cancelling}  ${propertyId}
 
-Mikko changes inforequest address and property id
+Mikko changes inforequest address
   Page should not contain  ${newName}
-  Page should not contain  ${newId}
   Element should be visible  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
   Click element  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
   Input text by test id  application-new-address  ${newName}
-  Input text by test id  application-new-propertyid  ${newId}
+  Element should be disabled  xpath=//section[@id='change-location']//input[@data-test-id='application-new-propertyid']
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}
-  Page should contain  ${newId}
 
 Mikko cancels an inforequest
   Wait Until  Element should be enabled  xpath=//*[@data-test-id='inforequest-cancel-btn']

@@ -579,7 +579,7 @@
 (defcommand "change-location"
   {:parameters [:id :x :y :address :propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :complement-needed]
+   :states     [:draft :info :answered :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
