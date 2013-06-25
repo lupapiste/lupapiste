@@ -107,9 +107,13 @@
       (-> document
         (apply-update [:henkilotiedot :etunimi] "Tauno")
         (apply-update [:henkilotiedot :sukunimi] "Palo")
+        (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
+        (apply-update [:yritys :yritysnimi] "Suunnittelu Palo")
         (apply-update [:osoite :katu] "katu")
         (apply-update [:osoite :postinumero] "12345")
         (apply-update [:osoite :postitoimipaikannimi] "Demola")
+        (apply-update [:patevyys :koulutus] "Demotehti")
+        (apply-update [:patevyys :patevyysluokka] "AA")
         (apply-update [:yhteystiedot :email] "tauno@example.com")
         (apply-update [:yhteystiedot :puhelin] "050")) => valid?
       (-> document
@@ -242,9 +246,14 @@
     (let [document (-> (new-document (schemas "hakija") ..now..)
                      (apply-update [:_selected] "yritys")
                      (apply-update [:yritys :yritysnimi] "Solita")
+                     (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
                      (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
                      (apply-update [:yritys :osoite :postinumero] "33720")
-                     (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
+                     (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere")
+                     (apply-update [:yritys :yhteyshenkilo :henkilotiedot :etunimi] "Tauno")
+                     (apply-update [:yritys :yhteyshenkilo :henkilotiedot :sukunimi] "Palo")
+                     (apply-update [:yritys :yhteyshenkilo :yhteystiedot :email] "tauno@example.com")
+                     (apply-update [:yritys :yhteyshenkilo  :yhteystiedot :puhelin] "050"))]
       document => valid?
       (-> document
         (apply-update [:yritys :osoite :katu])) => missing-required-fields?
