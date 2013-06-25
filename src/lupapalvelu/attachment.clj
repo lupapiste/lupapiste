@@ -368,11 +368,17 @@
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
+(defn authority-viewing-verdictGiven-application [{{:keys [attachmentId]} :data :as command} application]
+  (when (and
+          (-> application :state (= "verdictGiven"))
+          (not (-> command :user :role (= "authority"))))
+    (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
+
 (defcommand "upload-attachment"
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
-   :validators [attachment-is-not-locked]
-   :states     [:draft :info :open :submitted :complement-needed :answered]
+   :validators [attachment-is-not-locked authority-viewing-verdictGiven-application]
+   :states     [:draft :info :open :submitted :complement-needed :answered :verdictGiven]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
   (if (> size 0)
