@@ -131,46 +131,20 @@
         (:state application) => "submitted"))))
 
 (fact "Authority is able to add an attachment to an application after verdict has been given for it"
-
-  ;; TODO: Luo application sekä sonjalla (authority) että penalla (normi käyttäjä) => Kayta vaikka do-seq:a (http://clojuredocs.org/clojure_core/clojure.core/doseq)
-
   (let [application-id  (create-app-id sonja :municipality sonja-muni)
         resp        (command sonja :submit-application :id application-id)
         application (:application (query sonja :application :id application-id))]
     (success resp) => true
     (:state application) => "submitted"
 
-
-    (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Sonja Sibbo" :given 123 :official sonja-id)  ;id verdictId status name given official
+    (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official sonja-id)
           application (:application (query sonja :application :id application-id))]
       (success resp) => true
       (:state application) => "verdictGiven"
 
-
       (let [attachment-id (first (get-attachment-ids application))]
-        (upload-attachment sonja (:id application) attachment-id)
-        )
-
-      #_(let [resp (command sonja
-                 :create-attachments
-                 :id application-id
-                 :attachmentTypes [{:type-group "tg" :type-id "tid-1"}])
-            attachment-ids (:attachmentIds resp)]
-        (success resp) => true
-
-
-        ; :parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
-        (let [resp (command sonja
-                   :upload-attachment
-                   :id application-id
-                   :attachmentId (first attachment-ids)
-                   :attachmentType (-> attachment-ids first :type-id)
-                   :filename "testi-attachment.txt"
-                   :tempfile "mika_tahan_2.txt"            ; #<File C:\Users\jarias\AppData\Local\Temp\ring-multipart-3573803150139735612.tmp>
-                   :size 123)
-              attachment-ids (:attachmentIds resp)]
-          (success resp) => true)
-        ))))
+        (upload-attachment sonja (:id application) attachment-id true)
+        (upload-attachment pena (:id application) attachment-id false)))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (unauthorized (create-app sonja :municipality veikko-muni)) => true)

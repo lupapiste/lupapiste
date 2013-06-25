@@ -158,7 +158,7 @@
 ;; Stuffin' data in
 ;;
 
-(defn upload-attachment [apikey application-id attachment-id]
+(defn upload-attachment [apikey application-id attachment-id expect-to-succeed]
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         application (query apikey :application :id application-id)
@@ -170,15 +170,19 @@
                                    {:name "attachmentType" :content "paapiirustus.asemapiirros"}
                                    {:name "attachmentId"   :content attachment-id}
                                    {:name "upload"         :content uploadfile}]})]
-    (facts "Upload succesfully"
-      (fact "Status code" (:status resp) => 302)
-      (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))))
+    (if expect-to-succeed
+      (facts "Upload succesfully"
+        (fact "Status code" (:status resp) => 302)
+        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+      (facts "Upload should fail"
+        (fact "Status code" (:status resp) => 302)
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0)))))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
   (doseq [attachment-id (get-attachment-ids application)]
-    (upload-attachment pena (:id application) attachment-id)))
+    (upload-attachment pena (:id application) attachment-id true)))
 
 ;;
 ;; Vetuma
