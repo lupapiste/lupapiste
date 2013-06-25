@@ -340,13 +340,13 @@
                                          {:name "muu" :type :string :size "s"}
                                          {:name "ei tiedossa"}]}
                                  {:name "muu-lammonlahde" :type :string}]}
-                         {:name "verkostoliittymat" :type :group
+                         {:name "verkostoliittymat" :type :group :layout :vertical
                           :body [{:name "viemariKytkin" :type :checkbox}
                                  {:name "vesijohtoKytkin" :type :checkbox}
                                  {:name "sahkoKytkin" :type :checkbox}
                                  {:name "maakaasuKytkin" :type :checkbox}
                                  {:name "kaapeliKytkin" :type :checkbox}]}
-                         {:name "varusteet" :type :group
+                         {:name "varusteet" :type :group :layout :vertical
                           :body [{:name "sahkoKytkin" :type :checkbox}
                                  {:name "kaasuKytkin" :type :checkbox}
                                  {:name "viemariKytkin" :type :checkbox}
@@ -532,7 +532,9 @@
              :order 6
              :removable true
              :type :party}
-      :body party}
+      :body (body
+              party
+              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
 
      {:info {:name "rakennuspaikka"
              :order 2}
