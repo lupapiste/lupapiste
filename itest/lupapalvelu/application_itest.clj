@@ -131,20 +131,21 @@
         (:state application) => "submitted"))))
 
 (fact "Authority is able to add an attachment to an application after verdict has been given for it"
-  (let [application-id  (create-app-id sonja :municipality sonja-muni)
-        resp        (command sonja :submit-application :id application-id)
-        application (:application (query sonja :application :id application-id))]
-    (success resp) => true
-    (:state application) => "submitted"
-
-    (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official sonja-id)
-          application (:application (query sonja :application :id application-id))]
+  (doseq [user [sonja pena]]
+    (let [application-id  (create-app-id user :municipality sonja-muni)
+          resp            (command user :submit-application :id application-id)
+          application     (:application (query user :application :id application-id))]
       (success resp) => true
-      (:state application) => "verdictGiven"
+      (:state application) => "submitted"
 
-      (let [attachment-id (first (get-attachment-ids application))]
-        (upload-attachment sonja (:id application) attachment-id true)
-        (upload-attachment pena (:id application) attachment-id false)))))
+      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official sonja-id)
+            application (:application (query sonja :application :id application-id))]
+        (success resp) => true
+        (:state application) => "verdictGiven"
+
+        (let [attachment-id (first (get-attachment-ids application))]
+          (upload-attachment sonja (:id application) attachment-id true)
+          (upload-attachment pena (:id application) attachment-id false))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (unauthorized (create-app sonja :municipality veikko-muni)) => true)
