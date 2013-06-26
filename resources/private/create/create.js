@@ -36,6 +36,14 @@
       window.scrollTo(0, 0);
     };
 
+     self.returnPhase2 = function() {
+      $("#create-part-1").hide();
+      $("#create-part-3").hide();
+      $("#create-part-2").show();
+      window.scrollTo(0, 0);
+    };
+
+
     self.useManualEntry = ko.observable(false);
 
     self.map = null;
