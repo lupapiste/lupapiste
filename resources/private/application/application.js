@@ -43,7 +43,10 @@
     self.transparencies = transparencies;
 
     function stampableAttachment(a) {
-      var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
+      var ct = "";
+      if (a.latestVersion && typeof a.latestVersion.contentType === "function") {
+        ct = a.latestVersion.contentType();
+      }
       return ct === "application/pdf" || ct.search(/^image\//) === 0;
     }
 
