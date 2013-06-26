@@ -572,7 +572,7 @@
                   <tr>
                     <td data-bind="ltext: 'stamp.transparency'" class="label"></td>
                     <td colspan="2">
-                      <select data-bind="options: transparencies, optionsText: 'text', value: transparency" class="form-input"></select>
+                      <select data-bind="options: transparencies, optionsText: 'text', value: transparency" class="form-input combobox"></select>
                     </td>
                   </tr>
                 </tbody>
@@ -608,19 +608,13 @@
                     </td>
                   </tr>
                 </tbody>
-                <tfoot>
-                  <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th>
-                      <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
-                      <span>/</span>
-                      <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
-                    </th>
-                  </tr>
-                </tfoot>
               </table>
+              <div class="select-all">
+                <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
+                <span>/</span>
+                <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
+              </div>
+
               <form class="stamp-files-select-all-none">
               </form>
             </div>
