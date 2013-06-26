@@ -1,4 +1,10 @@
 required.field.desc: Tähdellä merkityt kentät on pakollisia *
+invite.desc: Voit valtuuttaa henkilön kutsumalla hänet sähköpostilla. Tällöin hän saa oikeudet muokata hakemusta ja perinteistä valtakirjaa vastaavat oikeudet asioida puolestasi.
+attachment.view.desc: Täällä voit lisätä suunnitelmaan tai liitteeseen uusia versioita, poistaa liitteen hakemukselta ja keskustella liitteestä. 
+
+attachment.legend.error: Puuttuva tai muutoksia vaativa liite
+attachment.legend.ok: Viranomaisen alustavasti hyväksymä liite. Varsinainen hyväksyntä annetaan myöhemmin luvan virallisessa käsittelyssä.
+
 
 
 
