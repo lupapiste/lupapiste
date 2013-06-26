@@ -113,7 +113,7 @@
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-          <button data-bind="click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-cancel-btn"  class="btn">
+          <button data-bind="click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
@@ -174,7 +174,9 @@
       <div class="tab-content-container content">
 
         <div id="application-info-tab" class="tab-content">
+          <h1 data-bind="ltext: 'application.tabInfo'"></h1>
           <p data-bind="ltext: 'application.applicationInfoDesc'" class="tab-info"></p>
+          <p data-bind="ltext: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="applicationDocgen">
@@ -186,7 +188,9 @@
           </div>
         </div>
         <div id="application-parties-tab" class="tab-content">
+          <h1 data-bind="ltext: 'application.tabParties'"></h1>
           <p data-bind="ltext: 'application.partiesDesc'" class="tab-info"></p>
+          <p data-bind="ltext: 'required.field.desc'"></p>
           <div class="application_section" data-bind="with: application">
             <h2 class="application_section_header " onclick="accordion.click();">
               <span class="font-icon icon-expanded"></span> <span data-bind="ltext: 'application.basicInfo'">Hakemuksen perustiedot</span></h2>
@@ -230,6 +234,7 @@
         </div>
 
         <div id="application-attachments-tab" class="tab-content">
+          <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
           <p data-bind="ltext: 'application.attachmentsDesc'" class="tab-info"></p>
           <div class="tab-wrapper">
             <div data-bind="if: attachmentsByGroup().length" data-test-id="application-attachments-table">
@@ -312,6 +317,7 @@
         </div>
 
         <div id="application-verdict-tab" class="tab-content">
+          <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
           <p data-bind="ltext: 'application.verdictDesc'" class="tab-info"></p>
           <div class="tab-wrapper" >
             <div class="row" data-bind="if: $root.verdictModel.verdicts()">
@@ -457,6 +463,7 @@
         </div>
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
+          <h1 data-bind="ltext: 'application.tabConversation'"></h1>
           <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
           <div data-bind="template: {name: 'comment-template'}"></div>
           <div class="process-nav"></div>

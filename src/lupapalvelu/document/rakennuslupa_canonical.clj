@@ -48,7 +48,6 @@
 
 (defn- get-yhteystiedot-data [yhteystiedot]
   {:sahkopostiosoite (-> yhteystiedot :email :value)
-  :faksinumero (-> yhteystiedot :fax :value)
   :puhelin (-> yhteystiedot :puhelin :value)})
 
 (defn- get-simple-yritys [yritys]
@@ -60,7 +59,6 @@
     (merge (get-simple-yritys yritys)
            {:postiosoite (get-simple-osoite (:osoite yritys))
             :puhelin (-> yhteystiedot :puhelin :value)
-            :faksinumero (-> yhteystiedot :fax :value)
             :sahkopostiosoite (-> yhteystiedot :email :value)})))
 
 (defn- get-name [henkilotiedot]

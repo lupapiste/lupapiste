@@ -67,16 +67,16 @@
         <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: verdictId, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-id"></input>
 
         <label for="verdict-type-select" class="form-label" data-bind="ltext: 'verdict.status'"></label><br/>
-        <select id="verdict-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.status.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-verdict')"></select>
+        <select id="verdict-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.status.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-verdict'), valueUpdate: 'afterkeydown'"></select>
 
         <label class="form-label" data-bind="ltext: 'verdict.name'"></label><br/>
-        <input type="text" class="form-input long" data-bind="value: name, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-name"></input>
+        <input type="text" class="form-input long" data-bind="value: name, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict'), valueUpdate: 'afterkeydown'" id="verdict-name"></input>
 
         <label class="form-label" data-bind="ltext: 'verdict.given'"></label><br/>
-        <input type="text" class="form-input long" data-bind="datepicker: given, valueUpdate: 'afterkeydown', disable: !$root.authorization.ok('give-verdict')" id="verdict-given"></input>
+        <input type="text" class="form-input long" data-bind="datepicker: given, disable: !$root.authorization.ok('give-verdict'), valueUpdate: 'afterkeydown'" id="verdict-given"></input>
 
         <label class="form-label" data-bind="ltext: 'verdict.official'"></label><br/>
-        <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('give-verdict')" id="verdict-official"></input>
+        <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('give-verdict'), valueUpdate: 'afterkeydown'" id="verdict-official"></input>
 
         <button
           data-bind="disable: disabled, click: submit, ltext: 'verdict.submit', visible: $root.authorization.ok('give-verdict')"

@@ -59,26 +59,26 @@
 
 (def yhteystiedot [{:name "yhteystiedot"
                     :type :group
-                    :body [{:name "puhelin" :type :string :subtype :tel}
-                           {:name "email" :type :string :subtype :email}
-                           {:name "fax" :type :string :subtype :tel}]}])
+                    :body [{:name "puhelin" :type :string :subtype :tel :required true}
+                           {:name "email" :type :string :subtype :email :required true}
+                           #_{:name "fax" :type :string :subtype :tel}]}])
 
 (def yhteystiedot-public-area [{:name "yhteystiedot"
                                 :type :group
-                                :body [{:name "puhelin" :type :string :subtype :tel}
-                                       {:name "email" :type :string :subtype :email}
+                                :body [{:name "puhelin" :type :string :subtype :tel :required true}
+                                       {:name "email" :type :string :subtype :email :required true}
                                        #_{:name "fax" :type :string :subtype :tel}]}])        ;; TODO: Saako FAX jaada? Ei kryspissa?
 
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
-                             :body [{:name "etunimi" :type :string :subtype :vrk-name}
-                                    {:name "sukunimi" :type :string :subtype :vrk-name}]}])
+                             :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}]}])
 
 (def henkilotiedot-with-hetu {:name "henkilotiedot"
                                :type :group
-                               :body [{:name "etunimi" :type :string :subtype :vrk-name}
-                                      {:name "sukunimi" :type :string :subtype :vrk-name}
-                                      {:name "hetu" :type :string :subtype :hetu :max-len 11}]})
+                               :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
+                                      {:name "sukunimi" :type :string :subtype :vrk-name :required true}
+                                      {:name "hetu" :type :string :subtype :hetu :max-len 11 :required true}]})
 
 (def henkilo (body
                henkilo-valitsin
@@ -101,8 +101,8 @@
                                   simple-osoite
                                   yhteystiedot))
 
-(def yritys-minimal [{:name "yritysnimi" :type :string}
-                     {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus}])
+(def yritys-minimal [{:name "yritysnimi" :type :string :required true}
+                     {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
 (def yritys (body
               yritys-minimal
@@ -136,8 +136,8 @@
                                  {:name "yritys" :type :group :body yritys}]))
 
 
-(def patevyys [{:name "koulutus" :type :string}
-               {:name "patevyysluokka" :type :select
+(def patevyys [{:name "koulutus" :type :string :required true}
+               {:name "patevyysluokka" :type :select :required true
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
@@ -155,7 +155,7 @@
                         designer-basic
                         {:name "patevyys" :type :group :body patevyys}))
 
-(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select
+(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select 
                        :body [{:name "GEO-suunnittelija"}
                               {:name "LVI-suunnittelija"}
                               {:name "IV-suunnittelija"}
