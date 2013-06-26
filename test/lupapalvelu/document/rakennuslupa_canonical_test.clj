@@ -34,8 +34,7 @@
 (def henkilo
   {:henkilotiedot henkilotiedot
    :yhteystiedot {:puhelin {:value "+358401234567"}
-                  :email {:value "pena@example.com"}
-                  :fax {:value "+358401234568"}}
+                  :email {:value "pena@example.com"}}
    :osoite osoite
    :turvakieltoKytkin {:value true}})
 
@@ -48,7 +47,6 @@
    :osoite osoite
    :yhteyshenkilo {:henkilotiedot nimi
                    :yhteystiedot {:email {:value "solita@solita.fi"},
-                                  :fax {:value "03-389 1380"},
                                   :puhelin {:value "03-389 1380"}}}})
 
 (def hakija1
@@ -339,7 +337,6 @@
 
 (defn- validete-contact [m]
   (fact m => (contains {:puhelin "+358401234567"
-                        :faksinumero "+358401234568"
                         :sahkopostiosoite "pena@example.com"})))
 
 (defn- validate-person-wo-ssn [person]
@@ -359,7 +356,6 @@
 (defn- validate-company [company]
   (validate-minimal-company company)
   (fact (:puhelin company) => "03-389 1380")
-  (fact (:faksinumero company) => "03-389 1380")
   (fact (:sahkopostiosoite company) => "solita@solita.fi"))
 
 (facts "Canonical hakija/henkilo model is correct"

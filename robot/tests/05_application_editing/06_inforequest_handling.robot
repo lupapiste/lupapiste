@@ -50,7 +50,6 @@ Mikko changes inforequest address
   Element should be visible  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
   Click element  xpath=//section[@id='inforequest']//a[@data-test-id='change-location-link']
   Input text by test id  application-new-address  ${newName}
-  Element should be disabled  xpath=//section[@id='change-location']//input[@data-test-id='application-new-propertyid']
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}
 
