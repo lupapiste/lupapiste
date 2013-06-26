@@ -24,7 +24,7 @@
 (fact ":tag is set" (has-tag rakennuslupa_to_krysp) => true)
 
 (facts "Rakennuslupa to canonical and then to rakennuslupa xml with schema validation"
-  (let [canonical (application-to-canonical application)
+  (let [canonical (application-to-canonical application "fi")
         xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
 

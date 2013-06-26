@@ -11,6 +11,7 @@
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.fixture.finland-rakval]
+            [lupapalvelu.fixture.cgi-test-users]
             [lupapalvelu.admin]
             [lupapalvelu.application]
             [lupapalvelu.authority-admin]

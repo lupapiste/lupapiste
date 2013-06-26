@@ -135,6 +135,11 @@
 (defn get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
 
+(defn db-mode
+  "Database mode is read from env document in systemstatus collection"
+  []
+  (:mode (by-id :systemstatus "env")))
+
 ;;
 ;; Bootstrappin'
 ;;
@@ -176,7 +181,8 @@
     (.build mob)))
 
 (def server-list
-  (let [servers (vals (env/value :mongodb :servers))]
+  (let [conf    (env/value :mongodb :servers)
+        servers (if (map? conf) (vals conf) conf)]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
 
 (def connected (atom false))
@@ -193,7 +199,7 @@
     (if @connected
       (debug "Already connected!")
       (do
-        (debug "Connecting to DB:" servers (if ssl "using ssl" "without encryption"))
+        (debug "Connecting to MongoDB:" servers (if ssl "using ssl" "without encryption"))
         (m/connect! servers (mongo-options :ssl ssl))
         (reset! connected true)
         (m/set-default-write-concern! WriteConcern/SAFE)
@@ -201,7 +207,7 @@
           (m/authenticate (m/get-db db) username (.toCharArray password))
           (debugf "Authenticated to DB '%s' as '%s'" db username))
         (m/use-db! db)
-        (debug "DB is" (.getName (m/get-db)))))))
+        (debugf "MongoDB %s mode is %s" (.getName (m/get-db)) (db-mode))))))
 
 (defn disconnect! []
   (debug "Disconnecting")
@@ -228,11 +234,14 @@
   (mc/ensure-index :organizations {:municipalities 1}))
 
 (defn clear! []
-  (warn "Clearing MongoDB")
-  (gfs/remove-all)
-  ; Collections must be dropped individially, otherwise index cache will be stale
-  (doseq [coll (db/get-collection-names)]
-    (when-not (.startsWith coll "system") (mc/drop coll)))
-  (ensure-indexes))
+  (if-let [mode (db-mode)]
+    (throw (IllegalStateException. (str "Database is running in " mode " mode, not clearing MongoDB")))
+    (do
+      (warn "Clearing MongoDB")
+      (gfs/remove-all)
+      ; Collections must be dropped individially, otherwise index cache will be stale
+      (doseq [coll (db/get-collection-names)]
+        (when-not (.startsWith coll "system") (mc/drop coll)))
+      (ensure-indexes))))
 
 (defstatus :mongo (server-status))

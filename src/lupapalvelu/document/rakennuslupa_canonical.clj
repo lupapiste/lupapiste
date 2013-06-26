@@ -48,7 +48,6 @@
 
 (defn- get-yhteystiedot-data [yhteystiedot]
   {:sahkopostiosoite (-> yhteystiedot :email :value)
-  :faksinumero (-> yhteystiedot :fax :value)
   :puhelin (-> yhteystiedot :puhelin :value)})
 
 (defn- get-simple-yritys [yritys]
@@ -60,7 +59,6 @@
     (merge (get-simple-yritys yritys)
            {:postiosoite (get-simple-osoite (:osoite yritys))
             :puhelin (-> yhteystiedot :puhelin :value)
-            :faksinumero (-> yhteystiedot :fax :value)
             :sahkopostiosoite (-> yhteystiedot :email :value)})))
 
 (defn- get-name [henkilotiedot]
@@ -241,14 +239,14 @@
                                           (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)
                                       :julkisivumateriaali (-> rakenne :julkisivu :value))
-        lammitystapa (-> lammitys :lammitystapa :value)]
+        lammitystapa (-> lammitys :lammitystapa :value)
+        huoneistot {:huoneisto (get-huoneisto-data huoneistot)}]
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
      :rakentajatyyppi (-> kaytto :rakentajaTyyppi :value)
      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
-     :rakennuksenTiedot (merge {
-                                :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
+     :rakennuksenTiedot (merge {:kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
                                 :tilavuus (-> mitat :tilavuus :value)
                                 :kokonaisala (-> mitat :kokonaisala :value)
                                 :kellarinpinta-ala (-> mitat :kellarinpinta-ala :value)
@@ -277,14 +275,16 @@
                                             :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin :value))
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
-                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}
-                                :asuinhuoneistot {:huoneisto (get-huoneisto-data huoneistot)}}
+                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (when (-> toimenpide :rakennusnro :value)
                                    {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value)
                                                     :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
-                               (when julkisivu-map {:julkisivu julkisivu-map}))}))
+                               (when julkisivu-map {:julkisivu julkisivu-map})
+                               (when huoneistot (if (not-empty (:huoneisto huoneistot))
+                                                  {:asuinhuoneistot huoneistot})
+                                 ))}))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
@@ -351,9 +351,12 @@
                                                (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))]
     (not-empty (sort-by :created toimenpiteet))))
 
-(defn- get-lisatiedot [documents]
+(defn- get-lisatiedot [documents lang]
   (let [lisatiedot (:data (first documents))]
-    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))}}))
+    {:Lisatiedot {:suoramarkkinointikieltoKytkin (true? (-> lisatiedot :suoramarkkinointikielto :value))
+                  :asioimiskieli (if (= lang "se")
+                                   "ruotsi"
+                                   "suomi")}}))
 
 (defn- get-asian-tiedot [documents maisematyo_documents]
   (let [asian-tiedot (:data (first documents))
@@ -361,6 +364,10 @@
                                (str "\n\n"  (:kuvaus (get-toimenpiteen-kuvaus maismatyo_doc)) ":" (-> maismatyo_doc :data :kuvaus :value )))]
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
                    :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
+
+(defn- change-value-to-when [value to_compare new_val]
+  (if (= value to_compare) new_val
+    value))
 
 (defn- get-bulding-places [documents application]
   (for [doc (:rakennuspaikka documents)
@@ -371,7 +378,7 @@
     {:Rakennuspaikka
      {:yksilointitieto id
       :alkuHetki (to-xml-datetime created)
-      :kaavanaste (-> rakennuspaikka :kaavanaste :value)
+      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste :value) "eiKaavaa" "ei kaavaa")
       :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
                                       {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
                                        :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
@@ -379,11 +386,10 @@
                                                                                     :kiinteistotunnus (:propertyId application)
                                                                                     :maaraAlaTunnus (-> kiinteisto :maaraalaTunnus :value)}}}}}}))
 
-(defn- get-kayttotapaus [documents]
-  (let [maisematyo-docs (:maisematyo documents)]
-    (if (= (count maisematyo-docs) (count documents))
+(defn- get-kayttotapaus [documents toimenpiteet]
+  (if (and (contains? documents :maisematyo) (empty? toimenpiteet))
       "Uusi maisematy\u00f6hakemus"
-      "Uusi hakemus")))
+      "Uusi hakemus"))
 
 (def puolto-mapping {:condition "ehdoilla"
                      :no "ei puolla"
@@ -406,8 +412,9 @@
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
-  [application]
+  [application lang]
   (let [documents (by-type (:documents application))
+        toimenpiteet (get-operations documents application)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot
                     {:aineistonnimi (:title application)
@@ -429,8 +436,8 @@
                         :suunnittelijatieto (get-designers documents)}}
                       :rakennuspaikkatieto (get-bulding-places documents application)
                       :lausuntotieto (get-statements (:statements application))
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents))
-                      :kayttotapaus (get-kayttotapaus documents)
+                      :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
+                      :kayttotapaus (get-kayttotapaus documents toimenpiteet)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}
                      }}}]
-    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] (get-operations documents application))))
+    (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto] toimenpiteet)))
