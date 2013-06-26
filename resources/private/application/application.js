@@ -52,7 +52,7 @@
 
     function normalizeAttachment(a) {
       var versions = _(a.versions()).reverse().value(),
-          restamp = versions[0].stamped(),
+          restamp = (typeof versions[0].stamped === "function" && versions[0].stamped()),
           selected = restamp ? versions[1] : versions[0];
       return {
         id:           a.id(),
