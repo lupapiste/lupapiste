@@ -71,6 +71,7 @@
                                    optionsCaption: loc('choose')"></select>
                </span>
             </div>
+          
         <!-- /ko -->
         </div>
         <div class="application_actions" data-bind="with: application">
@@ -83,6 +84,7 @@
             <span class="icon remove-grey left-align"></span>
           </button>
         </div>
+        <div class="clear"></div>
       </div>
     </div>
     <div class="container">
@@ -137,7 +139,7 @@
           data-window-id="upload-dialog"></button>
 
         <div>
-          <h3 class="tab-info" data-bind="ltext: 'inforequest.comments'"></h3>
+          <h3  data-bind="ltext: 'inforequest.comments'"></h3>
           <div data-bind="template: {name: 'comment-template', data: $root.comment}"></div>
         </div>
 
