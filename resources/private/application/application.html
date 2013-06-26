@@ -113,7 +113,7 @@
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
-          <button data-bind="click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-cancel-btn"  class="btn">
+          <button data-bind="click: stampAttachments,     visible: $root.authorization.ok('stamp-attachments'),      enable: $root.authorization.ok('stamp-attachments')"     data-test-id="application-stamp-btn"  class="btn">
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
@@ -647,7 +647,8 @@
               <button data-bind="
                   ltext: 'stamp.ok',
                   visible: status() > statusRunning"
-                class="btn btn-primary btn-dialog close">
+                class="btn btn-primary btn-dialog close"
+                data-test-id="application-stamp-dialdog-ok">
               </button>
             </div>
 
