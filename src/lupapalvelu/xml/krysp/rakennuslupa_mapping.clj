@@ -230,7 +230,8 @@
                                   ; kommentoitu pois kryspiun choicen vuoksi{(first attachment-tuple) {:liite (for-lausunto (first (last attachment-tuple)) application begin-of-link)}}
                                   ; Ei tueta useampaa liitetta toistaiseksi. krysp menee uusiksi{(first attachment-tuple) {:liite (get-liite-zipped attachment-tuple application begin-of-link)}}
                                   ))]
-    (not-empty canonical-attachments)))
+    (not-empty canonical-attachments))
+  [])
 
 (defn- get-attachments-as-canonical [application begin-of-link ]
   (let [attachments (:attachments application)
@@ -312,7 +313,7 @@
         canonical-without-attachments  (application-to-canonical application lang)
         fileserver-address (env/value :fileserver-address)
         begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
-        statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
+        ;statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
                                               {:Liite
@@ -327,8 +328,9 @@
                                                 :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
                                                 :versionumero 1
                                                 :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
-        canonical-with-statment-attachments  (add-statement-attchments canonical-without-attachments statement-attachments)
-        canonical (assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
+        ;canonical-with-statment-attachments  (add-statement-attchments canonical-without-attachments statement-attachments)
+        canonical canonical-without-attachments
+        ;(assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint(:attachments application))
