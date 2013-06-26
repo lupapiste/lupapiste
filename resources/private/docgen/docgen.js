@@ -49,7 +49,7 @@ var docgen = (function () {
       var event = getEvent(e);
       var input$ = $(event.target);
       input$.focus();
-    }
+    };
 
     self.findHelpElement = function (e) {
       var event = getEvent(e);
@@ -82,7 +82,9 @@ var docgen = (function () {
         element.fadeIn("slow").css("display", "block");
         var st = $(window).scrollTop(); // Scroll Top
         var y = element.offset().top;
-        if ((y - 80) < (st)) { $("html, body").animate({ scrollTop: y - 80 + "px" }); };
+        if ((y - 80) < (st)) {
+          $("html, body").animate({ scrollTop: y - 80 + "px" });
+        }
       }
       self.showError(e);
     };
@@ -99,7 +101,7 @@ var docgen = (function () {
       if (element.children().size()) {
         element.fadeIn("slow").css("display", "block");
       }
-    }
+    };
 
     self.hideError = function (e) {
       var element = self.findErrorElement(e);
@@ -794,24 +796,23 @@ var docgen = (function () {
 
     function showValidationResults(results) {
       // remove warning and error highlights
-      $("#document-" + docId + " :input").removeClass("warn").removeClass("error").removeClass("tip");
+      $("#document-" + self.docId + " :input").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
-      $("#document-" + docId + " .errorPanel").html("").fadeOut();
+      $("#document-" + self.docId + " .errorPanel").html("").fadeOut();
       // apply new errors & highlights
       if (results && results.length > 0) {
         _.each(results, function (r) {
-          var path = r.path,
-              level = r.result[0],
-              code = r.result[1];
-          if (level !== "tip") {
-            var errorPanel = $("#" + docId + "-" + path.join("-") + "-errorPanel");
-            errorPanel.html(errorPanel.html() + "<span class='" + level + "'>" + loc("error." + code) + "</span>");
-          }
-          
-          var label$ = $("#label-" + docId + "-" + path.join("-"))[0];
-          label$.className = label$.className + " " + level;
+          var level = r.result[0],
+              code = r.result[1],
+              pathStr = r.path.join("-");
 
-          $("#" + docId + "-" + path.join("-")).addClass(level);
+          if (level !== "tip") {
+            var errorPanel$ = $("#" + self.docId + "-" + pathStr + "-errorPanel");
+            errorPanel$.append("<span class='" + level + "'>" + loc("error." + code) + "</span>");
+          }
+
+          $("#" + pathStrToLabelID(pathStr)).addClass(level);
+          $("#" + pathStrToID(pathStr)).addClass(level);
         });
       }
     }
