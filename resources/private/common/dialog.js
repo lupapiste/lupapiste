@@ -82,6 +82,11 @@ LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
   '<div class="dialog-content"><div class="dialog-user-content"></div>' +
   '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>' +
   '<button class="btn btn-dialog close" data-test-id="confirm-no"></button></div></div>';
+LUPAPISTE.Modal.OkTemplate = '<div class="window autosized-ok">' +
+'<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
+'<div class="dialog-content dialog-content-low"><div class="dialog-user-content"></div>' +
+'<div style="text-align:center"><button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative"></button></div>' +
+'</div></div>';
 
 /**
  * Lupapiste Modal Dialog window.
@@ -99,10 +104,12 @@ LUPAPISTE.ModalDialog.dynamicDialogs = [];
  */
 LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesButton, noButton, renderOptions) {
   function bindButton(elem$, button) {
-    elem$.unbind("click").text(button.title);
+    if (elem$ && button) {
+      elem$.unbind("click").text(button.title || "");
     if (button.fn) {
       elem$.click(button.fn);
     }
+  }
   }
 
   dialog$.find(".dialog-title").text(title);
@@ -125,9 +132,18 @@ LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, ye
   LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
   return dialog$;
 };
+LUPAPISTE.ModalDialog.newOkDialog = function(id, title, content, okTitle, okHandler) {
+  "use strict";
+  var dialog$ = $(LUPAPISTE.Modal.OkTemplate).attr("id", id);
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, {title: okTitle, fn: okHandler});
+  LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
+  return dialog$;
+};
 
 LUPAPISTE.ModalDialog.dynamicYesNoId = "dynamic-yes-no-confirm-dialog";
+LUPAPISTE.ModalDialog.dynamicOkId = "dynamic-ok-confirm-dialog";
 LUPAPISTE.ModalDialog.newYesNoDialog(LUPAPISTE.ModalDialog.dynamicYesNoId);
+LUPAPISTE.ModalDialog.newOkDialog(LUPAPISTE.ModalDialog.dynamicOkId);
 
 /**
  * Expected keys on yesButton and noButton:
@@ -141,7 +157,18 @@ LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesButton, noB
   LUPAPISTE.ModalDialog.open(dialog$);
   return dialog$;
 };
-
+/**
+ * Expected keys on okButton:
+ *  - title
+ *  - fn
+ */
+LUPAPISTE.ModalDialog.showDynamicOk = function(title, content, okButton, renderOptions) {
+  "use strict";
+  var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicOkId);
+  LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, okButton, null, renderOptions);
+  LUPAPISTE.ModalDialog.open(dialog$);
+  return dialog$;
+};
 /**
  * Initializes modal dialog elements
  */
