@@ -396,15 +396,15 @@
                      :yes "puoltaa"})
 
 (defn- get-statement [statement]
-  {:Lausunto {:id (:id statement)
-              :pyydetty {:viranomainen (get-in statement [:person :text])
-                         :pyyntoPvm (to-xml-date (:requested statement))}
-              :lausunto {:viranomainen (get-in statement [:person :name])
-                         :lausuntoPvm (to-xml-date (:given statement))
-                         :lausunto {:lausunto (:text statement)}
-                         :puoltotieto (if (nil? (:status statement))
-                                        {:puolto "ei tiedossa"}
-                                        {:puolto ((keyword (:status statement)) puolto-mapping)})}}})
+  {:Lausunto {;:id (:id statement)
+              :viranomainen (get-in statement [:person :text])
+              :pyyntoPvm (to-xml-date (:requested statement))
+              :lausuntotieto {:Lausunto {:viranomainen (get-in statement [:person :text])
+                                         :lausunto (:text statement)
+                                         :lausuntoPvm (to-xml-date (:given statement))
+                                         :puoltotieto {:Puolto (if (nil? (:status statement))
+                                                        {:puolto "ei tiedossa"}
+                                                        {:puolto ((keyword (:status statement)) puolto-mapping)})}}}}})
 
 (defn- get-statements [statements]
   ;Returing vector because this element to be Associative
@@ -435,7 +435,7 @@
                        {:osapuolitieto (get-parties documents)
                         :suunnittelijatieto (get-designers documents)}}
                       :rakennuspaikkatieto (get-bulding-places documents application)
-                      ;:lausuntotieto (get-statements (:statements application))
+                      :lausuntotieto (get-statements (:statements application))
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus (get-kayttotapaus documents toimenpiteet)
                       :asianTiedot (get-asian-tiedot (:hankkeen-kuvaus documents) (:maisematyo documents))}

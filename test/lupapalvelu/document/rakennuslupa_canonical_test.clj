@@ -6,7 +6,8 @@
         [lupapalvelu.xml.emit]
         [lupapalvelu.xml.krysp.rakennuslupa-mapping]
         [clojure.data.xml]
-        [clj-time.core :only [date-time]]))
+        [clj-time.core :only [date-time]]
+        [lupapalvelu.factlet :as fl]))
 
 ;;
 ;; Local document validator predicate
@@ -543,20 +544,7 @@
         luvanTunnisteTiedot (:luvanTunnisteTiedot rakennusvalvontaasia)
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot)
         muuTunnustieto (:muuTunnustieto LupaTunnus)
-        MuuTunnus (:MuuTunnus muuTunnustieto)
-
-        lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))
-        Lausunto (:Lausunto lausuntotieto)
-        pyydetty (:pyydetty Lausunto)
-        viranomainen (:viranomainen pyydetty)
-        pyyntoPvm (:pyyntoPvm pyydetty)
-        lausunto (:lausunto Lausunto)
-        lausuntoViranomainen (:viranomainen lausunto)
-        lausuntoPvm (:lausuntoPvm lausunto)
-        lausuntoType (:lausunto lausunto)
-        lausuntoTeksti (:lausunto lausuntoType)
-        puoltotieto (:puoltotieto lausunto)
-        puolto (:puolto puoltotieto)]
+        MuuTunnus (:MuuTunnus muuTunnustieto)]
     ;(clojure.pprint/pprint canonical)
     (fact "canonical" canonical => truthy)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
@@ -616,9 +604,24 @@
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
 
+    (fl/fact*
+      (let [lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))  => truthy
+            Lausunto (:Lausunto lausuntotieto) => truthy
+            viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
+            pyyntoPvm (:pyyntoPvm Lausunto) => "2013-05-09"
+            lausuntotieto (:lausuntotieto Lausunto) => truthy
+            LL (:Lausunto lausuntotieto) => truthy ;Lausunto oli jo kaytissa, siksi LL
+            viranomainen (:viranomainen LL) => "Paloviranomainen"
+            lausunto (:lausunto LL) => "Savupiippu pit\u00e4\u00e4 olla."
+            lausuntoPvm (:lausuntoPvm LL) => "2013-05-09"
+            puoltotieto (:puoltotieto LL) => truthy
+            Puolto (:Puolto puoltotieto) => truthy
+            puolto (:puolto Puolto) => "ehdoilla"]
+        ))
+
 ;    (fact "Lasunto" lausunto => truthy)
 ;    (fact "viranomainen" viranomainen => "Paloviranomainen")
-;    (fact "Pyyntopvm" pyyntoPvm => "2013-05-09")
+;    (fact "Pyyntopvm" pyyntoPvm => )
 ;    (fact "Lasunto viranomainen" lausuntoViranomainen => "Sonja Sibbo")
 ;    (fact "Lausunto pvm" "20130509")
 ;    (fact "lausunto teksti osa" lausuntoTeksti => "Savupiippu pit\u00e4\u00e4 olla.")
