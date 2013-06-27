@@ -861,7 +861,7 @@ var docgen = (function () {
         setTimeout(function () {
           $(indicator).removeClass(className);
           $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
-        }, 2000);
+        }, 4000);
       }
 
       saveForReal(path, value, function (status, results) {
