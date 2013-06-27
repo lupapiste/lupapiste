@@ -7,7 +7,9 @@
         <h1>
           <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
           <span data-bind="if: latestVersion">
-          </span>
+            <span data-bind="ltext: 'attachment.version'">versio</span>
+            <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+           </span>
         </h1>
         <p data-bind="ltext: 'attachment.view.desc'" class="tab-info"></p>
          <button class="attachment-delete inline-block" data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
