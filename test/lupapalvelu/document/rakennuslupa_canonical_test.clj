@@ -206,8 +206,7 @@
 ;TODO LIITETIETO
 
 (def documents
-  [
-   hankkeen-kuvaus
+  [hankkeen-kuvaus
    hakija1
    hakija2
    paasuunnittelija
@@ -222,8 +221,7 @@
    aidan-rakentaminen
    puun-kaataminen
    purku
-   lisatieto
-   hankkeen-kuvaus])
+   lisatieto])
 
 (fact "Meta test: hakija1"          hakija1          => valid-against-current-schema?)
 (fact "Meta test: hakija2"          hakija2          => valid-against-current-schema?)
@@ -328,13 +326,13 @@
     (fact person-postinumero =>"33800")
     (fact person-postitoimipaikannimi => "Tuonela")))
 
-(defn- validete-contact [m]
+(defn- validate-contact [m]
   (fact m => (contains {:puhelin "+358401234567"
                         :sahkopostiosoite "pena@example.com"})))
 
 (defn- validate-person-wo-ssn [person]
   (validate-minimal-person person)
-  (validete-contact person)
+  (validate-contact person)
   (validate-address (:osoite person)))
 
 (defn- validate-person [person]
