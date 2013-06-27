@@ -106,10 +106,10 @@ LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesBu
   function bindButton(elem$, button) {
     if (elem$ && button) {
       elem$.unbind("click").text(button.title || "");
-    if (button.fn) {
-      elem$.click(button.fn);
+      if (button.fn) {
+        elem$.click(button.fn);
+      }
     }
-  }
   }
 
   dialog$.find(".dialog-title").text(title);
