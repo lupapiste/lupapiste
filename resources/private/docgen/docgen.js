@@ -222,6 +222,7 @@ var docgen = (function () {
             text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
           }
           statusContainer$.text(text);
+          statusContainer$.addClass("approval-" + approval.value);
         }
       }
 
