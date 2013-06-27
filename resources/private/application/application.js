@@ -478,6 +478,15 @@
       var targetTab = $target.attr("data-target");
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
     };
+     self.nextTab = function(model,event) {
+      var $target = $(event.target);
+      while ($target.is("span")) {
+        $target = $target.parent();
+      }
+      var targetTab = $target.attr("data-target");
+      window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
+      $('body').scrollTop($('#applicationTabs').position().top + 40 );
+    };
 
     // TODO: This needs to be removed and replace its usage in application.html by usage of authorization.ok().
     self.notPublicAreaTypeOperation = function() {
