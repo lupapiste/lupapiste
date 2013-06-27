@@ -45,7 +45,7 @@
                   :css  ["selectm.css"]}
 
    :common       {:depends [:init :jquery :knockout :underscore :moment :i18n :selectm]
-                  :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js" "combobox.js"
+                  :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "authorization.js" "vetuma.js"]
                   :css ["css/main.css"]
