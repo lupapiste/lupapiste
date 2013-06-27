@@ -1,19 +1,12 @@
 (ns lupapalvelu.document.rakennuslupa_canonical-test
-  (:use [lupapalvelu.document.rakennuslupa_canonical]
-        [lupapalvelu.document.model :only [validate-against-current-schema]]
+  (:use [lupapalvelu.document.canonical-test-common]
+        [lupapalvelu.document.rakennuslupa_canonical]
         [sade.util :only [contains-value?]]
         [midje.sweet]
         [lupapalvelu.xml.emit]
         [lupapalvelu.xml.krysp.rakennuslupa-mapping]
         [clojure.data.xml]
         [clj-time.core :only [date-time]]))
-
-;;
-;; Local document validator predicate
-;;
-
-(defn valid-against-current-schema? [document]
-  (or (fact (validate-against-current-schema document) => '()) true))
 
 ;;
 ;; Facts
@@ -245,7 +238,7 @@
 (fact "Meta test: hankkeen-kuvaus"  hankkeen-kuvaus  => valid-against-current-schema?)
 
 ;; In case a document was added but forgot to write test above
-(fact "Meta test: all documents in fixture are valid" documents => (has every? valid-against-current-schema?))
+(validate-all-documents documents)
 
 (def application
   {:municipality municipality,
