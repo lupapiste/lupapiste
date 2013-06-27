@@ -364,8 +364,8 @@
 
           <div data-bind="with: $root.application.data" class="application-statements">
 
-            <h1>Lausunnot</h1>
-
+            <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
+            <p data-bind="ltext: 'application.statementsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: $data.statements && statements().length>0">
               <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
             </div>
@@ -413,8 +413,8 @@
 
           <div data-bind="with: application" class="application-neighbors">
 
-            <h1>Naapurit</h1>
-
+            <h1 data-bind="ltext: 'application.neighbors'">Naapurit</h1>
+            <p data-bind="ltext: 'application.neighborsDesc'" class="tab-info"></p>
             <div data-bind="ifnot: neighbors() && neighbors().length>0">
               <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
             </div>
@@ -479,6 +479,7 @@
           <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content">
+          <p data-bind="ltext: 'invite.desc'" class="dialog-desc"> </p>
           <form data-bind="with: $root.invite">
             <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
             <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName, valueUpdate: 'afterkeydown'" />

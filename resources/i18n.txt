@@ -1,4 +1,14 @@
 
+invite.desc: Voit valtuuttaa henkilön kutsumalla hänet sähköpostilla. Tällöin hän saa oikeudet muokata hakemusta ja perinteistä valtakirjaa vastaavat oikeudet asioida puolestasi.
+attachment.view.desc: Täällä voit lisätä suunnitelmaan tai liitteeseen uusia versioita, poistaa liitteen hakemukselta ja keskustella liitteestä. 
 
+attachment.legend.error: Puuttuva tai muutoksia vaativa liite
+attachment.legend.ok: Viranomaisen alustavasti hyväksymä liite. Varsinainen hyväksyntä annetaan myöhemmin luvan virallisessa käsittelyssä.
 
+application.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta lausuntoja muilta viranomaisilta. Viranomaisten antamia lausuntoja voit lukea tällä välilehdellä.
 
+application.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet listan tiedotettavista naapureista. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai lähettää naapurille tiedotteen sähköpostitse Lupapisteen kautta.
+application.statements: Lausunnot
+application.neighbors: Naapurien tiedotus
+
+newRequest.create.desc: Neuvontapyynnössä voit kysyä viranomaiselta vapaasti hankkeestasi ja siihen liittyvistä lupa-asioinneista. Neuvontapyynnön jätettyäsi voit lisätä siihen myös liitteinä valokuvia ja suunnitelmia.
