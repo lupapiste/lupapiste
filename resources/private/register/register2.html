@@ -6,9 +6,6 @@
       <form id="register-form">
         <h1 data-bind="ltext: 'register.header2'"></h1>
         <p data-bind="ltext: 'register.personal-info'"></p>
-
-        <span id="register-email-error" class="error-message"></span>
-
         <div class="form-group">
           <div class="form-entry">
             <label class="form-label" data-bind="ltext: 'userinfo.firstName'">Etunimi</label>
@@ -68,6 +65,7 @@
           </div>
           <div class="clear"></div>
         </div>
+        <span id="register-email-error" class="error-message"></span>
         <div>
           <button id="test-register-submit" data-bind="disable: disabled, click: submit, ltext: 'register.register-action'" type="submit" class="btn btn-primary">Rekisteröidy</button>
           <button data-bind="click: cancel, ltext: 'cancel'" type="button" class="btn">Peruuta</button>
