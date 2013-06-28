@@ -529,4 +529,14 @@
    :documents documents,
    :modified 1372342070624,
    :address "Latokuja 1",
-   :municipality municipality})
+   :municipality municipality
+   ;; Statements kopioitu Rakennuslupa_canonical_test.clj:sta, joka on identtinen yleisten lueiden puolen kanssa.
+   :statements [{:given 1368080324142
+                 :id "518b3ee60364ff9a63c6d6a1"
+                 :person {:text "Paloviranomainen"
+                          :name "Sonja Sibbo"
+                          :email "sonja.sibbo@sipoo.fi"
+                          :id "516560d6c2e6f603beb85147"}
+                 :requested 1368080102631
+                 :status "condition"
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}]})
