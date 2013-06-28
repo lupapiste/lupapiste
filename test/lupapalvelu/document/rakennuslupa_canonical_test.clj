@@ -87,53 +87,53 @@
           :kaavanaste {:value "yleis"}}})
 
 (def common-rakennus {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
-                                     :henkilo henkilo
-                                     :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
-          :kaytto {:rakentajaTyyppi {:value "muu"}
-                   :kayttotarkoitus {:value "012 kahden asunnon talot"}}
-          :mitat {:tilavuus {:value "1000"}
-                  :kokonaisala {:value "1000"}
-                  :kellarinpinta-ala {:value "100"}
-                  :kerrosluku {:value "2"}
-                  :kerrosala {:value "180"}}
-          :rakenne {:rakentamistapa {:value "elementti"}
-                    :kantavaRakennusaine {:value "puu"}
-                    :muuRakennusaine {:value ""}
-                    :julkisivu {:value "puu"}}
-          :lammitys {:lammitystapa {:value "vesikeskus"}
-                     :lammonlahde {:value "muu"}
-                     :muu-lammonlahde {:value "polttopuillahan tuo"}}
-          :varusteet {:hissiKytkin {:value true},
-                      :kaasuKytkin {:value true},
-                      :koneellinenilmastointiKytkin {:value true},
-                      :sahkoKytkin {:value true},
-                      :saunoja {:value "1"},
-                      :vaestonsuoja {:value "1"},
-                      :vesijohtoKytkin {:value true},
-                      :viemariKytkin {:value true}
-                      :lamminvesiKytkin {:value true}
-                      :aurinkopaneeliKytkin {:value true}}
-          :verkostoliittymat {:kaapeliKytkin {:value true},
-                              :maakaasuKytkin {:value true},
-                              :sahkoKytkin {:value true},
-                              :vesijohtoKytkin {:value true},
-                              :viemariKytkin {:value true}},
-          :luokitus {:paloluokka {:value "P1"}
-                     :energialuokka {:value "C"}
-                     :energiatehokkuusluku {:value "124"}
-                     :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
-          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "A"} :huoneistonumero {:value "1"} :jakokirjain {:value "a"}}
-                           :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
-                                              :huoneistoala {:value "56"}
-                                              :huoneluku {:value "66"}}
-                           :keittionTyyppi {:value "keittio"}
-                           :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
-                       :1 {:huoneistoTunnus {},
-                           :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
-                                              :huoneistoala {:value "02"}
-                                              :huoneluku {:value "12"}}
-                           :keittionTyyppi {:value "keittokomero"},
-                           :varusteet {:ammeTaiSuihkuKytkin {:value true}, :saunaKytkin {:value true}, :lamminvesiKytkin {:value true}}}}})
+                                                 :henkilo henkilo
+                                                 :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
+                      :kaytto {:rakentajaTyyppi {:value "muu"}
+                               :kayttotarkoitus {:value "012 kahden asunnon talot"}}
+                      :mitat {:tilavuus {:value "1000"}
+                              :kokonaisala {:value "1000"}
+                              :kellarinpinta-ala {:value "100"}
+                              :kerrosluku {:value "2"}
+                              :kerrosala {:value "180"}}
+                      :rakenne {:rakentamistapa {:value "elementti"}
+                                :kantavaRakennusaine {:value "puu"}
+                                :muuRakennusaine {:value ""}
+                                :julkisivu {:value "puu"}}
+                      :lammitys {:lammitystapa {:value "vesikeskus"}
+                                 :lammonlahde {:value "muu"}
+                                 :muu-lammonlahde {:value "polttopuillahan tuo"}}
+                      :varusteet {:hissiKytkin {:value true},
+                                  :kaasuKytkin {:value true},
+                                  :koneellinenilmastointiKytkin {:value true},
+                                  :sahkoKytkin {:value true},
+                                  :saunoja {:value "1"},
+                                  :vaestonsuoja {:value "1"},
+                                  :vesijohtoKytkin {:value true},
+                                  :viemariKytkin {:value true}
+                                  :lamminvesiKytkin {:value true}
+                                  :aurinkopaneeliKytkin {:value true}}
+                      :verkostoliittymat {:kaapeliKytkin {:value true},
+                                          :maakaasuKytkin {:value true},
+                                          :sahkoKytkin {:value true},
+                                          :vesijohtoKytkin {:value true},
+                                          :viemariKytkin {:value true}},
+                      :luokitus {:paloluokka {:value "P1"}
+                                 :energialuokka {:value "C"}
+                                 :energiatehokkuusluku {:value "124"}
+                                 :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
+                      :huoneistot {:0 {:huoneistoTunnus {:porras {:value "A"} :huoneistonumero {:value "1"} :jakokirjain {:value "a"}}
+                                       :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
+                                                          :huoneistoala {:value "56"}
+                                                          :huoneluku {:value "66"}}
+                                       :keittionTyyppi {:value "keittio"}
+                                       :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
+                                   :1 {:huoneistoTunnus {},
+                                       :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
+                                                          :huoneistoala {:value "02"}
+                                                          :huoneluku {:value "12"}}
+                                       :keittionTyyppi {:value "keittokomero"},
+                                       :varusteet {:ammeTaiSuihkuKytkin {:value true}, :saunaKytkin {:value true}, :lamminvesiKytkin {:value true}}}}})
 
 (def uusi-rakennus
   {:id "uusi-rakennus"
@@ -143,7 +143,7 @@
    :data common-rakennus})
 
 (def rakennuksen-muuttaminen
-  {:id "muuutaminen"
+  {:id "muuttaminen"
    :created 1
    :schema {:info {:name "rakennuksen-muuttaminen"
                                        :op {:name "muu-laajentaminen"}}}
