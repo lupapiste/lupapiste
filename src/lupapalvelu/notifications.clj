@@ -5,6 +5,7 @@
         [lupapalvelu.i18n :only [loc]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
+            [sade.env :as env]
             [sade.strings :as ss]
             [net.cgrand.enlive-html :as enlive]
             [sade.security :as sadesecurity]
@@ -67,10 +68,7 @@
       (str "Lupapiste: " title title-postfix))))
 
 (defn- url-to [to]
-  (let [request (request/ring-request)
-        scheme (get request :scheme)
-        host (get-in request [:headers "host"])]
-    (str (name scheme) "://" host (if-not (ss/starts-with to "/") "/") to)))
+  (str (env/value :host) (if-not (ss/starts-with to "/") "/") to))
 
 (defn get-email-recipients-for-application [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
