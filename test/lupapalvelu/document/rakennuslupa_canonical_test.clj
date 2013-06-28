@@ -146,17 +146,16 @@
   {:id "muuttaminen"
    :created 1
    :schema {:info {:name "rakennuksen-muuttaminen"
-                                       :op {:name "muu-laajentaminen"}}}
+                   :op {:name "muu-laajentaminen"}}}
    :data (conj {:rakennusnro {:value "001"}
                 :perusparannuskytkin {:value true}
-                :muutostyolaji {:value "muut muutosty\u00f6t"}
-                } common-rakennus)})
+                :muutostyolaji {:value "muut muutosty\u00f6t"}} common-rakennus)})
 
 (def laajentaminen
   {:id "laajennus"
    :created 3
    :schema {:info {:name "rakennuksen-laajentaminen"
-                                       :op {:name "laajentaminen"}}}
+                   :op {:name "laajentaminen"}}}
    :data (conj {:rakennusnro {:value "001"}
                 :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                       :mitat {:tilavuus {:value "1500"}
@@ -165,9 +164,7 @@
                                               :huoneistoala {:0 {:pintaAla {:value "150"}
                                                                  :kayttotarkoitusKoodi {:value "asuntotilaa(ei vapaa-ajan asunnoista)"}}
                                                              :1 {:pintaAla {:value "10"}
-                                                                 :kayttotarkoitusKoodi {:value "varastotilaa"}}}}
-
-                                      }} common-rakennus)})
+                                                                 :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}} common-rakennus)})
 
 
 (def purku {:id "purku"
@@ -175,26 +172,26 @@
             :schema {:info {:name "purku"
                             :op {:name "purkaminen"}}}
             :data (conj {:rakennusnro {:value "001"}
-                         :poistumanAjankohta { :value "17.04.2013" },
+                         :poistumanAjankohta {:value "17.04.2013"},
                          :poistumanSyy {:value "tuhoutunut"}} common-rakennus)})
 
-(def aidan-rakentaminen { :data {:kokonaisala {:value "0"}
-                                 :kuvaus { :value "Aidan rakentaminen rajalle"}}
+(def aidan-rakentaminen {:data {:kokonaisala {:value "0"}
+                                :kuvaus { :value "Aidan rakentaminen rajalle"}}
                          :id "aidan-rakentaminen"
                          :created 5
-                         :schema {:info { :removable true
-                                         :op { :id  "5177ac76da060e8cd8348e07"
+                         :schema {:info {:removable true
+                                         :op {:id  "5177ac76da060e8cd8348e07"
                                               :name "aita"}
                                          :name "kaupunkikuvatoimenpide"}}})
 
 (def puun-kaataminen {:created 6
-                      :data { :kuvaus {:value "Puun kaataminen" }}
+                      :data { :kuvaus {:value "Puun kaataminen"}}
                       :id "puun kaataminen"
                       :schema { :info {:removable true
-                                       :op { :id "5177ad63da060e8cd8348e32"
-                                               :name "puun-kaataminen"
-                                               :created  1366797667137}
-                                       :name "maisematyo" }}})
+                                       :op {:id "5177ad63da060e8cd8348e32"
+                                            :name "puun-kaataminen"
+                                            :created  1366797667137}
+                                       :name "maisematyo"}}})
 
 (def hankkeen-kuvaus {:id "Hankeen kuvaus" :schema {:info {:name "hankkeen-kuvaus" :order 1}}
                       :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}
@@ -250,10 +247,10 @@
    :state "open"
    :opened 1354532324658
    :location {:x 408048, :y 6693225},
-   :attachments [{ :id "518ce59b036496133cf5ba7f"
-                  :latestVersion { :fileId "518ce59b036496133cf5ba7c"
-                                  :version { :major 0
-                                            :minor 1 }
+   :attachments [{:id "518ce59b036496133cf5ba7f"
+                  :latestVersion {:fileId "518ce59b036496133cf5ba7c"
+                                  :version {:major 0
+                                            :minor 1}
                                   :size 27726
                                   :created 1368188315224
                                   :filename "1901_001.pdf"
@@ -262,21 +259,20 @@
                                          :lastName "Sibbo"
                                          :firstName "Sonja"
                                          :username "sonja"
-                                         :id "777777777777777777000023" }
+                                         :id "777777777777777777000023"}
                                   :stamped false
-                                  :accepted nil }
+                                  :accepted nil}
                   :locked true
                   :modified 1368188315224
                   :op nil
                   :state "requires_authority_action"
-                  :target { :type "statement"
-                           :id "518ce582036496133cf5ba75" }
-                  :type { :type-group "muut"
-                         :type-id "muu" }
-                  :versions [
-                             {:fileId "518ce59b036496133cf5ba7c"
-                              :version { "major" 0
-                                        :minor 1 }
+                  :target {:type "statement"
+                           :id "518ce582036496133cf5ba75"}
+                  :type {:type-group "muut"
+                         :type-id "muu"}
+                  :versions [{:fileId "518ce59b036496133cf5ba7c"
+                              :version {"major" 0
+                                        :minor 1}
                               :size 27726
                               :created 1368188315224
                               :filename "1901_001.pdf"
@@ -285,15 +281,14 @@
                                      :lastName "Sibbo"
                                      :firstName "Sonja"
                                      :username "sonja"
-                                     :id "777777777777777777000023" }
+                                     :id "777777777777777777000023"}
                               :stamped false
                               :accepted nil}]}],
    :authority {:id "777777777777777777000023",
                :username "sonja",
                :firstName "Sonja",
                :lastName "Sibbo",
-               :role "authority",
-               },
+               :role "authority"},
    :title "s",
    :created 1354532324658,
    :documents documents,
@@ -309,8 +304,7 @@
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
                  :status "condition"
-                 :text "Savupiippu pit\u00e4\u00e4 olla."}]
-   })
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}]})
 
 (def get-osapuoli-data #'lupapalvelu.document.rakennuslupa_canonical/get-osapuoli-data)
 
