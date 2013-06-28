@@ -136,23 +136,7 @@
                                                                                                         {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                                         {:tag :kokonaisala}]}]}
                                                ]}]}
-                             {:tag :lausuntotieto :child [{:tag :Lausunto :ns "yht" :child [{:tag :pyydetty :child [{:tag :viranomainen}
-                                                                                                          {:tag :pyyntoPvm}]}
-                                                                                  {:tag :lausunto :child [{:tag :viranomainen}
-                                                                                                          {:tag :lausuntoPvm}
-                                                                                                          {:tag :lausunto :child [{:tag :lausunto}
-                                                                                                                                  {:tag :liite
-                                                                                                                                   :child [{:tag :kuvaus}
-                                                                                                                                           {:tag :linkkiliitteeseen}
-                                                                                                                                           {:tag :muokkausHetki}
-                                                                                                                                           {:tag :versionumero}
-                                                                                                                                           {:tag :tekija
-                                                                                                                                            :child [{:tag :kuntaRooliKoodi}
-                                                                                                                                                    {:tag :VRKrooliKoodi}
-                                                                                                                                                    henkilo
-                                                                                                                                                    yritys]}
-                                                                                                                                           {:tag :tyyppi}]}]}
-                                                                                                          {:tag :puoltotieto :child [{:tag :puolto}]}]}]}] }
+                             {:tag :lausuntotieto :child [lausunto] }
 
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot

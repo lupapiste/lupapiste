@@ -214,9 +214,7 @@
 ;TODO LIITETIETO
 
 (def documents
-  [
-   hankkeen-kuvaus
-   hakija1
+  [hakija1
    hakija2
    paasuunnittelija
    suunnittelija1
