@@ -15,51 +15,6 @@
 
 
 
-(def municipality 753)
-
-(def tyoaika {:id "51cc1cab23e74941fee4f49b",
-              :created 1372331179008,
-              :schema {:info {:name "tyoaika", :type "group", :order 63}},
-              :data {:tyoaika-alkaa-pvm
-                     {:modified 1372331246482, :value "17.06.2013"},
-                     :tyoaika-paattyy-pvm
-                     {:modified 1372331248524, :value "20.06.2013"}}})
-
-(def attachments [{:id "51cc1e7c23e74941fee4f519",
-                   :modified 1372331643985,
-                   :type {:type-group "yleiset-alueet",
-                          :type-id "aiemmin-hankittu-sijoituspaatos"},
-                   :state "requires_authority_action",
-                   :target nil,
-                   :op nil,
-                   :locked false,
-                   :latestVersion {:fileId "51cc1e7b23e74941fee4f516",
-                                   :version {:major 1, :minor 0},
-                                   :size 115496,
-                                   :created 1372331643985,
-                                   :filename "Screenshot_Lisaa_lausunnon_antaja.jpg",
-                                   :contentType "image/jpeg",
-                                   :stamped false,
-                                   :accepted nil,
-                                   :user {:id "777777777777777777000020",
-                                          :role "applicant",
-                                          :lastName "Panaani",
-                                          :firstName "Pena",
-                                          :username "pena"}},
-                   :versions [{:fileId "51cc1e7b23e74941fee4f516",
-                               :version {:major 1, :minor 0},
-                               :size 115496,
-                               :created 1372331643985,
-                               :filename "Screenshot_Lisaa_lausunnon_antaja.jpg",
-                               :contentType "image/jpeg",
-                               :stamped false,
-                               :accepted nil,
-                               :user {:id "777777777777777777000020",
-                                      :role "applicant",
-                                      :lastName "Panaani",
-                                      :firstName "Pena",
-                                      :username "pena"}}]}])
-
 (def henkilo_hakija {:henkilotiedot {:etunimi {:value "Pena"},
                                      :hetu {:modified 1372342041161, :value "260886-027R"},
                                      :sukunimi {:value "Panaani"}},
@@ -162,12 +117,57 @@
                              :sijoitusLuvanTunniste {:modified 1372331243461, :value "LP-753-2013-00001"}},
                       :schema {:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa", :order 60}}})
 
+(def tyoaika {:id "51cc1cab23e74941fee4f49b",
+              :created 1372331179008,
+              :schema {:info {:name "tyoaika", :type "group", :order 63}},
+              :data {:tyoaika-alkaa-pvm
+                     {:modified 1372331246482, :value "17.06.2013"},
+                     :tyoaika-paattyy-pvm
+                     {:modified 1372331248524, :value "20.06.2013"}}})
 
 (def documents [hakija
                 tyomaasta-vastaava
                 maksaja
                 hankkeen-kuvaus
                 tyoaika])
+
+
+(def municipality 753)
+
+(def attachments [{:id "51cc1e7c23e74941fee4f519",
+                   :modified 1372331643985,
+                   :type {:type-group "yleiset-alueet",
+                          :type-id "aiemmin-hankittu-sijoituspaatos"},
+                   :state "requires_authority_action",
+                   :target nil,
+                   :op nil,
+                   :locked false,
+                   :latestVersion {:fileId "51cc1e7b23e74941fee4f516",
+                                   :version {:major 1, :minor 0},
+                                   :size 115496,
+                                   :created 1372331643985,
+                                   :filename "Screenshot_Lisaa_lausunnon_antaja.jpg",
+                                   :contentType "image/jpeg",
+                                   :stamped false,
+                                   :accepted nil,
+                                   :user {:id "777777777777777777000020",
+                                          :role "applicant",
+                                          :lastName "Panaani",
+                                          :firstName "Pena",
+                                          :username "pena"}},
+                   :versions [{:fileId "51cc1e7b23e74941fee4f516",
+                               :version {:major 1, :minor 0},
+                               :size 115496,
+                               :created 1372331643985,
+                               :filename "Screenshot_Lisaa_lausunnon_antaja.jpg",
+                               :contentType "image/jpeg",
+                               :stamped false,
+                               :accepted nil,
+                               :user {:id "777777777777777777000020",
+                                      :role "applicant",
+                                      :lastName "Panaani",
+                                      :firstName "Pena",
+                                      :username "pena"}}]}])
 
 (def application
   {:created 1372331179008,
