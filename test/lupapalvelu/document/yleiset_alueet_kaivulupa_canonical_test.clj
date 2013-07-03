@@ -1,4 +1,8 @@
-(ns lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test)
+(ns lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test
+  (:use [lupapalvelu.factlet]
+        [midje.sweet]
+        [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical]
+        [sade.util :only [contains-value?]]))
 
 ;; NOTE: Rakennuslupa-canonical-testistä poiketen otin "auth"-kohdan pois.
 
@@ -70,7 +74,7 @@
                                 :henkilo henkilo,
                                 :yritys yritys}})
 
-(def laskuviite {:modified 1372331605911, :value "1234567890"})
+(def _laskuviite {:modified 1372331605911, :value "1234567890"})
 
 (def maksaja {:id "51cc1cab23e74941fee4f499",
               :created 1372331179008,
@@ -80,7 +84,7 @@
               :data {:_selected {:modified 1372341924880, :value "henkilo"},
                      :henkilo henkilo,
                      :yritys yritys,
-                     :laskuviite laskuviite}})
+                     :laskuviite _laskuviite}})
 
 (def hankkeen-kuvaus {:id "51cc1cab23e74941fee4f49a",
                       :created 1372331179008,
@@ -164,5 +168,23 @@
    :municipality municipality
    ;; Statements kopioitu Rakennuslupa_canonical_test.clj:sta, joka on identtinen yleisten lueiden puolen kanssa.
    :statements statements})
+
+
+(facts* "Canonical model is correct"
+  (let [canonical (application-to-canonical application "fi")
+       YleisetAlueet (:YleisetAlueet canonical) => truthy
+       yleinenAlueAsiatieto (first (:yleinenAlueAsiatieto YleisetAlueet)) => truthy
+       Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
+       maksajatieto (:maksajatieto Tyolupa) => truthy
+       Maksaja (:Maksaja maksajatieto) => truthy
+       laskuviite (:laskuviite Maksaja) => (:value _laskuviite)
+       ]
+
+    ;(clojure.pprint/pprint canonical)
+
+    (fact "contains nil" (contains-value? canonical nil?) => falsey)
+
+    ))
+
 
 
