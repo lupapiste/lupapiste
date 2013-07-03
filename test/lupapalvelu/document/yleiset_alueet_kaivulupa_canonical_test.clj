@@ -57,7 +57,7 @@
                        :order 3}},
              :data {:_selected {:modified 1372342070624, :value "yritys"},
                     :henkilo henkilo,
-                    :yritys yritys_hakija}})
+                    :yritys yritys}})
 
 (def tyomaasta-vastaava {:id "51cc1cab23e74941fee4f496",
                          :created 1372331179008,
