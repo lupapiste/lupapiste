@@ -605,7 +605,7 @@
     (fact "viranomainen" viranomainen => "Paloviranomainen")
     (fact "Pyyntopvm" pyyntoPvm => "2013-05-09")
     (fact "Lausunto viranomainen" lausuntoViranomainen => "Sonja Sibbo")
-    (fact "Lausunto pvm" "20130509")
+    (fact "Lausunto pvm" lausuntoPvm => "2013-05-09")
     (fact "lausunto teksti osa" lausuntoTeksti => "Savupiippu pit\u00e4\u00e4 olla.")
     (fact "Puolto" puolto => "ehdoilla")
 
