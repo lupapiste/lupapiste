@@ -218,7 +218,6 @@
 
 (defn- write-statement-attachments [attachments output-dir]
   (let [files (filter #(nil? (:files %)) attachments)]
-    (println files)
     (doseq [statement-files files]
       (write-attachments (map (fn [m] {:Liite (:Liite m)}) (vals statement-files)) output-dir))))
 
