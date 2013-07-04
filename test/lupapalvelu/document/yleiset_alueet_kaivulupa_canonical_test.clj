@@ -175,6 +175,7 @@
        YleisetAlueet (:YleisetAlueet canonical) => truthy
        yleinenAlueAsiatieto (first (:yleinenAlueAsiatieto YleisetAlueet)) => truthy
        Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
+
        maksajatieto (:maksajatieto Tyolupa) => truthy
        Maksaja (:Maksaja maksajatieto) => truthy
        maksaja-laskuviite (:laskuviite Maksaja) => (:value _laskuviite)
@@ -182,6 +183,19 @@
        maksaja-Henkilo (-> Maksaja :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
        maksaja-Yritys (-> Maksaja :yritystieto :Yritys) => truthy
        maksaja-henkilo-nimi (:nimi maksaja-Henkilo) => truthy  ;(fn [tieto] (println "\n nimitieto: " tieto))
+       ;; HUOM! Vastuuhenkilolla ei ole osoitetta.
+       ;maksaja-henkilo-osoite (:osoite maksaja-Henkilo) => truthy
+
+       toimintajaksotieto (:toimintajaksotieto Tyolupa) => truthy
+       Toimintajakso (:Toimintajakso toimintajaksotieto) => truthy
+
+       lupaAsianKuvaus (:lupaAsianKuvaus Tyolupa) => truthy
+       sijoituslupaviitetieto (:sijoituslupaviitetieto Tyolupa) => truthy
+       Sijoituslupaviite (:Sijoituslupaviite sijoituslupaviitetieto) => truthy
+
+       ;; TODO: tyomaastaVastaava, hakija
+;       osapuolitieto (:osapuolitieto Tyolupa) => truthy
+;       Osapuoli (:Osapuoli osapuolitieto) => truthy
 
        ]
 
@@ -191,20 +205,33 @@
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
     ;; Maksajan tiedot
-    (fact "maksaja-etunimi" (:etunimi maksaja-henkilo-nimi) => "Pena")
-    (fact "maksaja-sukunimi" (:sukunimi maksaja-henkilo-nimi) => "Panaani")
+    (fact "maksaja-etunimi" (:etunimi maksaja-henkilo-nimi) => (-> nimi :etunimi :value))
+    (fact "maksaja-sukunimi" (:sukunimi maksaja-henkilo-nimi) => (-> nimi :sukunimi :value))
     ;; HUOM! Vastuuhenkilolla ei ole osoitetta.
 ;    (fact "maksaja-henkilo-osoite" (:osoite maksaja-Henkilo) => truthy)
-;    (fact "maksaja-osoitenimi" (-> maksaja-henkilo-osoite :osoitenimi :teksti) => "Paapankuja 12")
-;    (fact "maksaja-postinumero" (:postinumero maksaja-henkilo-osoite) => "33800")
-;    (fact "maksaja-postitoimipaikannimi" (:postitoimipaikannimi maksaja-henkilo-osoite) => "Piippola")
-     (fact "maksaja-sahkopostiosoite" (:sahkopostiosoite maksaja-Henkilo) => "pena@example.com")
-     (fact "maksaja-puhelin" (:puhelin maksaja-Henkilo) => "0102030405")
+;    (fact "maksaja-osoitenimi" (-> maksaja-henkilo-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
+;    (fact "maksaja-postinumero" (:postinumero maksaja-henkilo-osoite) => (-> osoite :postinumero :value))
+;    (fact "maksaja-postitoimipaikannimi" (:postitoimipaikannimi maksaja-henkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
+     (fact "maksaja-sahkopostiosoite" (:sahkopostiosoite maksaja-Henkilo) => (-> yhteystiedot :email :value))
+     (fact "maksaja-puhelin" (:puhelin maksaja-Henkilo) => (-> yhteystiedot :puhelin :value))
      ;; HUOM! Vastuuhenkilolla ei ole hetua.
-;     (fact "maksaja-henkilotunnus" (:henkilotunnus maksaja-Henkilo) => "260886-027R")
+;     (fact "maksaja-henkilotunnus" (:henkilotunnus maksaja-Henkilo) => (-> henkilotiedot :hetu :value)
 
+     ;; Osapuolet
+     ;; TODO
 
+;     (println "\n toimintajaksotieto: " toimintajaksotieto)
+;     (println "\n Toimintajakso: " Toimintajakso)
+;     (println "\n Toimintajakso alkuHetki: " (:alkuHetki Toimintajakso))
 
+     ;; Toimintajakso
+     (fact "Toimintajakso-alkuHetki" (:alkuHetki Toimintajakso) => (to-xml-datetime-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
+     (fact "Toimintajakso-loppuHetki" (:loppuHetki Toimintajakso) => (to-xml-datetime-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
+
+     ;; Hankkeen kuvaus
+     (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
+     (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)  ;; TODO: Onko tama checkki ok?
+     (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
     ))
 
 
