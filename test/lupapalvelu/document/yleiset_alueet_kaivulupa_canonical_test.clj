@@ -81,7 +81,7 @@
               :schema {:info {:name "yleiset-alueet-maksaja",
                               :type "party",
                               :order 62}},
-              :data {:_selected {:modified 1372341924880, :value "henkilo"},
+              :data {:_selected {:modified 1372341924880, :value "yritys"},
                      :henkilo henkilo,
                      :yritys yritys,
                      :laskuviite _laskuviite}})
@@ -177,12 +177,33 @@
        Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
        maksajatieto (:maksajatieto Tyolupa) => truthy
        Maksaja (:Maksaja maksajatieto) => truthy
-       laskuviite (:laskuviite Maksaja) => (:value _laskuviite)
+       maksaja-laskuviite (:laskuviite Maksaja) => (:value _laskuviite)
+;; *** TODO:  Miten testata niin, etta "_selected"-kentan arvo olisi "henkilo"? ***
+       maksaja-Henkilo (-> Maksaja :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
+       maksaja-Yritys (-> Maksaja :yritystieto :Yritys) => truthy
+       maksaja-henkilo-nimi (:nimi maksaja-Henkilo) => truthy  ;(fn [tieto] (println "\n nimitieto: " tieto))
+
        ]
 
-    ;(clojure.pprint/pprint canonical)
+;    (println "\n canonical: ")
+;    (clojure.pprint/pprint canonical)
 
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
+
+    ;; Maksajan tiedot
+    (fact "maksaja-etunimi" (:etunimi maksaja-henkilo-nimi) => "Pena")
+    (fact "maksaja-sukunimi" (:sukunimi maksaja-henkilo-nimi) => "Panaani")
+    ;; HUOM! Vastuuhenkilolla ei ole osoitetta.
+;    (fact "maksaja-henkilo-osoite" (:osoite maksaja-Henkilo) => truthy)
+;    (fact "maksaja-osoitenimi" (-> maksaja-henkilo-osoite :osoitenimi :teksti) => "Paapankuja 12")
+;    (fact "maksaja-postinumero" (:postinumero maksaja-henkilo-osoite) => "33800")
+;    (fact "maksaja-postitoimipaikannimi" (:postitoimipaikannimi maksaja-henkilo-osoite) => "Piippola")
+     (fact "maksaja-sahkopostiosoite" (:sahkopostiosoite maksaja-Henkilo) => "pena@example.com")
+     (fact "maksaja-puhelin" (:puhelin maksaja-Henkilo) => "0102030405")
+     ;; HUOM! Vastuuhenkilolla ei ole hetua.
+;     (fact "maksaja-henkilotunnus" (:henkilotunnus maksaja-Henkilo) => "260886-027R")
+
+
 
     ))
 
