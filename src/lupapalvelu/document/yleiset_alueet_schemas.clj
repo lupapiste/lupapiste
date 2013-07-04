@@ -88,7 +88,8 @@
              {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
              {:name "vesijohto"}
              {:name "muu"}]}
-     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width} ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
+     ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
+     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
      {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
 
 
