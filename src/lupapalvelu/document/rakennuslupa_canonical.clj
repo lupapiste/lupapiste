@@ -396,7 +396,7 @@
                      :yes "puoltaa"})
 
 (defn- get-statement [statement]
-  {:Lausunto {;:id (:id statement)
+  {:Lausunto {:id (:id statement)
               :viranomainen (get-in statement [:person :text])
               :pyyntoPvm (to-xml-date (:requested statement))
               :lausuntotieto {:Lausunto {:viranomainen (get-in statement [:person :text])

@@ -189,7 +189,7 @@
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
   (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
         canonical-attachments (for [attachment-tuple statement-attachments-by-id]
-                                {(first attachment-tuple) {:liite (get-liite-for-lausunto (first (last attachment-tuple)) application begin-of-link)}})]
+                                {(first attachment-tuple) {:Liite (get-liite-for-lausunto (first (last attachment-tuple)) application begin-of-link)}})]
     (not-empty canonical-attachments)))
 
 (defn- get-attachments-as-canonical [application begin-of-link ]
@@ -205,7 +205,6 @@
     (not-empty canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
-  (println attachments)
   (doseq [attachment attachments]
     (let [file-id (get-in attachment [:Liite :fileId])
           attachment-file (mongo/download file-id)
@@ -216,17 +215,12 @@
                   in (content)]
         (copy in out)))))
 
-(defn- append-gridfs-file [zip file-name file-id]
-  (when file-id
-    (.putNextEntry zip (ZipEntry. (encode-filename file-name)))
-    (with-open [in ((:content (mongo/download file-id)))]
-      (io/copy in zip))))
 
 (defn- write-statement-attachments [attachments output-dir]
   (let [files (filter #(nil? (:files %)) attachments)]
-    ;(clojure.pprint/pprint files)
-    (doseq [file-tuple files]
-      (write-attachments (map (fn [m] {:Liite (:liite m)}) (vals file-tuple)) output-dir))))
+    (println files)
+    (doseq [statement-files files]
+      (write-attachments (map (fn [m] {:Liite (:Liite m)}) (vals statement-files)) output-dir))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
@@ -238,9 +232,10 @@
 (defn- add-statement-attchments [canonical statement-attachments]
   (reduce (fn [c a]
             (let [lausuntotieto (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
-                  paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id])) %) lausuntotieto)
+                  lausunto-id (name (first (keys a)))
+                  paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
                   index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-                  paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] (:Liite (last (last a))))
+                  paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
                   paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
               (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
             ) canonical statement-attachments))
@@ -278,7 +273,7 @@
         xml        (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint(:attachments application))
-    (clojure.pprint/pprint canonical-with-statment-attachments)
+    ;(clojure.pprint/pprint canonical-with-statment-attachments)
     ;(println xml-s)
     (validate xml-s)
     (with-open [out-file (writer tempfile)]
