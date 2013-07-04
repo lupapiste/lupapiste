@@ -184,38 +184,13 @@
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)]
-    {:kuvaus title
-     :linkkiliitteeseen link
-     :muokkausHetki (to-xml-datetime (:modified attachment))
-     :versionumero 1
-     :tyyppi type
-     :fileId file-id}))
-
-(defn- get-liite-zipped [id-and-attachments application begin-of-link]
-  (let [attachment (first (last id-and-attachments))
-        type "Lausunto"
-        title (str (:title application) ": " type "-" (:id attachment))
-        file-id (str "L-" (first id-and-attachments))
-        attachment-file-name (str (first id-and-attachments) ".zip")
-        link (str begin-of-link attachment-file-name)]
-    {:kuvaus title
-     :linkkiliitteeseen link
-     :muokkausHetki (to-xml-datetime (:modified attachment))
-     :versionumero 1
-     :tyyppi type
-     :files (for [attachment (last id-and-attachments)]
-              (:id attachment))}))
+    (get-Liite title link attachment type file-id)))
 
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
   (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
         canonical-attachments (for [attachment-tuple statement-attachments-by-id]
-                                (if (= 1 (count (last attachment-tuple)))
-                                  nil
-                                  ; kommentoitu pois kryspiun choicen vuoksi{(first attachment-tuple) {:liite (for-lausunto (first (last attachment-tuple)) application begin-of-link)}}
-                                  ; Ei tueta useampaa liitetta toistaiseksi. krysp menee uusiksi{(first attachment-tuple) {:liite (get-liite-zipped attachment-tuple application begin-of-link)}}
-                                  ))]
-    (not-empty canonical-attachments))
-  [])
+                                {(first attachment-tuple) {:liite (get-liite-for-lausunto (first (last attachment-tuple)) application begin-of-link)}})]
+    (not-empty canonical-attachments)))
 
 (defn- get-attachments-as-canonical [application begin-of-link ]
   (let [attachments (:attachments application)
@@ -230,6 +205,7 @@
     (not-empty canonical-attachments)))
 
 (defn- write-attachments [attachments output-dir]
+  (println attachments)
   (doseq [attachment attachments]
     (let [file-id (get-in attachment [:Liite :fileId])
           attachment-file (mongo/download file-id)
@@ -247,25 +223,10 @@
       (io/copy in zip))))
 
 (defn- write-statement-attachments [attachments output-dir]
-  (let [single-files (filter #(nil? (:files %)) attachments)
-        multiple-files (filter #(:files %) attachments)]
-    ;(println "single-files")
-    ;(clojure.pprint/pprint single-files)
-    ;(println "multiple-files")
-    ;(clojure.pprint/pprint multiple-files)
-    (doseq [file-tuple single-files]
-      (write-attachments (map (fn [m] {:Liite (:liite m)}) (vals file-tuple)) output-dir))
-    (for [statement-attachments multiple-files]
-      (let [tempfile (file (str (:kuvaus statement-attachments) ".zip.tmp"))
-            outfile (file (str (:kuvaus statement-attachments) ".zip"))]
-        (with-open [out (io/output-stream tempfile)]
-          (let [zip (ZipOutputStream. out)]
-            ; Add all attachments:
-            (doseq [file (:files statement-attachments)]
-              (append-gridfs-file zip (:filename file) (:fileId file))
-              (.finish zip))
-            (fs/rename tempfile outfile)
-          ))))))
+  (let [files (filter #(nil? (:files %)) attachments)]
+    ;(clojure.pprint/pprint files)
+    (doseq [file-tuple files]
+      (write-attachments (map (fn [m] {:Liite (:liite m)}) (vals file-tuple)) output-dir))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
@@ -279,7 +240,7 @@
             (let [lausuntotieto (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
                   paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id])) %) lausuntotieto)
                   index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
-                  paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausunto :lausunto :liite] (:liite (last (last a))))
+                  paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] (:Liite (last (last a))))
                   paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
               (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
             ) canonical statement-attachments))
@@ -297,7 +258,7 @@
         canonical-without-attachments  (application-to-canonical application lang)
         fileserver-address (env/value :fileserver-address)
         begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
-        ;statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
+        statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
                                               {:Liite
@@ -312,19 +273,18 @@
                                                 :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
                                                 :versionumero 1
                                                 :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
-        ;canonical-with-statment-attachments  (add-statement-attchments canonical-without-attachments statement-attachments)
-        canonical canonical-without-attachments
-        ;(assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
+        canonical-with-statment-attachments  (add-statement-attchments canonical-without-attachments statement-attachments)
+        canonical (assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint(:attachments application))
-    ;(clojure.pprint/pprint canonical)
+    (clojure.pprint/pprint canonical-with-statment-attachments)
     ;(println xml-s)
     (validate xml-s)
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
     (write-attachments attachments output-dir)
-    ;(write-statement-attachments statement-attachments output-dir)
+    (write-statement-attachments statement-attachments output-dir)
 
     (write-application-pdf-versions output-dir application submitted-application lang)
     (when (fs/exists? outfile) (fs/delete outfile))

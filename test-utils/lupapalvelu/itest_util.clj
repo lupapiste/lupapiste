@@ -178,6 +178,31 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0)))))
 
+(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (let [filename    "dev-resources/test-attachment.txt"
+        uploadfile  (io/file filename)
+        application (query apikey :application :id application-id)
+        uri         (str (server-address) "/api/upload")
+        resp        (c/post uri
+                      {:headers {"authorization" (str "apikey=" apikey)}
+                       :multipart [{:name "applicationId"  :content application-id}
+                                   {:name "Content/type"   :content "text/plain"}
+                                   {:name "attachmentType" :content "muut.muu"}
+                                   {:name "attachmentId"   :content attachment-id}
+                                   {:name "upload"         :content uploadfile}
+                                   {:name "targetId"       :content statement-id}
+                                   {:name "targetType"     :content "statement"}]}
+                      )]
+    (if expect-to-succeed
+      (facts "Statement upload succesfully"
+        (fact "Status code" (:status resp) => 302)
+        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+      ;(facts "Statement upload should fail"
+       ; (fact "Status code" (:status resp) => 302)
+      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0))
+      )))
+
+
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn upload-attachment-to-all-placeholders [apikey application]
