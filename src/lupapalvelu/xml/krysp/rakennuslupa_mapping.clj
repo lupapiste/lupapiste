@@ -273,7 +273,7 @@
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint(:attachments application))
     ;(clojure.pprint/pprint canonical-with-statment-attachments)
-    ;(println xml-s)
+    (println xml-s)
     (validate xml-s)
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
