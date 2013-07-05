@@ -170,33 +170,45 @@
    :statements statements})
 
 
+(def get-henkilo-plus-yritys #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-henkilo-plus-yritys)
+
 (facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application "fi")
        YleisetAlueet (:YleisetAlueet canonical) => truthy
        yleinenAlueAsiatieto (first (:yleinenAlueAsiatieto YleisetAlueet)) => truthy
        Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
-       maksajatieto (:maksajatieto Tyolupa) => truthy
-       Maksaja (:Maksaja maksajatieto) => truthy
+       ;; TODO: Naita voi yhdistella perakkain '->':lla... Refaktoroi.
+       Maksaja (-> Tyolupa :maksajatieto :Maksaja) => truthy
        maksaja-laskuviite (:laskuviite Maksaja) => (:value _laskuviite)
-;; *** TODO:  Miten testata niin, etta "_selected"-kentan arvo olisi "henkilo"? ***
        maksaja-Henkilo (-> Maksaja :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
        maksaja-Yritys (-> Maksaja :yritystieto :Yritys) => truthy
        maksaja-henkilo-nimi (:nimi maksaja-Henkilo) => truthy  ;(fn [tieto] (println "\n nimitieto: " tieto))
-       ;; HUOM! Vastuuhenkilolla ei ole osoitetta.
-       ;maksaja-henkilo-osoite (:osoite maksaja-Henkilo) => truthy
+       ;; Maksajan vastuuhenkilolla ei ole osoitetta, mutta yrityksella on.
+       maksaja-yritys-osoite (:postiosoite maksaja-Yritys) => truthy
 
-       toimintajaksotieto (:toimintajaksotieto Tyolupa) => truthy
-       Toimintajakso (:Toimintajakso toimintajaksotieto) => truthy
+       ;; Testataan muunnosfunktiota yksityisella maksajalla ("henkilo"-tyyppinen maksaja)
+       maksaja-yksityinen (get-henkilo-plus-yritys
+                            (assoc-in (:data maksaja) [:_selected :value] "henkilo") "maksaja")
+       maksaja-yksityinen-henkilotieto (:henkilotieto maksaja-yksityinen) => truthy
+       maksaja-yksityinen-Henkilo (:Henkilo maksaja-yksityinen-henkilotieto) => truthy
+       maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
+       maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
+
+       Toimintajakso (-> Tyolupa :toimintajaksotieto :Toimintajakso) => truthy
 
        lupaAsianKuvaus (:lupaAsianKuvaus Tyolupa) => truthy
-       sijoituslupaviitetieto (:sijoituslupaviitetieto Tyolupa) => truthy
-       Sijoituslupaviite (:Sijoituslupaviite sijoituslupaviitetieto) => truthy
+       Sijoituslupaviite (-> Tyolupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
 
-       ;; TODO: tyomaastaVastaava, hakija
-;       osapuolitieto (:osapuolitieto Tyolupa) => truthy
-;       Osapuoli (:Osapuoli osapuolitieto) => truthy
+;       Vastuuhenkilo (-> Tyolupa :vastuuhenkilotieto :Vastuuhenkilo) => truthy
+;       Vastuuhenkilo-osoitetieto (:osoitetieto Vastuuhenkilo) => truthy
+;       Vastuuhenkilo-osoite (:osoite Vastuuhenkilo-osoitetieto) => truthy
 
+       hakija-Osapuoli (-> Tyolupa :osapuolitieto :Osapuoli) => truthy
+       hakija-Henkilo (-> hakija-Osapuoli :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
+       hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
+       hakija-henkilo-nimi (:nimi maksaja-Henkilo) => truthy
+       hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
        ]
 
 ;    (println "\n canonical: ")
@@ -207,20 +219,50 @@
     ;; Maksajan tiedot
     (fact "maksaja-etunimi" (:etunimi maksaja-henkilo-nimi) => (-> nimi :etunimi :value))
     (fact "maksaja-sukunimi" (:sukunimi maksaja-henkilo-nimi) => (-> nimi :sukunimi :value))
-    ;; HUOM! Vastuuhenkilolla ei ole osoitetta.
-;    (fact "maksaja-henkilo-osoite" (:osoite maksaja-Henkilo) => truthy)
-;    (fact "maksaja-osoitenimi" (-> maksaja-henkilo-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
-;    (fact "maksaja-postinumero" (:postinumero maksaja-henkilo-osoite) => (-> osoite :postinumero :value))
-;    (fact "maksaja-postitoimipaikannimi" (:postitoimipaikannimi maksaja-henkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
-     (fact "maksaja-sahkopostiosoite" (:sahkopostiosoite maksaja-Henkilo) => (-> yhteystiedot :email :value))
-     (fact "maksaja-puhelin" (:puhelin maksaja-Henkilo) => (-> yhteystiedot :puhelin :value))
-     ;; HUOM! Vastuuhenkilolla ei ole hetua.
-;     (fact "maksaja-henkilotunnus" (:henkilotunnus maksaja-Henkilo) => (-> henkilotiedot :hetu :value)
+    (fact "maksaja-sahkopostiosoite" (:sahkopostiosoite maksaja-Henkilo) => (-> yhteystiedot :email :value))
+    (fact "maksaja-puhelin" (:puhelin maksaja-Henkilo) => (-> yhteystiedot :puhelin :value))
+    (fact "maksaja-nimi" (:nimi maksaja-Yritys) => (-> yritys-nimi-ja-tunnus :yritysnimi :value))
+    (fact "maksaja-liikeJaYhteisotunnus" (:liikeJaYhteisotunnus maksaja-Yritys) => (-> yritys-nimi-ja-tunnus :liikeJaYhteisoTunnus :value))
+    (fact "maksaja-osoitenimi" (-> maksaja-yritys-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
+    (fact "maksaja-postinumero" (:postinumero maksaja-yritys-osoite) => (-> osoite :postinumero :value))
+    (fact "maksaja-postitoimipaikannimi" (:postitoimipaikannimi maksaja-yritys-osoite) => (-> osoite :postitoimipaikannimi :value))
 
-     ;; Osapuolet
-     ;; TODO
+    ;; Maksaja, yksityinen henkilo
+    (fact "maksaja-yksityinen-etunimi" (:etunimi maksaja-yksityinen-nimi) => (-> nimi :etunimi :value))
+    (fact "maksaja-yksityinen-sukunimi" (:sukunimi maksaja-yksityinen-nimi) => (-> nimi :sukunimi :value))
+    (fact "maksaja-yksityinen-osoitenimi" (-> maksaja-yksityinen-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
+    (fact "maksaja-yksityinen-postinumero" (:postinumero maksaja-yksityinen-osoite) => (-> osoite :postinumero :value))
+    (fact "maksaja-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi maksaja-yksityinen-osoite) => (-> osoite :postitoimipaikannimi :value))
+    (fact "maksaja-yksityinen-sahkopostiosoite" (:sahkopostiosoite maksaja-yksityinen-Henkilo) => (-> yhteystiedot :email :value))
+    (fact "maksaja-yksityinen-puhelin" (:puhelin maksaja-yksityinen-Henkilo) => (-> yhteystiedot :puhelin :value))
+    (fact "maksaja-yksityinen-hetu" (:henkilotunnus maksaja-yksityinen-Henkilo) => (-> henkilotiedot :hetu :value))
 
-;     (println "\n toimintajaksotieto: " toimintajaksotieto)
+     ;; Osapuoli: Hakija
+    (fact "hakija-etunimi" (:etunimi hakija-henkilo-nimi) => (-> nimi :etunimi :value))
+    (fact "hakija-sukunimi" (:sukunimi hakija-henkilo-nimi) => (-> nimi :sukunimi :value))
+    (fact "hakija-sahkopostiosoite" (:sahkopostiosoite hakija-Henkilo) => (-> yhteystiedot :email :value))
+    (fact "hakija-puhelin" (:puhelin hakija-Henkilo) => (-> yhteystiedot :puhelin :value))
+    (fact "hakija-nimi" (:nimi hakija-Yritys) => (-> yritys-nimi-ja-tunnus :yritysnimi :value))
+    (fact "hakija-liikeJaYhteisotunnus" (:liikeJaYhteisotunnus hakija-Yritys) => (-> yritys-nimi-ja-tunnus :liikeJaYhteisoTunnus :value))
+    (fact "hakija-osoitenimi" (-> hakija-yritys-Postiosoite :osoitenimi :teksti) => (-> osoite :katu :value))
+    (fact "hakija-postinumero" (:postinumero hakija-yritys-Postiosoite) => (-> osoite :postinumero :value))
+    (fact "hakija-postitoimipaikannimi" (:postitoimipaikannimi hakija-yritys-Postiosoite) => (-> osoite :postitoimipaikannimi :value))
+    (fact "Vastuuhenkilo-rooliKoodi" (:rooliKoodi hakija-Osapuoli) => "hakija")
+
+     ;; Hakija, yksityinen henkilo -> Tama on testattu jo kohdassa "Maksaja, yksityinen henkilo" (muunnos on taysin sama)
+
+     ;; Tyomaasta vastaava
+     ;; ****** TODO: Muuta tama, kun tyomaastaVastaava muutetaan henkiloksi! ******
+;     (fact "Vastuuhenkilo-etunimi" (:etunimi Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :etunimi :value))
+;     (fact "Vastuuhenkilo-sukunimi" (:sukunimi Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :sukunimi :value))
+;     (fact "Vastuuhenkilo-osoite-osoitenimi" (:osoitenimi Vastuuhenkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :osoitenimi :value))
+;     (fact "Vastuuhenkilo-osoite-postinumero" (:postinumero Vastuuhenkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postinumero :value))
+;     (fact "Vastuuhenkilo-osoite-postitoimipaikannimi" (:postitoimipaikannimi Vastuuhenkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postitoimipaikannimi :value))
+;     (fact "Vastuuhenkilo-puhelinnumero" (:puhelinnumero Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :puhelin :value))
+;     (fact "Vastuuhenkilo-sahkopostiosoite" (:sahkopostiosoite Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :email :value))
+;     (fact "Vastuuhenkilo-rooliKoodi" (:rooliKoodi Vastuuhenkilo) => "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")
+
+
 ;     (println "\n Toimintajakso: " Toimintajakso)
 ;     (println "\n Toimintajakso alkuHetki: " (:alkuHetki Toimintajakso))
 
@@ -231,8 +273,7 @@
      ;; Hankkeen kuvaus
      (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
      (fact "vaadittuKytkin" (:vaadittuKytkin Sijoituslupaviite) => false)  ;; TODO: Onko tama checkki ok?
-     (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))
-    ))
+     (fact "Sijoituslupaviite" (:tunniste Sijoituslupaviite) => (-> hankkeen-kuvaus :data :sijoitusLuvanTunniste :value))))
 
 
 
