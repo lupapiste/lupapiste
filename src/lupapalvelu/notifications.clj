@@ -27,8 +27,6 @@
 
 (defmacro message [& xml] `(emit (-> ~@xml)))
 
-(def mail-agent (agent nil))
-
 (defn get-styles []
   (slurp (io/resource "email-templates/styles.css")))
 
@@ -53,13 +51,11 @@
   (replace-links-in-fi-sv e selector (partial get-application-link application suffix host)))
 
 (defn send-mail-to-recipients! [recipients title msg]
-  (doseq [recipient recipients]
-    (send-off
-      mail-agent
-      (fn [_]
-        (if (email/send-mail? recipient title msg)
-          (info "email was sent successfully." recipients title)
-          (error "email could not be delivered." recipients title msg))))))
+  (future 
+    (doseq [recipient recipients]
+      (if (email/send-mail? recipient title msg)
+        (info "email was sent successfully." recipients title)
+        (error "email could not be delivered." recipients title msg)))))
 
 (defn get-email-title [{:keys [title]} & [title-key]]
   (i18n/with-lang "fi"
