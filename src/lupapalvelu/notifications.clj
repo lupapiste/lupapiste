@@ -55,7 +55,8 @@
     (doseq [recipient recipients]
       (if (email/send-mail? recipient title msg)
         (info "email was sent successfully." recipients title)
-        (error "email could not be delivered." recipients title msg)))))
+        (error "email could not be delivered." recipients title msg))))
+  nil)
 
 (defn get-email-title [{:keys [title]} & [title-key]]
   (i18n/with-lang "fi"
