@@ -1,6 +1,6 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.core :only [ok fail defcommand defquery now]]
         [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
@@ -395,6 +395,39 @@
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
         (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
+
+;;
+;; Session timeout:
+;;
+;;    Middleware that checks session timeout.
+;;
+
+; Get session timeout from users data, or use sensible default:
+(defn get-session-timeout [request]
+  (get-in request [:session :noir :user :session-timeout] (* 1 60 1000)))
+
+; Check session timeout, return nil if request may proceed. Any other
+; return value is returned to caller.
+; - if request does not have a session, pass it through.
+; - if session is expired, return response with session clear
+; - pass call
+; - if call was query or command, update expiry time
+
+(defn- session-timeout-handler [handler request]
+  (let [now     (now)
+        session (:session request)
+        expires (:expires session now)]
+    (if (< expires now)
+      (assoc (resp/status 401 (resp/json {:ok false :message "session timeout"})) :session nil)
+      (let [resp (handler request)]
+        (if (re-find #"^/api/(command|query)/" (:uri request))
+          (assoc resp :session (assoc (or (:session resp) session) :expires (+ now (get-session-timeout request))))
+          resp)))))
+
+; Middleware registration point.
+
+(defn session-timeout [handler]
+  (fn [request] (session-timeout-handler handler request)))
 
 ;;
 ;; dev utils:
