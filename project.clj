@@ -39,12 +39,13 @@
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
                              [lein-hgnotes "0.1.0"]]
-                   :source-paths ["test-utils"]}
+                   :source-paths ["test-utils"]
+                   :jvm-opts ["-Djava.awt.headless=true"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["itest" "stest"]}
-             :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi"]}
-             :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi"]}}
+             :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
+             :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"[\/\\]jquery" #"[\/\\]theme[\/\\]default"
                          #"[\/\\]public[\/\\]lib" #"openlayers" #"underscore" #"highcharts\.js" #"lodash"]}
