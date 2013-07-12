@@ -22,7 +22,7 @@
 (defcommand "login"
   {:parameters [:username :password] :verified false}
   [{{:keys [username password]} :data}]
-  (if-let [user (security/login username password)]
+  (if-let [user (security/login (-> username lower-case trim) password)]
     (do
       (info "login successful, username:" username)
       (session/put! :user user)
