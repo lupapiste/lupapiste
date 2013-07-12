@@ -1,6 +1,7 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
-        [clojure.tools.logging])
+        [clojure.tools.logging]
+        [sade.util :only [lower-case]])
   (:require [lupapalvelu.mongo :as mongo]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
@@ -76,10 +77,10 @@
   (map :invite (filter :invite auth)))
 
 (defn invite [application email]
-  (first (filter #(-> % :email (= email)) (invites application))))
+  (first (filter #(-> % :email (= (lower-case email))) (invites application))))
 
 (defn invited? [{invites :invites} email]
-  (or (some #(= email (-> % :user :username)) invites) false))
+  (or (some #(= (lower-case email) (-> % :user :username)) invites) false))
 
 ;;
 ;; Conversion between Lupapiste and documents
