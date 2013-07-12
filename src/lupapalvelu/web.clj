@@ -1,6 +1,6 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.core :only [ok fail defcommand defquery now]]
         [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
@@ -395,6 +395,28 @@
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
         (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
+
+;;
+;; Session timeout:
+;;
+;;    Middleware that checks session timeout.
+;;
+
+(defn get-session-timeout [request]
+  (get-in request [:session :noir :user :session-timeout] (* 60 10 1000)))
+
+(defn session-timeout-handler [handler request]
+  (let [now (now)
+        expires (session/get :expires now)
+        expired? (< expires now)]
+    (if expired?
+      (session/clear!)
+      (if (re-find #"^/api/(command|query)/" (:uri request))
+        (session/put! :expires (+ now (get-session-timeout request)))))
+    (handler request)))
+
+(defn session-timeout [handler]
+  (fn [request] (session-timeout-handler handler request)))
 
 ;;
 ;; dev utils:
