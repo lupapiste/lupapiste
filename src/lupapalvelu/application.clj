@@ -2,7 +2,8 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join trim lower-case]]
+        [clojure.string :only [blank? join trim]]
+        [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
@@ -184,28 +185,29 @@
     {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
-      (if (domain/invited? application email)
-        (fail :invite.already-invited)
-        (let [invited (security/get-or-create-user-by-email email)
-              invite  {:title        title
-                       :application  application-id
-                       :text         text
-                       :path         path
-                       :documentName documentName
-                       :documentId   documentId
-                       :created      created
-                       :email        email
-                       :user         (security/summary invited)
-                       :inviter      (security/summary user)}
-              writer  (role invited :writer)
-              auth    (assoc writer :invite invite)]
-          (if (domain/has-auth? application (:id invited))
-            (fail :invite.already-has-auth)
-            (mongo/update
-              :applications
-              {:_id application-id
-               :auth {$not {$elemMatch {:invite.user.username email}}}}
-              {$push {:auth auth}})))))))
+      (let [email (lower-case email)]
+        (if (domain/invited? application email)
+          (fail :invite.already-invited)
+          (let [invited (security/get-or-create-user-by-email email)
+                invite  {:title        title
+                         :application  application-id
+                         :text         text
+                         :path         path
+                         :documentName documentName
+                         :documentId   documentId
+                         :created      created
+                         :email        email
+                         :user         (security/summary invited)
+                         :inviter      (security/summary user)}
+                writer  (role invited :writer)
+                auth    (assoc writer :invite invite)]
+            (if (domain/has-auth? application (:id invited))
+              (fail :invite.already-has-auth)
+              (mongo/update
+                :applications
+                {:_id application-id
+                 :auth {$not {$elemMatch {:invite.user.username email}}}}
+                {$push {:auth auth}}))))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -231,18 +233,19 @@
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user email
-        (fn [_]
-          (mongo/update-by-id :applications application-id
-            {$pull {:auth {$and [{:username email}
-                                 {:type {$ne :owner}}]}}}))))))
+      (let [email (lower-case email)]
+        (with-user email
+          (fn [_]
+            (mongo/update-by-id :applications application-id
+              {$pull {:auth {$and [{:username email}
+                                   {:type {$ne :owner}}]}}})))))))
 
 (defcommand "remove-auth"
   {:parameters [:id :email]
    :roles      [:applicant :authority]}
   [{{:keys [email]} :data :as command}]
   (update-application command
-    {$pull {:auth {$and [{:username email}
+    {$pull {:auth {$and [{:username (lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
 (defcommand "add-comment"

@@ -33,8 +33,8 @@
 
 (facts "user entity mongo model"
   (fact "is a map with all the data"
-     (create-use-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:email        ..email..
+     (create-use-entity "Foo@Bar.Com" some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     => (contains {:email        "foo@bar.com"
                    :personId     ..userid..
                    :role         ..role..
                    :firstName    ..firstname..

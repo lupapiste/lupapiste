@@ -47,7 +47,7 @@
   (non-private (mongo/select-one :users {:_id user-id})))
 
 (defn get-user-by-email [email]
-  (and email (non-private (mongo/select-one :users {:email email}))))
+  (and email (non-private (mongo/select-one :users {:email (util/lower-case email)}))))
 
 (defn- random-password []
   (let [ascii-codes (concat (range 48 58) (range 66 91) (range 97 123))]
@@ -58,7 +58,8 @@
   (>= (count password) (env/value :password :minlength)))
 
 (defn create-use-entity [email password userid role firstname lastname phone city street zip enabled organizations]
-  (let [salt              (dispense-salt)
+  (let [email             (util/lower-case email)
+        salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
     (-> {:username     email
          :email        email
@@ -76,7 +77,8 @@
 
 (defn- create-any-user [{:keys [email password userid role firstname lastname phone city street zip enabled organizations]
                          :or {firstname "" lastname "" password (random-password) role :dummy enabled false} :as user}]
-  (let [id                (mongo/create-id)
+  (let [email             (util/lower-case email)
+        id                (mongo/create-id)
         old-user          (get-user-by-email email)
         new-user-base     (create-use-entity email password userid role firstname lastname phone city street zip enabled organizations)
         new-user          (assoc new-user-base :id id)]
@@ -109,18 +111,19 @@
   (create-any-user (merge user {:role :authorityAdmin :enabled true})))
 
 (defn update-user [email data]
-  (mongo/update :users {:email email} {$set data}))
+  (mongo/update :users {:email (util/lower-case email)} {$set data}))
 
 (defn change-password [email password]
   (let [salt              (dispense-salt)
         hashed-password   (get-hash password salt)]
-    (mongo/update :users {:email email} {$set {:private.salt  salt
-                                               :private.password hashed-password}})))
+    (mongo/update :users {:email (util/lower-case email)} {$set {:private.salt  salt
+                                                            :private.password hashed-password}})))
 
 (defn get-or-create-user-by-email [email]
-  (or
-    (get-user-by-email email)
-    (create-any-user {:email email})))
+  (let [email (util/lower-case email)]
+    (or
+      (get-user-by-email email)
+      (create-any-user {:email email}))))
 
 (defn authority? [{role :role}]
   (= :authority (keyword role)))
