@@ -1,4 +1,5 @@
-(ns sade.util)
+(ns sade.util
+  (:require [clojure.string :as s]))
 
 ; from clojure.contrib/core
 
@@ -66,3 +67,4 @@
 (defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
 
+(defn lower-case ^String [^String x] (when x (s/lower-case x)))
