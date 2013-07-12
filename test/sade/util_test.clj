@@ -57,3 +57,11 @@
   (lower-case "")    => ""
   (lower-case "a")   => "a"
   (lower-case "A")   => "a")
+
+(fact
+  (trim nil)    => nil
+  (trim "")     => ""
+  (trim "a")    => "a"
+  (trim " a")   => "a"
+  (trim "a ")   => "a"
+  (trim " a ")  => "a")

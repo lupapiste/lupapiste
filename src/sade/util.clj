@@ -67,4 +67,5 @@
 (defmacro fn-> [& body] `(fn [x#] (-> x# ~@body)))
 (defmacro fn->> [& body] `(fn [x#] (->> x# ~@body)))
 
-(defn lower-case ^String [^String x] (when x (s/lower-case x)))
+(defn ^String lower-case [^CharSequence x] (when x (s/lower-case x)))
+(defn ^String trim [^CharSequence x] (when x (s/trim x)))
