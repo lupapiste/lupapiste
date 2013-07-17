@@ -112,8 +112,6 @@
 
 (defn send-neighbor-invite! [email token neighbor-id application host]
   (let [title        (get-email-title application "neighbor")
-        municipality (->> application :municipality (str "municipality."))
-        address      (->> application :address)
         full-path    (str "/neighbor-show/" (:id application) "/" neighbor-id "/" token)
         msg          (message
                        (template "neighbor.html")
