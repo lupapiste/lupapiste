@@ -763,6 +763,10 @@
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
         .complete(_.partial(repository.load, currentId, util.nop))
         .call();
+    },
+    statusPending: function(neighbor) {
+      console.log("statusPending:", neighbor);
+      return true;
     }
   };
 
