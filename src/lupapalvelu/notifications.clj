@@ -115,8 +115,7 @@
         full-path    (str "/neighbor-show/" (:id application) "/" neighbor-id "/" token)
         msg          (message
                        (template "neighbor.html")
-                    (replace-links-in-fi-sv "#link" (fn [lang]
-                           (str host "/app/" lang "/neighbor?hashbang=!" full-path "#!" full-path))))]
+                       (replace-links-in-fi-sv "#link" (fn [lang] (str host "/app/" lang "/neighbor#!" full-path))))]
     (send-mail-to-recipients! [email] title msg)))
 
 (defn get-message-for-application-state-change [application host]
