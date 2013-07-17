@@ -443,7 +443,7 @@
                       <span data-bind="dateTimeString: created" class="status-time"></span>
                     </td>
                     <td>
-                      <span data-bind="visible: $root.neighbor.statusPending(neighbor)">
+                      <span data-bind="visible: $root.neighbor.statusPending($data)">
                         <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('neighbor-send-invite'), ltext: 'neighbors.actions.sendEmail'" href="#"></a>
                         <a data-bind="click: $root.neighbor.upload, ltext: 'neighbors.actions.upload', clickBubble: false" href="#"></a>
                         <a data-bind="click: $root.neighbor.markDone, visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'), ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>

@@ -752,6 +752,8 @@
     }
   });
 
+  var completedNeighborStates = ["response-given", "mark-done"];
+  
   var neighborActions = {
     manage: function(application) {
       window.location.hash = "!/neighbors/" + application.id();
@@ -765,8 +767,8 @@
         .call();
     },
     statusPending: function(neighbor) {
-      console.log("statusPending:", neighbor);
-      return true;
+      var state = neighbor.lastStatus.state();
+      return !_.contains(completedNeighborStates, state);
     }
   };
 
