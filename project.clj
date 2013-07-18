@@ -1,7 +1,8 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [noir "1.3.0" :exclusions [org.clojure/clojure]]
+                 [noir "1.3.0" :exclusions [org.clojure/clojure compojure]]
+                 [compojure "1.1.5"]
                  [com.novemberain/monger "1.4.2"]
                  [org.clojure/tools.logging "0.2.6"]
                  [clj-logging-config "1.9.10" :exclusions [log4j]]
@@ -30,7 +31,8 @@
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.1"]]
   :plugins [[org.timmc/lein-otf "2.0.1"]]
-  :profiles {:dev {:dependencies [[midje "1.5.1"]
+  :profiles {:dev {:dependencies [[midje "1.5.1" :exclusions [[leiningen-core]]]
+                                  [leiningen-core "2.0.0"]
                                   [ring-mock "0.1.1"]
                                   [javax.activation/activation "1.1"]
                                   [dumbster/dumbster "1.6" :exclusions [[javax.mail/mail] [javax.activation/activation]]]
