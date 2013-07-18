@@ -755,11 +755,17 @@
   function NeighborStatusModel() {
     var self = this;
     
-    self.status = ko.observable();
+    self.state = ko.observable();
+    self.message = ko.observable();
+    self.created = ko.observable();
+    self.firstname = ko.observable();
+    self.lastname = ko.observable();
+    self.userid = ko.observable();
     
-    self.init = function(data) {
-      var data = data || {};
-      return self.status("heeloo");
+    self.init = function(neighbor) {
+      _.each(["state", "message", "created"], function(n) { self[n](neighbor.lastStatus[n]()); });
+      _.each(["firstname", "lastname", "userid"], function(n) { self[n](neighbor.lastStatus.vetuma[n]()); });
+      return self;
     };
     
     self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-neighbor-status"); return self; };
@@ -783,16 +789,12 @@
         .call();
     },
     statusPending: function(neighbor) {
-      var state = neighbor.lastStatus.state();
-      return !_.contains(completedNeighborStates, state);
+      return !_.contains(completedNeighborStates, neighbor.lastStatus.state());
     },
     statusHasData: function(neighbor) {
-      console.log("statusHasData:", neighbor, neighbor.lastStatus.state())
-      var state = neighbor.lastStatus.state();
-      return _.contains(dataNeighborStates, state);
+      return _.contains(dataNeighborStates, neighbor.lastStatus.state());
     },
     showStatus: function(neighbor) {
-      console.log("showStatus:", neighbor, neighbor.lastStatus.state());
       neighborStatusModel.init(neighbor).open();
       return false;
     }
@@ -860,7 +862,8 @@
       stampModel: stampModel,
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
-      sendNeighborEmailModel: sendNeighborEmailModel
+      sendNeighborEmailModel: sendNeighborEmailModel,
+      neighborStatusModel: neighborStatusModel
     };
 
     $("#application").applyBindings(bindings);
