@@ -121,7 +121,12 @@
 ;;
 
 (defn- app-post-processor [user]
-  (comp without-system-keys (partial with-meta-fields user)))
+  (comp
+    without-system-keys
+    (partial with-meta-fields user)
+    (if (= (:role user) :authority)
+      neighbors/strip-neighbors-userids
+      identity)))
 
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
   (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
