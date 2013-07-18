@@ -2,7 +2,8 @@
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
         [clojure.pprint :only [pprint]])
-  (:require [lupapalvelu.domain :as domain]
+  (:require [clojure.string :as s]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer [fn->]]))
 
@@ -61,8 +62,7 @@
     (fact (count neighbors) => 0)))
 
 (facts "neighbour invite & view on application"
-  (let [[{application-id :id :as application}
-         neighborId]    (create-app-with-neighbor)
+  (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
         _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
                                       :id application-id
@@ -80,11 +80,18 @@
 
     application => truthy
 
+    (Thread/sleep 100) ; Allow future to deliver email
+
     (let [response  (query pena :last-email)
           message   (-> response :message)
-          token     (->> message :body (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
+          token     (-> message
+                      :body
+                      ((partial re-matches #"(?sm).*neighbor-show/.+/(.*)\".*"))
+                      last
+                      (s/replace #"=" ""))]
 
       token => truthy
+      token =not=> #"="
 
       (fact "application query returns set document info"
         (let [application (-> (query pena :application :id application-id) :application)
