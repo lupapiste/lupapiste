@@ -752,7 +752,23 @@
     }
   });
 
+  function NeighborStatusModel() {
+    var self = this;
+    
+    self.status = ko.observable();
+    
+    self.init = function(data) {
+      var data = data || {};
+      return self.status("heeloo");
+    };
+    
+    self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-neighbor-status"); return self; };
+  }
+
+  var neighborStatusModel = new NeighborStatusModel();
+  
   var completedNeighborStates = ["mark-done", "response-given-ok", "response-given-comments"];
+  var dataNeighborStates = ["response-given-ok", "response-given-comments"];
   
   var neighborActions = {
     manage: function(application) {
@@ -769,6 +785,16 @@
     statusPending: function(neighbor) {
       var state = neighbor.lastStatus.state();
       return !_.contains(completedNeighborStates, state);
+    },
+    statusHasData: function(neighbor) {
+      console.log("statusHasData:", neighbor, neighbor.lastStatus.state())
+      var state = neighbor.lastStatus.state();
+      return _.contains(dataNeighborStates, state);
+    },
+    showStatus: function(neighbor) {
+      console.log("showStatus:", neighbor, neighbor.lastStatus.state());
+      neighborStatusModel.init(neighbor).open();
+      return false;
     }
   };
 

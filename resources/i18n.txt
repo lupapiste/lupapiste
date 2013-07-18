@@ -12,3 +12,6 @@ application.statements: Lausunnot
 application.neighbors: Naapurien tiedotus
 
 newRequest.create.desc: Neuvontapyynnössä voit kysyä viranomaiselta vapaasti hankkeestasi ja siihen liittyvistä lupa-asioinneista. Neuvontapyynnön jätettyäsi voit lisätä siihen myös liitteinä valokuvia ja suunnitelmia.
+
+neighbors.status-dialog.title: Naapurin kuulemisen tila
+neighbors.status-dialog.ok: Ok
