@@ -752,7 +752,7 @@
     }
   });
 
-  var completedNeighborStates = ["response-given", "mark-done"];
+  var completedNeighborStates = ["mark-done", "response-given-ok", "response-given-comments"];
   
   var neighborActions = {
     manage: function(application) {
