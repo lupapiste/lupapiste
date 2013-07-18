@@ -65,18 +65,18 @@
          neighborId]    (create-app-with-neighbor)
         _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
-                          :id application-id
-                          :neighborId neighborId
-                          :email "abba@example.com"
-                          :message "welcome!")
+                                      :id application-id
+                                      :neighborId neighborId
+                                      :email "abba@example.com"
+                                      :message "welcome!")
         application     (-> (query pena :application :id application-id) :application)
         hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
         _               (command pena :update-doc
-                          :id application-id
-                          :doc hakija-doc-id
-                          :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
-                                    ["henkilo.henkilotiedot.sukunimi" "Zorro"]
-                                    ["henkilo.henkilotiedot.hetu"     "123456789"]])]
+                                      :id application-id
+                                      :doc hakija-doc-id
+                                      :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
+                                                ["henkilo.henkilotiedot.sukunimi" "Zorro"]
+                                                ["henkilo.henkilotiedot.hetu"     "123456789"]])]
 
     application => truthy
 
@@ -96,13 +96,16 @@
           (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"))
 
       (fact "neighbor applicaiton query does not return hetu"
-        (let [application (-> (query pena :neighbor-application
-                                :applicationId application-id
-                                :neighborId neighborId
-                                :token token) :application)
+        (let [resp        (query pena :neighbor-application
+                                      :applicationId application-id
+                                      :neighborId neighborId
+                                      :token token)
+              application (:application resp)
               hakija-doc  (domain/get-document-by-id application hakija-doc-id)
               hakija-doc  (tools/unwrapped hakija-doc)]
 
+          resp => truthy
+          resp => (contains {:ok true})
           application => truthy
 
           (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
@@ -127,7 +130,7 @@
           :neighborId (name neighborId)
           :token token
           :stamp "INVALID"
-          :response "ime parsaa!"
+          :response "ok"
           :message "kehno suunta") => invalid-vetuma?)
 
       (fact "with vetuma"
