@@ -25,9 +25,17 @@
   (assoc headers (keyword header-name) (.getHeaderValue message header-name)))
 
 (defn- parse-message [message]
+  ; FIXME: This does not work, as the =\n cases are left on the message.
+  ; The dumbster is too stopid, it seems that it just parses message without
+  ; doing it properly, but messing so well that it can not be parsed any more.
   (when message
-    {:body    (-> (.getBody message) (s/replace #"=([^A-Z]{2})" "$1" ) ; strip extra '=' chars that are not part of quotation
-                (.getBytes "US-ASCII") (input-stream) (MimeUtility/decode "quoted-printable") (slurp))
+    {:body (->
+             (.getBody message)
+             (s/replace #"=([^A-Z]{2})" "$1" ) ; strip extra '=' chars that are not part of quotation
+             (.getBytes "US-ASCII")
+             (input-stream)
+             (MimeUtility/decode "quoted-printable")
+             (slurp))
      :headers (reduce (partial message-header message) {} (iterator-seq (.getHeaderNames message)))}))
 
 (defn messages [& {:keys [reset]}]
