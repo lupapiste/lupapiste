@@ -29,6 +29,7 @@ neighbors.status-dialog.user.lastName: Sukunimi
 neighbors.status-dialog.user.userid: Tunnus
 neighbors.status-dialog.user.time: Aika
  
+neighbors.status-dialog.message-title.response-given-ok:
 neighbors.status-dialog.message-title.response-given-comments: Naapurin viesti:
 neighbors.status-dialog.message-title.mark-done: Viranomaisen viesti:
  
