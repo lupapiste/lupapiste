@@ -74,20 +74,49 @@ Sonja checks that everything is ok
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//span[@data-test-id='neighbors-row-status-open']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-c@example.com']//span[@data-test-id='neighbors-row-status-open']
   
-Sonja meets marks neighbor 'a' as 'done'
+Sonja meets user 'a' IRL and marks her as 'done'
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
   Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
+  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
+  Wait until  Element should not be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
   
 Sonja opens status details dialog 
-  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
   Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-firstName']
   Element Text Should Be  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-firstName']  Sonja
   Element Text Should Be  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-lastName']  Sibbo
   Element should not be visible  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-usereid']
-  Sleep  5
   Click element  xpath=//div[@id='dialog-neighbor-status']//button[@data-test-id='neighbor-status-ok']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-neighbor-status']
   
 Sonja has done her part
+  Logout
+
+Mikko sees neighbors and their status
+  Mikko logs in
+  Open application  ${appname}  753-416-25-22
+  Open tab  statement
+  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']
+  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
+  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//span[@data-test-id='neighbors-row-status-open']
+  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-c@example.com']//span[@data-test-id='neighbors-row-status-open']
+
+Mikko can't mark neighbors as done, but can send an email invitation
+  Element should not be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbor-row-mark-done']
+  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbor-row-invite']
+
+Mikko sends an email invitation to neighbor 'b'
+  Click element   xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbor-row-invite']
+  Wait until  Element should be visible  xpath=//div[@id='dialog-send-neighbor-email']
+  Wait until  Input text  xpath=//input[@id='neighbors-sendemail-email']  b@example.com
+  Click element  xpath=//div[@id='dialog-send-neighbor-email']//button[@data-test-id='neighbors-sendemail-send']
+  Wait until  Element should not be visible  xpath=//div[@id='dialog-send-neighbor-email']
+  Logout
+  
+Mail is sent
+  ## Wait for mail delivery
   Sleep  1
+  Go to  ${SERVER}/api/last-email
+  Wait until  Element text should be  id=to  b@example.com
+  # Click element  id=link-fi
+  Logout

@@ -457,6 +457,7 @@
                         <a data-bind="click: $root.sendNeighborEmailModel.open,
                                       visible: $root.authorization.ok('neighbor-send-invite'),
                                       ltext: 'neighbors.actions.sendEmail'"
+                           data-test-id="neighbor-row-invite"
                            class="command"
                            href="#">
                         </a>
@@ -688,13 +689,23 @@
 
             <form>
               <label data-bind="ltext: 'neighbors.sendEmail.name'" class="form-label"></label>
-              <span data-bind="text: name" class="form-input text long" id="neighbors-sendemail-name" ></span>
+              <span data-bind="text: name"
+                    id="neighbors-sendemail-name"
+                    class="form-input text long">
+              </span>
 
               <label data-bind="ltext: 'neighbors.sendEmail.email'" class="form-label" for="neighbors-sendemail-email"></label>
-              <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}" class="form-input text long" id="neighbors-sendemail-email" />
+              <input data-bind="value: email,
+                                valueUpdate: 'afterkeydown',
+                                attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
+                     id="neighbors-sendemail-email" 
+                     class="form-input text long" />
             </form>
 
-            <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok" class="btn btn-primary btn-dialog"></button>
+            <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok"
+                    data-test-id="neighbors-sendemail-send"
+                    class="btn btn-primary btn-dialog">
+            </button>
             <button data-bind="ltext: 'neighbors.sendEmail.cancel'" class="btn btn-dialog close"></button>
 
           </div>
