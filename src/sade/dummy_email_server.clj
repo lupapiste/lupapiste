@@ -7,8 +7,8 @@
   (:require [clojure.string :as s]
             [sade.env :as env]
             [net.cgrand.enlive-html :as enlive])
-  (:import [javax.mail.internet MimeUtility]
-           [com.dumbster.smtp SimpleSmtpServer SmtpMessage]))
+  (:import [com.icegreen.greenmail.util GreenMail GreenMailUtil ServerSetup]
+           [org.apache.commons.mail.util MimeMessageParser]))
 
 (defonce server (atom nil))
 
@@ -17,31 +17,32 @@
 
 (defn start []
   (stop)
-  (let [port (env/value :email :port)]
+  (let [port (env/value :email :port)
+        smtp-server (GreenMail. (ServerSetup. port nil ServerSetup/PROTOCOL_SMTP))]
     (debug "Starting dummy mail server on port" port)
-    (swap! server (constantly (SimpleSmtpServer/start port)))))
-
-(defn- message-header [message headers header-name]
-  (assoc headers (keyword header-name) (.getHeaderValue message header-name)))
+    (.start smtp-server)
+    (reset! server smtp-server)))
 
 (defn- parse-message [message]
   (when message
-    {:body    (-> (.getBody message) (s/replace #"=([^A-Z]{2})" "$1" ) ; strip extra '=' chars that are not part of quotation
-                (.getBytes "US-ASCII") (input-stream) (MimeUtility/decode "quoted-printable") (slurp))
-     :headers (reduce (partial message-header message) {} (iterator-seq (.getHeaderNames message)))}))
+    (let [m (doto (MimeMessageParser. message) (.parse))]
+      {:body {:plain (when (.hasPlainContent m) (.getPlainContent m))
+              :html (when (.hasHtmlContent m) (.getHtmlContent m))}
+     :headers (into {} (map (fn [header] [(keyword (.getName header)) (.getValue header)]) (enumeration-seq (.getAllHeaders message))))})))
 
 (defn messages [& {:keys [reset]}]
   (when-let [s @server]
-    (let [messages (map parse-message (iterator-seq (.getReceivedEmail s)))]
+    (let [messages (map parse-message (.getReceivedMessages s))]
       (when reset
         (start))
       messages)))
 
-(defn dump []
-  (doseq [message (messages)]
-    (pprint message)))
 
 (env/in-dev
+
+  (defn dump []
+    (doseq [message (messages)]
+      (pprint message)))
 
   (defquery "sent-emails"
     {}

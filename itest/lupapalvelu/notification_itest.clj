@@ -2,6 +2,22 @@
   (:use [lupapalvelu.itest-util]
         [midje.sweet]))
 
+
+(facts "neighbor invite email has correct link"
+  (let [[application neighbor-id] (create-app-with-neighbor)
+        application-id            (:id application)
+        _                         (command pena :neighbor-send-invite
+                                                :id application-id
+                                                :neighborId neighbor-id
+                                                :email "abba@example.com")
+        _                         (Thread/sleep 20) ; delivery time
+        email                     (query pena :last-email)
+        body                      (get-in email [:message :body])
+        [_ a-id n-id token]       (re-matches #"(?sm).*neighbor-show/([^/]+)/([^/]+)/([^/]*)\".*" body)]
+    a-id => application-id
+    n-id => neighbor-id
+    token => #"[A-Za-z0-9]{48}"))
+
 (facts "email is sent on comment"
 
   (let [reset (query mikko :sent-emails :reset true)
