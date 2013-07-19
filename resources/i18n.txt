@@ -16,11 +16,19 @@ newRequest.create.desc: Neuvontapyynnössä voit kysyä viranomaiselta vapaasti 
 neighbors.status-dialog.title: Naapurin kuulemisen tila
 neighbors.status-dialog.ok: Ok
 
-neighbors.status-dialog.user.message: Tunnistettu käyttäjä:
-neighbors.status-dialog.user.firstname: Etunimi
-neighbors.status-dialog.user.lastname: Sukunimi
+neighbors.status-dialog.message.response-given-ok: Naapuri ilmoitti tutustuneensa hankkeeseen.
+neighbors.status-dialog.message.response-given-comments: Naapuri tutustui hankkeeseen ja halusi tuoda julki seuraavan kommentin:
+neighbors.status-dialog.message.mark-done: Viranomainen merkitsi naapurin 
+
+neighbors.status-dialog.description.response-given-ok: Naapuri:
+neighbors.status-dialog.description.response-given-comments: Naapuri:
+neighbors.status-dialog.description.mark-done: Merkinnän suorittanut viranomainen:
+
+neighbors.status-dialog.user.firstName: Etunimi
+neighbors.status-dialog.user.lastName: Sukunimi
 neighbors.status-dialog.user.userid: Tunnus
-neighbors.status-dialog.user.time: Vastaus annettu
-neighbors.status-dialog.ok-message: Naapuri ilmoitti tutustuneensa hankkeeseen.
-neighbors.status-dialog.comments-message: Naapuri tutustui hankkeeseen ja halusi tuoda julki seuraavan kommentin:
+neighbors.status-dialog.user.time: Aika
+ 
+neighbors.status-dialog.message-title.response-given-comments: Naapurin viesti:
+neighbors.status-dialog.message-title.mark-done: Viranomaisen viesti:
  

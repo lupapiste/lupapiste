@@ -756,25 +756,28 @@
     var self = this;
     
     self.state = ko.observable();
-    self.message = ko.observable();
     self.created = ko.observable();
-    self.firstname = ko.observable();
-    self.lastname = ko.observable();
+    self.message = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
     self.userid = ko.observable();
     
     self.init = function(neighbor) {
-      _.each(["state", "message", "created"], function(n) { self[n](neighbor.lastStatus[n]()); });
-      _.each(["firstname", "lastname", "userid"], function(n) { self[n](neighbor.lastStatus.vetuma[n]()); });
-      return self;
+      var l = neighbor.lastStatus;
+      var u = l.vetuma || l.user;
+      return self
+        .state(l.state())
+        .created(l.created())
+        .message(l.message && l.message())
+        .firstName(u.firstName && u.firstName())
+        .lastName(u.lastName && u.lastName())
+        .userid(u.userid && u.userid())
     };
     
     self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-neighbor-status"); return self; };
   }
 
   var neighborStatusModel = new NeighborStatusModel();
-  
-  var completedNeighborStates = ["mark-done", "response-given-ok", "response-given-comments"];
-  var dataNeighborStates = ["response-given-ok", "response-given-comments"];
   
   var neighborActions = {
     manage: function(application) {
@@ -788,11 +791,8 @@
         .complete(_.partial(repository.load, currentId, util.nop))
         .call();
     },
-    statusPending: function(neighbor) {
-      return !_.contains(completedNeighborStates, neighbor.lastStatus.state());
-    },
-    statusHasData: function(neighbor) {
-      return _.contains(dataNeighborStates, neighbor.lastStatus.state());
+    statusCompleted: function(neighbor) {
+      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], neighbor.lastStatus.state());
     },
     showStatus: function(neighbor) {
       neighborStatusModel.init(neighbor).open();

@@ -439,14 +439,14 @@
                       <span data-bind="text: email" class="owner-email"></span>
                     </td>
                     <td>
-                      <a data-bind="visible: $root.neighbor.statusHasData($data), click: $root.neighbor.showStatus" href="#">
+                      <a data-bind="visible: $root.neighbor.statusCompleted($data), click: $root.neighbor.showStatus" href="#">
                         <span data-bind="text: loc('neighbor.state', lastStatus.state())" class="status-state"></span>
                       </a>
-                      <span data-bind="visible: !$root.neighbor.statusHasData($data), text: loc('neighbor.state', lastStatus.state())" class="status-state"></span>
+                      <span data-bind="visible: !$root.neighbor.statusCompleted($data), text: loc('neighbor.state', lastStatus.state())" class="status-state"></span>
                       <span data-bind="dateTimeString: lastStatus.created" class="status-time"></span>
                     </td>
                     <td>
-                      <span data-bind="visible: $root.neighbor.statusPending($data)">
+                      <span data-bind="visible: !$root.neighbor.statusCompleted($data)">
                         <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('neighbor-send-invite'), ltext: 'neighbors.actions.sendEmail'" class="command" href="#"></a>
                         <a data-bind="click: $root.neighbor.upload, ltext: 'neighbors.actions.upload', clickBubble: false" class="command" href="#"></a>
                         <a data-bind="click: $root.neighbor.markDone, visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'), ltext: 'neighbors.actions.markDone', clickBubble: false" class="command" href="#"></a>
@@ -715,40 +715,37 @@
       </div>
         <div data-bind="with: neighborStatusModel" class="dialog-content">
 
-          <div>
-            <span data-bind="ltext: 'neighbors.status-dialog.user.message'"></span>
-            <table>
-              <tbody>
-                <tr>
-                  <td data-bind="ltext: 'neighbors.status-dialog.user.firstname'"></td>
-                  <td data-bind="text: firstname"></td>
-                </tr>
-                <tr>
-                  <td data-bind="ltext: 'neighbors.status-dialog.user.lastname'"></td>
-                  <td data-bind="text: lastname"></td>
-                </tr>
-                <tr data-bind="visible: userid">
-                  <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
-                  <td data-bind="text: userid"></td>
-                </tr>
-                <tr>
-                  <td data-bind="ltext: 'neighbors.status-dialog.user.time'"></td>
-                  <td data-bind="dateTimeString: created"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <div data-bind="text: loc('neighbors.status-dialog.message', state())"></div>
+          <div data-bind="text: loc('neighbors.status-dialog.description', state())"></div>
 
-          <div data-bind="visible: state() === 'response-given-ok'">
-            <span data-bind="ltext: 'neighbors.status-dialog.ok-message'"></span>
-          </div>
+          <table>
+            <tbody>
+              <tr>
+                <td data-bind="ltext: 'neighbors.status-dialog.user.firstName'"></td>
+                <td data-bind="text: firstName"></td>
+              </tr>
+              <tr>
+                <td data-bind="ltext: 'neighbors.status-dialog.user.lastName'"></td>
+                <td data-bind="text: lastName"></td>
+              </tr>
+              <tr data-bind="visible: userid">
+                <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
+                <td data-bind="text: userid"></td>
+              </tr>
+              <tr>
+                <td data-bind="ltext: 'neighbors.status-dialog.user.time'"></td>
+                <td data-bind="dateTimeString: created"></td>
+              </tr>
+            </tbody>
+          </table>
 
-          <div data-bind="visible: state() === 'response-given-comments'">
-            <div data-bind="ltext: 'neighbors.status-dialog.comments-message'"></div>
+          <div data-bind="visible: message">
+            <div data-bind="text: loc('neighbors.status-dialog.message-title', state())"></div>
             <div data-bind="text: message"></div>
           </div>
-          
+
           <button data-bind="ltext: 'neighbors.status-dialog.ok'" class="btn btn-primary btn-dialog close"></button>
+          
         </div>
       </div>
 
