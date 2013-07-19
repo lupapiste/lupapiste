@@ -82,7 +82,7 @@
 
     (let [response  (query pena :last-email)
           message   (-> response :message)
-          token     (->> message :body (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
+          token     (->> message :body :html (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
 
       token => truthy
 
