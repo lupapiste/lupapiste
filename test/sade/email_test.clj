@@ -4,9 +4,9 @@
             [sade.email :refer :all]
             [sade.dummy-email-server :as server]))
 
-(server/start)
+#_(server/start)
 
-(facts
+#_(facts
   (send-mail) => (throws AssertionError)
   (send-mail :to "a@b.c" :subject "s") => (throws AssertionError)
   (send-mail :to "a@b.c" :subject "s" :text "foo") => nil
@@ -15,3 +15,5 @@
   (last (server/messages)) => (contains {:body {:html "foo" :plain nil}})
   (send-mail :to "a@b.c" :subject "s" :html "foo" :text "bar") => nil
   (last (server/messages)) => (contains {:body {:html "foo" :plain "bar"}}))
+
+#_(server/stop)
