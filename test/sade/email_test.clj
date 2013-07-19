@@ -10,4 +10,8 @@
   (send-mail) => (throws AssertionError)
   (send-mail :to "a@b.c" :subject "s") => (throws AssertionError)
   (send-mail :to "a@b.c" :subject "s" :text "foo") => nil
-  )
+  (last (server/messages)) => (contains {:body {:html nil :plain "foo"}})
+  (send-mail :to "a@b.c" :subject "s" :html "foo") => nil
+  (last (server/messages)) => (contains {:body {:html "foo" :plain nil}})
+  (send-mail :to "a@b.c" :subject "s" :html "foo" :text "bar") => nil
+  (last (server/messages)) => (contains {:body {:html "foo" :plain "bar"}}))
