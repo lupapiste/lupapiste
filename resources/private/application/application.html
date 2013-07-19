@@ -668,15 +668,6 @@
 
               <label data-bind="ltext: 'neighbors.sendEmail.email'" class="form-label" for="neighbors-sendemail-email"></label>
               <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}" class="form-input text long" id="neighbors-sendemail-email" />
-
-              <label data-bind="ltext: 'neighbors.sendEmail.message'" class="form-label" for="neighbors-sendemail-message"></label>
-              <textarea
-                data-bind="value: message, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.message.placeholder')}"
-                class="form-input textarea"
-                id="neighbors-sendemail-message"
-                rows="3"
-                maxlength="4000">
-              </textarea>
             </form>
 
             <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok" class="btn btn-primary btn-dialog"></button>

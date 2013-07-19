@@ -808,10 +808,9 @@
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
-    self.message = ko.observable();
 
     self.ok = ko.computed(function() {
-      return util.isValidEmailAddress(self.email()) && !_.isBlank(self.message());
+      return util.isValidEmailAddress(self.email());
     });
 
     self.open = function(neighbor) {
@@ -820,12 +819,11 @@
         .neighborId(neighbor.neighborId())
         .propertyId(neighbor.neighbor.propertyId())
         .name(neighbor.neighbor.owner.name())
-        .email(neighbor.neighbor.owner.email())
-        .message("");
+        .email(neighbor.neighbor.owner.email());
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
-    var paramNames = ["id", "neighborId", "propertyId", "name", "email", "message"];
+    var paramNames = ["id", "neighborId", "propertyId", "name", "email"];
     function paramValue(paramName) { return self[paramName](); }
 
     self.send = function() {
