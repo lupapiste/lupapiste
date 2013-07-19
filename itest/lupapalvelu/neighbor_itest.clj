@@ -67,8 +67,7 @@
         _               (command pena :neighbor-send-invite
                                       :id application-id
                                       :neighborId neighborId
-                                      :email "abba@example.com"
-                                      :message "welcome!")
+                                      :email "abba@example.com")
         application     (-> (query pena :application :id application-id) :application)
         hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
         _               (command pena :update-doc
