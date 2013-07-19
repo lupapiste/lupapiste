@@ -18,7 +18,7 @@ neighbors.status-dialog.ok: Ok
 
 neighbors.status-dialog.message.response-given-ok: Naapuri ilmoitti tutustuneensa hankkeeseen.
 neighbors.status-dialog.message.response-given-comments: Naapuri tutustui hankkeeseen ja halusi tuoda julki seuraavan kommentin:
-neighbors.status-dialog.message.mark-done: Viranomainen merkitsi naapurin 
+neighbors.status-dialog.message.mark-done: Viranomainen merkitsi naapurin kuulluksi
 
 neighbors.status-dialog.description.response-given-ok: Naapuri:
 neighbors.status-dialog.description.response-given-comments: Naapuri:
