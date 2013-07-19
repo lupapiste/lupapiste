@@ -61,6 +61,21 @@
         neighbors (:neighbors application)]
     (fact (count neighbors) => 0)))
 
+(facts "neighbor invite email has correct link"
+  (let [[application neighbor-id] (create-app-with-neighbor)
+        application-id            (:id application)
+        _                         (command pena :neighbor-send-invite
+                                                :id application-id
+                                                :neighborId neighbor-id
+                                                :email "abba@example.com")
+        _                         (Thread/sleep 20) ; delivery time
+        email                     (query pena :last-email)
+        body                      (get-in email [:message :body])
+        [_ a-id n-id token]       (re-matches #"(?sm).*neighbor-show/([^/]+)/([^/]+)/([^/]*)\".*" body)]
+    a-id => application-id
+    n-id => neighbor-id
+    token => #"[A-Za-z0-9]{48}"))
+
 (facts "neighbour invite & view on application"
   (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
         _               (upload-attachment-to-all-placeholders pena application)
@@ -79,7 +94,7 @@
 
     application => truthy
 
-    (Thread/sleep 100) ; Allow future to deliver email
+    (Thread/sleep 20) ; Allow future to deliver email
 
     (let [response  (query pena :last-email)
           message   (-> response :message)
@@ -184,3 +199,4 @@
               :applicationId application-id
               :neighborId (name neighborId)
               :token token) => invalid-token?))))))
+
