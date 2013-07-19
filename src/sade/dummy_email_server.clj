@@ -37,7 +37,7 @@
         (start))
       messages)))
 
-#_(env/in-dev
+(env/in-dev
 
   (defn dump []
     (doseq [message (messages)]
@@ -55,10 +55,9 @@
 
   (defpage "/api/last-email" []
     (if-let [msg (last (messages))]
-      (let [html     (first (re-find #"(?ms)<html>(.*)</html>" (:body msg)))
+      (let [html     (get-in msg [:body :html])
             subject  (get-in msg [:headers :Subject])
             to       (get-in msg [:headers :To])]
-        (debug (get-in msg [:headers]))
         (enlive/emit* (-> (enlive/html-resource (input-stream (.getBytes html "UTF-8")))
                         (enlive/transform [:head] (enlive/append {:tag :title :content subject}))
                         (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
