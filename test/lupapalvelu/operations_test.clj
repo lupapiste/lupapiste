@@ -15,7 +15,7 @@
 (facts
   (fact "when operation-type is given"
     (get-operation application1) => :publicArea
-    (validate-public-area? irrelevant application1) => nil)
+    (validate-is-not-public-area? irrelevant application1) => (contains {:ok false}))
   (fact "when operation-type is not given"
     (get-operation application2) => nil
-    (validate-public-area? irrelevant application2) => (contains {:ok false})))
+    (validate-is-not-public-area? irrelevant application2) => nil))

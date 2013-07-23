@@ -258,7 +258,7 @@
 (defn get-operation [application]
   (-> application :operations last :operation-type keyword))
 
-(defn validate-public-area? [_ application]
+(defn validate-is-not-public-area? [_ application]
   (let [operation (get-operation application)]
-    (when-not (= operation :publicArea)
+    (when (= operation :publicArea)
       (fail :error.only-for-public-areas :operation operation))))
