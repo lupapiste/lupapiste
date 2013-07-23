@@ -117,6 +117,7 @@
 
 (defn enriched [m]
   (merge m {:user (current-user)
+            :lang *lang*
             :web  (web-stuff)}))
 
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
