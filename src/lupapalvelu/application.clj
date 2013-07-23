@@ -453,6 +453,7 @@
         hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
         hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
     (if user
+      ;; TODO: is this a good way to introduce new types into the system?
       (if (= (:operation-type op-info) :publicArea)
         (cons (assoc-in
                 (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user))
