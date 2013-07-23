@@ -13,6 +13,6 @@
     (query pena :ping-raw) => not-ok?
     (raw :ping-raw) => (contains {:body "pong" :status 200}))
   (fact "ping!"
-    (command pena :ping!) => not-ok?
+    (command pena :ping!) => ok?
     (query pena :ping!) => not-ok?
     (raw :ping!) => (contains {:status 404})))
