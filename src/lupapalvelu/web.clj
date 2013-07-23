@@ -135,6 +135,9 @@
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
 
+(defpage "/api/raw/:name" {name :name}
+  (execute (enriched (core/raw name (from-query)))))
+
 ;;
 ;; Web UI:
 ;;
