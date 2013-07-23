@@ -1,13 +1,15 @@
 (ns sade.email
   (:use [sade.core]
         [clojure.tools.logging])
-  (:require [postal.core :as postal]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as s]
+            [postal.core :as postal]
             [sade.env :as env]
-            [sade.strings :as s]))
+            [net.cgrand.enlive-html :as enlive]
+            [endophile.core :as endophile]
+            [clostache.parser :as clostache]))
 
-(defn send-mail [& {:keys [from to subject plain html] :or {from "lupapiste@lupapiste.fi"}}]
-  (assert (or plain html) "must provide at least one body")
-  (assert (and to subject) "must provide both 'to' and 'subject'")
+(defn send-mail [from to subject plain html]
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
         body       (if (and plain-body html-body)
@@ -21,3 +23,66 @@
                       :body     body})]
     (when-not (= (:error error) :SUCCESS)
       error)))
+
+;;
+;; email with templating:
+;; ======================
+;;
+
+(defn find-resource [resource-name]
+  (or (io/resource (str "email-templates/" resource-name)) (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))))
+
+(defn fetch-template [template-name]
+  (with-open [in (io/input-stream (find-resource template-name))]
+    (slurp in)))
+
+(when-not (env/dev-mode?)
+  (def fetch-template (memoize fetch-template)))
+
+;; Plain text support:
+;; ===================
+
+(defmulti ->str (fn [element] (if (map? element) (:tag element) :str)))
+
+(defn- ->str* [elements] (s/join (map ->str elements)))
+
+(defmethod ->str :default [element] (->str* (:content element)))
+(defmethod ->str :str     [element] (s/join element))
+(defmethod ->str :h1      [element] (str \newline (->str* (:content element)) \newline \newline))
+(defmethod ->str :p       [element] (str \newline (->str* (:content element)) \newline))
+(defmethod ->str :ul      [element] (->str* (:content element)))
+(defmethod ->str :li      [element] (str \* \space (->str* (:content element)) \newline))
+(defmethod ->str :a       [element] (str (get-in element [:attrs :href])))
+(defmethod ->str :img     [element] "")
+
+;; HTML support:
+;; =============
+
+(defn wrap-html [html-body]
+  (let [html-wrap (enlive/html-resource (find-resource "html-wrap.html"))]
+    (enlive/transform html-wrap [:body] (enlive/content html-body))))
+
+(wrap-html [{:tag "style" :content ["hello" "style"]}])
+
+;; Sending emails with templates:
+;; ==============================
+
+(defn apply-template [template context]
+  (let [master    (fetch-template "master.md")
+        header    (fetch-template "header.md")
+        body      (fetch-template template)
+        footer    (fetch-template "footer.md")
+        rendered  (clostache/render master context {:header header :body body :footer footer})
+        content   (endophile/to-clj (endophile/mp rendered))]
+    {:plain (->str* content)
+     :html (endophile/html-string (wrap-html content))}))
+
+(let [{plain :plain html :html} (apply-template "invite.md" {:firstName "Jarppe" :lastName "Lansio" :link-fi "http://foo.bar/boz" :link-sv "http://foo.bar/biz"})]
+  (println "PLAIN:")
+  (println plain)
+  (println "HTML:")
+  (println html))
+
+(defn send-email-message [from to subject template context]
+  (let [{plain :plain html :html} (apply-template template context)]
+    (send-mail from to subject (->str* content) (endophile/html-string content))))
