@@ -3,13 +3,16 @@
         [clojure.walk :only [keywordize-keys]]
         [midje.sweet]))
 
-(defn raw-error? [{:keys [status]}]
-  (= status 404))
-
 (facts
   (fact "ping"
+    (command pena :ping) => not-ok?
     (query pena :ping) => ok?
-    (raw :ping) => raw-error?)
+    (raw :ping) => (contains {:status 404}))
   (fact "ping-raw"
+    (command pena :ping-raw) => not-ok?
     (query pena :ping-raw) => not-ok?
-    (raw :ping-raw) => (contains {:body "pong" :status 200})))
+    (raw :ping-raw) => (contains {:body "pong" :status 200}))
+  (fact "ping!"
+    (command pena :ping!) => not-ok?
+    (query pena :ping!) => not-ok?
+    (raw :ping!) => (contains {:status 404})))
