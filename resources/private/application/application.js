@@ -487,15 +487,8 @@
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
       $('body').scrollTop($('#applicationTabs').position().top + 40 );
     };
-
-    // TODO: This needs to be removed and replace its usage in application.html by usage of authorization.ok().
-    self.notPublicAreaTypeOperation = function() {
-      return !self.operations()
-             || self.operations().length === 0
-             || self.operations()[self.operations().length-1]['operation-type'] === undefined
-             || self.operations()[self.operations().length-1]['operation-type']() != 'publicArea';
-    };
   };
+  
   var application = new ApplicationModel();
 
   var authorities = ko.observableArray([]);
