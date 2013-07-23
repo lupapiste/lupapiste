@@ -136,7 +136,10 @@
   (execute (enriched (core/query name (from-query)))))
 
 (defpage "/api/raw/:name" {name :name}
-  (execute (enriched (core/raw name (from-query)))))
+  (let [response (execute (enriched (core/raw name (from-query))))]
+    (if-not (= (:ok response) false)
+      response
+      (resp/status 404 (resp/json response)))))
 
 ;;
 ;; Web UI:

@@ -37,6 +37,12 @@
 
 (defn printed [x] (println x) x)
 
+(defn raw   [action & args]
+  (c/get
+    (str (server-address) "/api/raw/" (name action))
+    {:query-params (apply hash-map args)
+     :throw-exceptions false}))
+
 (defn query [apikey query-name & args]
   (let [resp (c/get
                (str (server-address) "/api/query/" (name query-name))
