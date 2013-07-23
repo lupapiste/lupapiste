@@ -453,7 +453,7 @@
     };
 
     self.exportPdf = function() {
-      window.open("/api/pdf-export/" + self.id() + "?lang=" + loc.currentLanguage, "_blank");
+      window.open("/api/raw/pdf-export?id=" + self.id() + "&lang=" + loc.currentLanguage, "_blank");
       return false;
     };
 

@@ -352,9 +352,6 @@
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
   (attachment/output-all-attachments application-id (current-user) *lang*))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (ke6666/export application-id (current-user) *lang*))
-
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
