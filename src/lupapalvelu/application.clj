@@ -555,7 +555,9 @@
                                                      (partition 2 attachment/attachment-types)))
                          :comments      (map make-comment messages)
                          :permitType    (permit-type-from-operation op)}
-          application   (assoc application :documents (if info-request? [] (make-documents user created nil op application)))
+          application   (assoc application :documents (if info-request?
+                                                        []
+                                                        (make-documents user created nil op application)))
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
       (autofill-rakennuspaikka app-with-ver created)
