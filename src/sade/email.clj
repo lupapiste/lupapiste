@@ -68,8 +68,6 @@
   (let [html-wrap (enlive/html-resource (find-resource "html-wrap.html"))]
     (enlive/transform html-wrap [:body] (enlive/content html-body))))
 
-(wrap-html [{:tag "style" :content ["hello" "style"]}])
-
 ;; Sending emails with templates:
 ;; ==============================
 
