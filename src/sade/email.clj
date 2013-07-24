@@ -9,7 +9,11 @@
             [endophile.core :as endophile]
             [clostache.parser :as clostache]))
 
-(defn send-mail [from to subject plain html]
+(def ^:private from (get-in (env/get-config) [:email :from] "\"Lupapiste\" <lupapiste@lupapiste.fi>"))
+
+(defn send-mail [to subject & {:keys [plain html]}]
+  (assert to "must provide 'to'")
+  (assert subject "must provide 'subject'")
   (assert (or plain html) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
@@ -80,7 +84,7 @@
         content   (endophile/to-clj (endophile/mp rendered))]
     [(->str* content) (endophile/html-string (wrap-html content))]))
 
-(defn send-email-message [from to subject template context]
-  (assert (and from to subject template context) "missing argument")
+(defn send-email-message [to subject template context]
+  (assert (and to subject template context) "missing argument")
   (let [[plain html] (apply-template template context)]
-    (send-mail from to subject plain html)))
+    (send-mail to subject :plain plain :html html)))

@@ -45,9 +45,9 @@
       (pprint message)))
 
   (defcommand "send-email"
-    {:parameters [:from :to :subject :template]}
-    [{{:keys [from to subject template] :as data} :data}]
-    (if-let [error (send-email-message from to subject template (dissoc data :from :to :subject :template))]
+    {:parameters [:to :subject :template]}
+    [{{:keys [to subject template] :as data} :data}]
+    (if-let [error (send-email-message to subject template (dissoc data :from :to :subject :template))]
       (fail "send-email-message failed" error)
       (ok)))
 

@@ -61,8 +61,7 @@
     (fact (count neighbors) => 0)))
 
 (facts "neighbour invite & view on application"
-  (let [[{application-id :id :as application}
-         neighborId]    (create-app-with-neighbor)
+  (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
         _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
                           :id application-id
@@ -84,6 +83,7 @@
           message   (-> response :message)
           token     (->> message :body :html (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
 
+      (println (->> message :body :html))
       token => truthy
 
       (fact "application query returns set document info"

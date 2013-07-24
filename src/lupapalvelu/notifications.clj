@@ -54,9 +54,9 @@
 (defn send-mail-to-recipients! [recipients title msg]
   (future
     (doseq [recipient recipients]
-      (if (email/send-mail :to recipient :subject title :html msg)
-        (error "email could not be delivered." recipients title msg)
-        (info "email was sent successfully." recipients title))))
+      (if (email/send-mail recipient title :html msg)
+        (error "email could not be delivered." recipient title msg)
+        (info "email was sent successfully." recipient title))))
   nil)
 
 (defn get-email-title [{:keys [title]} & [title-key]]
