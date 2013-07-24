@@ -91,7 +91,7 @@
   ([schema]
     (has-hetu? schema []))
   ([schema-body base-path]
-    (let [full-path (apply conj base-path [:henkilo :henkilotiedot :hetu])]
+    (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (model/find-by-name schema-body full-path)))))
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]

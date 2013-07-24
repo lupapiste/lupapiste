@@ -71,11 +71,11 @@
 
 (facts "has-hetu?"
   (fact "direct find"
-    (has-hetu? schemas/party []) => true
-    (has-hetu? schemas/party [:a]) => false)
+    (has-hetu? schemas/party [:henkilo]) => true
+    (has-hetu? schemas/party [])         => false)
   (fact "nested find"
     (has-hetu? [{:name "a"
                  :type :group
                  :body [{:name "b"
                          :type :group
-                         :body schemas/party}]}] [:a :b]) => true))
+                         :body schemas/party}]}] [:a :b :henkilo]) => true))
