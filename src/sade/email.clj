@@ -81,5 +81,6 @@
     [(->str* content) (endophile/html-string (wrap-html content))]))
 
 (defn send-email-message [from to subject template context]
+  (assert (and from to subject template context) "missing argument")
   (let [[plain html] (apply-template template context)]
     (send-mail from to subject plain html)))
