@@ -3,6 +3,7 @@
         [clojure.tools.logging]
         [sade.util :only [lower-case]])
   (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.model :as model]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
@@ -85,6 +86,13 @@
 ;;
 ;; Conversion between Lupapiste and documents
 ;;
+
+(defn has-hetu?
+  ([schema]
+    (has-hetu? schema []))
+  ([schema-body base-path]
+    (let [full-path (apply conj base-path [:henkilo :henkilotiedot :hetu])]
+      (boolean (model/find-by-name schema-body full-path)))))
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]
   (->

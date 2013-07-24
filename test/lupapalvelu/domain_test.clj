@@ -1,7 +1,8 @@
 (ns lupapalvelu.domain-test
   (:use lupapalvelu.domain
         clojure.test
-        midje.sweet))
+        midje.sweet)
+  (:require [lupapalvelu.document.schemas :as schemas]))
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
@@ -68,3 +69,13 @@
                 :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
                                        :osoite {:postinumero     {:value "zip"}}}))
 
+(facts "has-hetu?"
+  (fact "direct find"
+    (has-hetu? schemas/party []) => true
+    (has-hetu? schemas/party [:a]) => false)
+  (fact "nested find"
+    (has-hetu? [{:name "a"
+                 :type :group
+                 :body [{:name "b"
+                         :type :group
+                         :body schemas/party}]}] [:a :b]) => true))
