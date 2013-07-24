@@ -618,7 +618,7 @@
                                                          (partition 2 attachment/attachment-types))
                                :documents (make-documents user created nil op nil)
                                :modified created}
-           $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))
+           $pushAll {:attachments (make-attachments created op (:organization application))}})))
 
 ;;
 ;; Verdicts
