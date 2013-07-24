@@ -545,7 +545,6 @@
                          :title         address
                          :auth          [owner]
                          :attachments   (if info-request? [] (make-attachments created op organization))
-
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
