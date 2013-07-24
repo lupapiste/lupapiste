@@ -5,6 +5,7 @@ Teidät halutaan lisätä osapuoleksi lupahakemukselle. Hyväksyäksesi roolin j
 ## Ystävällisin terveisin, Lupapiste
 
 ---
+
 # Hej {{firstName}} {{lastName}},
 
 Ni anlitas som ett parti i en lovansökan. För att godkänna uppgiften och se ansökan [klicka här]({{link-sv}}).

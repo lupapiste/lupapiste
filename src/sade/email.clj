@@ -48,12 +48,17 @@
 
 (defmethod ->str :default [element] (->str* (:content element)))
 (defmethod ->str :str     [element] (s/join element))
-(defmethod ->str :h1      [element] (str \newline (->str* (:content element)) \newline \newline))
+(defmethod ->str :h1      [element] (str \newline (->str* (:content element)) \newline))
+(defmethod ->str :h2      [element] (str \newline (->str* (:content element)) \newline))
 (defmethod ->str :p       [element] (str \newline (->str* (:content element)) \newline))
 (defmethod ->str :ul      [element] (->str* (:content element)))
 (defmethod ->str :li      [element] (str \* \space (->str* (:content element)) \newline))
-(defmethod ->str :a       [element] (str (get-in element [:attrs :href])))
+(defmethod ->str :a       [element] (str (->str* (:content element)) \: \space (get-in element [:attrs :href])))
 (defmethod ->str :img     [element] "")
+(defmethod ->str :br      [element] "")
+(defmethod ->str :hr      [element] "\n---------\n")
+(defmethod ->str :blockquote [element] (s/replace (s/replace (->str* (:content element)) #"\n{2,}" "\n  ") #"^\n" "  "))
+
 
 ;; HTML support:
 ;; =============
@@ -74,15 +79,16 @@
         footer    (fetch-template "footer.md")
         rendered  (clostache/render master context {:header header :body body :footer footer})
         content   (endophile/to-clj (endophile/mp rendered))]
-    {:plain (->str* content)
-     :html (endophile/html-string (wrap-html content))}))
+    [(->str* content) (endophile/html-string (wrap-html content))]))
 
-(let [{plain :plain html :html} (apply-template "invite.md" {:firstName "Jarppe" :lastName "Lansio" :link-fi "http://foo.bar/boz" :link-sv "http://foo.bar/biz"})]
+(let [[plain html] (apply-template "invite.md" {:firstName "Jarppe" :lastName "L\u00E4nsi\u00F6" :link-fi "http://foo.bar/boz" :link-sv "http://foo.bar/biz"})]
   (println "PLAIN:")
   (println plain)
-  (println "HTML:")
-  (println html))
+  #_(println "HTML:")
+  #_(println html)
+  (with-open [foo (io/output-stream "foo.html")]
+    (spit foo html)))
 
 (defn send-email-message [from to subject template context]
-  (let [{plain :plain html :html} (apply-template template context)]
-    (send-mail from to subject (->str* content) (endophile/html-string content))))
+  (let [[plain html] (apply-template template context)]
+    (send-mail from to subject plain html)))
