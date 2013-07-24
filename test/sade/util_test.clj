@@ -51,3 +51,17 @@
   (map (fn->> :a (reduce +)) [{:a [1 2 3]}
                               {:a [2 3 4]}
                               {:a [3 4 5]}]) => [6 9 12])
+
+(fact
+  (lower-case nil)   => nil
+  (lower-case "")    => ""
+  (lower-case "a")   => "a"
+  (lower-case "A")   => "a")
+
+(fact
+  (trim nil)    => nil
+  (trim "")     => ""
+  (trim "a")    => "a"
+  (trim " a")   => "a"
+  (trim "a ")   => "a"
+  (trim " a ")  => "a")

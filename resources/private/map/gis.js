@@ -11,7 +11,7 @@ var gis = (function() {
     return new OpenLayers.Marker(pos, icon.clone());
   }
 
-  var defaultIcon = makeIcon("/img/marker-blue.png", 21, 25);
+  var defaultIcon = makeIcon("/img/map-marker.png", 21, 25);
 
   function Map(element, zoomWheelEnabled) {
     var self = this;

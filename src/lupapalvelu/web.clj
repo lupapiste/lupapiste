@@ -1,6 +1,6 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.core :only [ok fail defcommand defquery now]]
         [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
@@ -30,7 +30,7 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [clojure.string :as s]
-            [sade.util :as util]
+            [sade.util :refer [lower-case] :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
@@ -117,6 +117,7 @@
 
 (defn enriched [m]
   (merge m {:user (current-user)
+            :lang *lang*
             :web  (web-stuff)}))
 
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
@@ -134,6 +135,12 @@
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
+
+(defpage "/api/raw/:name" {name :name}
+  (let [response (execute (enriched (core/raw name (from-query))))]
+    (if-not (= (:ok response) false)
+      response
+      (resp/status 404 (resp/json response)))))
 
 ;;
 ;; Web UI:
@@ -222,7 +229,7 @@
                              (str (.substring line 0 limit) "... (truncated)")
                              line)))
         sanitized-page (sanitize (or page "(unknown)"))
-        user           (or email "(anonymous)")
+        user           (or (lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
         sanitized-msg  (sanitize (str message))]
     (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
@@ -345,9 +352,6 @@
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
   (attachment/output-all-attachments application-id (current-user) *lang*))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (ke6666/export application-id (current-user) *lang*))
-
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
@@ -395,6 +399,28 @@
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
         (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
+
+;;
+;; Session timeout:
+;;
+;;    Middleware that checks session timeout.
+;;
+
+(defn get-session-timeout [request]
+  (get-in request [:session :noir :user :session-timeout] (* 60 10 1000)))
+
+(defn session-timeout-handler [handler request]
+  (let [now (now)
+        expires (session/get :expires now)
+        expired? (< expires now)]
+    (if expired?
+      (session/clear!)
+      (if (re-find #"^/api/(command|query)/" (:uri request))
+        (session/put! :expires (+ now (get-session-timeout request)))))
+    (handler request)))
+
+(defn session-timeout [handler]
+  (fn [request] (session-timeout-handler handler request)))
 
 ;;
 ;; dev utils:

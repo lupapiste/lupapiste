@@ -1,4 +1,5 @@
 (ns lupapalvelu.web-test
+  (:require [lupapalvelu.core])
   (:use [lupapalvelu.web]
         [midje.sweet]
         [midje.util :only [testable-privates]]))
@@ -16,4 +17,3 @@
   (parse "apikey" "baz boz") => nil
   (parse "apikey" "") => nil
   (parse "apikey" nil) => nil)
-

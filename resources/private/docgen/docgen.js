@@ -222,6 +222,7 @@ var docgen = (function () {
             text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
           }
           statusContainer$.text(text);
+          statusContainer$.addClass("approval-" + approval.value);
         }
       }
 
@@ -860,7 +861,7 @@ var docgen = (function () {
         setTimeout(function () {
           $(indicator).removeClass(className);
           $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
-        }, 2000);
+        }, 4000);
       }
 
       saveForReal(path, value, function (status, results) {
