@@ -13,7 +13,7 @@
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.1.0" :exclusions [commons-codec]]
                  [clj-http "0.7.0" :exclusions [commons-codec]]
-                 [camel-snake-kebab "0.1.0"]
+                 [camel-snake-kebab "0.1.1"]
                  [digest "1.4.2"]
                  [clj-time "0.5.0" :exclusions [org.clojure/clojure]]
                  [org.apache.commons/commons-lang3 "3.1"] ; Already a dependency but required explicitly
