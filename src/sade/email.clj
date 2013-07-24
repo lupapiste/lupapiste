@@ -10,6 +10,7 @@
             [clostache.parser :as clostache]))
 
 (defn send-mail [from to subject plain html]
+  (assert (or plain html) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
         body       (if (and plain-body html-body)
