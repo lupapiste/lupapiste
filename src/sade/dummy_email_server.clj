@@ -3,10 +3,11 @@
         [clojure.tools.logging]
         [clojure.pprint :only [pprint]]
         [noir.core :only [defpage]]
-        [lupapalvelu.core :only [defquery ok]])
+        [lupapalvelu.core :only [defquery defcommand ok fail]])
   (:require [clojure.string :as s]
             [sade.env :as env]
-            [net.cgrand.enlive-html :as enlive])
+            [net.cgrand.enlive-html :as enlive]
+            [sade.email :refer [send-email-message]])
   (:import [com.icegreen.greenmail.util GreenMail GreenMailUtil ServerSetup]
            [org.apache.commons.mail.util MimeMessageParser]))
 
@@ -42,6 +43,13 @@
   (defn dump []
     (doseq [message (messages)]
       (pprint message)))
+
+  (defcommand "send-email"
+    {:parameters [:from :to :subject :template]}
+    [{{:keys [from to subject template] :as data} :data}]
+    (if-let [error (send-email-message from to subject template (dissoc data :from :to :subject :template))]
+      (fail "send-email-message failed" error)
+      (ok)))
 
   (defquery "sent-emails"
     {}
