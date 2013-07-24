@@ -301,9 +301,11 @@
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
+            with-hetu?   (domain/has-hetu? (:body schema) [path])
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (tools/timestamped (domain/->henkilo subject) created)
+            henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu?) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
+        (info "setting-user-to-document, with hetu: " with-hetu?)
         (if (nil? document)
           (fail :error.document-not-found)
           ;; TODO: update via model
