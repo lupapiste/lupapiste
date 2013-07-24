@@ -608,20 +608,17 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft :info :answered]}
-  [command]
-  (with-application command
-    (fn [inforequest]
-      (let [id       (get-in command [:data :id])
-            created  (:created command)
-            op       (first (:operations inforequest))]
-        (mongo/update-by-id :applications id {$set {:infoRequest false
-                                                    :state :open
-                                                    :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                                              (partition 2 attachment/attachment-types-public-areas)
-                                                                              (partition 2 attachment/attachment-types))
-                                                    :documents (make-documents (:user command) created nil op nil)
-                                                    :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
+  [{{:keys [id]} :data :keys [user created application] :as command}]
+  (let [op (first (:operations application))]
+    (mongo/update-by-id :applications id
+                        {$set {:infoRequest false
+                               :state :open
+                               :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
+                                                         (partition 2 attachment/attachment-types-public-areas)
+                                                         (partition 2 attachment/attachment-types))
+                               :documents (make-documents user created nil op nil)
+                               :modified created}
+           $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))
 
 ;;
 ;; Verdicts
