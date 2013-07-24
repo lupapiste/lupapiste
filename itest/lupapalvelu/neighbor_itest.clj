@@ -83,7 +83,6 @@
           message   (-> response :message)
           token     (->> message :body :html (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
 
-      (println (->> message :body :html))
       token => truthy
 
       (fact "application query returns set document info"

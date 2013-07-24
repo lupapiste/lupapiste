@@ -9,7 +9,8 @@
             [endophile.core :as endophile]
             [clostache.parser :as clostache]))
 
-(def ^:private from (get-in (env/get-config) [:email :from] "\"Lupapiste\" <lupapiste@lupapiste.fi>"))
+(def defaults {:from     "\"Lupapiste\" <lupapiste@lupapiste.fi>"
+               :reply-to "\"Lupapiste\" <lupapiste@lupapiste.fi>"})
 
 (defn send-mail [to subject & {:keys [plain html]}]
   (assert to "must provide 'to'")
@@ -20,12 +21,10 @@
         body       (if (and plain-body html-body)
                      [:alternative plain-body html-body]
                      [(or plain-body html-body)])
+        config     (:email (env/get-config))
         error      (postal/send-message
-                     (env/value :email)
-                     {:from     from
-                      :to       to
-                      :subject  subject
-                      :body     body})]
+                     config
+                     (merge defaults (dissoc config :dummy-server :host :port) {:to to :subject subject :body body}))]
     (when-not (= (:error error) :SUCCESS)
       error)))
 
