@@ -59,13 +59,12 @@
         (info "email was sent successfully." recipient title))))
   nil)
 
-(defn get-email-title [{:keys [title]} & [title-key]]
-  (i18n/with-lang "fi"
-    (let [title-postfix (if title-key (str " - " (i18n/loc (s/join "." ["email" "title" title-key])) ""))]
-      (str "Lupapiste: " title title-postfix))))
+(defn get-email-title [{title :title} & [title-key]]
+  (let [title-postfix (when title-key (str " - " (i18n/localize "fi" "email.title" title-key)))]
+    (str "lupapiste.fi: " title title-postfix)))
 
 (defn- url-to [to]
-  (str (env/value :host) (if-not (ss/starts-with to "/") "/") to))
+  (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
 
 (defn get-email-recipients-for-application [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
