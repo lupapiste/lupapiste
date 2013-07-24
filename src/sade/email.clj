@@ -62,8 +62,7 @@
 (defmethod ->str :img     [element] "")
 (defmethod ->str :br      [element] "")
 (defmethod ->str :hr      [element] "\n---------\n")
-(defmethod ->str :blockquote [element] (s/replace (s/replace (->str* (:content element)) #"\n{2,}" "\n  ") #"^\n" "  "))
-
+(defmethod ->str :blockquote [element] (-> element :content ->str* (s/replace #"\n{2,}" "\n  ") (s/replace #"^\n" "  ")))
 
 ;; HTML support:
 ;; =============
