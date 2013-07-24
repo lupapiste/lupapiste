@@ -306,7 +306,7 @@
             henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu?) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
         (info "setting-user-to-document, with hetu: " with-hetu?)
-        (if (nil? document)
+        (if-not document
           (fail :error.document-not-found)
           ;; TODO: update via model
           (do
