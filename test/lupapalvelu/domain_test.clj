@@ -67,7 +67,12 @@
   (fact "some fields are mapped"
     (->henkilo {:firstName "firstName"
                 :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
-                                       :osoite {:postinumero     {:value "zip"}}}))
+                                       :osoite {:postinumero     {:value "zip"}}})
+
+  (fact "hetu is mapped"
+    (->henkilo {:id       "id"
+                :personId "123"} :with-hetu true) => {:userId               {:value "id"}
+                                                      :henkilotiedot {:hetu {:value "123"}}}))
 
 (facts "has-hetu?"
   (fact "direct find"

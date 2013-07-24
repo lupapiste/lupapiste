@@ -94,18 +94,20 @@
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (model/find-by-name schema-body full-path)))))
 
-(defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]
-  (->
-    {:userId                        {:value id}
-     :henkilotiedot {:etunimi       {:value firstName}
-                     :sukunimi      {:value lastName}}
-     :yhteystiedot {:email          {:value email}
-                    :puhelin        {:value phone}}
-     :osoite {:katu                 {:value street}
-              :postinumero          {:value zip}
-              :postitoimipaikannimi {:value city}}}
-    strip-nils
-    strip-empty-maps))
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId]} & {:keys [with-hetu]}]
+  (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
+    (->
+      {:userId                        {:value id}
+       :henkilotiedot {:etunimi       {:value firstName}
+                       :sukunimi      {:value lastName}}
+       :yhteystiedot {:email          {:value email}
+                      :puhelin        {:value phone}}
+       :osoite {:katu                 {:value street}
+                :postinumero          {:value zip}
+                :postitoimipaikannimi {:value city}}}
+      merge-hetu
+      strip-nils
+      strip-empty-maps)))
 
 (defn ->yritys-public-area [{:keys [id firstName lastName email phone street zip city]}]
   (->
