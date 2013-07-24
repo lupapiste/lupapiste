@@ -44,13 +44,12 @@
       (log/errorf "unknown localization term '%s'" term)
       "")))
 
-(defn localize
-  "Localize \"term\" using given \"terms\". If \"term\" is unknown, return term surrounded with triple question marks."
-  [terms term]
-  (or (terms term) (str "???" term "???")))
+(defn localize [lang & terms]
+  (let [term (s/join \. terms)]
+    (get (get-terms lang) term (str "???" term "???"))))
 
 (defn localizer [lang]
-  (partial localize (get-terms lang)))
+  (partial localize lang))
 
 (def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
