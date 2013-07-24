@@ -71,8 +71,9 @@
 
 (facts "has-hetu?"
   (fact "direct find"
+    (has-hetu? schemas/party)            => true
     (has-hetu? schemas/party [:henkilo]) => true
-    (has-hetu? schemas/party [])         => false)
+    (has-hetu? schemas/party [:invalid]) => false)
   (fact "nested find"
     (has-hetu? [{:name "a"
                  :type :group

@@ -89,7 +89,7 @@
 
 (defn has-hetu?
   ([schema]
-    (has-hetu? schema []))
+    (has-hetu? schema [:henkilo]))
   ([schema-body base-path]
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (model/find-by-name schema-body full-path)))))
