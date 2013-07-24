@@ -522,13 +522,15 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
     (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
-    (let [user-summary  (security/summary user)
-          id            (make-application-id municipality)
+    (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
           info-request? (if infoRequest true false)
-          state         (if info-request? :info (if (security/authority? user) :open :draft))
-          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+          state         (if info-request? :info
+                          (if (security/authority? user) :open :draft))
+          make-comment  (partial assoc {:target {:type "application"}
+                                        :created created
+                                        :user (security/summary user)} :text)
           organization  application-organization-id
           application   {:id            id
                          :created       created
