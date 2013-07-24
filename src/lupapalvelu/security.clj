@@ -130,3 +130,6 @@
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
+
+(defn same-user? [{id1 :id :as user1} {id2 :id :as user2}]
+  (= id1 id2))
