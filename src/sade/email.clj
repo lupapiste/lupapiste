@@ -81,14 +81,6 @@
         content   (endophile/to-clj (endophile/mp rendered))]
     [(->str* content) (endophile/html-string (wrap-html content))]))
 
-(let [[plain html] (apply-template "invite.md" {:firstName "Jarppe" :lastName "L\u00E4nsi\u00F6" :link-fi "http://foo.bar/boz" :link-sv "http://foo.bar/biz"})]
-  (println "PLAIN:")
-  (println plain)
-  #_(println "HTML:")
-  #_(println html)
-  (with-open [foo (io/output-stream "foo.html")]
-    (spit foo html)))
-
 (defn send-email-message [from to subject template context]
   (let [[plain html] (apply-template template context)]
     (send-mail from to subject plain html)))
