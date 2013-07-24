@@ -301,11 +301,11 @@
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
-            with-hetu?   (domain/has-hetu? (:body schema) [path])
+            with-hetu    (domain/has-hetu? (:body schema) [path])
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu?) created)
+            henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-        (info "setting-user-to-document, with hetu: " with-hetu?)
+        (info "setting-user-to-document, with hetu: " with-hetu)
         (if-not document
           (fail :error.document-not-found)
           ;; TODO: update via model
@@ -457,11 +457,11 @@
       ;; TODO: is this a good way to introduce new types into the system?
       (if (= (:operation-type op-info) :publicArea)
         (cons (assoc-in
-                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user))
+                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
                 [:data :yritys]
                 (domain/->yritys-public-area user))
           new-docs)
-        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs))
+        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs))
       new-docs)))
 
 (defn- ->location [x y]
@@ -617,7 +617,7 @@
                                                     :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
                                                                               (partition 2 attachment/attachment-types-public-areas)
                                                                               (partition 2 attachment/attachment-types))
-                                                    :documents (make-documents (-> command :user security/summary) created nil op nil)
+                                                    :documents #_ "TODO: why summary?" (make-documents (-> command :user security/summary) created nil op nil)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
 
