@@ -302,9 +302,13 @@
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (tools/timestamped (domain/->henkilo subject) created)
+            with-hetu    (and
+                           (domain/has-hetu? (:body schema) [path])
+                           (security/same-user? user subject))
+            henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-        (if (nil? document)
+        (info "setting-user-to-document, with hetu: " with-hetu)
+        (if-not document
           (fail :error.document-not-found)
           ;; TODO: update via model
           (do
@@ -439,7 +443,6 @@
                                                             yleiset-alueet/sijoituslupa
                                                             yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
-
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
@@ -456,11 +459,11 @@
       ;; TODO: is this a good way to introduce new types into the system?
       (if (= (:operation-type op-info) :publicArea)
         (cons (assoc-in
-                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user))
+                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
                 [:data :yritys]
                 (domain/->yritys-public-area user))
           new-docs)
-        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs))
+        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs))
       new-docs)))
 
 (defn- ->location [x y]
@@ -522,13 +525,15 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
     (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
-    (let [user-summary  (security/summary user)
-          id            (make-application-id municipality)
+    (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
           info-request? (if infoRequest true false)
-          state         (if info-request? :info (if (security/authority? user) :open :draft))
-          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+          state         (if info-request? :info
+                          (if (security/authority? user) :open :draft))
+          make-comment  (partial assoc {:target {:type "application"}
+                                        :created created
+                                        :user (security/summary user)} :text)
           organization  application-organization-id
           application   {:id            id
                          :created       created
@@ -544,8 +549,9 @@
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
-                         :attachments   (if info-request? [] (make-attachments created op organization))
-
+                         :attachments   (if info-request?
+                                          []
+                                          (make-attachments created op organization))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
@@ -553,7 +559,9 @@
                                                      (partition 2 attachment/attachment-types)))
                          :comments      (map make-comment messages)
                          :permitType    (permit-type-from-operation op)}
-          application   (assoc application :documents (if info-request? [] (make-documents user created nil op application)))
+          application   (assoc application :documents (if info-request?
+                                                        []
+                                                        (make-documents user created nil op application)))
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
       (autofill-rakennuspaikka app-with-ver created)
@@ -600,20 +608,17 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft :info :answered]}
-  [command]
-  (with-application command
-    (fn [inforequest]
-      (let [id       (get-in command [:data :id])
-            created  (:created command)
-            op       (first (:operations inforequest))]
-        (mongo/update-by-id :applications id {$set {:infoRequest false
-                                                    :state :open
-                                                    :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                                              (partition 2 attachment/attachment-types-public-areas)
-                                                                              (partition 2 attachment/attachment-types))
-                                                    :documents (make-documents (-> command :user security/summary) created nil op nil)
-                                                    :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
+  [{{:keys [id]} :data :keys [user created application] :as command}]
+  (let [op (first (:operations application))]
+    (mongo/update-by-id :applications id
+                        {$set {:infoRequest false
+                               :state :open
+                               :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
+                                                         (partition 2 attachment/attachment-types-public-areas)
+                                                         (partition 2 attachment/attachment-types))
+                               :documents (make-documents user created nil op nil)
+                               :modified created}
+           $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))
 
 ;;
 ;; Verdicts

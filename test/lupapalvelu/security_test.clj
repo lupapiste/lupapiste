@@ -63,6 +63,8 @@
 
   (fact "authorityAdmin does have organizations"
      (create-use-entity ..email.. some-password ..userid.. "authorityAdmin" ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:organizations ..organizations..}))
+     => (contains {:organizations ..organizations..})))
 
-  )
+(facts "same-user?"
+  (same-user? {:id "123"} {:id "123"}) => true
+  (same-user? {:id "123"} {:id "234"}) => false)
