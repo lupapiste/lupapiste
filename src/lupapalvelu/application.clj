@@ -619,7 +619,7 @@
                                                     :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
                                                                               (partition 2 attachment/attachment-types-public-areas)
                                                                               (partition 2 attachment/attachment-types))
-                                                    :documents #_ "TODO: why summary?" (make-documents (-> command :user security/summary) created nil op nil)
+                                                    :documents (make-documents (:user command) created nil op nil)
                                                     :modified created}
                                               $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
 
