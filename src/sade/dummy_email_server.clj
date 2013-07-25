@@ -58,11 +58,11 @@
 
   (defquery "last-email"
     {}
-    [{{reset :reset} :data}]
+    [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
 
   (defpage "/api/last-email" []
-    (if-let [msg (last (messages))]
+    (if-let [msg (last (messages :reset true))]
       (let [html     (get-in msg [:body :html])
             subject  (get-in msg [:headers :Subject])
             to       (get-in msg [:headers :To])]
