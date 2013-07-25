@@ -8,6 +8,6 @@ Rakennuspaikan rajanaapurina Teille ilmoitetaan, että osoitteessa {{address}}, 
 
 # Hej {{name}},
 
-Samma på svenska: {{address}, {{city-sv}}.
+Samma på svenska: {{address}}, {{city-sv}}.
 
 {{link-sv}}
