@@ -4,8 +4,8 @@
         midje.sweet))
 
 (facts "email titles"
-  (get-email-title {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste: Haavikontie 9, Tampere - uusi kommentti"
-  (get-email-title {:title "Haavikontie 9, Tampere"}) => "Lupapiste: Haavikontie 9, Tampere")
+  (get-email-title {:title "Haavikontie 9, Tampere"} "new-comment") => "Lupapiste.fi: Haavikontie 9, Tampere - uusi kommentti"
+  (get-email-title {:title "Haavikontie 9, Tampere"}) => "Lupapiste.fi: Haavikontie 9, Tampere")
 
 (fact "create application link"
   (fact "..for application"
