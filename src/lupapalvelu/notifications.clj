@@ -61,7 +61,7 @@
 
 (defn get-email-title [{title :title} & [title-key]]
   (let [title-postfix (when title-key (str " - " (i18n/localize "fi" "email.title" title-key)))]
-    (str "lupapiste.fi: " title title-postfix)))
+    (str "Lupapiste.fi: " title title-postfix)))
 
 (defn- url-to [to]
   (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
