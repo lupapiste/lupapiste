@@ -54,18 +54,17 @@
 (defn send-mail-to-recipients! [recipients title msg]
   (future
     (doseq [recipient recipients]
-      (if (email/send-mail? recipient title msg)
-        (info "email was sent successfully." recipients title)
-        (error "email could not be delivered." recipients title msg))))
+      (if (email/send-mail recipient title :html msg)
+        (error "email could not be delivered." recipient title msg)
+        (info "email was sent successfully." recipient title))))
   nil)
 
-(defn get-email-title [{:keys [title]} & [title-key]]
-  (i18n/with-lang "fi"
-    (let [title-postfix (if title-key (str " - " (i18n/loc (s/join "." ["email" "title" title-key])) ""))]
-      (str "Lupapiste: " title title-postfix))))
+(defn get-email-title [{title :title} & [title-key]]
+  (let [title-postfix (when title-key (str " - " (i18n/localize "fi" "email.title" title-key)))]
+    (str "Lupapiste.fi: " title title-postfix)))
 
 (defn- url-to [to]
-  (str (env/value :host) (if-not (ss/starts-with to "/") "/") to))
+  (str (env/value :host) (when-not (ss/starts-with to "/") "/") to))
 
 (defn get-email-recipients-for-application [application]
   (map (fn [user] (:email (mongo/by-id :users (:id user)))) (:auth application)))
@@ -111,19 +110,25 @@
 ;;
 
 (defn send-neighbor-invite! [email token neighbor-id application host]
-  (let [title        (get-email-title application "neighbor")
-        full-path    (str "/neighbor-show/" (:id application) "/" neighbor-id "/" token)
-        msg          (message
-                       (template "neighbor.html")
-                       (replace-links-in-fi-sv "#link" (fn [lang] (str host "/app/" lang "/neighbor#!" full-path))))]
-    (send-mail-to-recipients! [email] title msg)))
+  (let [neighbor-name  (get-in application [:neighbors neighbor-id :neighbor :owner :name])
+        address        (get application :address)
+        municipality   (get application :municipality)
+        subject        (get-email-title application "neighbor")
+        page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
+        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor#!/neighbor-show/" (:id application) "/" neighbor-id "/" token))]
+    (email/send-email-message email subject "neighbor.md" {:name neighbor-name
+                                                           :address address
+                                                           :city-fi (i18n/localize :fi "municipality" municipality)
+                                                           :city-sv (i18n/localize :sv "municipality" municipality)
+                                                           :link-fi (link-fn :fi)
+                                                           :link-sv (link-fn :sv)})))
 
 (defn get-message-for-application-state-change [application host]
   (message
     (template "application-state-change.html")
     (replace-application-links "#application-link" application "" host)
-    (enlive/transform [:#state-fi] (enlive/content (i18n/with-lang "fi" (i18n/loc (str (:state application))))))
-    (enlive/transform [:#state-sv] (enlive/content (i18n/with-lang "sv" (i18n/loc (str (:state application))))))))
+    (enlive/transform [:#state-fi] (enlive/content (i18n/localize :fi (str (:state application)))))
+    (enlive/transform [:#state-sv] (enlive/content (i18n/localize :sv (str (:state application)))))))
 
 (defn get-message-for-new-comment [application host]
   (message

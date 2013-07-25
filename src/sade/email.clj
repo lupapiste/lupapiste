@@ -1,35 +1,110 @@
 (ns sade.email
   (:use [sade.core]
         [clojure.tools.logging])
-  (:require [postal.core :as postal]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as s]
+            [postal.core :as postal]
             [sade.env :as env]
-            [sade.strings :as s]))
+            [net.cgrand.enlive-html :as enlive]
+            [endophile.core :as endophile]
+            [clostache.parser :as clostache]))
+
+;; Default headers:
+;; ----------------
+
+(def defaults {:from     "\"Lupapiste\" <lupapiste@lupapiste.fi>"
+               :reply-to "\"Lupapiste\" <lupapiste@lupapiste.fi>"})
+
+;;
+;; Sending 'raw' email messages:
+;; =============================
+;;
 
 (defn send-mail
-  "Sends HTML email and returns a sade.core.ok/fail with :reason telling weather is was ok"
-  ([to subject body]
-    (send-mail to (env/value :email :from) subject body))
-  ([to from subject body]
-    (try
-      (let [status (postal/send-message
-                     (env/value :email)
-                     {:from    from
-                      :to      to
-                      :subject subject
-                      :body    [{:type "text/html; charset=utf-8"
-                                 :content body}]})]
-        (if (= (:error status) :SUCCESS) (ok) (fail (:msg status))))
-      (catch Exception e
-        (error e (.getMessage e))
-        (fail (.getMessage e))))))
+  "Send raw email message. Consider using send-email-message instead."
+  [to subject & {:keys [plain html]}]
+  (assert to "must provide 'to'")
+  (assert subject "must provide 'subject'")
+  (assert (or plain html) "must provide some content")
+  (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
+        html-body  (when html {:content html :type "text/html; charset=utf-8"})
+        body       (if (and plain-body html-body)
+                     [:alternative plain-body html-body]
+                     [(or plain-body html-body)])
+        config     (:email (env/get-config))
+        error      (postal/send-message
+                     config
+                     (merge defaults (dissoc config :dummy-server :host :port) {:to to :subject subject :body body}))]
+    (when-not (= (:error error) :SUCCESS)
+      error)))
 
-(defn send-mail? [to subject body] (ok? (send-mail to subject body)))
+;;
+;; Sending emails with templates:
+;; ==============================
+;;
 
-(comment
-  (postal/send-message
-    (env/value :email)
-    {:from    "foo@bar.com"
-     :to      "dorka@dii.daa"
-     :subject "subjectus"
-     :body    [{:type "text/html; charset=utf-8"
-                :content "<h1>heelo</h1>"}]}))
+(declare apply-template)
+
+(defn send-email-message
+  "Sends email message using a template."
+  [to subject template context]
+  (assert (and to subject template context) "missing argument")
+  (let [[plain html] (apply-template template context)]
+    (send-mail to subject :plain plain :html html)))
+
+;;
+;; templating:
+;; -----------
+;;
+
+(defn find-resource [resource-name]
+  (or (io/resource (str "email-templates/" resource-name)) (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))))
+
+(defn fetch-template [template-name]
+  (with-open [in (io/input-stream (find-resource template-name))]
+    (slurp in)))
+
+(when-not (env/dev-mode?)
+  (def fetch-template (memoize fetch-template)))
+
+;;
+;; Plain text support:
+;; -------------------
+
+(defmulti ->str (fn [element] (if (map? element) (:tag element) :str)))
+
+(defn- ->str* [elements] (s/join (map ->str elements)))
+
+(defmethod ->str :default [element] (->str* (:content element)))
+(defmethod ->str :str     [element] (s/join element))
+(defmethod ->str :h1      [element] (str \newline (->str* (:content element)) \newline))
+(defmethod ->str :h2      [element] (str \newline (->str* (:content element)) \newline))
+(defmethod ->str :p       [element] (str \newline (->str* (:content element)) \newline))
+(defmethod ->str :ul      [element] (->str* (:content element)))
+(defmethod ->str :li      [element] (str \* \space (->str* (:content element)) \newline))
+(defmethod ->str :a       [element] (str (->str* (:content element)) \: \space (get-in element [:attrs :href])))
+(defmethod ->str :img     [element] "")
+(defmethod ->str :br      [element] "")
+(defmethod ->str :hr      [element] "\n---------\n")
+(defmethod ->str :blockquote [element] (-> element :content ->str* (s/replace #"\n{2,}" "\n  ") (s/replace #"^\n" "  ")))
+
+;;
+;; HTML support:
+;; -------------
+
+(defn- wrap-html [html-body]
+  (let [html-wrap (enlive/html-resource (find-resource "html-wrap.html"))]
+    (enlive/transform html-wrap [:body] (enlive/content html-body))))
+
+;;
+;; Apply template:
+;; ---------------
+
+(defn apply-template [template context]
+  (let [master    (fetch-template "master.md")
+        header    (fetch-template "header.md")
+        body      (fetch-template template)
+        footer    (fetch-template "footer.md")
+        rendered  (clostache/render master context {:header header :body body :footer footer})
+        content   (endophile/to-clj (endophile/mp rendered))]
+    [(->str* content) (endophile/html-string (wrap-html content))]))

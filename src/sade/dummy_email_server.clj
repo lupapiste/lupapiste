@@ -3,12 +3,13 @@
         [clojure.tools.logging]
         [clojure.pprint :only [pprint]]
         [noir.core :only [defpage]]
-        [lupapalvelu.core :only [defquery ok]])
+        [lupapalvelu.core :only [defquery defcommand ok fail]])
   (:require [clojure.string :as s]
             [sade.env :as env]
-            [net.cgrand.enlive-html :as enlive])
-  (:import [javax.mail.internet MimeUtility]
-           [com.dumbster.smtp SimpleSmtpServer SmtpMessage]))
+            [net.cgrand.enlive-html :as enlive]
+            [sade.email :refer [send-email-message]])
+  (:import [com.icegreen.greenmail.util GreenMail GreenMailUtil ServerSetup]
+           [org.apache.commons.mail.util MimeMessageParser]))
 
 (defonce server (atom nil))
 
@@ -17,39 +18,38 @@
 
 (defn start []
   (stop)
-  (let [port (env/value :email :port)]
+  (let [port (env/value :email :port)
+        smtp-server (GreenMail. (ServerSetup. port nil ServerSetup/PROTOCOL_SMTP))]
     (debug "Starting dummy mail server on port" port)
-    (swap! server (constantly (SimpleSmtpServer/start port)))))
-
-(defn- message-header [message headers header-name]
-  (assoc headers (keyword header-name) (.getHeaderValue message header-name)))
+    (.start smtp-server)
+    (reset! server smtp-server)))
 
 (defn- parse-message [message]
-  ; FIXME: This does not work, as the =\n cases are left on the message.
-  ; The dumbster is too stopid, it seems that it just parses message without
-  ; doing it properly, but messing so well that it can not be parsed any more.
   (when message
-    {:body (->
-             (.getBody message)
-             (s/replace #"=([^A-Z]{2})" "$1" ) ; strip extra '=' chars that are not part of quotation
-             (.getBytes "US-ASCII")
-             (input-stream)
-             (MimeUtility/decode "quoted-printable")
-             (slurp))
-     :headers (reduce (partial message-header message) {} (iterator-seq (.getHeaderNames message)))}))
+    (let [m (doto (MimeMessageParser. message) (.parse))]
+      {:body {:plain (when (.hasPlainContent m) (.getPlainContent m))
+              :html (when (.hasHtmlContent m) (.getHtmlContent m))}
+     :headers (into {} (map (fn [header] [(keyword (.getName header)) (.getValue header)]) (enumeration-seq (.getAllHeaders message))))})))
 
 (defn messages [& {:keys [reset]}]
   (when-let [s @server]
-    (let [messages (map parse-message (iterator-seq (.getReceivedEmail s)))]
+    (let [messages (map parse-message (.getReceivedMessages s))]
       (when reset
         (start))
       messages)))
 
 (env/in-dev
-  
+
   (defn dump []
     (doseq [message (messages)]
       (pprint message)))
+
+  (defcommand "send-email"
+    {:parameters [:to :subject :template]}
+    [{{:keys [to subject template] :as data} :data}]
+    (if-let [error (send-email-message to subject template (dissoc data :from :to :subject :template))]
+      (fail "send-email-message failed" error)
+      (ok)))
 
   (defquery "sent-emails"
     {}
@@ -63,12 +63,10 @@
 
   (defpage "/api/last-email" []
     (if-let [msg (last (messages))]
-      (let [html     (first (re-find #"(?ms)<html>(.*)</html>" (:body msg)))
+      (let [html     (get-in msg [:body :html])
             subject  (get-in msg [:headers :Subject])
             to       (get-in msg [:headers :To])]
-        (debug (get-in msg [:headers]))
-        (enlive/emit* (->
-                        (enlive/html-resource (input-stream (.getBytes html "UTF-8")))
+        (enlive/emit* (-> (enlive/html-resource (input-stream (.getBytes html "UTF-8")))
                         (enlive/transform [:head] (enlive/append {:tag :title :content subject}))
                         (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
                                                                                        {:tag :dd :attrs {:id "to"} :content to}

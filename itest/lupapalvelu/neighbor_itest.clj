@@ -16,7 +16,7 @@
   (let [resp (create-app pena)
         application-id (:id resp)
         resp (command pena :add-comment :id application-id :text "foo" :target "application")
-        resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :type :person :email "e")
+        resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
         resp (query pena :application :id application-id)
         application (:application resp)
@@ -28,11 +28,9 @@
 
 (facts "create app, add neighbor"
   (let [[application neighborId neighbors] (create-app-with-neighbor)
-        neighbor (find-by-id neighborId neighbors)]
     (fact (:neighbor neighbor) => {:propertyId "p"
                                    :owner {:name "n"
                                            :address {:street "s" :city "c" :zip "z"}
-                                           :type "person"
                                            :email "e"}})
     (fact (count (:status neighbor)) => 1)
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
@@ -40,7 +38,7 @@
 (facts "create app, update neighbor"
   (let [[application neighborId] (create-app-with-neighbor)
         application-id (:id application)
-        _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :type :person :email "e2")
+        _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :email "e2")
         application (:application (query pena :application :id application-id))
         neighbors (:neighbors application)
         neighbor (find-by-id neighborId neighbors)]
@@ -48,7 +46,6 @@
     (fact (:neighbor neighbor) => {:propertyId "p2"
                                    :owner {:name "n2"
                                            :address {:street "s2" :city "c2" :zip "z2"}
-                                           :type "person"
                                            :email "e2"}})
     (fact (count (:status neighbor)) => 1)
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
@@ -98,11 +95,7 @@
 
     (let [response  (query pena :last-email)
           message   (-> response :message)
-          token     (-> message
-                      :body
-                      ((partial re-matches #"(?sm).*neighbor-show/.+/(.*)\".*"))
-                      last
-                      (s/replace #"=" ""))]
+          token     (->> message :body :html (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
 
       token => truthy
       token =not=> #"="
