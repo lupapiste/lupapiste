@@ -166,4 +166,4 @@
 (fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
   (make-query {} {:filter-kind  "both"
                   :filter-state "all"
-                  :filter-user  "123"} irrelevant) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
+                  :filter-user  "123"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))

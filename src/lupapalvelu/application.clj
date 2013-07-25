@@ -723,7 +723,7 @@
                 "kind" (if (:infoRequest application) "inforequest" "application")}]
       (reduce (partial add-field application) base col-map)))
 
-  (defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]} _]
+  (defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]}]
     (merge
       query
       (condp = filter-kind
@@ -748,7 +748,7 @@
   (defn applications-for-user [user params]
     (let [user-query  (domain/basic-application-query-for user)
           user-total  (mongo/count :applications user-query)
-          query       (make-query user-query params user)
+          query       (make-query user-query params)
           query-total (mongo/count :applications query)
           skip        (params :iDisplayStart)
           limit       (params :iDisplayLength)
