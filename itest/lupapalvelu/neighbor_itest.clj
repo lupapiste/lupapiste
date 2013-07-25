@@ -28,6 +28,7 @@
 
 (facts "create app, add neighbor"
   (let [[application neighborId neighbors] (create-app-with-neighbor)
+        neighbor (find-by-id neighborId neighbors)]
     (fact (:neighbor neighbor) => {:propertyId "p"
                                    :owner {:name "n"
                                            :address {:street "s" :city "c" :zip "z"}
@@ -67,8 +68,9 @@
                                                 :email "abba@example.com")
         _                         (Thread/sleep 20) ; delivery time
         email                     (query pena :last-email)
-        body                      (get-in email [:message :body])
-        [_ a-id n-id token]       (re-matches #"(?sm).*neighbor-show/([^/]+)/([^/]+)/([^/]*)\".*" body)]
+        body                      (get-in email [:message :body :plain])
+        [_ a-id n-id token]       (re-find #"(?sm)/neighbor-show/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+    
     a-id => application-id
     n-id => neighbor-id
     token => #"[A-Za-z0-9]{48}"))
@@ -93,9 +95,9 @@
 
     (Thread/sleep 20) ; Allow future to deliver email
 
-    (let [response  (query pena :last-email)
-          message   (-> response :message)
-          token     (->> message :body :html (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
+    (let [email                     (query pena :last-email)
+          body                      (get-in email [:message :body :plain])
+          [_ a-id n-id token]       (re-find #"(?sm)/neighbor-show/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
       token => truthy
       token =not=> #"="
