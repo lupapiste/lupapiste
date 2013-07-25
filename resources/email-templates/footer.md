@@ -1,6 +1,7 @@
----
+## Ystävällisin terveisin, [Lupapiste.fi](https://lupapiste.fi)
+## Med vänlig hälsning, [Lupapiste.fi](https://lupapiste.fi)
 
-[Lupapiste.fi](https://lupapiste.fi)
+---
 
 > Ympäristöministeriö
 > 
