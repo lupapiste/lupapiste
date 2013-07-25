@@ -33,15 +33,14 @@
                                      :body [{:name "single2" :type :string}
                                             {:name "repeats2" :type :string :subtype :digit :repeating true}]}]})
 
-;; Tests for internals:
-
-(def find-by-name #'lupapalvelu.document.model/find-by-name)
-
-(facts "Facts about internals"
+(facts "Find-by-name"
   (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
   (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
   (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
+  (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :boolean})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
+
+;; Tests for internals:
 
 (facts "has-errors?"
   (has-errors? [])                  => false

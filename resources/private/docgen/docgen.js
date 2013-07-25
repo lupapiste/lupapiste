@@ -222,6 +222,7 @@ var docgen = (function () {
             text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
           }
           statusContainer$.text(text);
+          statusContainer$.addClass("approval-" + approval.value);
         }
       }
 
@@ -796,7 +797,7 @@ var docgen = (function () {
 
     function showValidationResults(results) {
       // remove warning and error highlights
-      $("#document-" + self.docId + " :input").removeClass("warn").removeClass("error").removeClass("tip");
+      $("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
       $("#document-" + self.docId + " .errorPanel").html("").fadeOut();
       // apply new errors & highlights
@@ -860,7 +861,7 @@ var docgen = (function () {
         setTimeout(function () {
           $(indicator).removeClass(className);
           $(indicator).fadeOut(200, function () { target.parentNode.removeChild(indicator); });
-        }, 2000);
+        }, 4000);
       }
 
       saveForReal(path, value, function (status, results) {

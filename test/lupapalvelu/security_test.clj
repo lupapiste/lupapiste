@@ -33,8 +33,8 @@
 
 (facts "user entity mongo model"
   (fact "is a map with all the data"
-     (create-use-entity ..email.. some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:email        ..email..
+     (create-use-entity "Foo@Bar.Com" some-password ..userid.. ..role.. ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
+     => (contains {:email        "foo@bar.com"
                    :personId     ..userid..
                    :role         ..role..
                    :firstName    ..firstname..
@@ -63,6 +63,8 @@
 
   (fact "authorityAdmin does have organizations"
      (create-use-entity ..email.. some-password ..userid.. "authorityAdmin" ..firstname.. ..lastname.. ..phone.. ..city.. ..street.. ..zip.. ..enabled.. ..organizations..)
-     => (contains {:organizations ..organizations..}))
+     => (contains {:organizations ..organizations..})))
 
-  )
+(facts "same-user?"
+  (same-user? {:id "123"} {:id "123"}) => true
+  (same-user? {:id "123"} {:id "234"}) => false)

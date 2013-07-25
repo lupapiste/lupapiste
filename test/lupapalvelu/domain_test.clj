@@ -1,7 +1,8 @@
 (ns lupapalvelu.domain-test
   (:use lupapalvelu.domain
         clojure.test
-        midje.sweet))
+        midje.sweet)
+  (:require [lupapalvelu.document.schemas :as schemas]))
 
 (facts
   (let [application {:auth [{:id :user-x} {:id :user-y}]}]
@@ -66,5 +67,21 @@
   (fact "some fields are mapped"
     (->henkilo {:firstName "firstName"
                 :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
-                                       :osoite {:postinumero     {:value "zip"}}}))
+                                       :osoite {:postinumero     {:value "zip"}}})
 
+  (fact "hetu is mapped"
+    (->henkilo {:id       "id"
+                :personId "123"} :with-hetu true) => {:userId               {:value "id"}
+                                                      :henkilotiedot {:hetu {:value "123"}}}))
+
+(facts "has-hetu?"
+  (fact "direct find"
+    (has-hetu? schemas/party)            => true
+    (has-hetu? schemas/party [:henkilo]) => true
+    (has-hetu? schemas/party [:invalid]) => false)
+  (fact "nested find"
+    (has-hetu? [{:name "a"
+                 :type :group
+                 :body [{:name "b"
+                         :type :group
+                         :body schemas/party}]}] [:a :b :henkilo]) => true))
