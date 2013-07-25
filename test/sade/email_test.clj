@@ -43,8 +43,6 @@
                                                                 {:type "text/html; charset=utf-8"
                                                                  :content "html text"}]})) => {:error "oh noes"}))
 
-(testable-privates sade.email fetch-template find-resource apply-template)
-
 (facts "Facts about apply-template"
   (apply-template "does-not-exists.md" {:receiver "foobar"}) => (throws IllegalArgumentException))
 

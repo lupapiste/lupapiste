@@ -57,10 +57,10 @@
 ;; -----------
 ;;
 
-(defn- find-resource [resource-name]
+(defn find-resource [resource-name]
   (or (io/resource (str "email-templates/" resource-name)) (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))))
 
-(defn- fetch-template [template-name]
+(defn fetch-template [template-name]
   (with-open [in (io/input-stream (find-resource template-name))]
     (slurp in)))
 
@@ -100,7 +100,7 @@
 ;; Apply template:
 ;; ---------------
 
-(defn- apply-template [template context]
+(defn apply-template [template context]
   (let [master    (fetch-template "master.md")
         header    (fetch-template "header.md")
         body      (fetch-template template)
