@@ -1,9 +1,9 @@
 (ns sade.email-test
   (:require [sade.email :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [postal.core :as postal]
             [clojure.java.io :as io]))
-
 
 (facts "Facts about sending emails"
   ; Need some body:
@@ -43,6 +43,7 @@
                                                                 {:type "text/html; charset=utf-8"
                                                                  :content "html text"}]})) => {:error "oh noes"}))
 
+(testable-privates sade.email fetch-template find-resource apply-template)
 
 (facts "Facts about apply-template"
   (apply-template "does-not-exists.md" {:receiver "foobar"}) => (throws IllegalArgumentException))
