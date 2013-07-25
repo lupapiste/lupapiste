@@ -24,7 +24,7 @@
     :lastName "Viranomainen"
     :phone "03121991"
     :username "veikko"
-    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG" ;; veikko
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5051ba0caa2480f374dcfeff"}}
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti
