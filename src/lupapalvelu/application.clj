@@ -121,7 +121,6 @@
   ;;
 
   (defquery "applications" {:authenticated true :verified true} [{user :user}]
-    (println "-->" (domain/application-query-for user))
     (ok :applications (map #(-> % ((partial with-meta-fields user)) without-system-keys)
                            (mongo/select :applications (domain/application-query-for user)))))
 
@@ -759,7 +758,6 @@
                         (query/limit limit))
           rows        (map (comp make-row (partial with-meta-fields user)) apps)
           echo        (str (Integer/parseInt (str (params :sEcho))))] ; Prevent XSS
-      (println "-->" query)
       {:aaData                rows
        :iTotalRecords         user-total
        :iTotalDisplayRecords  query-total
