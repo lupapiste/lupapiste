@@ -9,10 +9,20 @@
             [endophile.core :as endophile]
             [clostache.parser :as clostache]))
 
+;; Default headers:
+;; ----------------
+
 (def defaults {:from     "\"Lupapiste\" <lupapiste@lupapiste.fi>"
                :reply-to "\"Lupapiste\" <lupapiste@lupapiste.fi>"})
 
-(defn send-mail [to subject & {:keys [plain html]}]
+;;
+;; Sending 'raw' email messages:
+;; =============================
+;;
+
+(defn send-mail
+  "Send raw email message. Consider using send-email-message instead."
+  [to subject & {:keys [plain html]}]
   (assert to "must provide 'to'")
   (assert subject "must provide 'subject'")
   (assert (or plain html) "must provide some content")
@@ -29,22 +39,37 @@
       error)))
 
 ;;
-;; email with templating:
-;; ======================
+;; Sending emails with templates:
+;; ==============================
 ;;
 
-(defn find-resource [resource-name]
+(declare apply-template)
+
+(defn send-email-message
+  "Sends email message using a template."
+  [to subject template context]
+  (assert (and to subject template context) "missing argument")
+  (let [[plain html] (apply-template template context)]
+    (send-mail to subject :plain plain :html html)))
+
+;;
+;; templating:
+;; -----------
+;;
+
+(defn- find-resource [resource-name]
   (or (io/resource (str "email-templates/" resource-name)) (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))))
 
-(defn fetch-template [template-name]
+(defn- fetch-template [template-name]
   (with-open [in (io/input-stream (find-resource template-name))]
     (slurp in)))
 
 (when-not (env/dev-mode?)
   (def fetch-template (memoize fetch-template)))
 
+;;
 ;; Plain text support:
-;; ===================
+;; -------------------
 
 (defmulti ->str (fn [element] (if (map? element) (:tag element) :str)))
 
@@ -63,17 +88,19 @@
 (defmethod ->str :hr      [element] "\n---------\n")
 (defmethod ->str :blockquote [element] (-> element :content ->str* (s/replace #"\n{2,}" "\n  ") (s/replace #"^\n" "  ")))
 
+;;
 ;; HTML support:
-;; =============
+;; -------------
 
-(defn wrap-html [html-body]
+(defn- wrap-html [html-body]
   (let [html-wrap (enlive/html-resource (find-resource "html-wrap.html"))]
     (enlive/transform html-wrap [:body] (enlive/content html-body))))
 
-;; Sending emails with templates:
-;; ==============================
+;;
+;; Apply template:
+;; ---------------
 
-(defn apply-template [template context]
+(defn- apply-template [template context]
   (let [master    (fetch-template "master.md")
         header    (fetch-template "header.md")
         body      (fetch-template template)
@@ -81,8 +108,3 @@
         rendered  (clostache/render master context {:header header :body body :footer footer})
         content   (endophile/to-clj (endophile/mp rendered))]
     [(->str* content) (endophile/html-string (wrap-html content))]))
-
-(defn send-email-message [to subject template context]
-  (assert (and to subject template context) "missing argument")
-  (let [[plain html] (apply-template template context)]
-    (send-mail to subject :plain plain :html html)))
