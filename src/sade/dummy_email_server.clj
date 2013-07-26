@@ -29,7 +29,7 @@
     (let [m (doto (MimeMessageParser. message) (.parse))]
       {:body {:plain (when (.hasPlainContent m) (.getPlainContent m))
               :html (when (.hasHtmlContent m) (.getHtmlContent m))}
-     :headers (into {} (map (fn [header] [(keyword (.getName header)) (.getValue header)]) (enumeration-seq (.getAllHeaders message))))})))
+       :headers (into {} (map (fn [header] [(keyword (s/lower-case (.getName header))) (.getValue header)]) (enumeration-seq (.getAllHeaders message))))})))
 
 (defn messages [& {:keys [reset]}]
   (when-let [s @server]
@@ -61,11 +61,11 @@
     [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
 
-  (defpage "/api/last-email" []
-    (if-let [msg (last (messages :reset true))]
+  (defpage "/api/last-email" {reset :reset}
+    (if-let [msg (last (messages :reset reset))]
       (let [html     (get-in msg [:body :html])
-            subject  (get-in msg [:headers :Subject])
-            to       (get-in msg [:headers :To])]
+            subject  (get-in msg [:headers :subject])
+            to       (get-in msg [:headers :to])]
         (enlive/emit* (-> (enlive/html-resource (input-stream (.getBytes html "UTF-8")))
                         (enlive/transform [:head] (enlive/append {:tag :title :content subject}))
                         (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
