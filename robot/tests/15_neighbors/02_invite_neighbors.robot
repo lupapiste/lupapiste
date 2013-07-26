@@ -52,6 +52,8 @@ Sonja adds some neighbors
 Sonja removes mistakenly added neighbor d
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
   Click element  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
+  Wait until  Element should be visible  xpath=//div[@id='dialog-confirm-neighbor-remove']
+  Click element  xpath=//div[@id='dialog-confirm-neighbor-remove']//*[@data-test-id='confirm-yes']
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
   
 Sonja corrects the email address of neighbor c

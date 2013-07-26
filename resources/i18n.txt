@@ -33,3 +33,5 @@ neighbors.status-dialog.message-title.response-given-ok:
 neighbors.status-dialog.message-title.response-given-comments: Naapurin viesti:
 neighbors.status-dialog.message-title.mark-done: Viranomaisen viesti:
  
+neighbors.remove-dialog.title: Poista naapuri?
+neighbors.remove-dialog.message: Oletko varma että haluat poistaa naapurin?
