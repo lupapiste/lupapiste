@@ -1,6 +1,5 @@
 (ns sade.email
-  (:use [sade.core]
-        [clojure.tools.logging])
+  (:use [clojure.tools.logging])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [postal.core :as postal]
@@ -9,11 +8,28 @@
             [endophile.core :as endophile]
             [clostache.parser :as clostache]))
 
+;;
 ;; Default headers:
 ;; ----------------
 
 (def defaults {:from     "\"Lupapiste\" <lupapiste@lupapiste.fi>"
                :reply-to "\"Lupapiste\" <lupapiste@lupapiste.fi>"})
+
+;;
+;; Delivery:
+;; ---------
+;;
+
+(def deliver-email (fn [to subject body]
+                     (assert to "must provide 'to'")
+                     (assert subject "must provide 'subject'")
+                     (assert body "must provide 'body'")
+                     (let [config     (:email (env/get-config))
+                           error      (postal/send-message
+                                        config
+                                        (merge defaults (dissoc config :dummy-server :host :port) {:to to :subject subject :body body}))]
+                       (when-not (= (:error error) :SUCCESS)
+                         error))))
 
 ;;
 ;; Sending 'raw' email messages:
@@ -23,20 +39,13 @@
 (defn send-mail
   "Send raw email message. Consider using send-email-message instead."
   [to subject & {:keys [plain html]}]
-  (assert to "must provide 'to'")
-  (assert subject "must provide 'subject'")
   (assert (or plain html) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
         body       (if (and plain-body html-body)
                      [:alternative plain-body html-body]
-                     [(or plain-body html-body)])
-        config     (:email (env/get-config))
-        error      (postal/send-message
-                     config
-                     (merge defaults (dissoc config :dummy-server :host :port) {:to to :subject subject :body body}))]
-    (when-not (= (:error error) :SUCCESS)
-      error)))
+                     [(or plain-body html-body)])]
+    (deliver-email to subject body)))
 
 ;;
 ;; Sending emails with templates:
@@ -108,3 +117,4 @@
         rendered  (clostache/render master context {:header header :body body :footer footer})
         content   (endophile/to-clj (endophile/mp rendered))]
     [(->str* content) (endophile/html-string (wrap-html content))]))
+

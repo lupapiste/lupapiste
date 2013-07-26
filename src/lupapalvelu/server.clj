@@ -52,9 +52,7 @@
     ((resolve 'lupapalvelu.perf-mon/init))
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9090)
-    (when (env/value [:email :dummy-server])
-      (require 'sade.dummy-email-server)
-      ((resolve 'sade.dummy-email-server/start))))
+    (require 'sade.dummy-email-server))
   (with-logs "lupapalvelu"
     (let [jetty-opts (into
                        {:max-threads 250}
@@ -67,7 +65,9 @@
                               :ns 'lupapalvelu.web
                               :jetty-options jetty-opts
                               :session-cookie-attrs (env/value :cookie)})))
-  "ok")
+  "server running")
 
 (comment
   (-main))
+
+"server ready"
