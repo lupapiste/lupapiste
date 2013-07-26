@@ -784,7 +784,6 @@
       window.location.hash = "!/neighbors/" + application.id();
       return false;
     },
-    upload: function(neighbor) { /* TODO: */ },
     markDone: function(neighbor) {
       ajax
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})

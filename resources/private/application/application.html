@@ -461,12 +461,6 @@
                            class="command"
                            href="#">
                         </a>
-                        <a data-bind="click: $root.neighbor.upload,
-                                      ltext: 'neighbors.actions.upload',
-                                      clickBubble: false"
-                           class="command"
-                           href="#">
-                        </a>
                         <a data-bind="click: $root.neighbor.markDone,
                                       visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
                                       ltext: 'neighbors.actions.markDone',
