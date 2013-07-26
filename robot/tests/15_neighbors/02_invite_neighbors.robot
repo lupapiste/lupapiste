@@ -116,8 +116,6 @@ Mikko sends an email invitation to neighbor 'b'
   Logout
   
 Mail is sent
-  ## Wait for mail delivery
-  Sleep  1
   Go to  ${SERVER}/api/last-email
   Wait until  Element should contain  id=to  b@example.com
   

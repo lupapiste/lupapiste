@@ -272,7 +272,6 @@ Create inforequest
   Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
-  # Sleep  1
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
