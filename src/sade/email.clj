@@ -1,6 +1,6 @@
 (ns sade.email
-  (:use [clojure.tools.logging])
-  (:require [clojure.java.io :as io]
+  (:require [clojure.tools.logging :refer :all]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [postal.core :as postal]
             [sade.env :as env]
@@ -117,4 +117,3 @@
         rendered  (clostache/render master context {:header header :body body :footer footer})
         content   (endophile/to-clj (endophile/mp rendered))]
     [(->str* content) (endophile/html-string (wrap-html content))]))
-
