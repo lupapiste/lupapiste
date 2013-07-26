@@ -797,7 +797,7 @@ var docgen = (function () {
 
     function showValidationResults(results) {
       // remove warning and error highlights
-      $("#document-" + self.docId + " :input").removeClass("warn").removeClass("error").removeClass("tip");
+      $("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("tip");
       // clear validation errors
       $("#document-" + self.docId + " .errorPanel").html("").fadeOut();
       // apply new errors & highlights

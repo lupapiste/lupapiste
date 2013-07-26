@@ -15,10 +15,10 @@
                  [clj-http "0.7.0" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.1"]
                  [digest "1.4.2"]
-                 [clj-time "0.5.0" :exclusions [org.clojure/clojure]]
+                 [clj-time "0.5.1" :exclusions [org.clojure/clojure]]
                  [org.apache.commons/commons-lang3 "3.1"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
-                 [com.lowagie/itext "2.1.7"]
+                 [com.lowagie/itext "4.2.1"]
                  [org.clojure/data.zip "0.1.1"]
                  [com.draines/postal "1.10.3" :explusions [javax.mail/mail]]
                  [javax.mail/mail "1.4.5"]
@@ -46,7 +46,7 @@
                    :jvm-opts ["-Djava.awt.headless=true"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
-             :alltests {:source-paths ["itest" "stest"]}
+             :alltests {:source-paths [#_"test" "itest" "stest"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]

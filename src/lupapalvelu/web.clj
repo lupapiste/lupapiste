@@ -117,6 +117,7 @@
 
 (defn enriched [m]
   (merge m {:user (current-user)
+            :lang *lang*
             :web  (web-stuff)}))
 
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
@@ -134,6 +135,12 @@
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
+
+(defpage "/api/raw/:name" {name :name}
+  (let [response (execute (enriched (core/raw name (from-query))))]
+    (if-not (= (:ok response) false)
+      response
+      (resp/status 404 (resp/json response)))))
 
 ;;
 ;; Web UI:
@@ -344,9 +351,6 @@
 
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
   (attachment/output-all-attachments application-id (current-user) *lang*))
-
-(defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (ke6666/export application-id (current-user) *lang*))
 
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
