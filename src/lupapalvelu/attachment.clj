@@ -32,7 +32,7 @@
 ;; Metadata
 ;;
 
-(def ^:private attachment-types
+(def ^:private attachment-types-R
   [:hakija [:valtakirja
             :ote_kauppa_ja_yhdistysrekisterista
             :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
@@ -90,7 +90,7 @@
           :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
           :muu]])
 
-(def ^:private attachment-types-public-areas
+(def ^:private attachment-types-YA
   [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                     :tilapainen-liikennejarjestelysuunnitelma
                     :tyyppiratkaisu
@@ -98,16 +98,22 @@
                     :liitoslausunto
                     :asemapiirros]])
 
-(defn get-attachment-types-by-permit-type [permit-type]
+;;
+;; Api
+;;
+
+(defn get-attachment-types-by-permit-type
+  "Returns partitioned list of allowed attachment types or throws exception"
+  [permit-type]
   (partition 2
     (condp = (keyword permit-type)
-      :R  attachment-types
-      :YA attachment-types-public-areas
-      (fail! (str "unsupported permit-type: " permit-type)))))
+      :R  attachment-types-R
+      :YA attachment-types-YA
+      (fail! "unsupported permit-type"))))
 
+;; TODO: return attachment type based on what types of operations the given organization is having.
 (defn organization-attachments [organization]
-  ;; TODO: return attachment type based on what types of operations the given organization is having.
-  attachment-types)
+  attachment-types-R)
 
 (defn make-attachment [now target locked op attachement-type]
   {:id (mongo/create-id)
