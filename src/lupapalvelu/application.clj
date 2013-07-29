@@ -120,9 +120,11 @@
 ;; Query application:
 ;;
 
+(defn- app-post-processor [user]
+  (comp without-system-keys (partial with-meta-fields user)))
+
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map #(-> % ((partial with-meta-fields user)) without-system-keys)
-                         (mongo/select :applications (domain/application-query-for user)))))
+  (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
@@ -132,9 +134,7 @@
    :parameters [:id]}
   [{app :application user :user}]
   (if app
-    (ok :application (-> app
-                       ((partial with-meta-fields user))
-                       without-system-keys)
+    (ok :application ((app-post-processor user) app)
         :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 

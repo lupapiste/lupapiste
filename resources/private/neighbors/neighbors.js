@@ -25,6 +25,7 @@
 
     self.applicationId = ko.observable();
     self.neighbors = ko.observableArray();
+    self.neighborId = ko.observable();
     self.map = null;
 
     self.init = function(application) {
@@ -35,21 +36,37 @@
       self
         .applicationId(application.id)
         .neighbors(application.neighbors)
+        .neighborId(null)
         .map.updateSize().clear().center(x, y, 11).add(x, y);
     };
 
     self.edit   = function(neighbor) { editModel.init(neighbor).edit().open(); };
     self.add    = function()         { editModel.init().edit().open(); };
     self.click  = function(x, y)     { editModel.init().search(x, y).open(); };
+    self.done = function() { window.location.hash = "!/application/" + applicationId + "/statement"; };
     self.remove = function(neighbor) {
-      // TODO: needs "Are you sure?" dialog.
+      self.neighborId(neighbor.neighborId);
+      LUPAPISTE.ModalDialog.open("#dialog-confirm-neighbor-remove");
+      return self;
+    };
+
+    self.removeNeighbor = function() {
       ajax
-        .command("neighbor-remove", {id: applicationId, neighborId: neighbor.neighborId})
-        .complete(_.partial(repository.load, applicationId, util.nop))
+        .command("neighbor-remove", {id: self.applicationId(), neighborId: self.neighborId()})
+        .complete(_.partial(repository.load, self.applicationId(), util.nop))
         .call();
       return self;
     };
-    self.done = function() { window.location.hash = "!/application/" + applicationId + "/statement"; };
+
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog(
+          "dialog-confirm-neighbor-remove",
+          loc("neighbors.remove-dialog.title"),
+          loc("neighbors.remove-dialog.message"),
+          loc("yes"),
+          self.removeNeighbor,
+          loc("no"));
+    });
   }
 
   function EditModel() {

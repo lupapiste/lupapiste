@@ -1,7 +1,8 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [noir "1.3.0" :exclusions [org.clojure/clojure]]
+                 [noir "1.3.0" :exclusions [org.clojure/clojure compojure]]
+                 [compojure "1.1.5"]
                  [com.novemberain/monger "1.4.2"]
                  [org.clojure/tools.logging "0.2.6"]
                  [clj-logging-config "1.9.10" :exclusions [log4j]]
@@ -19,6 +20,8 @@
                  [commons-io/commons-io "2.4"]
                  [com.lowagie/itext "4.2.1"]
                  [org.clojure/data.zip "0.1.1"]
+                 [de.ubercode.clostache/clostache "1.3.1"]
+                 [endophile "0.1.1" :exclusions [hiccup]]
                  [com.draines/postal "1.10.4"]
                  [org.clojure/data.xml "0.0.7"]
                  [swiss-arrows "0.6.0"]
@@ -32,8 +35,6 @@
   :plugins [[org.timmc/lein-otf "2.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
-                                  [javax.activation/activation "1.1.1"]
-                                  [dumbster/dumbster "1.6" :exclusions [[javax.mail/mail] [javax.activation/activation]]]
                                   [clj-ssh "0.5.6"]]
                    :plugins [[lein-midje "2.0.1"]
                              [lein-buildid "0.1.0"]
@@ -43,12 +44,17 @@
                    :jvm-opts ["-Djava.awt.headless=true"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
-             :alltests {:source-paths [#_"test" "itest" "stest"]}
+             :alltests {:source-paths [#_"test" "itest" "stest"]
+                        :jvm-opts ["-XX:MaxPermSize=256M"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
-              :excludes [#"[\/\\]jquery" #"[\/\\]theme[\/\\]default"
-                         #"[\/\\]public[\/\\]lib" #"openlayers" #"underscore" #"highcharts\.js" #"lodash"]}
+              :excludes [#"[\/\\]jquery"
+                         #"[\/\\]theme[\/\\]default"
+                         #"[\/\\]public[\/\\]lib"
+                         #"openlayers"
+                         #"underscore"
+                         #"lodash"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"

@@ -429,7 +429,7 @@
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: neighbors">
-                  <tr>
+                  <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + neighbor.owner.email()}">
                     <td data-bind="text: neighbor.propertyId"></td>
                     <td data-bind="with: neighbor.owner">
                       <span data-bind="text: name" class="owner-name"></span>
@@ -438,21 +438,45 @@
                       <span data-bind="text: address.city" class="owner-city"></span>
                       <span data-bind="text: email" class="owner-email"></span>
                     </td>
-                    <td data-bind="with: lastStatus">
-                      <span data-bind="text: loc('neighbor.state', state())" class="status-state"></span>
-                      <span data-bind="dateTimeString: created" class="status-time"></span>
+                    <td>
+                      <a data-bind="visible: $root.neighbor.statusCompleted($data),
+                                    click: $root.neighbor.showStatus,
+                                    attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
+                         href="#">
+                        <span data-bind="text: loc('neighbor.state', lastStatus.state())" class="status-state"></span>
+                      </a>
+                      <span data-bind="visible: !$root.neighbor.statusCompleted($data),
+                                       text: loc('neighbor.state', lastStatus.state()),
+                                       attr: {'data-test-id': 'neighbors-row-status-' + lastStatus.state()}"
+                            class="status-state">
+                      </span>
+                      <span data-bind="dateTimeString: lastStatus.created" class="status-time"></span>
                     </td>
                     <td>
-                      <a data-bind="click: $root.sendNeighborEmailModel.open, visible: $root.authorization.ok('neighbor-send-invite'), ltext: 'neighbors.actions.sendEmail'" href="#"></a>
-                      <a data-bind="click: $root.neighbor.upload, ltext: 'neighbors.actions.upload', clickBubble: false" href="#"></a>
-                      <a data-bind="click: $root.neighbor.markDone, visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'), ltext: 'neighbors.actions.markDone', clickBubble: false" href="#"></a>
+                      <span data-bind="visible: !$root.neighbor.statusCompleted($data)">
+                        <a data-bind="click: $root.sendNeighborEmailModel.open,
+                                      visible: $root.authorization.ok('neighbor-send-invite'),
+                                      ltext: 'neighbors.actions.sendEmail'"
+                           data-test-id="neighbor-row-invite"
+                           class="command"
+                           href="#">
+                        </a>
+                        <a data-bind="click: $root.neighbor.markDone,
+                                      visible: lastStatus.state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
+                                      ltext: 'neighbors.actions.markDone',
+                                      clickBubble: false"
+                           data-test-id="neighbor-row-mark-done"
+                           class="command"
+                           href="#">
+                         </a>
+                      </span>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage',visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
+            <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
 
           </div>
 
@@ -498,8 +522,8 @@
 
       <div id="dialog-request-for-statement" class="window autosized">
         <div class="dialog-header">
-          <p data-bind="ltext: 'application.statement.add'"></p>
-          <p class="dialog-close close">X</p>
+         <p data-bind="ltext: 'application.statement.add'"></p>
+         <p class="dialog-close close">X</p>
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
           <div data-bind="foreach: data()">
@@ -659,22 +683,23 @@
 
             <form>
               <label data-bind="ltext: 'neighbors.sendEmail.name'" class="form-label"></label>
-              <span data-bind="text: name" class="form-input text long" id="neighbors-sendemail-name" ></span>
+              <span data-bind="text: name"
+                    id="neighbors-sendemail-name"
+                    class="form-input text long">
+              </span>
 
               <label data-bind="ltext: 'neighbors.sendEmail.email'" class="form-label" for="neighbors-sendemail-email"></label>
-              <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}" class="form-input text long" id="neighbors-sendemail-email" />
-
-              <label data-bind="ltext: 'neighbors.sendEmail.message'" class="form-label" for="neighbors-sendemail-message"></label>
-              <textarea
-                data-bind="value: message, valueUpdate: 'afterkeydown', attr: {placeholder: loc('neighbors.sendEmail.message.placeholder')}"
-                class="form-input textarea"
-                id="neighbors-sendemail-message"
-                rows="3"
-                maxlength="4000">
-              </textarea>
+              <input data-bind="value: email,
+                                valueUpdate: 'afterkeydown',
+                                attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
+                     id="neighbors-sendemail-email" 
+                     class="form-input text long" />
             </form>
 
-            <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok" class="btn btn-primary btn-dialog"></button>
+            <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok"
+                    data-test-id="neighbors-sendemail-send"
+                    class="btn btn-primary btn-dialog">
+            </button>
             <button data-bind="ltext: 'neighbors.sendEmail.cancel'" class="btn btn-dialog close"></button>
 
           </div>
@@ -700,6 +725,47 @@
               <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close" data-test-id="add-party-button"></button>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <div id="dialog-neighbor-status" class="window autosized">
+        <div class="dialog-header">
+        <p data-bind="ltext: 'neighbors.status-dialog.title'"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+        <div data-bind="with: neighborStatusModel" class="dialog-content">
+
+          <div data-bind="text: loc('neighbors.status-dialog.message', state())"></div>
+          <div data-bind="text: loc('neighbors.status-dialog.description', state())"></div>
+
+          <table>
+            <tbody>
+              <tr>
+                <td data-bind="ltext: 'neighbors.status-dialog.user.firstName'"></td>
+                <td data-bind="text: firstName" data-test-id="neighbor-status-firstName"></td>
+              </tr>
+              <tr>
+                <td data-bind="ltext: 'neighbors.status-dialog.user.lastName'"></td>
+                <td data-bind="text: lastName" data-test-id="neighbor-status-lastName"></td>
+              </tr>
+              <tr data-bind="visible: userid">
+                <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
+                <td data-bind="text: userid" data-test-id="neighbor-status-userid"></td>
+              </tr>
+              <tr>
+                <td data-bind="ltext: 'neighbors.status-dialog.user.time'"></td>
+                <td data-bind="dateTimeString: created"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div data-bind="visible: message">
+            <div data-bind="text: loc('neighbors.status-dialog.message-title', state())"></div>
+            <div data-bind="text: message"  data-test-id="neighbor-status-message"></div>
+          </div>
+
+          <button data-bind="ltext: 'neighbors.status-dialog.ok'" data-test-id="neighbor-status-ok" class="btn btn-primary btn-dialog close"></button>
+          
         </div>
       </div>
 

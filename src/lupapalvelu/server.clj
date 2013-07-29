@@ -24,7 +24,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.etag :as etag]
-            [sade.security-headers :as headers]))
+            [sade.security-headers :as headers]
+            [sade.dummy-email-server]))
 
 (defn -main [& _]
   (infof "Server starting in %s mode" env/mode)
@@ -51,10 +52,7 @@
     (require 'lupapalvelu.perf-mon)
     ((resolve 'lupapalvelu.perf-mon/init))
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9090)
-    (when (env/value [:email :dummy-server])
-      (require 'sade.dummy-email-server)
-      ((resolve 'sade.dummy-email-server/start))))
+    (nrepl/start-server :port 9090))
   (with-logs "lupapalvelu"
     (let [jetty-opts (into
                        {:max-threads 250}
@@ -67,7 +65,9 @@
                               :ns 'lupapalvelu.web
                               :jetty-options jetty-opts
                               :session-cookie-attrs (env/value :cookie)})))
-  "ok")
+  "server running")
 
 (comment
   (-main))
+
+"server ready to start"
