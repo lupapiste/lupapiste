@@ -84,6 +84,16 @@
   (or (some #(= (lower-case email) (-> % :user :username)) invites) false))
 
 ;;
+;; PermitTypes
+;;
+
+(defn permit-type
+  "gets the permit-type of application"
+  [application]
+  {:post [(not= % nil)]}
+  (:permitType application))
+
+;;
 ;; Conversion between Lupapiste and documents
 ;;
 
