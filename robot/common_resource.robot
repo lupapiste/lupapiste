@@ -296,6 +296,7 @@ Prepare new request
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
+  Wait until  Element should be visible  xpath=//*[@class="attachments-list"]/span[text()="Asemapiirros"]
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
