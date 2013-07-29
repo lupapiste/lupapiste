@@ -84,16 +84,17 @@
         :attachments (attachments/organization-attachments organizationId))
     (fail :unknown-organization)))
 
-; Returns the organization based on municipality and operation.
-; For example in municipality 753 with operation of type R the organization is 753-R
 (defn resolve-organization [municipality operation]
-  (mongo/select-one :organizations {:municipalities municipality}))
+  (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType operation}]})]
+    (when (> (count organizations) 1)
+      (errorf "multiple organizations in scope of - municipality=%s, operation=%s -> %s" municipality operation))
+    (first organizations)))
 
 ; return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R
 ; TODO: operation does not have permitModule
 (defquery "get-organization-details"
   {:parameters [:municipality] :verified true}
-  [{{municipality :municipality operation :operation} :data}]
+  [{{:keys [municipality operation]} :data}]
   (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1})]
     (ok :links (:links result))
     (fail :unknown-organization)))
