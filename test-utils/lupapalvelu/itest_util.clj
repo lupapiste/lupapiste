@@ -37,6 +37,13 @@
 
 (defn printed [x] (println x) x)
 
+(defn raw [apikey action & args]
+  (c/get
+    (str (server-address) "/api/raw/" (name action))
+    {:headers {"authorization" (str "apikey=" apikey)}
+     :query-params (apply hash-map args)
+     :throw-exceptions false}))
+
 (defn query [apikey query-name & args]
   (let [resp (c/get
                (str (server-address) "/api/query/" (name query-name))
@@ -122,6 +129,9 @@
 (fact "not-ok?"
   (not-ok? {:ok false}) => true
   (not-ok? {:ok true}) => false)
+
+(defn http200? [{:keys [status]}]
+  (= status 200))
 
 ;;
 ;; DSLs
