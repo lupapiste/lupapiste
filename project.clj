@@ -11,7 +11,7 @@
                  [org.jasypt/jasypt "1.9.0"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.1.0" :exclusions [commons-codec]]
-                 [clj-http "0.7.6" :exclusions [commons-codec]]
+                 [clj-http "0.7.0" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.1"]
                  [digest "1.4.3"]
                  [clj-time "0.5.1" :exclusions [org.clojure/clojure]]
