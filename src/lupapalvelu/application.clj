@@ -530,7 +530,7 @@
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
-          info-request? (if infoRequest true false)
+          info-request? (boolean infoRequest)
           state         (if info-request? :info
                           (if (security/authority? user) :open :draft))
           make-comment  (partial assoc {:target {:type "application"}
