@@ -522,10 +522,10 @@
                       operation-validator]
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
+  (let [organization-id (:id (organization/resolve-organization municipality operation))]
     (when-not
       (or (security/applicant? user)
-          (user-is-authority-in-organization? (:id user) application-organization-id))
+          (user-is-authority-in-organization? (:id user) organization-id))
       (fail! :error.unauthorized))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
@@ -536,7 +536,7 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (security/summary user)} :text)
-          organization  application-organization-id
+          organization  organization-id
           application   {:id            id
                          :created       created
                          :opened        (when (#{:open :info} state) created)
