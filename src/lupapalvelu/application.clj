@@ -527,8 +527,10 @@
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
           info-request? (boolean infoRequest)
-          state         (if info-request? :info
-                          (if (security/authority? user) :open :draft))
+          state         (cond
+                          info-request?              :info
+                          (security/authority? user) :open
+                          :else                      :draft)
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (security/summary user)} :text)
@@ -547,12 +549,8 @@
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
-                         :attachments   (if info-request?
-                                          []
-                                          (make-attachments created op organization-id))
-                         :allowedAttachmentTypes (if info-request?
-                                                   [[:muut [:muu]]]
-                                                   (attachment/get-attachment-types-by-permit-type permit-type))
+                         :attachments   (if info-request? [] (make-attachments created op organization-id))
+                         :allowedAttachmentTypes (if info-request? [[:muut [:muu]]] (attachment/get-attachment-types-by-permit-type permit-type))
                          :comments      (map make-comment messages)}
           application   (assoc application :documents (if info-request?
                                                         []
