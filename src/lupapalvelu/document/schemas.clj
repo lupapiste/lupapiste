@@ -166,12 +166,10 @@
                               {:name "ei tiedossa"}]}])
 
 (def suunnittelija (body
+                     kuntaroolikoodi
                      henkilo-valitsin
                      designer-basic
-                     {:name "patevyys" :type :group
-                      :body (body
-                              kuntaroolikoodi
-                              patevyys)}))
+                     {:name "patevyys" :type :group :body patevyys}))
 
 (def huoneisto [{:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
