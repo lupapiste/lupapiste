@@ -93,8 +93,6 @@
 
     application => truthy
 
-    (Thread/sleep 20) ; Allow future to deliver email
-
     (let [email                     (query pena :last-email)
           body                      (get-in email [:message :body :plain])
           [_ a-id n-id token]       (re-find #"(?sm)/neighbor-show/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
