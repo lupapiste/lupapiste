@@ -84,10 +84,10 @@
         :attachments (attachments/organization-attachments organizationId))
     (fail :unknown-organization)))
 
-(defn resolve-organization [municipality operation]
-  (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType operation}]})]
+(defn resolve-organization [municipality permit-type]
+  (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType permit-type}]})]
     (when (> (count organizations) 1)
-      (errorf "multiple organizations in scope of - municipality=%s, operation=%s -> %s" municipality operation))
+      (errorf "multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type))
     (first organizations)))
 
 ; return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R

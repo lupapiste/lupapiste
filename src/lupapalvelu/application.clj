@@ -517,8 +517,8 @@
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [organization-id (:id (organization/resolve-organization municipality operation))
-        permit-type     (operations/permit-type operation)]
+  (let [permit-type     (operations/permit-type operation)
+        organization-id (:id (organization/resolve-organization municipality permit-type))]
     (when-not
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
