@@ -524,49 +524,51 @@
    :verified   true}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
-    (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
-    (let [id            (make-application-id municipality)
-          owner         (role user :owner :type :owner)
-          op            (make-op operation created)
-          info-request? (if infoRequest true false)
-          state         (if info-request? :info
-                          (if (security/authority? user) :open :draft))
-          make-comment  (partial assoc {:target {:type "application"}
-                                        :created created
-                                        :user (security/summary user)} :text)
-          organization  application-organization-id
-          application   {:id            id
-                         :created       created
-                         :opened        (when (#{:open :info} state) created)
-                         :modified      created
-                         :infoRequest   info-request?
-                         :operations    [op]
-                         :state         state
-                         :municipality  municipality
-                         :location      (->location x y)
-                         :organization  organization
-                         :address       address
-                         :propertyId    propertyId
-                         :title         address
-                         :auth          [owner]
-                         :attachments   (if info-request?
-                                          []
-                                          (make-attachments created op organization))
-                         :allowedAttachmentTypes (if info-request?
-                                                   [[:muut [:muu]]]
-                                                   (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                     (partition 2 attachment/attachment-types-public-areas)
-                                                     (partition 2 attachment/attachment-types)))
-                         :comments      (map make-comment messages)
-                         :permitType    (permit-type-from-operation op)}
-          application   (assoc application :documents (if info-request?
-                                                        []
-                                                        (make-documents user created nil op application)))
-          app-with-ver  (domain/set-software-version application)]
-      (mongo/insert :applications app-with-ver)
-      (autofill-rakennuspaikka app-with-ver created)
-      (ok :id id))
-    (fail :error.unauthorized))))
+    (if (or
+          (security/applicant? user)
+          (user-is-authority-in-organization? (:id user) application-organization-id))
+      (let [id            (make-application-id municipality)
+            owner         (role user :owner :type :owner)
+            op            (make-op operation created)
+            info-request? (if infoRequest true false)
+            state         (if info-request? :info
+                            (if (security/authority? user) :open :draft))
+            make-comment  (partial assoc {:target {:type "application"}
+                                          :created created
+                                          :user (security/summary user)} :text)
+            organization  application-organization-id
+            application   {:id            id
+                           :created       created
+                           :opened        (when (#{:open :info} state) created)
+                           :modified      created
+                           :infoRequest   info-request?
+                           :operations    [op]
+                           :state         state
+                           :municipality  municipality
+                           :location      (->location x y)
+                           :organization  organization
+                           :address       address
+                           :propertyId    propertyId
+                           :title         address
+                           :auth          [owner]
+                           :attachments   (if info-request?
+                                            []
+                                            (make-attachments created op organization))
+                           :allowedAttachmentTypes (if info-request?
+                                                     [[:muut [:muu]]]
+                                                     (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
+                                                       (partition 2 attachment/attachment-types-public-areas)
+                                                       (partition 2 attachment/attachment-types)))
+                           :comments      (map make-comment messages)
+                           :permitType    (permit-type-from-operation op)}
+            application   (assoc application :documents (if info-request?
+                                                          []
+                                                          (make-documents user created nil op application)))
+            app-with-ver  (domain/set-software-version application)]
+        (mongo/insert :applications app-with-ver)
+        (autofill-rakennuspaikka app-with-ver created)
+        (ok :id id))
+      (fail :error.unauthorized))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
