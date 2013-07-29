@@ -468,10 +468,6 @@
 (defn- ->location [x y]
   {:x (->double x) :y (->double y)})
 
-(defn- permit-type-from-operation [operation]
-  ;; TODO operation to permit type mapping???
-  "buildingPermit")
-
 (defn- make-application-id [municipality]
   (let [year           (str (year (local-now)))
         sequence-name  (str "applications-" municipality "-" year)
@@ -519,10 +515,10 @@
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
-                      operation-validator]
-   :verified   true}
+                      operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [organization-id (:id (organization/resolve-organization municipality operation))]
+  (let [organization-id (:id (organization/resolve-organization municipality operation))
+        permit-type     (operations/permit-type operation)]
     (when-not
       (or (security/applicant? user)
           (user-is-authority-in-organization? (:id user) organization-id))
@@ -540,6 +536,7 @@
                          :created       created
                          :opened        (when (#{:open :info} state) created)
                          :modified      created
+                         :permitType    permit-type
                          :infoRequest   info-request?
                          :operations    [op]
                          :state         state
@@ -555,11 +552,8 @@
                                           (make-attachments created op organization-id))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
-                                                   (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                     (partition 2 attachment/attachment-types-public-areas)
-                                                     (partition 2 attachment/attachment-types)))
-                         :comments      (map make-comment messages)
-                         :permitType    (permit-type-from-operation op)}
+                                                   (attachment/get-attachment-types-by-permit-type permit-type))
+                         :comments      (map make-comment messages)}
           application   (assoc application :documents (if info-request?
                                                         []
                                                         (make-documents user created nil op application)))
@@ -609,13 +603,12 @@
    :roles      [:applicant]
    :states     [:draft :info :answered]}
   [{{:keys [id]} :data :keys [user created application] :as command}]
-  (let [op (first (:operations application))]
+  (let [op          (first (:operations application))
+        permit-type (:permitType application)]
     (mongo/update-by-id :applications id
                         {$set {:infoRequest false
                                :state :open
-                               :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                         (partition 2 attachment/attachment-types-public-areas)
-                                                         (partition 2 attachment/attachment-types))
+                               :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                                :documents (make-documents user created nil op nil)
                                :modified created}
            $pushAll {:attachments (make-attachments created op (:organization application))}})))
