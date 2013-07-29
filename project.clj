@@ -21,7 +21,7 @@
                  [com.lowagie/itext "4.2.1"]
                  [org.clojure/data.zip "0.1.1"]
                  [de.ubercode.clostache/clostache "1.3.1"]
-                 [endophile "0.1.0" :exclusions [hiccup]]
+                 [endophile "0.1.1" :exclusions [hiccup]]
                  [com.draines/postal "1.10.4"]
                  [org.clojure/data.xml "0.0.7"]
                  [swiss-arrows "0.6.0"]
