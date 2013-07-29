@@ -32,7 +32,6 @@
                  [fi.sito/oskari "0.9.12"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]]
-  :plugins [[org.timmc/lein-otf "2.0.1"]]
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.6"]]
@@ -42,6 +41,8 @@
                              [lein-hgnotes "0.1.0"]]
                    :source-paths ["test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"]}
+             :uberjar  {:source-paths ["main-src"]
+                        :main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths [#_"test" "itest" "stest"]
@@ -62,6 +63,5 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
-  :aot [lupapalvelu.conversion.convert lupapalvelu.mml.update-poi]
   :repl-options {:init-ns lupapalvelu.server}
   :min-lein-version "2.0.0")

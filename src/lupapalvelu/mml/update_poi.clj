@@ -6,8 +6,7 @@
             [monger.collection :as mc]
             [monger.db :as db]
             [swiss-arrows.core :refer [-<>>]]
-            [slingshot.slingshot :refer [try+ throw+]])
-  (:gen-class))
+            [slingshot.slingshot :refer [try+ throw+]]))
 
 (def default-filename (str "/Volumes/HD2/Users/jarppe/swd/lupa-workspace/mml/" "PNR_2012_01.TXT"))
 
