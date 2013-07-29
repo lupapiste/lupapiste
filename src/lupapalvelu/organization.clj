@@ -94,8 +94,9 @@
 (defquery "get-organization-details"
   {:parameters [:municipality] :verified true}
   [{{municipality :municipality operation :operation} :data}]
-  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1})]
-    (ok :links (:links result))
+  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
+    (ok :links (:links result)
+        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
     (fail :unknown-organization)))
 
 (defcommand "organization-operations-attachments"
