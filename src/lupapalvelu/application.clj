@@ -536,7 +536,6 @@
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (security/summary user)} :text)
-          organization  organization-id
           application   {:id            id
                          :created       created
                          :opened        (when (#{:open :info} state) created)
@@ -546,14 +545,14 @@
                          :state         state
                          :municipality  municipality
                          :location      (->location x y)
-                         :organization  organization
+                         :organization  organization-id
                          :address       address
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
                          :attachments   (if info-request?
                                           []
-                                          (make-attachments created op organization))
+                                          (make-attachments created op organization-id))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
