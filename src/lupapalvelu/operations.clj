@@ -216,22 +216,22 @@
                                  :schema-data [[["_selected" :value] "yritys"]]
                                  :operation-type :publicArea
                                  :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa" "tyoaika")
-                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+                                 :attachments []} ;; TODO: Mita attachmentteihin?
    :yleiset-alueet-kayttolupa   {:schema "tyoaika"
                                  :operation-type :publicArea
                                  :required (conj yleiset-alueet-common-schemas "yleiset-alueet-hankkeen-kuvaus-kaivulupa")
-                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+                                 :attachments []} ;; TODO: Mita attachmentteihin?
    :mainostus-ja-viitoituslupa  {:schema "mainosten-tai-viitoitusten-sijoittaminen"
                                  :operation-type :publicArea
                                  :required yleiset-alueet-common-schemas
-                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+                                 :attachments []} ;; TODO: Mita attachmentteihin?
    :yleiset-alueet-sijoituslupa {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                  :schema-data [[["_selected" :value] "yritys"]]
                                  :operation-type :publicArea
                                  :required ["sijoituslupa-sijoituksen-tarkoitus"]
-                                 :attachments []}                                                     ;; TODO: Mita attachmentteihin?
+                                 :attachments []} ;; TODO: Mita attachmentteihin?
 
-;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika"                              ;; Mika nimi tassa kuuluu olla?
+;   :yleiset-alueet-liikennetta-haittaavan-tyon-lupa   {:schema "tyoaika" ;; Mika nimi tassa kuuluu olla?
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })
 
