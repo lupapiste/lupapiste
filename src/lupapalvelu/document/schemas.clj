@@ -4,20 +4,20 @@
 ;; Register schemas
 ;;
 
-(defonce ^:private all-schemas (atom {}))
+(defonce ^:private registered-schemas (atom {}))
 
-(defn get-schemas [] @all-schemas)
+(defn get-schemas [] @registered-schemas)
 
 (defn defschema [data]
   (let [schema-name (name (get-in data [:info :name]))]
-    (swap! all-schemas assoc schema-name (assoc-in data [:info :name] schema-name))))
+    (swap! registered-schemas assoc schema-name (assoc-in data [:info :name] schema-name))))
 
 (defn defschemas [schemas]
   (doseq [schema schemas]
     (defschema schema)))
 
 (defn get-schema [schema-name]
-  (-> all-schemas deref (get (name schema-name))))
+  (-> registered-schemas deref (get (name schema-name))))
 
 ;;
 ;; helpers
