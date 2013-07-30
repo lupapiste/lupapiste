@@ -118,6 +118,10 @@
                   :filter-user  "123"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
 
 (fact "validate-is-not-public-area?"
-  (validate-is-not-public-area? ..user.. {:permitType "RA"}) => nil
-  (validate-is-not-public-area? ..user.. {:permitType "YA"}) => (contains {:ok false})
-  (validate-is-not-public-area? ..user.. {:permitType :YA})  => (contains {:ok false}))
+  ((validate-permit-type-is-not :YA) ..user.. {:permitType "YA"}) => (contains {:ok false})
+  ((validate-permit-type-is-not :R)  ..user.. {:permitType "YA"}) => nil
+  (validate-permit-type-is-not-ya    ..user.. {:permitType "RA"}) => nil
+  (validate-permit-type-is-not-ya    ..user.. {:permitType "YA"}) => (contains {:ok false})
+  (validate-permit-type-is-not-ya    ..user.. {:permitType :YA})  => (contains {:ok false})
+
+  )

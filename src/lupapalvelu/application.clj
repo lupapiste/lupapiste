@@ -510,10 +510,13 @@
 ;; Validators
 ;;
 
-(defn validate-is-not-public-area? [_ application]
-  (let [permit-type (domain/permit-type application)]
-    (when (= (keyword permit-type) :YA)
-      (fail :error.only-for-public-areas :permitType permit-type))))
+(defn validate-permit-type-is-not [permit-type]
+  (fn [_ application]
+    (let [application-permit-type (domain/permit-type application)]
+      (when (= (keyword application-permit-type) (keyword permit-type))
+        (fail :error.invalid-permit-type :permit-type permit-type)))))
+
+(def validate-permit-type-is-not-ya (validate-permit-type-is-not :YA))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
@@ -574,7 +577,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
    :input-validators [operation-validator]
-   :validators [validate-is-not-public-area?]}
+   :validators [validate-permit-type-is-not-ya]}
   [command]
   (with-application command
     (fn [application]
