@@ -34,8 +34,8 @@
      {:name "tapahtuma-aika-paattyy-pvm" :type :date}]))
 
 #_(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-            {:name "henkilo" :type :group :body henkilo}
-            {:name "yritys" :type :group :body yritys}])
+              {:name "henkilo" :type :group :body henkilo}
+              {:name "yritys" :type :group :body yritys}])
 
 #_{:info {:name "hakija"
           :order 3
@@ -108,15 +108,15 @@
      {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
              :type :group
              :order 63}
-            :body tyo-aika}]))
+      :body tyo-aika}]))
 
 (def kayttolupa-mainoslaitteet-ja-opasteviitat
   (to-map-by-name
     [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
-            :type :group
-;            :removable false  ;; TODO: Miten voi poistaa raksin?
-            :order 64}
-     :body mainostus-tai-viitoitus-tapahtuma-valinta}]))
+             :type :group
+             ;            :removable false  ;; TODO: Miten voi poistaa raksin?
+             :order 64}
+      :body mainostus-tai-viitoitus-tapahtuma-valinta}]))
 
 (def sijoituslupa
   (to-map-by-name
