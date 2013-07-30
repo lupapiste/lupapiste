@@ -436,36 +436,32 @@
     {} schema-data))
 
 ;; FIXME: existing-document is always nil
-(defn- make-documents [created existing-documents op application]
-  (let [op-info               (operations/operations (keyword (:name op)))
-        make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 :schema (schemas/get-schema schema-name)
-                                                 :created created
-                                                 :data (if (= schema-name (:schema op-info))
-                                                         (schema-data-to-body (:schema-data op-info) application)
-                                                         {})})
-        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
-        required-schema-names (remove existing-schema-names (:required op-info))
-        required-docs         (map make required-schema-names)
-        op-schema-name        (:schema op-info)
-        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
-        new-docs              (cons op-doc required-docs)]
-    new-docs))
-
-(defn with-hakija-doc [application user]
-  {:pre [(not= nil user)]}
-  (let [permitType         (keyword (domain/permit-type application))
-        hakija             (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
-        hakija-public-area (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")
-        docs               (:documents application)
-        docs               (condp = permitType
-                             :YA (cons (assoc-in
-                                         (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
-                                         [:data :yritys]
-                                         (domain/->yritys-public-area user))
-                                    docs)
-                             :R  (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) docs))]
-    (assoc application :documents docs)))
+(defn- make-documents [user created existing-documents op application]
+ (let [op-info               (operations/operations (keyword (:name op)))
+       make                  (fn [schema-name] {:id (mongo/create-id)
+                                                :schema (schemas/get-schema schema-name)
+                                                :created created
+                                                :data (if (= schema-name (:schema op-info))
+                                                        (schema-data-to-body (:schema-data op-info) application)
+                                                        {})})
+       existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+       required-schema-names (remove existing-schema-names (:required op-info))
+       required-docs         (map make required-schema-names)
+       op-schema-name        (:schema op-info)
+       op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+       new-docs              (cons op-doc required-docs)
+       hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
+       hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
+   (if user
+     ;; TODO: is this a good way to introduce new types into the system?
+     (if (= (:operation-type op-info) :publicArea)
+       (cons (assoc-in
+               (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
+               [:data :yritys]
+               (domain/->yritys-public-area user))
+         new-docs)
+       (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs))
+     new-docs)))
 
  (defn- ->location [x y]
    {:x (->double x) :y (->double y)})
@@ -533,10 +529,9 @@
                            info-request?              :info
                            (security/authority? user) :open
                            :else                      :draft)
-           make-comment  (partial assoc
-                           {:target {:type "application"}
-                            :created created
-                            :user (security/summary user)} :text)
+           make-comment  (partial assoc {:target {:type "application"}
+                                         :created created
+                                         :user (security/summary user)} :text)
            application   {:id            id
                           :created       created
                           :opened        (when (#{:open :info} state) created)
@@ -560,8 +555,7 @@
                               :documents              []}
                              {:attachments            (make-attachments created op organization-id)
                               :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-                              :documents              (make-documents created nil op application)}))
-           application   (with-hakija-doc application user)
+                              :documents              (make-documents user created nil op application)}))
            application   (domain/set-software-version application)]
        (mongo/insert :applications application)
        (autofill-rakennuspaikka application created)
@@ -581,7 +575,7 @@
              documents  (:documents application)
              op-id      (mongo/create-id)
              op         (make-op (get-in command [:data :operation]) created)
-             new-docs   (make-documents created documents op nil)]
+             new-docs   (make-documents nil created documents op nil)]
          (mongo/update-by-id :applications id {$push {:operations op}
                                                $pushAll {:documents new-docs
                                                          :attachments (make-attachments created op (:organization application))}
@@ -614,7 +608,7 @@
                          {$set {:infoRequest false
                                 :state :open
                                 :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-                                :documents (with-hakija-doc (make-documents user created nil op nil) user)
+                                :documents (make-documents user created nil op nil)
                                 :modified created}
             $pushAll {:attachments (make-attachments created op (:organization application))}})))
 
