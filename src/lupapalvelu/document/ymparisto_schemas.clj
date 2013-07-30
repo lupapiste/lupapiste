@@ -63,42 +63,35 @@
                                        {:name "Rahaa"}
                                        {:name "Pankkitakaus"}]}))
 
-(def ympschemas
-  (to-map-by-name [{:info {:name "meluilmoitus"
-                           :order 50}
-                    :body meluilmoitus}
-                   {:info {:name "pima"
-                           :order 51}
-                    :body pima}
-                   {:info {:name "ymp-ilm-kesto-mini"
-                           :order 60}
-                    :body kesto-mini}
-                   {:info {:name "ymp-ilm-kesto"
-                           :order 60}
-                    :body kesto}
-                   {:info {:name "ottamismaara"
-                           :order 50}
-                    :body ottamismaara}
-                   {:info {:name "ottamis-suunnitelma"
-                           :order 51}
-                    :body ottamis-suunnitelma}
-                   {:info {:name "maa-ainesluvan-omistaja"
-                           :order 3
-                           :type :party}
-                    :body party}
-                   {:info {:name "ottamis-suunnitelman-laatija"
-                           :order 4
-                           :type :party}
-                    :body party}
-                   {:info {:name "paatoksen-toimitus"
-                           :order 9999}
-                    :body [{:name "paatoksenToimittaminen" :type :select
-                           :body [{:name "Noudetaan"}
-                                  {:name "Postitetaan"}]}]
-                    }]))
-
-
-
-
-
-
+(defschemas
+  [{:info {:name "meluilmoitus"
+           :order 50}
+    :body meluilmoitus}
+   {:info {:name "pima"
+           :order 51}
+    :body pima}
+   {:info {:name "ymp-ilm-kesto-mini"
+           :order 60}
+    :body kesto-mini}
+   {:info {:name "ymp-ilm-kesto"
+           :order 60}
+    :body kesto}
+   {:info {:name "ottamismaara"
+           :order 50}
+    :body ottamismaara}
+   {:info {:name "ottamis-suunnitelma"
+           :order 51}
+    :body ottamis-suunnitelma}
+   {:info {:name "maa-ainesluvan-omistaja"
+           :order 3
+           :type :party}
+    :body party}
+   {:info {:name "ottamis-suunnitelman-laatija"
+           :order 4
+           :type :party}
+    :body party}
+   {:info {:name "paatoksen-toimitus"
+           :order 9999}
+    :body [{:name "paatoksenToimittaminen" :type :select
+           :body [{:name "Noudetaan"}
+                  {:name "Postitetaan"}]}]}])
