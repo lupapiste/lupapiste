@@ -293,11 +293,11 @@
 ;; Validate
 ;;
 
-(defn validate-permit-type-is-not [type]
+(defn validate-permit-type-is-not [ptype]
   (fn [_ application]
     (let [application-permit-type (permit-type application)]
-      (when (= (keyword application-permit-type) (keyword type))
-        (fail :error.invalid-permit-type :permit-type type)))))
+      (when (= (keyword application-permit-type) (keyword ptype))
+        (fail :error.invalid-permit-type :permit-type ptype)))))
 
 (def validate-permit-type-is-not-ya (validate-permit-type-is-not :YA))
 
