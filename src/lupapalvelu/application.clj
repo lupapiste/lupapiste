@@ -556,9 +556,9 @@
                              {:attachments            (make-attachments created op organization-id)
                               :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
                               :documents              (make-documents user created nil op application)}))
-           app-with-ver  (domain/set-software-version application)]
-       (mongo/insert :applications app-with-ver)
-       (autofill-rakennuspaikka app-with-ver created)
+           application   (domain/set-software-version application)]
+       (mongo/insert :applications application)
+       (autofill-rakennuspaikka application created)
        (ok :id id))))
 
  (defcommand "add-operation"
