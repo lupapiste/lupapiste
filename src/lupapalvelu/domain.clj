@@ -138,4 +138,3 @@
 
 (defn set-software-version [m]
   (assoc m :_software_version "1.0.5"))
-
