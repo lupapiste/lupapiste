@@ -422,10 +422,10 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created op organization-id & {:keys [target]}]
-  (let [organization (mongo/select-one :organizations {:_id organization-id} {:operations-attachments 1})]
-    (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
-      (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
+(defn- make-attachments [created operation organization-id & {:keys [target]}]
+  (let [organization (organization/get-organization organization-id)]
+    (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
+      (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data application]
   (reduce
