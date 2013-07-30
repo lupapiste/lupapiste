@@ -303,7 +303,7 @@
     (fn [application]
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
-            schema       (get schemas/schemas schema-name)
+            schema       (schemas/get-schema schema-name)
             subject      (security/get-non-private-userinfo userId)
             with-hetu    (and
                            (domain/has-hetu? (:body schema) [path])
