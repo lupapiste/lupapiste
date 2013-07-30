@@ -10,6 +10,7 @@
     self.operations = ko.observable();
     self.operation = ko.observable();
     self.pending = ko.observable();
+    self.processing = ko.observable();
     self.waitingOperations = ko.observable();
 
     self.clear = function() {
@@ -22,6 +23,7 @@
       self
         .operations(null)
         .operation(null)
+        .processing(false)
         .pending(false)
         .waitingOperations(false)
         .title(application.title)
@@ -42,6 +44,7 @@
     self.addOperation = function(op) {
       ajax
         .command("add-operation", {id: self.application.id, operation: op.op})
+        .processing(self.processing)
         .pending(self.pending)
         .success(function() {
           window.location.hash = self.url();
