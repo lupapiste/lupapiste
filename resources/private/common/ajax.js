@@ -11,6 +11,9 @@ var ajax = (function() {
         clearTimeout(self.pendingHandler);
         self.pendingListener(false);
       }
+      if (self.processingListener) {
+        self.processingListener(false);
+      }
       self.completeHandler(jqXHR, textStatus);
     };
 
@@ -111,6 +114,14 @@ var ajax = (function() {
       return self;
     };
 
+    self.processing = function(listener) {
+      if (!listener) { return self; }
+      if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
+      self.processingListener = listener;
+      self.processingListener(false);
+      return self;
+    };
+
     self.pending = function(listener, timeout) {
       if (!listener) { return self; }
       if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
@@ -121,6 +132,9 @@ var ajax = (function() {
     };
 
     self.call = function() {
+      if (self.processingListener) {
+        self.processingListener(true);
+      }
       if (self.pendingListener) {
         self.pendingHandler = setTimeout(_.partial(self.pendingListener, true), self.pendingTimeout);
       }
