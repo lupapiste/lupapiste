@@ -4,6 +4,7 @@
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
             [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.core :refer [fail]]
             [sade.env :as env]))
 
@@ -273,7 +274,7 @@
 ;                                                       :required (conj yleiset-alueet-common-schemas [])}
    })
 
-(defn permit-type [operation]
+(defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
 
 (doseq [[op {:keys [permit-type]}] operations]
@@ -295,7 +296,7 @@
 
 (defn validate-permit-type-is-not [ptype]
   (fn [_ application]
-    (let [application-permit-type (permit-type application)]
+    (let [application-permit-type (domain/permit-type application)]
       (when (= (keyword application-permit-type) (keyword ptype))
         (fail :error.invalid-permit-type :permit-type ptype)))))
 
