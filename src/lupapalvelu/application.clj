@@ -146,7 +146,11 @@
   (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
 (defn filter-repeating-party-docs [names]
-  (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
+  (filter
+    (fn [name]
+      (and (= :party (get-in (schemas/get-schemas) [name :info :type]))
+        (= true (get-in (schemas/get-schemas) [name :info :repeating]))))
+    names))
 
 (defquery "party-document-names"
   {:parameters [:id]
