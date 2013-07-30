@@ -436,8 +436,10 @@
     {} schema-data))
 
 ;; FIXME: existing-document is always nil
+;; TODO: permit-type splitting.
 (defn- make-documents [user created existing-documents op application]
  (let [op-info               (operations/operations (keyword (:name op)))
+       permit-type           (keyword (domain/permit-type application))
        make                  (fn [schema-name] {:id (mongo/create-id)
                                                 :schema (schemas/get-schema schema-name)
                                                 :created created
@@ -452,16 +454,16 @@
        new-docs              (cons op-doc required-docs)
        hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
        hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
-   (if user
-     ;; TODO: is this a good way to introduce new types into the system?
-     (if (= (:operation-type op-info) :publicArea)
-       (cons (assoc-in
+   (if-not user
+     new-docs
+     (condp = permit-type
+       :YA (cons
+             (assoc-in
                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
                [:data :yritys]
                (domain/->yritys-public-area user))
-         new-docs)
-       (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs))
-     new-docs)))
+             new-docs)
+       (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs)))))
 
  (defn- ->location [x y]
    {:x (->double x) :y (->double y)})
