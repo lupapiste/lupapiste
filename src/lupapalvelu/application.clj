@@ -434,14 +434,7 @@
 (defn- make-documents [user created existing-documents op application]
   (let [op-info               (operations/operations (keyword (:name op)))
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 ;; TODO: Yhdista (nama kaikki) schemat jossain jarkevammassa paikassa
-                                                 :schema ((merge schemas/schemas
-                                                            poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
-                                                            ympschemas/ympschemas
-                                                            yleiset-alueet/kaivuulupa
-                                                            yleiset-alueet/sijoituslupa
-                                                            yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
-                                                            #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
+                                                 :schema (schemas/get-schema schema-name)
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
