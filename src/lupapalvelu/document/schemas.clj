@@ -17,7 +17,8 @@
     (defschema schema)))
 
 (defn get-schema [schema-name]
-  (-> registered-schemas deref (get (name schema-name))))
+  {:pre [(not= nil schema-name)]}
+  (@registered-schemas (name schema-name)))
 
 ;;
 ;; helpers
