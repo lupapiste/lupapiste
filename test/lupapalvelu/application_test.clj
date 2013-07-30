@@ -116,3 +116,8 @@
   (make-query {} {:filter-kind  "both"
                   :filter-state "all"
                   :filter-user  "123"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
+
+(fact "validate-is-not-public-area?"
+  (validate-is-not-public-area? ..user.. {:permitType "RA"}) => nil
+  (validate-is-not-public-area? ..user.. {:permitType "YA"}) => (contains {:ok false})
+  (validate-is-not-public-area? ..user.. {:permitType :YA})  => (contains {:ok false}))

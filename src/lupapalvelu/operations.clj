@@ -289,14 +289,3 @@
   (if-not (schemas/get-schema schema)
     (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
 
-;;
-;; Commons
-;;
-
-(defn get-operation [application]
-  (-> application :operations last :operation-type keyword))
-
-(defn validate-is-not-public-area? [_ application]
-  (let [operation (get-operation application)]
-    (when (= operation :publicArea)
-      (fail :error.only-for-public-areas :operation operation))))

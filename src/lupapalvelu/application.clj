@@ -506,8 +506,14 @@
  (defn- operation-validator [{{operation :operation} :data}]
    (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
- (defn- public-area-validator [command application]
-   (when (= (:operation-type (operations/operations (keyword (:name (first (:operations application)))))) :publicArea) (fail :error.unknown-type)))
+;;
+;; Validators
+;;
+
+(defn validate-is-not-public-area? [_ application]
+  (let [permit-type (domain/permit-type application)]
+    (when (= (keyword permit-type) :YA)
+      (fail :error.only-for-public-areas :permitType permit-type))))
 
  ;; TODO: separate methods for inforequests & applications for clarity.
  (defcommand "create-application"
@@ -568,7 +574,7 @@
     :roles      [:applicant :authority]
     :states     [:draft :open :complement-needed]
     :input-validators [operation-validator]
-    :validators [public-area-validator]}
+    :validators [validate-is-not-public-area?]}
    [command]
    (with-application command
      (fn [application]
