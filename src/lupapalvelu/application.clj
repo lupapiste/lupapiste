@@ -438,32 +438,32 @@
 ;; FIXME: existing-document is always nil
 ;; TODO: permit-type splitting.
 (defn- make-documents [user created existing-documents op application]
- (let [op-info               (operations/operations (keyword (:name op)))
-       permit-type           (keyword (domain/permit-type application))
-       make                  (fn [schema-name] {:id (mongo/create-id)
-                                                :schema (schemas/get-schema schema-name)
-                                                :created created
-                                                :data (if (= schema-name (:schema op-info))
-                                                        (schema-data-to-body (:schema-data op-info) application)
-                                                        {})})
-       existing-schema-names (set (map (comp :name :info :schema) existing-documents))
-       required-schema-names (remove existing-schema-names (:required op-info))
-       required-docs         (map make required-schema-names)
-       op-schema-name        (:schema op-info)
-       op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
-       new-docs              (cons op-doc required-docs)
-       hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
-       hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
-   (if-not user
-     new-docs
-     (condp = permit-type
-       :YA (cons
-             (assoc-in
-               (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
-               [:data :yritys]
-               (domain/->yritys-public-area user))
-             new-docs)
-       (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs)))))
+  (let [op-info               (operations/operations (keyword (:name op)))
+        permit-type           (keyword (domain/permit-type application))
+        make                  (fn [schema-name] {:id (mongo/create-id)
+                                                 :schema (schemas/get-schema schema-name)
+                                                 :created created
+                                                 :data (if (= schema-name (:schema op-info))
+                                                         (schema-data-to-body (:schema-data op-info) application)
+                                                         {})})
+        existing-schema-names (set (map (comp :name :info :schema) existing-documents))
+        required-schema-names (remove existing-schema-names (:required op-info))
+        required-docs         (map make required-schema-names)
+        op-schema-name        (:schema op-info)
+        op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
+        new-docs              (cons op-doc required-docs)
+        hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
+        hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
+    (if-not user
+      new-docs
+      (condp = permit-type
+        :YA (cons
+              (assoc-in
+                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
+                [:data :yritys]
+                (domain/->yritys-public-area user))
+              new-docs)
+        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs)))))
 
  (defn- ->location [x y]
    {:x (->double x) :y (->double y)})
@@ -514,7 +514,7 @@
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [permit-type     (operations/permit-type operation)
+  (let [permit-type     (operations/permit-type-of-operation operation)
         organization-id (:id (organization/resolve-organization municipality permit-type))]
     (when-not
       (or (security/applicant? user)
@@ -574,7 +574,7 @@
             documents  (:documents application)
             op-id      (mongo/create-id)
             op         (make-op (get-in command [:data :operation]) created)
-            new-docs   (make-documents nil created documents op nil)]
+            new-docs   (make-documents nil created documents op application)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
