@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody data-bind="foreach: neighbors">
-          <tr>
+          <tr data-bind="attr: {'data-test-id': 'manage-neighbors-email-' + neighbor.owner.email}">
             <td data-bind="text: neighbor.propertyId"></td>
             <td data-bind="with: neighbor.owner">
               <span data-bind="text: name" class="owner-name"></span>
@@ -27,19 +27,19 @@
               <span data-bind="text: email" class="owner-email"></span>
             </td>
             <td data-bind="with: _.last(status)">
-              <span data-bind="text: state" class="status-state"></span>
+              <span data-bind="text: loc('neighbor.state', state)" class="status-state"></span>
               <span data-bind="dateTimeString: created" class="status-time"></span>
             </td>
             <td>
-              <a data-bind="click: $root.edit, clickBubble: false, ltext: 'neighbors.actions.edit'" href="#"></a>
-              <a data-bind="click: $root.remove, clickBubble: false, ltext: 'neighbors.actions.remove'" href="#"></a>
+              <a data-bind="click: $root.edit, clickBubble: false, ltext: 'neighbors.actions.edit'" data-test-id="manage-neighbors-edit" href="#"></a>
+              <a data-bind="click: $root.remove, clickBubble: false, ltext: 'neighbors.actions.remove'" data-test-id="manage-neighbors-remove"href="#"></a>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <button data-bind="click: $root.add, ltext: 'neighbors.add'" class="btn btn-primary modal"></button>
-      <button data-bind="click: $root.done, ltext: 'neighbors.done'" class="btn"></button>
+      <button data-bind="click: $root.add, ltext: 'neighbors.add'" data-test-id="manager-neighbors-add" class="btn btn-primary modal"></button>
+      <button data-bind="click: $root.done, ltext: 'neighbors.done'" data-test-id="manager-neighbors-done" class="btn"></button>
 
     </div>
 
@@ -56,10 +56,10 @@
         </div>
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
-          <input data-bind="value: propertyId, enable: status() > statusSearch, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" />
+          <input data-bind="value: propertyId, enable: status() > statusSearch, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
 
           <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors.owner.name"></label>
-          <input data-bind="value: name, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.name" />
+          <input data-bind="value: name, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.name" data-test-id="neighbors.edit.name"/>
 
           <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors.owner.address.street"></label>
           <input data-bind="value: street, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.street" />
@@ -71,10 +71,10 @@
           <input data-bind="value: zip, enable: status() > statusSearch" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
 
           <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
-          <input data-bind="value: email, enable: status() > statusSearch, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" />
+          <input data-bind="value: email, enable: status() > statusSearch, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
         </form>
 
-        <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog"></button>
+        <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.edit.ok"></button>
         <button data-bind="ltext: 'neighbors.edit.cancel'" class="btn btn-dialog close"></button>
 
       </div>

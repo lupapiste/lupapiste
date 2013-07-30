@@ -57,6 +57,7 @@
     self.municipality = ko.observable(null);
     self.organization = ko.observable(null);
     self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
+    self.attachmentsForOp = ko.computed(function() { var m = self.organization(); return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null; });
     self.municipalityCode = ko.observable(null);
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
@@ -94,13 +95,6 @@
     self.operation = ko.observable();
     self.message = ko.observable("");
     self.requestType = ko.observable();
-
-    self.attachmentsForOp = ko.computed(function() {
-      var m = self.municipality(),
-          ops = m && m["operations-attachments"],
-          op = self.operation();
-      return (ops && op) ? _.map(ops[op], function(a) { return {"group": a[0], "id": a[1]}; }) : [];
-    });
 
     self.clear = function() {
       if (!self.map) {

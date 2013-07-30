@@ -138,7 +138,7 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', operation())"></div>
       <div data-bind="html: loc('operations', operation(), 'desc')"></div>
 
-      <div class="municipality-links" data-bind="visible: organizationLinks">
+      <div class="organization-links" data-bind="visible: organizationLinks">
         <div data-bind="ltext: 'organization.links'"></div>
         <ul data-bind="foreach: organizationLinks">
           <li>
@@ -147,8 +147,8 @@
         </ul>
       </div>
 
-      <div class="municipality-attachments" data-bind="visible: attachmentsForOp().length">
-        <div data-bind="ltext: 'municipality.attachments'"></div>
+      <div class="organization-attachments" data-bind="visible: attachmentsForOp">
+        <div data-bind="ltext: 'organization.attachments'"></div>
         <div class="attachments-list" data-bind="foreach: attachmentsForOp"><span data-bind="visible: $index">, </span><span data-bind="text: loc('attachmentType', group, id)"></span></div>
       </div>
 
