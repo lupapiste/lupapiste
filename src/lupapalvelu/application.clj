@@ -607,7 +607,7 @@
                         {$set {:infoRequest false
                                :state :open
                                :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-                               :documents (make-documents user created nil op nil)
+                               :documents (make-documents user created nil op application)
                                :modified created}
            $pushAll {:attachments (make-attachments created op (:organization application))}})))
 
