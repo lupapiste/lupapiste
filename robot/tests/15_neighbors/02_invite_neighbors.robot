@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Authority adds couple of neighbors, then we invite them and see how they respond
-# Suite teardown  Logout
+Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
@@ -126,7 +126,8 @@ Neighbor clicks on email link and sees epplication
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinrakennuksen rakentaminen
   
-Neighbor clicks vetuba button to identify herself
+Neighbor clicks vetuma button to identify herself
+  [Tags]  integration
   Click element  xpath=//*[@data-test-id='vetuma-init']
   Click element  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//a[@class='nordea']
@@ -136,6 +137,7 @@ Neighbor clicks vetuba button to identify herself
   Click element  xpath=//button[@type='submit']
   
 Neighbor is back and leaves a comment
+  [Tags]  integration
   Wait until  Element should be visible  xpath=//input[@data-test-id='neighbor-response-comments']
   Click element  xpath=//input[@data-test-id='neighbor-response-comments']
   Wait until  Element should be enabled  xpath=//*[@data-test-id='neighbor-response-message']
@@ -146,6 +148,7 @@ Neighbor is back and leaves a comment
   Element text should be  xpath=//*[@data-test-id='neighbor-response-done']  KIITOS VASTAUKSESTASI!
   
 Mikko sees that the neighbor has given a comment
+  [Tags]  integration
   Go to login page
   Mikko logs in
   Open application  ${appname}  753-416-25-22
@@ -153,6 +156,7 @@ Mikko sees that the neighbor has given a comment
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']
   
 Mikko opens dialog to see neighbors response
+  [Tags]  integration
   Click element  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
@@ -160,13 +164,16 @@ Mikko opens dialog to see neighbors response
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
   
 Mikko can not see neighbor sotu
+  [Tags]  integration
   Element should not be visible  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-userid']
   
 Mikko goes to pursuit happines in life
+  [Tags]  integration
   Click element  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-ok']
   Logout
 
 Sonja sees that the neighbour has given a comment
+  [Tags]  integration
   Sonja logs in
   Open application  ${appname}  753-416-25-22
   Open tab  statement
@@ -178,6 +185,6 @@ Sonja sees that the neighbour has given a comment
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
   
 Sonja can see neighbor sotu
+  [Tags]  integration
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-userid']  210281-9988
   Click element  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-ok']
-  Logout
