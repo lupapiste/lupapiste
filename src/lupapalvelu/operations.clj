@@ -280,16 +280,13 @@
   (when-not permit-type
     (throw (Exception. (format "Operation %s does not have permit-type set." op)))))
 
-;; schemas, bad place to list things.
+;;
+;; Sanity scheck
+;;
+
 (doseq [[op {:keys [schema required]}] operations
         schema (cons schema required)]
-  (if-not ((merge schemas/schemas
-             poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
-             yleiset-alueet/kaivuulupa
-             yleiset-alueet/sijoituslupa
-             yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
-             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa
-             ympschemas/ympschemas) schema)
+  (if-not (schemas/get-schema schema)
     (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
 
 ;;
