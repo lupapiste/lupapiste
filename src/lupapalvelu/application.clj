@@ -506,18 +506,6 @@
  (defn- operation-validator [{{operation :operation} :data}]
    (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
-;;
-;; Validators
-;;
-
-(defn validate-permit-type-is-not [permit-type]
-  (fn [_ application]
-    (let [application-permit-type (domain/permit-type application)]
-      (when (= (keyword application-permit-type) (keyword permit-type))
-        (fail :error.invalid-permit-type :permit-type permit-type)))))
-
-(def validate-permit-type-is-not-ya (validate-permit-type-is-not :YA))
-
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
   {:parameters [:operation :x :y :address :propertyId :municipality]
@@ -577,7 +565,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
    :input-validators [operation-validator]
-   :validators [validate-permit-type-is-not-ya]}
+   :validators [operations/validate-permit-type-is-not-ya]}
   [command]
   (with-application command
     (fn [application]
