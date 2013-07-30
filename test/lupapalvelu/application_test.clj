@@ -107,8 +107,6 @@
   (validate-y {:data {:y "7780000"}}) => {:ok false :text "error.illegal-coordinates"}
   (validate-y {:data {:y "7779999"}}) => nil)
 
-(def make-documents #'lupapalvelu.application/make-documents)
-
 (defn find-by-schema? [docs schema-name]
   (domain/get-document-by-name {:documents docs} schema-name))
 
