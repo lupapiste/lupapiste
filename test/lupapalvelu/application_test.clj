@@ -114,55 +114,6 @@
 
 (defn has-schema? [schema] (fn [docs] (find-by-schema? docs schema)))
 
-(comment
-  (facts
-    (against-background (operations/operations :foo) => {:schema "foo" :required ["a" "b"] :attachments []}
-      (operations/operations :bar) => {:schema "bar" :required ["b" "c"] :attachments []}
-      (schemas/schemas "hakija")   => {:info {:name "hakija"}, :data []}
-      (schemas/schemas "foo")      => {:info {:name "foo"}, :data []}
-      (schemas/schemas "a")        => {:info {:name "a"}, :data []}
-      (schemas/schemas "b")        => {:info {:name "b"}, :data []}
-      (schemas/schemas "bar")      => {:info {:name "bar"}, :data []}
-      (schemas/schemas "c")        => {:info {:name "c"}, :data []})
-    (let [user {:name "foo"}
-          created 12345]
-      (let [docs (make-documents user created nil :foo)]
-        (count docs) => 4
-        (find-by-schema? docs "hakija") => (contains {:data {:henkilo {:henkilotiedot user}}})
-        docs => (has-schema? "foo")
-        docs => (has-schema? "a")
-        docs => (has-schema? "b"))
-      ; use-case: "create-application"
-      (let [docs (make-documents user created [{:schema {:name "hakija"}}] :foo)]
-        (count docs) => 4)
-      ; use-case "add-operation"
-      (let [docs (make-documents user created nil :foo)
-            docs (make-documents nil created docs :bar)]
-        (count docs) => 2
-        docs => (has-schema? "bar")
-        docs => (has-schema? "c")))))
-
-(comment
-  ; Should rewrite this as a couple of unit tests
-  (fact "Assert that proper documents are created"
-
-    (let [id (:id (create-app :operation "foo"))
-          app (:application (query pena :application :id id))
-          docs (:documents app)]
-      (count docs) => 4 ; foo, a, b and "hakija".
-      (find-by-schema? docs "foo") => truthy
-      (find-by-schema? docs "a") => truthy
-      (find-by-schema? docs "b") => truthy
-      (-> (find-by-schema? docs "foo") :schema :info) => (contains {:op "foo" :removable true})
-      ; Add operation:
-      (command pena :add-operation :id id :operation "bar")
-      (let [app (:application (query pena :application :id id))
-            docs (:documents app)]
-        (count docs) => 6 ; foo, a, b and "hakija" + bar and c
-        (find-by-schema? docs "bar") => truthy
-        (find-by-schema? docs "c") => truthy
-        (-> (find-by-schema? docs "bar") :schema :info) => (contains {:op "bar" :removable true})))))
-
 (fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
   (make-query {} {:filter-kind  "both"
                   :filter-state "all"
