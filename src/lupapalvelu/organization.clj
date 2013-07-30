@@ -136,6 +136,9 @@
 (defn get-organization [id]
   (and id (mongo/select-one :organizations {:_id id})))
 
+(defn get-organization-attachments-for-operation [organization operation]
+  (-> organization :operations-attachments ((-> operation {} :name keyword))))
+
 (defn municipality-by-propertyId [id]
   (when (and (>= (count id) 3) (not (s/blank? id)))
     (subs id 0 3)))
