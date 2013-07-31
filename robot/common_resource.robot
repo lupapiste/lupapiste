@@ -7,7 +7,7 @@ Library        Selenium2Library   timeout=10  run_on_failure=Log Source
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   300
+${WAIT_DELAY}                   3600
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
