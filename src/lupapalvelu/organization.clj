@@ -96,6 +96,9 @@
   [{user :user}]
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
+(defquery "municipalities-with-organization"
+  {} [_] (ok :municipalities (municipalities-with-organization)))
+
 ;; FIXME: uses old format
 (defquery "municipalities-for-new-application"
   {:authenticated true
