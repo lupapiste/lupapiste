@@ -9,8 +9,8 @@
     self.url = ko.observable();
     self.operations = ko.observable();
     self.operation = ko.observable();
-    self.pending = ko.observable();
     self.processing = ko.observable();
+    self.pending = ko.observable();
     self.waitingOperations = ko.observable();
 
     self.clear = function() {
