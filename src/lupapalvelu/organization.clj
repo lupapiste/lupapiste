@@ -9,11 +9,40 @@
             [lupapalvelu.attachment :as attachments]
             [lupapalvelu.operations :as operations]))
 
+;;
+;; local api
+;;
+
+(defn get-organization [id]
+  (and id (mongo/select-one :organizations {:_id id})))
+
+(defn get-organization-attachments-for-operation [organization operation]
+  (-> organization :operations-attachments ((-> operation :name keyword))))
+
+(defn municipality-by-propertyId [id]
+  (when (and (>= (count id) 3) (not (s/blank? id)))
+    (subs id 0 3)))
+
+(defn get-legacy [organization-id]
+  (let [organization (mongo/select-one :organizations {:_id organization-id})
+        legacy       (:legacy organization)]
+    (when-not (s/blank? legacy) legacy)))
+
+(defn municipalities-with-organization []
+  (let [id-and-scopes (mongo/select :organizations {} {:scope 1})]
+    (distinct
+      (for [{id :id scopes :scope} id-and-scopes
+            {:keys [municipality]} scopes] municipality))))
+
 (defn find-user-organizations [user]
   (mongo/select :organizations {:_id {$in (:organizations user)}}))
 
 (defn find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+
+;;
+;; Actions
+;;
 
 (defquery "users-in-same-organizations"
   {:roles [:authority]}
@@ -67,6 +96,7 @@
   [{user :user}]
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
+;; FIXME: uses old format
 (defquery "municipalities-for-new-application"
   {:authenticated true
    :verified true}
@@ -129,25 +159,6 @@
         (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
         (ok))
       (fail :legacy_is_dead))))
-
-;;
-;; local api
-;;
-
-(defn get-organization [id]
-  (and id (mongo/select-one :organizations {:_id id})))
-
-(defn get-organization-attachments-for-operation [organization operation]
-  (-> organization :operations-attachments ((-> operation :name keyword))))
-
-(defn municipality-by-propertyId [id]
-  (when (and (>= (count id) 3) (not (s/blank? id)))
-    (subs id 0 3)))
-
-(defn get-legacy [organization-id]
-  (let [organization (mongo/select-one :organizations {:_id organization-id})
-        legacy       (:legacy organization)]
-    (when-not (s/blank? legacy) legacy)))
 
 ;;
 ;; Helpers
