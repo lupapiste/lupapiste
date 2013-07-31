@@ -7,7 +7,7 @@ Library        Selenium2Library   timeout=10  run_on_failure=Log Source
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   3600
+${WAIT_DELAY}                   10
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
@@ -41,10 +41,12 @@ Go to login page
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
   Title should be  Lupapiste
+  Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority applications page should be open
   Location should contain  ${AUTHORITY APPLICATIONS PATH}
   #Title should be  Lupapiste - Viranomainen
+  Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority-admin front page should be open
   Wait until page contains element  admin-header
