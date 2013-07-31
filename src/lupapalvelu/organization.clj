@@ -31,7 +31,7 @@
     (ok :organization (assoc organization :operations-attachments ops)
         :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
 
-(defcommand "organization-link-add"
+(defcommand "add-organization-link"
   {:description "Adds link to organization."
    :parameters [:url :nameFi :nameSv]
    :roles [:authorityAdmin]
