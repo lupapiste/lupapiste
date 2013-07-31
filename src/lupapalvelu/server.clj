@@ -43,7 +43,7 @@
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware headers/add-security-headers)
   #_(when-not (env/feature? :disable-anti-csrf) (server/add-middleware web/anti-csrf))
-  (server/add-middleware web/anti-csrf)
+  #_(server/add-middleware web/anti-csrf)
   (server/add-middleware web/authentication)
   (server/add-middleware web/session-timeout)
   (server/add-middleware etag/if-none-match-build-number)
