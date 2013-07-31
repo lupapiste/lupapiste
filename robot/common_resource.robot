@@ -119,6 +119,7 @@ User is not logged in
 
 Login
   [Arguments]  ${username}  ${password}
+  Wait until  Element should be visible  login-username
   Input text  login-username  ${username}
   Input text  login-password  ${password}
   # for IE8
@@ -251,12 +252,14 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Wait until  Element should be visible  user-name  
   Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
+  Wait until  Element should be visible  user-name  
   Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
