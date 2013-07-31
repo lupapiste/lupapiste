@@ -41,7 +41,7 @@
     (mongo/update :organizations {:_id organization} {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "organization-link-update"
+(defcommand "update-organization-link"
   {:description "Updates organization link."
    :parameters [:url :nameFi :nameSv :index]
    :roles [:authorityAdmin]
