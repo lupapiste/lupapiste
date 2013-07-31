@@ -197,11 +197,6 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
-(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
-
-(defjson "/api/hashbang" []
-  (ok :bang (session/get! :hashbang "")))
-
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
@@ -216,11 +211,18 @@
       (redirect lang application-page)
       (redirect-to-frontpage lang))))
 
+(defn- ->hashbang [v]
+  (when (and v (= -1 (.indexOf v ":")))
+    (second (re-matches #"^[#!/]{0,3}(.*)" v))))
+
 (defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
-  (when (and hashbang (local? hashbang))
+  ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when-let [hashbang (->hashbang hashbang)]
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
 
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
