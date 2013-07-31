@@ -51,7 +51,7 @@
     (mongo/update :organizations {:_id organization} {$set {(str "links." i) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "organization-link-rm"
+(defcommand "remove-organization-link"
   {:description "Removes organization link."
    :parameters [:nameFi :nameSv :url]
    :roles [:authorityAdmin]
