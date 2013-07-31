@@ -134,9 +134,7 @@
    :parameters [:id]}
   [{app :application user :user}]
   (if app
-    (ok :application (-> app
-                       ((partial with-meta-fields user))
-                       without-system-keys)
+    (ok :application ((app-post-processor user) app)
         :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
@@ -605,7 +603,7 @@
    :states     [:draft :info :answered]}
   [{{:keys [id]} :data :keys [user created application] :as command}]
   (let [op          (first (:operations application))
-        permit-type (:permitType application)]
+        permit-type (domain/permit-type application)]
     (mongo/update-by-id :applications id
                         {$set {:infoRequest false
                                :state :open
