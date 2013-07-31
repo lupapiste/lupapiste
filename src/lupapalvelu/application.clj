@@ -436,10 +436,10 @@
         (update-in body path (constantly val))))
     {} schema-data))
 
-;; FIXME: existing-document is always nil
 ;; TODO: permit-type splitting.
-(defn- make-documents [user created existing-documents op application]
+(defn- make-documents [user created op application]
   (let [op-info               (operations/operations (keyword (:name op)))
+        existing-documents    (:documents application)
         permit-type           (keyword (domain/permit-type application))
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/get-schema schema-name)
@@ -555,7 +555,7 @@
                              :documents              []}
                             {:attachments            (make-attachments created op organization-id)
                              :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-                             :documents              (make-documents user created nil op application)}))
+                             :documents              (make-documents user created op application)}))
           application   (domain/set-software-version application)]
       (mongo/insert :applications application)
       (autofill-rakennuspaikka application created)
@@ -572,10 +572,9 @@
     (fn [application]
       (let [id         (get-in command [:data :id])
             created    (:created command)
-            documents  (:documents application)
             op-id      (mongo/create-id)
             op         (make-op (get-in command [:data :operation]) created)
-            new-docs   (make-documents nil created documents op application)]
+            new-docs   (make-documents nil created op application)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
@@ -608,7 +607,7 @@
                         {$set {:infoRequest false
                                :state :open
                                :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
-                               :documents (make-documents user created nil op application)
+                               :documents (make-documents user created op application)
                                :modified created}
            $pushAll {:attachments (make-attachments created op (:organization application))}})))
 
