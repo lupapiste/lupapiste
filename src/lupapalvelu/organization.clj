@@ -78,8 +78,8 @@
 (defquery "organization"
   {:parameters [:organizationId] :verified true}
   [{{organizationId :organizationId} :data}]
-  (if-let [result (mongo/select-one :organizations {:_id organizationId} {"links" 1})]
-    (ok :links (:links result)
+  (if-let [{:keys [links]} (mongo/select-one :organizations {:_id organizationId} {"links" 1})]
+    (ok :links links
         :operations (operations/municipality-operations organizationId)
         :attachments (attachments/organization-attachments organizationId))
     (fail :unknown-organization)))
