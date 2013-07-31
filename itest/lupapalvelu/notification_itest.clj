@@ -14,7 +14,7 @@
     commented => ok?
 
     ; XXX Wait for mail delivery
-    (Thread/sleep 2000)
+    (Thread/sleep 20)
 
     (let [resp (query mikko :sent-emails :reset true)
           messages (:messages resp)]

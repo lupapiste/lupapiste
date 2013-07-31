@@ -120,9 +120,11 @@
 ;; Query application:
 ;;
 
+(defn- app-post-processor [user]
+  (comp without-system-keys (partial with-meta-fields user)))
+
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map #(-> % ((partial with-meta-fields user)) without-system-keys)
-                         (mongo/select :applications (domain/application-query-for user)))))
+  (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
@@ -130,12 +132,13 @@
 (defquery "application"
   {:authenticated true
    :parameters [:id]}
-  [{:keys [application user]}]
-  (when-not application (fail! :error.not-found))
-  (ok :application (-> application
-                     ((partial with-meta-fields user))
-                     without-system-keys)
-    :authorities (find-authorities-in-applications-organization application)))
+  [{app :application user :user}]
+  (if app
+    (ok :application (-> app
+                       ((partial with-meta-fields user))
+                       without-system-keys)
+        :authorities (find-authorities-in-applications-organization app))
+    (fail :error.not-found)))
 
 ;; Gets an array of application ids and returns a map for each application that contains the
 ;; application id and the authorities in that organization.

@@ -13,6 +13,8 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.propertyId = ko.observable("");
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
+  self.processing = ko.observable();
+  self.pending = ko.observable();
 
   self.ok = ko.computed(function() {
     return util.prop.isPropertyId(self.propertyId()) && self.address();
@@ -45,6 +47,8 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.errorMessage(null);
     self.map.clear().updateSize();
     self.center(10);
+    self.processing(false);
+    self.pending(false);
   };
 
   //
@@ -94,7 +98,12 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.saveNewLocation = function() {
     var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
-    ajax.command("change-location", data).success(self.onSuccess).error(self.onError).call();
+    ajax.command("change-location", data)
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(self.onSuccess)
+      .error(self.onError)
+      .call();
     return false;
   };
 

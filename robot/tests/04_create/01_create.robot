@@ -64,7 +64,7 @@ Mikko closes application at Latokuja 3 and logs out
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application  create-veikko-auth-app  837  837-416-17-15
+  Create application the fast way  create-veikko-auth-app  837  837-416-17-15
   Wait until  Application state should be  open
   It is possible to add operation
 

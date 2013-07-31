@@ -745,17 +745,50 @@
     }
   });
 
+  function NeighborStatusModel() {
+    var self = this;
+    
+    self.state = ko.observable();
+    self.created = ko.observable();
+    self.message = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
+    self.userid = ko.observable();
+    
+    self.init = function(neighbor) {
+      var l = neighbor.lastStatus;
+      var u = l.vetuma || l.user;
+      return self
+        .state(l.state())
+        .created(l.created())
+        .message(l.message && l.message())
+        .firstName(u.firstName && u.firstName())
+        .lastName(u.lastName && u.lastName())
+        .userid(u.userid && u.userid())
+    };
+    
+    self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-neighbor-status"); return self; };
+  }
+
+  var neighborStatusModel = new NeighborStatusModel();
+  
   var neighborActions = {
     manage: function(application) {
       window.location.hash = "!/neighbors/" + application.id();
       return false;
     },
-    upload: function(neighbor) { /* TODO: */ },
     markDone: function(neighbor) {
       ajax
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
         .complete(_.partial(repository.load, currentId, util.nop))
         .call();
+    },
+    statusCompleted: function(neighbor) {
+      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], neighbor.lastStatus.state());
+    },
+    showStatus: function(neighbor) {
+      neighborStatusModel.init(neighbor).open();
+      return false;
     }
   };
 
@@ -767,10 +800,9 @@
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
-    self.message = ko.observable();
 
     self.ok = ko.computed(function() {
-      return util.isValidEmailAddress(self.email()) && !_.isBlank(self.message());
+      return util.isValidEmailAddress(self.email());
     });
 
     self.open = function(neighbor) {
@@ -779,12 +811,11 @@
         .neighborId(neighbor.neighborId())
         .propertyId(neighbor.neighbor.propertyId())
         .name(neighbor.neighbor.owner.name())
-        .email(neighbor.neighbor.owner.email())
-        .message("");
+        .email(neighbor.neighbor.owner.email());
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
-    var paramNames = ["id", "neighborId", "propertyId", "name", "email", "message"];
+    var paramNames = ["id", "neighborId", "propertyId", "name", "email"];
     function paramValue(paramName) { return self[paramName](); }
 
     self.send = function() {
@@ -821,7 +852,8 @@
       stampModel: stampModel,
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
-      sendNeighborEmailModel: sendNeighborEmailModel
+      sendNeighborEmailModel: sendNeighborEmailModel,
+      neighborStatusModel: neighborStatusModel
     };
 
     $("#application").applyBindings(bindings);

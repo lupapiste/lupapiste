@@ -94,9 +94,10 @@
 ; TODO: operation does not have permitModule
 (defquery "get-organization-details"
   {:parameters [:municipality] :verified true}
-  [{{:keys [municipality operation]} :data}]
-  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1})]
-    (ok :links (:links result))
+  [{{municipality :municipality operation :operation} :data}]
+  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
+    (ok :links (:links result)
+        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
     (fail :unknown-organization)))
 
 (defcommand "organization-operations-attachments"
