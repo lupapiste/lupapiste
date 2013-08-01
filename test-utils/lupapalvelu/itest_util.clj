@@ -1,6 +1,7 @@
 (ns lupapalvelu.itest-util
   (:use [lupapalvelu.fixture.minimal :only [users]]
         [clojure.walk :only [keywordize-keys]]
+        [swiss-arrows.core]
         [midje.sweet])
   (:require [clj-http.client :as c]
             [lupapalvelu.logging]
@@ -136,6 +137,16 @@
 ;;
 ;; DSLs
 ;;
+
+(defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
+(defn feature? [& feature]
+  (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
+
+(defmacro with-anti-csrf [& body]
+  `(let [old-value# (feature? :disable-anti-csrf)]
+     (set-anti-csrf! true)
+     (do ~@body)
+     (set-anti-csrf! false)))
 
 (defn create-app-id [apikey & args]
   (let [resp (apply create-app apikey args)
