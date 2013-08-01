@@ -215,11 +215,18 @@
   (when (and v (= -1 (.indexOf v ":")))
     (second (re-matches #"^[#!/]{0,3}(.*)" v))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+(defn serve-app [app hashbang]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (when-let [hashbang (->hashbang hashbang)]
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
+
+; Same as above, but with an extra path.
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
 
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
