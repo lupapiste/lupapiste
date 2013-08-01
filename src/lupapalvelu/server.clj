@@ -67,7 +67,4 @@
                               :session-cookie-attrs (env/value :cookie)})))
   "server running")
 
-(comment
-  (-main))
-
 "server ready to start"
