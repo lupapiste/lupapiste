@@ -2,7 +2,8 @@
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
         [clojure.pprint :only [pprint]])
-  (:require [lupapalvelu.domain :as domain]
+  (:require [clojure.string :as s]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer [fn->]]))
 
@@ -15,7 +16,7 @@
   (let [resp (create-app pena)
         application-id (:id resp)
         resp (command pena :add-comment :id application-id :text "foo" :target "application")
-        resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :type :person :email "e")
+        resp (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n" :street "s" :city "c" :zip "z" :email "e")
         neighborId (:neighborId resp)
         resp (query pena :application :id application-id)
         application (:application resp)
@@ -31,7 +32,6 @@
     (fact (:neighbor neighbor) => {:propertyId "p"
                                    :owner {:name "n"
                                            :address {:street "s" :city "c" :zip "z"}
-                                           :type "person"
                                            :email "e"}})
     (fact (count (:status neighbor)) => 1)
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
@@ -39,7 +39,7 @@
 (facts "create app, update neighbor"
   (let [[application neighborId] (create-app-with-neighbor)
         application-id (:id application)
-        _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :type :person :email "e2")
+        _ (command sonja "neighbor-update" :id application-id :neighborId neighborId :propertyId "p2" :name "n2" :street "s2" :city "c2" :zip "z2" :email "e2")
         application (:application (query pena :application :id application-id))
         neighbors (:neighbors application)
         neighbor (find-by-id neighborId neighbors)]
@@ -47,7 +47,6 @@
     (fact (:neighbor neighbor) => {:propertyId "p2"
                                    :owner {:name "n2"
                                            :address {:street "s2" :city "c2" :zip "z2"}
-                                           :type "person"
                                            :email "e2"}})
     (fact (count (:status neighbor)) => 1)
     (fact (first (:status neighbor)) => (contains {:state "open" :created integer?}))))
@@ -60,31 +59,46 @@
         neighbors (:neighbors application)]
     (fact (count neighbors) => 0)))
 
+(facts "neighbor invite email has correct link"
+  (let [[application neighbor-id] (create-app-with-neighbor)
+        application-id            (:id application)
+        _                         (command pena :neighbor-send-invite
+                                                :id application-id
+                                                :neighborId neighbor-id
+                                                :email "abba@example.com")
+        _                         (Thread/sleep 20) ; delivery time
+        email                     (query pena :last-email)
+        body                      (get-in email [:message :body :plain])
+        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+    
+    a-id => application-id
+    n-id => neighbor-id
+    token => #"[A-Za-z0-9]{48}"))
+
 (facts "neighbour invite & view on application"
-  (let [[{application-id :id :as application}
-         neighborId]    (create-app-with-neighbor)
+  (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
         _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
-                          :id application-id
-                          :neighborId neighborId
-                          :email "abba@example.com"
-                          :message "welcome!")
+                                      :id application-id
+                                      :neighborId neighborId
+                                      :email "abba@example.com")
         application     (-> (query pena :application :id application-id) :application)
         hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
         _               (command pena :update-doc
-                          :id application-id
-                          :doc hakija-doc-id
-                          :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
-                                    ["henkilo.henkilotiedot.sukunimi" "Zorro"]
-                                    ["henkilo.henkilotiedot.hetu"     "123456789"]])]
+                                      :id application-id
+                                      :doc hakija-doc-id
+                                      :updates [["henkilo.henkilotiedot.etunimi"  "Zebra"]
+                                                ["henkilo.henkilotiedot.sukunimi" "Zorro"]
+                                                ["henkilo.henkilotiedot.hetu"     "123456789"]])]
 
     application => truthy
 
-    (let [response  (query pena :last-email)
-          message   (-> response :message)
-          token     (->> message :body (re-matches #"(?sm).*neighbor-show/.+/(.*)\".*") last)]
+    (let [email                     (query pena :last-email)
+          body                      (get-in email [:message :body :plain])
+          [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
       token => truthy
+      token =not=> #"="
 
       (fact "application query returns set document info"
         (let [application (-> (query pena :application :id application-id) :application)
@@ -96,13 +110,16 @@
           (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "123456789"))
 
       (fact "neighbor applicaiton query does not return hetu"
-        (let [application (-> (query pena :neighbor-application
-                                :applicationId application-id
-                                :neighborId neighborId
-                                :token token) :application)
+        (let [resp        (query pena :neighbor-application
+                                      :applicationId application-id
+                                      :neighborId neighborId
+                                      :token token)
+              application (:application resp)
               hakija-doc  (domain/get-document-by-id application hakija-doc-id)
               hakija-doc  (tools/unwrapped hakija-doc)]
 
+          resp => truthy
+          resp => (contains {:ok true})
           application => truthy
 
           (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
@@ -127,7 +144,7 @@
           :neighborId (name neighborId)
           :token token
           :stamp "INVALID"
-          :response "ime parsaa!"
+          :response "ok"
           :message "kehno suunta") => invalid-vetuma?)
 
       (fact "with vetuma"
@@ -175,3 +192,4 @@
               :applicationId application-id
               :neighborId (name neighborId)
               :token token) => invalid-token?))))))
+

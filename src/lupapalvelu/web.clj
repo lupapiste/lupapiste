@@ -36,7 +36,8 @@
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery]
             [lupapalvelu.neighbors])
-  (:import [java.io ByteArrayInputStream]))
+  (:import [java.io ByteArrayInputStream]
+           [java.util.concurrent TimeUnit]))
 
 ;;
 ;; Helpers
@@ -117,6 +118,7 @@
 
 (defn enriched [m]
   (merge m {:user (current-user)
+            :lang *lang*
             :web  (web-stuff)}))
 
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
@@ -134,6 +136,12 @@
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
+
+(defpage "/api/raw/:name" {name :name}
+  (let [response (execute (enriched (core/raw name (from-query))))]
+    (if-not (= (:ok response) false)
+      response
+      (resp/status 404 (resp/json response)))))
 
 ;;
 ;; Web UI:
@@ -189,11 +197,6 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
-(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
-
-(defjson "/api/hashbang" []
-  (ok :bang (session/get! :hashbang "")))
-
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
@@ -208,11 +211,25 @@
       (redirect lang application-page)
       (redirect-to-frontpage lang))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
-  (when (and hashbang (local? hashbang))
+(defn- ->hashbang [v]
+  (when (and v (= -1 (.indexOf v ":")))
+    (second (re-matches #"^[#!/]{0,3}(.*)" v))))
+
+(defn serve-app [app hashbang]
+  ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when-let [hashbang (->hashbang hashbang)]
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
+
+; Same as above, but with an extra path.
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
 
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
@@ -345,9 +362,6 @@
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
   (attachment/output-all-attachments application-id (current-user) *lang*))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (ke6666/export application-id (current-user) *lang*))
-
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
@@ -403,7 +417,7 @@
 ;;
 
 (defn get-session-timeout [request]
-  (get-in request [:session :noir :user :session-timeout] (* 60 10 1000)))
+  (get-in request [:session :noir :user :session-timeout] (.toMillis TimeUnit/HOURS 1)))
 
 (defn session-timeout-handler [handler request]
   (let [now (now)

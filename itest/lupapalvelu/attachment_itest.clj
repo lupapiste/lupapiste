@@ -56,7 +56,7 @@
             (auth-get "/api/download-all-attachments/" application-id))
 
           (fact "pdf export"
-            (auth-get "/api/pdf-export/" application-id))
+            (raw pena "pdf-export" :id application-id) => http200?)
 
           (doseq [attachment-id (get-attachment-ids application)
                   :let [file-id  (attachment-latest-file-id application attachment-id)]]
