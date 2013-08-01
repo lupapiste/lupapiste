@@ -99,6 +99,11 @@
 (defquery "municipalities-with-organization"
   {} [_] (ok :municipalities (municipalities-with-organization)))
 
+(defquery "operations-for-municipality"
+  {:authenticated true}
+  [{{:keys [municipality]} :data}]
+  (ok :operations (operations/municipality-operations municipality)))
+
 ;; FIXME: uses old format
 (defquery "municipalities-for-new-application"
   {:authenticated true
