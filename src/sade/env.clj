@@ -69,7 +69,7 @@
     read-value
     true?))
 
-(defn- set-feature!
+(defn set-feature!
   "sets feature value in-memory."
   [value path] (swap! config assoc-in (concat [:feature] (map keyword path)) value))
 
