@@ -115,7 +115,7 @@
         municipality   (get application :municipality)
         subject        (get-email-title application "neighbor")
         page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
-        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor#!/neighbor-show/" (:id application) "/" (name neighbor-id) "/" token))]
+        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" (name neighbor-id) "/" token))]
     (email/send-email-message email subject "neighbor.md" {:name neighbor-name
                                                            :address address
                                                            :city-fi (i18n/localize :fi "municipality" municipality)
