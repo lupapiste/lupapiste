@@ -101,9 +101,11 @@
               data-test-id="create-inforequest-message">
           </textarea>
           <button
-              data-bind="ltext: 'application.startConversation', click: createInfoRequest, enable: message().length > 0"
+              data-bind="click: createInfoRequest, enable: message().length > 0, disable: pending"
               class="btn btn-primary"
               data-test-id="create-inforequest">
+              <span data-bind="ltext: 'application.startConversation'"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
           </button>
         </form>
         <br>
@@ -157,11 +159,9 @@
           <span data-bind="ltext: 'newRequest.newInforequest'"></span><span class="icon add left-align"></span>
         </button>
         <button data-bind="click: createApplication, disable: processing" data-test-id="create-application" class="btn btn-primary">
+          <em data-bind="visible: pending" class="button-loader"></em>
           <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
         </button>
-        <div data-bind="visible: pending">
-          <img src="/img/ajax-loader.gif" alt="..." width="66" height="66" />
-        </div>
       </div>
     </div>
 
