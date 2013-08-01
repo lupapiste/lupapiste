@@ -45,7 +45,7 @@
                         :main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
-             :alltests {:source-paths [#_"test" "itest" "stest"]
+             :alltests {:source-paths ["test" "itest" "stest"]
                         :jvm-opts ["-XX:MaxPermSize=256M"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
