@@ -112,8 +112,6 @@
     (rename-keys {:sukunimi :lastname})))
 
 (defn- extract-vtjdata [{:keys [vtjdata]}]
-  (println vtjdata)
-  (println (vtj/extract-vtj vtjdata))
   (vtj/extract-vtj vtjdata))
 
 (defn- extract-userid [{s :extradata}]
