@@ -21,13 +21,33 @@
             "4" "is"   ; inarinsaame
             "5" "ks"}) ; koltansaame
 
+(def priorities {"540"  1   ; kunnan nimi, kaupunki
+                 "550"  2   ; kunnan nimi, maaseutu
+                 "560"  3   ; kylan, kaupunginosan tai kulmakunnan nimi
+
+                 "225"  4   ; liikennealueen nimi
+                 
+                 "350"  5   ; saaren nimi
+                 "410"  5   ; vakaveden nimi
+                 "420"  5   ; virtaveden nimi
+                 "330"  5   ; suon nimi
+
+                 "235"  6   ; puiston nimi
+                 "345"  6   ; niemen nimi
+                 "325"  6   ; metsa-alueen nimi
+
+                 "200"  7   ; maa-aineksenottoalueen nimi
+                 "245"  7}) ; urheilu- tai virkistysalueen nimi
+
 (defn parse [line]
-  (let [data (s/split line #";")]
+  (let [data        (s/split line #";")
+        record-type (->> (get data 3) ->long (format "%03d"))]
     {:id            (get data 30)
      :text          (get data 0)
      :name          (s/lower-case (get data 0))
      :lang          (langs (get data 1) "?")
-     :type          (->> (get data 3) ->long (format "%03d"))
+     :type          record-type
+     :priority      (get priorities record-type 100)
      :location {:x  (->long (get data 10))
                 :y  (->long (get data 9))}
      :municipality  (->> (get data 11) ->long (format "%03d"))}))
@@ -47,18 +67,21 @@
       (when-not ((fnil valid? "") (field record))
         (throw+ (format "Input file does not look valid: field=%s, value=\"%s\"" (name field) (field record)))))))
 
+(defn process-rows [i [record & r]]
+  (when record
+    (save (parse record))
+    (when (zero? (mod i 10000)) (println "processed" i "lines..."))
+    (recur (inc i) r)))
+
 (defn process [filename]
   (with-open [input (io/reader filename :encoding "ISO-8859-1")]
-    (doseq [[i record] (partition 2 (interleave (map inc (range)) (map parse (line-seq input))))]
-      (save record)
-      (when (zero? (mod i 10000))
-        (println "processed" i "lines...")))))
+    (process-rows 1 (line-seq input))))
 
 (defn run [filename]
   (let [start (System/currentTimeMillis)]
     (println "Removing old data (this might take some time)...")
     (mc/drop :poi)
-    (mc/ensure-index :poi {:name 1 :lang 1})
+    (mc/ensure-index :poi {:name 1 :lang 1 :type 1 :priority 1})
     (println (format "Processing file %s..." filename))
     (process filename)
     (println "Done, saved " (mc/count :poi) "records in" (-<>> start (- (System/currentTimeMillis)) double (/ <> 1000.0) (format "%.1f")) "sec")))

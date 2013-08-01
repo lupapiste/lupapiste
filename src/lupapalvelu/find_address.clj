@@ -40,6 +40,8 @@
                 :kind :property-id})
        (wfs/point-by-property-id property-id)))
 
+(def max-entries 25)
+
 (def poi-types ["200"   ; maa-aineksenottoalueen nimi
                 "225"   ; liikennealueen nimi
                 "235"   ; puiston nimi
@@ -59,8 +61,8 @@
          (q/find {:name {$regex (str \^ (s/lower-case poi))}
                   :lang *lang*
                   :type {$in poi-types}})
-         (q/sort {:name -1})
-         (q/limit 10))
+         (q/sort (array-map :priority 1 :name 1))
+         (q/limit max-entries))
     (map (comp (fn [r] (dissoc r :_id)) (set-kind :poi)))))
 
 (defn municipality-prop [] (if (= *lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
@@ -76,7 +78,7 @@
     (map (comp (set-kind :address :street) wfs/feature-to-address))))
 
 (defn search-poi-or-street [v]
-  (take 25 (concat (take 15 (search-street v)) (search-poi v))))
+  (take max-entries (concat (take (- max-entries 10) (search-street v)) (search-poi v))))
 
 (defn search-street-with-number [street number]
   (->> (wfs/post wfs/maasto
