@@ -6,7 +6,8 @@
             [monger.collection :as mc]
             [monger.db :as db]
             [swiss-arrows.core :refer [-<>>]]
-            [slingshot.slingshot :refer [try+ throw+]]))
+            [slingshot.slingshot :refer [try+ throw+]]
+            [lupapalvelu.find-address :as find-address]))
 
 (def default-filename (str "/Volumes/HD2/Users/jarppe/swd/lupa-workspace/mml/" "PNR_2012_01.TXT"))
 
@@ -39,21 +40,21 @@
                  "200"  7   ; maa-aineksenottoalueen nimi
                  "245"  7}) ; urheilu- tai virkistysalueen nimi
 
-(defn parse [line]
-  (let [data        (s/split line #";")
-        record-type (->> (get data 3) ->long (format "%03d"))]
-    {:id            (get data 30)
-     :text          (get data 0)
-     :name          (s/lower-case (get data 0))
-     :lang          (langs (get data 1) "?")
-     :type          record-type
-     :priority      (get priorities record-type 100)
-     :location {:x  (->long (get data 10))
-                :y  (->long (get data 9))}
-     :municipality  (->> (get data 11) ->long (format "%03d"))}))
+(def included-types (set find-address/poi-types))
 
-(defn save [record]
-  (mc/insert :poi record))
+(defn parse [line]
+  (let [data     (s/split line #";")
+        poi-type (->> (get data 3) ->long (format "%03d"))]
+    (when (included-types poi-type)
+      {:id            (get data 30)
+       :text          (get data 0)
+       :name          (s/lower-case (get data 0))
+       :lang          (langs (get data 1) "?")
+       :type          poi-type
+       :priority      (get priorities poi-type 100)
+       :location {:x  (->long (get data 10))
+                  :y  (->long (get data 9))}
+       :municipality  (->> (get data 11) ->long (format "%03d"))})))
 
 (def validators {:id            (partial re-matches #"\d{8}")
                  :lang          (partial re-matches #"fi|sv|ps|is|ks")
@@ -67,15 +68,19 @@
       (when-not ((fnil valid? "") (field record))
         (throw+ (format "Input file does not look valid: field=%s, value=\"%s\"" (name field) (field record)))))))
 
-(defn process-rows [i [record & r]]
-  (when record
-    (save (parse record))
-    (when (zero? (mod i 10000)) (println "processed" i "lines..."))
-    (recur (inc i) r)))
+(defn process-rows [i c [record & r]]
+  (if record
+    (let [data (parse record)]
+      (when data
+        (mc/insert :poi data))
+      (when (and (zero? (mod i 10000)) (pos? i))
+        (println "processed" i "lines..."))
+      (recur (inc i) (if data (inc c) c) r))
+    [i c]))
 
 (defn process [filename]
   (with-open [input (io/reader filename :encoding "ISO-8859-1")]
-    (process-rows 1 (line-seq input))))
+    (process-rows 0 0 (line-seq input))))
 
 (defn run [filename]
   (let [start (System/currentTimeMillis)]
@@ -83,8 +88,11 @@
     (mc/drop :poi)
     (mc/ensure-index :poi {:name 1 :lang 1 :type 1 :priority 1})
     (println (format "Processing file %s..." filename))
-    (process filename)
-    (println "Done, saved " (mc/count :poi) "records in" (-<>> start (- (System/currentTimeMillis)) double (/ <> 1000.0) (format "%.1f")) "sec")))
+    (let [[rows pois] (process filename)
+          total (mc/count :poi)] 
+      (if (= pois total)
+        (println "Done, processed" rows "rows with" pois "poi's, in" (-<>> start (- (System/currentTimeMillis)) double (/ <> 1000.0) (format "%.1f")) "sec")
+        (println "ERROR: processed" rows "rows with" pois "poi's, but :poi collection has" total "records")))))
 
 (defn connect []
   (m/connect!)
