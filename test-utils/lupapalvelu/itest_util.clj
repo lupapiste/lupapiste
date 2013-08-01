@@ -146,7 +146,8 @@
   `(let [old-value# (feature? :disable-anti-csrf)]
      (set-anti-csrf! true)
      (do ~@body)
-     (set-anti-csrf! false)))
+     (set-anti-csrf! false)
+     "By the power of Grayskull."))
 
 (defn create-app-id [apikey & args]
   (let [resp (apply create-app apikey args)
