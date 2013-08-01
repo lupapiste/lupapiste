@@ -6,10 +6,7 @@
             [monger.collection :as mc]
             [monger.db :as db]
             [swiss-arrows.core :refer [-<>>]]
-            [slingshot.slingshot :refer [try+ throw+]]
-            [lupapalvelu.find-address :as find-address]))
-
-(def default-filename (str "/Volumes/HD2/Users/jarppe/swd/lupa-workspace/mml/" "PNR_2012_01.TXT"))
+            [slingshot.slingshot :refer [try+ throw+]]))
 
 (defn ->long [v]
   (if (and v (string? v) (re-matches #"\d+" v))
@@ -17,10 +14,7 @@
     0))
 
 (def langs {"1" "fi"
-            "2" "sv"
-            "3" "ps"   ; pohjoissaame
-            "4" "is"   ; inarinsaame
-            "5" "ks"}) ; koltansaame
+            "2" "sv"})
 
 (def priorities {"540"  1   ; kunnan nimi, kaupunki
                  "550"  2   ; kunnan nimi, maaseutu
@@ -40,21 +34,21 @@
                  "200"  7   ; maa-aineksenottoalueen nimi
                  "245"  7}) ; urheilu- tai virkistysalueen nimi
 
-(def included-types (set find-address/poi-types))
-
 (defn parse [line]
   (let [data     (s/split line #";")
-        poi-type (->> (get data 3) ->long (format "%03d"))]
-    (when (included-types poi-type)
-      {:id            (get data 30)
-       :text          (get data 0)
-       :name          (s/lower-case (get data 0))
-       :lang          (langs (get data 1) "?")
+        poi-type (->> (nth data 3) ->long (format "%03d"))
+        priority (priorities poi-type)
+        lang     (langs (nth data 1))]
+    (when (and priority lang)
+      {:id            (nth data 30)
+       :text          (nth data 0)
+       :name          (s/lower-case (nth data 0))
+       :lang          lang
        :type          poi-type
-       :priority      (get priorities poi-type 100)
-       :location {:x  (->long (get data 10))
-                  :y  (->long (get data 9))}
-       :municipality  (->> (get data 11) ->long (format "%03d"))})))
+       :priority      priority
+       :location {:x  (->long (nth data 10))
+                  :y  (->long (nth data 9))}
+       :municipality  (->> (nth data 11) ->long (format "%03d"))})))
 
 (def validators {:id            (partial re-matches #"\d{8}")
                  :lang          (partial re-matches #"fi|sv|ps|is|ks")
@@ -86,7 +80,7 @@
   (let [start (System/currentTimeMillis)]
     (println "Removing old data (this might take some time)...")
     (mc/drop :poi)
-    (mc/ensure-index :poi {:name 1 :lang 1 :type 1 :priority 1})
+    (mc/ensure-index :poi {:name 1 :lang 1 :priority 1})
     (println (format "Processing file %s..." filename))
     (let [[rows pois] (process filename)
           total (mc/count :poi)] 
