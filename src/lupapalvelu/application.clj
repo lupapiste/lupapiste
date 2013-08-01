@@ -776,3 +776,13 @@
                 "both"         base-query
                 {:_id -1})]
     (ok :data (mongo/count :applications query))))
+
+(let [organizations (mongo/select :organizations)
+      without-scope (filter (comp not :scope) organizations)]
+  (infof "%s organizations, %s need update" (count organizations) (count without-scope))
+  (when-not (empty? without-scope)
+    (doseq [{:keys [id municipalities]} without-scope]
+      (let [scopes (map (fn [municipality] {:municipality municipality :permitType "R"}) municipalities)]
+        (mongo/update-by-id :organizations id {$set {:scope scopes}})))
+    (infof "%s organizations need update now." (mongo/count :organizations {:scope {$exists false}}))))
+
