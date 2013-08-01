@@ -53,6 +53,7 @@
               :excludes [#"[\/\\]jquery"
                          #"[\/\\]theme[\/\\]default"
                          #"[\/\\]public[\/\\]lib"
+                         #"[\/\\]test[\/\\]"
                          #"openlayers"
                          #"underscore"
                          #"lodash"]}
