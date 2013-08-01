@@ -30,14 +30,13 @@ var LUPAPISTE = LUPAPISTE || {};
     trace("pageId", pageId, "pagePath", pagePath);
 
     if (pageId !== self.currentPage) {
-
       $(".page").removeClass("visible");
 
       var page = $("#" + pageId);
       if (page.length === 0) {
         error("Unknown page", pageId);
         // firefox bug: does not compute with hashbangs (LUPA-80)
-        pageId = allowAnonymous ? "login" : pageId = "404";
+        pageId = allowAnonymous ? "login" : "404";
         pagePath = [];
         page = $("#" + pageId);
       }
