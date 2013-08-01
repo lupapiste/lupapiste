@@ -8,31 +8,35 @@
             [swiss-arrows.core :refer [-<>>]]
             [slingshot.slingshot :refer [try+ throw+]]))
 
+;;
+;; Included types of poi in priority order:
+;;
+
+(def poi-types ["540"   ; kunnan nimi, kaupunki
+                "550"   ; kunnan nimi, maaseutu
+                "560"   ; kylan, kaupunginosan tai kulmakunnan nimi
+                "225"   ; liikennealueen nimi
+                "350"   ; saaren nimi
+                "410"   ; vakaveden nimi
+                "420"   ; virtaveden nimi
+                "330"   ; suon nimi
+                "235"   ; puiston nimi
+                "345"   ; niemen nimi
+                "325"   ; metsa-alueen nimi
+                "200"   ; maa-aineksenottoalueen nimi
+                "245"]) ; urheilu- tai virkistysalueen nimi
+
+;;
+;;
+;;
+
 (defn ->long [v]
-  (if (and v (string? v) (re-matches #"\d+" v))
-    (Long/parseLong v)
-    0))
+  (Long/parseLong v))
 
 (def langs {"1" "fi"
             "2" "sv"})
 
-(def priorities {"540"  1   ; kunnan nimi, kaupunki
-                 "550"  2   ; kunnan nimi, maaseutu
-                 "560"  3   ; kylan, kaupunginosan tai kulmakunnan nimi
-
-                 "225"  4   ; liikennealueen nimi
-                 
-                 "350"  5   ; saaren nimi
-                 "410"  5   ; vakaveden nimi
-                 "420"  5   ; virtaveden nimi
-                 "330"  5   ; suon nimi
-
-                 "235"  6   ; puiston nimi
-                 "345"  6   ; niemen nimi
-                 "325"  6   ; metsa-alueen nimi
-
-                 "200"  7   ; maa-aineksenottoalueen nimi
-                 "245"  7}) ; urheilu- tai virkistysalueen nimi
+(def priorities (into {} (zipmap poi-types (range))))
 
 (defn parse [line]
   (let [data     (s/split line #";")
