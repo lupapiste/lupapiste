@@ -8,6 +8,8 @@ LUPAPISTE.InviteModel = function() {
   self.documentName = ko.observable();
   self.documentId = ko.observable();
   self.error = ko.observable();
+  self.processing = ko.observable();
+  self.pending = ko.observable();
 
   self.setApplicationId = function(applicationId) {
     self.applicationId = applicationId;
@@ -36,6 +38,8 @@ LUPAPISTE.InviteModel = function() {
                              email: email,
                              title: "uuden suunnittelijan lis\u00E4\u00E4minen",
                              text: text})
+      .processing(self.processing)
+      .pending(self.pending)
       .success(function() {
         repository.load(self.applicationId);
         LUPAPISTE.ModalDialog.close();
