@@ -67,14 +67,14 @@
         (throw+ (format "Input file does not look valid: field=%s, value=\"%s\"" (name field) (field record)))))))
 
 (defn process-rows [i c [record & r]]
-  (if record
+  (if-not record
+    [i c]
     (let [data (parse record)]
       (when data
         (mc/insert :poi data))
       (when (and (zero? (mod i 10000)) (pos? i))
         (println "processed" i "lines..."))
-      (recur (inc i) (if data (inc c) c) r))
-    [i c]))
+      (recur (inc i) (if data (inc c) c) r))))
 
 (defn process [filename]
   (with-open [input (io/reader filename :encoding "ISO-8859-1")]
