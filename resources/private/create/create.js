@@ -61,6 +61,8 @@
     self.municipalityCode = ko.observable(null);
     self.municipalityName = ko.observable();
     self.municipalitySupported = ko.observable(true);
+    self.processing = ko.observable();
+    self.pending = ko.observable();
 
     self.municipalityCode.subscribe(function(code) {
       if (self.useManualEntry()) { municipalities.findById(code, self.municipality); }
@@ -298,6 +300,8 @@
         messages: isBlank(self.message()) ? [] : [self.message()],
         municipality: self.municipality().id
       })
+      .processing(self.processing)
+      .pending(self.pending)
       .success(function(data) {
         setTimeout(self.clear, 0);
         window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;

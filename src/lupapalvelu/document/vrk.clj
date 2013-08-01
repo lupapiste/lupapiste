@@ -294,17 +294,19 @@
    :fields  [tilavuus        [:mitat :tilavuus ->int]
              kerrosala       [:mitat :kerrosala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]]
-   :facts   {:ok   [[6 4 "611 voimalaitosrakennukset"]
-                    [5 4 "032 luhtitalot"]]
-             :fail [[5 4 "611 voimalaitosrakennukset"]]}}
+   :facts   {:ok   [[5 4 "611 voimalaitosrakennukset"]
+                    [5 4 "811 navetat, sikalat, kanalat yms"]
+                    [6 4 "032 luhtitalot"]]
+             :fail [[5 4 "032 luhtitalot"]]}}
   (and
     tilavuus
     (< tilavuus (* 1.5 kerrosala))
     (and
       kayttotarkoitus
-      (or
-        (> (->int kayttotarkoitus) 799)
-        (#{:162 :163 :169 :611 :613 :699 :712 :719 :722} kayttotarkoitus)))))
+      (not
+        (or
+          (> (->int kayttotarkoitus) 799)
+          (#{:162 :163 :169 :611 :613 :699 :712 :719 :722} kayttotarkoitus))))))
 
 (defvalidator :vrk:CR314
   {:doc     "Asuinrakennukssa pitaa olla lammitys"
