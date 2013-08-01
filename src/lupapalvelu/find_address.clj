@@ -61,7 +61,7 @@
          (q/find {:name {$regex (str \^ (s/lower-case poi))}
                   :lang *lang*
                   :type {$in poi-types}})
-         (q/sort (array-map :priority 1 :name 1))
+         (q/sort (array-map :name 1 :priority 1))
          (q/limit max-entries))
     (map (comp (fn [r] (dissoc r :_id)) (set-kind :poi)))))
 
