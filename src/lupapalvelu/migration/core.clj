@@ -2,17 +2,26 @@
   (:require [monger.collection :as mc]
             [monger.query :as q]
             [lupapalvelu.core :refer [now]]
+            [slingshot.slingshot :refer [try+ throw+]]
             [clojure.stacktrace :refer [print-cause-trace]]))
 
 (defonce migration-id (atom 0))
 (defonce migrations (atom {}))
 
 (defmacro defmigration [migration-name & body]
-  `(let [name-str# (name (quote ~migration-name))
-         id#       (swap! migration-id inc)]
-     (swap! migrations assoc name-str# {:id id# 
-                                        :name name-str#
-                                        :fn (fn [] (do ~@body))})))
+  (let [has-opts? (map? (first body))
+        opts      (when has-opts? (first body))
+        pre       (or (:pre opts) 'true)
+        post      (or (:post opts) 'true)
+        body      (if has-opts? (rest body) body)]
+    `(let [name-str# (name (quote ~migration-name))
+           id#       (swap! migration-id inc)]
+       (swap! migrations assoc name-str# {:id id# 
+                                          :name name-str#
+                                          :pre (fn [] (assert ~pre))
+                                          :post (fn [] (assert ~post))
+                                          :fn (fn [] (do ~@body))})
+       nil)))
 
 (defn migration-by-id [id]
   (first (filter (comp (partial = id) :id) (vals @migrations))))
@@ -21,14 +30,27 @@
   (q/with-collection "migrations"
     (q/sort {:time 1})))
 
-(defn- execute-migration-fn [f]
+(def execution-name {:pre "pre-condition"
+                     :fn "execution"
+                     :post "post-condition"})
+
+(defn- execute [execution-type m]
   (try
-    {:ok true :result (f)}
-    (catch Exception e
-      {:ok false :ex (with-out-str (print-cause-trace e))})))
+    ((execution-type m))
+    (catch Throwable e
+      (throw+ {:ok false :ex (str (execution-name execution-type) " failed: " (with-out-str (print-cause-trace e)))}))))
+
+(defn- execute-migration [m]
+  (try+
+    (execute :pre m)
+    (let [result {:ok true :result (execute :fn m)}]
+      (execute :post m)
+      result)
+    (catch map? e
+      e)))
 
 (defn execute-migration! [m]
-  (let [result (assoc (execute-migration-fn (:fn m)) :id (:id m) :time (now))]
+  (let [result (assoc (execute-migration m) :id (:id m) :time (now))]
     (mc/insert :migrations result)
     result))
 

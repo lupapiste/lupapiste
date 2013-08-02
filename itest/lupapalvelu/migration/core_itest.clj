@@ -15,36 +15,53 @@
 
 (background (before :facts (clean-history!)))
 
-(defmigration a "a")
-(defmigration b "b")
-(defmigration c (throw (RuntimeException. "oh noes!")))
+(defmigration a
+  "a")
 
-(def starts-with-oh-noes (fn [v] (ss/starts-with v "java.lang.RuntimeException: oh noes!")))
+(defmigration b
+  "b")
+
+(defmigration c
+  (throw (RuntimeException. "oh noes!")))
+
+(defmigration d {:pre (= 1 2)}
+  (throw (Exception. "never")))
+
+(defmigration e {:post (= 1 2)}
+  "e")
+
+(def oh-noes (fn [s] (re-find #"java.lang.RuntimeException: oh noes!" s)))
 
 (facts "setup"
-  (count @migrations) => 3
+  (count @migrations) => 5
   (@migrations "a") => (contains {:id 1 :name "a"})
   (@migrations "b") => (contains {:id 2 :name "b"})
   (@migrations "c") => (contains {:id 3 :name "c"})
+  (@migrations "d") => (contains {:id 4 :name "d"})
+  (@migrations "e") => (contains {:id 5 :name "e"})
   (migration-history) => [])
 
 (facts "execute-migration! and migration-history"
-  (unexecuted-migrations) => (just [(contains {:id 1}) (contains {:id 2}) (contains {:id 3})])
+  (unexecuted-migrations) => (just [(contains {:id 1}) (contains {:id 2}) (contains {:id 3}) (contains {:id 4}) (contains {:id 5})])
   
-  (execute-migration! (@migrations "a")) => (contains {:id 1 :ok true :result "a"})
+  (execute-migration! (@migrations "a")) => (contains {:id 1 :ok true :result "a" :time 100})
     (provided (now) => 100)
-  (migration-history) => (just [(contains {:ok true :time 100 :result "a"})])
-  (unexecuted-migrations) => (just [(contains {:id 2}) (contains {:id 3})])
+  (migration-history) => (just [(contains {:id 1 :ok true :result "a" :time 100})])
+  (unexecuted-migrations) => (just [(contains {:id 2}) (contains {:id 3}) (contains {:id 4}) (contains {:id 5})])
   
-  (execute-migration! (@migrations "b")) => (contains {:id 2 :ok true :result "b"})
+  (execute-migration! (@migrations "b")) => (contains {:id 2 :ok true :result "b" :time 101})
     (provided (now) => 101)
   (migration-history) => (just [(contains {:ok true :time 100 :result "a"})
                                 (contains {:ok true :time 101 :result "b"})])
-  (unexecuted-migrations) => (just [(contains {:id 3})])
+  (unexecuted-migrations) => (just [(contains {:id 3}) (contains {:id 4}) (contains {:id 5})])
   
-  (execute-migration! (@migrations "c")) => (contains {:id 3 :ok false :ex starts-with-oh-noes})
+  (execute-migration! (@migrations "c")) => (contains {:id 3 :ok false :ex oh-noes})
     (provided (now) => 102)
   (migration-history) => (just [(contains {:ok true  :time 100 :result "a" })
                                 (contains {:ok true  :time 101 :result "b"})
-                                (contains {:ok false :time 102 :ex starts-with-oh-noes})])
-  (unexecuted-migrations) => (just [(contains {:id 3})]))
+                                (contains {:ok false :time 102 :ex oh-noes})])
+  (unexecuted-migrations) => (just [(contains {:id 3}) (contains {:id 4}) (contains {:id 5})])
+  
+  ;(execute-migration! (@migrations "d")) => (throws AssertionError)
+  ;(execute-migration! (@migrations "e")) => (throws AssertionError)
+  )
