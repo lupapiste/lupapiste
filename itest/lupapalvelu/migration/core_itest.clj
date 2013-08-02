@@ -32,6 +32,9 @@
 
 (def oh-noes (fn [s] (re-find #"java.lang.RuntimeException: oh noes!" s)))
 
+(defn starts-with [prefix]
+  (fn [s] (ss/starts-with s prefix)))
+
 (facts "setup"
   (count @migrations) => 5
   (@migrations "a") => (contains {:id 1 :name "a"})
@@ -62,6 +65,12 @@
                                 (contains {:ok false :time 102 :ex oh-noes})])
   (unexecuted-migrations) => (just [(contains {:id 3}) (contains {:id 4}) (contains {:id 5})])
   
-  ;(execute-migration! (@migrations "d")) => (throws AssertionError)
-  ;(execute-migration! (@migrations "e")) => (throws AssertionError)
-  )
+  (execute-migration! (@migrations "d")) => (contains {:id 4 :ok false :ex (starts-with "pre-condition failed")})
+    (provided (now) => 102)
+  (last (migration-history)) => (contains {:ok false :time 102 :ex (starts-with "pre-condition failed")})
+  (unexecuted-migrations) => (just [(contains {:id 3}) (contains {:id 4}) (contains {:id 5})])
+  
+  (execute-migration! (@migrations "e")) => (contains {:id 5 :ok false :ex (starts-with "post-condition failed")})
+    (provided (now) => 103)
+  (last (migration-history)) => (contains {:ok false :time 103 :ex (starts-with "post-condition failed")})
+  (unexecuted-migrations) => (just [(contains {:id 3}) (contains {:id 4}) (contains {:id 5})]))
