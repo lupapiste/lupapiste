@@ -104,15 +104,6 @@
   [{{:keys [municipality]} :data}]
   (ok :operations (operations/municipality-operations municipality)))
 
-;; FIXME: uses old format
-(defquery "municipalities-for-new-application"
-  {:authenticated true
-   :verified true}
-  [{user :user}]
-  (ok :municipalities
-     (map (fn [id] {:id id :operations (operations/municipality-operations id)})
-          (->> (mongo/select :organizations {} {"municipalities" 1}) (mapcat :municipalities) distinct))))
-
 (defquery "organization"
   {:parameters [:organizationId] :verified true}
   [{{organizationId :organizationId} :data}]
