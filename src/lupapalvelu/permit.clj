@@ -32,12 +32,12 @@
 
 (defn validate-permit-type-is-not [ptype]
   (fn [_ application]
-    (let [application-permit-type (domain/permit-type application)]
+    (let [application-permit-type (permit-type application)]
       (when (= (keyword application-permit-type) (keyword ptype))
         (fail :error.invalid-permit-type :permit-type ptype)))))
 
 (defn validate-permit-type-is [ptype]
   (fn [_ application]
-    (let [application-permit-type (domain/permit-type application)]
+    (let [application-permit-type (permit-type application)]
       (when-not (= (keyword application-permit-type) (keyword ptype))
         (fail :error.invalid-permit-type :permit-type ptype)))))
