@@ -107,22 +107,27 @@
 (def ^:private yleiset-alueet-common-schemas ["yleiset-alueet-maksaja"])
 
 
-(def ^:private uuden_rakennuksen_liitteet [:paapiirustus [:asemapiirros
-                                                          :pohjapiirros
-                                                          :julkisivupiirros
-                                                          :leikkauspiirros]
-                                           :rakennuspaikka [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
+(def ^:private uuden_rakennuksen_liitteet [:paapiirustus
+                                           [:asemapiirros
+                                            :pohjapiirros
+                                            :julkisivupiirros
+                                            :leikkauspiirros]
+                                           :rakennuspaikka
+                                           [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
 
-(def ^:private rakennuksen_muutos_liitteet [:paapiirustus [:pohjapiirros
-                                                           :julkisivupiirros]])
+(def ^:private rakennuksen_muutos_liitteet [:paapiirustus
+                                            [:pohjapiirros
+                                             :julkisivupiirros]])
 
-(def ^:private rakennuksen_laajennuksen_liitteet [:paapiirustus [:asemapiirros
-                                                                 :pohjapiirros
-                                                                 :julkisivupiirros
-                                                                 :leikkauspiirros]])
+(def ^:private rakennuksen_laajennuksen_liitteet [:paapiirustus
+                                                  [:asemapiirros
+                                                   :pohjapiirros
+                                                   :julkisivupiirros
+                                                   :leikkauspiirros]])
 
-(def ^:private kaupunkikuva_toimenpide_liitteet [:paapiirustus [:asemapiirros
-                                                                :julkisivupiirros]])
+(def ^:private kaupunkikuva_toimenpide_liitteet [:paapiirustus
+                                                 [:asemapiirros
+                                                  :julkisivupiirros]])
 
 (def operations
   {:asuinrakennus               {:schema "uusiRakennus"
