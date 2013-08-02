@@ -84,17 +84,6 @@
   (or (some #(= (lower-case email) (-> % :user :username)) invites) false))
 
 ;;
-;; PermitTypes
-;;
-
-(error "***** permit-type returns always 'R' if not set. Should be set!")
-(defn permit-type
-  "gets the permit-type of application"
-  [application]
-  {:post [(not= % nil)]}
-  (or (:permitType application) "R"))
-
-;;
 ;; Conversion between Lupapiste and documents
 ;;
 

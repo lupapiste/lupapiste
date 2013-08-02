@@ -10,3 +10,6 @@
     ((validate-permit-type-is R) irrelevant {:permitType "YA"}) => (contains {:ok false})
     ((validate-permit-type-is YA)  irrelevant {:permitType "YA"}) => nil))
 
+(fact "permit-type"
+  (permit-type {:permitType "R"}) => "R"
+  (permit-type {})                => "R") ;;(throws AssertionError)) FIXME: should fail, needs to run migration first

@@ -441,7 +441,7 @@
 (defn- make-documents [user created op application]
   (let [op-info               (operations/operations (keyword (:name op)))
         existing-documents    (:documents application)
-        permit-type           (keyword (domain/permit-type application))
+        permit-type           (keyword (permit/permit-type application))
         make                  (fn [schema-name] {:id (mongo/create-id)
                                                  :schema (schemas/get-schema schema-name)
                                                  :created created
@@ -603,7 +603,7 @@
    :states     [:draft :info :answered]}
   [{{:keys [id]} :data :keys [user created application] :as command}]
   (let [op          (first (:operations application))
-        permit-type (domain/permit-type application)]
+        permit-type (permit/permit-type application)]
     (mongo/update-by-id :applications id
                         {$set {:infoRequest false
                                :state :open

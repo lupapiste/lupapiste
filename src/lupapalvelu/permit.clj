@@ -1,18 +1,30 @@
 (ns lupapalvelu.permit
   (:require [lupapalvelu.domain :as domain]
-            [lupapalvelu.core :refer [fail]]))
+            [lupapalvelu.core :refer [fail]]
+            [clojure.tools.logging :refer :all]))
 
 ;;
 ;; Enum
 ;;
 
 (defmacro defpermit [permit-name description]
-  `(def ~(-> permit-name name symbol) ~(str description) ~(keyword permit-name)))
+  `(def ~permit-name ~(str description) ~(str permit-name)))
 
-(defpermit :R  "Rakennusluvat")
-(defpermit :YA "Yleisten alueiden luvat")
-(defpermit :Y  "Ymparistoluvat")
-(defpermit :P  "Poikkeusluvat")
+(defpermit R  "Rakennusluvat")
+(defpermit YA "Yleisten alueiden luvat")
+(defpermit Y  "Ymparistoluvat")
+(defpermit P  "Poikkeusluvat")
+
+;;
+;; Helpers
+;;
+
+(errorf "***** permit-type returns always '%s' if not set. Should be set!" R)
+(defn permit-type
+  "gets the permit-type of application"
+  [application]
+  {:post [(not= % nil)]}
+  (or (:permitType application) R))
 
 ;;
 ;; Validate
