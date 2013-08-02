@@ -84,10 +84,10 @@
             ["maa-ainesten_ottaminen" :maa-aineslupa]]]]})
 
 (defn all-operations []
-  (concat operations-for-R
-    (when (env/feature? :poikkari) operations-for-P)
-    (when (env/feature? :ymparisto) operations-for-Y)
-    (when (env/feature? :yleiset-alueet) operations-for-YA)))
+  (keep :tree (vector operations-for-R
+                (when (env/feature? :poikkari) operations-for-P)
+                (when (env/feature? :ymparisto) operations-for-Y)
+                (when (env/feature? :yleiset-alueet) operations-for-YA))))
 
 ;; TODO: implement
 (defn municipality-operations [municipality] (all-operations))
