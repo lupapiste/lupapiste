@@ -27,6 +27,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
@@ -566,7 +567,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
    :input-validators [operation-validator]
-   :validators [operations/validate-permit-type-is-not-ya]}
+   :validators [(permit/validate-permit-type-is permit/R)]}
   [command]
   (with-application command
     (fn [application]

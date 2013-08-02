@@ -289,16 +289,3 @@
         schema (cons schema required)]
   (if-not (schemas/get-schema schema)
     (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema)))))
-
-;;
-;; Validate
-;;
-
-(defn validate-permit-type-is-not [ptype]
-  (fn [_ application]
-    (let [application-permit-type (domain/permit-type application)]
-      (when (= (keyword application-permit-type) (keyword ptype))
-        (fail :error.invalid-permit-type :permit-type ptype)))))
-
-(def validate-permit-type-is-not-ya (validate-permit-type-is-not :YA))
-
