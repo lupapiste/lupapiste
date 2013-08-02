@@ -63,9 +63,11 @@
                                                                             ]]]])))
 
 
-(defn municipality-operations [municipality]
-  ; Same data for all municipalities for now.
-  operations-tree)
+;; TODO: implement
+(defn municipality-operations [municipality] operations-tree)
+
+;; TODO: implement
+(defn organization-operations [organization-id] operations-tree)
 
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
