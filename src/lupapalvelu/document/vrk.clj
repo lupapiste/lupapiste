@@ -289,10 +289,19 @@
   (and (#{:691 :111} toimenpide) (not= kerrosluku 1)))
 
 (defvalidator :vrk:CR313
-  {:doc     "Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala. &BR407 kayttotarkoitukset"
+  {:doc     "Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kerrosala."
    :schema  "uusiRakennus"
    :fields  [tilavuus        [:mitat :tilavuus ->int]
-             kerrosala       [:mitat :kerrosala ->int]
+             kerrosala       [:mitat :kerrosala ->int]]
+   :facts   {:ok   [[6 4]]
+             :fail [[5 4]]}}
+  (and tilavuus (< tilavuus (* 1.5 kerrosala))))
+
+(defvalidator :vrk:BR407
+  {:doc     "Jos rakentamistoimenpide on 1, niin tilavuuden on oltava 1,5 kertaa kokonaisala jo kayttotapaus on ..."
+   :schema  "uusiRakennus"
+   :fields  [tilavuus        [:mitat :tilavuus ->int]
+             kokonaisala     [:mitat :kokonaisala ->int]
              kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]]
    :facts   {:ok   [[5 4 "611 voimalaitosrakennukset"]
                     [5 4 "811 navetat, sikalat, kanalat yms"]
@@ -300,7 +309,7 @@
              :fail [[5 4 "032 luhtitalot"]]}}
   (and
     tilavuus
-    (< tilavuus (* 1.5 kerrosala))
+    (< tilavuus (* 1.5 kokonaisala))
     (and
       kayttotarkoitus
       (not
