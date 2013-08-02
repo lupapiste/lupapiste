@@ -333,10 +333,8 @@
 ;;
 
 (defquery "operations"
-  {}
+  {:description "returns operations: without parameters all, with permitType-parameter just those operations"}
   [{{:keys [permitType]} :data}]
   (if permitType
-    (ok)
+    (ok :operations (operations-for-permit-type permitType))
     (ok :operations (all-operations))))
-
-
