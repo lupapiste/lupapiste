@@ -22,4 +22,4 @@ neighbors.remove-dialog.title: Poista naapuri?
 neighbors.remove-dialog.message: Oletko varma että haluat poistaa naapurin?
 
 error.vrk:CR313:   Jos rakennetaan uutta rakennusta, niin tilavuuden on oltava 1,5 kertaa kerrosala
-error.vrk:BR407:   Jos rakennetaan uutta rakennusta, niin tilavuuden on oltava 1,5 kertaa kokonaisala ...
+error.vrk:BR407:   Jos rakennetaan uutta rakennusta, niin tilavuuden on oltava 1,5 kertaa kokonaisala
