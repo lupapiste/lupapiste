@@ -30,11 +30,11 @@
   (q/with-collection "migrations"
     (q/sort {:time 1})))
 
-(def execution-name {:pre "pre-condition"
-                     :fn "execution"
-                     :post "post-condition"})
+(def ^:private execution-name {:pre "pre-condition"
+                               :fn "execution"
+                               :post "post-condition"})
 
-(defn- execute [execution-type m]
+(defn- call-execute [execution-type m]
   (try
     ((execution-type m))
     (catch Throwable e
@@ -42,9 +42,9 @@
 
 (defn- execute-migration [m]
   (try+
-    (execute :pre m)
-    (let [result {:ok true :result (execute :fn m)}]
-      (execute :post m)
+    (call-execute :pre m)
+    (let [result {:ok true :result (call-execute :fn m)}]
+      (call-execute :post m)
       result)
     (catch map? e
       e)))
