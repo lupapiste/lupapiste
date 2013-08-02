@@ -104,12 +104,12 @@
   [{{:keys [municipality]} :data}]
   (ok :operations (operations/municipality-operations municipality)))
 
+;; not used.
 (defquery "organization"
   {:parameters [:organizationId] :verified true}
   [{{:keys [organizationId]} :data}]
   (if-let [{:keys [links]} (get-organization organizationId)]
     (ok :links links
-        :operations (operations/organization-operations organizationId)
         :attachments (attachments/organization-attachments organizationId))
     (fail :unknown-organization)))
 
