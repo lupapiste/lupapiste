@@ -36,7 +36,8 @@
 
 (defn- call-execute [execution-type m]
   (try
-    ((execution-type m))
+    (when-let [f (execution-type m)]
+      (f))
     (catch Throwable e
       (throw+ {:ok false :ex (str (execution-name execution-type) " failed: " (with-out-str (print-cause-trace e)))}))))
 
