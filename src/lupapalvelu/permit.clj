@@ -30,14 +30,14 @@
 ;; Validate
 ;;
 
-(defn validate-permit-type-is-not [ptype]
+(defn validate-permit-type-is-not [validator-permit-type]
   (fn [_ application]
     (let [application-permit-type (permit-type application)]
-      (when (= (keyword application-permit-type) (keyword ptype))
-        (fail :error.invalid-permit-type :permit-type ptype)))))
+      (when (= (keyword application-permit-type) (keyword validator-permit-type))
+        (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
 
-(defn validate-permit-type-is [ptype]
+(defn validate-permit-type-is [validator-permit-type]
   (fn [_ application]
     (let [application-permit-type (permit-type application)]
-      (when-not (= (keyword application-permit-type) (keyword ptype))
-        (fail :error.invalid-permit-type :permit-type ptype)))))
+      (when-not (= (keyword application-permit-type) (keyword validator-permit-type))
+        (fail :error.invalid-permit-type :permit-type validator-permit-type)))))
