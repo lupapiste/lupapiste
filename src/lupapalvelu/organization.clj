@@ -132,7 +132,7 @@
 (defcommand "organization-operations-attachments"
   {:parameters [:operation :attachments]
    :roles [:authorityAdmin]}
-  [{{operation :operation attachments :attachments} :data user :user}]
+  [{{:keys [operation attachments]} :data user :user}]
   ; FIXME: validate operation and attachments
   (let [organizations (:organizations user)
         organization  (first organizations)]
