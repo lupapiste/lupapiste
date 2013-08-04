@@ -64,7 +64,9 @@
         <div class="container">
 
           <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc'" class="tab-info"></p>
+          <p data-bind="ltext: 'neighbor.show.welcome.desc1'" class="tab-info"></p>
+          <p data-bind="ltext: 'neighbor.show.welcome.desc2'" class="tab-info-continued"></p>
+          <p data-bind="ltext: 'neighbor.show.welcome.desc3'" class="tab-info-continued"></p>
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
 
           <!-- docgen generated content: -->
@@ -122,6 +124,7 @@
 
           <div data-bind="visible: pending" class="pending"></div>
           <h1 data-bind="ltext: 'neighbor.show.form'"></h1>
+          <p data-bind="ltext: 'neighbor.show.responce.desc'" class="tab-info"></p>
           <div class="neighbor-reply-form">
             <div data-bind="ifnot: tupasUser">
               <!-- generated vetuma-form comes here -->
@@ -166,6 +169,8 @@
                 </span>
                 
                 <h1 data-bind="visible: done, ltext: 'neighbor.show.response.done'" data-test-id="neighbor-response-done"></h1>
+                <p data-bind="visible: done, ltext: 'neighbor.show.response.done.desc'"> <p>
+
                 
               </form>
             </div>
