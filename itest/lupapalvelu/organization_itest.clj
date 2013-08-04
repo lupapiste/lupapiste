@@ -5,8 +5,8 @@
 
 (apply-remote-minimal)
 
-(facts "municipalities"
+(facts "organization"
   (query pena :organization :organizationId "INVALID") => not-ok?
   (let [resp (query pena :organization :organizationId "753-R")]
     resp => ok?
-    (keys resp) => (just [:ok :attachments :operations :links])))
+    (keys resp) => (just [:ok :attachments :links])))
