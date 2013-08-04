@@ -119,10 +119,8 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type))
     (first organizations)))
 
-; return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R
-; TODO: operation does not have permitModule
 (defquery "organization-details"
-  {:parameters [:municipality] :verified true}
+  {:parameters [:municipality :operation] :verified true}
   [{{:keys [municipality operation]} :data}]
   (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
     (ok :links (:links result)
