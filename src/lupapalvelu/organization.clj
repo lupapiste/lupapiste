@@ -121,7 +121,7 @@
 
 ; return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R
 ; TODO: operation does not have permitModule
-(defquery "get-organization-details"
+(defquery "organization-details"
   {:parameters [:municipality] :verified true}
   [{{:keys [municipality operation]} :data}]
   (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
@@ -154,9 +154,7 @@
   [{{:keys [legacy]} :data {:keys [organizations] :as user} :user}]
   (let [organization (first organizations)]
     (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
-      (do
-        (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
-        (ok))
+      (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
       (fail :legacy_is_dead))))
 
 ;;

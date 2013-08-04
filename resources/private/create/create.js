@@ -344,7 +344,7 @@
       onSelect: function(v) {
         if (v) {
           model.operation(v.op);
-          ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+          ajax.query("organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
             model.organization(d);
           }).call();
         } else {
