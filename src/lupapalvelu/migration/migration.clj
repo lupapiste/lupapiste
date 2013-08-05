@@ -1,5 +1,7 @@
 (ns lupapalvelu.migration.migration
-  (:require [lupapalvelu.migration.core :refer :all]
+  (:require [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.migration.core :refer :all]
+            [lupapalvelu.migration.migrations]
             [slingshot.slingshot :refer [try+ throw+]]
             [clojure.stacktrace :refer [print-cause-trace]]
             [clojure.pprint :refer [pprint]])
@@ -41,7 +43,7 @@
     (when long-format
       (if (:ok r)
         (pprint (:result r))
-        (println (:ex r)))
+        (println (:error r)))
       (println))))
 
 (defn run-migration! [migration-name]
@@ -56,7 +58,7 @@
           (println))
         (do
           (println "Failure")
-          (println (:ex result))
+          (println result)
           (throw+ result))))))
 
 (defn run-migrations! [migration-names]
@@ -74,11 +76,12 @@
       (print-cause-trace e)
       1)))
 
-(defn -main [& [f & args]]
+(defn -main [& [action & args]]
+  (mongo/connect!)
   (cond
-    (nil? f)       (show-help)
-    (= f "list")   (list-migrations)
-    (= f "hist")   (show-history (= "-l" (first args)))
-    (= f "update") (run-migrations! (map :name (unexecuted-migrations)))
-    (= f "run")    (if (seq args) (run-migrations! args) (rtfm))
-    :else          (rtfm)))
+    (nil? action)       (show-help)
+    (= action "list")   (list-migrations)
+    (= action "hist")   (show-history (= "-l" (first args)))
+    (= action "update") (run-migrations! (map :name (unexecuted-migrations)))
+    (= action "run")    (if (seq args) (run-migrations! args) (rtfm))
+    :else               (rtfm)))
