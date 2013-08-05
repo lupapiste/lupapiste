@@ -162,3 +162,8 @@
         (find-by-schema? docs "bar") => truthy
         (find-by-schema? docs "c") => truthy
         (-> (find-by-schema? docs "bar") :schema :info) => (contains {:op "bar" :removable true})))))
+
+(fact "make-query (LUPA-519) with filter-user checks both authority and auth.id"
+  (make-query {} {:filter-kind  "both"
+                  :filter-state "all"
+                  :filter-user  "123"}) => (contains {"$or" [{"auth.id" "123"} {"authority.id" "123"}]}))
