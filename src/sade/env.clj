@@ -4,7 +4,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.walk :as walk]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [monger.collection :as mc])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
@@ -116,3 +117,5 @@
   `(if (dev-mode?)
      (binding [*in-dev-macro* true]
        (do ~@body))))
+
+(def db-mode (:mode (mc/find-one-as-map :systemstatus {:_id "env"})))
