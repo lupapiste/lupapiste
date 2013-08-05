@@ -9,11 +9,13 @@
 (defonce migrations (atom {}))
 (defonce migration-order (atom 0))
 
-(defmacro defmigration [migration-name & body]
-  (let [has-opts?                      (map? (first body))
-        {:keys [pre post apply-when]}  (when has-opts? (first body))
-        body                           (if has-opts? (rest body) body)
-        order                          (swap! migration-order inc)]
+(defmacro defmigration
+  "TODO: doc"
+  [migration-name & body]
+  (let [has-opts?      (and (map? (first body)) (> (count body) 1))
+        {:keys [pre post apply-when] :or {pre [] post []}}  (when has-opts? (first body))
+        body           (if has-opts? (rest body) body)
+        order          (swap! migration-order inc)]
     `(let [name-str#   (name (quote ~migration-name))
            pre#        (when (quote ~pre) (fn [] (assert ~pre)))
            post#       (when (quote ~post) (fn [] (assert ~post)))
