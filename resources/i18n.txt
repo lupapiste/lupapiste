@@ -1,0 +1,22 @@
+neighbors.status-dialog.title: Naapurin kuulemisen tila
+neighbors.status-dialog.ok: Ok
+
+neighbors.status-dialog.message.response-given-ok: Naapuri ilmoitti tutustuneensa hankkeeseen.
+neighbors.status-dialog.message.response-given-comments: Naapuri tutustui hankkeeseen ja halusi tuoda julki seuraavan kommentin:
+neighbors.status-dialog.message.mark-done: Viranomainen merkitsi naapurin kuulluksi
+
+neighbors.status-dialog.description.response-given-ok: Naapuri:
+neighbors.status-dialog.description.response-given-comments: Naapuri:
+neighbors.status-dialog.description.mark-done: Merkinnän suorittanut viranomainen:
+
+neighbors.status-dialog.user.firstName: Etunimi
+neighbors.status-dialog.user.lastName: Sukunimi
+neighbors.status-dialog.user.userid: Tunnus
+neighbors.status-dialog.user.time: Aika
+ 
+neighbors.status-dialog.message-title.response-given-ok:
+neighbors.status-dialog.message-title.response-given-comments: Naapurin viesti:
+neighbors.status-dialog.message-title.mark-done: Viranomaisen viesti:
+ 
+neighbors.remove-dialog.title: Poista naapuri?
+neighbors.remove-dialog.message: Oletko varma että haluat poistaa naapurin?

@@ -39,7 +39,7 @@
     (let [decryptor (EncryptableProperties. (doto (StandardPBEStringEncryptor.)
                                               (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
                                               (.setPassword password)))]
-      (with-open [resource (clojure.lang.RT/resourceAsStream nil file-name)]
+      (with-open [resource (io/input-stream (io/resource file-name))]
         (.load decryptor resource)
         (merge
           (clojure.walk/keywordize-keys
@@ -57,14 +57,15 @@
   "If value autoreload=true, rereads the configuration file,
    otherwise returns cached configuration. Cache time 10s."
   []
-  (let [modified   (-> config deref :last)
+  (let [current    @config
+        modified   (:last current)
         now        (java.lang.System/currentTimeMillis)
-        autoreload (-> config deref :data :autoreload str read-value true?)]
+        autoreload (-> current :data :autoreload str read-value true?)]
     (:data
       (if (and autoreload (> now (+ 10000 modified)))
         (reset! config {:last now
                         :data (read-config prop-file)})
-        @config))))
+        current))))
 
 (defn value
   "Returns a value from config."

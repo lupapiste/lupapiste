@@ -36,7 +36,8 @@
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery]
             [lupapalvelu.neighbors])
-  (:import [java.io ByteArrayInputStream]))
+  (:import [java.io ByteArrayInputStream]
+           [java.util.concurrent TimeUnit]))
 
 ;;
 ;; Helpers
@@ -407,7 +408,7 @@
 ;;
 
 (defn get-session-timeout [request]
-  (get-in request [:session :noir :user :session-timeout] (* 60 10 1000)))
+  (get-in request [:session :noir :user :session-timeout] (.toMillis TimeUnit/HOURS 1)))
 
 (defn session-timeout-handler [handler request]
   (let [now (now)
