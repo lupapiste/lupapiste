@@ -69,7 +69,7 @@
         _                         (Thread/sleep 20) ; delivery time
         email                     (query pena :last-email)
         body                      (get-in email [:message :body :plain])
-        [_ a-id n-id token]       (re-find #"(?sm)/neighbor-show/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
     
     a-id => application-id
     n-id => neighbor-id
@@ -95,7 +95,7 @@
 
     (let [email                     (query pena :last-email)
           body                      (get-in email [:message :body :plain])
-          [_ a-id n-id token]       (re-find #"(?sm)/neighbor-show/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+          [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
       token => truthy
       token =not=> #"="
