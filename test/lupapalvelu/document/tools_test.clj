@@ -69,3 +69,14 @@
   (timestamped {} nil) => {}
   (timestamped expected-wrapped-simple-document nil) => expected-wrapped-simple-document-timestamped)
 
+(fact "stripped"
+  (strip-elements-by-name schema "INVALID") => schema
+  (strip-elements-by-name schema "band") => {:info {:name "band"}
+                                             :body []}
+  (strip-elements-by-name schema "members") => {:info {:name "band"}
+                                                :body [{:name "band"
+                                                        :type :group
+                                                        :body [{:name "name"
+                                                                :type :string}
+                                                               {:name "genre"
+                                                                :type :string}]}]})
