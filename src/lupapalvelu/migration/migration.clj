@@ -63,7 +63,7 @@
 (defn run-migrations! [migration-names]
   (try+
     (dorun (map run-migration! migration-names))
-    (println "All migrations executes successfully")
+    (println "All migrations executed successfully")
   (catch string? message (println "Execution terminated by failure:" message) 1)
   (catch map? result (println "Migration execution failure") 1)
   (catch Exception e (println "Execution terminated by failure") (print-cause-trace e) 1)))
