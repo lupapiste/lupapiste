@@ -15,6 +15,8 @@
                (str (server-address) "/proxy/" (name proxy-name))
                {:headers {"authorization" (str "apikey=" apikey)
                           "content-type" "application/json;charset=utf-8"}
+                :socket-timeout 1000
+                :conn-timeout 1000
                 :body (json/encode (apply hash-map args))})]
     (decode-response resp)))
 
