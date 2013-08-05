@@ -13,7 +13,16 @@
   `(fn [] ~@(map #(cons 'assert (list %)) body)))
 
 (defmacro defmigration
-  "TODO: doc"
+  "Defines a migration. First argument is a migration name, followed by (optional) map with options,
+   followed by a body of actual migration code.
+   Supported options are:
+     :pre   A vector of pre assertions
+     :post  A vector of post assertions
+     :apply-when  A body of a function
+   The 'apply-when' function is evaluated before migration is executed. If the result of the migration
+   is truthy the migration is executed, otherwise the migration is skipped. After the migration has
+   been executed the 'apply-when' is evaluated for the second time. If it still evaluates to truthy
+   migration is considered to be a failure."
   [migration-name & body]
   (let [name-str       (name migration-name)
         order          (swap! migration-order inc)
