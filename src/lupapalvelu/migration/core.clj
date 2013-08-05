@@ -15,13 +15,13 @@
 (defmacro defmigration
   "TODO: doc"
   [migration-name & body]
-  (let [order          (swap! migration-order inc)
+  (let [name-str       (name migration-name)
+        order          (swap! migration-order inc)
         has-opts?      (and (map? (first body)) (> (count body) 1))
         {:keys [pre post apply-when]} (when has-opts? (first body))
         pre            (->assertion pre)
         post           (->assertion post)
-        body           (if has-opts? (rest body) body)
-        name-str       (name migration-name)]
+        body           (if has-opts? (rest body) body)]
     `(swap! migrations assoc ~name-str {:name ~name-str
                                         :order ~order
                                         :pre ~pre
