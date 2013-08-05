@@ -91,7 +91,7 @@
                                                  :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
                       :kaytto {:rakentajaTyyppi {:value "muu"}
                                :kayttotarkoitus {:value "012 kahden asunnon talot"}}
-                      :mitat {:tilavuus {:value "1000"}
+                      :mitat {:tilavuus {:value "1500"}
                               :kokonaisala {:value "1000"}
                               :kellarinpinta-ala {:value "100"}
                               :kerrosluku {:value "2"}

@@ -12,7 +12,6 @@
     strip-xml-namespaces))
 
 (defn extract-vtj [s]
-  (println (form-decode s))
   (let [xml (parse-vtj s)]
     {:firstName   (get-text xml :NykyisetEtunimet :Etunimet)
      :lastName    (get-text xml :NykyinenSukunimi :Sukunimi)
