@@ -69,3 +69,17 @@
 
 (defn ^String lower-case [^CharSequence x] (when x (s/lower-case x)))
 (defn ^String trim [^CharSequence x] (when x (s/trim x)))
+
+;; https://gist.github.com/rplevy/3021378
+
+(defmacro with
+  "do things with the first expression passed,
+   and produce the result"
+  [expr & body]
+  `(let [~'% ~expr] ~@body))
+
+(defmacro within
+  "do things with the first expression passed (for side effects),
+   but produce the value of the first expression"
+  [expr & body]
+  `(let [~'% ~expr] ~@body ~'%))

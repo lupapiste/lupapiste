@@ -27,6 +27,7 @@
             [lupapalvelu.security :as security]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
@@ -147,7 +148,11 @@
   (ok :authorityInfo (find-authorities-in-applications-organization app)))
 
 (defn filter-repeating-party-docs [names]
-  (filter (fn [name] (and (= :party (get-in schemas/schemas [name :info :type])) (= true (get-in schemas/schemas [name :info :repeating])))) names))
+  (filter
+    (fn [name]
+      (and (= :party (get-in (schemas/get-schemas) [name :info :type]))
+        (= true (get-in (schemas/get-schemas) [name :info :repeating]))))
+    names))
 
 (defquery "party-document-names"
   {:parameters [:id]
@@ -300,7 +305,7 @@
     (fn [application]
       (let [document     (domain/get-document-by-id application documentId)
             schema-name  (get-in document [:schema :info :name])
-            schema       (get schemas/schemas schema-name)
+            schema       (schemas/get-schema schema-name)
             subject      (security/get-non-private-userinfo userId)
             with-hetu    (and
                            (domain/has-hetu? (:body schema) [path])
@@ -419,10 +424,10 @@
   (update-application command
     {$set {:shapes [shape]}}))
 
-(defn- make-attachments [created op organization-id & {:keys [target]}]
-  (let [organization (mongo/select-one :organizations {:_id organization-id} {:operations-attachments 1})]
-    (for [[type-group type-id] (get-in organization [:operations-attachments (keyword (:name op))])]
-      (attachment/make-attachment created target false op {:type-group type-group :type-id type-id}))))
+(defn- make-attachments [created operation organization-id & {:keys [target]}]
+  (let [organization (organization/get-organization organization-id)]
+    (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
+      (attachment/make-attachment created target false operation {:type-group type-group :type-id type-id}))))
 
 (defn- schema-data-to-body [schema-data application]
   (reduce
@@ -432,17 +437,13 @@
         (update-in body path (constantly val))))
     {} schema-data))
 
-(defn- make-documents [user created existing-documents op application]
+;; TODO: permit-type splitting.
+(defn- make-documents [user created op application]
   (let [op-info               (operations/operations (keyword (:name op)))
+        existing-documents    (:documents application)
+        permit-type           (keyword (permit/permit-type application))
         make                  (fn [schema-name] {:id (mongo/create-id)
-                                                 ;; TODO: Yhdista (nama kaikki) schemat jossain jarkevammassa paikassa
-                                                 :schema ((merge schemas/schemas
-                                                            poischemas/poikkuslupa-and-suunnitelutarveratkaisu-schemas
-                                                            ympschemas/ympschemas
-                                                            yleiset-alueet/kaivuulupa
-                                                            yleiset-alueet/sijoituslupa
-                                                            yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
-                                                            #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
+                                                 :schema (schemas/get-schema schema-name)
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
@@ -455,64 +456,57 @@
         new-docs              (cons op-doc required-docs)
         hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
         hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
-    (if user
-      ;; TODO: is this a good way to introduce new types into the system?
-      (if (= (:operation-type op-info) :publicArea)
-        (cons (assoc-in
+    (if-not user
+      new-docs
+      (condp = permit-type
+        :YA (cons
+              (assoc-in
                 (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
                 [:data :yritys]
                 (domain/->yritys-public-area user))
-          new-docs)
-        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs))
-      new-docs)))
+              new-docs)
+        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs)))))
 
-(defn- ->location [x y]
-  {:x (->double x) :y (->double y)})
+ (defn- ->location [x y]
+   {:x (->double x) :y (->double y)})
 
-(defn- permit-type-from-operation [operation]
-  ;; TODO operation to permit type mapping???
-  "buildingPermit")
+ (defn- make-application-id [municipality]
+   (let [year           (str (year (local-now)))
+         sequence-name  (str "applications-" municipality "-" year)
+         counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
+     (str "LP-" municipality "-" year "-" counter)))
 
-(defn- make-application-id [municipality]
-  (let [year           (str (year (local-now)))
-        sequence-name  (str "applications-" municipality "-" year)
-        counter        (format "%05d" (mongo/get-next-sequence-value sequence-name))]
-    (str "LP-" municipality "-" year "-" counter)))
+ (defn- make-op [op-name created]
+   {:id (mongo/create-id)
+    :name (keyword op-name)
+    :created created
+    :operation-type (:operation-type (operations/operations (keyword op-name)))})
 
-(defn- make-op [op-name created]
-  {:id (mongo/create-id)
-   :name (keyword op-name)
-   :created created
-   :operation-type (:operation-type (operations/operations (keyword op-name)))})
+ (def ktj-format (tf/formatter "yyyyMMdd"))
+ (def output-format (tf/formatter "dd.MM.yyyy"))
 
-(def ktj-format (tf/formatter "yyyyMMdd"))
-(def output-format (tf/formatter "dd.MM.yyyy"))
+ (defn- autofill-rakennuspaikka [application created]
+   (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
+         kiinteistotunnus (:propertyId application)
+         ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
+     (when ktj-tiedot
+       (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
+                      [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
+                      [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
+                      [[:kiinteisto :rekisterointipvm] (or (try
+                                                         (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                         (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+         (commands/persist-model-updates
+           (:id application)
+           rakennuspaikka
+           updates
+           created)))))
 
-(defn- autofill-rakennuspaikka [application created]
-  (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
-        kiinteistotunnus (:propertyId application)
-        ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
-    (when ktj-tiedot
-      (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
-                     [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
-                     [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
-                     [[:kiinteisto :rekisterointipvm] (or (try
-                                                        (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                        (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
-        (commands/persist-model-updates
-          (:id application)
-          rakennuspaikka
-          updates
-          created)))))
+ (defn user-is-authority-in-organization? [user-id organization-id]
+   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
-(defn user-is-authority-in-organization? [user-id organization-id]
-  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
-
-(defn- operation-validator [{{operation :operation} :data}]
-  (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
-
-(defn- public-area-validator [command application]
-  (when (= (:operation-type (operations/operations (keyword (:name (first (:operations application)))))) :publicArea) (fail :error.unknown-type)))
+ (defn- operation-validator [{{operation :operation} :data}]
+   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand "create-application"
@@ -520,69 +514,68 @@
    :roles      [:applicant :authority]
    :input-validators [(partial non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
-                      operation-validator]
-   :verified   true}
+                      operation-validator]}
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
-  (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
-    (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
+  (let [permit-type     (operations/permit-type-of-operation operation)
+        organization-id (:id (organization/resolve-organization municipality permit-type))]
+    (when-not
+      (or (security/applicant? user)
+          (user-is-authority-in-organization? (:id user) organization-id))
+      (fail! :error.unauthorized))
     (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
-          info-request? (if infoRequest true false)
-          state         (if info-request? :info
-                          (if (security/authority? user) :open :draft))
+          info-request? (boolean infoRequest)
+          state         (cond
+                          info-request?              :info
+                          (security/authority? user) :open
+                          :else                      :draft)
           make-comment  (partial assoc {:target {:type "application"}
                                         :created created
                                         :user (security/summary user)} :text)
-          organization  application-organization-id
           application   {:id            id
                          :created       created
                          :opened        (when (#{:open :info} state) created)
                          :modified      created
+                         :permitType    permit-type
                          :infoRequest   info-request?
                          :operations    [op]
                          :state         state
                          :municipality  municipality
                          :location      (->location x y)
-                         :organization  organization
+                         :organization  organization-id
                          :address       address
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
-                         :attachments   (if info-request?
-                                          []
-                                          (make-attachments created op organization))
-                         :allowedAttachmentTypes (if info-request?
-                                                   [[:muut [:muu]]]
-                                                   (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                     (partition 2 attachment/attachment-types-public-areas)
-                                                     (partition 2 attachment/attachment-types)))
-                         :comments      (map make-comment messages)
-                         :permitType    (permit-type-from-operation op)}
-          application   (assoc application :documents (if info-request?
-                                                        []
-                                                        (make-documents user created nil op application)))
-          app-with-ver  (domain/set-software-version application)]
-      (mongo/insert :applications app-with-ver)
-      (autofill-rakennuspaikka app-with-ver created)
-      (ok :id id))
-    (fail :error.unauthorized))))
+                         :comments      (map make-comment messages)}
+          application   (merge application
+                          (if info-request?
+                            {:attachments            []
+                             :allowedAttachmentTypes [[:muut [:muu]]]
+                             :documents              []}
+                            {:attachments            (make-attachments created op organization-id)
+                             :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
+                             :documents              (make-documents user created op application)}))
+          application   (domain/set-software-version application)]
+      (mongo/insert :applications application)
+      (autofill-rakennuspaikka application created)
+      (ok :id id))))
 
 (defcommand "add-operation"
   {:parameters [:id :operation]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
    :input-validators [operation-validator]
-   :validators [public-area-validator]}
+   :validators [(permit/validate-permit-type-is permit/R)]}
   [command]
   (with-application command
     (fn [application]
       (let [id         (get-in command [:data :id])
             created    (:created command)
-            documents  (:documents application)
             op-id      (mongo/create-id)
             op         (make-op (get-in command [:data :operation]) created)
-            new-docs   (make-documents nil created documents op nil)]
+            new-docs   (make-documents nil created op application)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
@@ -609,14 +602,13 @@
    :roles      [:applicant]
    :states     [:draft :info :answered]}
   [{{:keys [id]} :data :keys [user created application] :as command}]
-  (let [op (first (:operations application))]
+  (let [op          (first (:operations application))
+        permit-type (permit/permit-type application)]
     (mongo/update-by-id :applications id
                         {$set {:infoRequest false
                                :state :open
-                               :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                         (partition 2 attachment/attachment-types-public-areas)
-                                                         (partition 2 attachment/attachment-types))
-                               :documents (make-documents user created nil op nil)
+                               :allowedAttachmentTypes (attachment/get-attachment-types-by-permit-type permit-type)
+                               :documents (make-documents user created op application)
                                :modified created}
            $pushAll {:attachments (make-attachments created op (:organization application))}})))
 

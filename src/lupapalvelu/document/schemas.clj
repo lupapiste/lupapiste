@@ -1,6 +1,26 @@
 (ns lupapalvelu.document.schemas)
 
 ;;
+;; Register schemas
+;;
+
+(defonce ^:private registered-schemas (atom {}))
+
+(defn get-schemas [] @registered-schemas)
+
+(defn defschema [data]
+  (let [schema-name (name (get-in data [:info :name]))]
+    (swap! registered-schemas assoc schema-name (assoc-in data [:info :name] schema-name))))
+
+(defn defschemas [schemas]
+  (doseq [schema schemas]
+    (defschema schema)))
+
+(defn get-schema [schema-name]
+  {:pre [(not= nil schema-name)]}
+  (@registered-schemas (name schema-name)))
+
+;;
 ;; helpers
 ;;
 
@@ -155,7 +175,7 @@
                         designer-basic
                         {:name "patevyys" :type :group :body patevyys}))
 
-(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select 
+(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select
                        :body [{:name "GEO-suunnittelija"}
                               {:name "LVI-suunnittelija"}
                               {:name "IV-suunnittelija"}
@@ -473,92 +493,91 @@
 ;; schemas
 ;;
 
-(def schemas
-  (to-map-by-name
-    [{:info {:name "hankkeen-kuvaus"
-             :order 1}
-      :body [kuvaus
-             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
+(defschemas
+  [{:info {:name "hankkeen-kuvaus"
+           :order 1}
+    :body [kuvaus
+           {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
-     {:info {:name "uusiRakennus" :approvable true}
-      :body (body rakennuksen-omistajat rakennuksen-tiedot)}
+    {:info {:name "uusiRakennus" :approvable true}
+     :body (body rakennuksen-omistajat rakennuksen-tiedot)}
 
-     {:info {:name "rakennuksen-muuttaminen"}
-      :body rakennuksen-muuttaminen}
+    {:info {:name "rakennuksen-muuttaminen"}
+     :body rakennuksen-muuttaminen}
 
-     {:info {:name "rakennuksen-laajentaminen"}
-      :body rakennuksen-laajentaminen}
+    {:info {:name "rakennuksen-laajentaminen"}
+     :body rakennuksen-laajentaminen}
 
-     {:info {:name "purku"}
-      :body purku}
+    {:info {:name "purku"}
+     :body purku}
 
-     {:info {:name "kaupunkikuvatoimenpide"}
-      :body rakennelma}
+    {:info {:name "kaupunkikuvatoimenpide"}
+     :body rakennelma}
 
-     {:info {:name "maisematyo"}
-      :body maisematyo}
+    {:info {:name "maisematyo"}
+     :body maisematyo}
 
-     {:info {:name "hakija"
-             :order 3
-             :removable true
-             :repeating true
-             :type :party}
-      :body party}
+    {:info {:name "hakija"
+            :order 3
+            :removable true
+            :repeating true
+            :type :party}
+     :body party}
 
-     {:info {:name "hakija-public-area"
-             :order 3
-             :removable true
-             :repeating true
-             :type :party}
-      :body party-public-area}
+    {:info {:name "hakija-public-area"
+            :order 3
+            :removable true
+            :repeating true
+            :type :party}
+     :body party-public-area}
 
-     {:info {:name "paasuunnittelija"
-             :order 4
-             :removable false
-             :type :party}
-      :body paasuunnittelija}
+    {:info {:name "paasuunnittelija"
+            :order 4
+            :removable false
+            :type :party}
+     :body paasuunnittelija}
 
-     {:info {:name "suunnittelija"
-             :repeating true
-             :order 5
-             :removable true
-             :type :party}
-      :body suunnittelija}
+    {:info {:name "suunnittelija"
+            :repeating true
+            :order 5
+            :removable true
+            :type :party}
+     :body suunnittelija}
 
-     {:info {:name "maksaja"
-             :repeating true
-             :order 6
-             :removable true
-             :type :party}
-      :body (body
-              party
-              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
+    {:info {:name "maksaja"
+            :repeating true
+            :order 6
+            :removable true
+            :type :party}
+     :body (body
+             party
+             {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
 
-     {:info {:name "rakennuspaikka"
-             :order 2}
-      :body [{:name "kiinteisto"
-              :type :group
-              :body [{:name "maaraalaTunnus" :type :string}
-                     {:name "tilanNimi" :type :string :readonly true}
-                     {:name "rekisterointipvm" :type :string :readonly true}
-                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                     {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
+    {:info {:name "rakennuspaikka"
+            :order 2}
+     :body [{:name "kiinteisto"
+             :type :group
+             :body [{:name "maaraalaTunnus" :type :string}
+                    {:name "tilanNimi" :type :string :readonly true}
+                    {:name "rekisterointipvm" :type :string :readonly true}
+                    {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                    {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
 
-             {:name "hallintaperuste" :type :select :required true
-              :body [{:name "oma"}
-                     {:name "vuokra"}
-                     {:name "ei tiedossa"}]}
-             {:name "kaavanaste" :type :select
-              :body [{:name "asema"}
-                     {:name "ranta"}
-                     {:name "rakennus"}
-                     {:name "yleis"}
-                     {:name "eiKaavaa"}
-                     {:name "ei tiedossa"}]}]}
+            {:name "hallintaperuste" :type :select :required true
+             :body [{:name "oma"}
+                    {:name "vuokra"}
+                    {:name "ei tiedossa"}]}
+            {:name "kaavanaste" :type :select
+             :body [{:name "asema"}
+                    {:name "ranta"}
+                    {:name "rakennus"}
+                    {:name "yleis"}
+                    {:name "eiKaavaa"}
+                    {:name "ei tiedossa"}]}]}
 
-     {:info {:name "lisatiedot"
-             :order 100}
-      :body [{:name "suoramarkkinointikielto"
-              :type :checkbox
-              :layout :full-width}]}]))
+    {:info {:name "lisatiedot"
+            :order 100}
+     :body [{:name "suoramarkkinointikielto"
+             :type :checkbox
+             :layout :full-width}]}])
 
