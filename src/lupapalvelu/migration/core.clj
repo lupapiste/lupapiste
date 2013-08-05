@@ -56,12 +56,13 @@
     (catch map? e
       e)))
 
-(defn execute-migration! [m]
-  (assert m)
-  (when-let [result (execute-migration m)]
-    (let [record (assoc result :name (:name m) :time (now))]
-      (mc/insert :migrations record)
-      record)))
+(defn execute-migration! [migration-name]
+  (if-let [m (@migrations migration-name)] 
+    (when-let [result (execute-migration m)]
+      (let [record (assoc result :name (:name m) :time (now))]
+        (mc/insert :migrations record)
+        record))
+    {:ok false :error "unknown migration"}))
 
 (defn unexecuted-migrations []
   (let [all-migrations (sort-by :order (vals @migrations))

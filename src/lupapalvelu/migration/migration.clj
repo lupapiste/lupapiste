@@ -19,7 +19,8 @@
   (println "  hist ............... Show migration executions")
   (println "  hist -l ............ Show migration executions in long format")
   (println "  update ............. Execute migrations that have not been executed")
-  (println "  run [id, id...] .... Execute migrations with given ID's"))
+  (println "  run [name...] ...... Execute migrations by name")
+  (println "  run -f ............. Execute all migrations"))
 
 (defn rtfm []
   (println "What? I dont even...")
@@ -57,7 +58,7 @@
           (pprint (:result result))
           (println))
         (do
-          (println "Failure")
+          (print "Failure: ")
           (println result)
           (throw+ result))))))
 
@@ -65,16 +66,9 @@
   (try+
     (dorun (map run-migration! migration-names))
     (println "All migrations executes successfully")
-    (catch string? message
-      (println "Execution terminated by failure:" message)
-      1)
-    (catch map? result
-      (println "Migration execution failure")
-      1)
-    (catch Exception e
-      (println "Execution terminated by failure")
-      (print-cause-trace e)
-      1)))
+  (catch string? message (println "Execution terminated by failure:" message) 1)
+  (catch map? result (println "Migration execution failure") 1)
+  (catch Exception e (println "Execution terminated by failure") (print-cause-trace e) 1)))
 
 (defn -main [& [action & args]]
   (mongo/connect!)
@@ -82,6 +76,8 @@
     (nil? action)       (show-help)
     (= action "list")   (list-migrations)
     (= action "hist")   (show-history (= "-l" (first args)))
-    (= action "update") (run-migrations! (map :name (unexecuted-migrations)))
-    (= action "run")    (if (seq args) (run-migrations! args) (rtfm))
+    (= action "run")    (run-migrations! (map :name (if (= "-f" (first args))
+                                                      (->> @migrations vals (sort-by :order))
+                                                      (unexecuted-migrations))))
+    (= action "update") (update!)
     :else               (rtfm)))
