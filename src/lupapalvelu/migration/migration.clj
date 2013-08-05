@@ -65,6 +65,9 @@
   (catch map? result (println "Migration execution failure") 1)
   (catch Exception e (println "Execution terminated by failure") (print-cause-trace e) 1)))
 
+(defn update! []
+  (run-migrations! (map :name (unexecuted-migrations))))
+
 (defn -main [& [action & args]]
   (mongo/connect!)
   (cond
@@ -73,5 +76,5 @@
     (= action "hist")     (show-history (= "-l" (first args)))
     (= action "run")      (if (seq args) (run-migrations! args) (rtfm))
     (= action "run-all")  (run-migrations! (map :name (->> @migrations vals (sort-by :order))))
-    (= action "update")   (run-migrations! (map :name (unexecuted-migrations)))
+    (= action "update")   (update!)
     :else                 (rtfm)))
