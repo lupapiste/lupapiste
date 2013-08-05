@@ -89,3 +89,6 @@
 (fact "apply-when says yes all the time"
   (defmigration a {:apply-when (identity true)} "a")
   (execute-migration! "a") => (contains {:name "a" :ok false :error "migration execution did not change result of apply-when"}))
+
+; leave everything is pristine condition
+(cleanup!)
