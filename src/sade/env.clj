@@ -117,5 +117,3 @@
   `(if (dev-mode?)
      (binding [*in-dev-macro* true]
        (do ~@body))))
-
-(def db-mode (:mode (mc/find-one-as-map :systemstatus {:_id "env"})))
