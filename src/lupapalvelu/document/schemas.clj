@@ -576,3 +576,14 @@
              :type :checkbox
              :layout :full-width}]}])
 
+
+(defn strip-elements-by-name
+  [schema element-name]
+  (assoc schema :body (postwalk
+                        (fn [form]
+                          (cond
+                            (and (map? form) (= (:name form) element-name)) nil
+                            (sequential? form) (->> form (filter identity) vec)
+                            :else form))
+                        (:body schema))))
+
