@@ -35,12 +35,9 @@
 (def status {true  "SUCCESS"
              false "FAIL"})
 
-(defn migration-name [id]
-  (:name (migration-by-id id)))
-
 (defn show-history [long-format]
   (doseq [r (migration-history)]
-    (printf "%s: %3d: '%s' %s%n" (time->str (:time r)) (:id r) (migration-name (:id r)) (status (:ok r)))
+    (printf "%s: %s: %s%n" (time->str (:time r)) (:name r) (status (:ok r)))
     (when long-format
       (if (:ok r)
         (pprint (:result r))
@@ -76,5 +73,5 @@
     (= action "hist")     (show-history (= "-l" (first args)))
     (= action "run")      (if (seq args) (run-migrations! args) (rtfm))
     (= action "run-all")  (run-migrations! (map :name (->> @migrations vals (sort-by :order))))
-    (= action "update")   (update!)
+    (= action "update")   (run-migrations! (map :name (unexecuted-migrations)))
     :else                 (rtfm)))
