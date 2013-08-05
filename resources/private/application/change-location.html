@@ -24,7 +24,12 @@
 
               <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
 
-              <button data-bind="ltext: 'save', click: saveNewLocation, enable: ok" class="btn btn-primary btn-dialog" data-test-id="change-location-save"></button>
+              <button data-bind="ltext: 'save', click: saveNewLocation, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="change-location-save"></button>
+
+              <div data-bind="visible: pending">
+                <img src="/img/ajax-loader.gif" alt="..." width="66" height="66" />
+              </div>
+
               <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
             </div>
 

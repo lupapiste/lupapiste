@@ -7,6 +7,8 @@ var comments = (function() {
     self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
+    self.processing = ko.observable();
+    self.pending = ko.observable();
 
     self.refresh = function(application, target) {
       self.setApplicationId(application.id);
@@ -24,12 +26,14 @@ var comments = (function() {
     };
 
     self.disabled = ko.computed(function() {
-      return _.isEmpty(self.text());
+      return self.processing() || _.isEmpty(self.text());
     });
 
     self.submit = function(model) {
       var id = self.applicationId;
       ajax.command("add-comment", { id: id, text: model.text(), target: self.target()})
+        .processing(self.processing)
+        .pending(self.pending)
         .success(function() {
           model.text("");
           repository.load(id);

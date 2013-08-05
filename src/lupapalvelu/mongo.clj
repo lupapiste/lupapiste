@@ -241,7 +241,7 @@
       (gfs/remove-all)
       ; Collections must be dropped individially, otherwise index cache will be stale
       (doseq [coll (db/get-collection-names)]
-        (when-not (.startsWith coll "system") (mc/drop coll)))
+        (when-not (or (.startsWith coll "system") (= "poi" coll)) (mc/drop coll)))
       (ensure-indexes))))
 
 (defstatus :mongo (server-status))
