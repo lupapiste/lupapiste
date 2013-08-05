@@ -403,12 +403,14 @@
 (defn anti-csrf
   [handler]
   (fn [request]
-    (let [cookie-name "anti-csrf-token"
-          cookie-attrs (dissoc (env/value :cookie) :http-only)]
-      (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
-               (not (logged-in-with-apikey? request)))
-        (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-        (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
+    (if (env/feature? :disable-anti-csrf)
+      (handler request)
+      (let [cookie-name "anti-csrf-token"
+            cookie-attrs (dissoc (env/value :cookie) :http-only)]
+        (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+                 (not (logged-in-with-apikey? request)))
+          (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+          (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
 
 ;;
 ;; Session timeout:

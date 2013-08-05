@@ -50,7 +50,8 @@
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
-    ((resolve 'lupapalvelu.perf-mon/init))
+    ((resolve 'lupapalvelu.perf-mon/init)))
+  (when (env/feature? :nrepl)
     (warn "*** Starting nrepl")
     (nrepl/start-server :port 9090))
   (with-logs "lupapalvelu"

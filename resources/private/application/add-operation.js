@@ -30,7 +30,7 @@
         .url("#!/application/" + application.id);
       var id = application.id;
       ajax
-        .query("organization", {organizationId: application.organization})
+        .query("operations", {permitType: application.permitType})
         .pending(self.waitingOperations)
         .success(function (data) {
           if (self.application.id === id) {
