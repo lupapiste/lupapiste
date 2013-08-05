@@ -78,6 +78,9 @@
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
+(defn create-YA-app [apikey & args] (apply create-app apikey (concat args [:operation "mainostus-ja-viitoituslupa"])))
+(defn create-R-app [apikey & args]  (apply create-app apikey (concat args [:operation "asuinrakennus"])))
+
 (defn success [resp]
   (fact (:text resp) => nil)
   (:ok resp))
@@ -134,6 +137,9 @@
 (defn http200? [{:keys [status]}]
   (= status 200))
 
+(defn http404? [{:keys [status]}]
+  (= status 404))
+
 ;;
 ;; DSLs
 ;;
@@ -173,8 +179,7 @@
 (defn action-not-allowed [apikey id action]
   (let [resp (query apikey :allowed-actions :id id)]
     (success resp) => true
-    (get-in resp [:actions action :ok]) => falsey
-    (unauthorized (command apikey action :id id))))
+    (get-in resp [:actions action :ok]) => falsey))
 
 ;;
 ;; Stuffin' data in
