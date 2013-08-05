@@ -8,6 +8,7 @@
 
 (defn cleanup! []
   (reset! migrations {})
+  (reset! migration-order 0)
   (mongo/remove-many :migrations {}))
 
 (background (before :facts (cleanup!)))
@@ -21,6 +22,15 @@
   (@migrations "a") => (contains {:name "a"})
   (migration-history) => empty?
   (unexecuted-migrations) => (just [(contains {:name "a"})]))
+
+(facts "migration have order"
+  (defmigration a "a")
+  (defmigration b "b")
+  (defmigration c "c")
+  (count @migrations) => 3
+  (unexecuted-migrations) => (just [(contains {:name "a" :order 1})
+                                    (contains {:name "b" :order 2})
+                                    (contains {:name "c" :order 3})]))
 
 (fact "executing migration adds it to migration history"
   (defmigration a "A")
@@ -60,8 +70,7 @@
 
 (fact "apply-when says no"
   (defmigration a {:apply-when (identity false)} (throw (Error. "never")))
-  (execute-migration! (@migrations "a")) => nil?
-  (migration-history) => empty?)
+  (execute-migration! (@migrations "a")) => (contains {:name "a" :ok true :result (starts-with "execution not needed")}))
 
 (fact "apply-when says yes"
   (let [v (atom true)
@@ -73,4 +82,3 @@
 (fact "apply-when says yes all the time"
   (defmigration a {:apply-when (identity true)} "a")
   (execute-migration! (@migrations "a")) => (contains {:name "a" :ok false :error "migration execution did not change result of apply-when"}))
-
