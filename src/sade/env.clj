@@ -4,7 +4,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.walk :as walk]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [monger.collection :as mc])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
