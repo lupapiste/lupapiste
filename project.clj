@@ -35,7 +35,7 @@
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.6"]]
-                   :plugins [[lein-midje "2.0.1"]
+                   :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
                              [lein-hgnotes "0.1.0"]]
