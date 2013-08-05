@@ -58,13 +58,21 @@
   (execute-migration! "a") => (contains {:name "a" :ok false :error oh-noes})
   (migration-history) => (just [(contains {:name "a" :ok false :error oh-noes})]))
 
+(facts "single map is not considered as an options map"
+  (defmigration a {:foo "bar"})
+  (execute-migration! "a") => (contains {:result {:foo "bar"}}))
+
+(facts "first map is considered as an options map"
+  (defmigration a {} {:foo "bar"})
+  (execute-migration! "a") => (contains {:result {:foo "bar"}}))
+
 (fact "pre-condition failure"
-  (defmigration a {:pre (= 1 2)} (throw (Error. "never")))
+  (defmigration a {:pre [(= 1 2)]} (throw (Error. "never")))
   (execute-migration! "a") => (contains {:name "a" :ok false :error (starts-with "pre-condition failed")})
   (migration-history) => (just [(contains {:name "a" :ok false :error (starts-with "pre-condition failed")})]))
 
 (fact "post-condition failure" 
-  (defmigration a {:post (= 1 2)} "a")
+  (defmigration a {:post [(= 1 2)]} "a")
   (execute-migration! "a") => (contains {:name "a" :ok false :error (starts-with "post-condition failed")})
   (migration-history) => (just [(contains {:name "a" :ok false :error (starts-with "post-condition failed")})]))
 

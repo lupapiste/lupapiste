@@ -9,24 +9,25 @@
 (defonce migrations (atom {}))
 (defonce migration-order (atom 0))
 
+(defn- ->assertion  [body]
+  `(fn [] ~@(map #(cons 'assert (list %)) body)))
+
 (defmacro defmigration
   "TODO: doc"
   [migration-name & body]
-  (let [has-opts?      (and (map? (first body)) (> (count body) 1))
-        {:keys [pre post apply-when] :or {pre [] post []}}  (when has-opts? (first body))
+  (let [order          (swap! migration-order inc)
+        has-opts?      (and (map? (first body)) (> (count body) 1))
+        {:keys [pre post apply-when]} (when has-opts? (first body))
+        pre            (->assertion pre)
+        post           (->assertion post)
         body           (if has-opts? (rest body) body)
-        order          (swap! migration-order inc)]
-    `(let [name-str#   (name (quote ~migration-name))
-           pre#        (when (quote ~pre) (fn [] (assert ~pre)))
-           post#       (when (quote ~post) (fn [] (assert ~post)))
-           apply-when# (when (quote ~apply-when) (fn [] ~apply-when))]
-       (swap! migrations assoc name-str# {:name name-str#
-                                          :order ~order
-                                          :pre pre#
-                                          :post post#
-                                          :apply-when apply-when#
-                                          :fn (fn [] (do ~@body))})
-       nil)))
+        name-str       (name migration-name)]
+    `(swap! migrations assoc ~name-str {:name ~name-str
+                                        :order ~order
+                                        :pre ~pre
+                                        :post ~post
+                                        :apply-when (when (quote ~apply-when) (fn [] ~apply-when))
+                                        :fn (fn [] (do ~@body))})))
 
 (defn migration-history []
   (q/with-collection "migrations"
