@@ -3,8 +3,9 @@
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]))
 
-(defmigration add-default-permit-type {:pre (= (->> :applications mongo/select (keep :permitType) count) 0)
-                                       :post (= (->> :applications mongo/select (keep :permitType) count) (mongo/count :applications))}
+
+
+(defmigration add-default-permit-type {:apply-when (->> (mongo/select :applications) (keep :permitType) count pos?)}
   (mongo/update :applications {:permitType {$exists false}} {$set {:permitType "R"}} :multi true))  
 
 

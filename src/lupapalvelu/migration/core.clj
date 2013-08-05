@@ -9,17 +9,19 @@
 (defonce migrations (atom {}))
 
 (defmacro defmigration [migration-name & body]
-  (let [has-opts? (map? (first body))
-        opts      (when has-opts? (first body))
-        pre       (or (:pre opts) 'true)
-        post      (or (:post opts) 'true)
-        body      (if has-opts? (rest body) body)]
-    `(let [name-str# (name (quote ~migration-name))
-           id#       (swap! migration-id inc)]
+  (let [has-opts?                      (map? (first body))
+        {:keys [pre post apply-when]}  (when has-opts? (first body))
+        body                           (if has-opts? (rest body) body)]
+    `(let [name-str#   (name (quote ~migration-name))
+           id#         (swap! migration-id inc)
+           pre#        (when (quote ~pre) (fn [] (assert ~pre)))
+           post#       (when (quote ~post) (fn [] (assert ~post)))
+           apply-when# (when (quote ~apply-when) (fn [] ~apply-when))]
        (swap! migrations assoc name-str# {:id id# 
                                           :name name-str#
-                                          :pre (fn [] (assert ~pre))
-                                          :post (fn [] (assert ~post))
+                                          :pre pre#
+                                          :post post#
+                                          :apply-when apply-when#
                                           :fn (fn [] (do ~@body))})
        nil)))
 
@@ -31,29 +33,42 @@
     (q/sort {:time 1})))
 
 (def ^:private execution-name {:pre "pre-condition"
-                               :fn "execution"
-                               :post "post-condition"})
+                               :post "post-condition"
+                               :apply-when "apply-when"
+                               :fn "execution"})
 
 (defn- call-execute [execution-type m]
-  (try
-    (when-let [f (execution-type m)]
-      (f))
-    (catch Throwable e
-      (throw+ {:ok false :ex (str (execution-name execution-type) " failed: " (with-out-str (print-cause-trace e)))}))))
+  (when-let [f (execution-type m)]
+    (try
+      (f)
+      (catch Throwable e
+        (throw+ {:ok false :error (str (execution-name execution-type) " failed: " (with-out-str (print-cause-trace e)))})))))
+
+(defmacro dbg [msg & body]
+  `(do
+     (println ~msg)
+     (let [r# (do ~@body)]
+       (clojure.pprint/pprint r#)
+       r#)))
 
 (defn- execute-migration [m]
   (try+
-    (call-execute :pre m)
-    (let [result {:ok true :result (call-execute :fn m)}]
-      (call-execute :post m)
-      result)
+    (when (or (nil? (:apply-when m)) (call-execute :apply-when m))
+      (call-execute :pre m)
+      (let [result (call-execute :fn m)]
+        (when (call-execute :apply-when m)
+          (throw+ {:ok false :error "migration execution did not change result of apply-when"}))
+        (call-execute :post m)
+        {:ok true :result result}))
     (catch map? e
       e)))
 
 (defn execute-migration! [m]
-  (let [result (assoc (execute-migration m) :id (:id m) :time (now))]
-    (mc/insert :migrations result)
-    result))
+  (assert m)
+  (when-let [result (execute-migration m)]
+    (let [record (assoc result :id (:id m) :time (now))]
+      (mc/insert :migrations record)
+      record)))
 
 (defn unexecuted-migrations []
   (let [all-migrations (sort-by :id (vals @migrations))
