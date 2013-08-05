@@ -7,10 +7,9 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (facts "inforequest workflow"
-  (let [resp (create-app pena :messages ["hello"] :infoRequest true :municipality sonja-muni)
-        id   (:id resp)]
+  (let [{id :id :as resp} (create-app pena :messages ["hello"] :infoRequest true :municipality sonja-muni)]
 
-    (success resp) => true
+    resp => ok?
 
     (fact "inforequest was created with message"
       (let [application (query-application pena id)]

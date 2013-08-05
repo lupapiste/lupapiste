@@ -1,5 +1,5 @@
 (ns sade.env
-  (:use [sade.util :only [deep-merge-with]]
+  (:use [sade.util]
         [sade.strings :only [numeric?]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
@@ -50,22 +50,9 @@
                      (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))
           mongo-connection-info)))))
 
-(def ^:private config (atom {:last (java.lang.System/currentTimeMillis)
-                             :data (read-config prop-file)}))
+(def ^:private config (atom (read-config prop-file)))
 
-(defn get-config
-  "If value autoreload=true, rereads the configuration file,
-   otherwise returns cached configuration. Cache time 10s."
-  []
-  (let [current    @config
-        modified   (:last current)
-        now        (java.lang.System/currentTimeMillis)
-        autoreload (-> current :data :autoreload str read-value true?)]
-    (:data
-      (if (and autoreload (> now (+ 10000 modified)))
-        (reset! config {:last now
-                        :data (read-config prop-file)})
-        current))))
+(defn get-config [] @config)
 
 (defn value
   "Returns a value from config."
@@ -81,6 +68,18 @@
     str
     read-value
     true?))
+
+(defn set-feature!
+  "sets feature value in-memory."
+  [value path] (swap! config assoc-in (concat [:feature] (map keyword path)) value))
+
+(defn enable-feature!
+  "enables feature value in-memory."
+  [& feature] (set-feature! true feature))
+
+(defn disable-feature!
+  "disables feature value in-memory."
+  [& feature] (set-feature! false feature))
 
 (defn features
   "Returns a list of all enabled features."
