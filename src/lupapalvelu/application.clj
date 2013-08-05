@@ -398,20 +398,21 @@
    :states     [:draft :info :open :complement-needed]
    :notify     "state-change"
    :validators [validate-owner-or-writer]}
-  [{{:keys [host]} :web :as command}]
+  [{{:keys [host]} :web :keys [created] :as command}]
   (with-application command
-    (fn [application]
-      (let [new-state :submitted
-            application-id (:id application)]
+    (fn [{:keys [id opened] :as application}]
+      (let [new-state      :submitted
+            opened         (or opened created)]
         (mongo/update
           :applications
-          {:_id application-id}
-          {$set {:state new-state
-                 :submitted (:created command) }})
+          {:_id id}
+          {$set {:state     new-state
+                 :opened    opened
+                 :submitted created}})
         (try
           (mongo/insert
             :submitted-applications
-            (assoc (dissoc application :id) :_id application-id))
+            (assoc (dissoc application :id) :_id id))
           (catch com.mongodb.MongoException$DuplicateKey e
             ; This is ok. Only the first submit is saved.
             ))))))

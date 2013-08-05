@@ -87,7 +87,9 @@
   ([url]
     (get-xml url nil))
   ([url credentials]
-    (let [raw (:body (if credentials (http/get url {:basic-auth credentials}) (http/get url)))
+    (let [raw (:body (if credentials (http/get url {:basic-auth credentials
+                                                    :socket-timeout 1000
+                                                    :conn-timeout 1000}) (http/get url)))
           xml (parse raw)]
       xml)))
 
