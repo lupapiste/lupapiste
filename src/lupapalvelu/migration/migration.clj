@@ -45,17 +45,16 @@
       (println))))
 
 (defn- run-migration! [migration-name]
-  (println "Executing migration:" migration-name)
+  (printf "Executing migration '%s': " migration-name)
   (let [result (execute-migration! migration-name)]
     (if (:ok result)
       (do
-        (println "Successful:")
-        (pprint (:result result))
-        (println))
+        (println "Successful"))
       (do
-        (print "Failure: ")
+        (println "Failure:")
         (println result)
-        (throw+ result)))))
+        (throw+ result))))
+  (flush))
 
 (defn- run-migrations! [migration-names]
   (try+
