@@ -575,15 +575,3 @@
      :body [{:name "suoramarkkinointikielto"
              :type :checkbox
              :layout :full-width}]}])
-
-
-(defn strip-elements-by-name
-  "returns a copy of a schema with all elements with name of element-name stripped of."
-  [schema element-name]
-  (assoc schema :body (postwalk
-                        (fn [form]
-                          (cond
-                            (and (map? form) (= (:name form) element-name)) nil
-                            (sequential? form) (->> form (filter identity) vec)
-                            :else form))
-                        (:body schema))))
