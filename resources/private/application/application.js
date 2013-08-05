@@ -43,13 +43,16 @@
     self.transparencies = transparencies;
 
     function stampableAttachment(a) {
-      var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
+      var ct = "";
+      if (a.latestVersion && typeof a.latestVersion.contentType === "function") {
+        ct = a.latestVersion.contentType();
+      }
       return ct === "application/pdf" || ct.search(/^image\//) === 0;
     }
 
     function normalizeAttachment(a) {
       var versions = _(a.versions()).reverse().value(),
-          restamp = versions[0].stamped(),
+          restamp = (typeof versions[0].stamped === "function" && versions[0].stamped()),
           selected = restamp ? versions[1] : versions[0];
       return {
         id:           a.id(),
@@ -450,7 +453,7 @@
     };
 
     self.exportPdf = function() {
-      window.open("/api/pdf-export/" + self.id() + "?lang=" + loc.currentLanguage, "_blank");
+      window.open("/api/raw/pdf-export?id=" + self.id() + "&lang=" + loc.currentLanguage, "_blank");
       return false;
     };
 
@@ -475,15 +478,17 @@
       var targetTab = $target.attr("data-target");
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
     };
-
-    // TODO: This needs to be removed and replace its usage in application.html by usage of authorization.ok().
-    self.notPublicAreaTypeOperation = function() {
-      return !self.operations()
-             || self.operations().length === 0
-             || self.operations()[self.operations().length-1]['operation-type'] === undefined
-             || self.operations()[self.operations().length-1]['operation-type']() != 'publicArea';
+     self.nextTab = function(model,event) {
+      var $target = $(event.target);
+      while ($target.is("span")) {
+        $target = $target.parent();
+      }
+      var targetTab = $target.attr("data-target");
+      window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
+      $('body').scrollTop($('#applicationTabs').position().top + 40 );
     };
   };
+  
   var application = new ApplicationModel();
 
   var authorities = ko.observableArray([]);
@@ -740,17 +745,50 @@
     }
   });
 
+  function NeighborStatusModel() {
+    var self = this;
+    
+    self.state = ko.observable();
+    self.created = ko.observable();
+    self.message = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
+    self.userid = ko.observable();
+    
+    self.init = function(neighbor) {
+      var l = neighbor.lastStatus;
+      var u = l.vetuma || l.user;
+      return self
+        .state(l.state())
+        .created(l.created())
+        .message(l.message && l.message())
+        .firstName(u.firstName && u.firstName())
+        .lastName(u.lastName && u.lastName())
+        .userid(u.userid && u.userid())
+    };
+    
+    self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-neighbor-status"); return self; };
+  }
+
+  var neighborStatusModel = new NeighborStatusModel();
+  
   var neighborActions = {
     manage: function(application) {
       window.location.hash = "!/neighbors/" + application.id();
       return false;
     },
-    upload: function(neighbor) { /* TODO: */ },
     markDone: function(neighbor) {
       ajax
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
         .complete(_.partial(repository.load, currentId, util.nop))
         .call();
+    },
+    statusCompleted: function(neighbor) {
+      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], neighbor.lastStatus.state());
+    },
+    showStatus: function(neighbor) {
+      neighborStatusModel.init(neighbor).open();
+      return false;
     }
   };
 
@@ -762,10 +800,9 @@
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
-    self.message = ko.observable();
 
     self.ok = ko.computed(function() {
-      return util.isValidEmailAddress(self.email()) && !_.isBlank(self.message());
+      return util.isValidEmailAddress(self.email());
     });
 
     self.open = function(neighbor) {
@@ -774,12 +811,11 @@
         .neighborId(neighbor.neighborId())
         .propertyId(neighbor.neighbor.propertyId())
         .name(neighbor.neighbor.owner.name())
-        .email(neighbor.neighbor.owner.email())
-        .message("");
+        .email(neighbor.neighbor.owner.email());
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
-    var paramNames = ["id", "neighborId", "propertyId", "name", "email", "message"];
+    var paramNames = ["id", "neighborId", "propertyId", "name", "email"];
     function paramValue(paramName) { return self[paramName](); }
 
     self.send = function() {
@@ -816,7 +852,8 @@
       stampModel: stampModel,
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
-      sendNeighborEmailModel: sendNeighborEmailModel
+      sendNeighborEmailModel: sendNeighborEmailModel,
+      neighborStatusModel: neighborStatusModel
     };
 
     $("#application").applyBindings(bindings);

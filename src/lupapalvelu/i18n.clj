@@ -10,7 +10,7 @@
   (let [k (get row "key")
         t (get row lang)]
     (if (and k t (> (.length t) 0))
-      (assoc-in result [lang k] (s/trim t))
+      (assoc-in result [(keyword lang) k] (s/trim t))
       result)))
 
 (defn- process-row [languages result row]
@@ -35,7 +35,7 @@
   "Return localization temrs for given language. If language is not supported returns terms for default language (\"fi\")"
   [lang]
   (let [terms (get-localizations)]
-    (or (terms lang) (terms "fi"))))
+    (or (terms (keyword lang)) (terms :fi))))
 
 (defn unknown-term [term]
   (if (env/dev-mode?)
@@ -44,13 +44,14 @@
       (log/errorf "unknown localization term '%s'" term)
       "")))
 
-(defn localize
-  "Localize \"term\" using given \"terms\". If \"term\" is unknown, return term surrounded with triple question marks."
-  [terms term]
-  (or (terms term) (str "???" term "???")))
+(defn localize [lang & terms]
+  (let [term (s/join \. terms)]
+    (if-let [result (get (get-terms (keyword lang)) term)]
+      result
+      (unknown-term term))))
 
 (defn localizer [lang]
-  (partial localize (get-terms lang)))
+  (partial localize (keyword lang)))
 
 (def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
@@ -58,7 +59,7 @@
   loc)
 
 (defmacro with-lang [lang & body]
-  `(binding [*lang* ~lang
+  `(binding [*lang* (keyword ~lang)
              loc (localizer ~lang)]
      ~@body))
 
@@ -90,4 +91,4 @@
         (read-lines (line-seq in)))))
 
   (defn get-localizations []
-    (assoc excel-data "fi" (merge (get excel-data "fi") (load-add-ons)))))
+    (assoc excel-data :fi (merge (get excel-data :fi) (load-add-ons)))))

@@ -4,6 +4,7 @@
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
             [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
+            [lupapalvelu.core :refer [fail]]
             [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")
@@ -250,4 +251,14 @@
     (throw (Exception. (format "Operation '%s' refers to missing schema '%s'" op schema))))
   )
 
+;;
+;; Commons
+;;
 
+(defn get-operation [application]
+  (-> application :operations last :operation-type keyword))
+
+(defn validate-is-not-public-area? [_ application]
+  (let [operation (get-operation application)]
+    (when (= operation :publicArea)
+      (fail :error.only-for-public-areas :operation operation))))

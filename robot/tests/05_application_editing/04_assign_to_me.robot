@@ -51,8 +51,6 @@ Sonja adds a comment
 
 # LUPA-463
 Open latest email
-  ## Wait for mail delivery
-  Sleep  1
   Go to  ${SERVER}/api/last-email
   Page Should Contain  ${appname}
   Page Should Contain  mikko@example.com

@@ -2,7 +2,8 @@
   (:use [monger.operators]
         [clojure.tools.logging]
         [lupapalvelu.core]
-        [clojure.string :only [blank? join trim lower-case]]
+        [clojure.string :only [blank? join trim]]
+        [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
@@ -119,9 +120,11 @@
 ;; Query application:
 ;;
 
+(defn- app-post-processor [user]
+  (comp without-system-keys (partial with-meta-fields user)))
+
 (defquery "applications" {:authenticated true :verified true} [{user :user}]
-  (ok :applications (map #(-> % ((partial with-meta-fields user)) without-system-keys)
-                         (mongo/select :applications (domain/application-query-for user)))))
+  (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
@@ -131,9 +134,7 @@
    :parameters [:id]}
   [{app :application user :user}]
   (if app
-    (ok :application (-> app
-                       ((partial with-meta-fields user))
-                       without-system-keys)
+    (ok :application ((app-post-processor user) app)
         :authorities (find-authorities-in-applications-organization app))
     (fail :error.not-found)))
 
@@ -184,28 +185,29 @@
     {:keys [id email title text documentName documentId path]} :data {:keys [host]} :web :as command}]
   (with-application command
     (fn [{application-id :id :as application}]
-      (if (domain/invited? application email)
-        (fail :invite.already-invited)
-        (let [invited (security/get-or-create-user-by-email email)
-              invite  {:title        title
-                       :application  application-id
-                       :text         text
-                       :path         path
-                       :documentName documentName
-                       :documentId   documentId
-                       :created      created
-                       :email        email
-                       :user         (security/summary invited)
-                       :inviter      (security/summary user)}
-              writer  (role invited :writer)
-              auth    (assoc writer :invite invite)]
-          (if (domain/has-auth? application (:id invited))
-            (fail :invite.already-has-auth)
-            (mongo/update
-              :applications
-              {:_id application-id
-               :auth {$not {$elemMatch {:invite.user.username email}}}}
-              {$push {:auth auth}})))))))
+      (let [email (lower-case email)]
+        (if (domain/invited? application email)
+          (fail :invite.already-invited)
+          (let [invited (security/get-or-create-user-by-email email)
+                invite  {:title        title
+                         :application  application-id
+                         :text         text
+                         :path         path
+                         :documentName documentName
+                         :documentId   documentId
+                         :created      created
+                         :email        email
+                         :user         (security/summary invited)
+                         :inviter      (security/summary user)}
+                writer  (role invited :writer)
+                auth    (assoc writer :invite invite)]
+            (if (domain/has-auth? application (:id invited))
+              (fail :invite.already-has-auth)
+              (mongo/update
+                :applications
+                {:_id application-id
+                 :auth {$not {$elemMatch {:invite.user.username email}}}}
+                {$push {:auth auth}}))))))))
 
 (defcommand "approve-invite"
   {:parameters [:id]
@@ -231,18 +233,19 @@
   [{{:keys [id email]} :data :as command}]
   (with-application command
     (fn [{application-id :id}]
-      (with-user email
-        (fn [_]
-          (mongo/update-by-id :applications application-id
-            {$pull {:auth {$and [{:username email}
-                                 {:type {$ne :owner}}]}}}))))))
+      (let [email (lower-case email)]
+        (with-user email
+          (fn [_]
+            (mongo/update-by-id :applications application-id
+              {$pull {:auth {$and [{:username email}
+                                   {:type {$ne :owner}}]}}})))))))
 
 (defcommand "remove-auth"
   {:parameters [:id :email]
    :roles      [:applicant :authority]}
   [{{:keys [email]} :data :as command}]
   (update-application command
-    {$pull {:auth {$and [{:username email}
+    {$pull {:auth {$and [{:username (lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
 (defcommand "add-comment"
@@ -299,9 +302,13 @@
             schema-name  (get-in document [:schema :info :name])
             schema       (get schemas/schemas schema-name)
             subject      (security/get-non-private-userinfo userId)
-            henkilo      (tools/timestamped (domain/->henkilo subject) created)
+            with-hetu    (and
+                           (domain/has-hetu? (:body schema) [path])
+                           (security/same-user? user subject))
+            henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
             full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-        (if (nil? document)
+        (info "setting-user-to-document, with hetu: " with-hetu)
+        (if-not document
           (fail :error.document-not-found)
           ;; TODO: update via model
           (do
@@ -436,7 +443,6 @@
                                                             yleiset-alueet/sijoituslupa
                                                             yleiset-alueet/kayttolupa-mainoslaitteet-ja-opasteviitat
                                                             #_yleiset-alueet/liikennetta-haittaavan-tyon-lupa) schema-name)
-
                                                  :created created
                                                  :data (if (= schema-name (:schema op-info))
                                                          (schema-data-to-body (:schema-data op-info) application)
@@ -450,13 +456,14 @@
         hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
         hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
     (if user
+      ;; TODO: is this a good way to introduce new types into the system?
       (if (= (:operation-type op-info) :publicArea)
         (cons (assoc-in
-                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user))
+                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
                 [:data :yritys]
                 (domain/->yritys-public-area user))
           new-docs)
-        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user)) new-docs))
+        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs))
       new-docs)))
 
 (defn- ->location [x y]
@@ -518,13 +525,15 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [application-organization-id (:id (organization/resolve-organization municipality operation))]
     (if (or (security/applicant? user) (user-is-authority-in-organization? (:id user) application-organization-id))
-    (let [user-summary  (security/summary user)
-          id            (make-application-id municipality)
+    (let [id            (make-application-id municipality)
           owner         (role user :owner :type :owner)
           op            (make-op operation created)
           info-request? (if infoRequest true false)
-          state         (if info-request? :info (if (security/authority? user) :open :draft))
-          make-comment  (partial assoc {:target {:type "application"} :created created :user user-summary} :text)
+          state         (if info-request? :info
+                          (if (security/authority? user) :open :draft))
+          make-comment  (partial assoc {:target {:type "application"}
+                                        :created created
+                                        :user (security/summary user)} :text)
           organization  application-organization-id
           application   {:id            id
                          :created       created
@@ -540,8 +549,9 @@
                          :propertyId    propertyId
                          :title         address
                          :auth          [owner]
-                         :attachments   (if info-request? [] (make-attachments created op organization))
-
+                         :attachments   (if info-request?
+                                          []
+                                          (make-attachments created op organization))
                          :allowedAttachmentTypes (if info-request?
                                                    [[:muut [:muu]]]
                                                    (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
@@ -549,7 +559,9 @@
                                                      (partition 2 attachment/attachment-types)))
                          :comments      (map make-comment messages)
                          :permitType    (permit-type-from-operation op)}
-          application   (assoc application :documents (if info-request? [] (make-documents user created nil op application)))
+          application   (assoc application :documents (if info-request?
+                                                        []
+                                                        (make-documents user created nil op application)))
           app-with-ver  (domain/set-software-version application)]
       (mongo/insert :applications app-with-ver)
       (autofill-rakennuspaikka app-with-ver created)
@@ -596,20 +608,17 @@
   {:parameters [:id]
    :roles      [:applicant]
    :states     [:draft :info :answered]}
-  [command]
-  (with-application command
-    (fn [inforequest]
-      (let [id       (get-in command [:data :id])
-            created  (:created command)
-            op       (first (:operations inforequest))]
-        (mongo/update-by-id :applications id {$set {:infoRequest false
-                                                    :state :open
-                                                    :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
-                                                                              (partition 2 attachment/attachment-types-public-areas)
-                                                                              (partition 2 attachment/attachment-types))
-                                                    :documents (make-documents (-> command :user security/summary) created nil op nil)
-                                                    :modified created}
-                                              $pushAll {:attachments (make-attachments created op (:organization inforequest))}})))))
+  [{{:keys [id]} :data :keys [user created application] :as command}]
+  (let [op (first (:operations application))]
+    (mongo/update-by-id :applications id
+                        {$set {:infoRequest false
+                               :state :open
+                               :allowedAttachmentTypes (if (= (:operation-type (operations/operations (keyword (:name op)))) :publicArea)
+                                                         (partition 2 attachment/attachment-types-public-areas)
+                                                         (partition 2 attachment/attachment-types))
+                               :documents (make-documents user created nil op nil)
+                               :modified created}
+           $pushAll {:attachments (make-attachments created op (:organization application))}})))
 
 ;;
 ;; Verdicts
@@ -713,23 +722,22 @@
               "kind" (if (:infoRequest application) "inforequest" "application")}]
     (reduce (partial add-field application) base col-map)))
 
-(defn make-query [query params user]
-  (let [search (params :filter-search)
-        kind (params :filter-kind)]
-    (merge
-      query
-      (condp = kind
-        "applications" {:infoRequest false}
-        "inforequests" {:infoRequest true}
-        "both"         nil)
-      (condp = (:filter-state params)
-        "all"       {:state {$ne "canceled"}}
-        "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
-        "canceled"  {:state "canceled"})
-      (when-not (contains? #{nil "0"} (:filter-user params))
-        {"authority.id" (:filter-user params)})
-      (when-not (blank? search)
-        {:address {$regex search $options "i"}}))))
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user]}]
+  (merge
+    query
+    (condp = filter-kind
+      "applications" {:infoRequest false}
+      "inforequests" {:infoRequest true}
+      "both"         nil)
+    (condp = filter-state
+      "all"       {:state {$ne "canceled"}}
+      "active"    {:state {$nin ["draft" "canceled" "answered" "verdictGiven"]}}
+      "canceled"  {:state "canceled"})
+    (when-not (contains? #{nil "0"} filter-user)
+      {$or [{"auth.id" filter-user}
+            {"authority.id" filter-user}]})
+    (when-not (blank? filter-search)
+      {:address {$regex filter-search $options "i"}})))
 
 (defn make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
@@ -739,7 +747,7 @@
 (defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
-        query       (make-query user-query params user)
+        query       (make-query user-query params)
         query-total (mongo/count :applications query)
         skip        (params :iDisplayStart)
         limit       (params :iDisplayLength)

@@ -77,8 +77,8 @@
 ;; Neue api:
 ;;
 
-(defn- find-by-name [schema-body [k & ks]]
-  (when-let [elem (some #(when (= (:name %) k) %) schema-body)]
+(defn find-by-name [schema-body [k & ks]]
+  (when-let [elem (some #(when (= (:name %) (name k)) %) schema-body)]
     (if (nil? ks)
       elem
       (if (:repeating elem)

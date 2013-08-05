@@ -97,7 +97,7 @@
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
     (kuntaRoolikoodit party-type)
-    (get-in party [:patevyys :kuntaRoolikoodi :value] "ei tiedossa")))
+    (get-in party [:kuntaRoolikoodi :value] "ei tiedossa")))
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"

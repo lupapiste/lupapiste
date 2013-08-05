@@ -33,15 +33,14 @@
                                      :body [{:name "single2" :type :string}
                                             {:name "repeats2" :type :string :subtype :digit :repeating true}]}]})
 
-;; Tests for internals:
-
-(def find-by-name #'lupapalvelu.document.model/find-by-name)
-
-(facts "Facts about internals"
+(facts "Find-by-name"
   (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
   (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
   (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
+  (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :boolean})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
+
+;; Tests for internals:
 
 (facts "has-errors?"
   (has-errors? [])                  => false
@@ -107,9 +106,13 @@
       (-> document
         (apply-update [:henkilotiedot :etunimi] "Tauno")
         (apply-update [:henkilotiedot :sukunimi] "Palo")
+        (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
+        (apply-update [:yritys :yritysnimi] "Suunnittelu Palo")
         (apply-update [:osoite :katu] "katu")
         (apply-update [:osoite :postinumero] "12345")
         (apply-update [:osoite :postitoimipaikannimi] "Demola")
+        (apply-update [:patevyys :koulutus] "Demotehti")
+        (apply-update [:patevyys :patevyysluokka] "AA")
         (apply-update [:yhteystiedot :email] "tauno@example.com")
         (apply-update [:yhteystiedot :puhelin] "050")) => valid?
       (-> document
@@ -242,9 +245,14 @@
     (let [document (-> (new-document (schemas "hakija") ..now..)
                      (apply-update [:_selected] "yritys")
                      (apply-update [:yritys :yritysnimi] "Solita")
+                     (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
                      (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
                      (apply-update [:yritys :osoite :postinumero] "33720")
-                     (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
+                     (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere")
+                     (apply-update [:yritys :yhteyshenkilo :henkilotiedot :etunimi] "Tauno")
+                     (apply-update [:yritys :yhteyshenkilo :henkilotiedot :sukunimi] "Palo")
+                     (apply-update [:yritys :yhteyshenkilo :yhteystiedot :email] "tauno@example.com")
+                     (apply-update [:yritys :yhteyshenkilo  :yhteystiedot :puhelin] "050"))]
       document => valid?
       (-> document
         (apply-update [:yritys :osoite :katu])) => missing-required-fields?

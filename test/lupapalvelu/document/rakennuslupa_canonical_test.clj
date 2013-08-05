@@ -68,15 +68,15 @@
 (def suunnittelija1
   {:id "suunnittelija1" :schema {:info {:name "suunnittelija"}}
    :data (merge suunnittelija-henkilo
-                {:patevyys {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
-                            :koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
+                {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
+                {:patevyys {:koulutus {:value "Koulutus"} :patevyysluokka {:value "B"}}}
                 {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def suunnittelija2
   {:id "suunnittelija2"  :schema {:info {:name "suunnittelija"}}
    :data (merge suunnittelija-henkilo
-                {:patevyys {:kuntaRoolikoodi {:value "GEO-suunnittelija"}
-                            :koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
+                {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
+                {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"} :patevyysluokka {:value "AA"}}}
                 {:yritys   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}}})})
 
 (def maksaja1
@@ -99,7 +99,7 @@
                                      :omistajalaji {:value "muu yksityinen henkilö tai perikunta"}}}
           :kaytto {:rakentajaTyyppi {:value "muu"}
                    :kayttotarkoitus {:value "012 kahden asunnon talot"}}
-          :mitat {:tilavuus {:value "1000"}
+          :mitat {:tilavuus {:value "1500"}
                   :kokonaisala {:value "1000"}
                   :kellarinpinta-ala {:value "100"}
                   :kerrosluku {:value "2"}

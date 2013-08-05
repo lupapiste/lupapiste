@@ -1,6 +1,6 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.core :only [ok fail defcommand defquery now]]
         [lupapalvelu.i18n :only [*lang*]]
         [clojure.tools.logging]
         [clojure.tools.logging]
@@ -30,13 +30,14 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [clojure.string :as s]
-            [sade.util :as util]
+            [sade.util :refer [lower-case] :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery]
             [lupapalvelu.neighbors])
-  (:import [java.io ByteArrayInputStream]))
+  (:import [java.io ByteArrayInputStream]
+           [java.util.concurrent TimeUnit]))
 
 ;;
 ;; Helpers
@@ -117,6 +118,7 @@
 
 (defn enriched [m]
   (merge m {:user (current-user)
+            :lang *lang*
             :web  (web-stuff)}))
 
 ;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
@@ -134,6 +136,12 @@
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
+
+(defpage "/api/raw/:name" {name :name}
+  (let [response (execute (enriched (core/raw name (from-query))))]
+    (if-not (= (:ok response) false)
+      response
+      (resp/status 404 (resp/json response)))))
 
 ;;
 ;; Web UI:
@@ -189,11 +197,6 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
-(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
-
-(defjson "/api/hashbang" []
-  (ok :bang (session/get! :hashbang "")))
-
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
@@ -208,11 +211,25 @@
       (redirect lang application-page)
       (redirect-to-frontpage lang))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
-  (when (and hashbang (local? hashbang))
+(defn- ->hashbang [v]
+  (when (and v (= -1 (.indexOf v ":")))
+    (second (re-matches #"^[#!/]{0,3}(.*)" v))))
+
+(defn serve-app [app hashbang]
+  ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when-let [hashbang (->hashbang hashbang)]
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
+
+; Same as above, but with an extra path.
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
 
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
@@ -222,7 +239,7 @@
                              (str (.substring line 0 limit) "... (truncated)")
                              line)))
         sanitized-page (sanitize (or page "(unknown)"))
-        user           (or email "(anonymous)")
+        user           (or (lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
         sanitized-msg  (sanitize (str message))]
     (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
@@ -345,9 +362,6 @@
 (defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
   (attachment/output-all-attachments application-id (current-user) *lang*))
 
-(defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (ke6666/export application-id (current-user) *lang*))
-
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
@@ -395,6 +409,28 @@
                (not (logged-in-with-apikey? request)))
         (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
         (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
+
+;;
+;; Session timeout:
+;;
+;;    Middleware that checks session timeout.
+;;
+
+(defn get-session-timeout [request]
+  (get-in request [:session :noir :user :session-timeout] (.toMillis TimeUnit/HOURS 1)))
+
+(defn session-timeout-handler [handler request]
+  (let [now (now)
+        expires (session/get :expires now)
+        expired? (< expires now)]
+    (if expired?
+      (session/clear!)
+      (if (re-find #"^/api/(command|query)/" (:uri request))
+        (session/put! :expires (+ now (get-session-timeout request)))))
+    (handler request)))
+
+(defn session-timeout [handler]
+  (fn [request] (session-timeout-handler handler request)))
 
 ;;
 ;; dev utils:
