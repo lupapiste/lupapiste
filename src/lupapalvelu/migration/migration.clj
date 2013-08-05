@@ -9,11 +9,12 @@
            [java.util Date]))
 
 
-(def time-formatter (SimpleDateFormat. "yyyy/MM/dd HH:mm:ss"))
-(defn time->str [t]
+(def ^:private time-formatter (SimpleDateFormat. "yyyy/MM/dd HH:mm:ss"))
+
+(defn- time->str [t]
   (->> t Date. (.format time-formatter)))
 
-(defn show-help []
+(defn- show-help []
   (println "Migrations commands:")
   (println "  list ............... List known migrations")
   (println "  hist ............... Show migration executions")
@@ -22,20 +23,19 @@
   (println "  run [name...] ...... Execute migrations by name(s)")
   (println "  run-all ............ Execute all migrations"))
 
-(defn rtfm []
+(defn- rtfm []
   (println "What? I dont even...")
   (show-help)
   1)
 
-(defn list-migrations []
+(defn- list-migrations []
   (doseq [m (sort-by :id (vals @migrations))]
     (println (:name m)))
   (flush))
 
-(def status {true  "SUCCESS"
-             false "FAIL"})
+(def ^:private status {true "SUCCESS" false "FAIL"})
 
-(defn show-history [long-format]
+(defn- show-history [long-format]
   (doseq [r (migration-history)]
     (printf "%s: %s: %s%n" (time->str (:time r)) (:name r) (status (:ok r)))
     (when long-format
@@ -44,7 +44,7 @@
         (println (:error r)))
       (println))))
 
-(defn run-migration! [migration-name]
+(defn- run-migration! [migration-name]
   (println "Executing migration:" migration-name)
   (let [result (execute-migration! migration-name)]
     (if (:ok result)
@@ -57,7 +57,7 @@
         (println result)
         (throw+ result)))))
 
-(defn run-migrations! [migration-names]
+(defn- run-migrations! [migration-names]
   (try+
     (dorun (map run-migration! migration-names))
     (println "All migrations executed successfully")
