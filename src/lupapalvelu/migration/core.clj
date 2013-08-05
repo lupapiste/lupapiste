@@ -1,11 +1,11 @@
 (ns lupapalvelu.migration.core
   (:require [monger.collection :as mc]
             [monger.query :as q]
-            [lupapalvelu.core :refer [now]]
             [slingshot.slingshot :refer [try+ throw+]]
             [clojure.stacktrace :refer [print-cause-trace]]))
 
-(defonce migration-id (atom 0))
+(defn now [] (java.lang.System/currentTimeMillis))
+
 (defonce migrations (atom {}))
 
 (defmacro defmigration [migration-name & body]
@@ -13,20 +13,15 @@
         {:keys [pre post apply-when]}  (when has-opts? (first body))
         body                           (if has-opts? (rest body) body)]
     `(let [name-str#   (name (quote ~migration-name))
-           id#         (swap! migration-id inc)
            pre#        (when (quote ~pre) (fn [] (assert ~pre)))
            post#       (when (quote ~post) (fn [] (assert ~post)))
            apply-when# (when (quote ~apply-when) (fn [] ~apply-when))]
-       (swap! migrations assoc name-str# {:id id# 
-                                          :name name-str#
+       (swap! migrations assoc name-str# {:name name-str#
                                           :pre pre#
                                           :post post#
                                           :apply-when apply-when#
                                           :fn (fn [] (do ~@body))})
        nil)))
-
-(defn migration-by-id [id]
-  (first (filter (comp (partial = id) :id) (vals @migrations))))
 
 (defn migration-history []
   (q/with-collection "migrations"
@@ -66,11 +61,11 @@
 (defn execute-migration! [m]
   (assert m)
   (when-let [result (execute-migration m)]
-    (let [record (assoc result :id (:id m) :time (now))]
+    (let [record (assoc result :name (:name m) :time (now))]
       (mc/insert :migrations record)
       record)))
 
 (defn unexecuted-migrations []
   (let [all-migrations (sort-by :id (vals @migrations))
-        executed-migration-ids (set (map :id (filter :ok (migration-history))))]
-    (filter (comp (complement executed-migration-ids) :id) all-migrations)))
+        executed-migration-names (set (map :name (filter :ok (migration-history))))]
+    (filter (comp (complement executed-migration-names) :name) all-migrations)))
