@@ -134,10 +134,12 @@
 (facts* "Application has opened when submitted from draft"
   (let [resp (create-app pena) => ok?
         id   (:id resp)
+        app1 (query pena :application :id id) => ok?
         resp (command pena :submit-application :id id) => ok?
         resp (query pena :application :id id) => ok?
-        app  (:application resp)]
-    (:opened app) => number?))
+        app2 (:application resp)]
+    (:opened app1) => nil
+    (:opened app2) => number?))
 
 (fact "Authority is able to add an attachment to an application after verdict has been given for it"
   (doseq [user [sonja pena]]
