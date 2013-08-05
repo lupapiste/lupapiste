@@ -18,9 +18,9 @@
   (println "  list ............... List known migrations")
   (println "  hist ............... Show migration executions")
   (println "  hist -l ............ Show migration executions in long format")
-  (println "  update ............. Execute migrations that have not been executed")
-  (println "  run [name...] ...... Execute migrations by name")
-  (println "  run -f ............. Execute all migrations"))
+  (println "  update ............. Execute migrations that have not been executed successfully")
+  (println "  run [name...] ...... Execute migrations by name(s)")
+  (println "  run-all ............ Execute all migrations"))
 
 (defn rtfm []
   (println "What? I dont even...")
@@ -29,7 +29,7 @@
 
 (defn list-migrations []
   (doseq [m (sort-by :id (vals @migrations))]
-    (printf "%3d: %s%n" (:id m) (:name m)))
+    (println (:name m)))
   (flush))
 
 (def status {true  "SUCCESS"
@@ -48,19 +48,17 @@
       (println))))
 
 (defn run-migration! [migration-name]
-  (let [m (@migrations migration-name)]
-    (when-not m (throw+ (str "unknwon migration name: '" migration-name "'")))
-    (printf "Executing migration '%s' (%s)%n" (:name m) (:id m))
-    (let [result (execute-migration! m)]
-      (if (:ok result)
-        (do
-          (println "Successful:")
-          (pprint (:result result))
-          (println))
-        (do
-          (print "Failure: ")
-          (println result)
-          (throw+ result))))))
+  (println "Executing migration:" migration-name)
+  (let [result (execute-migration! migration-name)]
+    (if (:ok result)
+      (do
+        (println "Successful:")
+        (pprint (:result result))
+        (println))
+      (do
+        (print "Failure: ")
+        (println result)
+        (throw+ result)))))
 
 (defn run-migrations! [migration-names]
   (try+
@@ -73,11 +71,10 @@
 (defn -main [& [action & args]]
   (mongo/connect!)
   (cond
-    (nil? action)       (show-help)
-    (= action "list")   (list-migrations)
-    (= action "hist")   (show-history (= "-l" (first args)))
-    (= action "run")    (run-migrations! (map :name (if (= "-f" (first args))
-                                                      (->> @migrations vals (sort-by :order))
-                                                      (unexecuted-migrations))))
-    (= action "update") (update!)
-    :else               (rtfm)))
+    (nil? action)         (show-help)
+    (= action "list")     (list-migrations)
+    (= action "hist")     (show-history (= "-l" (first args)))
+    (= action "run")      (if (seq args) (run-migrations! args) (rtfm))
+    (= action "run-all")  (run-migrations! (map :name (->> @migrations vals (sort-by :order))))
+    (= action "update")   (update!)
+    :else                 (rtfm)))
