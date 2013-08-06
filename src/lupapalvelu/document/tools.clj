@@ -136,7 +136,7 @@
         :else form))
     schema-body))
 
-(defn strip-elements-by-name
+(defn schema-without-element-by-name
   "returns a copy of a schema with all elements with name of element-name stripped of."
   [schema element-name]
   (assoc schema :body (schema-body-without-element-by-name (:body schema) element-name)))

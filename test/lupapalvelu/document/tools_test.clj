@@ -80,6 +80,6 @@
                                                                               :type :string}]}])
 
 (fact "strip-elements-by-name"
-  (schema-body-without-element-by-name (:body schema) "band") => []
-  (strip-elements-by-name schema "INVALID") => schema
-  (strip-elements-by-name schema "band") => {:info {:name "band"} :body []})
+  (schema-without-element-by-name schema "band") => {:info {:name "band"} :body []}
+  (schema-without-element-by-name schema "INVALID") => schema
+  (schema-without-element-by-name schema "band") => {:info {:name "band"} :body []})
