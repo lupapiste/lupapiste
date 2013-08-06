@@ -253,42 +253,51 @@
     {$pull {:auth {$and [{:username (lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
-(defcommand add-comment
+(defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
+  (when (and to (not (security/authority? user)))
+    (fail :error.to-settable-only-by-authority)))
+
+(defquery add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
+   :validators [applicant-cant-set-to ]
    :notify     "new-comment"}
-  [{{:keys [text target]} :data {:keys [host]} :web :keys [user created] :as command}]
+  [{{:keys [text target to]} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
-      (update-application command
-        {$set  {:modified created}
-         $push {:comments {:text    text
-                           :target  target
-                           :created created
-                           :user    (security/summary user)}}})
+      (let [to-user   (or (security/summary (security/get-user-by-email to))
+                          (fail! :to-is-not-a-email-of-any-user-in-system))
+            from-user (security/summary user)]
+        (update-application command
+          {$set  {:modified created}
+           $push {:comments {:text    text
+                             :target  target
+                             :created created
+                             :to      to-user
+                             :user    from-user}}})
 
-      (condp = (keyword state)
+        (condp = (keyword state)
 
-        ;; LUPA-XYZ (was: open-application)
-        :draft  (when (not (blank? text))
-                  (update-application command
-                    {$set {:modified created
-                           :state    :open
-                           :opened   created}}))
-
-        ;; LUPA-371
-        :info (when (security/authority? user)
-                (update-application command
-                  {$set {:state    :answered
-                         :modified created}}))
-
-        ;; LUPA-371 (was: mark-inforequest-answered)
-        :answered (when (security/applicant? user)
+          ;; LUPA-XYZ (was: open-application)
+          :draft  (when (not (blank? text))
                     (update-application command
-                      {$set {:state :info
-                             :modified created}}))
+                      {$set {:modified created
+                             :state    :open
+                             :opened   created}}))
 
-        nil))))
+          ;; LUPA-371
+          :info (when (security/authority? user)
+                  (update-application command
+                    {$set {:state    :answered
+                           :modified created}}))
+
+          ;; LUPA-371 (was: mark-inforequest-answered)
+          :answered (when (security/applicant? user)
+                      (update-application command
+                        {$set {:state :info
+                               :modified created}}))
+
+          nil)))))
 
 (defcommand mark-seen
   {:parameters [:id :type]
