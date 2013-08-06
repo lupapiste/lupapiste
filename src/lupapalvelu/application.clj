@@ -257,9 +257,9 @@
   (when (and to (not (security/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
-(defquery can-comment-with-to {:roles [:authority]})
+(defquery can-target-comment-to-authority {:roles [:authority]})
 
-(defquery add-comment
+(defcommand add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
    :validators [applicant-cant-set-to ]
