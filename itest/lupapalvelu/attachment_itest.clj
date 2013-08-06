@@ -49,8 +49,7 @@
       (fact "uploading files"
         (let [application (:application (query pena :application :id application-id))
               _           (upload-attachment-to-all-placeholders pena application)
-              application (:application (query pena :application :id application-id))
-              auth-get    (fn [& uri] (c/get (apply str (server-address) uri) {:headers {"authorization" (str "apikey=" pena)}}))]
+              application (:application (query pena :application :id application-id))]
 
           (fact "download all"
             (raw pena "download-all-attachments" :id application-id) => http200?)
@@ -61,11 +60,17 @@
           (doseq [attachment-id (get-attachment-ids application)
                   :let [file-id  (attachment-latest-file-id application attachment-id)]]
 
-            (fact "view-attachment"
-              (auth-get "/api/view-attachment/" file-id))
+            (fact "view-attachment anonymously should not be possible"
+              (raw nil "view-attachment" :attachment-id file-id) => http401?)
 
-            (fact "download-attachment"
-              (auth-get "/api/download-attachment/" file-id)))))
+            (fact "view-attachment as pena should be possible"
+              (raw pena "view-attachment" :attachment-id file-id) => http200?)
+
+            (fact "download-attachment anonymously should not be possible"
+              (raw nil "download-attachment" :attachment-id file-id) => http401?)
+
+            (fact "download-attachment as pena should be possible"
+              (raw pena  "download-attachment" :attachment-id file-id) => http200?))))
 
       (fact "Veikko can approve attachment"
         (approve-attachment application-id (first attachment-ids)))

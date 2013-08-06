@@ -348,18 +348,6 @@
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
-(defn- output-attachment [attachment-id download?]
-  (if (logged-in?)
-    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
-    (resp/status 401 "Unauthorized\r\n")))
-
-;; TODO raw
-(defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id false))
-
-(defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id true))
-
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;

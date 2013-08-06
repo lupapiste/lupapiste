@@ -467,6 +467,23 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn- output-attachment-if-logged-in [attachment-id download? user]
+  (if user
+    (output-attachment attachment-id download? (partial get-attachment-as user))
+    {:status 401
+     :headers {"Content-Type" "text/plain"}
+     :body "401 Unauthorized"}))
+
+(defraw "view-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id false user))
+
+(defraw "download-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id true user))
+
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
     (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
