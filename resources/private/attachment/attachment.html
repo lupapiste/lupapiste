@@ -85,7 +85,7 @@
 
       <div class="attachment-file-conversation">
         <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
-        <div data-bind="template: {name: 'comment-template', data: $root.commentsModel}"></div>
+        <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
       </div>
 
     </div>
