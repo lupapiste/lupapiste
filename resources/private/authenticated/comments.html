@@ -46,24 +46,17 @@
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
 
-          <div data-bindz="with: $parent.authorities">
+          <div data-bind="with: $parent.authorities">
             <select
-              data-bind="options: $parent.authorities,
+              data-bind="options: $data,
                          optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
                          optionsValue: 'id',
-                         value: to,
+                         visible: $root.authorization.ok('can-target-comment-to-authority'),
+                         value: $parent.to,
                          optionsCaption: loc('choose')"
               data-test-id="application-assigneed-authority">
             </select>
           </div>
-
-          <button
-            data-bind="visible: $root.authorization.ok('can-target-comment-to-authority'), click: submit"
-            data-test-id="application-new-comment-btn"
-            type="submit"
-            class="btn btn-primary">
-            <span data-bind="ltext: 'application.conversationSend'"></span>
-          </button>
         </form>
       </div>
     </script>
