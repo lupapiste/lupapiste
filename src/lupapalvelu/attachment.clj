@@ -505,16 +505,18 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn output-all-attachments [application-id user lang]
-  (let [loc (i18n/localizer lang)]
-    (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
-      {:body (temp-file-input-stream (get-all-attachments application loc lang))
-       :status 200
+(defraw "download-all-attachments"
+  {:parameters [:id]}
+  [{:keys [application lang]}]
+  (if application
+    (let [loc (i18n/localizer lang)]
+      {:status 200
        :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
-      {:body "404"
-       :status 404
-       :headers {"Content-Type" "text/plain"}})))
+                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}
+       :body (temp-file-input-stream (get-all-attachments application loc lang))})
+    {:status 404
+     :headers {"Content-Type" "text/plain"}
+     :body "404"}))
 
 ;;
 ;; Stamping:
