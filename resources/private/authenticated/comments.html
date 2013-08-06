@@ -6,7 +6,9 @@
       <div data-bind="with: $data.comment">
         <table class="table table-striped conversation" data-test-id="comments-table">
           <tbody data-bind="foreach: comments()">
-            <tr data-bind="attr: {'class': $parent.isForNewAttachment($data) ? 'comment attachment-comment' : 'comment'}">
+            <tr data-bind="css: {'attachment-comment': $parent.isForNewAttachment($data),
+                                 'comment-for-me':     $parent.isForMe($data)},
+                                 'comment':            true">
               <td class="comment-party commenttd">
                 <span class="date" data-bind="dateTimeString: created"></span>
                 <br />
