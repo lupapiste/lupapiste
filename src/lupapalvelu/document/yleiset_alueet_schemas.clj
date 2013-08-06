@@ -14,7 +14,7 @@
 
 (def yleiset-alueet-maksaja
   (body
-    party-public-area
+    party
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def tyomaasta-vastaava
@@ -23,15 +23,15 @@
 
 (def tyo-aika
   (body
-    [{:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
-     {:name "tyoaika-paattyy-pvm" :type :date}]))
+    {:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
+    {:name "tyoaika-paattyy-pvm" :type :date}))
 
-(def tapahtuman-tiedot
+(def tapahtuman-tiedot2
   (body
     {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
     {:name "tapahtumapaikka" :type :string :size "l"}
-    [{:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
-     {:name "tapahtuma-aika-paattyy-pvm" :type :date}]))
+    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
+    {:name "tapahtuma-aika-paattyy-pvm" :type :date}))
 
 #_(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
               {:name "henkilo" :type :group :body henkilo}
