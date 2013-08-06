@@ -25,7 +25,8 @@
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.etag :as etag]
             [sade.security-headers :as headers]
-            [sade.dummy-email-server]))
+            [sade.dummy-email-server]
+            [lupapalvelu.migration.migration :as migration]))
 
 (defn -main [& _]
   (infof "Server starting in %s mode" env/mode)
@@ -38,6 +39,8 @@
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)
+  (when-not (mongo/db-mode)
+    (migration/update!))
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)
   (server/add-middleware uach/add-ua-compatible-header)
@@ -67,8 +70,5 @@
                               :jetty-options jetty-opts
                               :session-cookie-attrs (env/value :cookie)})))
   "server running")
-
-(comment
-  (-main))
 
 "server ready to start"

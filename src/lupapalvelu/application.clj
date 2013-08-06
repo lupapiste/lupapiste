@@ -454,19 +454,15 @@
         required-docs         (map make required-schema-names)
         op-schema-name        (:schema op-info)
         op-doc                (update-in (make op-schema-name) [:schema :info] merge {:op op :removable true})
-        new-docs              (cons op-doc required-docs)
-        hakija                (assoc-in (make "hakija") [:data :_selected :value] "henkilo")
-        hakija-public-area    (assoc-in (make "hakija-public-area") [:data :_selected :value] "yritys")]
+        new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
-      (condp = permit-type
-        :YA (cons
-              (assoc-in
-                (assoc-in hakija-public-area [:data :henkilo] (domain/->henkilo user :with-hetu true))
-                [:data :yritys]
-                (domain/->yritys-public-area user))
-              new-docs)
-        (cons (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true)) new-docs)))))
+      (let [hakija (condp = permit-type
+                     :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
+                         (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
+            hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
+            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
+        (conj new-docs hakija)))))
 
  (defn- ->location [x y]
    {:x (->double x) :y (->double y)})
