@@ -33,17 +33,6 @@
     {:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
     {:name "tapahtuma-aika-paattyy-pvm" :type :date}))
 
-#_(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-              {:name "henkilo" :type :group :body henkilo}
-              {:name "yritys" :type :group :body yritys}])
-
-#_{:info {:name "hakija"
-          :order 3
-          :removable true
-          :repeating true
-          :type :party}
-   :body party}
-
 #_(def tapahtumien-syotto                                                      ;; merkinnatJaPiirroksettietoType
   {:info {:name "tapahtumien-syotto"
           :order 68
