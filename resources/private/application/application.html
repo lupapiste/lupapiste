@@ -292,7 +292,7 @@
                 </tbody>
               </table>
 
-              <a data-bind="attr: {href: '/api/download-all-attachments/' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+              <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
             </div>
             <div data-bind="ifnot: attachmentsByGroup().length">
@@ -694,7 +694,7 @@
               <input data-bind="value: email,
                                 valueUpdate: 'afterkeydown',
                                 attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
-                     id="neighbors-sendemail-email" 
+                     id="neighbors-sendemail-email"
                      class="form-input text long" />
             </form>
 
@@ -729,7 +729,7 @@
           </div>
         </div>
       </div>
-      
+
       <div id="dialog-neighbor-status" class="window autosized">
         <div class="dialog-header">
         <p data-bind="ltext: 'neighbors.status-dialog.title'"></p>
@@ -767,7 +767,7 @@
           </div>
 
           <button data-bind="ltext: 'neighbors.status-dialog.ok'" data-test-id="neighbor-status-ok" class="btn btn-primary btn-dialog close"></button>
-          
+
         </div>
       </div>
 
