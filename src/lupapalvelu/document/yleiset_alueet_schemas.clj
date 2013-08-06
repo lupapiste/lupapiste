@@ -26,7 +26,7 @@
     {:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
     {:name "tyoaika-paattyy-pvm" :type :date}))
 
-(def tapahtuman-tiedot2
+(def tapahtuman-tiedot
   (body
     {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
     {:name "tapahtumapaikka" :type :string :size "l"}
