@@ -399,7 +399,8 @@
                      :yes "puoltaa"})
 
 (defn- get-statement [statement]
-  (let [lausunton (when (nil? (:status statement))
+  (clojure.pprint/pprint statement)
+  (let [lausunton (when (:status statement)
                              {:Lausunto {:viranomainen (get-in statement [:person :text])
                                          :lausunto (:text statement)
                                          :lausuntoPvm (to-xml-date (:given statement))
