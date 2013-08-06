@@ -17,10 +17,6 @@
     party
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def tyomaasta-vastaava
-  (body
-    party-public-area))
-
 (def tyo-aika
   (body
     {:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
@@ -88,7 +84,7 @@
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :order 61}
-    :body tyomaasta-vastaava}
+    :body party}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
            :type :party
            :order 62}
