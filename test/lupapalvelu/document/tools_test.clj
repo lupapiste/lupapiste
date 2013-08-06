@@ -69,14 +69,17 @@
   (timestamped {} nil) => {}
   (timestamped expected-wrapped-simple-document nil) => expected-wrapped-simple-document-timestamped)
 
-(fact "stripped"
+(fact "schema-body-without-element-by-name"
+  (schema-body-without-element-by-name (:body schema) "band") => []
+  (schema-body-without-element-by-name (:body schema) "invalid") => (:body schema)
+  (schema-body-without-element-by-name (:body schema) "members") => [{:name "band"
+                                                                      :type :group
+                                                                      :body [{:name "name"
+                                                                              :type :string}
+                                                                             {:name "genre"
+                                                                              :type :string}]}])
+
+(fact "strip-elements-by-name"
+  (schema-body-without-element-by-name (:body schema) "band") => []
   (strip-elements-by-name schema "INVALID") => schema
-  (strip-elements-by-name schema "band") => {:info {:name "band"}
-                                             :body []}
-  (strip-elements-by-name schema "members") => {:info {:name "band"}
-                                                :body [{:name "band"
-                                                        :type :group
-                                                        :body [{:name "name"
-                                                                :type :string}
-                                                               {:name "genre"
-                                                                :type :string}]}]})
+  (strip-elements-by-name schema "band") => {:info {:name "band"} :body []})

@@ -125,13 +125,19 @@
   "Re-created a map from it's path-vals extracted with (path-vals)."
   [c] (reduce (partial apply assoc-in) {} c))
 
+(defn schema-body-without-element-by-name
+  "returns a schema body with all elements with name of element-name stripped of."
+  [schema-body element-name]
+  (walk/postwalk
+    (fn [form]
+      (cond
+        (and (map? form) (= (:name form) element-name)) nil
+        (sequential? form) (->> form (filter identity) vec)
+        :else form))
+    schema-body))
+
 (defn strip-elements-by-name
   "returns a copy of a schema with all elements with name of element-name stripped of."
   [schema element-name]
-  (assoc schema :body (walk/postwalk
-                        (fn [form]
-                          (cond
-                            (and (map? form) (= (:name form) element-name)) nil
-                            (sequential? form) (->> form (filter identity) vec)
-                            :else form))
-                        (:body schema))))
+  (assoc schema :body (schema-body-without-element-by-name (:body schema) element-name)))
+
