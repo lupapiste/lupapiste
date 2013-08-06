@@ -112,7 +112,7 @@
 (defn ->yritys [{:keys [id firstName lastName email phone street zip city]}]
   (->
     {;:userId                        {:value id}
-     :vastuuhenkilo {:henkilotiedot {:etunimi       {:value firstName}
+     :yhteyshenkilo {:henkilotiedot {:etunimi       {:value firstName}
                                      :sukunimi      {:value lastName}}
                      :yhteystiedot {:email          {:value email}
                                     :puhelin        {:value phone}}}

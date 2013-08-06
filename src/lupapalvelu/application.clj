@@ -461,7 +461,7 @@
                      :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))
             hakija (assoc-in hakija [:data :henkilo] (domain/->henkilo user :with-hetu true))
-            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user :with-hetu true))]
+            hakija (assoc-in hakija [:data :yritys]  (domain/->yritys user))]
         (conj new-docs hakija)))))
 
  (defn- ->location [x y]
