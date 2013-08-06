@@ -292,7 +292,7 @@
                 </tbody>
               </table>
 
-              <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+              <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
             </div>
             <div data-bind="ifnot: attachmentsByGroup().length">
