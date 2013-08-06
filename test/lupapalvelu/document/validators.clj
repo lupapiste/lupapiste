@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.validators
   (:use [lupapalvelu.document.model]
-        [lupapalvelu.document.schemas]
         [lupapalvelu.document.tools]
-        [midje.sweet]))
+        [midje.sweet])
+  (:require [lupapalvelu.document.schemas :as schemas]))
 
 (defn valid? [document]
   (or (fact (validate document) => '()) true))
@@ -19,7 +19,7 @@
     (or (fact (validate document) => (has not-every? (contains {:result result}))) true)))
 
 (defn dummy-doc [schema-name]
-  (let [schema (schemas schema-name)
+  (let [schema (schemas/get-schema schema-name)
         data   (create-document-data schema dummy-values)]
     {:schema schema
      :data   data}))

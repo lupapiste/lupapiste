@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-itest
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
+        [lupapalvelu.factlet]
         [clojure.pprint :only [pprint]])
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
@@ -117,7 +118,7 @@
     (fact "Application is open"
        (let [query-resp      (query sonja :application :id application-id)
              application     (:application query-resp)]
-         (success query-resp)   => true
+         query-resp  => ok?
          application => truthy
          (:state application) => "open"
          (:opened application) => truthy
@@ -127,8 +128,18 @@
     (fact "Application is submitted"
       (let [resp        (command sonja :submit-application :id application-id)
             application (:application (query sonja :application :id application-id))]
-        (success resp) => true
+        resp => ok?
         (:state application) => "submitted"))))
+
+(facts* "Application has opened when submitted from draft"
+  (let [resp (create-app pena) => ok?
+        id   (:id resp)
+        app1 (query pena :application :id id) => ok?
+        resp (command pena :submit-application :id id) => ok?
+        resp (query pena :application :id id) => ok?
+        app2 (:application resp)]
+    (:opened app1) => nil
+    (:opened app2) => number?))
 
 (fact "Authority is able to add an attachment to an application after verdict has been given for it"
   (doseq [user [sonja pena]]

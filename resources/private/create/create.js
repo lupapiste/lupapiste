@@ -24,7 +24,7 @@
     };
 
     self.goPhase2 = function() {
-      tree.reset(_.map(self.municipality().operations, operations2tree));
+      tree.reset(_.map(self.operations(), operations2tree));
       $("#create-part-1").hide();
       $("#create-part-2").show();
       window.scrollTo(0, 0);
@@ -55,6 +55,7 @@
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
     self.municipality = ko.observable(null);
+    self.operations = ko.observable(null);
     self.organization = ko.observable(null);
     self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
     self.attachmentsForOp = ko.computed(function() { var m = self.organization(); return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null; });
@@ -65,6 +66,7 @@
     self.pending = ko.observable();
 
     self.municipalityCode.subscribe(function(code) {
+      if(code) { self.findOperations(code); }
       if (self.useManualEntry()) { municipalities.findById(code, self.municipality); }
     });
 
@@ -76,6 +78,13 @@
       });
       return self;
     };
+
+    self.findOperations = function(code) {
+      municipalities.operationsForMunicipality(code, function(opearations) {
+        self.operations(opearations);
+      });
+      return self;
+    }
 
     self.addressData.subscribe(function(a) {
       self.addressString(a ? a.street + " " + a.number : "");
@@ -335,7 +344,7 @@
       onSelect: function(v) {
         if (v) {
           model.operation(v.op);
-          ajax.query("get-organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
+          ajax.query("organization-details", {municipality: model.municipality().id, operation: v.op}).success(function(d) {
             model.organization(d);
           }).call();
         } else {

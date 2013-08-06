@@ -98,7 +98,7 @@
   (mc/drop collection))
 
 (defn remove-many
-  "Returns all documents matching query."
+  "Removes all documents matching query."
   [collection query] (mc/remove collection query))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
