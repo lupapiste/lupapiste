@@ -7,7 +7,8 @@ var currentUser = (function() {
     set: function(u) { user = u; },
     get: function() { return user; },
     isAuthority: function() { return user.role === "authority"; },
-    isApplicant: function() { return user.role === "applicant"; }
+    isApplicant: function() { return user.role === "applicant"; },
+    id: function() { return user.id; }
   };
 
 })();

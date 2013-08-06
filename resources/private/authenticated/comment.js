@@ -22,6 +22,14 @@ var comments = (function() {
       self.comments(ko.mapping.fromJS(filteredComments));
     };
 
+    self.isForMe = function(model) {
+      if(model.to && model.to.id && model.to.id() === currentUser.id()) {
+        console.log("for me!");
+        return true;
+      }
+      return false;
+    }
+
     self.setApplicationId = function(applicationId) {
       self.applicationId = applicationId;
     };
