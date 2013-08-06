@@ -245,15 +245,15 @@
               {$pull {:auth {$and [{:username email}
                                    {:type {$ne :owner}}]}}})))))))
 
-(defcommand "remove-auth"
-  {:parameters [:id :email]
+(defcommand remove-auth
+  {:parameters [:id email]
    :roles      [:applicant :authority]}
-  [{{:keys [email]} :data :as command}]
+  [command]
   (update-application command
     {$pull {:auth {$and [{:username (lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
-(defcommand "add-comment"
+(defcommand add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
    :notify     "new-comment"}
@@ -290,14 +290,14 @@
 
         nil))))
 
-(defcommand "mark-seen"
+(defcommand mark-seen
   {:parameters [:id :type]
    :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements" "verdicts"} type) (fail :error.unknown-type)))]
    :authenticated true}
   [{:keys [data user created] :as command}]
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
-(defcommand "set-user-to-document"
+(defcommand set-user-to-document
   {:parameters [:id :documentId :userId :path]
    :authenticated true}
   [{{:keys [documentId userId path]} :data user :user created :created :as command}]
