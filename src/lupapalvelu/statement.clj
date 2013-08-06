@@ -1,10 +1,10 @@
 (ns lupapalvelu.statement
   (:use [monger.operators]
-        [clojure.tools.logging]
         [lupapalvelu.core]
         [sade.env]
         [sade.util :only [lower-case]])
-  (:require [sade.security :as sadesecurity]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [sade.security :as sadesecurity]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]

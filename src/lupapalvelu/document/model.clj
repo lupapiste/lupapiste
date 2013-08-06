@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.model
-  (:use [clojure.tools.logging]
-        [sade.strings]
+  (:use [sade.strings]
         [clojure.walk :only [keywordize-keys]])
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]

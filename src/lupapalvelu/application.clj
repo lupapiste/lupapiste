@@ -1,13 +1,13 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
-        [clojure.tools.logging]
         [lupapalvelu.core]
         [clojure.string :only [blank? join trim]]
         [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [clj-time.format :as timeformat]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn error fatal)]
+            [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]

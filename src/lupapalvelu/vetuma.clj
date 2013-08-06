@@ -6,9 +6,9 @@
         [monger.operators]
         [clj-time.local :only [local-now]]
         [hiccup.form]
-        [clojure.tools.logging]
         [lupapalvelu.core :only [fail]])
-  (:require [digest]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error errorf fatal)]
+            [digest]
             [sade.env :as env]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]

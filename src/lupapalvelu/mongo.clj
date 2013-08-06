@@ -1,8 +1,8 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count])
-  (:use monger.operators
-        clojure.tools.logging)
-  (:require [sade.env :as env]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error fatal)]
+            [monger.operators :refer :all]
+            [sade.env :as env]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
