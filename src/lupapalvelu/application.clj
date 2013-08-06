@@ -257,6 +257,8 @@
   (when (and to (not (security/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 
+(defquery add-comment-to-authority {:roles [:authority]})
+
 (defquery add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
