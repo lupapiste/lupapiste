@@ -117,9 +117,10 @@
                        henkilotiedot-minimal
                        yhteystiedot)}))
 
-(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-            {:name "henkilo" :type :group :body henkilo}
-            {:name "yritys" :type :group :body yritys}])
+(def party (body
+             {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+             {:name "henkilo" :type :group :body henkilo}
+             {:name "yritys" :type :group :body yritys}))
 
 (def party-with-required-hetu (body
                                 [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
