@@ -53,7 +53,7 @@
               auth-get    (fn [& uri] (c/get (apply str (server-address) uri) {:headers {"authorization" (str "apikey=" pena)}}))]
 
           (fact "download all"
-            (auth-get "/api/download-all-attachments/" application-id))
+            (raw pena "download-all-attachments" :id application-id) => http200?)
 
           (fact "pdf export"
             (raw pena "pdf-export" :id application-id) => http200?)
