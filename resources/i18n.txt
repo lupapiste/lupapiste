@@ -1,1 +1,4 @@
-
+R: 	Rakennuslupa
+YA: Yleisten alueiden lupa
+Y: 	Ympäristölupa
+P: 	Poikkeamislupa
