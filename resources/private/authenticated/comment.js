@@ -23,11 +23,7 @@ var comments = (function() {
     };
 
     self.isForMe = function(model) {
-      if(model.to && model.to.id && model.to.id() === currentUser.id()) {
-        console.log("for me!");
-        return true;
-      }
-      return false;
+      return model.to && model.to.id && model.to.id() === currentUser.id();
     }
 
     self.setApplicationId = function(applicationId) {
