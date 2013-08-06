@@ -1,4 +1,5 @@
-(ns lupapalvelu.document.schemas)
+(ns lupapalvelu.document.schemas
+  (:require [lupapalvelu.document.tools :refer :all]))
 
 ;;
 ;; Register schemas
@@ -78,12 +79,6 @@
                            {:name "email" :type :string :subtype :email :required true}
                            #_{:name "fax" :type :string :subtype :tel}]}])
 
-(def yhteystiedot-public-area [{:name "yhteystiedot"
-                                :type :group
-                                :body [{:name "puhelin" :type :string :subtype :tel :required true}
-                                       {:name "email" :type :string :subtype :email :required true}
-                                       #_{:name "fax" :type :string :subtype :tel}]}])        ;; TODO: Saako FAX jaada? Ei kryspissa?
-
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
                              :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
@@ -100,12 +95,6 @@
                [henkilotiedot-with-hetu]
                simple-osoite
                yhteystiedot))
-
-(def henkilo-public-area (body
-                           {:name "userId" :type :personSelector}
-                           [henkilotiedot-with-hetu]
-                           simple-osoite
-                           yhteystiedot-public-area))
 
 (def henkilo-with-required-hetu (body
                                   henkilo-valitsin
@@ -128,22 +117,9 @@
                        henkilotiedot-minimal
                        yhteystiedot)}))
 
-(def yritys-public-area (body
-                          yritys-minimal
-                          simple-osoite
-                          {:name "vastuuhenkilo"
-                           :type :group
-                           :body (body
-                                   henkilotiedot-minimal
-                                   yhteystiedot-public-area)}))
-
 (def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
             {:name "henkilo" :type :group :body henkilo}
             {:name "yritys" :type :group :body yritys}])
-
-(def party-public-area [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                        {:name "henkilo" :type :group :body henkilo-public-area}
-                        {:name "yritys" :type :group :body yritys-public-area}])
 
 (def party-with-required-hetu (body
                                 [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
@@ -519,12 +495,12 @@
             :type :party}
      :body party}
 
-    {:info {:name "hakija-public-area"
+    {:info {:name "hakija-ya"
             :order 3
             :removable true
             :repeating true
             :type :party}
-     :body party-public-area}
+     :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
 
     {:info {:name "paasuunnittelija"
             :order 4

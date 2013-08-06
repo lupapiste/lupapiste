@@ -109,7 +109,7 @@
       strip-nils
       strip-empty-maps)))
 
-(defn ->yritys-public-area [{:keys [id firstName lastName email phone street zip city]}]
+(defn ->yritys [{:keys [id firstName lastName email phone street zip city]}]
   (->
     {;:userId                        {:value id}
      :vastuuhenkilo {:henkilotiedot {:etunimi       {:value firstName}
