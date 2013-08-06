@@ -268,7 +268,7 @@
   (with-application command
     (fn [{:keys [id state] :as application}]
       (let [to-user   (and to (or (security/summary (security/get-non-private-userinfo to))
-                                 (fail! :to-is-not-id-of-any-user-in-system)))
+                                  (fail! :to-is-not-id-of-any-user-in-system)))
             from-user (security/summary user)]
         (update-application command
           {$set  {:modified created}
