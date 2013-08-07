@@ -10,11 +10,11 @@
 (apply-remote-minimal)
 
 #_(fact "can't inject js in 'x' or 'y' params"
-  (create-app pena :x ";alert(\"foo\");" :y "what ever") => not-ok?
-  (create-app pena :x "0.1x" :y "1.0")                   => not-ok?
-  (create-app pena :x "1x2" :y "1.0")                    => not-ok?
-  (create-app pena :x "2" :y "1.0")                      => not-ok?
-  (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
+   (create-app pena :x ";alert(\"foo\");" :y "what ever") => not-ok?
+   (create-app pena :x "0.1x" :y "1.0")                   => not-ok?
+   (create-app pena :x "1x2" :y "1.0")                    => not-ok?
+   (create-app pena :x "2" :y "1.0")                      => not-ok?
+   (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
 
 (fact "creating application without message"
   (let [id    (create-app-id pena)
@@ -171,6 +171,10 @@
 
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
+
+(fact "adding comments"
+  (let [app  (create-and-submit-application pena)]
+    (:state app) => "submitted"))
 
 (comment
   (apply-remote-minimal)

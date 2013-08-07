@@ -162,6 +162,14 @@
     id => truthy
     id))
 
+(defn create-and-submit-application [apikey & args]
+  (let [id    (apply create-app-id apikey args)
+        resp  (command apikey :submit-application :id id) => ok?
+        resp  (query pena :application :id id) => ok?
+        app   (:application resp)]
+    (:state app) => "submitted!"
+    app))
+
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
