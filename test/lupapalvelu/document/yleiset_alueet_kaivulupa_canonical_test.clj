@@ -15,8 +15,6 @@
 ;;        - allowedAttachmentTypes
 ;;        - organization ?
 
-;; TODO: Applicationin "permitType"-kohta pitäisi poistaa, se on nyt kovakoodatusti "buildingPermit".
-
 
 (def nimi {:etunimi {:modified 1372341939920, :value "Pena"},
            :sukunimi {:modified 1372341939920, :value "Panaani"}})
@@ -70,7 +68,7 @@
                                    :removable true,
                                    :type "party",
                                    :order 61}},
-                         :data {:_selected {:modified 1372342063565, :value "henkilo"},
+                         :data {:_selected {:modified 1372342063565, :value "yritys"},
                                 :henkilo henkilo,
                                 :yritys yritys}})
 
@@ -166,11 +164,12 @@
    :propertyId "75341600550007",
    :documents documents,
    :municipality municipality
-   ;; Statements kopioitu Rakennuslupa_canonical_test.clj:sta, joka on identtinen yleisten lueiden puolen kanssa.
+   ;; Statements kopioitu Rakennuslupa_canonical_test.clj:sta, joka on identtinen yleisten alueiden puolen kanssa.
    :statements statements})
 
 
 (def get-henkilo-plus-yritys #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-henkilo-plus-yritys)
+(def get-tyomaasta-vastaava #'lupapalvelu.document.yleiset-alueet-kaivulupa-canonical/get-tyomaasta-vastaava)
 
 (facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application "fi")
@@ -200,16 +199,29 @@
        lupaAsianKuvaus (:lupaAsianKuvaus Tyolupa) => truthy
        Sijoituslupaviite (-> Tyolupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
 
-;       Vastuuhenkilo (-> Tyolupa :vastuuhenkilotieto :Vastuuhenkilo) => truthy
-;       Vastuuhenkilo-osoitetieto (:osoitetieto Vastuuhenkilo) => truthy
-;       Vastuuhenkilo-osoite (:osoite Vastuuhenkilo-osoitetieto) => truthy
+       osapuolet-vec (-> Tyolupa :osapuolitieto) => truthy
 
-       hakija-Osapuoli (-> Tyolupa :osapuolitieto :Osapuoli) => truthy
+       ;; tyomaasta-vastaavan yritystieto-osa
+       rooliKoodi-tyomaastavastaava "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6"
+       rooliKoodi-tyonsuorittaja "ty\u00f6nsuorittaja"
+       Vastuuhenkilo-yritys (:Osapuoli (first (filter #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-tyonsuorittaja) osapuolet-vec)))
+       Vastuuhenkilo-yritys-yritystieto (-> Vastuuhenkilo-yritys :yritystieto :Yritys) => truthy
+       Vastuuhenkilo-yritys-Postiosoite (-> Vastuuhenkilo-yritys-yritystieto :postiosoitetieto :Postiosoite) => truthy
+       ;; tyomaasta-vastaavan henkilotieto-osa
+       Vastuuhenkilo-henkilo (-> Tyolupa :vastuuhenkilotieto :Vastuuhenkilo) => truthy
+
+       ;; Testataan muunnosfunktiota henkilo-tyyppisella tyomaasta vastaavalla
+       tyomaasta-vastaava-henkilo (get-tyomaasta-vastaava
+                                    (assoc-in (:data tyomaasta-vastaava) [:_selected :value] "henkilo")) => truthy
+       tyomaasta-vastaava-Vastuuhenkilo (-> tyomaasta-vastaava-henkilo :vastuuhenkilotieto :Vastuuhenkilo) => truthy
+       tyomaasta-vastaava-Vastuuhenkilo-osoite (-> tyomaasta-vastaava-Vastuuhenkilo :osoitetieto :osoite) => truthy
+
+       rooliKoodi-Hakija "hakija"
+       hakija-Osapuoli (:Osapuoli (first (filter #(= (-> % :Osapuoli :rooliKoodi) rooliKoodi-Hakija) osapuolet-vec)))
        hakija-Henkilo (-> hakija-Osapuoli :henkilotieto :Henkilo) => truthy  ;; kyseessa yrityksen vastuuhenkilo
        hakija-Yritys (-> hakija-Osapuoli :yritystieto :Yritys) => truthy
        hakija-henkilo-nimi (:nimi maksaja-Henkilo) => truthy
-       hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy
-       ]
+       hakija-yritys-Postiosoite (-> hakija-Yritys :postiosoitetieto :Postiosoite) => truthy]
 
 ;    (println "\n canonical: ")
 ;    (clojure.pprint/pprint canonical)
@@ -247,25 +259,44 @@
     (fact "hakija-osoitenimi" (-> hakija-yritys-Postiosoite :osoitenimi :teksti) => (-> osoite :katu :value))
     (fact "hakija-postinumero" (:postinumero hakija-yritys-Postiosoite) => (-> osoite :postinumero :value))
     (fact "hakija-postitoimipaikannimi" (:postitoimipaikannimi hakija-yritys-Postiosoite) => (-> osoite :postitoimipaikannimi :value))
-    (fact "Vastuuhenkilo-rooliKoodi" (:rooliKoodi hakija-Osapuoli) => "hakija")
+    (fact "hakija-rooliKoodi" (:rooliKoodi hakija-Osapuoli) => rooliKoodi-Hakija)
 
      ;; Hakija, yksityinen henkilo -> Tama on testattu jo kohdassa "Maksaja, yksityinen henkilo" (muunnos on taysin sama)
 
-     ;; Tyomaasta vastaava
-     ;; ****** TODO: Muuta tama, kun tyomaastaVastaava muutetaan henkiloksi! ******
-;     (fact "Vastuuhenkilo-etunimi" (:etunimi Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :etunimi :value))
-;     (fact "Vastuuhenkilo-sukunimi" (:sukunimi Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :sukunimi :value))
-;     (fact "Vastuuhenkilo-osoite-osoitenimi" (:osoitenimi Vastuuhenkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :osoitenimi :value))
-;     (fact "Vastuuhenkilo-osoite-postinumero" (:postinumero Vastuuhenkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postinumero :value))
-;     (fact "Vastuuhenkilo-osoite-postitoimipaikannimi" (:postitoimipaikannimi Vastuuhenkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postitoimipaikannimi :value))
-;     (fact "Vastuuhenkilo-puhelinnumero" (:puhelinnumero Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :puhelin :value))
-;     (fact "Vastuuhenkilo-sahkopostiosoite" (:sahkopostiosoite Vastuuhenkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :email :value))
-;     (fact "Vastuuhenkilo-rooliKoodi" (:rooliKoodi Vastuuhenkilo) => "lupaehdoista/ty\u00f6maasta vastaava henkil\u00f6")
+     ;; Tyomaasta vastaava, yritys-tyyppia
+     (fact "Vastuuhenkilo-henkilo-rooliKoodi"
+       (:rooliKoodi Vastuuhenkilo-henkilo) => rooliKoodi-tyomaastavastaava)
+     (fact "Vastuuhenkilo-henkilo-etunimi"
+       (:etunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :etunimi :value))
+     (fact "Vastuuhenkilo-henkilo-sukunimi"
+       (:sukunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :sukunimi :value))
+     (fact "Vastuuhenkilo-henkilo-puhelinnumero"
+       (:puhelinnumero Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :puhelin :value))
+     (fact "Vastuuhenkilo-henkilo-sahkopostiosoite"
+       (:sahkopostiosoite Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :email :value))
+     (fact "Vastuuhenkilo-yritys-rooliKoodi"
+       (:rooliKoodi Vastuuhenkilo-yritys) => rooliKoodi-tyonsuorittaja)
+     (fact "Vastuuhenkilo-yritys-osoite-osoitenimi"
+       (-> Vastuuhenkilo-yritys-Postiosoite :osoitenimi :teksti) => (-> tyomaasta-vastaava :data :yritys :osoite :katu :value))
+     (fact "Vastuuhenkilo-yritys-osoite-postinumero"
+       (:postinumero Vastuuhenkilo-yritys-Postiosoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postinumero :value))
+     (fact "Vastuuhenkilo-yritys-osoite-postitoimipaikannimi"
+       (:postitoimipaikannimi Vastuuhenkilo-yritys-Postiosoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postitoimipaikannimi :value))
+
+     ;; Tyomaasta vastaava, henkilo-tyyppia
+     (fact "tyomaasta-vastaava-yksityinen-rooliKoodi" (:rooliKoodi tyomaasta-vastaava-Vastuuhenkilo) => rooliKoodi-tyomaastavastaava)
+     (fact "tyomaasta-vastaava-yksityinen-etunimi" (:etunimi tyomaasta-vastaava-Vastuuhenkilo) => (-> nimi :etunimi :value))
+     (fact "tyomaasta-vastaava-yksityinen-sukunimi" (:sukunimi tyomaasta-vastaava-Vastuuhenkilo) => (-> nimi :sukunimi :value))
+     (fact "tyomaasta-vastaava-yksityinen-sahkopostiosoite" (:sahkopostiosoite tyomaasta-vastaava-Vastuuhenkilo) => (-> yhteystiedot :email :value))
+     (fact "tyomaasta-vastaava-yksityinen-puhelin" (:puhelinnumero tyomaasta-vastaava-Vastuuhenkilo) => (-> yhteystiedot :puhelin :value))
+     (fact "tyomaasta-vastaava-yksityinen-osoitenimi" (-> tyomaasta-vastaava-Vastuuhenkilo-osoite :osoitenimi) => (-> osoite :katu :value))
+     (fact "tyomaasta-vastaava-yksityinen-postinumero" (:postinumero tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postinumero :value))
+     (fact "tyomaasta-vastaava-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
+     ;(fact "tyomaasta-vastaava-yksityinen-hetu" (:henkilotunnus tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> henkilotiedot :hetu :value))
 
 
 ;     (println "\n Toimintajakso: " Toimintajakso)
 ;     (println "\n Toimintajakso alkuHetki: " (:alkuHetki Toimintajakso))
-
      ;; Toimintajakso
      (fact "Toimintajakso-alkuHetki" (:alkuHetki Toimintajakso) => (to-xml-datetime-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
      (fact "Toimintajakso-loppuHetki" (:loppuHetki Toimintajakso) => (to-xml-datetime-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
