@@ -169,6 +169,10 @@
         title       (get-email-title application "verdict")]
     (send-mail-to-recipients! recipients title msg)))
 
+;;
+;; Da notify
+;;
+
 (defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
   (condp = (keyword template)
     :new-comment  (send-notifications-on-new-comment! application user host)
