@@ -121,21 +121,19 @@
 (defpage [:get "/perfmon/throttle"] _
   (->> {:db @db-throttle :web @web-throttle} (resp/json) (resp/status 200)))
 
-(defpage [:post "/perfmon/throttle/:id"] {id :id}
-  (if-let [throttle ({"db" db-throttle "web" web-throttle} id)]
-    (let [value (-> (request/ring-request) :json :value str Long/parseLong)]
+(defpage [:post "/perfmon/throttle/:id"] {id :id value :value}
+  (let [throttle ({"db" db-throttle "web" web-throttle} id)]
+    (when (and throttle value)
       (reset! throttle value)
-      (->> {id value} (resp/json) (resp/status 200)))
-    (resp/status 404 (str "unknown throttle: '" id "'"))))
+      (->> {id value} (resp/json) (resp/status 200)))))
 
-(defpage [:post "/perfmon/browser-timing"] _
-  (let [timing (-> (request/ring-request) :json :timing)
-        user-agent (-> (request/ring-request) :headers (get "user-agent"))]
+(defpage [:post "/perfmon/browser-timing"] {timing :timing}
+  (let [user-agent (-> (request/ring-request) :headers (get "user-agent"))]
     (mc/insert "perf-mon-timing" 
-               {:ts (System/currentTimeMillis)
-                :ua user-agent
-                :timing timing}
-               WriteConcern/NONE))
+      {:ts (System/currentTimeMillis)
+       :ua user-agent
+       :timing timing}
+      WriteConcern/NONE))
   (->> {:ok true} (resp/json) (resp/status 200)))
 
 ;;
