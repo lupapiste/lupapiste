@@ -1,6 +1,7 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
   (:use  [lupapalvelu.xml.krysp.yhteiset]
          [clojure.data.xml]
+         [sade.util]
          [clojure.java.io]
          [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical to-xml-datetime]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
@@ -91,7 +92,6 @@
 
 (def rakennus {:tag :Rakennus
                :child yht-rakennus})
-
 
 (def rakennuslupa_to_krysp
   {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.0/rakennusvalvonta.xsd"
@@ -187,9 +187,14 @@
     {:Liite (get-Liite title link attachment type file-id)}))
 
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
-  (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
-        canonical-attachments (for [attachment-tuple statement-attachments-by-id]
-                                {(first attachment-tuple) (for [attachment (last attachment-tuple)] (get-liite-for-lausunto attachment application begin-of-link))})]
+  (let [statement-attachments-by-id (group-by
+                                      (fn-> :target :id keyword)
+                                      (filter
+                                        (fn-> :target :type (= "statement"))
+                                        (:attachments application)))
+        canonical-attachments (for [[id attacments] statement-attachments-by-id]
+                                {id (for [attachment attacments]
+                                      (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
 (defn- get-attachments-as-canonical [application begin-of-link ]
@@ -215,10 +220,6 @@
       (with-open [out (output-stream attachment-file)
                   in (content)]
         (copy in out)))))
-
-
-
-
 
 (defn- write-statement-attachments [attachments output-dir]
   (let [f (for [fi attachments]
@@ -288,4 +289,3 @@
     (write-application-pdf-versions output-dir application submitted-application lang)
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile)))
-
