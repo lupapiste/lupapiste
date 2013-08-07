@@ -6,7 +6,8 @@
         [lupapalvelu.xml.emit]
         [lupapalvelu.xml.krysp.rakennuslupa-mapping]
         [clojure.data.xml]
-        [clj-time.core :only [date-time]]))
+        [clj-time.core :only [date-time]]
+        [lupapalvelu.factlet :as fl]))
 
 ;;
 ;; Facts
@@ -247,43 +248,7 @@
    :state "open"
    :opened 1354532324658
    :location {:x 408048, :y 6693225},
-   :attachments [{:id "518ce59b036496133cf5ba7f"
-                  :latestVersion {:fileId "518ce59b036496133cf5ba7c"
-                                  :version {:major 0
-                                            :minor 1}
-                                  :size 27726
-                                  :created 1368188315224
-                                  :filename "1901_001.pdf"
-                                  :contentType "application/pdf"
-                                  :user {:role "authority"
-                                         :lastName "Sibbo"
-                                         :firstName "Sonja"
-                                         :username "sonja"
-                                         :id "777777777777777777000023"}
-                                  :stamped false
-                                  :accepted nil}
-                  :locked true
-                  :modified 1368188315224
-                  :op nil
-                  :state "requires_authority_action"
-                  :target {:type "statement"
-                           :id "518ce582036496133cf5ba75"}
-                  :type {:type-group "muut"
-                         :type-id "muu"}
-                  :versions [{:fileId "518ce59b036496133cf5ba7c"
-                              :version {"major" 0
-                                        :minor 1}
-                              :size 27726
-                              :created 1368188315224
-                              :filename "1901_001.pdf"
-                              :contentType "application/pdf"
-                              :user {:role "authority"
-                                     :lastName "Sibbo"
-                                     :firstName "Sonja"
-                                     :username "sonja"
-                                     :id "777777777777777777000023"}
-                              :stamped false
-                              :accepted nil}]}],
+   :attachments [],
    :authority {:id "777777777777777777000023",
                :username "sonja",
                :firstName "Sonja",
@@ -528,20 +493,7 @@
         luvanTunnisteTiedot (:luvanTunnisteTiedot rakennusvalvontaasia)
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot)
         muuTunnustieto (:muuTunnustieto LupaTunnus)
-        MuuTunnus (:MuuTunnus muuTunnustieto)
-
-        lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))
-        Lausunto (:Lausunto lausuntotieto)
-        pyydetty (:pyydetty Lausunto)
-        viranomainen (:viranomainen pyydetty)
-        pyyntoPvm (:pyyntoPvm pyydetty)
-        lausunto (:lausunto Lausunto)
-        lausuntoViranomainen (:viranomainen lausunto)
-        lausuntoPvm (:lausuntoPvm lausunto)
-        lausuntoType (:lausunto lausunto)
-        lausuntoTeksti (:lausunto lausuntoType)
-        puoltotieto (:puoltotieto lausunto)
-        puolto (:puolto puoltotieto)]
+        MuuTunnus (:MuuTunnus muuTunnustieto)]
     ;(clojure.pprint/pprint canonical)
     (fact "canonical" canonical => truthy)
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
@@ -601,13 +553,16 @@
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")
 
-    (fact "Lausunto" lausunto => truthy)
-    (fact "viranomainen" viranomainen => "Paloviranomainen")
-    (fact "Pyyntopvm" pyyntoPvm => "2013-05-09")
-    (fact "Lausunto viranomainen" lausuntoViranomainen => "Sonja Sibbo")
-    (fact "Lausunto pvm" lausuntoPvm => "2013-05-09")
-    (fact "lausunto teksti osa" lausuntoTeksti => "Savupiippu pit\u00e4\u00e4 olla.")
-    (fact "Puolto" puolto => "ehdoilla")
-
- ;   (clojure.pprint/pprint canonical)
-    ))
+    (fl/fact*
+      (let [lausuntotieto (first (:lausuntotieto rakennusvalvontaasia))  => truthy
+            Lausunto (:Lausunto lausuntotieto) => truthy
+            viranomainen (:viranomainen Lausunto) => "Paloviranomainen"
+            pyyntoPvm (:pyyntoPvm Lausunto) => "2013-05-09"
+            lausuntotieto (:lausuntotieto Lausunto) => truthy
+            LL (:Lausunto lausuntotieto) => truthy ;Lausunto oli jo kaytissa, siksi LL
+            viranomainen (:viranomainen LL) => "Paloviranomainen"
+            lausunto (:lausunto LL) => "Savupiippu pit\u00e4\u00e4 olla."
+            lausuntoPvm (:lausuntoPvm LL) => "2013-05-09"
+            puoltotieto (:puoltotieto LL) => truthy
+            Puolto (:Puolto puoltotieto) => truthy
+            puolto (:puolto Puolto) => "ehdoilla"]))))
