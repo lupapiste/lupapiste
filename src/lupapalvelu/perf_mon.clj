@@ -124,7 +124,7 @@
 (defpage [:post "/perfmon/throttle/:id"] {id :id value :value}
   (let [throttle ({"db" db-throttle "web" web-throttle} id)]
     (when (and throttle value)
-      (reset! throttle value)
+      (reset! throttle (to-long value))
       (->> {id value} (resp/json) (resp/status 200)))))
 
 (defpage [:post "/perfmon/browser-timing"] {timing :timing}
