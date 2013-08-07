@@ -14,35 +14,20 @@
 
 (def yleiset-alueet-maksaja
   (body
-    party-public-area
+    party
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
-
-(def tyomaasta-vastaava
-  (body
-    party-public-area))
 
 (def tyo-aika
   (body
-    [{:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
-     {:name "tyoaika-paattyy-pvm" :type :date}]))
+    {:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
+    {:name "tyoaika-paattyy-pvm" :type :date}))
 
 (def tapahtuman-tiedot
   (body
     {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
     {:name "tapahtumapaikka" :type :string :size "l"}
-    [{:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
-     {:name "tapahtuma-aika-paattyy-pvm" :type :date}]))
-
-#_(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-              {:name "henkilo" :type :group :body henkilo}
-              {:name "yritys" :type :group :body yritys}])
-
-#_{:info {:name "hakija"
-          :order 3
-          :removable true
-          :repeating true
-          :type :party}
-   :body party}
+    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
+    {:name "tapahtuma-aika-paattyy-pvm" :type :date}))
 
 #_(def tapahtumien-syotto                                                      ;; merkinnatJaPiirroksettietoType
   {:info {:name "tapahtumien-syotto"
@@ -100,7 +85,7 @@
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :order 61}
-    :body tyomaasta-vastaava}
+    :body party}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
            :type :party
            :order 62}
