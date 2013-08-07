@@ -340,15 +340,10 @@
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
-                                           {:applicationId (or applicationId "")
-                                            :attachmentId (or attachmentId "")
-                                            :attachmentType (or attachmentType "")
-                                            :locked (or locked "false")
-                                            :authority (or authority "false")
-                                            :typeSelector (or typeSelector "")
-                                            :targetId (or targetId "")
-                                            :targetType (or targetType "")
-                                            :errorMessage (result :text)}))))))
+                                           (-> (:params (request/ring-request))
+                                             (dissoc :upload)
+                                             (dissoc ring.middleware.anti-forgery/token-key)
+                                             (assoc  :errorMessage (result :text)))))))))
 
 ;;
 ;; Server is alive
