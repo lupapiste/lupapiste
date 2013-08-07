@@ -109,8 +109,6 @@
                                              :given     nil
                                              :status    nil})
                 statements    (map ->statement persons)]
-            (println persons)
-            (println organization)
             (mongo/update :applications {:_id id} {$pushAll {:statements statements
                                                              :auth unique-writers}})
             (notifications/send-on-request-for-statement! persons application user host)))))))

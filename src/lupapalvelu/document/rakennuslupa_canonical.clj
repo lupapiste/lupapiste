@@ -35,7 +35,7 @@
   (let [d (from-long timestamp)]
     (if-not (nil? timestamp)
       (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
-;
+
 (defn to-xml-datetime-from-string [date-as-string]
   (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
     (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
@@ -396,20 +396,21 @@
                      :no "ei puolla"
                      :yes "puoltaa"})
 
+;; TODO
 (defn- get-statement [statement]
   (let [lausunton (when (:status statement)
-                             {:Lausunto {:viranomainen (get-in statement [:person :text])
-                                         :lausunto (:text statement)
-                                         :lausuntoPvm (to-xml-date (:given statement))
-                                         :puoltotieto {:Puolto {:puolto ((keyword (:status statement)) puolto-mapping)}}}})]
+                    {:Lausunto {:viranomainen (get-in statement [:person :text])
+                                :lausunto (:text statement)
+                                :lausuntoPvm (to-xml-date (:given statement))
+                                :puoltotieto {:Puolto {:puolto ((keyword (:status statement)) puolto-mapping)}}}})]
     (if lausunton
-    {:Lausunto {:id (:id statement)
-                :viranomainen (get-in statement [:person :text])
-                :pyyntoPvm (to-xml-date (:requested statement))
-                :lausuntotieto lausunton}}
-    {:Lausunto {:id (:id statement)
-                :viranomainen (get-in statement [:person :text])
-                :pyyntoPvm (to-xml-date (:requested statement))}})))
+      {:Lausunto {:id (:id statement)
+                  :viranomainen (get-in statement [:person :text])
+                  :pyyntoPvm (to-xml-date (:requested statement))
+                  :lausuntotieto lausunton}}
+      {:Lausunto {:id (:id statement)
+                  :viranomainen (get-in statement [:person :text])
+                  :pyyntoPvm (to-xml-date (:requested statement))}})))
 
 (defn- get-statements [statements]
   ;Returing vector because this element to be Associative
