@@ -172,6 +172,7 @@
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
+;; TODO
 (fact "adding comments"
   (let [app  (create-and-submit-application pena)]
     (:state app) => "submitted"))
