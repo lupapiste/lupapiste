@@ -113,6 +113,12 @@
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
 
+(defcommand "save-user-attachment"
+  {:parameters [:type]
+   :authenticated true}
+  [{{attachment-type :type} :data {user-id :id} :user}]
+  (info "save:" user-id attachment-type)
+  (ok))
 
 (env/in-dev
   (defcommand "create-apikey"
