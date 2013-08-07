@@ -2,13 +2,12 @@
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail defcommand defquery now]]
         [lupapalvelu.i18n :only [*lang*]]
-        [clojure.tools.logging]
-        [clojure.tools.logging]
-        [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]]
         [lupapalvelu.security :only [current-user]])
-  (:require [noir.request :as request]
+  (:require [taoensso.timbre :as timbre :refer (trace tracef debug info infof warn warnf error errorf fatal spy)]
+            [lupapalvelu.logging :refer [with-logging-context]]
+            [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
@@ -121,11 +120,10 @@
             :lang *lang*
             :web  (web-stuff)}))
 
-;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (or (get-in action [:data :id]) "")
-     :userId        (or (get-in action [:user :id]) "")}
+    {:applicationId (get-in action [:data :id])
+     :userId        (get-in action [:user :id])}
     (core/execute action)))
 
 (defn- execute-command [name]
@@ -303,7 +301,7 @@
 
 (defn- get-apikey [request]
   (let [authorization (get-in request [:headers "authorization"])]
-    (parse "apikey" authorization)))
+    (spy (parse "apikey" authorization))))
 
 (defn authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
@@ -318,7 +316,7 @@
   (and (get-apikey request) (logged-in? request)))
 
 ;;
-;; File upload/download:
+;; File upload
 ;;
 
 (defpage [:post "/api/upload"]
@@ -340,27 +338,14 @@
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
-                                           {:applicationId (or applicationId "")
-                                            :attachmentId (or attachmentId "")
-                                            :attachmentType (or attachmentType "")
-                                            :locked (or locked "false")
-                                            :authority (or authority "false")
-                                            :typeSelector (or typeSelector "")
-                                            :errorMessage (result :text)}))))))
+                                           (-> (:params (request/ring-request))
+                                             (dissoc :upload)
+                                             (dissoc ring.middleware.anti-forgery/token-key)
+                                             (assoc  :errorMessage (result :text)))))))))
 
-(defn- output-attachment [attachment-id download?]
-  (if (logged-in?)
-    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
-    (resp/status 401 "Unauthorized\r\n")))
-
-(defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id false))
-
-(defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id true))
-
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
-  (attachment/output-all-attachments application-id (current-user) *lang*))
+;;
+;; Server is alive
+;;
 
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
@@ -392,9 +377,13 @@
 ;;
 
 (defn- csrf-attack-hander [request]
+  (warn "CSRF attempt blocked."
+    "Client IP:" (client-ip request)
+    "Referer:" (get-in request [:headers "referer"]))
+  (resp/json (fail :error.invalid-csrf-token))
   (with-logging-context
-    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
-     :userId        (or (:id (current-user request)) "???")}
+    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
+     :userId        (:id (current-user request) "???")}
     (warn "CSRF attempt blocked."
           "Client IP:" (client-ip request)
           "Referer:" (get-in request [:headers "referer"]))

@@ -1,13 +1,13 @@
 (ns lupapalvelu.wfs
   (:refer-clojure :exclude [and or sort-by filter])
-  (:require [clj-http.client :as client]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn errorf fatal)]
+            [clj-http.client :as client]
             [clojure.string :as s]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
             [sade.env :as env])
   (:use [clojure.data.zip.xml :only [xml-> text]]
-        [sade.strings :only [starts-with-i]]
-        [clojure.tools.logging]))
+        [sade.strings :only [starts-with-i]]))
 
 ;;
 ;; config:

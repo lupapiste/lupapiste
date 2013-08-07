@@ -1,12 +1,12 @@
 (ns lupapalvelu.attachment
   (:use [monger.operators]
         [lupapalvelu.core]
-        [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as get-application-no-access-checking application-query-for]]
         [lupapalvelu.i18n :only [loc *lang* with-lang]]
         [clojure.string :only [split join trim]]
         [swiss-arrows.core :only [-<> -<>>]])
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn warnf error errorf fatal)]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.mongo :as mongo]
@@ -467,6 +467,23 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn- output-attachment-if-logged-in [attachment-id download? user]
+  (if user
+    (output-attachment attachment-id download? (partial get-attachment-as user))
+    {:status 401
+     :headers {"Content-Type" "text/plain"}
+     :body "401 Unauthorized"}))
+
+(defraw "view-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id false user))
+
+(defraw "download-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id true user))
+
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
     (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
@@ -481,19 +498,20 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc lang]
+(defn- get-all-attachments [application lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
+      (let [zip (ZipOutputStream. out)
+            loc (i18n/localizer lang)]
         ; Add all attachments:
         (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
+          (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
+        (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -505,16 +523,17 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn output-all-attachments [application-id user lang]
-  (let [loc (i18n/localizer lang)]
-    (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
-      {:body (temp-file-input-stream (get-all-attachments application loc lang))
-       :status 200
+(defraw "download-all-attachments"
+  {:parameters [:id]}
+  [{:keys [application lang]}]
+  (if application
+    {:status 200
        :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
-      {:body "404"
-       :status 404
-       :headers {"Content-Type" "text/plain"}})))
+                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+       :body (temp-file-input-stream (get-all-attachments application lang))}
+    {:status 404
+     :headers {"Content-Type" "text/plain"}
+     :body "404"}))
 
 ;;
 ;; Stamping:

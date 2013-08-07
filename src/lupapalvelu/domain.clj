@@ -1,8 +1,8 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
-        [clojure.tools.logging]
         [sade.util :only [lower-case]])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn warnf error fatal)]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.model :as model]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 

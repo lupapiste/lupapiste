@@ -1,4 +1,5 @@
 (ns lupapalvelu.document.yleiset-alueet-schemas
+  (:require [lupapalvelu.document.tools :refer :all])
   (:use [lupapalvelu.document.schemas]))
 
 
@@ -14,7 +15,7 @@
 
 (def yleiset-alueet-maksaja
   (body
-    party
+    (schema-body-without-element-by-name party "turvakieltoKytkin")
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def tyo-aika
@@ -73,7 +74,8 @@
              {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
              {:name "vesijohto"}
              {:name "muu"}]}
-     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width} ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
+     ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
+     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
      {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
 
 
@@ -84,7 +86,7 @@
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :order 61}
-    :body party}
+    :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
            :type :party
            :order 62}

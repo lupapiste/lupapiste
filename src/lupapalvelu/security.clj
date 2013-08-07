@@ -1,7 +1,7 @@
 (ns lupapalvelu.security
-  (:use [monger.operators]
-        [clojure.tools.logging])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer :all]
             [sade.util :as util]
             [sade.env :as env]
             [noir.request :as request]

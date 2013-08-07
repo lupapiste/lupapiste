@@ -1,9 +1,9 @@
 (ns lupapalvelu.notifications
   (:use [monger.operators]
-        [clojure.tools.logging]
         [sade.strings :only [suffix]]
         [lupapalvelu.i18n :only [loc]])
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.env :as env]
             [sade.strings :as ss]

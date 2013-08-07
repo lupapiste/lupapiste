@@ -4,7 +4,7 @@
         [swiss-arrows.core]
         [midje.sweet])
   (:require [clj-http.client :as c]
-            [lupapalvelu.logging]
+            [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
             [cheshire.core :as json]))
@@ -136,6 +136,9 @@
 
 (defn http200? [{:keys [status]}]
   (= status 200))
+
+(defn http401? [{:keys [status]}]
+  (= status 401))
 
 (defn http404? [{:keys [status]}]
   (= status 404))
