@@ -1,9 +1,9 @@
 (ns lupapalvelu.user
   (:use [monger.operators]
         [lupapalvelu.core]
-        [lupapalvelu.i18n :only [*lang*]]
-        [clojure.tools.logging])
-  (:require [lupapalvelu.mongo :as mongo]
+        [lupapalvelu.i18n :only [*lang*]])
+  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn warnf error fatal)]
+            [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]

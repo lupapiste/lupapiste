@@ -1,13 +1,13 @@
 (ns lupapalvelu.operations
-  (:use [clojure.tools.logging]
-        [sade.util])
-  (:require [lupapalvelu.document.schemas :as schemas]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.suunnittelutarveratkaisu-ja-poikeamis-schemas :as poischemas]
             [lupapalvelu.document.ymparisto-schemas :as ympschemas]
             [lupapalvelu.document.yleiset-alueet-schemas :as yleiset-alueet]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.core :refer :all]
+            [sade.util :refer :all]
             [sade.env :as env]))
 
 (def default-description "operations.tree.default-description")

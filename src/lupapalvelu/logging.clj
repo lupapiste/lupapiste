@@ -1,28 +1,46 @@
 (ns lupapalvelu.logging
-  (:use [clojure.tools.logging]
-        [clj-logging-config.log4j])
-  (:require [sade.env :as env]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal spy with-log-level)]
+            [clojure.string :as s]
+            [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io])
-  (:import [org.apache.log4j FileAppender EnhancedPatternLayout]))
+  (:import [org.joda.time.format DateTimeFormat DateTimeFormatter]))
 
-(def pattern "%-7p %d (%r) [%X{sessionId}] [%X{applicationId}] [%X{userId}] %c:%L - %m%n")
+(def ^:dynamic context {})
 
-(defn to-file [file] (FileAppender. (EnhancedPatternLayout. pattern) file true))
+(defmacro with-logging-context [logging-context & body]
+  (assert (map? logging-context) "logging-context must be a map")
+  `(binding [context (merge context ~logging-context)]
+     (do ~@body)))
 
-(def default {:level env/log-level :pattern pattern})
+(defn log-prefix [{:keys [level timestamp ns]}]
+  (let [{:keys [sessionId applicationId userId]} context]
+    (str
+      (-> level name s/upper-case)
+      \space timestamp \space
+      \[ sessionId \] \space
+      \[ applicationId \] \space
+      \[ userId \] \space
+      ns)))
 
-(set-loggers! "sade"                 default
-              "lupapalvelu"          default
-              "ontodev.excel"        default
-              "org"                  (assoc default :level :info)
-              "events"               {:out (to-file (.getPath (io/file env/log-dir "logs" "events.log")))})
+(def time-format "yyyy-MM-dd HH:mm:ss.S")
+
+(timbre/set-level! env/log-level)
+(timbre/set-config! [:timestamp-pattern] time-format)
+(timbre/set-config! [:prefix-fn] log-prefix)
+
+;;
+;; event log:
+;;
+
+(def ^:private ^DateTimeFormatter time-fmt (DateTimeFormat/forPattern time-format))
+(def ^:private ^java.io.Writer event-log-out (io/writer (io/file (doto (io/file env/log-dir "logs") (.mkdirs)) "events.log") :append true))
 
 (defn unsecure-log-event [level event]
-  (with-logs "events" level level
-    (println event)))
-
+  (.write event-log-out (str (log-prefix {:level level :timestamp (.print time-fmt (System/currentTimeMillis)) :ns ""}) " - " event \newline))
+  (.flush event-log-out))
+  
 (defn log-event [level event]
   (let [stripped (-> event
                    (dissoc :application)
@@ -31,4 +49,4 @@
     (try
       (unsecure-log-event level jsoned)
       (catch Exception e
-        (error "can't write to event log:" stripped)))))
+        (error e "Can't write to event log:" jsoned)))))

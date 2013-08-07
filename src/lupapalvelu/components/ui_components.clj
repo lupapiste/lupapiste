@@ -1,6 +1,6 @@
 (ns lupapalvelu.components.ui-components
-  (:use [clojure.tools.logging])
-  (:require [lupapalvelu.components.core :as c]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [sade.env :as env]

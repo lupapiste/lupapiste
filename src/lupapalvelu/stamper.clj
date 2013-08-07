@@ -1,7 +1,7 @@
 (ns lupapalvelu.stamper
-  (:use [clojure.tools.logging]
-        [slingshot.slingshot :only [throw+]])
-  (:require [clojure.java.io :as io]
+  (:use [slingshot.slingshot :only [throw+]])
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.strings :as ss]
             [lupapalvelu.mime :as mime])
