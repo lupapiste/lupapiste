@@ -498,11 +498,12 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc lang]
+(defn- get-all-attachments [application lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
+      (let [zip (ZipOutputStream. out)
+            loc (i18n/localizer lang)]
         ; Add all attachments:
         (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
@@ -526,11 +527,10 @@
   {:parameters [:id]}
   [{:keys [application lang]}]
   (if application
-    (let [loc (i18n/localizer lang)]
-      {:status 200
+    {:status 200
        :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}
-       :body (temp-file-input-stream (get-all-attachments application loc lang))})
+                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+       :body (temp-file-input-stream (get-all-attachments application lang))}
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
