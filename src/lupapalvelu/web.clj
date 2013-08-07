@@ -318,7 +318,7 @@
   (and (get-apikey request) (logged-in? request)))
 
 ;;
-;; File upload/download:
+;; File upload
 ;;
 
 (defpage [:post "/api/upload"]
@@ -346,7 +346,13 @@
                                             :locked (or locked "false")
                                             :authority (or authority "false")
                                             :typeSelector (or typeSelector "")
+                                            :targetId (or targetId "")
+                                            :targetType (or targetType "")
                                             :errorMessage (result :text)}))))))
+
+;;
+;; Server is alive
+;;
 
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
