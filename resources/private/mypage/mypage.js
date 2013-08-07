@@ -33,13 +33,17 @@
     this.experience = ko.observable();
     this.fise = ko.observable();
     this.qualification = ko.observable();
-    this.attachments = ko.observableArray();
     this.companyName = ko.observable();
     this.companyId = ko.observable();
     this.companyStreet = ko.observable();
     this.companyZip = ko.observable();
     this.companyCity = ko.observable();
-
+    
+    // Attachments:
+    this.examination = ko.observable();
+    this.proficiency= ko.observable();
+    this.cv = ko.observable();
+    
     this.init = function(u) {
       return this
         .error(null)
@@ -60,7 +64,10 @@
         .companyId(u.companyId)
         .companyStreet(u.companyStreet)
         .companyZip(u.companyZip)
-        .companyCity(u.companyCity);
+        .companyCity(u.companyCity)
+        .examination(u.examination)
+        .proficiency(u.proficiency)
+        .cv(u.cv);
     };
 
     this.clear = function() {
@@ -81,6 +88,25 @@
         .attr("data-test-role", this.role());
       return this;
     };
+    
+    this.uploadFile = function(name) {
+      console.log("upload:", name, this.firstName());
+      return false;
+    };
+    
+    this.downloadFile = function(name) {
+      console.log("download:", name, this.firstName());
+      return false;
+    };
+    
+    this.removeFile = function(name) {
+      console.log("remove:", name, this.firstName());
+      return false;
+    };
+    
+    this.upload   = function(name) { return this.uploadFile.bind(this, name); };
+    this.download = function(name) { return this.downloadFile.bind(this, name); };
+    this.remove   = function(name) { return this.removeFile.bind(this, name); };
 
   }
 

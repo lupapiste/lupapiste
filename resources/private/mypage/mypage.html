@@ -33,26 +33,96 @@
         <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
       </div>
       <div data-bind="visible: architect">
+        
         <div class="form-entry">
           <label data-bind="ltext: 'userinfo.architect.company.name'" for="architect.company.name" class="form-label"></label>
-          <input data-bind="value: companyName" id="company.name" type="text" class="form-input"></input>
+          <input data-bind="value: companyName" id="architect.company.name" type="text" class="form-input"></input>
         </div>
         <div class="form-entry">
           <label data-bind="ltext: 'userinfo.architect.company.id'" for="architect.company.id" class="form-label"></label>
-          <input data-bind="value: companyId" id="company.id" type="text" class="form-input"></input>
+          <input data-bind="value: companyId" id="architect.company.id" type="text" class="form-input"></input>
         </div>
         <div class="form-entry">
           <label data-bind="ltext: 'userinfo.architect.company.street'" for="architect.company.street" class="form-label"></label>
-          <input data-bind="value: companyStreet" id="company.street" type="text" class="form-input"></input>
+          <input data-bind="value: companyStreet" id="architect.company.street" type="text" class="form-input"></input>
         </div>
         <div class="form-entry">
           <label data-bind="ltext: 'userinfo.architect.company.zip'" for="architect.company.zip" class="form-label"></label>
-          <input data-bind="value: companyZip" id="company.zip" type="text" class="form-input"></input>
+          <input data-bind="value: companyZip" id="architect.company.zip" type="text" class="form-input"></input>
         </div>
         <div class="form-entry">
           <label data-bind="ltext: 'userinfo.architect.company.city'" for="architect.company.city" class="form-label"></label>
-          <input data-bind="value: companyCity" id="company.city" type="text" class="form-input"></input>
+          <input data-bind="value: companyCity" id="architect.company.city" type="text" class="form-input"></input>
         </div>
+        
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
+          <input data-bind="value: degree" id="architect.degree" type="text" class="form-input"></input>
+        </div>
+
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.experience'" for="architect.experience" class="form-label"></label>
+          <input data-bind="value: experience" id="architect.experience" type="text" class="form-input"></input>
+        </div>
+
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
+          <input data-bind="value: fise" id="architect.fise" type="text" class="form-input"></input>
+        </div>
+
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.qualification'" for="architect.qualification" class="form-label"></label>
+          <input data-bind="value: qualification" id="architect.qualification" type="text" class="form-input"></input>
+        </div>
+
+        <div class="form-entry">
+          <table>
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-bind="ltext: 'userinfo.architect.attachments.name.examination'"></td>
+                <td>
+                  <span data-bind="visible: examination">
+                    <a data-bind="click: download('examination'), text: examination.name" href="#"></a>
+                    <a data-bind="click: remove('examination'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                  </span>
+                  <span data-bind="visible: !examination()">
+                    <a data-bind="click: upload('examination'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
+                <td>
+                  <span data-bind="visible: proficiency">
+                    <a data-bind="click: download('proficiency'), text: examination.name" href="#"></a>
+                    <a data-bind="click: remove('proficiency'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                  </span>
+                  <span data-bind="visible: !proficiency()">
+                    <a data-bind="click: upload('proficiency'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
+                <td>
+                  <span data-bind="visible: cv">
+                    <a data-bind="click: download('cv'), text: examination.name" href="#"></a>
+                    <a data-bind="click: remove('cv'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                  </span>
+                  <span data-bind="visible: !cv()">
+                    <a data-bind="click: upload('cv'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>        
       </div>
       
       <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
