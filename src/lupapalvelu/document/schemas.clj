@@ -165,7 +165,7 @@
 
 (def huoneisto [{:name "muutostapa" :type :select
                  :body [{:name "poisto"}
-                        {:name "lisäys"}
+                        {:name "lis\u00e4ys"}
                         {:name "muutos"}
                         {:name "ei tiedossa"}]}
                 {:name "huoneistoTunnus" :type :group

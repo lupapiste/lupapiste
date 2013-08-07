@@ -129,13 +129,15 @@
                      :energialuokka {:value "C"}
                      :energiatehokkuusluku {:value "124"}
                      :energiatehokkuusluvunYksikko {:value "kWh/m2"}}
-          :huoneistot {:0 {:huoneistoTunnus {:porras {:value "A"} :huoneistonumero {:value "1"} :jakokirjain {:value "a"}}
+          :huoneistot {:0 {:muutostapa "lis\u00e4ys"
+                           :huoneistoTunnus {:porras {:value "A"} :huoneistonumero {:value "1"} :jakokirjain {:value "a"}}
                            :huoneistonTyyppi {:huoneistoTyyppi {:value "asuinhuoneisto"}
                                               :huoneistoala {:value "56"}
                                               :huoneluku {:value "66"}}
                            :keittionTyyppi {:value "keittio"}
                            :varusteet {:parvekeTaiTerassiKytkin {:value true}, :WCKytkin {:value true}}}
-                       :1 {:huoneistoTunnus {},
+                       :1 {:muutostapa "lis\u00e4ys"
+                           :huoneistoTunnus {},
                            :huoneistonTyyppi {:huoneistoTyyppi {:value "toimitila"}
                                               :huoneistoala {:value "02"}
                                               :huoneluku {:value "12"}}
