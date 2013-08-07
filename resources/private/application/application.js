@@ -485,10 +485,11 @@
       }
       var targetTab = $target.attr("data-target");
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
-      $('body').scrollTop($('#applicationTabs').position().top + 40 );
+      var y = $('#applicationTabs').position().top + 40;
+      window.scrollTo(0,y);
     };
   };
-  
+
   var application = new ApplicationModel();
 
   var authorities = ko.observableArray([]);
@@ -747,14 +748,14 @@
 
   function NeighborStatusModel() {
     var self = this;
-    
+
     self.state = ko.observable();
     self.created = ko.observable();
     self.message = ko.observable();
     self.firstName = ko.observable();
     self.lastName = ko.observable();
     self.userid = ko.observable();
-    
+
     self.init = function(neighbor) {
       var l = neighbor.lastStatus;
       var u = l.vetuma || l.user;
@@ -766,12 +767,12 @@
         .lastName(u.lastName && u.lastName())
         .userid(u.userid && u.userid())
     };
-    
+
     self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-neighbor-status"); return self; };
   }
 
   var neighborStatusModel = new NeighborStatusModel();
-  
+
   var neighborActions = {
     manage: function(application) {
       window.location.hash = "!/neighbors/" + application.id();
