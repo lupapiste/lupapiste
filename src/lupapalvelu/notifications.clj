@@ -135,7 +135,7 @@
     (template "application-new-comment.html")
     (replace-application-links "#conversation-link" application "/conversation" host)))
 
-(defn send-notifications-on-new-comment! [application user comment-text host]
+(defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
     (let [recipients (get-email-recipients-for-application application)
           msg        (get-message-for-new-comment application host)
@@ -171,7 +171,7 @@
 
 (defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
   (condp = (keyword template)
-    :new-comment  (send-notifications-on-new-comment! application user (:text data) host)
+    :new-comment  (send-notifications-on-new-comment! application user host)
     :invite       (send-invite! (:email data) (:text data) application host)
     :state-change (send-notifications-on-application-state-change! application host)
     :verdict      (send-notifications-on-verdict! application host)))
