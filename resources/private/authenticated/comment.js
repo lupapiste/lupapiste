@@ -13,6 +13,7 @@ var comments = (function() {
     self.refresh = function(application, target) {
       self.setApplicationId(application.id);
       self.target(target || {type: "application"});
+      self.text("");
       var filteredComments =
         _.filter(application.comments,
             function(comment) {
