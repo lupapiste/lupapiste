@@ -188,9 +188,6 @@
 
 (defn- get-statement-attachments-as-canonical [application begin-of-link ]
   (let [statement-attachments-by-id (group-by #(keyword (get-in % [:target :id]))  (filter #(= "statement" (-> % :target :type)) (:attachments application)))
-        _ (println "=============================Ä")
-        - (clojure.pprint/pprint statement-attachments-by-id)
-        _ (println "=============================Ä")
         canonical-attachments (for [attachment-tuple statement-attachments-by-id]
                                 {(first attachment-tuple) (for [attachment (last attachment-tuple)] (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
@@ -239,21 +236,11 @@
 (defn- add-statement-attchments [canonical statement-attachments]
   (reduce (fn [c a]
             (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
-                  _ (println "AAAAAAAAAAAAAAAAAAAAAAAAA")
-                  _ (clojure.pprint/pprint c)
-
                   lausunto-id (name (first (keys a)))
-                  _ (print "Lausunto id ")
-                  _ (println lausunto-id)
                   paivitettava-lausunto (some #(if (= (get-in % [:Lausunto :id]) lausunto-id)%) lausuntotieto)
                   index-of-paivitettava (.indexOf lausuntotieto paivitettava-lausunto)
                   paivitetty-lausunto (assoc-in paivitettava-lausunto [:Lausunto :lausuntotieto :Lausunto :liitetieto] ((keyword lausunto-id) a))
-                  _ (println "paivitetta")
-                  _ (clojure.pprint/pprint paivitettava-lausunto)
-                  paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)
-                  _ (println "paivitetty")
-                  _(clojure.pprint/pprint paivitetty)
-                  _ (println "AAAAAAAAAAAAAAAAAAAAAAAAA")]
+                  paivitetty (assoc lausuntotieto index-of-paivitettava paivitetty-lausunto)]
               (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
             ) canonical statement-attachments))
 
@@ -271,9 +258,6 @@
         fileserver-address (env/value :fileserver-address)
         begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
         statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
-        _ (println "=============================")
-        - (clojure.pprint/pprint statement-attachments)
-        _ (println "=============================")
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
                                               {:Liite
@@ -289,15 +273,12 @@
                                                 :versionumero 1
                                                 :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
         canonical-with-statment-attachments  (add-statement-attchments canonical-without-attachments statement-attachments)
-        _ (println "€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€")
-        _ (clojure.pprint/pprint canonical-with-statment-attachments)
-        _ (println "€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€")
         canonical (assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
         xml        (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint(:attachments application))
     ;(clojure.pprint/pprint canonical-with-statment-attachments)
-    (println xml-s)
+    ;(println xml-s)
     (validate xml-s)
     (with-open [out-file (writer tempfile)]
       (emit xml out-file))
