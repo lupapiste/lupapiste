@@ -1,12 +1,12 @@
 (ns lupapalvelu.attachment
   (:use [monger.operators]
         [lupapalvelu.core]
-        [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as get-application-no-access-checking application-query-for]]
         [lupapalvelu.i18n :only [loc *lang* with-lang]]
         [clojure.string :only [split join trim]]
         [swiss-arrows.core :only [-<> -<>>]])
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn warnf error errorf fatal)]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.mongo :as mongo]

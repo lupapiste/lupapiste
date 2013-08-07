@@ -1,8 +1,8 @@
 (ns lupapalvelu.token
   (:use [monger.operators]
-        [clojure.tools.logging]
         [sade.security :only [random-password]])
-  (:require [lupapalvelu.core :as core]
+  (:require [taoensso.timbre :as timbre :refer (errorf)]
+            [lupapalvelu.core :as core]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [noir.request :as request]))
