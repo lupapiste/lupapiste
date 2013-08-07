@@ -243,12 +243,6 @@
     (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
             user sanitized-ua sanitized-page sanitized-msg)))
 
-(defcommand "hello"
-  {:authenticated true}
-  [{user :user}]
-  ;(error "oh noes!")
-  (ok :hello "foo"))
-
 ;;
 ;; Login/logout:
 ;;
