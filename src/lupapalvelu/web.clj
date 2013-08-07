@@ -5,7 +5,8 @@
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]]
         [lupapalvelu.security :only [current-user]])
-  (:require [taoensso.timbre :as timbre :refer (trace tracef debug info infof warn warnf error errorf fatal)]
+  (:require [taoensso.timbre :as timbre :refer (trace tracef debug info infof warn warnf error errorf fatal spy)]
+            [lupapalvelu.logging :refer [with-logging-context]]
             [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
@@ -119,13 +120,10 @@
             :lang *lang*
             :web  (web-stuff)}))
 
-;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
-  (core/execute action)
-  ; FIXME: timbre
-  #_(with-logging-context
-    {:applicationId (or (get-in action [:data :id]) "")
-     :userId        (or (get-in action [:user :id]) "")}
+  (with-logging-context
+    {:applicationId (get-in action [:data :id])
+     :userId        (get-in action [:user :id])}
     (core/execute action)))
 
 (defn- execute-command [name]
@@ -245,6 +243,12 @@
     (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
             user sanitized-ua sanitized-page sanitized-msg)))
 
+(defcommand "hello"
+  {:authenticated true}
+  [{user :user}]
+  ;(error "oh noes!")
+  (ok :hello "foo"))
+
 ;;
 ;; Login/logout:
 ;;
@@ -303,7 +307,7 @@
 
 (defn- get-apikey [request]
   (let [authorization (get-in request [:headers "authorization"])]
-    (parse "apikey" authorization)))
+    (spy (parse "apikey" authorization))))
 
 (defn authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
@@ -396,10 +400,9 @@
     "Client IP:" (client-ip request)
     "Referer:" (get-in request [:headers "referer"]))
   (resp/json (fail :error.invalid-csrf-token))
-  ; FIXME: timbre
-  #_(with-logging-context
-    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
-     :userId        (or (:id (current-user request)) "???")}
+  (with-logging-context
+    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
+     :userId        (:id (current-user request) "???")}
     (warn "CSRF attempt blocked."
           "Client IP:" (client-ip request)
           "Referer:" (get-in request [:headers "referer"]))
