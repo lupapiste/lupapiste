@@ -299,7 +299,11 @@
                         {$set {:state :info
                                :modified created}}))
 
-          nil)))))
+          nil)
+
+        ;; LUPA-407
+        (when to-user
+          (notifications/send-notifications-on-new-targetted-comment! application (:email to-user) host))))))
 
 (defcommand mark-seen
   {:parameters [:id :type]

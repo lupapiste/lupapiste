@@ -142,6 +142,11 @@
           title      (get-email-title application "new-comment")]
       (send-mail-to-recipients! recipients title msg))))
 
+(defn send-notifications-on-new-targetted-comment! [application to-email host]
+  (let [msg        (get-message-for-new-comment application host)
+        title      (get-email-title application "new-comment")]
+    (send-mail-to-recipients! [to-email] title msg)))
+
 (defn send-invite! [email text application host]
   (let [title (get-email-title application "invite")
         msg   (message
