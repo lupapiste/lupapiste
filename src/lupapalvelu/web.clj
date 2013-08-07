@@ -2,13 +2,12 @@
   (:use [noir.core :only [defpage]]
         [lupapalvelu.core :only [ok fail defcommand defquery now]]
         [lupapalvelu.i18n :only [*lang*]]
-        [clojure.tools.logging]
-        [clojure.tools.logging]
-        [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]]
         [lupapalvelu.security :only [current-user]])
-  (:require [noir.request :as request]
+  (:require [taoensso.timbre :as timbre :refer (trace tracef debug info infof warn warnf error errorf fatal spy)]
+            [lupapalvelu.logging :refer [with-logging-context]]
+            [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
@@ -121,11 +120,10 @@
             :lang *lang*
             :web  (web-stuff)}))
 
-;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (or (get-in action [:data :id]) "")
-     :userId        (or (get-in action [:user :id]) "")}
+    {:applicationId (get-in action [:data :id])
+     :userId        (get-in action [:user :id])}
     (core/execute action)))
 
 (defn- execute-command [name]
@@ -303,7 +301,7 @@
 
 (defn- get-apikey [request]
   (let [authorization (get-in request [:headers "authorization"])]
-    (parse "apikey" authorization)))
+    (spy (parse "apikey" authorization))))
 
 (defn authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
@@ -379,9 +377,13 @@
 ;;
 
 (defn- csrf-attack-hander [request]
+  (warn "CSRF attempt blocked."
+    "Client IP:" (client-ip request)
+    "Referer:" (get-in request [:headers "referer"]))
+  (resp/json (fail :error.invalid-csrf-token))
   (with-logging-context
-    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
-     :userId        (or (:id (current-user request)) "???")}
+    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
+     :userId        (:id (current-user request) "???")}
     (warn "CSRF attempt blocked."
           "Client IP:" (client-ip request)
           "Referer:" (get-in request [:headers "referer"]))

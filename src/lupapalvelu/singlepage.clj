@@ -1,8 +1,8 @@
 (ns lupapalvelu.singlepage
-  (:use [clojure.tools.logging]
-        [clj-time.coerce :only [from-long to-date]]
+  (:use [clj-time.coerce :only [from-long to-date]]
         [lupapalvelu.components.ui-components :only [ui-components]])
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
+            [clojure.java.io :as io]
             [net.cgrand.enlive-html :as enlive]
             [sade.env :as env]
             [lupapalvelu.components.core :as c])

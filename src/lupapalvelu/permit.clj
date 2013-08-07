@@ -1,7 +1,7 @@
 (ns lupapalvelu.permit
   (:require [lupapalvelu.domain :as domain]
             [lupapalvelu.core :refer [fail]]
-            [clojure.tools.logging :refer :all]))
+            [taoensso.timbre :as timbre :refer (errorf)]))
 
 ;;
 ;; Enum

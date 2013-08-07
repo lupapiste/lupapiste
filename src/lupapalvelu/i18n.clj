@@ -1,8 +1,8 @@
 (ns lupapalvelu.i18n
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error errorf fatal)]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [ontodev.excel :as xls]
-            [clojure.tools.logging :as log]
             [cheshire.core :as json]
             [sade.env :as env]))
 
@@ -41,7 +41,7 @@
   (if (env/dev-mode?)
     (str "???" term "???")
     (do
-      (log/errorf "unknown localization term '%s'" term)
+      (errorf "unknown localization term '%s'" term)
       "")))
 
 (defn localize [lang & terms]
