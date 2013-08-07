@@ -1,4 +1,5 @@
 (ns lupapalvelu.document.yleiset-alueet-schemas
+  (:require [lupapalvelu.document.tools :refer :all])
   (:use [lupapalvelu.document.schemas]))
 
 
@@ -14,7 +15,7 @@
 
 (def yleiset-alueet-maksaja
   (body
-    party
+    (schema-body-without-element-by-name party "turvakieltoKytkin")
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def tyo-aika
@@ -84,7 +85,7 @@
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :order 61}
-    :body party}
+    :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
            :type :party
            :order 62}
