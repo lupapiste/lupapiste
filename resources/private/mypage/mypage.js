@@ -89,8 +89,8 @@
   ownInfo.saved.subscribe(function(v) { if (v) { ownInfo.updateUserName(); }});
 
   $(function() {
-    ko.applyBindings(ownInfo, $("#own-info-form")[0]);
-    ko.applyBindings(pw, $("#pw-form")[0]);
+    $("#own-info-form").applyBindings(ownInfo);
+    $("#pw-form").applyBindings(pw);
   });
 
 })();
