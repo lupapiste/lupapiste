@@ -19,33 +19,37 @@
 
   function OwnInfo() {
 
-    this.error = ko.observable();
-    this.saved = ko.observable();
-    this.firstName = ko.observable();
-    this.lastName = ko.observable();
-    this.street = ko.observable();
-    this.city = ko.observable();
-    this.zip = ko.observable();
-    this.phone = ko.observable();
-    this.role = ko.observable();
-    this.architect = ko.observable();
-    this.degree = ko.observable();
-    this.experience = ko.observable();
-    this.fise = ko.observable();
-    this.qualification = ko.observable();
-    this.companyName = ko.observable();
-    this.companyId = ko.observable();
-    this.companyStreet = ko.observable();
-    this.companyZip = ko.observable();
-    this.companyCity = ko.observable();
+    var self = this;
+    
+    self.error = ko.observable();
+    self.saved = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
+    self.street = ko.observable();
+    self.city = ko.observable();
+    self.zip = ko.observable();
+    self.phone = ko.observable();
+    self.role = ko.observable();
+    self.architect = ko.observable();
+    self.degree = ko.observable();
+    self.experience = ko.observable();
+    self.fise = ko.observable();
+    self.qualification = ko.observable();
+    self.companyName = ko.observable();
+    self.companyId = ko.observable();
+    self.companyStreet = ko.observable();
+    self.companyZip = ko.observable();
+    self.companyCity = ko.observable();
+    
+    self.availableQualifications = ["AA", "A", "B", "C"];
     
     // Attachments:
-    this.examination = ko.observable();
-    this.proficiency= ko.observable();
-    this.cv = ko.observable();
+    self.examination = ko.observable();
+    self.proficiency= ko.observable();
+    self.cv = ko.observable();
     
-    this.init = function(u) {
-      return this
+    self.init = function(u) {
+      return self
         .error(null)
         .saved(false)
         .firstName(u.firstName)
@@ -70,43 +74,64 @@
         .cv(u.cv);
     };
 
-    this.clear = function() {
-      return this.saved(false).error(null);
+    self.clear = function() {
+      return self.saved(false).error(null);
     };
 
-    this.ok = ko.computed(function() { return isNotBlank(this.firstName()) && isNotBlank(this.lastName()); }, this);
-    this.save = makeSaveFn("save-user-info",
+    self.ok = ko.computed(function() { return isNotBlank(self.firstName()) && isNotBlank(self.lastName()); }, self);
+    self.save = makeSaveFn("save-user-info",
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",
          "degree", "experience", "fise", "qualification",
          "companyName", "companyId", "companyStreet", "companyZip", "companyCity"]);
 
-    this.updateUserName = function() {
+    self.updateUserName = function() {
       $("#user-name")
-        .text(this.firstName() + " " + this.lastName())
-        .attr("data-test-role", this.role());
-      return this;
+        .text(self.firstName() + " " + self.lastName())
+        .attr("data-test-role", self.role());
+      return self;
     };
     
-    this.uploadFile = function(name) {
-      console.log("upload:", name, this.firstName());
+    self.uploading = false;
+    
+    hub.subscribe("upload-done", function() {
+      if (self.uploading) {
+        console.log("upload-done");
+        LUPAPISTE.ModalDialog.close();
+        self.uploading = false;
+      }
+    });
+
+    self.uploadFile = function(name) {
+      console.log("upload!", name, self.firstName());
+      
+      self.uploading = true;
+      document.getElementById("uploadFrame").contentWindow.LUPAPISTE.Upload.init(null, null, "foo/" + name, false, "target", true, false);
+      
+      /*
+      ajax
+        .command("save-user-attachment", {type: name})
+        .success(function() { self.clear(); })
+        .error(function(d) { self.clear().error(d.text); })
+        .call();
+      */
       return false;
     };
     
-    this.downloadFile = function(name) {
-      console.log("download:", name, this.firstName());
+    self.downloadFile = function(name) {
+      console.log("download:", name, self.firstName());
       return false;
     };
     
-    this.removeFile = function(name) {
-      console.log("remove:", name, this.firstName());
+    self.removeFile = function(name) {
+      console.log("remove:", name, self.firstName());
       return false;
     };
     
-    this.upload   = function(name) { return this.uploadFile.bind(this, name); };
-    this.download = function(name) { return this.downloadFile.bind(this, name); };
-    this.remove   = function(name) { return this.removeFile.bind(this, name); };
+    self.upload   = function(name) { return self.uploadFile.bind(self, name); };
+    self.download = function(name) { return self.downloadFile.bind(self, name); };
+    self.remove   = function(name) { return self.removeFile.bind(self, name); };
 
   }
 

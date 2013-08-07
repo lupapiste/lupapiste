@@ -72,7 +72,12 @@
 
         <div class="form-entry">
           <label data-bind="ltext: 'userinfo.architect.qualification'" for="architect.qualification" class="form-label"></label>
-          <input data-bind="value: qualification" id="architect.qualification" type="text" class="form-input"></input>
+          <select
+              data-bind="options: availableQualifications,
+                         value: qualification,
+                         optionsCaption: loc('userinfo.architect.qualification.choose')"
+              id="architect.qualification">
+          </select>
         </div>
 
         <div class="form-entry">

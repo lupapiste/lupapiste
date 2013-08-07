@@ -13,6 +13,7 @@ userinfo.architect.degree: Tutkinto
 userinfo.architect.experience: Kokemus (vuosia)
 userinfo.architect.fise: FISE pätevyyskortti (linkki)
 userinfo.architect.qualification: Pätevyysluokka
+userinfo.architect.qualification.choose: Valitse...
 userinfo.architect.attachments: Todistukset
 userinfo.architect.attachments.add: Lisää tiedosto
 userinfo.architect.attachments.remove: Poista
