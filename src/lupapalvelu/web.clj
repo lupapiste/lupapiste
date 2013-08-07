@@ -316,7 +316,7 @@
   (and (get-apikey request) (logged-in? request)))
 
 ;;
-;; File upload/download:
+;; File upload
 ;;
 
 (defpage [:post "/api/upload"]
@@ -338,27 +338,14 @@
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
-                                           {:applicationId (or applicationId "")
-                                            :attachmentId (or attachmentId "")
-                                            :attachmentType (or attachmentType "")
-                                            :locked (or locked "false")
-                                            :authority (or authority "false")
-                                            :typeSelector (or typeSelector "")
-                                            :errorMessage (result :text)}))))))
+                                           (-> (:params (request/ring-request))
+                                             (dissoc :upload)
+                                             (dissoc ring.middleware.anti-forgery/token-key)
+                                             (assoc  :errorMessage (result :text)))))))))
 
-(defn- output-attachment [attachment-id download?]
-  (if (logged-in?)
-    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
-    (resp/status 401 "Unauthorized\r\n")))
-
-(defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id false))
-
-(defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id true))
-
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
-  (attachment/output-all-attachments application-id (current-user) *lang*))
+;;
+;; Server is alive
+;;
 
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
