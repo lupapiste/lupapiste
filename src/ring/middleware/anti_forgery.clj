@@ -15,8 +15,10 @@
           in POST forms if the handler is wrapped in wrap-anti-forgery."}
   *anti-forgery-token*)
 
+(def token-key :__anti-forgery-token)
+
 (defn- session-token [request token-gen-fn log-fn]
-  (or (get-in request [:session :__anti-forgery-token])
+  (or (get-in request [:session token-key])
       (token-gen-fn)))
 
 (defn- assoc-in-session
@@ -26,17 +28,17 @@
     (assoc-in response [:session] (merge (:session request) {k v}))))
 
 (defn- assoc-session-token [response request token log-fn]
-  (let [old-token (get-in request [:session :__anti-forgery-token])]
+  (let [old-token (get-in request [:session token-key])]
     (if (= old-token token)
       response
-      (assoc-in-session response request :__anti-forgery-token token))))
+      (assoc-in-session response request token-key token))))
 
 (defn- form-params [request]
   (merge (:form-params request)
          (:multipart-params request)))
 
 (defn- request-token [request]
-  (or (-> request form-params (get "__anti-forgery-token"))
+  (or (-> request form-params (get (name token-key)))
       (-> request :headers (get "x-anti-forgery-token"))))
 
 (defn- secure-eql? [^String a ^String b]
