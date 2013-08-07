@@ -52,7 +52,12 @@
               application (:application (query pena :application :id application-id))]
 
           (fact "download all"
-            (raw pena "download-all-attachments" :id application-id) => http200?)
+            (let [resp (raw pena "download-all-attachments" :id application-id)]
+              resp => http200?
+              (get-in resp [:headers "content-disposition"]) => "attachment;filename=\"liitteet.zip\"")
+              (fact "p\u00e5 svenska"
+                (get-in (raw pena "download-all-attachments" :id application-id :lang "sv") [:headers "content-disposition"])
+                => "attachment;filename=\"bilagor.zip\""))
 
           (fact "pdf export"
             (raw pena "pdf-export" :id application-id) => http200?)
