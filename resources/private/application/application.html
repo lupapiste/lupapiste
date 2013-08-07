@@ -104,7 +104,6 @@
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-<!--           TODO: notPublicAreaTypeOperation() needs to be replaced by usage of authorization.ok(). -->
           <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>
@@ -268,7 +267,7 @@
                     </td>
                     <td>
                       <span data-bind="if: $data.latestVersion">
-                        <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
+                        <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
                         <i data-bind="ltext: latestVersion.contentType"></i>
                         <i data-bind="size: latestVersion.size"></i>
                       </span>
@@ -293,7 +292,7 @@
                 </tbody>
               </table>
 
-              <a data-bind="attr: {href: '/api/download-all-attachments/' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+              <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
             </div>
             <div data-bind="ifnot: attachmentsByGroup().length">
@@ -341,7 +340,7 @@
                     <td data-bind="dateString: official"></td>
                     <td data-bind="foreach: $root.verdictModel.attachments()">
                       <span data-bind="with: $data.latestVersion">
-                        <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                        <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
                           <i data-bind="ltext: contentType"></i>
                           <i data-bind="size: size"></i><br/>
                       </span>
@@ -695,7 +694,7 @@
               <input data-bind="value: email,
                                 valueUpdate: 'afterkeydown',
                                 attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
-                     id="neighbors-sendemail-email" 
+                     id="neighbors-sendemail-email"
                      class="form-input text long" />
             </form>
 
@@ -730,7 +729,7 @@
           </div>
         </div>
       </div>
-      
+
       <div id="dialog-neighbor-status" class="window autosized">
         <div class="dialog-header">
         <p data-bind="ltext: 'neighbors.status-dialog.title'"></p>
@@ -768,7 +767,7 @@
           </div>
 
           <button data-bind="ltext: 'neighbors.status-dialog.ok'" data-test-id="neighbor-status-ok" class="btn btn-primary btn-dialog close"></button>
-          
+
         </div>
       </div>
 
