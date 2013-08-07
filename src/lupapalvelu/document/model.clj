@@ -1,12 +1,12 @@
 (ns lupapalvelu.document.model
   (:use [clojure.tools.logging]
         [sade.strings]
-        [lupapalvelu.document.schemas :only [schemas]]
         [clojure.walk :only [keywordize-keys]])
   (:require [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
             [lupapalvelu.document.validator :as validator]
@@ -149,7 +149,7 @@
 (defn validate-against-current-schema
   "Validates document against the latest schema and returns list of errors."
   [{{{schema-name :name} :info} :schema document-data :data :as document}]
-  (let [latest-schema (get schemas schema-name)
+  (let [latest-schema (schemas/get-schema schema-name)
         pimped-doc    (assoc document :schema latest-schema)]
     (validate pimped-doc)))
 

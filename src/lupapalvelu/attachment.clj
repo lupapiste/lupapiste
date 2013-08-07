@@ -32,73 +32,88 @@
 ;; Metadata
 ;;
 
-(def attachment-types [:hakija [:valtakirja
-                                :ote_kauppa_ja_yhdistysrekisterista
-                                :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
-                       :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
-                                                 :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
-                                                 :rasitustodistus
-                                                 :todistus_erityisoikeuden_kirjaamisesta
-                                                 :jaljennos_vuokrasopimuksesta
-                                                 :jaljennos_perunkirjasta]
-                       :rakennuspaikka [:ote_alueen_peruskartasta
-                                        :ote_asemakaavasta_jos_asemakaava_alueella
-                                        :ote_kiinteistorekisteristerista
-                                        :tonttikartta_tarvittaessa
-                                        :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
-                                        :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
-                       :paapiirustus [:asemapiirros
-                                      :pohjapiirros
-                                      :leikkauspiirros
-                                      :julkisivupiirros]
-                       :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
-                                                   :selvitys_naapurien_kuulemisesta
-                                                   :elyn_tai_kunnan_poikkeamapaatos
-                                                   :suunnittelutarveratkaisu
-                                                   :ymparistolupa]
-                       :muut [:selvitys_rakennuspaikan_terveellisyydesta
-                              :selvitys_rakennuspaikan_korkeusasemasta
-                              :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
-                              :julkisivujen_varityssuunnitelma
-                              :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
-                              :piha_tai_istutussuunnitelma
-                              :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
-                              :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
-                              :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
-                              :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
-                              :energiataloudellinen_selvitys
-                              :paloturvallisuussuunnitelma
-                              :liikkumis_ja_esteettomyysselvitys
-                              :kerrosalaselvitys
-                              :vaestonsuojasuunnitelma
-                              :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
-                              :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
-                              :selvitys_kiinteiston_jatehuollon_jarjestamisesta
-                              :rakennesuunnitelma
-                              :ilmanvaihtosuunnitelma
-                              :lammityslaitesuunnitelma
-                              :radontekninen_suunnitelma
-                              :kalliorakentamistekninen_suunnitelma
-                              :paloturvallisuusselvitys
-                              :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
-                              :merkki_ja_turvavalaistussuunnitelma
-                              :sammutusautomatiikkasuunnitelma
-                              :rakennusautomaatiosuunnitelma
-                              :valaistussuunnitelma
-                              :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-                              :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
-                              :muu]])
+(def ^:private attachment-types-R
+  [:hakija [:valtakirja
+            :ote_kauppa_ja_yhdistysrekisterista
+            :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
+   :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
+                             :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
+                             :rasitustodistus
+                             :todistus_erityisoikeuden_kirjaamisesta
+                             :jaljennos_vuokrasopimuksesta
+                             :jaljennos_perunkirjasta]
+   :rakennuspaikka [:ote_alueen_peruskartasta
+                    :ote_asemakaavasta_jos_asemakaava_alueella
+                    :ote_kiinteistorekisteristerista
+                    :tonttikartta_tarvittaessa
+                    :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
+                    :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
+   :paapiirustus [:asemapiirros
+                  :pohjapiirros
+                  :leikkauspiirros
+                  :julkisivupiirros]
+   :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
+                               :selvitys_naapurien_kuulemisesta
+                               :elyn_tai_kunnan_poikkeamapaatos
+                               :suunnittelutarveratkaisu
+                               :ymparistolupa]
+   :muut [:selvitys_rakennuspaikan_terveellisyydesta
+          :selvitys_rakennuspaikan_korkeusasemasta
+          :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
+          :julkisivujen_varityssuunnitelma
+          :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+          :piha_tai_istutussuunnitelma
+          :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
+          :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
+          :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
+          :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
+          :energiataloudellinen_selvitys
+          :paloturvallisuussuunnitelma
+          :liikkumis_ja_esteettomyysselvitys
+          :kerrosalaselvitys
+          :vaestonsuojasuunnitelma
+          :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
+          :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
+          :selvitys_kiinteiston_jatehuollon_jarjestamisesta
+          :rakennesuunnitelma
+          :ilmanvaihtosuunnitelma
+          :lammityslaitesuunnitelma
+          :radontekninen_suunnitelma
+          :kalliorakentamistekninen_suunnitelma
+          :paloturvallisuusselvitys
+          :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
+          :merkki_ja_turvavalaistussuunnitelma
+          :sammutusautomatiikkasuunnitelma
+          :rakennusautomaatiosuunnitelma
+          :valaistussuunnitelma
+          :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+          :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
+          :muu]])
 
-(def attachment-types-public-areas [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
-                                                     :tilapainen-liikennejarjestelysuunnitelma
-                                                     :tyyppiratkaisu
-                                                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
-                                                     :liitoslausunto
-                                                     :asemapiirros]])
+(def ^:private attachment-types-YA
+  [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
+                    :tilapainen-liikennejarjestelysuunnitelma
+                    :tyyppiratkaisu
+                    :tieto-kaivupaikkaan-liittyvista-johtotiedoista
+                    :liitoslausunto
+                    :asemapiirros]])
 
+;;
+;; Api
+;;
+
+(defn get-attachment-types-by-permit-type
+  "Returns partitioned list of allowed attachment types or throws exception"
+  [permit-type]
+  (partition 2
+    (condp = (keyword permit-type)
+      :R  attachment-types-R
+      :YA attachment-types-YA
+      (fail! "unsupported permit-type"))))
+
+;; TODO: return attachment type based on what types of operations the given organization is having.
 (defn organization-attachments [organization]
-  ;; TODO: return attachment type based on what types of operations the given organization is having.
-  attachment-types)
+  attachment-types-R)
 
 (defn make-attachment [now target locked op attachement-type]
   {:id (mongo/create-id)
@@ -452,6 +467,23 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn- output-attachment-if-logged-in [attachment-id download? user]
+  (if user
+    (output-attachment attachment-id download? (partial get-attachment-as user))
+    {:status 401
+     :headers {"Content-Type" "text/plain"}
+     :body "401 Unauthorized"}))
+
+(defraw "view-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id false user))
+
+(defraw "download-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id true user))
+
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
     (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
@@ -466,19 +498,20 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc lang]
+(defn- get-all-attachments [application lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
+      (let [zip (ZipOutputStream. out)
+            loc (i18n/localizer lang)]
         ; Add all attachments:
         (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
+          (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
+        (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -490,16 +523,17 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn output-all-attachments [application-id user lang]
-  (let [loc (i18n/localizer lang)]
-    (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
-      {:body (temp-file-input-stream (get-all-attachments application loc lang))
-       :status 200
+(defraw "download-all-attachments"
+  {:parameters [:id]}
+  [{:keys [application lang]}]
+  (if application
+    {:status 200
        :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
-      {:body "404"
-       :status 404
-       :headers {"Content-Type" "text/plain"}})))
+                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+       :body (temp-file-input-stream (get-all-attachments application lang))}
+    {:status 404
+     :headers {"Content-Type" "text/plain"}
+     :body "404"}))
 
 ;;
 ;; Stamping:

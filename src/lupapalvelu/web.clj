@@ -348,20 +348,6 @@
                                             :typeSelector (or typeSelector "")
                                             :errorMessage (result :text)}))))))
 
-(defn- output-attachment [attachment-id download?]
-  (if (logged-in?)
-    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
-    (resp/status 401 "Unauthorized\r\n")))
-
-(defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id false))
-
-(defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id true))
-
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
-  (attachment/output-all-attachments application-id (current-user) *lang*))
-
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
 ;;
@@ -403,12 +389,14 @@
 (defn anti-csrf
   [handler]
   (fn [request]
-    (let [cookie-name "anti-csrf-token"
-          cookie-attrs (dissoc (env/value :cookie) :http-only)]
-      (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
-               (not (logged-in-with-apikey? request)))
-        (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-        (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
+    (if (env/feature? :disable-anti-csrf)
+      (handler request)
+      (let [cookie-name "anti-csrf-token"
+            cookie-attrs (dissoc (env/value :cookie) :http-only)]
+        (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+                 (not (logged-in-with-apikey? request)))
+          (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+          (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
 
 ;;
 ;; Session timeout:

@@ -1,4 +1,25 @@
-(ns lupapalvelu.document.schemas)
+(ns lupapalvelu.document.schemas
+  (:require [lupapalvelu.document.tools :refer :all]))
+
+;;
+;; Register schemas
+;;
+
+(defonce ^:private registered-schemas (atom {}))
+
+(defn get-schemas [] @registered-schemas)
+
+(defn defschema [data]
+  (let [schema-name (name (get-in data [:info :name]))]
+    (swap! registered-schemas assoc schema-name (assoc-in data [:info :name] schema-name))))
+
+(defn defschemas [schemas]
+  (doseq [schema schemas]
+    (defschema schema)))
+
+(defn get-schema [schema-name]
+  {:pre [(not= nil schema-name)]}
+  (@registered-schemas (name schema-name)))
 
 ;;
 ;; helpers
@@ -20,11 +41,6 @@
     :type      :group
     :repeating true
     :body      (body childs)}])
-
-(defn to-map-by-name
-  "Take list of schema maps, return a map of schemas keyed by :name under :info"
-  [docs]
-  (reduce (fn [docs doc] (assoc docs (get-in doc [:info :name]) doc)) {} docs))
 
 ;;
 ;; schema sniplets
@@ -63,12 +79,6 @@
                            {:name "email" :type :string :subtype :email :required true}
                            #_{:name "fax" :type :string :subtype :tel}]}])
 
-(def yhteystiedot-public-area [{:name "yhteystiedot"
-                                :type :group
-                                :body [{:name "puhelin" :type :string :subtype :tel :required true}
-                                       {:name "email" :type :string :subtype :email :required true}
-                                       #_{:name "fax" :type :string :subtype :tel}]}])        ;; TODO: Saako FAX jaada? Ei kryspissa?
-
 (def henkilotiedot-minimal [{:name "henkilotiedot"
                              :type :group
                              :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
@@ -85,12 +95,6 @@
                [henkilotiedot-with-hetu]
                simple-osoite
                yhteystiedot))
-
-(def henkilo-public-area (body
-                           {:name "userId" :type :personSelector}
-                           [henkilotiedot-with-hetu]
-                           simple-osoite
-                           yhteystiedot-public-area))
 
 (def henkilo-with-required-hetu (body
                                   henkilo-valitsin
@@ -113,22 +117,10 @@
                        henkilotiedot-minimal
                        yhteystiedot)}))
 
-(def yritys-public-area (body
-                          yritys-minimal
-                          simple-osoite
-                          {:name "vastuuhenkilo"
-                           :type :group
-                           :body (body
-                                   henkilotiedot-minimal
-                                   yhteystiedot-public-area)}))
-
-(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-            {:name "henkilo" :type :group :body henkilo}
-            {:name "yritys" :type :group :body yritys}])
-
-(def party-public-area [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                        {:name "henkilo" :type :group :body henkilo-public-area}
-                        {:name "yritys" :type :group :body yritys-public-area}])
+(def party (body
+             {:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+             {:name "henkilo" :type :group :body henkilo}
+             {:name "yritys" :type :group :body yritys}))
 
 (def party-with-required-hetu (body
                                 [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
@@ -155,7 +147,7 @@
                         designer-basic
                         {:name "patevyys" :type :group :body patevyys}))
 
-(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select 
+(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select
                        :body [{:name "GEO-suunnittelija"}
                               {:name "LVI-suunnittelija"}
                               {:name "IV-suunnittelija"}
@@ -473,92 +465,90 @@
 ;; schemas
 ;;
 
-(def schemas
-  (to-map-by-name
-    [{:info {:name "hankkeen-kuvaus"
-             :order 1}
-      :body [kuvaus
-             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
+(defschemas
+  [{:info {:name "hankkeen-kuvaus"
+           :order 1}
+    :body [kuvaus
+           {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
 
-     {:info {:name "uusiRakennus" :approvable true}
-      :body (body rakennuksen-omistajat rakennuksen-tiedot)}
+    {:info {:name "uusiRakennus" :approvable true}
+     :body (body rakennuksen-omistajat rakennuksen-tiedot)}
 
-     {:info {:name "rakennuksen-muuttaminen"}
-      :body rakennuksen-muuttaminen}
+    {:info {:name "rakennuksen-muuttaminen"}
+     :body rakennuksen-muuttaminen}
 
-     {:info {:name "rakennuksen-laajentaminen"}
-      :body rakennuksen-laajentaminen}
+    {:info {:name "rakennuksen-laajentaminen"}
+     :body rakennuksen-laajentaminen}
 
-     {:info {:name "purku"}
-      :body purku}
+    {:info {:name "purku"}
+     :body purku}
 
-     {:info {:name "kaupunkikuvatoimenpide"}
-      :body rakennelma}
+    {:info {:name "kaupunkikuvatoimenpide"}
+     :body rakennelma}
 
-     {:info {:name "maisematyo"}
-      :body maisematyo}
+    {:info {:name "maisematyo"}
+     :body maisematyo}
 
-     {:info {:name "hakija"
-             :order 3
-             :removable true
-             :repeating true
-             :type :party}
-      :body party}
+    {:info {:name "hakija"
+            :order 3
+            :removable true
+            :repeating true
+            :type :party}
+     :body party}
 
-     {:info {:name "hakija-public-area"
-             :order 3
-             :removable true
-             :repeating true
-             :type :party}
-      :body party-public-area}
+    {:info {:name "hakija-ya"
+            :order 3
+            :removable true
+            :repeating true
+            :type :party}
+     :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
 
-     {:info {:name "paasuunnittelija"
-             :order 4
-             :removable false
-             :type :party}
-      :body paasuunnittelija}
+    {:info {:name "paasuunnittelija"
+            :order 4
+            :removable false
+            :type :party}
+     :body paasuunnittelija}
 
-     {:info {:name "suunnittelija"
-             :repeating true
-             :order 5
-             :removable true
-             :type :party}
-      :body suunnittelija}
+    {:info {:name "suunnittelija"
+            :repeating true
+            :order 5
+            :removable true
+            :type :party}
+     :body suunnittelija}
 
-     {:info {:name "maksaja"
-             :repeating true
-             :order 6
-             :removable true
-             :type :party}
-      :body (body
-              party
-              {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
+    {:info {:name "maksaja"
+            :repeating true
+            :order 6
+            :removable true
+            :type :party}
+     :body (body
+             party
+             {:name "laskuviite" :type :string :max-len 30 :layout :full-width})}
 
-     {:info {:name "rakennuspaikka"
-             :order 2}
-      :body [{:name "kiinteisto"
-              :type :group
-              :body [{:name "maaraalaTunnus" :type :string}
-                     {:name "tilanNimi" :type :string :readonly true}
-                     {:name "rekisterointipvm" :type :string :readonly true}
-                     {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
-                     {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
+    {:info {:name "rakennuspaikka"
+            :order 2}
+     :body [{:name "kiinteisto"
+             :type :group
+             :body [{:name "maaraalaTunnus" :type :string}
+                    {:name "tilanNimi" :type :string :readonly true}
+                    {:name "rekisterointipvm" :type :string :readonly true}
+                    {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
+                    {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}]}
 
-             {:name "hallintaperuste" :type :select :required true
-              :body [{:name "oma"}
-                     {:name "vuokra"}
-                     {:name "ei tiedossa"}]}
-             {:name "kaavanaste" :type :select
-              :body [{:name "asema"}
-                     {:name "ranta"}
-                     {:name "rakennus"}
-                     {:name "yleis"}
-                     {:name "eiKaavaa"}
-                     {:name "ei tiedossa"}]}]}
+            {:name "hallintaperuste" :type :select :required true
+             :body [{:name "oma"}
+                    {:name "vuokra"}
+                    {:name "ei tiedossa"}]}
+            {:name "kaavanaste" :type :select
+             :body [{:name "asema"}
+                    {:name "ranta"}
+                    {:name "rakennus"}
+                    {:name "yleis"}
+                    {:name "eiKaavaa"}
+                    {:name "ei tiedossa"}]}]}
 
-     {:info {:name "lisatiedot"
-             :order 100}
-      :body [{:name "suoramarkkinointikielto"
-              :type :checkbox
-              :layout :full-width}]}]))
-
+    {:info {:name "lisatiedot"
+            :order 100}
+     :body [{:name "suoramarkkinointikielto"
+             :type :checkbox
+             :layout :full-width}]}])

@@ -35,7 +35,7 @@
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.6"]]
-                   :plugins [[lein-midje "2.0.1"]
+                   :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
                              [lein-hgnotes "0.1.0"]]
@@ -45,7 +45,7 @@
                         :main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
-             :alltests {:source-paths [#_"test" "itest" "stest"]
+             :alltests {:source-paths ["test" "itest" "stest"]
                         :jvm-opts ["-XX:MaxPermSize=256M"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
@@ -53,6 +53,7 @@
               :excludes [#"[\/\\]jquery"
                          #"[\/\\]theme[\/\\]default"
                          #"[\/\\]public[\/\\]lib"
+                         #"[\/\\]test[\/\\]"
                          #"openlayers"
                          #"underscore"
                          #"lodash"]}

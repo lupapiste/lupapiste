@@ -1,6 +1,7 @@
 (ns lupapalvelu.itest-util
   (:use [lupapalvelu.fixture.minimal :only [users]]
         [clojure.walk :only [keywordize-keys]]
+        [swiss-arrows.core]
         [midje.sweet])
   (:require [clj-http.client :as c]
             [lupapalvelu.logging]
@@ -77,6 +78,9 @@
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
+(defn create-YA-app [apikey & args] (apply create-app apikey (concat args [:operation "mainostus-ja-viitoituslupa"])))
+(defn create-R-app [apikey & args]  (apply create-app apikey (concat args [:operation "asuinrakennus"])))
+
 (defn success [resp]
   (fact (:text resp) => nil)
   (:ok resp))
@@ -133,9 +137,26 @@
 (defn http200? [{:keys [status]}]
   (= status 200))
 
+(defn http401? [{:keys [status]}]
+  (= status 401))
+
+(defn http404? [{:keys [status]}]
+  (= status 404))
+
 ;;
 ;; DSLs
 ;;
+
+(defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
+(defn feature? [& feature]
+  (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
+
+(defmacro with-anti-csrf [& body]
+  `(let [old-value# (feature? :disable-anti-csrf)]
+     (set-anti-csrf! true)
+     (do ~@body)
+     (set-anti-csrf! false)
+     "By the power of Grayskull."))
 
 (defn create-app-id [apikey & args]
   (let [resp (apply create-app apikey args)
@@ -161,8 +182,7 @@
 (defn action-not-allowed [apikey id action]
   (let [resp (query apikey :allowed-actions :id id)]
     (success resp) => true
-    (get-in resp [:actions action :ok]) => falsey
-    (unauthorized (command apikey action :id id))))
+    (get-in resp [:actions action :ok]) => falsey))
 
 ;;
 ;; Stuffin' data in

@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.model-test
   (:use [lupapalvelu.document.model]
-        [lupapalvelu.document.schemas]
         [lupapalvelu.document.validators]
-        [midje.sweet]))
+        [midje.sweet])
+  (:require [lupapalvelu.document.schemas :as schemas]))
 
 ;; Define a "random" timestamp used in test.
 ;; Midje metaconstraints seems to mess with tools/unwrapped.
@@ -102,7 +102,7 @@
 
 (facts "with real schemas - important field for paasuunnittelija"
   (with-timestamp some-time
-    (let [document (new-document (schemas "paasuunnittelija") ..now..)]
+    (let [document (new-document (schemas/get-schema "paasuunnittelija") ..now..)]
       (-> document
         (apply-update [:henkilotiedot :etunimi] "Tauno")
         (apply-update [:henkilotiedot :sukunimi] "Palo")
@@ -219,7 +219,7 @@
 
 (facts "with real schemas - required fields for henkilo hakija"
   (with-timestamp some-time
-    (let [document (-> (new-document (schemas "hakija") ..now..)
+    (let [document (-> (new-document (schemas/get-schema "hakija") ..now..)
                    (apply-update [:_selected] "henkilo")
                    (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
                    (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
@@ -242,7 +242,7 @@
 
 (facts "with real schemas - required fields for yritys hakija"
   (with-timestamp some-time
-    (let [document (-> (new-document (schemas "hakija") ..now..)
+    (let [document (-> (new-document (schemas/get-schema "hakija") ..now..)
                      (apply-update [:_selected] "yritys")
                      (apply-update [:yritys :yritysnimi] "Solita")
                      (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
@@ -365,7 +365,7 @@
                   :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
                                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
                                                                 :timestamp 1370856511356}}}}
-                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas "uusiRakennus"))}}]
+                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas/get-schema "uusiRakennus"))}}]
     (modifications-since-approvals real-doc) => 0))
 
 ;;
