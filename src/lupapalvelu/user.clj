@@ -98,14 +98,18 @@
   (ok :user user))
 
 (defcommand "save-user-info"
-  {:parameters [:firstName :lastName :street :city :zip :phone]
+  {:parameters [:firstName :lastName :street :city :zip :phone
+                :architect :degree :experience :fise :qualification
+                :companyName :companyId :companyStreet :companyZip :companyCity]
    :authenticated true
    :verified true}
   [{data :data {user-id :id} :user}]
   (mongo/update-by-id
     :users
     user-id
-    {$set (select-keys data [:firstName :lastName :street :city :zip :phone])})
+    {$set (select-keys data [:firstName :lastName :street :city :zip :phone
+                             :architect :degree :experience :fise :qualification
+                             :companyName :companyId :companyStreet :companyZip :companyCity])})
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
 

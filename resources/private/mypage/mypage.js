@@ -19,25 +19,48 @@
 
   function OwnInfo() {
 
-    this.firstName = ko.observable("");
-    this.lastName = ko.observable("");
-    this.street = ko.observable("");
-    this.city = ko.observable("");
-    this.zip = ko.observable("");
-    this.phone = ko.observable("");
-    this.error = ko.observable(null);
-    this.saved = ko.observable(false);
-    this.role = ko.observable("");
+    this.error = ko.observable();
+    this.saved = ko.observable();
+    this.firstName = ko.observable();
+    this.lastName = ko.observable();
+    this.street = ko.observable();
+    this.city = ko.observable();
+    this.zip = ko.observable();
+    this.phone = ko.observable();
+    this.role = ko.observable();
+    this.architect = ko.observable();
+    this.degree = ko.observable();
+    this.experience = ko.observable();
+    this.fise = ko.observable();
+    this.qualification = ko.observable();
+    this.attachments = ko.observableArray();
+    this.companyName = ko.observable();
+    this.companyId = ko.observable();
+    this.companyStreet = ko.observable();
+    this.companyZip = ko.observable();
+    this.companyCity = ko.observable();
 
     this.init = function(u) {
       return this
-        .firstName(u.firstName || "")
-        .lastName(u.lastName || "")
-        .street(u.street || "")
-        .city(u.city || "")
-        .zip(u.zip || "")
-        .phone(u.phone || "")
-        .role(u.role || "");
+        .error(null)
+        .saved(false)
+        .firstName(u.firstName)
+        .lastName(u.lastName)
+        .street(u.street)
+        .city(u.city)
+        .zip(u.zip)
+        .phone(u.phone)
+        .role(u.role)
+        .architect(u.architect)
+        .degree(u.degree)
+        .experience(u.experience)
+        .fise(u.fise)
+        .qualification(u.qualification)
+        .companyName(u.companyName)
+        .companyId(u.companyId)
+        .companyStreet(u.companyStreet)
+        .companyZip(u.companyZip)
+        .companyCity(u.companyCity);
     };
 
     this.clear = function() {
@@ -45,18 +68,23 @@
     };
 
     this.ok = ko.computed(function() { return isNotBlank(this.firstName()) && isNotBlank(this.lastName()); }, this);
-    this.save = makeSaveFn("save-user-info", ["firstName", "lastName", "street", "city", "zip", "phone"]);
+    this.save = makeSaveFn("save-user-info",
+        ["firstName", "lastName",
+         "street", "city", "zip", "phone",
+         "architect",
+         "degree", "experience", "fise", "qualification",
+         "companyName", "companyId", "companyStreet", "companyZip", "companyCity"]);
 
     this.updateUserName = function() {
-      $("#user-name").text(this.firstName() + " " + this.lastName());
-      $("#user-name").attr("data-test-role", this.role());
+      $("#user-name")
+        .text(this.firstName() + " " + this.lastName())
+        .attr("data-test-role", this.role());
       return this;
     };
 
   }
 
   function Password() {
-
     this.oldPassword = ko.observable("");
     this.newPassword = ko.observable("");
     this.newPassword2 = ko.observable("");

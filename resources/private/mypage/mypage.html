@@ -27,12 +27,41 @@
         <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
         <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
       </div>
+      
+      <div class="form-entry">
+        <label data-bind="ltext: 'userinfo.architect'" for="architect" class="form-label"></label>
+        <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
+      </div>
+      <div data-bind="visible: architect">
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.company.name'" for="architect.company.name" class="form-label"></label>
+          <input data-bind="value: companyName" id="company.name" type="text" class="form-input"></input>
+        </div>
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.company.id'" for="architect.company.id" class="form-label"></label>
+          <input data-bind="value: companyId" id="company.id" type="text" class="form-input"></input>
+        </div>
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.company.street'" for="architect.company.street" class="form-label"></label>
+          <input data-bind="value: companyStreet" id="company.street" type="text" class="form-input"></input>
+        </div>
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.company.zip'" for="architect.company.zip" class="form-label"></label>
+          <input data-bind="value: companyZip" id="company.zip" type="text" class="form-input"></input>
+        </div>
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.architect.company.city'" for="architect.company.city" class="form-label"></label>
+          <input data-bind="value: companyCity" id="company.city" type="text" class="form-input"></input>
+        </div>
+      </div>
+      
       <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
       <p class="context-error" data-bind="visible: error() != null, ltext: error"></p>
       <span data-bind="visible: !error() && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
       <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
     </form>
    </div>
+   
    <div class="fifty">
     <form id="pw-form">
       <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>

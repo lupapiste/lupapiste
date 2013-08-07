@@ -24,20 +24,22 @@
                   :username "teppo@example.com"
                   :zip "33560"})}))
 
-  (command teppo :save-user-info
-    :firstName "Seppo"
-    :lastName "Sieninen"
-    :street "Sutakatu 7"
-    :city "Sampere"
-    :zip "33200"
-    :phone "0505503171") => ok?
+  (let [data {:firstName "Seppo"
+              :lastName "Sieninen"
+              :street "Sutakatu 7"
+              :city "Sampere"
+              :zip "33200"
+              :phone "0505503171"
+              :architect true
+              :degree "d"
+              :experience 5
+              :fise "f"
+              :qualification "q"
+              :companyName "cn"
+              :companyId "cid"
+              :companyStreet "cs"
+              :companyZip "cz"
+              :companyCity "cc"}]
 
-  (query teppo :user) => (contains
-                           {:user
-                            (contains
-                              {:firstName "Seppo"
-                               :lastName "Sieninen"
-                               :street "Sutakatu 7"
-                               :city "Sampere"
-                               :zip "33200"
-                               :phone "0505503171"})}))
+  (apply command teppo :save-user-info (flatten (seq data))) => ok?
+  (query teppo :user) => (contains {:user (contains data)})))

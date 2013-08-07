@@ -2,3 +2,17 @@ R: 	Rakennuslupa
 YA: Yleisten alueiden lupa
 Y: 	Ympäristölupa
 P: 	Poikkeamislupa
+
+userinfo.architect: Olen suunnittelija
+userinfo.architect.company.name: Yritys
+userinfo.architect.company.id: Y-tunnus
+userinfo.architect.company.street: Katuosoite
+userinfo.architect.company.zip: Postinumero
+userinfo.architect.company.city: Postitoimipaikka
+userinfo.architect.degree: Tutkinto
+userinfo.architect.experience: Kokemus (vuosia)
+userinfo.architect.fise: FISE pätevyyskortti (linkki)
+userinfo.architect.qualification: Pätevyysluokka
+userinfo.architect.attachments: Todistukset
+userinfo.architect.attachments.name: Todistus
+userinfo.architect.attachments.file: Tiedosto
