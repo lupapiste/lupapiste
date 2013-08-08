@@ -343,6 +343,11 @@
                                              (dissoc ring.middleware.anti-forgery/token-key)
                                              (assoc  :errorMessage (result :text)))))))))
 
+(defpage [:post "/api/uploadx"] {[{:keys [size tempfile content-type filename]}] :files}
+  (info "uploadX" size content-type filename)
+  (ok))
+
+
 ;;
 ;; Server is alive
 ;;
