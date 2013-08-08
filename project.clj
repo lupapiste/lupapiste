@@ -45,7 +45,7 @@
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
-                        :jvm-opts ["-Xmx1G" "-XX:MaxPermSize=512M"]}
+                        :jvm-opts ["-Xmx2G" "-XX:MaxPermSize=1G"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
