@@ -38,8 +38,8 @@
          (:multipart-params request)))
 
 (defn- request-token [request]
-  (or (-> request form-params (get (name token-key)))
-      (-> request :headers (get "x-anti-forgery-token"))))
+  (or (get-in request [:params token-key])
+      (get-in request [:headers "x-anti-forgery-token"])))
 
 (defn- secure-eql? [^String a ^String b]
   (if (and a b (= (.length a) (.length b)))
