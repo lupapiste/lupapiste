@@ -213,6 +213,7 @@
           .startCallback(function() { data.process().done(function() { data.submit(); }); })
           .ready();
       },
+      replaceFileInput: false,
       send: uploadModel.sending,
       done: uploadModel.done,
       fail: uploadModel.error
