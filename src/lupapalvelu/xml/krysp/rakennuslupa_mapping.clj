@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:use  [lupapalvelu.xml.krysp.yhteiset]
+  (:use  [lupapalvelu.xml.krysp.mapping-common]
          [clojure.data.xml]
          [sade.util]
          [clojure.java.io]
@@ -94,11 +94,11 @@
                :child yht-rakennus})
 
 (def rakennuslupa_to_krysp
-  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.0/rakennusvalvonta.xsd"
-                                        :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-                                        :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-                                        :xmlns:xlink "http://www.w3.org/1999/xlink"
-                                        :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
+  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.1/rakennusvalvonta.xsd"
+                                              :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+                                              :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+                                              :xmlns:xlink "http://www.w3.org/1999/xlink"
+                                              :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
    :child [{:tag :toimituksenTiedot :child toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
@@ -112,13 +112,15 @@
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
                                        :child [{:tag :uusi :child [{:tag :kuvaus}]}
-                                               {:tag :laajennus :child [{:tag :laajennuksentiedot :child[{:tag :tilavuus}
-                                                                                                        {:tag :kerrosala}
-                                                                                                        {:tag :kokonaisala}
-                                                                                                        {:tag :huoneistoala :child [{:tag :pintaAla :ns "yht"}
-                                                                                                                                    {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
-                                                                         {:tag :kuvaus}
-                                                                         {:tag :perusparannusKytkin}]}
+                                               {:tag :laajennus :child [{:tag :laajennuksentiedot
+                                                                         :child[{:tag :tilavuus}
+                                                                                {:tag :kerrosala}
+                                                                                {:tag :kokonaisala}
+                                                                                {:tag :huoneistoala
+                                                                                 :child [{:tag :pintaAla :ns "yht"}
+                                                                                         {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
+                                                                        {:tag :kuvaus}
+                                                                        {:tag :perusparannusKytkin}]}
                                                {:tag :perusparannus}
                                                {:tag :uudelleenrakentaminen}
                                                {:tag :purkaminen :child [{:tag :kuvaus}
@@ -130,12 +132,12 @@
                                                {:tag :kaupunkikuvaToimenpide :child [{:tag :kuvaus}]}
                                                {:tag :rakennustieto
                                                 :child [rakennus]}
-                                               {:tag :rakennelmatieto :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
-                                                                                                        {:tag :alkuHetki :ns "yht"}
-                                                                                                        sijantitieto
-                                                                                                        {:tag :kuvaus :child [{:tag :kuvaus}]}
-                                                                                                        {:tag :kokonaisala}]}]}
-                                               ]}]}
+                                               {:tag :rakennelmatieto
+                                                :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
+                                                                                  {:tag :alkuHetki :ns "yht"}
+                                                                                  sijantitieto
+                                                                                  {:tag :kuvaus :child [{:tag :kuvaus}]}
+                                                                                  {:tag :kokonaisala}]}]}]}]}
                              {:tag :lausuntotieto :child [lausunto] }
 
                              {:tag :lisatiedot
@@ -234,7 +236,7 @@
     (ke6666/generate submitted-application lang submitted-file)
     (ke6666/generate application lang current-file)))
 
-(defn- add-statement-attchments [canonical statement-attachments]
+(defn- add-statement-attachments [canonical statement-attachments]
   (reduce (fn [c a]
             (let [lausuntotieto (get-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto])
                   lausunto-id (name (first (keys a)))
@@ -245,8 +247,7 @@
               (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
             ) canonical statement-attachments))
 
-(defn get-application-as-krysp [application lang submitted-application organization]
-  (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
+(defn save-application-as-krysp [application lang submitted-application organization]
   (let [sftp-user (:rakennus-ftp-user organization)
         rakennusvalvonta-directory "/rakennus"
         dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
@@ -273,12 +274,12 @@
                                                 :muokkausHetki (to-xml-datetime (lupapalvelu.core/now))
                                                 :versionumero 1
                                                 :tyyppi "hakemus_taustajarjestelmaan_siirettaessa"}})
-        canonical-with-statment-attachments  (add-statement-attchments canonical-without-attachments statement-attachments)
-        canonical (assoc-in canonical-with-statment-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
-        xml        (element-to-xml canonical rakennuslupa_to_krysp)
+        canonical-with-statement-attachments  (add-statement-attachments canonical-without-attachments statement-attachments)
+        canonical (assoc-in canonical-with-statement-attachments [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto] attachments-with-generated-pdfs)
+        xml (element-to-xml canonical rakennuslupa_to_krysp)
         xml-s (indent-str xml)]
     ;(clojure.pprint/pprint(:attachments application))
-    ;(clojure.pprint/pprint canonical-with-statment-attachments)
+    ;(clojure.pprint/pprint canonical-with-statement-attachments)
     ;(println xml-s)
     (validate xml-s)
     (with-open [out-file (writer tempfile)]

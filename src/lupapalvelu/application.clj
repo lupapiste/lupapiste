@@ -28,7 +28,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.neighbors :as neighbors]
             [clj-time.format :as tf]))
@@ -384,7 +384,7 @@
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application organization)
+        (try (mapping-to-krysp/save-application-as-krysp application (-> command :data :lang) submitted-application organization)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
