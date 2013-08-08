@@ -126,11 +126,19 @@
   function UploadModel() {
     var self = this;
 
+    self.ready = ko.observable();
+    self.sending = ko.observable();
+    self.done = ko.observable();
+    self.startCallback = ko.observable();
     self.attachmentType = ko.observable();
     
     self.init = function(attachmentType) {
-      self.attachmentType(attachmentType);
-      return self;
+      return self
+        .ready(false)
+        .sending(false)
+        .done(false)
+        .startCallback(null)
+        .attachmentType(attachmentType);
     }
     
     self.open = function(uploadFileType) {
@@ -139,7 +147,13 @@
     };
 
     self.upload = function() {
-      console.log("Uppaa!");
+      console.log("model:upload");
+      var f = self.startCallback();
+      if (f) {
+        f();
+      } else {
+        console.log("f==null");
+      }
       return false;
     };
     
@@ -184,11 +198,34 @@
     $("#dialog-userinfo-architect-upload").applyBindings(uploadModel);
     
     $("#dialog-userinfo-architect-upload form").fileupload({
-      dataType: 'json',
-      done: function (e, data) {
-        console.log("uploaded successfully", e, data);
-      }
+      dataType: "json",
+      autoUpload: false,
+      add: function(e, data) {
+        uploadModel.ready(true).startCallback(function() {
+          data.process().done(function () {
+            console.log("model:submit");
+            data.submit();
+          });
+        });
+      },
+      send: function(e, data) { uploadModel.ready(false).sending(true); },
+      processstart: function (e, data) { console.log("process-start:", e, data); },
+      done: function(e, data) { uploadModel.sending(false).done(true); },
     });
+    /*
+    ).bind("fileuploadprocessstart", ;
+      .bind("fileuploadadd", function (e, data) { console.log("ADD:", e, data); })
+      .bind("fileuploadsubmit", function (e, data) { console.log("SUBMIT:", e, data); })
+      .bind("fileuploadsend", function (e, data) { console.log("SEND:", e, data); })
+      .bind("fileuploaddone", function (e, data) { console.log("DONE:", e, data); })
+      .bind("fileuploadfail", function (e, data) { console.log("FAIL:", e, data); })
+      .bind("fileuploadalways", function (e, data) { console.log("ALWAYS:", e, data); })
+      .bind("fileuploadprogress", function (e, data) { console.log("PROGRESS:", e, data); })
+      .bind("fileuploadprogressall", function (e, data) { console.log("PROGRESS-ALL:", e, data); })
+      .bind("fileuploadstart", function (e, data) { console.log("START:", e, data); })
+      .bind("fileuploadstop", function (e, data) { console.log("STOP:", e, data); })
+      .bind("fileuploadchange", function (e, data) { console.log("CHANGE:", e, data); });
+    */
   });
 
 })();

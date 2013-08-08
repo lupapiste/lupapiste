@@ -163,7 +163,7 @@
         <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
   
         <br/><br/>
-        <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;" class="btn">Takaisin</a>
+        <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;" class="btn"></a>
   
         </form>
     </div>
@@ -185,7 +185,9 @@
           <input data-bind="attr: {value: attachmentType}" type="hidden" name="attachmentType"></input>
         </form>
 
-        <button data-bind="click: upload, ltext: 'userinfo.architect.upload.ok'"
+        <button data-bind="click: upload,
+                           enable: ready,
+                           ltext: 'userinfo.architect.upload.ok'"
                 data-test-id="userinfo-upload-ok"
                 class="btn btn-primary btn-dialog">
         </button>
