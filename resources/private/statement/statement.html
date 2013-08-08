@@ -62,7 +62,7 @@
 
       <div>
         <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
-        <div data-bind="template: {name: 'comment-template', data: $root.commentsModel}"></div>
+        <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
       </div>
 
     </div>

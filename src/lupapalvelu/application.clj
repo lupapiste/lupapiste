@@ -1,13 +1,13 @@
 (ns lupapalvelu.application
   (:use [monger.operators]
-        [clojure.tools.logging]
         [lupapalvelu.core]
         [clojure.string :only [blank? join trim]]
         [sade.util :only [lower-case]]
         [clj-time.core :only [year]]
         [clj-time.local :only [local-now]]
         [lupapalvelu.i18n :only [with-lang loc]])
-  (:require [clj-time.format :as timeformat]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn error fatal)]
+            [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [monger.query :as query]
             [sade.env :as env]
@@ -245,59 +245,74 @@
               {$pull {:auth {$and [{:username email}
                                    {:type {$ne :owner}}]}}})))))))
 
-(defcommand "remove-auth"
-  {:parameters [:id :email]
+(defcommand remove-auth
+  {:parameters [:id email]
    :roles      [:applicant :authority]}
-  [{{:keys [email]} :data :as command}]
+  [command]
   (update-application command
     {$pull {:auth {$and [{:username (lower-case email)}
                          {:type {$ne :owner}}]}}}))
 
-(defcommand "add-comment"
+(defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
+  (when (and to (not (security/authority? user)))
+    (fail :error.to-settable-only-by-authority)))
+
+(defquery can-target-comment-to-authority {:roles [:authority] :feature [:targetted-comments]})
+
+(defcommand add-comment
   {:parameters [:id :text :target]
    :roles      [:applicant :authority]
+   :validators [applicant-cant-set-to ]
    :notify     "new-comment"}
-  [{{:keys [text target]} :data {:keys [host]} :web :keys [user created] :as command}]
+  [{{:keys [text target to]} :data {:keys [host]} :web :keys [user created] :as command}]
   (with-application command
     (fn [{:keys [id state] :as application}]
-      (update-application command
-        {$set  {:modified created}
-         $push {:comments {:text    text
-                           :target  target
-                           :created created
-                           :user    (security/summary user)}}})
+      (let [to-user   (and to (or (security/get-non-private-userinfo to)
+                                  (fail! :to-is-not-id-of-any-user-in-system)))
+            from-user (security/summary user)]
+        (update-application command
+          {$set  {:modified created}
+           $push {:comments {:text    text
+                             :target  target
+                             :created created
+                             :to      (security/summary to-user)
+                             :user    from-user}}})
 
-      (condp = (keyword state)
+        (condp = (keyword state)
 
-        ;; LUPA-XYZ (was: open-application)
-        :draft  (when (not (blank? text))
-                  (update-application command
-                    {$set {:modified created
-                           :state    :open
-                           :opened   created}}))
-
-        ;; LUPA-371
-        :info (when (security/authority? user)
-                (update-application command
-                  {$set {:state    :answered
-                         :modified created}}))
-
-        ;; LUPA-371 (was: mark-inforequest-answered)
-        :answered (when (security/applicant? user)
+          ;; LUPA-XYZ (was: open-application)
+          :draft  (when (not (blank? text))
                     (update-application command
-                      {$set {:state :info
-                             :modified created}}))
+                      {$set {:modified created
+                             :state    :open
+                             :opened   created}}))
 
-        nil))))
+          ;; LUPA-371
+          :info (when (security/authority? user)
+                  (update-application command
+                    {$set {:state    :answered
+                           :modified created}}))
 
-(defcommand "mark-seen"
+          ;; LUPA-371 (was: mark-inforequest-answered)
+          :answered (when (security/applicant? user)
+                      (update-application command
+                        {$set {:state :info
+                               :modified created}}))
+
+          nil)
+
+        ;; LUPA-407
+        (when to-user
+          (notifications/send-notifications-on-new-targetted-comment! application (:email to-user) host))))))
+
+(defcommand mark-seen
   {:parameters [:id :type]
    :input-validators [(fn [{{type :type} :data}] (when-not (#{"comments" "statements" "verdicts"} type) (fail :error.unknown-type)))]
    :authenticated true}
   [{:keys [data user created] :as command}]
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
-(defcommand "set-user-to-document"
+(defcommand set-user-to-document
   {:parameters [:id :documentId :userId :path]
    :authenticated true}
   [{{:keys [documentId userId path]} :data user :user created :created :as command}]
