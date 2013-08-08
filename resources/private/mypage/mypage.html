@@ -175,11 +175,9 @@
       </div>
       <div class="dialog-content">
 
-        <div data-bind="text: uploadFileType"></div>
-
         <form action="/api/uploadx" method="POST" enctype="multipart/form-data">
           <span>Uppaa:</span>
-          <input type="hidden" name="bobo" value="baba"></input>
+          <input data-bind="attr: {value: attachmentType}" type="hidden" name="attachmentType"></input>
           <input type="file" name="files[]"></input>
         </form>
 

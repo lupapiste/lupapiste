@@ -343,8 +343,8 @@
                                              (dissoc ring.middleware.anti-forgery/token-key)
                                              (assoc  :errorMessage (result :text)))))))))
 
-(defpage [:post "/api/uploadx"] {[{:keys [size tempfile content-type filename]}] :files}
-  (info "uploadX" size content-type filename)
+(defpage [:post "/api/uploadx"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
+  (info "uploadX" attachment-type filename  content-type size)
   (ok))
 
 

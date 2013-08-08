@@ -93,9 +93,9 @@
       return self;
     };
     
-    self.uploadFile = function(name) {
-      console.log("upload!", name, self.firstName());
-      uploadModel.init(name).open();
+    self.uploadFile = function(attachmentType) {
+      console.log("upload!", attachmentType, self.firstName());
+      uploadModel.init(attachmentType).open();
       
       /*
       ajax
@@ -117,19 +117,19 @@
       return false;
     };
     
-    self.upload   = function(name) { return self.uploadFile.bind(self, name); };
-    self.download = function(name) { return self.downloadFile.bind(self, name); };
-    self.remove   = function(name) { return self.removeFile.bind(self, name); };
+    self.upload   = function(attachmentType) { return self.uploadFile.bind(self, attachmentType); };
+    self.download = function(attachmentType) { return self.downloadFile.bind(self, attachmentType); };
+    self.remove   = function(attachmentType) { return self.removeFile.bind(self, attachmentType); };
 
   }
 
   function UploadModel() {
     var self = this;
 
-    self.uploadFileType = ko.observable();
+    self.attachmentType = ko.observable();
     
-    self.init = function(uploadFileType) {
-      self.uploadFileType(uploadFileType);
+    self.init = function(attachmentType) {
+      self.attachmentType(attachmentType);
       return self;
     }
     
