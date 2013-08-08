@@ -4,7 +4,7 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   // Model
 
-  self.map = {};
+  self.map = null;
   self.id = 0;
   self.municipalityCode = 0;
   self.x = 0;
