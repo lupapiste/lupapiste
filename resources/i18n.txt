@@ -22,3 +22,6 @@ userinfo.architect.attachments.file: Tiedosto
 userinfo.architect.attachments.name.examination: Tutkintotodistus
 userinfo.architect.attachments.name.proficiency: Pätevyystodistus
 userinfo.architect.attachments.name.cv: CV
+userinfo.architect.upload.title: Lisää tiedosto
+userinfo.architect.upload.ok: Lisää
+userinfo.architect.upload.cancel: Peruuta
