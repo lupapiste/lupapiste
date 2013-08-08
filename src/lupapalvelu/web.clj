@@ -388,7 +388,7 @@
     (warn "CSRF attempt blocked."
           "Client IP:" (client-ip request)
           "Referer:" (get-in request [:headers "referer"]))
-    (resp/json (fail :error.invalid-csrf-token))))
+    (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf
   [handler]
