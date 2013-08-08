@@ -10,11 +10,11 @@
 (apply-remote-minimal)
 
 #_(fact "can't inject js in 'x' or 'y' params"
-  (create-app pena :x ";alert(\"foo\");" :y "what ever") => not-ok?
-  (create-app pena :x "0.1x" :y "1.0")                   => not-ok?
-  (create-app pena :x "1x2" :y "1.0")                    => not-ok?
-  (create-app pena :x "2" :y "1.0")                      => not-ok?
-  (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
+   (create-app pena :x ";alert(\"foo\");" :y "what ever") =not=> ok?
+   (create-app pena :x "0.1x" :y "1.0")                   =not=> ok?
+   (create-app pena :x "1x2" :y "1.0")                    =not=> ok?
+   (create-app pena :x "2" :y "1.0")                      =not=> ok?
+   (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
 
 (fact "creating application without message"
   (let [id    (create-app-id pena)
@@ -88,7 +88,7 @@
     authority-before-assignation => nil
     authority-after-assignation => (contains {:id (:id authority)})
     (fact "Authority is not able to submit"
-      (action-not-allowed sonja application-id :submit-application))))
+      sonja =not=> (allowed? sonja :submit-application :id application-id))))
 
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (create-app-id pena :municipality sonja-muni)
@@ -124,7 +124,7 @@
          (:opened application) => truthy
          (:opened application) => (:created application)))
     (fact "Authority could submit her own application"
-      (action-allowed sonja application-id :submit-application))
+      sonja => (allowed? :submit-application :id application-id))
     (fact "Application is submitted"
       (let [resp        (command sonja :submit-application :id application-id)
             application (:application (query sonja :application :id application-id))]
@@ -171,6 +171,23 @@
 
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
+
+(fact "adding comments"
+  (let [{id :id}  (create-and-submit-application pena)]
+    (fact "applicant can't comment with to"
+      pena =not=> (allowed? :can-target-comment-to-authority)
+      pena =not=> (allowed? :add-comment :id id :to irrelevant)
+      (command pena :add-comment :id id :text "comment1" :target "application") => ok?
+      (command pena :add-comment :id id :text "comment1" :target "application" :to sonja-id) =not=> ok?)
+    (fact "authority can comment with to"
+      sonja => (allowed? :can-target-comment-to-authority)
+      sonja => (allowed? :add-comment :id id :to sonja-id)
+      (command sonja :add-comment :id id :text "comment1" :target "application") => ok?
+      (command sonja :add-comment :id id :text "comment1" :target "application" :to sonja-id) => ok?)))
+
+(fact "create-and-submit-application"
+  (let [app  (create-and-submit-application pena)]
+    (:state app) => "submitted"))
 
 (comment
   (apply-remote-minimal)

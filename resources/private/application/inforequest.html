@@ -140,7 +140,7 @@
 
         <div>
           <h3  data-bind="ltext: 'inforequest.comments'"></h3>
-          <div data-bind="template: {name: 'comment-template', data: $root.comment}"></div>
+          <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
         </div>
 
       </div>

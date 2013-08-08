@@ -96,5 +96,5 @@
       (fact "pdf does not work with YA-lupa"
         (let [{application-id :id :as response} (create-YA-app pena :municipality veikko-muni)]
           response => ok?
-          (action-not-allowed pena application-id :pdf-export)
+          pena =not=> (allowed? :pdf-export :id application-id)
           (raw pena "pdf-export" :id application-id) => http404?)))))
