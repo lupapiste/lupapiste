@@ -382,10 +382,6 @@
 ;;
 
 (defn- csrf-attack-hander [request]
-  (warn "CSRF attempt blocked."
-    "Client IP:" (client-ip request)
-    "Referer:" (get-in request [:headers "referer"]))
-  (resp/json (fail :error.invalid-csrf-token))
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (current-user request) "???")}
