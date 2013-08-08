@@ -175,8 +175,6 @@
       </div>
       <div class="dialog-content">
 
-        <div>State: <span data-bind="text: state"></span></div>
-        
         <div data-bind="visible: state() < stateSending">
           <span data-bind="ltext: 'userinfo.architect.upload.state.init'"></span>
           <span data-bind="text: loc('userinfo.architect.attachments.name', attachmentType())"></span>
