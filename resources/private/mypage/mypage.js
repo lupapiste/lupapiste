@@ -96,14 +96,6 @@
     self.uploadFile = function(attachmentType) {
       console.log("upload!", attachmentType, self.firstName());
       uploadModel.init(attachmentType).open();
-      
-      /*
-      ajax
-        .command("save-user-attachment", {type: name})
-        .success(function() { self.clear(); })
-        .error(function(d) { self.clear().error(d.text); })
-        .call();
-      */
       return false;
     };
     
@@ -131,7 +123,7 @@
     self.stateSending  = 2;
     self.stateDone     = 3;
     self.stateError    = 4;
-    
+
     self.state = ko.observable(-1); // -1 makes sure that init() fires state change.
     
     self.ready = _.partial(self.state, self.stateReady);
@@ -141,13 +133,15 @@
     
     self.startCallback = ko.observable();
     self.attachmentType = ko.observable();
-    
+    self.csrf = ko.observable();
+
     self.init = function(attachmentType) {
       return self
         .state(self.stateInit)
         .startCallback(null)
-        .attachmentType(attachmentType);
-    }
+        .attachmentType(attachmentType)
+        .csrf($.cookie("anti-csrf-token"));
+    };
     
     self.open = function(uploadFileType) {
       LUPAPISTE.ModalDialog.open("#dialog-userinfo-architect-upload");
@@ -171,7 +165,6 @@
       }
     });
     
-    window.um = self;
   }
 
   function Password() {
