@@ -170,8 +170,11 @@
         resp  (command apikey :submit-application :id id) => ok?
         resp  (query pena :application :id id) => ok?
         app   (:application resp)]
-    (:state app) => "submitted!"
     app))
+
+(fact "create-and-submit-application"
+  (let [app  (create-and-submit-application pena)]
+    (:state app) => "submitted"))
 
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
