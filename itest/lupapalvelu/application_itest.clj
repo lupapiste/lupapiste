@@ -88,7 +88,7 @@
     authority-before-assignation => nil
     authority-after-assignation => (contains {:id (:id authority)})
     (fact "Authority is not able to submit"
-      sonja => (allowed? sonja :submit-application :id application-id))))
+      sonja =not=> (allowed? sonja :submit-application :id application-id))))
 
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (create-app-id pena :municipality sonja-muni)
@@ -124,7 +124,7 @@
          (:opened application) => truthy
          (:opened application) => (:created application)))
     (fact "Authority could submit her own application"
-      sonja => (allowed? :submit-application application-id))
+      sonja => (allowed? :submit-application :id application-id))
     (fact "Application is submitted"
       (let [resp        (command sonja :submit-application :id application-id)
             application (:application (query sonja :application :id application-id))]
