@@ -165,10 +165,6 @@
         app   (:application resp)]
     app))
 
-(fact "create-and-submit-application"
-  (let [app  (create-and-submit-application pena)]
-    (:state app) => "submitted"))
-
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))

@@ -185,6 +185,10 @@
       (command sonja :add-comment :id id :text "comment1" :target "application") => ok?
       (command sonja :add-comment :id id :text "comment1" :target "application" :to sonja-id) => ok?)))
 
+(fact "create-and-submit-application"
+  (let [app  (create-and-submit-application pena)]
+    (:state app) => "submitted"))
+
 (comment
   (apply-remote-minimal)
   ; Do 70 applications in each municipality:
