@@ -205,7 +205,8 @@
               huoneistoPorras (-> huoneisto :huoneistoTunnus :porras :value)
               jakokirjain (-> huoneisto :huoneistoTunnus :jakokirjain :value)]
         :when (seq huoneisto)]
-    (merge {:huoneluku (-> tyyppi :huoneluku :value)
+    (merge {:muutostapa (-> huoneisto :muutostapa :value)
+            :huoneluku (-> tyyppi :huoneluku :value)
             :keittionTyyppi (-> huoneisto :keittionTyyppi :value)
             :huoneistoala (-> tyyppi :huoneistoala :value)
             :varusteet {:WCKytkin (true? (-> varusteet :WCKytkin :value))
