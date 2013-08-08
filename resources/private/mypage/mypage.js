@@ -93,21 +93,9 @@
       return self;
     };
     
-    self.uploading = false;
-    
-    hub.subscribe("upload-done", function() {
-      if (self.uploading) {
-        console.log("upload-done");
-        LUPAPISTE.ModalDialog.close();
-        self.uploading = false;
-      }
-    });
-
     self.uploadFile = function(name) {
       console.log("upload!", name, self.firstName());
-      
-      self.uploading = true;
-      document.getElementById("uploadFrame").contentWindow.LUPAPISTE.Upload.init(null, null, "foo/" + name, false, "target", true, false);
+      uploadModel.init(name).open();
       
       /*
       ajax
@@ -137,13 +125,26 @@
 
   function UploadModel() {
     var self = this;
-    self.foo = ko.observable("foozzaa");
+
+    self.uploadFileType = ko.observable();
+    
+    self.init = function(uploadFileType) {
+      self.uploadFileType(uploadFileType);
+      return self;
+    }
+    
+    self.open = function(uploadFileType) {
+      LUPAPISTE.ModalDialog.open("#dialog-userinfo-architect-upload");
+      return self;
+    };
+
     self.upload = function() {
       console.log("Uppaa!");
       return false;
     };
+    
   }
-  
+
   function Password() {
     this.oldPassword = ko.observable("");
     this.newPassword = ko.observable("");
