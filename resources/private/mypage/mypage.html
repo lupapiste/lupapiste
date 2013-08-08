@@ -3,165 +3,170 @@
 <body>
   <section class="page container" id="mypage">
 
-   <div class="fifty">
-    <form id="own-info-form">
-      <h2 data-bind="ltext: 'mypage.title'"></h2>
-      <div class="form-entry">
-        <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
-        <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'" id="firstName" type="text" class="form-input"></input>
-      </div>
+    <div class="fifty">
+      <form id="own-info-form">
+        <h2 data-bind="ltext: 'mypage.title'"></h2>
+        <div class="form-entry">
+          <label data-bind="ltext: 'userinfo.firstName'" for="firstName" class="form-label"></label>
+          <input data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'" id="firstName" type="text" class="form-input"></input>
+        </div>
 
-      <div class="form-entry">
-        <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
-        <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'" id="lastName" type="text" class="form-input"></input>
-      </div>
-      <div class="form-entry">
-        <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
-        <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'" id="street" type="text"  class="form-input"></input>
-        <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
-        <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'" id="zip" type="text" class="form-input"></input>
-        <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
-        <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
-      </div>
-      <div class="form-entry">
-        <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
-        <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
-      </div>
-      
-      <div class="form-entry">
-        <label data-bind="ltext: 'userinfo.architect'" for="architect" class="form-label"></label>
-        <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
-      </div>
-      <div data-bind="visible: architect">
-        
         <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.company.name'" for="architect.company.name" class="form-label"></label>
-          <input data-bind="value: companyName" id="architect.company.name" type="text" class="form-input"></input>
+          <label data-bind="ltext: 'userinfo.lastName'" for="lastName" class="form-label"></label>
+          <input data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'" id="lastName" type="text" class="form-input"></input>
         </div>
         <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.company.id'" for="architect.company.id" class="form-label"></label>
-          <input data-bind="value: companyId" id="architect.company.id" type="text" class="form-input"></input>
+          <label data-bind="ltext: 'userinfo.street'" for="street" class="form-label"></label>
+          <input data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'" id="street" type="text"  class="form-input"></input>
+          <label data-bind="ltext: 'userinfo.zip'" for="zip" class="form-label"></label>
+          <input data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'" id="zip" type="text" class="form-input"></input>
+          <label data-bind="ltext: 'userinfo.city'" for="city" class="form-label"></label>
+          <input data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'" id="city" type="text" class="form-input"></input>
         </div>
         <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.company.street'" for="architect.company.street" class="form-label"></label>
-          <input data-bind="value: companyStreet" id="architect.company.street" type="text" class="form-input"></input>
-        </div>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.company.zip'" for="architect.company.zip" class="form-label"></label>
-          <input data-bind="value: companyZip" id="architect.company.zip" type="text" class="form-input"></input>
-        </div>
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.company.city'" for="architect.company.city" class="form-label"></label>
-          <input data-bind="value: companyCity" id="architect.company.city" type="text" class="form-input"></input>
+          <label data-bind="ltext: 'userinfo.phone'" for="phone" class="form-label"></label>
+          <input data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'" id="phone" type="text" class="form-input"></input>
         </div>
         
+        <div data-bind="if: features.enabled('architect-info')"><div class="feature"><span class="legend">neighbors</span>
+        
         <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
-          <input data-bind="value: degree" id="architect.degree" type="text" class="form-input"></input>
+          <label data-bind="ltext: 'userinfo.architect'" for="architect" class="form-label"></label>
+          <input data-bind="checked: architect" id="architect" type="checkbox" class="form-input"></input>
         </div>
+        
+        <div data-bind="visible: architect">
+        
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.company.name'" for="architect.company.name" class="form-label"></label>
+            <input data-bind="value: companyName" id="architect.company.name" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.company.id'" for="architect.company.id" class="form-label"></label>
+            <input data-bind="value: companyId" id="architect.company.id" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.company.street'" for="architect.company.street" class="form-label"></label>
+            <input data-bind="value: companyStreet" id="architect.company.street" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.company.zip'" for="architect.company.zip" class="form-label"></label>
+            <input data-bind="value: companyZip" id="architect.company.zip" type="text" class="form-input"></input>
+          </div>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.company.city'" for="architect.company.city" class="form-label"></label>
+            <input data-bind="value: companyCity" id="architect.company.city" type="text" class="form-input"></input>
+          </div>
+          
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
+            <input data-bind="value: degree" id="architect.degree" type="text" class="form-input"></input>
+          </div>
+  
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.experience'" for="architect.experience" class="form-label"></label>
+            <input data-bind="value: experience" id="architect.experience" type="text" class="form-input"></input>
+          </div>
+  
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
+            <input data-bind="value: fise" id="architect.fise" type="text" class="form-input"></input>
+          </div>
 
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.experience'" for="architect.experience" class="form-label"></label>
-          <input data-bind="value: experience" id="architect.experience" type="text" class="form-input"></input>
+          <div class="form-entry">
+            <label data-bind="ltext: 'userinfo.architect.qualification'" for="architect.qualification" class="form-label"></label>
+            <select
+                data-bind="options: availableQualifications,
+                           value: qualification,
+                           optionsCaption: loc('userinfo.architect.qualification.choose')"
+                id="architect.qualification">
+            </select>
+          </div>
+
+          <div class="form-entry">
+            <table>
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
+                  <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-bind="ltext: 'userinfo.architect.attachments.name.examination'"></td>
+                  <td>
+                    <span data-bind="visible: examination">
+                      <a data-bind="click: download('examination'), text: examination.name" href="#"></a>
+                      <a data-bind="click: remove('examination'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                    </span>
+                    <span data-bind="visible: !examination()">
+                      <a data-bind="click: upload('examination'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
+                  <td>
+                    <span data-bind="visible: proficiency">
+                      <a data-bind="click: download('proficiency'), text: examination.name" href="#"></a>
+                      <a data-bind="click: remove('proficiency'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                    </span>
+                    <span data-bind="visible: !proficiency()">
+                      <a data-bind="click: upload('proficiency'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
+                  <td>
+                    <span data-bind="visible: cv">
+                      <a data-bind="click: download('cv'), text: examination.name" href="#"></a>
+                      <a data-bind="click: remove('cv'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                    </span>
+                    <span data-bind="visible: !cv()">
+                      <a data-bind="click: upload('cv'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>        
         </div>
-
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
-          <input data-bind="value: fise" id="architect.fise" type="text" class="form-input"></input>
-        </div>
-
-        <div class="form-entry">
-          <label data-bind="ltext: 'userinfo.architect.qualification'" for="architect.qualification" class="form-label"></label>
-          <select
-              data-bind="options: availableQualifications,
-                         value: qualification,
-                         optionsCaption: loc('userinfo.architect.qualification.choose')"
-              id="architect.qualification">
-          </select>
-        </div>
-
-        <div class="form-entry">
-          <table>
-            <thead>
-              <tr>
-                <th data-bind="ltext: 'userinfo.architect.attachments.name'"></th>
-                <th data-bind="ltext: 'userinfo.architect.attachments.file'"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td data-bind="ltext: 'userinfo.architect.attachments.name.examination'"></td>
-                <td>
-                  <span data-bind="visible: examination">
-                    <a data-bind="click: download('examination'), text: examination.name" href="#"></a>
-                    <a data-bind="click: remove('examination'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                  </span>
-                  <span data-bind="visible: !examination()">
-                    <a data-bind="click: upload('examination'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
-                <td>
-                  <span data-bind="visible: proficiency">
-                    <a data-bind="click: download('proficiency'), text: examination.name" href="#"></a>
-                    <a data-bind="click: remove('proficiency'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                  </span>
-                  <span data-bind="visible: !proficiency()">
-                    <a data-bind="click: upload('proficiency'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                  </span>
-                </td>
-              </tr>
-              <tr>
-                <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
-                <td>
-                  <span data-bind="visible: cv">
-                    <a data-bind="click: download('cv'), text: examination.name" href="#"></a>
-                    <a data-bind="click: remove('cv'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                  </span>
-                  <span data-bind="visible: !cv()">
-                    <a data-bind="click: upload('cv'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>        
-      </div>
       
-      <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
-      <p class="context-error" data-bind="visible: error() != null, ltext: error"></p>
-      <span data-bind="visible: !error() && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
-      <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
-    </form>
-   </div>
+        </div></div> <!-- feature flagging -->
+        
+        <button data-bind="ltext: 'save', enable: ok, click: save" type="button" class="btn btn-primary" data-test-id="save-my-userinfo"></button>
+        <p class="context-error" data-bind="visible: error() != null, ltext: error"></p>
+        <span data-bind="visible: !error() && saved, ltext: 'saved'" style="font-weight: bold; color: green;" data-test-id="save-my-userinfo-ok"></span>
+        <img class="own-info-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
+      </form>
+    </div>
    
-   <div class="fifty">
-    <form id="pw-form">
-      <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
-
-      <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
-      <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
-
-      <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
-      <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
-      <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
-
-      <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
-      <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
-      <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
-
-      <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
-      <p  class="context-error" data-bind="visible: error() != null, ltext: error" class="context-error"></p>
-      <span data-bind="visible: !error() && saved, ltext: 'mypage.passwordChanged'" style="font-weight: bold; color: green;" data-test-id="change-my-passwor-ok"></span>
-      <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
-
-      <br/><br/>
-      <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;" class="btn">Takaisin</a>
-
-    </form>
-   </div>
-  </section>
+    <div class="fifty">
+      <form id="pw-form">
+        <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
+  
+        <label data-bind="ltext: 'userinfo.oldPassword'" for="oldPassword" class="form-label"></label>
+        <input data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}" id="oldPassword" type="password" class="form-input"></input>
+  
+        <label data-bind="ltext: 'userinfo.newPassword'" for="newPassword" class="form-label">:</label>
+        <input data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}" id="newPassword" type="password" class="form-input"></input>
+        <span data-bind="text: loc('mypage.quality.' + quality()), attr: {'class': quality}, visible: newPassword().length > 0"></span>
+  
+        <label data-bind="ltext: 'userinfo.newPassword2'" for="newPassword2" class="form-label">:</label>
+        <input data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}" id="newPassword2" type="password" class="form-input"></input>
+        <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'" style="color: gray; font-style: italic;"></span>
+  
+        <button data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'" type="button" class="btn btn-primary" data-test-id="change-my-password"></button>
+        <p  class="context-error" data-bind="visible: error() != null, ltext: error" class="context-error"></p>
+        <span data-bind="visible: !error() && saved, ltext: 'mypage.passwordChanged'" style="font-weight: bold; color: green;" data-test-id="change-my-passwor-ok"></span>
+        <img class="pw-ajax-loader" style="display: none" src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"/>
+  
+        <br/><br/>
+        <a data-bind="ltext: 'back'" href="#" onclick="javascript:history.go(-1);return false;" class="btn">Takaisin</a>
+  
+        </form>
+    </div>
+   </section>
 </body>
 </html>
