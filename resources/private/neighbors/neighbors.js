@@ -29,7 +29,7 @@
     self.map = null;
 
     self.init = function(application) {
-      if (!self.map) { self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click); }
+      if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
       var location = application.location,
           x = location.x,
           y = location.y;
