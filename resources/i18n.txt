@@ -25,8 +25,8 @@ userinfo.architect.attachments.name.cv: CV
 userinfo.architect.upload.title: Lisää tiedosto
 userinfo.architect.upload.ok: Lisää
 userinfo.architect.upload.cancel: Peruuta
-userinfo.architect.upload.ready: Valmis
+userinfo.architect.upload.ready: Tiedoston lataaminen onnistui
 userinfo.architect.upload.state.init: Lähetä uusi
 userinfo.architect.upload.state.sending: Tiedostoa ladataan...
-userinfo.architect.upload.state.ready: Valmis
+userinfo.architect.upload.state.ready: Sulje
 userinfo.architect.upload.state.error: Tapahtui virhe, yritä myöhemmin uudeleen.
