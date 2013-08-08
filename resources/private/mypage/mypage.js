@@ -182,6 +182,13 @@
     $("#own-info-form").applyBindings(ownInfo);
     $("#pw-form").applyBindings(pw);
     $("#dialog-userinfo-architect-upload").applyBindings(uploadModel);
+    
+    $("#dialog-userinfo-architect-upload form").fileupload({
+      dataType: 'json',
+      done: function (e, data) {
+        console.log("uploaded successfully", e, data);
+      }
+    });
   });
 
 })();

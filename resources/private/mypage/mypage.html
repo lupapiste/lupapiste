@@ -177,7 +177,11 @@
 
         <div data-bind="text: uploadFileType"></div>
 
-        <!-- input id="fileupload" type="file" name="files[]" data-url="server/php/" multiple -->
+        <form action="/api/uploadx" method="POST" enctype="multipart/form-data">
+          <span>Uppaa:</span>
+          <input type="hidden" name="bobo" value="baba"></input>
+          <input type="file" name="files[]"></input>
+        </form>
 
         <button data-bind="click: upload, ltext: 'userinfo.architect.upload.ok'"
                 data-test-id="userinfo-upload-ok"
