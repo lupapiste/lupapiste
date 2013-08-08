@@ -1,4 +1,4 @@
-R: 	Rakennuslupa
+\R: 	Rakennuslupa
 YA: Yleisten alueiden lupa
 Y: 	Ympäristölupa
 P: 	Poikkeamislupa
@@ -25,4 +25,8 @@ userinfo.architect.attachments.name.cv: CV
 userinfo.architect.upload.title: Lisää tiedosto
 userinfo.architect.upload.ok: Lisää
 userinfo.architect.upload.cancel: Peruuta
-userinfo.architect.attachments.dialog.message: Lähetä uusi
+userinfo.architect.upload.ready: Valmis
+userinfo.architect.upload.state.init: Lähetä uusi
+userinfo.architect.upload.state.sending: Tiedostoa ladataan...
+userinfo.architect.upload.state.ready: Valmis
+userinfo.architect.upload.state.error: Tapahtui virhe, yritä myöhemmin uudeleen.

@@ -126,17 +126,25 @@
   function UploadModel() {
     var self = this;
 
-    self.ready = ko.observable();
-    self.sending = ko.observable();
-    self.done = ko.observable();
+    self.stateInit     = 0;
+    self.stateReady    = 1;
+    self.stateSending  = 2;
+    self.stateDone     = 3;
+    self.stateError    = 4;
+    
+    self.state = ko.observable(-1); // -1 makes sure that init() fires state change.
+    
+    self.ready = _.partial(self.state, self.stateReady);
+    self.sending = _.partial(self.state, self.stateSending);
+    self.done = _.partial(self.state, self.stateDone);
+    self.error = _.partial(self.state, self.stateError);
+    
     self.startCallback = ko.observable();
     self.attachmentType = ko.observable();
     
     self.init = function(attachmentType) {
       return self
-        .ready(false)
-        .sending(false)
-        .done(false)
+        .state(self.stateInit)
         .startCallback(null)
         .attachmentType(attachmentType);
     }
@@ -149,14 +157,21 @@
     self.upload = function() {
       console.log("model:upload");
       var f = self.startCallback();
-      if (f) {
-        f();
-      } else {
-        console.log("f==null");
-      }
+      f();
       return false;
     };
+
+    // jQuery upload-plugin and knockout conflict on this property, this fixes that:
+    self.state.subscribe(function(value) {
+      var $input = $("#dialog-userinfo-architect-upload input[type=file]");
+      if (value < self.stateSending) {
+        $input.removeAttr("disabled");
+      } else {
+        $input.attr("disabled", "disabled");
+      }
+    });
     
+    window.um = self;
   }
 
   function Password() {
@@ -201,31 +216,14 @@
       dataType: "json",
       autoUpload: false,
       add: function(e, data) {
-        uploadModel.ready(true).startCallback(function() {
-          data.process().done(function () {
-            console.log("model:submit");
-            data.submit();
-          });
-        });
+        uploadModel
+          .startCallback(function() { data.process().done(function() { data.submit(); }); })
+          .ready();
       },
-      send: function(e, data) { uploadModel.ready(false).sending(true); },
-      processstart: function (e, data) { console.log("process-start:", e, data); },
-      done: function(e, data) { uploadModel.sending(false).done(true); },
+      send: uploadModel.sending,
+      done: uploadModel.done
     });
-    /*
-    ).bind("fileuploadprocessstart", ;
-      .bind("fileuploadadd", function (e, data) { console.log("ADD:", e, data); })
-      .bind("fileuploadsubmit", function (e, data) { console.log("SUBMIT:", e, data); })
-      .bind("fileuploadsend", function (e, data) { console.log("SEND:", e, data); })
-      .bind("fileuploaddone", function (e, data) { console.log("DONE:", e, data); })
-      .bind("fileuploadfail", function (e, data) { console.log("FAIL:", e, data); })
-      .bind("fileuploadalways", function (e, data) { console.log("ALWAYS:", e, data); })
-      .bind("fileuploadprogress", function (e, data) { console.log("PROGRESS:", e, data); })
-      .bind("fileuploadprogressall", function (e, data) { console.log("PROGRESS-ALL:", e, data); })
-      .bind("fileuploadstart", function (e, data) { console.log("START:", e, data); })
-      .bind("fileuploadstop", function (e, data) { console.log("STOP:", e, data); })
-      .bind("fileuploadchange", function (e, data) { console.log("CHANGE:", e, data); });
-    */
+    
   });
 
 })();

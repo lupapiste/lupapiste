@@ -175,9 +175,23 @@
       </div>
       <div class="dialog-content">
 
-        <div>
-          <span data-bind="ltext: 'userinfo.architect.attachments.dialog.message'"></span>
+        <div>State: <span data-bind="text: state"></span></div>
+        
+        <div data-bind="visible: state() < stateSending">
+          <span data-bind="ltext: 'userinfo.architect.upload.state.init'"></span>
           <span data-bind="text: loc('userinfo.architect.attachments.name', attachmentType())"></span>
+        </div>
+        
+        <div data-bind="visible: state() === stateSending">
+          <span data-bind="ltext: 'userinfo.architect.upload.state.sending'"></span>
+        </div>
+        
+        <div data-bind="visible: state() === stateDone">
+          <span data-bind="ltext: 'userinfo.architect.upload.state.ready'"></span>
+        </div>
+        
+        <div data-bind="visible: state() === stateError">
+          <span data-bind="ltext: 'userinfo.architect.upload.state.error'"></span>
         </div>
         
         <form action="/api/uploadx" method="POST" enctype="multipart/form-data">
@@ -186,12 +200,20 @@
         </form>
 
         <button data-bind="click: upload,
-                           enable: ready,
+                           visible: state() < stateSending,
+                           enable: state() == stateReady,
                            ltext: 'userinfo.architect.upload.ok'"
                 data-test-id="userinfo-upload-ok"
                 class="btn btn-primary btn-dialog">
         </button>
-        <button data-bind="ltext: 'userinfo.architect.upload.cancel'"
+        <button data-bind="visible: state() == stateDone,
+                           ltext: 'userinfo.architect.upload.ready'"
+                data-test-id="userinfo-upload-ready"
+                class="btn btn-primary btn-dialog close">
+        </button>
+        <button data-bind="enable: state() < stateSending,
+                           visible: state() < stateDone,
+                           ltext: 'userinfo.architect.upload.cancel'"
                 data-test-id="userinfo-upload-cancel"
                 class="btn btn-dialog close">
         </button>
