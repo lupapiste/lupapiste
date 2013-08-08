@@ -39,7 +39,8 @@
                              [lein-nitpicker "0.3.0"]
                              [lein-hgnotes "0.1.0"]]
                    :source-paths ["test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true"]}
+                   :jvm-opts ["-Djava.awt.headless=true"
+                              "-Xmx1G" "-XX:MaxPermSize=256M"]}
              :uberjar  {:source-paths ["main-src"]
                         :main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
