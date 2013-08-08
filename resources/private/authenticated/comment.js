@@ -9,6 +9,7 @@ var comments = (function() {
     self.comments = ko.observableArray();
     self.processing = ko.observable();
     self.pending = ko.observable();
+    self.to = ko.observable();
 
     self.refresh = function(application, target) {
       self.setApplicationId(application.id);
@@ -22,6 +23,10 @@ var comments = (function() {
       self.comments(ko.mapping.fromJS(filteredComments));
     };
 
+    self.isForMe = function(model) {
+      return model.to && model.to.id && model.to.id() === currentUser.id();
+    }
+
     self.setApplicationId = function(applicationId) {
       self.applicationId = applicationId;
     };
@@ -32,11 +37,12 @@ var comments = (function() {
 
     self.submit = function(model) {
       var id = self.applicationId;
-      ajax.command("add-comment", { id: id, text: model.text(), target: self.target()})
+      ajax.command("add-comment", { id: id, text: model.text(), target: self.target(), to: self.to()})
         .processing(self.processing)
         .pending(self.pending)
         .success(function() {
           model.text("");
+          self.to(undefined);
           repository.load(id);
         })
         .call();
