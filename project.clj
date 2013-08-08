@@ -43,7 +43,7 @@
                               "-Xmx1G" "-XX:MaxPermSize=256M"]}
              :uberjar  {:source-paths ["main-src"]
                         :main lupapalvelu.main}
-             :itest    {:test-paths ["test" "itest"]}
+             :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
                         :jvm-opts ["-Xmx1G" "-XX:MaxPermSize=256M"]}
