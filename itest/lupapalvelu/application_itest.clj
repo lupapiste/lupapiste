@@ -88,7 +88,7 @@
     authority-before-assignation => nil
     authority-after-assignation => (contains {:id (:id authority)})
     (fact "Authority is not able to submit"
-      (action-not-allowed sonja application-id :submit-application))))
+      sonja => (allowed? sonja :submit-application :id application-id))))
 
 (fact "Assign application to an authority and then to no-one"
   (let [application-id (create-app-id pena :municipality sonja-muni)
@@ -124,7 +124,7 @@
          (:opened application) => truthy
          (:opened application) => (:created application)))
     (fact "Authority could submit her own application"
-      (action-allowed sonja application-id :submit-application))
+      sonja => (allowed? :submit-application application-id))
     (fact "Application is submitted"
       (let [resp        (command sonja :submit-application :id application-id)
             application (:application (query sonja :application :id application-id))]
@@ -175,10 +175,10 @@
 (fact "adding comments"
   (let [{id :id}  (create-and-submit-application pena)]
     (fact "applicant can't comment with to"
-      pena => (not-allowed? :can-target-comment-to-authority)
-      pena => (not-allowed? :add-comment :id id :to irrelevant)
+      pena =not=> (allowed? :can-target-comment-to-authority)
+      pena =not=> (allowed? :add-comment :id id :to irrelevant)
       (command pena :add-comment :id id :text "comment1" :target "application") => ok?
-      (command pena :add-comment :id id :text "comment1" :target "application" :to sonja-id) => not-ok?)
+      (command pena :add-comment :id id :text "comment1" :target "application" :to sonja-id) =not=> ok?)
     (fact "authority can comment with to"
       sonja => (allowed? :can-target-comment-to-authority)
       sonja => (allowed? :add-comment :id id :to sonja-id)
