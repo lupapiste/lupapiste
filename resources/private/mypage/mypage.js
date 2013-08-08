@@ -221,9 +221,10 @@
           .ready();
       },
       send: uploadModel.sending,
-      done: uploadModel.done
+      done: uploadModel.done,
+      fail: uploadModel.error
     });
-    
+        
   });
 
 })();
