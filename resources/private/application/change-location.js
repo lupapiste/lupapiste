@@ -2,9 +2,27 @@ LUPAPISTE.ChangeLocationModel = function() {
   var self = this;
   self.dialogSelector = "#dialog-change-location";
 
-  // Model
+  var _map = null;
 
-  self.map = null;
+  self.map = function() {
+    if (!_map) _map = gis
+        .makeMap("change-location-map")
+        .center(404168, 6693765, 10)
+        .addClickHandler(function(x, y) {
+          self
+            .address("")
+            .propertyId("")
+            .beginUpdateRequest()
+            .setXY(x, y)
+            .searchPropertyId(x, y)
+            .searchAddress(x, y);
+          return false;
+        });
+    return _map;
+  };
+
+  // Model
+  
   self.id = 0;
   self.municipalityCode = 0;
   self.x = 0;
@@ -21,21 +39,18 @@ LUPAPISTE.ChangeLocationModel = function() {
   });
 
   self.drawLocation = function() {
-    self.map.clear().add(self.x, self.y);
+    return self.map().clear().add(self.x, self.y);
   };
 
   self.setXY = function(x, y) {
     self.x = x;
     self.y = y;
-    if (self.map) {
-      self.drawLocation();
-    }
+    self.drawLocation();
+    return self;
   };
 
   self.center = function(zoom) {
-    if (self.map) {
-      self.map.center(self.x, self.y, zoom);
-    }
+    self.map().center(self.x, self.y, zoom);
   };
 
   self.reset = function(app) {
@@ -45,7 +60,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.address(app.address());
     self.propertyId(app.propertyId());
     self.errorMessage(null);
-    self.map.clear().updateSize();
+    self.map().clear().updateSize();
     self.center(10);
     self.processing(false);
     self.pending(false);
@@ -115,18 +130,6 @@ LUPAPISTE.ChangeLocationModel = function() {
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
-  // Click on the map
-
-  self.click = function(x, y) {
-    self.setXY(x, y);
-
-    self.address("");
-    self.propertyId("");
-
-    self.beginUpdateRequest().searchPropertyId(x, y).searchAddress(x, y);
-    return false;
-  };
-
   // Service functions
 
   self.searchPointByPropertyId = function(propertyId) {
@@ -163,9 +166,4 @@ LUPAPISTE.ChangeLocationModel = function() {
     return self;
   };
 
-  // DOM ready
-  $(function() {
-    self.map = gis.makeMap("change-location-map").center(404168, 6693765, 10);
-    self.map.addClickHandler(self.click);
-  });
 };
