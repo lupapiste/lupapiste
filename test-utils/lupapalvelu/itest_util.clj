@@ -195,6 +195,15 @@
     (success resp) => true
     (get-in resp [:actions action :ok]) => falsey))
 
+(defn allowed? [action]
+  (fn [apikey]
+    (let [{:keys [ok actions]} (query apikey :allowed-actions)
+          allowed? (-> actions action :ok)]
+      (and ok allowed?))))
+
+(defn not-allowed? [action]
+  (complement (allowed? action)))
+
 ;;
 ;; Stuffin' data in
 ;;
