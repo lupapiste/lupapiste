@@ -135,6 +135,15 @@
 
   }
 
+  function UploadModel() {
+    var self = this;
+    self.foo = ko.observable("foozzaa");
+    self.upload = function() {
+      console.log("Uppaa!");
+      return false;
+    };
+  }
+  
   function Password() {
     this.oldPassword = ko.observable("");
     this.newPassword = ko.observable("");
@@ -160,7 +169,8 @@
 
   var ownInfo = new OwnInfo();
   var pw = new Password();
-
+  var uploadModel = new UploadModel();
+  
   hub.onPageChange("mypage", function() { ownInfo.clear(); pw.clear(); });
 
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
@@ -170,6 +180,7 @@
   $(function() {
     $("#own-info-form").applyBindings(ownInfo);
     $("#pw-form").applyBindings(pw);
+    $("#dialog-userinfo-architect-upload").applyBindings(uploadModel);
   });
 
 })();
