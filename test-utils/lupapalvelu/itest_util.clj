@@ -127,13 +127,6 @@
   (ok? {:ok true}) => true
   (ok? {:ok false}) => false)
 
-(defn not-ok? [resp]
-  ((comp not ok?) resp))
-
-(fact "not-ok?"
-  (not-ok? {:ok false}) => true
-  (not-ok? {:ok true}) => false)
-
 (defn http200? [{:keys [status]}]
   (= status 200))
 
