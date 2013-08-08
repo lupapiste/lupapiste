@@ -39,13 +39,14 @@
                              [lein-nitpicker "0.3.0"]
                              [lein-hgnotes "0.1.0"]]
                    :source-paths ["test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true"]}
+                   :jvm-opts ["-Djava.awt.headless=true"
+                              "-Xmx1G" "-XX:MaxPermSize=256M"]}
              :uberjar  {:source-paths ["main-src"]
                         :main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
-                        :jvm-opts ["-Xmx2G" "-XX:MaxPermSize=1G"]}
+                        :jvm-opts ["-Xmx1G" "-XX:MaxPermSize=256M"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
