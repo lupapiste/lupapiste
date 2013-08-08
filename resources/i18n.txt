@@ -25,3 +25,4 @@ userinfo.architect.attachments.name.cv: CV
 userinfo.architect.upload.title: Lisää tiedosto
 userinfo.architect.upload.ok: Lisää
 userinfo.architect.upload.cancel: Peruuta
+userinfo.architect.attachments.dialog.message: Lähetä uusi
