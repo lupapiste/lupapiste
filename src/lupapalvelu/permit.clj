@@ -19,12 +19,11 @@
 ;; Helpers
 ;;
 
-(errorf "***** permit-type returns always '%s' if not set. Should be set!" R)
 (defn permit-type
   "gets the permit-type of application"
   [application]
   {:post [(not= % nil)]}
-  (or (:permitType application) R))
+  (:permitType application))
 
 ;;
 ;; Validate
