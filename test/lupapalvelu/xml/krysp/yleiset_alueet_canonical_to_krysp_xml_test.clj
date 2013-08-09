@@ -23,20 +23,20 @@
     (println xml-s)
     (println "\n")
 
-    (println "\n application: ")
-    (clojure.pprint/pprint application)
-    (println "\n")
-
-    (println "\n kaivulupa_to_krysp: ")
-    (clojure.pprint/pprint kaivulupa_to_krysp)
-    (println "\n")
+;    (println "\n application: ")
+;    (clojure.pprint/pprint application)
+;    (println "\n")
+;
+;    (println "\n kaivulupa_to_krysp: ")
+;    (clojure.pprint/pprint kaivulupa_to_krysp)
+;    (println "\n")
 
     ;; Alla oleva tekee jo validoinnin,
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:yleiset-alueet-ftp-user "sipoo"}) ;TODO: own test
 
     (with-open
-      [out-file (writer "/Users/jarias/muunnos-example.xml" )]
+      [out-file (writer "/Users/jarias/krysp-muunnos-oma-testi.xml" )]
       (emit xml out-file))
 
     (fact "xml exist" xml => truthy)
