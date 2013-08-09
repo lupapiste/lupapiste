@@ -104,15 +104,6 @@
   [{{:keys [municipality]} :data}]
   (ok :operations (operations/municipality-operations municipality)))
 
-;; not used.
-(defquery "organization"
-  {:parameters [:organizationId] :verified true}
-  [{{:keys [organizationId]} :data}]
-  (if-let [{:keys [links]} (get-organization organizationId)]
-    (ok :links links
-        :attachments (attachments/organization-attachments organizationId))
-    (fail :unknown-organization)))
-
 (defn resolve-organization [municipality permit-type]
   (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType permit-type}]})]
     (when (> (count organizations) 1)

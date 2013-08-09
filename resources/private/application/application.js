@@ -614,12 +614,9 @@
         $('#application-map').css("display", "inline-block");
       }
 
-      (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
-
-      if (application.shapes && application.shapes().length > 0) {
-        applicationMap.drawShape(application.shapes()[0]);
-        inforequestMap.drawShape(application.shapes()[0]);
-      }
+      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application")
+      map.clear().center(x, y, 10).add(x, y);
+      if (application.shapes && application.shapes().length > 0) map.drawShape(application.shapes()[0]);
 
       if (application.infoRequest()) {
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
@@ -727,13 +724,27 @@
     };
   }();
 
+  function createMap(divName) { return gis.makeMap(divName, false).center([{x: 404168, y: 6693765}], 12); }
+  
+  function getOrCreateMap(kind) {
+    if (kind === "application") {
+      if (!applicationMap) applicationMap = createMap("application-map"); 
+      return applicationMap;
+    } else if (kind === "inforequest") {
+      if (!inforequestMap) inforequestMap = createMap("inforequest-map");
+      return inforequestMap;
+    } else {
+      throw "Unknown kind: " + kind;
+    }
+  }
+  
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
     if (newId !== currentId || !tab) {
       pageutil.showAjaxWait();
       currentId = newId;
-      ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
+      getOrCreateMap(kind).updateSize();
       repository.load(currentId);
     }
     selectTab(tab || "info");
@@ -835,9 +846,6 @@
   var sendNeighborEmailModel = new SendNeighborEmailModel();
 
   $(function() {
-    applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
-    inforequestMap = gis.makeMap("inforequest-map", false).center([{x: 404168, y: 6693765}], 12);
-
     var bindings = {
       application: application,
       authorities: authorities,

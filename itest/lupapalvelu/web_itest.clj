@@ -9,16 +9,16 @@
 
 (facts
   (fact "ping"
-    (command pena :ping) => not-ok?
+    (command pena :ping) =not=> ok?
     (query pena :ping) => ok?
     (raw pena :ping) => (contains {:status 404}))
   (fact "ping-raw"
-    (command pena :ping-raw) => not-ok?
-    (query pena :ping-raw) => not-ok?
+    (command pena :ping-raw) =not=> ok?
+    (query pena :ping-raw) =not=> ok?
     (raw pena :ping-raw) => (contains {:body "pong" :status 200}))
   (fact "ping!"
     (command pena :ping!) => ok?
-    (query pena :ping!) => not-ok?
+    (query pena :ping!) =not=> ok?
     (raw pena :ping!) => (contains {:status 404})))
 
 (defn ->cookie-store [store]

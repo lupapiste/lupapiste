@@ -127,13 +127,6 @@
   (ok? {:ok true}) => true
   (ok? {:ok false}) => false)
 
-(defn not-ok? [resp]
-  ((comp not ok?) resp))
-
-(fact "not-ok?"
-  (not-ok? {:ok false}) => true
-  (not-ok? {:ok true}) => false)
-
 (defn http200? [{:keys [status]}]
   (= status 200))
 
@@ -172,10 +165,6 @@
         app   (:application resp)]
     app))
 
-(fact "create-and-submit-application"
-  (let [app  (create-and-submit-application pena)]
-    (:state app) => "submitted"))
-
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
     (command apikey :add-comment :id id :text "hello" :target "application") => ok?))
@@ -185,24 +174,11 @@
     response => ok?
     application))
 
-(defn action-allowed [apikey id action]
-  (let [resp (query apikey :allowed-actions :id id)]
-    (success resp) => true
-    (get-in resp [:actions action :ok]) => truthy))
-
-(defn action-not-allowed [apikey id action]
-  (let [resp (query apikey :allowed-actions :id id)]
-    (success resp) => true
-    (get-in resp [:actions action :ok]) => falsey))
-
 (defn allowed? [action & args]
   (fn [apikey]
     (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
           allowed? (-> actions action :ok)]
       (and ok allowed?))))
-
-(defn not-allowed? [action & args]
-  (complement (apply allowed? action args)))
 
 ;;
 ;; Stuffin' data in
