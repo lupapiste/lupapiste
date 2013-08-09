@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.mapping-common)
 
+
 (def tunnus-children [{:tag :valtakunnallinenNumero}
                       {:tag :jarjestysnumero}
                       {:tag :kiinttun}
@@ -10,10 +11,13 @@
                       :child [{:tag :Point
                                :child [{:tag :pos}]}]})
 
-(def postiosoite-children [{:tag :kunta}
-                           {:tag :osoitenimi :child [{:tag :teksti}]}
-                           {:tag :postinumero}
-                           {:tag :postitoimipaikannimi}])
+(def ^:private postiosoite-children [{:tag :kunta}
+                                     {:tag :osoitenimi :child [{:tag :teksti}]}
+                                     {:tag :postinumero}
+                                     {:tag :postitoimipaikannimi}])
+
+;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
+(def postiosoite-children-ns-yht (into [] (map (fn [m] (assoc m :ns "yht")) postiosoite-children)))
 
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
@@ -75,15 +79,18 @@
                              {:tag :rakennusoikeusYhteensa :ns "yht" }
                              {:tag :uusiKytkin :ns "yht"}]})
 
-;; Used also in "yleiset alueet" (that's why namespace is defined again, ':ns "yht"')
-(def henkilo-child [{:tag :nimi
-                     :child [{:tag :etunimi}
-                             {:tag :sukunimi}]}
-                    {:tag :osoite :child postiosoite-children}
-                    {:tag :sahkopostiosoite}
-                    {:tag :faksinumero}
-                    {:tag :puhelin}
-                    {:tag :henkilotunnus}])
+
+(def ^:private henkilo-child [{:tag :nimi
+                               :child [{:tag :etunimi}
+                                       {:tag :sukunimi}]}
+                              {:tag :osoite :child postiosoite-children}
+                              {:tag :sahkopostiosoite}
+                              {:tag :faksinumero}
+                              {:tag :puhelin}
+                              {:tag :henkilotunnus}])
+
+;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
+(def henkilo-child-ns-yht (into [] (map (fn [m] (assoc m :ns "yht")) henkilo-child)))
 
 (def yritys-child [{:tag :nimi}
                    {:tag :liikeJaYhteisotunnus}
@@ -94,6 +101,16 @@
                    {:tag :puhelin}
                    {:tag :www}
                    {:tag :sahkopostiosoite}])
+
+(def yritys-child-ns-yht [{:tag :nimi}
+                          {:tag :liikeJaYhteisotunnus}
+                          {:tag :kayntiosoite :child postiosoite-children-ns-yht}
+                          {:tag :kotipaikka}
+                          {:tag :postiosoite :child postiosoite-children-ns-yht}
+                          {:tag :faksinumero}
+                          {:tag :puhelin}
+                          {:tag :www}
+                          {:tag :sahkopostiosoite}])
 
 (def henkilo {:tag :henkilo :ns "yht"
               :child henkilo-child})
