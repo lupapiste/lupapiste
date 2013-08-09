@@ -233,7 +233,7 @@
         .applyBindings(uploadModel)
         .find("form")
           .fileupload({
-            url: "/api/uploadx",
+            url: "/api/upload-user-attachment",
             type: "POST",
             dataType: "json",
             replaceFileInput: true,

@@ -11,6 +11,7 @@
             [sade.util :refer [lower-case trim] :as util]
             [sade.env :as env]
             [noir.session :as session]
+            [noir.core :refer [defpage]]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
             [noir.response :as resp]))
@@ -98,9 +99,7 @@
   (ok :user user))
 
 (defcommand "save-user-info"
-  {:parameters [:firstName :lastName :street :city :zip :phone
-                :architect :degree :experience :fise :qualification
-                :companyName :companyId :companyStreet :companyZip :companyCity]
+  {:parameters [:firstName :lastName]
    :authenticated true
    :verified true}
   [{data :data {user-id :id} :user}]
@@ -112,6 +111,11 @@
                              :companyName :companyId :companyStreet :companyZip :companyCity])})
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
+
+(defpage [:post "/api/upload-user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
+  (info "upload-user-attachment" attachment-type filename content-type size)
+  ; IE is fucking stupid: use content type text/plain, or else IE prompts to download response:  
+  (->> {:fileId "1234567890"} (resp/content-type "text/plain") (resp/status 200)))
 
 (defcommand "save-user-attachment"
   {:parameters [:type]
