@@ -167,6 +167,8 @@
         .state(self.stateInit)
         .start(null)
         .attachmentType(attachmentType)
+        .filename(null)
+        .filesize(null)
         .csrf($.cookie("anti-csrf-token"));
     };
     
