@@ -1,19 +1,15 @@
 (ns lupapalvelu.document.rakennuslupa_canonical
   (:use [lupapalvelu.core :only [now]]
         [sade.strings]
-        [clj-time.coerce :only [from-long]]
-        [lupapalvelu.i18n :only [with-lang loc]])
+        [lupapalvelu.i18n :only [with-lang loc]]
+        [lupapalvelu.document.canonical-common])
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
-            [clojure.string :as s]
-            [clj-time.format :as timeformat]))
+            [clojure.string :as s]))
 
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
-
-; Empty String will be rendered as empty XML element
-(def empty-tag "")
 
 ; State of the content when it is send over KRYSP
 ; NOT the same as the state of the application!
@@ -25,23 +21,6 @@
    :sent "vireill\u00e4"
    :submitted "vireill\u00e4"
    :complement-needed "vireill\u00e4"})
-
-(defn to-xml-date [timestamp]
-  (let [d (from-long timestamp)]
-    (if-not (nil? timestamp)
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") d))))
-
-(defn to-xml-datetime [timestamp]
-  (let [d (from-long timestamp)]
-    (if-not (nil? timestamp)
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
-
-(defn to-xml-datetime-from-string [date-as-string]
-  (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
-    (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
-
-(defn by-type [documents]
-  (group-by #(keyword (get-in % [:schema :info :name])) documents))
 
 (defn- get-simple-osoite [osoite]
   {:osoitenimi {:teksti (-> osoite :katu :value)}
