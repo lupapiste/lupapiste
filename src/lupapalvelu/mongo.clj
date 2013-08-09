@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [count])
   (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error fatal)]
             [monger.operators :refer :all]
+            [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
             [monger.core :as m]
             [monger.collection :as mc]
@@ -120,12 +121,14 @@
     (gfs/metadata (assoc (apply hash-map metadata) :uploaded (System/currentTimeMillis)))))
 
 (defn download [file-id]
-  (if-let [attachment (gfs/find-one {:_id file-id})]
-    {:content (fn [] (.getInputStream attachment))
-     :content-type (.getContentType attachment)
-     :content-length (.getLength attachment)
-     :file-name (.getFilename attachment)
-     :application (.getString (.getMetaData attachment) "application")}))
+  (when-let [attachment (gfs/find-one {:_id file-id})]
+    (let [metadata (from-db-object (.getMetaData attachment) :true)]
+      {:content (fn [] (.getInputStream attachment))
+       :content-type (.getContentType attachment)
+       :content-length (.getLength attachment)
+       :file-name (.getFilename attachment)
+       :metadata metadata
+       :application (:application metadata)})))
 
 (defn delete-file [file-id]
   (info "removing file" file-id)
