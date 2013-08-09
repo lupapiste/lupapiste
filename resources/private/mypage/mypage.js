@@ -157,6 +157,8 @@
     self.error = _.partial(self.state, self.stateError);
     
     self.start = ko.observable();
+    self.filename = ko.observable();
+    self.filesize = ko.observable();
     self.attachmentType = ko.observable();
     self.csrf = ko.observable();
 
@@ -212,8 +214,11 @@
             replaceFileInput: true,
             autoUpload: false,
             add: function(e, data) {
+              var f = data.files[0];
               uploadModel
                 .start(function() { data.process().done(function() { data.submit(); }); })
+                .filename(f.name)
+                .filesize(f.size)
                 .ready();
             },
             send: uploadModel.sending,
