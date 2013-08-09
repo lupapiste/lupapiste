@@ -187,7 +187,7 @@
 (defn upload-attachment [apikey application-id attachment-id expect-to-succeed]
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/upload")
+        uri         (str (server-address) "/api/upload/attachment")
         resp        (c/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
