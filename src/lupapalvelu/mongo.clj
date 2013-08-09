@@ -106,10 +106,11 @@
   input)
 
 (defn upload [file-id filename content-type tempfile & metadata]
-  (assert (and (instance? Long file-id)
+  (assert (and (string? file-id)
                (string? filename)
                (string? content-type)
                (instance? java.io.File tempfile)
+               (sequential? metadata)
                (even? (clojure.core/count metadata))))
   (gfs/store-file
     (gfs/make-input-file tempfile)
