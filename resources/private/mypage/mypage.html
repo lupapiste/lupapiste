@@ -95,20 +95,17 @@
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.examination'"></td>
                   <td>
-                    <span data-bind="visible: examination">
-                      <a data-bind="click: download('examination'), text: examination.name" href="#"></a>
-                      <a data-bind="click: remove('examination'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                    </span>
-                    <span data-bind="visible: !examination()">
-                      <a data-bind="click: upload('examination'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                    </span>
+                    <a data-bind="click: download(examination), visible: examination.filename, text: examination.filename" href="#"></a>
+                    <a data-bind="click: remove(examination), visible: examination.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                    <a data-bind="click: upload(examination), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
                   </td>
                 </tr>
+                <!--
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
                   <td>
-                    <span data-bind="visible: proficiency">
-                      <a data-bind="click: download('proficiency'), text: examination.name" href="#"></a>
+                    <span data-bind="visible: proficiency.filename">
+                      <a data-bind="click: download('proficiency'), text: proficiency.filename" href="#"></a>
                       <a data-bind="click: remove('proficiency'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
                     </span>
                     <span data-bind="visible: !proficiency()">
@@ -119,8 +116,8 @@
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
                   <td>
-                    <span data-bind="visible: cv">
-                      <a data-bind="click: download('cv'), text: examination.name" href="#"></a>
+                    <span data-bind="visible: cv.filename">
+                      <a data-bind="click: download('cv'), text: cv.filename" href="#"></a>
                       <a data-bind="click: remove('cv'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
                     </span>
                     <span data-bind="visible: !cv()">
@@ -128,6 +125,7 @@
                     </span>
                   </td>
                 </tr>
+                -->
               </tbody>
             </table>
           </div>        
