@@ -10,10 +10,10 @@
                       :child [{:tag :Point
                                :child [{:tag :pos}]}]})
 
-(def ^:private postiosoite-children [{:tag :kunta}
-                                     {:tag :osoitenimi :child [{:tag :teksti}]}
-                                     {:tag :postinumero}
-                                     {:tag :postitoimipaikannimi}])
+(def postiosoite-children [{:tag :kunta}
+                           {:tag :osoitenimi :child [{:tag :teksti}]}
+                           {:tag :postinumero}
+                           {:tag :postitoimipaikannimi}])
 
 (def ^:private osoite {:tag :osoite  :ns "yht"
                        :child postiosoite-children})
@@ -75,34 +75,38 @@
                              {:tag :rakennusoikeusYhteensa :ns "yht" }
                              {:tag :uusiKytkin :ns "yht"}]})
 
-(def henkilo
-  {:tag :henkilo :ns "yht"
-   :child [{:tag :nimi
-            :child [{:tag :etunimi}
-                    {:tag :sukunimi}]}
-           {:tag :osoite :child postiosoite-children}
-           {:tag :sahkopostiosoite}
-           {:tag :faksinumero}
-           {:tag :puhelin}
-           {:tag :henkilotunnus}]})
+;; Used also in "yleiset alueet" (that's why namespace is defined again, ':ns "yht"')
+(def henkilo-child [{:tag :nimi
+                     :child [{:tag :etunimi}
+                             {:tag :sukunimi}]}
+                    {:tag :osoite :child postiosoite-children}
+                    {:tag :sahkopostiosoite}
+                    {:tag :faksinumero}
+                    {:tag :puhelin}
+                    {:tag :henkilotunnus}])
+
+(def yritys-child [{:tag :nimi}
+                   {:tag :liikeJaYhteisotunnus}
+                   {:tag :kayntiosoite :child postiosoite-children}
+                   {:tag :kotipaikka}
+                   {:tag :postiosoite :child postiosoite-children}
+                   {:tag :faksinumero}
+                   {:tag :puhelin}
+                   {:tag :www}
+                   {:tag :sahkopostiosoite}])
+
+(def henkilo {:tag :henkilo :ns "yht"
+              :child henkilo-child})
 
 (def yritys {:tag :yritys :ns "yht"
-             :child [{:tag :nimi}
-                     {:tag :kayntiosoite :child postiosoite-children}
-                     {:tag :liikeJaYhteisotunnus}
-                     {:tag :kotipaikka}
-                     {:tag :postiosoite :child postiosoite-children}
-                     {:tag :faksinumero}
-                     {:tag :puhelin}
-                     {:tag :www}
-                     {:tag :sahkopostiosoite}]})
+             :child yritys-child})
 
 (def osapuoli-body {:tag :Osapuoli
-                     :child [{:tag :kuntaRooliKoodi}
-                             {:tag :VRKrooliKoodi}
-                             henkilo
-                             yritys
-                             {:tag :turvakieltoKytkin}]})
+                    :child [{:tag :kuntaRooliKoodi}
+                            {:tag :VRKrooliKoodi}
+                            henkilo
+                            yritys
+                            {:tag :turvakieltoKytkin}]})
 
 (def osapuolet
   {:tag :Osapuolet :ns "yht"
