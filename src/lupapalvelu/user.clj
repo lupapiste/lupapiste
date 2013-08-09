@@ -112,8 +112,8 @@
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
 
-(defpage [:post "/api/upload-user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
-  (info "upload-user-attachment" attachment-type filename content-type size)
+(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
+  (info "upload/user-attachment" attachment-type filename content-type size)
   ; IE is fucking stupid: use content type text/plain, or else IE prompts to download response:  
   (->> {:fileId "1234567890"} (resp/json) (resp/content-type "text/plain") (resp/status 200)))
 
