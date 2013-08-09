@@ -398,7 +398,7 @@
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
   (if (> size 0)
     (let [file-id (mongo/create-id)
-          sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+          sanitazed-filename (mime/sanitize-filename filename)]
       (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
       (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
