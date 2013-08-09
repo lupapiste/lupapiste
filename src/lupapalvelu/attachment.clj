@@ -403,7 +403,7 @@
       (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
-            (mongo/upload id file-id sanitazed-filename content-type tempfile created)
+            (mongo/upload file-id sanitazed-filename content-type tempfile :application id)
             (.delete (io/file tempfile))
             (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
               (executed "add-comment"
@@ -591,7 +591,7 @@
     (with-open [in ((:content (mongo/download fileId)))
                 out (io/output-stream temp-file)]
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
-    (mongo/upload application-id new-file-id filename contentType temp-file created)
+    (mongo/upload new-file-id filename contentType temp-file :application application-id)
     (let [new-version (if re-stamp?
                         (update-version-content application-id attachment-id new-file-id (.length temp-file) created)
                         (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) created user true))]

@@ -105,13 +105,18 @@
   (.setId input id)
   input)
 
-(defn upload [applicationId file-id filename content-type tempfile timestamp]
+(defn upload [file-id filename content-type tempfile & metadata]
+  (assert (and (instance? Long file-id)
+               (string? filename)
+               (string? content-type)
+               (instance? java.io.File tempfile)
+               (even? (clojure.core/count metadata))))
   (gfs/store-file
     (gfs/make-input-file tempfile)
     (set-file-id file-id)
     (gfs/filename filename)
     (gfs/content-type content-type)
-    (gfs/metadata {:uploaded timestamp, :application applicationId})))
+    (gfs/metadata (assoc (apply hash-map metadata) :uploaded (System/currentTimeMillis)))))
 
 (defn download [file-id]
   (if-let [attachment (gfs/find-one {:_id file-id})]
