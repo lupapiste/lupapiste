@@ -1,16 +1,17 @@
 (ns lupapalvelu.document.yleiset-alueet-kaivulupa-canonical-test
   (:use [lupapalvelu.factlet]
         [midje.sweet]
+        [lupapalvelu.document.canonical-common]
         [lupapalvelu.document.yleiset-alueet-kaivulupa-canonical]
         [sade.util :only [contains-value?]]))
 
-;; NOTE: Rakennuslupa-canonical-testistä poiketen otin "auth"-kohdan pois.
+;; NOTE: Rakennuslupa-canonical-testista poiketen otin "auth"-kohdan pois.
 
-;; TODO: Pitäisikö "location"-kohta poistaa? Sillä ei kuulemma tehdä mitään.
+;; TODO: Pitaisiko "location"-kohta poistaa? Silla ei kuulemma tehda mitaan.
 
 ;; TODO: Kopioi lausuntokohta, "statements", rakennusluvan puolelta.
 
-;; TODO: Jossain itesteissä pitäisi testata seuraavat applicationin kohdat:
+;; TODO: Jossain itesteissa pitaisi testata seuraavat applicationin kohdat:
 ;;        - operations
 ;;        - allowedAttachmentTypes
 ;;        - organization ?
@@ -153,7 +154,8 @@
                   :text "Savupiippu pit\u00e4\u00e4 olla."}])
 
 (def application
-  {:created 1372331179008,
+  {:permitType "YA",
+   :created 1372331179008,
    :opened 1372331643985,
    :modified 1372342070624,
    :state "open",
@@ -176,6 +178,9 @@
         YleisetAlueet (:YleisetAlueet canonical) => truthy
         yleinenAlueAsiatieto (first (:yleinenAlueAsiatieto YleisetAlueet)) => truthy
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
+
+        Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
+        Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
 
         ;; TODO: Naita voi yhdistella perakkain '->':lla... Refaktoroi.
         Maksaja (-> Tyolupa :maksajatieto :Maksaja) => truthy
@@ -227,6 +232,9 @@
 ;      (clojure.pprint/pprint canonical)
 
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
+
+      (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => "kaivu- tai katuty\u00f6lupa")
+      (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false) ;; TODO: Onko tama checkki ok?
 
       ;; Maksajan tiedot
       (fact "maksaja-etunimi" (:etunimi maksaja-henkilo-nimi) => (-> nimi :etunimi :value))
