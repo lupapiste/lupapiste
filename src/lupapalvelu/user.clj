@@ -7,9 +7,11 @@
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.mime :as mime]
             [sade.security :as sadesecurity]
             [sade.util :refer [lower-case trim] :as util]
             [sade.env :as env]
+            [sade.strings :as ss]
             [noir.session :as session]
             [noir.core :refer [defpage]]
             [lupapalvelu.token :as token]
@@ -113,16 +115,29 @@
   (ok))
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
-  (info "upload/user-attachment" attachment-type filename content-type size)
-  ; IE is fucking stupid: use content type text/plain, or else IE prompts to download response:  
-  (->> {:fileId "1234567890"} (resp/json) (resp/content-type "text/plain") (resp/status 200)))
+  (let [user              (security/current-user)
+        filename          (mime/sanitize-filename filename)
+        attachment-type   (keyword attachment-type)
+        new-file-id       (mongo/create-id)
+        old-file-id       (get-in user [attachment-type :id])
+        file-info         {:file-id new-file-id
+                           :filename filename
+                           :content-type content-type
+                           :size size}]
+    
+    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size)
 
-(defcommand "save-user-attachment"
-  {:parameters [:type]
-   :authenticated true}
-  [{{attachment-type :type} :data {user-id :id} :user}]
-  (info "save:" user-id attachment-type)
-  (ok))
+    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type"))
+    (when-not (mime/allowed-file? filename) (fail! "unsupported file type"))
+    
+    (mongo/upload new-file-id filename content-type tempfile :user-id (:id user) :attachment-type attachment-type)
+    (mongo/update-by-id :users (:id user) {$set {attachment-type file-info}})
+    (when old-file-id (mongo/delete-file old-file-id))
+    
+    (->> (assoc file-info :ok true) 
+      (resp/json)
+      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.  
+      (resp/status 200))))
 
 (env/in-dev
   (defcommand "create-apikey"
