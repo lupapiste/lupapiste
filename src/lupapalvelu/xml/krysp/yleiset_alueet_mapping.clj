@@ -43,7 +43,7 @@
                         :child mapping-common/henkilo-child-ns-yht}]}
               {:tag :yritystieto
                :child [{:tag :Yritys
-                        :child yritys-child-ns-yht}]}
+                        :child mapping-common/yritys-child-ns-yht}]}
               {:tag :laskuviite}])
 
 (def toimintajakso [{:tag :alkuHetki :ns "yht"}
