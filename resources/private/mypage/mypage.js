@@ -131,14 +131,14 @@
     self.done = _.partial(self.state, self.stateDone);
     self.error = _.partial(self.state, self.stateError);
     
-    self.startCallback = ko.observable();
+    self.start = ko.observable();
     self.attachmentType = ko.observable();
     self.csrf = ko.observable();
 
     self.init = function(attachmentType) {
       return self
         .state(self.stateInit)
-        .startCallback(null)
+        .start(null)
         .attachmentType(attachmentType)
         .csrf($.cookie("anti-csrf-token"));
     };
@@ -149,13 +149,12 @@
     };
 
     self.upload = function() {
-      console.log("model:upload");
-      var f = self.startCallback();
-      f();
+      self.start()();
       return false;
     };
 
-    // jQuery upload-plugin and knockout conflict on this property, this fixes that:
+    // jQuery upload-plugin replaces the input element after each file selection and
+    // doing so it loses all listeners. This keeps input up-to-date with 'state':
     self.state.subscribe(function(value) {
       var $input = $("#dialog-userinfo-architect-upload input[type=file]");
       if (value < self.stateSending) {
@@ -201,24 +200,27 @@
   ownInfo.saved.subscribe(function(v) { if (v) { ownInfo.updateUserName(); }});
 
   $(function() {
-    $("#own-info-form").applyBindings(ownInfo);
-    $("#pw-form").applyBindings(pw);
-    $("#dialog-userinfo-architect-upload").applyBindings(uploadModel);
-    
-    $("#dialog-userinfo-architect-upload form").fileupload({
-      dataType: "json",
-      autoUpload: false,
-      add: function(e, data) {
-        uploadModel
-          .startCallback(function() { data.process().done(function() { data.submit(); }); })
-          .ready();
-      },
-      replaceFileInput: false,
-      send: uploadModel.sending,
-      done: uploadModel.done,
-      fail: uploadModel.error
-    });
-        
+    $("#mypage")
+      .find("#own-info-form").applyBindings(ownInfo).end()
+      .find("#pw-form").applyBindings(pw).end()
+      .find("#dialog-userinfo-architect-upload")
+        .applyBindings(uploadModel)
+        .find("form")
+          .fileupload({
+            url: "/api/uploadx",
+            type: "POST",
+            dataType: "json",
+            replaceFileInput: true,
+            autoUpload: false,
+            add: function(e, data) {
+              uploadModel
+                .start(function() { data.process().done(function() { data.submit(); }); })
+                .ready();
+            },
+            send: uploadModel.sending,
+            done: uploadModel.done,
+            fail: uploadModel.error
+          });
   });
 
 })();

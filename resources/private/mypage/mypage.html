@@ -192,11 +192,22 @@
           <span data-bind="ltext: 'userinfo.architect.upload.state.error'"></span>
         </div>
         
-        <form action="/api/uploadx" method="POST" enctype="multipart/form-data">
+        <form>
           <input type="file" name="files[]"></input>
           <input data-bind="attr: {value: attachmentType}" type="hidden" name="attachmentType"></input>
           <input data-bind="attr: {value: csrf}" type="hidden" name="__anti-forgery-token"></input>
         </form>
+
+        <div>
+          <div data-bind="visible: !filename()">
+            <span data-bind="ltext: 'userinfo.architect.upload.no-file'"></span>
+          </div>
+          <div data-bind="visible: filename">
+            <span data-bind="ltext: 'userinfo.architect.upload.filename'"></span>
+            <span data-bind="text: filename"></span>
+            <span data-bind="size: filesize"></span>
+          </div>
+        </div>
 
         <button data-bind="click: upload,
                            visible: state() < stateSending,
