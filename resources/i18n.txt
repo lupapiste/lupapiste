@@ -2,3 +2,5 @@ R: 	Rakennuslupa
 YA: Yleisten alueiden lupa
 Y: 	Ympäristölupa
 P: 	Poikkeamislupa
+comment-request-label: Lähetä ilmoitus viestistä
+comment-request-prompt: Valitse käyttäjä
