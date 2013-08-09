@@ -6,6 +6,10 @@
 ; Empty String will be rendered as empty XML element
 (def empty-tag "")
 
+; State of the content when it is send over KRYSP
+; NOT the same as the state of the application!
+(def toimituksenTiedot-tila "keskener\u00e4inen")
+
 (defn to-xml-date [timestamp]
   (let [d (tc/from-long timestamp)]
     (if-not (nil? timestamp)

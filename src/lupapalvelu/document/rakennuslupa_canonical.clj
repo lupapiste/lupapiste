@@ -11,10 +11,6 @@
 ;; Macro to get values from
 (defmacro value [m & path] `(-> ~m ~@path :value))
 
-; State of the content when it is send over KRYSP
-; NOT the same as the state of the application!
-(def toimituksenTiedot-tila "keskener\u00e4inen")
-
 (def application-state-to-krysp-state
   {:draft "uusi lupa, ei k\u00e4sittelyss\u00e4"
    :open "vireill\u00e4"
