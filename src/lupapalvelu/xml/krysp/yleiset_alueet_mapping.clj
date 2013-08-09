@@ -16,10 +16,6 @@
   #_(:import [java.util.zip ZipOutputStream ZipEntry]))
 
 
-;; the namespace "yht" added to the base level of all maps in the given vector
-(defn- add-yht-namespace-to-vectors-maps [vector-with-maps]
-  (into [] (map (fn [m] (assoc m :ns "yht")) vector-with-maps)))
-
 ;; tags changed:
 ;; :kayntiosoite -> :kayntiosoitetieto
 ;; :postiosoite -> :postiosoitetieto
@@ -31,28 +27,23 @@
               (assoc
                 (assoc m :tag :kayntiosoitetieto)
                 :child
-                [{:tag :Kayntiosoite :child (add-yht-namespace-to-vectors-maps mapping-common/postiosoite-children)}])
+                [{:tag :Kayntiosoite :child mapping-common/postiosoite-children-ns-yht}])
               m))
     (prewalk
       (fn [m] (if (= (:tag m) :postiosoite)
                 (assoc
                   (assoc m :tag :postiosoitetieto)
                   :child
-                  [{:tag :Postiosoite :child (add-yht-namespace-to-vectors-maps mapping-common/postiosoite-children)}])
+                  [{:tag :Postiosoite :child mapping-common/postiosoite-children-ns-yht}])
                 m))
       mapping-common/yritys-child)))
 
-
 (def maksaja [{:tag :henkilotieto
                :child [{:tag :Henkilo
-                        :child (add-yht-namespace-to-vectors-maps mapping-common/henkilo-child)}]}
+                        :child mapping-common/henkilo-child-ns-yht}]}
               {:tag :yritystieto
                :child [{:tag :Yritys
-                        :child
-                        (prewalk
-                          (fn [m] (if (or (= (:tag m) :postiosoite) (= (:tag m) :kayntiosoite))
-                                    (assoc m :child (add-yht-namespace-to-vectors-maps mapping-common/postiosoite-children))))
-                          mapping-common/yritys-child)}]}
+                        :child yritys-child-ns-yht}]}
               {:tag :laskuviite}])
 
 (def toimintajakso [{:tag :alkuHetki :ns "yht"}
@@ -61,7 +52,7 @@
 (def osapuoli [{:tag :Osapuoli
                 :child [{:tag :henkilotieto
                          :child [{:tag :Henkilo
-                                  :child (add-yht-namespace-to-vectors-maps mapping-common/henkilo-child)}]}
+                                  :child mapping-common/henkilo-child-ns-yht}]}
                         {:tag :yritystieto
                          :child [{:tag :Yritys
                                   :child yritys-child-modified}]}
@@ -72,7 +63,7 @@
                              {:tag :sukunimi}
                              {:tag :osoitetieto
                               :child [{:tag :osoite
-                                       :child (add-yht-namespace-to-vectors-maps mapping-common/postiosoite-children)}]}
+                                       :child mapping-common/postiosoite-children-ns-yht}]}
                              {:tag :puhelinnumero}
                              {:tag :sahkopostiosoite}
                              {:tag :rooliKoodi}]}])
@@ -82,10 +73,7 @@
 (def kaivulupa_to_krysp
   {:tag :YleisetAlueet
    :ns "yak"
-   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
-                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
-                               http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus
-                               http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
+   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
          ;; TODO: Tarvitaanko naita kahta?
