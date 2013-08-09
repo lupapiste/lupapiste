@@ -119,7 +119,7 @@
         filename          (mime/sanitize-filename filename)
         attachment-type   (keyword attachment-type)
         new-file-id       (mongo/create-id)
-        old-file-id       (get-in user [attachment-type :id])
+        old-file-id       (get-in user [attachment-type :file-id])
         file-info         {:file-id new-file-id
                            :filename filename
                            :content-type content-type
@@ -127,8 +127,8 @@
     
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size)
 
-    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type"))
-    (when-not (mime/allowed-file? filename) (fail! "unsupported file type"))
+    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
+    (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
     
     (mongo/upload new-file-id filename content-type tempfile :user-id (:id user) :attachment-type attachment-type)
     (mongo/update-by-id :users (:id user) {$set {attachment-type file-info}})
