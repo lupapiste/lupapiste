@@ -345,7 +345,7 @@
 
 (defpage [:post "/api/uploadx"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType x-anti-forgery-token :x-anti-forgery-token}
   (info "uploadX" x-anti-forgery-token ":" attachment-type filename content-type size)
-  (ok :fileId "1234567890"))
+  (->> {:fileId "1234567890"} (resp/json) (resp/status 200)))
 
 
 ;;

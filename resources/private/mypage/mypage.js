@@ -43,19 +43,24 @@
     
     self.availableQualifications = ["AA", "A", "B", "C"];
 
-    function makeFileInfo(attachmentType) { return { attachmentType: ko.observable.bind(self)(attachmentType),
-                                                     filename: ko.observable.bind(self)() }; }
     function val(f) { return _.isFunction(f) ? f() : f; }
-    function updateFileInfo(prop, value) { prop.filename(value && val(value.filename)); return self; }
-
-    // Attachments:
-    self.examination = makeFileInfo();
-    self.proficiency = makeFileInfo();
-    self.cv = makeFileInfo();
     
-    self.updateExamination = updateFileInfo.bind(self, self.examination);
-    self.updateProficiency = updateFileInfo.bind(self, self.proficiency);
-    self.updateCv = updateFileInfo.bind(self, self.cv);
+    function FileInfo(attachmentType) {
+      this.attachmentType = ko.observable(attachmentType);
+      this.fileId = ko.observable();
+      this.filename = ko.observable();
+      this.update = function(from) {
+        this
+          .filename(from && val(from.filename))
+          .fileId(from && val(from.fileId));
+        return self;
+      }
+    }
+    
+    // Attachments:
+    self.examination = new FileInfo("examination");
+    self.proficiency = new FileInfo("proficiency");
+    self.cv = new FileInfo("cv");
     
     self.init = function(u) {
       return self
@@ -78,9 +83,9 @@
         .companyStreet(u.companyStreet)
         .companyZip(u.companyZip)
         .companyCity(u.companyCity)
-        .updateExamination(u.examination) 
-        .updateProficiency(u.proficiency)
-        .updateCv(u.cv);
+        .examination.update(u.examination) 
+        .proficiency.update(u.proficiency)
+        .cv.update(u.cv);
     };
 
     self.clear = function() {
@@ -108,12 +113,12 @@
     };
     
     self.downloadFile = function(prop) {
-      console.log("download:", prop.filename());
+      console.log("download:", prop.filename(), prop.fileId());
       return false;
     };
     
     self.removeFile = function(prop) {
-      console.log("remove:", prop.filename());
+      console.log("remove:", prop.filename(), prop.fileId());
       return false;
     };
     
@@ -169,6 +174,7 @@
     self.start = ko.observable();
     self.filename = ko.observable();
     self.filesize = ko.observable();
+    self.fileId = ko.observable();
     self.prop = ko.observable();
     self.attachmentType = ko.observable();
     self.csrf = ko.observable();
@@ -176,11 +182,12 @@
     self.init = function(prop) {
       return self
         .state(self.stateInit)
+        .filename(null)
+        .filesize(null)
+        .fileId(null)
         .start(null)
         .prop(prop)
         .attachmentType(prop.attachmentType())
-        .filename(null)
-        .filesize(null)
         .csrf($.cookie("anti-csrf-token"));
     };
     
@@ -206,10 +213,7 @@
     });
 
     self.state.subscribe(function(value) {
-      if (value === self.stateDone) {
-        var p = self.prop();
-        p.filename(self.filename());
-      }
+      if (value === self.stateDone) self.prop().update(self);
     });
 
   }
@@ -243,7 +247,7 @@
                 .ready();
             },
             send: uploadModel.sending,
-            done: uploadModel.done,
+            done: function(e, data) { uploadModel.fileId(data.response().result.fileId).done(); },
             fail: uploadModel.error
           });
   });
