@@ -30,3 +30,5 @@ userinfo.architect.upload.state.init: Lähetä uusi
 userinfo.architect.upload.state.sending: Tiedostoa ladataan...
 userinfo.architect.upload.state.ready: Tiedoston lataaminen onnistui
 userinfo.architect.upload.state.error: Tapahtui virhe, yritä myöhemmin uudeleen.
+userinfo.architect.upload.no-file: Tiedostoa ei valittuna
+userinfo.architect.upload.filename: Valittu tiedosto:
