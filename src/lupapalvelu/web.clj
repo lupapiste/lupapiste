@@ -319,7 +319,7 @@
 ;; File upload
 ;;
 
-(defpage [:post "/api/upload"]
+(defpage [:post "/api/upload/attachment"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
   (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
@@ -342,7 +342,6 @@
                                              (dissoc :upload)
                                              (dissoc ring.middleware.anti-forgery/token-key)
                                              (assoc  :errorMessage (result :text)))))))))
-
 ;;
 ;; Server is alive
 ;;
