@@ -113,6 +113,31 @@
     self.download = function(attachmentType) { return self.downloadFile.bind(self, attachmentType); };
     self.remove   = function(attachmentType) { return self.removeFile.bind(self, attachmentType); };
 
+    self.saved.subscribe(self.updateUserName);
+
+  }
+
+  function Password() {
+    this.oldPassword = ko.observable("");
+    this.newPassword = ko.observable("");
+    this.newPassword2 = ko.observable("");
+    this.error = ko.observable(null);
+    this.saved = ko.observable(false);
+
+    this.clear = function() {
+      return this
+        .oldPassword("")
+        .newPassword("")
+        .newPassword2("")
+        .saved(false)
+        .error(null);
+    };
+
+    this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && util.isValidPassword(this.newPassword()) && equals(this.newPassword(), this.newPassword2()); }, this);
+    this.noMatch = ko.computed(function() { return isNotBlank(this.newPassword()) && isNotBlank(this.newPassword2()) && !equals(this.newPassword(), this.newPassword2()); }, this);
+
+    this.save = makeSaveFn("change-passwd", ["oldPassword", "newPassword"]);
+    this.quality = ko.computed(function() { return util.getPwQuality(this.newPassword()); }, this);
   }
 
   function UploadModel() {
@@ -166,38 +191,12 @@
     
   }
 
-  function Password() {
-    this.oldPassword = ko.observable("");
-    this.newPassword = ko.observable("");
-    this.newPassword2 = ko.observable("");
-    this.error = ko.observable(null);
-    this.saved = ko.observable(false);
-
-    this.clear = function() {
-      return this
-        .oldPassword("")
-        .newPassword("")
-        .newPassword2("")
-        .saved(false)
-        .error(null);
-    };
-
-    this.ok = ko.computed(function() { return isNotBlank(this.oldPassword()) && util.isValidPassword(this.newPassword()) && equals(this.newPassword(), this.newPassword2()); }, this);
-    this.noMatch = ko.computed(function() { return isNotBlank(this.newPassword()) && isNotBlank(this.newPassword2()) && !equals(this.newPassword(), this.newPassword2()); }, this);
-
-    this.save = makeSaveFn("change-passwd", ["oldPassword", "newPassword"]);
-    this.quality = ko.computed(function() { return util.getPwQuality(this.newPassword()); }, this);
-  }
-
   var ownInfo = new OwnInfo();
   var pw = new Password();
   var uploadModel = new UploadModel();
-  
+
   hub.onPageChange("mypage", function() { ownInfo.clear(); pw.clear(); });
-
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
-
-  ownInfo.saved.subscribe(function(v) { if (v) { ownInfo.updateUserName(); }});
 
   $(function() {
     $("#mypage")
