@@ -1,25 +1,15 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa_canonical_to_krysp_xml_test
-  (:use [lupapalvelu.document.rakennuslupa_canonical-test]
-        [midje.sweet]
-        [lupapalvelu.document.rakennuslupa_canonical :only [by-type application-to-canonical]]
+  (:use [midje.sweet]
+        [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical]]
+        [lupapalvelu.document.rakennuslupa_canonical-test :only [application]]
         [lupapalvelu.xml.emit]
-        [lupapalvelu.xml.krysp.rakennuslupa-mapping]
-        [lupapalvelu.xml.krysp.validator]
+;        [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system]
+        [lupapalvelu.xml.krysp.rakennuslupa-mapping :only [rakennuslupa_to_krysp]]
+        [lupapalvelu.xml.krysp.validator :only [validate]]
+        [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :only [has-tag]]
         [clojure.data.xml]
-        [clojure.java.io]))
-
-
-(defn- has-tag [m]
-  (if (:tag m)
-    (if-let [children (seq (:child m))]
-      (if (reduce #(and %1 %2) (map has-tag children))
-          true
-          (do
-            (println "Tag missing in:") (clojure.pprint/pprint children) (println)
-            false))
-      true)
-    false)
-  )
+        [clojure.java.io])
+  (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 (fact ":tag is set" (has-tag rakennuslupa_to_krysp) => true)
 
@@ -30,20 +20,15 @@
 
     ;(println xml-s)
     ;Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-    (save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO: own test
+    (mapping-to-krysp/save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO: own test
+;    (save-application-as-krysp application "fi" application {:rakennus-ftp-user "sipoo"}) ;TODO: own test
 
     ;(clojure.pprint/pprint application)
 
     ;(clojure.pprint/pprint rakennuslupa_to_krysp)
     ;(with-open [out-file (writer "/Users/terotu/example.xml" )]
     ;    (emit xml out-file))
-    (fact xml => truthy)
+    (fact "xml exist" xml => truthy)
 
-    (let [xml-reader (java.io.StringReader. xml-s)
-          xml-source (javax.xml.transform.stream.StreamSource. xml-reader)]
-      ; Throws some exception if the markup is invalid
-      (.validate schema-validator xml-source)
-      )
-
-    )
-  )
+    (validate xml-s)  ;; in lupapalvelu.xml.krysp.validator
+    ))

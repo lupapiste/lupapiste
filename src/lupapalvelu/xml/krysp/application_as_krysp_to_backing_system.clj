@@ -1,12 +1,28 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require
     [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
-    [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]))
+    [lupapalvelu.xml.krysp.yleiset-alueet-mapping :as ya-mapping]
+    [lupapalvelu.permit :as permit]
+    [sade.env :as env]
+    [me.raynes.fs :as fs]))
 
 (defn save-application-as-krysp [application lang submitted-application organization]
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
+
   (let [permit-type (keyword (permit/permit-type application))
         krysp-fn (condp = permit-type
                    :YA ya-mapping/save-application-as-krysp
-                   :R  rl-mapping/save-application-as-krysp)]
-    (krysp-fn application (-> command :data :lang) submitted-application organization))
+                   :R  rl-mapping/save-application-as-krysp)
+        sftp-user ((condp = permit-type
+                     :YA :yleiset-alueet-ftp-user               ;; TODO: Mika tama pitaa olla?
+                     :R  :rakennus-ftp-user)
+                    organization)
+        rakennusvalvonta-directory (condp = permit-type
+                                     :YA "/yleiset-alueet"      ;; TODO: Mika tama pitaa olla?
+                                     :R  "/rakennus")
+        dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
+        output-dir (str (env/value :outgoing-directory) "/" dynamic-part-of-outgoing-directory)
+        fileserver-address (env/value :fileserver-address)
+        begin-of-link (str fileserver-address rakennusvalvonta-directory "/")]
+
+    (krysp-fn application lang submitted-application output-dir begin-of-link)))

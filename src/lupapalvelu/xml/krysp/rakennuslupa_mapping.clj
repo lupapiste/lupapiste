@@ -1,18 +1,18 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
-  (:use  [lupapalvelu.xml.krysp.mapping-common]
-         [clojure.data.xml]
-         [sade.util]
+  (:use  [clojure.data.xml]
          [clojure.java.io]
-         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical to-xml-datetime]]
+         [sade.util]
+         [lupapalvelu.document.canonical-common :only [to-xml-datetime]]
+         [lupapalvelu.document.rakennuslupa_canonical :only [application-to-canonical]]
          [lupapalvelu.xml.emit :only [element-to-xml]]
          [lupapalvelu.xml.krysp.validator :only [validate]]
-         [lupapalvelu.attachment :only [encode-filename]]
-         [clojure.java.io :as io])
-  (:require [sade.env :as env]
-            [me.raynes.fs :as fs]
-            [lupapalvelu.ke6666 :as ke6666]
-            [lupapalvelu.mongo :as mongo])
-  (:import [java.util.zip ZipOutputStream ZipEntry]))
+         [lupapalvelu.attachment :only [encode-filename]])
+  (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
+         #_[sade.env :as env]
+         [me.raynes.fs :as fs]
+         [lupapalvelu.ke6666 :as ke6666]
+         [lupapalvelu.mongo :as mongo])
+  #_(:import [java.util.zip ZipOutputStream ZipEntry]))
 
 ;RakVal
 
@@ -35,7 +35,7 @@
 
 (def yht-rakennus [{:tag :yksilointitieto :ns "yht"}
                    {:tag :alkuHetki :ns "yht"}
-                   sijantitieto
+                   mapping-common/sijantitieto
                    {:tag :rakennuksenTiedot
                     :child [{:tag :rakennustunnus :child [{:tag :jarjestysnumero}
                                                           {:tag :kiinttun}]}
@@ -84,8 +84,8 @@
                     :child [{:tag :Omistaja
                              :child [{:tag :kuntaRooliKoodi :ns "yht"}
                                      {:tag :VRKrooliKoodi :ns "yht"}
-                                     henkilo
-                                     yritys
+                                     mapping-common/henkilo
+                                     mapping-common/yritys
                                      {:tag :omistajalaji :ns "rakval"
                                       :child [{:tag :muu}
                                               {:tag :omistajalaji}]}]}]}])
@@ -94,30 +94,35 @@
                :child yht-rakennus})
 
 (def rakennuslupa_to_krysp
-  {:tag :Rakennusvalvonta :ns "rakval" :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.1/rakennusvalvonta.xsd"
-                                              :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
-                                              :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-                                              :xmlns:xlink "http://www.w3.org/1999/xlink"
-                                              :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
-   :child [{:tag :toimituksenTiedot :child toimituksenTiedot}
+  {:tag :Rakennusvalvonta
+   :ns "rakval"
+   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset
+                               http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd
+                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta
+                               http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.1.1/rakennusvalvonta.xsd"
+          :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"
+          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+          :xmlns:xlink "http://www.w3.org/1999/xlink"
+          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"}
+   :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :rakennusvalvontaAsiatieto
             :child [{:tag :RakennusvalvontaAsia
-                     :child [{:tag :kasittelynTilatieto :child [tilamuutos]}
+                     :child [{:tag :kasittelynTilatieto :child [mapping-common/tilamuutos]}
                              {:tag :luvanTunnisteTiedot
-                              :child [lupatunnus]}
+                              :child [mapping-common/lupatunnus]}
                              {:tag :osapuolettieto
-                              :child [osapuolet]}
+                              :child [mapping-common/osapuolet]}
                              {:tag :rakennuspaikkatieto
-                              :child [rakennuspaikka]}
+                              :child [mapping-common/rakennuspaikka]}
                              {:tag :toimenpidetieto
                               :child [{:tag :Toimenpide
                                        :child [{:tag :uusi :child [{:tag :kuvaus}]}
                                                {:tag :laajennus :child [{:tag :laajennuksentiedot
-                                                                         :child[{:tag :tilavuus}
-                                                                                {:tag :kerrosala}
-                                                                                {:tag :kokonaisala}
-                                                                                {:tag :huoneistoala
-                                                                                 :child [{:tag :pintaAla :ns "yht"}
+                                                                         :child [{:tag :tilavuus}
+                                                                                 {:tag :kerrosala}
+                                                                                 {:tag :kokonaisala}
+                                                                                 {:tag :huoneistoala
+                                                                                  :child [{:tag :pintaAla :ns "yht"}
                                                                                          {:tag :kayttotarkoitusKoodi :ns "yht"}]}]}
                                                                         {:tag :kuvaus}
                                                                         {:tag :perusparannusKytkin}]}
@@ -135,10 +140,10 @@
                                                {:tag :rakennelmatieto
                                                 :child [{:tag :Rakennelma :child [{:tag :yksilointitieto :ns "yht"}
                                                                                   {:tag :alkuHetki :ns "yht"}
-                                                                                  sijantitieto
+                                                                                  mapping-common/sijantitieto
                                                                                   {:tag :kuvaus :child [{:tag :kuvaus}]}
                                                                                   {:tag :kokonaisala}]}]}]}]}
-                             {:tag :lausuntotieto :child [lausunto] }
+                             {:tag :lausuntotieto :child [mapping-common/lausunto] }
 
                              {:tag :lisatiedot
                               :child [{:tag :Lisatiedot
@@ -154,14 +159,18 @@
                                                {:tag :tekija :ns "yht"
                                                 :child [{:tag :kuntaRooliKoodi}
                                                         {:tag :VRKrooliKoodi}
-                                                        henkilo
-                                                        yritys]}
+                                                        mapping-common/henkilo
+                                                        mapping-common/yritys]}
                                                {:tag :tyyppi :ns "yht"}]}]}
                              {:tag :kayttotapaus}
                              {:tag :asianTiedot
                               :child [{:tag :Asiantiedot
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
+
+;;
+;; *** TODO: Naita common fileen? ***
+;;
 
 (defn- get-file-name-on-server [file-id file-name]
   (str file-id "_" (encode-filename file-name)))
@@ -247,18 +256,11 @@
               (assoc-in c [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto] paivitetty))
             ) canonical statement-attachments))
 
-(defn save-application-as-krysp [application lang submitted-application organization]
-  (let [sftp-user (:rakennus-ftp-user organization)
-        rakennusvalvonta-directory "/rakennus"
-        dynamic-part-of-outgoing-directory (str sftp-user rakennusvalvonta-directory)
-        output-dir (str (env/value :outgoing-directory) "/" dynamic-part-of-outgoing-directory)
-        _          (fs/mkdirs output-dir)
-        file-name  (str output-dir "/" (:id application))
+(defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
+  (let [file-name  (str output-dir "/" (:id application))
         tempfile   (file (str file-name ".tmp"))
         outfile    (file (str file-name ".xml"))
         canonical-without-attachments  (application-to-canonical application lang)
-        fileserver-address (env/value :fileserver-address)
-        begin-of-link (str fileserver-address rakennusvalvonta-directory "/")
         statement-attachments (get-statement-attachments-as-canonical application begin-of-link)
         attachments (get-attachments-as-canonical application begin-of-link)
         attachments-with-generated-pdfs (conj attachments
@@ -282,8 +284,9 @@
     ;(clojure.pprint/pprint canonical-with-statement-attachments)
     ;(println xml-s)
     (validate xml-s)
-    (with-open [out-file (writer tempfile)]
-      (emit xml out-file))
+    (with-open [out-file-stream (writer tempfile)]
+      (emit xml out-file-stream))
+    (fs/mkdirs output-dir)
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)
 
