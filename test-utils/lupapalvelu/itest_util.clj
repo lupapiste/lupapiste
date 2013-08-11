@@ -207,7 +207,7 @@
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         application (query apikey :application :id application-id)
-        uri         (str (server-address) "/api/upload")
+        uri         (str (server-address) "/api/upload/attachment")
         resp        (c/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
