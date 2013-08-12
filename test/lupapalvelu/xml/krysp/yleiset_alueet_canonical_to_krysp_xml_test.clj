@@ -41,5 +41,5 @@
 
     (fact "xml exist" xml => truthy)
 
-    (validator/validate xml-s)  ;; TODO: Laita takasin!
+    (validator/validate xml-s)
     ))
