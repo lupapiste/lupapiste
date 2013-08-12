@@ -375,12 +375,12 @@
     {$set {:modified  created
            :state     :canceled}}))
 
-(defcommand "request-for-complement"
-  {:parameters [:id]
+(defcommand request-for-complement
+  {:parameters [id]
    :roles      [:authority]
    :notify     "state-change"
    :states     [:sent]}
-  [{{id :id} :data {host :host} :web created :created :as command}]
+  [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
            :state :complement-needed}}))
