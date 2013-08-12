@@ -353,9 +353,9 @@
     {$set {:authority (security/summary user)}}))
 
 (defcommand assign-application
-  {:parameters  [:id :assigneeId]
+  {:parameters  [:id assigneeId]
    :roles       [:authority]}
-  [{{:keys [assigneeId]} :data user :user :as command}]
+  [{user :user :as command}]
   (update-application command
     (if assigneeId
       {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
