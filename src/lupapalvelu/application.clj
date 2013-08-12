@@ -386,7 +386,7 @@
            :state :complement-needed}}))
 
 ;; FIXME: does not set state if complement-needed
-(defcommand "approve-application"
+(defcommand approve-application
   {:parameters [:id lang]
    :roles      [:authority]
    :notify     "state-change"
@@ -408,7 +408,7 @@
             (.printStackTrace e)
             (fail (.getMessage e))))))))
 
-(defcommand "submit-application"
+(defcommand submit-application
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
@@ -431,7 +431,7 @@
           ; This is ok. Only the first submit is saved.
             ))))))
 
-(defcommand "save-application-shape"
+(defcommand save-application-shape
   {:parameters [:id :shape]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]}
