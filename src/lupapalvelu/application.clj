@@ -429,7 +429,7 @@
           (assoc (dissoc application :id) :_id id))
         (catch com.mongodb.MongoException$DuplicateKey e
           ; This is ok. Only the first submit is saved.
-            ))))))
+            )))))
 
 (defcommand save-application-shape
   {:parameters [:id shape]
@@ -676,10 +676,10 @@
           (ok))
         (fail :no-legacy-available)))))
 
-(defcommand "get-building-info-from-legacy"
-  {:parameters [:id]
+(defcommand get-building-info-from-legacy
+  {:parameters [id]
    :roles      [:applicant :authority]}
-  [{{:keys [id]} :data :as command}]
+  [command]
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy   (organization/get-legacy organization)]
