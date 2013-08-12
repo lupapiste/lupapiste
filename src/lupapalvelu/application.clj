@@ -635,8 +635,8 @@
    :states     [:submitted :complement-needed :sent]
    :notify     "verdict"
    :roles      [:authority]}
-  [{:keys [created]}]
-  (update-application
+  [{:keys [created] :as command}]
+  (update-application command
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdict  {:id verdictId
