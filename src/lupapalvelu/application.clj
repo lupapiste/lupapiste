@@ -345,14 +345,14 @@
 ;; Assign
 ;;
 
-(defcommand "assign-to-me"
+(defcommand assign-to-me
   {:parameters [:id]
    :roles      [:authority]}
   [{user :user :as command}]
   (update-application command
     {$set {:authority (security/summary user)}}))
 
-(defcommand "assign-application"
+(defcommand assign-application
   {:parameters  [:id :assigneeId]
    :roles       [:authority]}
   [{{:keys [assigneeId]} :data user :user :as command}]
