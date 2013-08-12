@@ -636,9 +636,7 @@
    :notify     "verdict"
    :roles      [:authority]}
   [{:keys [created]}]
-  (mongo/update
-    :applications
-    {:_id id}
+  (update-application
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdict  {:id verdictId
