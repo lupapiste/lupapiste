@@ -629,13 +629,13 @@
   (when (or (< status 1) (> status 42))
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
-(defcommand "give-verdict"
-  {:parameters [:id :verdictId :status :name :given :official]
+(defcommand give-verdict
+  {:parameters [id verdictId status name given official]
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
    :notify     "verdict"
    :roles      [:authority]}
-  [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
+  [{:keys [created]}]
   (mongo/update
     :applications
     {:_id id}
