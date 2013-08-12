@@ -590,14 +590,14 @@
                                                         :attachments (make-attachments created op (:organization application))}
                                               $set {:modified created}})))))
 
-(defcommand "change-location"
-  {:parameters [:id :x :y :address :propertyId]
+(defcommand change-location
+  {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
-  [{{:keys [id x y address propertyId]} :data created :created application :application}]
+  [{:keys [created application]}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
                                                 :address       (trim address)
