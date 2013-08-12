@@ -84,7 +84,7 @@
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :yleinenAlueAsiatieto
             :child [{:tag :Tyolupa
-                     :child [{:tag :kayttotarkoitus :ns "yht"}
+                     :child [{:tag :kayttotarkoitus}
                              {:tag :johtoselvitysviitetieto
                               :child [{:tag :Johtoselvitysviite
                                        :child [{:tag :vaadittuKytkin
