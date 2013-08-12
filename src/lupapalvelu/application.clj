@@ -606,11 +606,11 @@
                                                 :modified      created}})
     (fail :error.property-in-other-muinicipality)))
 
-(defcommand "convert-to-application"
-  {:parameters [:id]
+(defcommand convert-to-application
+  {:parameters [id]
    :roles      [:applicant]
    :states     [:draft :info :answered]}
-  [{{:keys [id]} :data :keys [user created application] :as command}]
+  [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]
     (mongo/update-by-id :applications id
