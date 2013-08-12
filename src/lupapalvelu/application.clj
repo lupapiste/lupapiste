@@ -385,8 +385,9 @@
     {$set {:modified  created
            :state :complement-needed}}))
 
+;; FIXME: does not set state if complement-needed
 (defcommand "approve-application"
-  {:parameters [:id :lang]
+  {:parameters [:id lang]
    :roles      [:authority]
    :notify     "state-change"
    :states     [:submitted :complement-needed]}
@@ -399,7 +400,7 @@
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application organization)
+        (try (rl-mapping/get-application-as-krysp application lang submitted-application organization)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
@@ -416,20 +417,18 @@
   [{{:keys [host]} :web :keys [created] :as command}]
   (with-application command
     (fn [{:keys [id opened] :as application}]
-      (let [new-state      :submitted
-            opened         (or opened created)]
-        (mongo/update
-          :applications
-          {:_id id}
-          {$set {:state     new-state
-                 :opened    opened
-                 :submitted created}})
-        (try
-          (mongo/insert
-            :submitted-applications
-            (assoc (dissoc application :id) :_id id))
-          (catch com.mongodb.MongoException$DuplicateKey e
-            ; This is ok. Only the first submit is saved.
+      (mongo/update
+        :applications
+        {:_id id}
+        {$set {:state     :submitted
+               :opened    (or opened created)
+               :submitted created}})
+      (try
+        (mongo/insert
+          :submitted-applications
+          (assoc (dissoc application :id) :_id id))
+        (catch com.mongodb.MongoException$DuplicateKey e
+          ; This is ok. Only the first submit is saved.
             ))))))
 
 (defcommand "save-application-shape"
