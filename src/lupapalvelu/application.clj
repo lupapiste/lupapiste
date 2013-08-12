@@ -573,19 +573,17 @@
       (autofill-rakennuspaikka application created)
       (ok :id id))))
 
-(defcommand "add-operation"
-  {:parameters [:id :operation]
+(defcommand add-operation
+  {:parameters [id operation]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
    :input-validators [operation-validator]
    :validators [(permit/validate-permit-type-is permit/R)]}
-  [command]
+  [{:keys [created] :as command}]
   (with-application command
     (fn [application]
-      (let [id         (get-in command [:data :id])
-            created    (:created command)
-            op-id      (mongo/create-id)
-            op         (make-op (get-in command [:data :operation]) created)
+      (let [op-id      (mongo/create-id)
+            op         (make-op operation created)
             new-docs   (make-documents nil created op application)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
