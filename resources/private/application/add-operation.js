@@ -9,6 +9,7 @@
     self.url = ko.observable();
     self.operations = ko.observable();
     self.operation = ko.observable();
+    self.processing = ko.observable();
     self.pending = ko.observable();
     self.waitingOperations = ko.observable();
 
@@ -22,13 +23,14 @@
       self
         .operations(null)
         .operation(null)
+        .processing(false)
         .pending(false)
         .waitingOperations(false)
         .title(application.title)
         .url("#!/application/" + application.id);
       var id = application.id;
       ajax
-        .query("organization", {organizationId: application.organization})
+        .query("operations", {permitType: application.permitType})
         .pending(self.waitingOperations)
         .success(function (data) {
           if (self.application.id === id) {
@@ -42,6 +44,7 @@
     self.addOperation = function(op) {
       ajax
         .command("add-operation", {id: self.application.id, operation: op.op})
+        .processing(self.processing)
         .pending(self.pending)
         .success(function() {
           window.location.hash = self.url();

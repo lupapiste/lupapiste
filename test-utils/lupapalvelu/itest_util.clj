@@ -1,9 +1,10 @@
 (ns lupapalvelu.itest-util
   (:use [lupapalvelu.fixture.minimal :only [users]]
         [clojure.walk :only [keywordize-keys]]
+        [swiss-arrows.core]
         [midje.sweet])
   (:require [clj-http.client :as c]
-            [lupapalvelu.logging]
+            [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
             [cheshire.core :as json]))
@@ -77,6 +78,9 @@
                (mapcat seq))]
     (apply command apikey :create-application args)))
 
+(defn create-YA-app [apikey & args] (apply create-app apikey (concat args [:operation "mainostus-ja-viitoituslupa"])))
+(defn create-R-app [apikey & args]  (apply create-app apikey (concat args [:operation "asuinrakennus"])))
+
 (defn success [resp]
   (fact (:text resp) => nil)
   (:ok resp))
@@ -123,19 +127,29 @@
   (ok? {:ok true}) => true
   (ok? {:ok false}) => false)
 
-(defn not-ok? [resp]
-  ((comp not ok?) resp))
-
-(fact "not-ok?"
-  (not-ok? {:ok false}) => true
-  (not-ok? {:ok true}) => false)
-
 (defn http200? [{:keys [status]}]
   (= status 200))
+
+(defn http401? [{:keys [status]}]
+  (= status 401))
+
+(defn http404? [{:keys [status]}]
+  (= status 404))
 
 ;;
 ;; DSLs
 ;;
+
+(defn set-anti-csrf! [value] (query pena :set-feature :feature "disable-anti-csrf" :value (not value)))
+(defn feature? [& feature]
+  (boolean (-<>> :features (query pena) :features (into {}) (get <> (map name feature)))))
+
+(defmacro with-anti-csrf [& body]
+  `(let [old-value# (feature? :disable-anti-csrf)]
+     (set-anti-csrf! true)
+     (do ~@body)
+     (set-anti-csrf! false)
+     "By the power of Grayskull."))
 
 (defn create-app-id [apikey & args]
   (let [resp (apply create-app apikey args)
@@ -143,6 +157,13 @@
     resp => ok?
     id => truthy
     id))
+
+(defn create-and-submit-application [apikey & args]
+  (let [id    (apply create-app-id apikey args)
+        resp  (command apikey :submit-application :id id) => ok?
+        resp  (query pena :application :id id) => ok?
+        app   (:application resp)]
+    app))
 
 (defn comment-application [id apikey]
   (fact "comment is added succesfully"
@@ -153,16 +174,11 @@
     response => ok?
     application))
 
-(defn action-allowed [apikey id action]
-  (let [resp (query apikey :allowed-actions :id id)]
-    (success resp) => true
-    (get-in resp [:actions action :ok]) => truthy))
-
-(defn action-not-allowed [apikey id action]
-  (let [resp (query apikey :allowed-actions :id id)]
-    (success resp) => true
-    (get-in resp [:actions action :ok]) => falsey
-    (unauthorized (command apikey action :id id))))
+(defn allowed? [action & args]
+  (fn [apikey]
+    (let [{:keys [ok actions]} (apply query apikey :allowed-actions args)
+          allowed? (-> actions action :ok)]
+      (and ok allowed?))))
 
 ;;
 ;; Stuffin' data in
@@ -186,6 +202,31 @@
       (facts "Upload should fail"
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0)))))
+
+(defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
+  (let [filename    "dev-resources/test-attachment.txt"
+        uploadfile  (io/file filename)
+        application (query apikey :application :id application-id)
+        uri         (str (server-address) "/api/upload")
+        resp        (c/post uri
+                      {:headers {"authorization" (str "apikey=" apikey)}
+                       :multipart [{:name "applicationId"  :content application-id}
+                                   {:name "Content/type"   :content "text/plain"}
+                                   {:name "attachmentType" :content "muut.muu"}
+                                   {:name "attachmentId"   :content attachment-id}
+                                   {:name "upload"         :content uploadfile}
+                                   {:name "targetId"       :content statement-id}
+                                   {:name "targetType"     :content "statement"}]}
+                      )]
+    (if expect-to-succeed
+      (facts "Statement upload succesfully"
+        (fact "Status code" (:status resp) => 302)
+        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+      ;(facts "Statement upload should fail"
+       ; (fact "Status code" (:status resp) => 302)
+      ;  (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.0.5.html") => 0))
+      )))
+
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 

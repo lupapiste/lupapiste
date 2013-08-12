@@ -109,7 +109,7 @@
               <!-- ko if: latestVersion && latestVersion.filename -->
               <tr>
                 <td>
-                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
+                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                 </td>
@@ -140,7 +140,7 @@
 
         <div>
           <h3  data-bind="ltext: 'inforequest.comments'"></h3>
-          <div data-bind="template: {name: 'comment-template', data: $root.comment}"></div>
+          <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
         </div>
 
       </div>

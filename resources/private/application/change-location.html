@@ -24,7 +24,11 @@
 
               <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
 
-              <button data-bind="ltext: 'save', click: saveNewLocation, enable: ok" class="btn btn-primary btn-dialog" data-test-id="change-location-save"></button>
+              <button data-bind="click: saveNewLocation, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="change-location-save">
+                <span data-bind="ltext: 'save'"></span>
+                <em data-bind="visible: pending" class="button-loader"></em>
+              </button>
+
               <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
             </div>
 

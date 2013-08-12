@@ -1,5 +1,5 @@
 (ns sade.security-headers
-  (:use [clj-logging-config.log4j :only [with-logging-context]]))
+  (:require [lupapalvelu.logging :refer [with-logging-context]]))
 
 (defn add-security-headers
   "Ring middleware.
@@ -27,6 +27,5 @@
   [handler]
   (fn [request]
     (let [sessionId (get-in request [:cookies "ring-session" :value])]
-      (with-logging-context
-        {:sessionId (or sessionId "?")}
+      (with-logging-context {:sessionId sessionId}
         (handler request)))))

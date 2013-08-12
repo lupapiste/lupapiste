@@ -26,14 +26,11 @@
 
       <div data-bind="text: loc('operations.selected') + ' ' + loc('operations', op)"></div>
 
-      <button data-bind="click: addOperation" class="btn btn-primary" data-test-id="add-operation-to-application">
+      <button data-bind="click: addOperation, disable: processing" class="btn btn-primary" data-test-id="add-operation-to-application">
         <span data-bind="ltext: 'operations.add'"></span>
         <span class="icon add left-align"></span>
+        <em data-bind="visible: pending" class="button-loader"></em>
       </button>
-
-      <div data-bind="visible: pending">
-        <img src="/img/ajax-loader.gif" alt="..." width="66" height="66" />
-      </div>
     </div>
 
   </section>

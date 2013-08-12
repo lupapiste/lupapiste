@@ -106,7 +106,7 @@
         (apply-update [:lammitys :lammitystapa] "ei tiedossa")
         (apply-update [:lammitys :lammonlahde] "ei tiedossa")) => valid?)
 
-    (fact "Kokonaisalan oltava vähintään kerrosala"
+    (fact "Kokonaisalan oltava vahintaan kerrosala"
       (-> uusi-rakennus
         (apply-update [:mitat :kerrosala] "4")
         (apply-update [:mitat :kokonaisala] "4")) => valid?

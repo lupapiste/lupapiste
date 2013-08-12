@@ -69,8 +69,8 @@
         _                         (Thread/sleep 20) ; delivery time
         email                     (query pena :last-email)
         body                      (get-in email [:message :body :plain])
-        [_ a-id n-id token]       (re-find #"(?sm)/neighbor-show/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
-    
+        [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+
     a-id => application-id
     n-id => neighbor-id
     token => #"[A-Za-z0-9]{48}"))
@@ -95,7 +95,7 @@
 
     (let [email                     (query pena :last-email)
           body                      (get-in email [:message :body :plain])
-          [_ a-id n-id token]       (re-find #"(?sm)/neighbor-show/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
+          [_ a-id n-id token]       (re-find #"(?sm)/neighbor/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)/([A-Za-z0-9-]+)" body)]
 
       token => truthy
       token =not=> #"="
@@ -134,7 +134,14 @@
               (fact "there are some attachments"
                 (->> application :attachments count) => pos?)
               (fact "everyone is paapiirustus"
-                (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey))
+                (->> application :attachments (some (fn-> :type :type-group (not= "paapiirustus")))) => falsey)
+
+              (let [file-id (->> application :attachments first :latestVersion :fileId)]
+                (fact "downloading should be possible"
+                  (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token token :file-id file-id) => http200?)
+
+                (fact "downloading with wrong token should not be possible"
+                  (raw nil "neighbor-download-attachment" :neighbor-id neighborId :token "h4x3d token" :file-id file-id) => http401?)))
 
             (:auth application) => nil)))
 

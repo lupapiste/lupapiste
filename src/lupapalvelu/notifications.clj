@@ -1,9 +1,9 @@
 (ns lupapalvelu.notifications
   (:use [monger.operators]
-        [clojure.tools.logging]
         [sade.strings :only [suffix]]
         [lupapalvelu.i18n :only [loc]])
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -115,7 +115,7 @@
         municipality   (get application :municipality)
         subject        (get-email-title application "neighbor")
         page           (str "#!/neighbor-show/" (:id application) "/" neighbor-id "/" token)
-        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor#!/neighbor-show/" (:id application) "/" (name neighbor-id) "/" token))]
+        link-fn        (fn [lang] (str host "/app/" (name lang) "/neighbor/" (:id application) "/" (name neighbor-id) "/" token))]
     (email/send-email-message email subject "neighbor.md" {:name neighbor-name
                                                            :address address
                                                            :city-fi (i18n/localize :fi "municipality" municipality)
@@ -135,12 +135,17 @@
     (template "application-new-comment.html")
     (replace-application-links "#conversation-link" application "/conversation" host)))
 
-(defn send-notifications-on-new-comment! [application user comment-text host]
+(defn send-notifications-on-new-comment! [application user host]
   (when (security/authority? user)
     (let [recipients (get-email-recipients-for-application application)
           msg        (get-message-for-new-comment application host)
           title      (get-email-title application "new-comment")]
       (send-mail-to-recipients! recipients title msg))))
+
+(defn send-notifications-on-new-targetted-comment! [application to-email host]
+  (let [msg        (get-message-for-new-comment application host)
+        title      (get-email-title application "new-comment")]
+    (send-mail-to-recipients! [to-email] title msg)))
 
 (defn send-invite! [email text application host]
   (let [title (get-email-title application "invite")
@@ -164,9 +169,13 @@
         title       (get-email-title application "verdict")]
     (send-mail-to-recipients! recipients title msg)))
 
+;;
+;; Da notify
+;;
+
 (defn notify! [template {{:keys [host]} :web :keys [user created application data] :as command}]
   (condp = (keyword template)
-    :new-comment  (send-notifications-on-new-comment! application user (:text data) host)
+    :new-comment  (send-notifications-on-new-comment! application user host)
     :invite       (send-invite! (:email data) (:text data) application host)
     :state-change (send-notifications-on-application-state-change! application host)
     :verdict      (send-notifications-on-verdict! application host)))

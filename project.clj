@@ -1,11 +1,10 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [noir "1.3.0" :exclusions [org.clojure/clojure compojure]]
-                 [compojure "1.1.5"]
+                 [noir "1.3.0" :exclusions [org.clojure/clojure compojure clj-stacktrace org.clojure/tools.macro]]
+                 [compojure "1.1.5" :exclusions [org.clojure/tools.macro]]
                  [com.novemberain/monger "1.4.2"]
-                 [org.clojure/tools.logging "0.2.6"]
-                 [clj-logging-config "1.9.10" :exclusions [log4j]]
+                 [com.taoensso/timbre "2.5.0"]
                  [org.slf4j/slf4j-log4j12 "1.7.5"]
                  [enlive "1.1.1" :exclusions [org.clojure/clojure]]
                  [org.clojure/tools.nrepl "0.2.3"]
@@ -35,24 +34,26 @@
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.6"]]
-                   :plugins [[lein-midje "2.0.1"]
+                   :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
                              [lein-hgnotes "0.1.0"]]
                    :source-paths ["test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true"]}
+                   :jvm-opts ["-Djava.awt.headless=true"
+                              "-Xmx1G" "-XX:MaxPermSize=256M"]}
              :uberjar  {:source-paths ["main-src"]
                         :main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
-             :alltests {:source-paths [#_"test" "itest" "stest"]
-                        :jvm-opts ["-XX:MaxPermSize=256M"]}
+             :alltests {:source-paths ["test" "itest" "stest"]
+                        :jvm-opts ["-Xmx1G" "-XX:MaxPermSize=256M"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=http://lupadev.solita.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=http://lupatest.solita.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"[\/\\]jquery"
                          #"[\/\\]theme[\/\\]default"
                          #"[\/\\]public[\/\\]lib"
+                         #"[\/\\]test[\/\\]"
                          #"openlayers"
                          #"underscore"
                          #"lodash"]}

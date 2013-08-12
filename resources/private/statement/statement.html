@@ -32,7 +32,7 @@
             <tbody data-bind="foreach: attachments">
               <tr data-bind="with: $data.latestVersion">
                 <td>
-                  <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                  <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
                   <i data-bind="ltext: contentType"></i>
                   <i data-bind="size: size"></i>
                 </td>
@@ -62,7 +62,7 @@
 
       <div>
         <h3 data-bind="ltext: 'statement.conversation'">Keskustele päätöksestä:</h3>
-        <div data-bind="template: {name: 'comment-template', data: $root.commentsModel}"></div>
+        <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
       </div>
 
     </div>

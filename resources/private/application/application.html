@@ -104,7 +104,6 @@
             <span data-bind="ltext: 'application.addOperation'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-<!--           TODO: notPublicAreaTypeOperation() needs to be replaced by usage of authorization.ok(). -->
           <button data-bind="click: exportPdf,            visible: $root.authorization.ok('pdf-export')"  data-test-id="application-pdf-btn">
             <span data-bind="ltext: 'application.pdf'"></span>
             <span class="icon print left-align"></span>
@@ -268,7 +267,7 @@
                     </td>
                     <td>
                       <span data-bind="if: $data.latestVersion">
-                        <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/download-attachment/' + latestVersion.fileId}"></a><br/>
+                        <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
                         <i data-bind="ltext: latestVersion.contentType"></i>
                         <i data-bind="size: latestVersion.size"></i>
                       </span>
@@ -293,7 +292,7 @@
                 </tbody>
               </table>
 
-              <a data-bind="attr: {href: '/api/download-all-attachments/' + $root.application.id()}, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+              <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
             </div>
             <div data-bind="ifnot: attachmentsByGroup().length">
@@ -341,7 +340,7 @@
                     <td data-bind="dateString: official"></td>
                     <td data-bind="foreach: $root.verdictModel.attachments()">
                       <span data-bind="with: $data.latestVersion">
-                        <a href="#" data-bind="text: filename, attr: {href: '/api/download-attachment/' + fileId}"></a><br/>
+                        <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
                           <i data-bind="ltext: contentType"></i>
                           <i data-bind="size: size"></i><br/>
                       </span>
@@ -488,7 +487,7 @@
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>
           <p data-bind="ltext: 'application.conversationDesc'" class="tab-info"></p>
-          <div data-bind="template: {name: 'comment-template'}"></div>
+          <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities}}"></div>
           <div class="process-nav"></div>
         </div>
 
@@ -515,7 +514,10 @@
             <div data-bind="visible: error" >
               <div data-bind="text: error" class="context-error"></div>
             </div>
-            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, ltext: 'application.inviteSend'"></button>
+            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, disable: processing">
+              <span data-bind="ltext: 'application.inviteSend'"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
+            </button>
           </form>
         </div>
       </div>
@@ -692,7 +694,7 @@
               <input data-bind="value: email,
                                 valueUpdate: 'afterkeydown',
                                 attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
-                     id="neighbors-sendemail-email" 
+                     id="neighbors-sendemail-email"
                      class="form-input text long" />
             </form>
 
@@ -727,7 +729,7 @@
           </div>
         </div>
       </div>
-      
+
       <div id="dialog-neighbor-status" class="window autosized">
         <div class="dialog-header">
         <p data-bind="ltext: 'neighbors.status-dialog.title'"></p>
@@ -748,10 +750,6 @@
                 <td data-bind="ltext: 'neighbors.status-dialog.user.lastName'"></td>
                 <td data-bind="text: lastName" data-test-id="neighbor-status-lastName"></td>
               </tr>
-              <tr data-bind="visible: userid">
-                <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
-                <td data-bind="text: userid" data-test-id="neighbor-status-userid"></td>
-              </tr>
               <tr>
                 <td data-bind="ltext: 'neighbors.status-dialog.user.time'"></td>
                 <td data-bind="dateTimeString: created"></td>
@@ -759,13 +757,13 @@
             </tbody>
           </table>
 
-          <div data-bind="visible: message">
+          <div data-bind="visible: message" class="neighbors-message">
             <div data-bind="text: loc('neighbors.status-dialog.message-title', state())"></div>
             <div data-bind="text: message"  data-test-id="neighbor-status-message"></div>
           </div>
 
           <button data-bind="ltext: 'neighbors.status-dialog.ok'" data-test-id="neighbor-status-ok" class="btn btn-primary btn-dialog close"></button>
-          
+
         </div>
       </div>
 
