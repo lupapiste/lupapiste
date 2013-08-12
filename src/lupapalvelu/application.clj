@@ -365,12 +365,12 @@
 ;;
 ;;
 
-(defcommand "cancel-application"
+(defcommand cancel-application
   {:parameters [:id]
    :roles      [:applicant]
    :notify     "state-change"
    :states     [:draft :info :open :submitted]}
-  [{{id :id} :data {:keys [host]} :web created :created :as command}]
+  [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
            :state     :canceled}}))
