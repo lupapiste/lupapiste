@@ -294,9 +294,8 @@ Prepare new request
   # for IE8
   Focus  xpath=//input[@data-test-id="create-address"]
   Execute Javascript  $("select[data-test-id='create-municipality-select']").show();
-  Execute Javascript  $("input[data-test-id='create-property-id']").removeAttr("readonly").removeAttr("disabled");
+  Execute Javascript  $("input[data-test-id='create-property-id']").removeAttr("readonly").removeAttr("disabled").val("${propertyId}").change();
   Input text by test id  create-address  ${address}
-  Input text by test id  create-property-id  ${propertyId}
   Select From List by test id  create-municipality-select  ${municipality}
   Set animations off
   Click enabled by test id  create-continue
