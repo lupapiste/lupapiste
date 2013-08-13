@@ -100,32 +100,22 @@
                     <a data-bind="click: upload(examination), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
                   </td>
                 </tr>
-                <!--
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
                   <td>
-                    <span data-bind="visible: proficiency.filename">
-                      <a data-bind="click: download('proficiency'), text: proficiency.filename" href="#"></a>
-                      <a data-bind="click: remove('proficiency'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                    </span>
-                    <span data-bind="visible: !proficiency()">
-                      <a data-bind="click: upload('proficiency'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                    </span>
+                    <a data-bind="click: download(proficiency), visible: proficiency.filename, text: proficiency.filename" href="#"></a>
+                    <a data-bind="click: remove(proficiency), visible: proficiency.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                    <a data-bind="click: upload(proficiency), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
                   </td>
                 </tr>
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
                   <td>
-                    <span data-bind="visible: cv.filename">
-                      <a data-bind="click: download('cv'), text: cv.filename" href="#"></a>
-                      <a data-bind="click: remove('cv'), ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
-                    </span>
-                    <span data-bind="visible: !cv()">
-                      <a data-bind="click: upload('cv'), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
-                    </span>
+                    <a data-bind="click: download(cv), visible: cv.filename, text: cv.filename" href="#"></a>
+                    <a data-bind="click: remove(cv), visible: cv.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
+                    <a data-bind="click: upload(cv), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
                   </td>
                 </tr>
-                -->
               </tbody>
             </table>
           </div>        
