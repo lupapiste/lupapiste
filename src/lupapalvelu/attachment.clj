@@ -268,7 +268,7 @@
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
   [{:keys [id attachments] :as application} attachmentId]
   (info "1/3 deleting files of attachment" attachmentId)
-  (dorun (map mongo/delete-file (attachment-file-ids application attachmentId)))
+  (dorun (map mongo/delete-file-by-id (attachment-file-ids application attachmentId)))
   (info "2/3 deleted files of attachment" attachmentId)
   (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
   (info "3/3 deleted meta-data of attachment" attachmentId))
@@ -278,7 +278,7 @@
   [{:keys [id attachments] :as application} attachmentId fileId]
   (let [latest-version (latest-version-after-removing-file attachments attachmentId fileId)]
     (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
-    (mongo/delete-file fileId)
+    (mongo/delete-file-by-id fileId)
     (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
     (mongo/update
       :applications
