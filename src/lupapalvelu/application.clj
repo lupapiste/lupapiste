@@ -180,7 +180,7 @@
         invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
 
-(defcommand "invite"
+(defcommand invite
   {:parameters [:id :email :title :text :documentName :path]
    :roles      [:applicant :authority]
    :notify     "invite"
@@ -313,32 +313,30 @@
   (update-application command {$set {(str "_" (:type data) "-seen-by." (:id user)) created}}))
 
 (defcommand set-user-to-document
-  {:parameters [:id :documentId :userId :path]
+  {:parameters [:id documentId userId path]
    :authenticated true}
-  [{{:keys [documentId userId path]} :data user :user created :created :as command}]
-  (with-application command
-    (fn [application]
-      (let [document     (domain/get-document-by-id application documentId)
-            schema-name  (get-in document [:schema :info :name])
-            schema       (schemas/get-schema schema-name)
-            subject      (security/get-non-private-userinfo userId)
-            with-hetu    (and
-                           (domain/has-hetu? (:body schema) [path])
-                           (security/same-user? user subject))
-            henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
-            full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
-        (info "setting-user-to-document, with hetu: " with-hetu)
-        (if-not document
-          (fail :error.document-not-found)
-          ;; TODO: update via model
-          (do
-            (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
-            (mongo/update
-              :applications
-              {:_id (:id application)
-               :documents {$elemMatch {:id documentId}}}
-              {$set {full-path henkilo
-                     :modified created}})))))))
+  [{:keys [user created application] :as command}]
+  (let [document     (domain/get-document-by-id application documentId)
+        schema-name  (get-in document [:schema :info :name])
+        schema       (schemas/get-schema schema-name)
+        subject      (security/get-non-private-userinfo userId)
+        with-hetu    (and
+                       (domain/has-hetu? (:body schema) [path])
+                       (security/same-user? user subject))
+        henkilo      (tools/timestamped (domain/->henkilo subject :with-hetu with-hetu) created)
+        full-path    (str "documents.$.data" (when-not (blank? path) (str "." path)))]
+    (info "setting-user-to-document, with hetu: " with-hetu)
+    (if-not document
+      (fail :error.document-not-found)
+      ;; TODO: update via model
+      (do
+        (infof "merging user %s with best effort into document %s into path %s" subject name full-path)
+        (mongo/update
+          :applications
+          {:_id (:id application)
+           :documents {$elemMatch {:id documentId}}}
+          {$set {full-path henkilo
+                 :modified created}})))))
 
 
 ;;
