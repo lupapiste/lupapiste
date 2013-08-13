@@ -301,7 +301,7 @@
   (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
 
 (defcommand set-attachment-type
-  {:parameters [:id attachmentId attachmentType]
+  {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :submitted :complement-needed]}
   [{:keys [application]}]
