@@ -113,12 +113,12 @@
     };
     
     self.downloadFile = function(prop) {
-      console.log("download:", prop.filename(), prop.fileId());
+      // cons ole.log("download:", prop.filename(), prop.fileId());
       return false;
     };
     
     self.removeFile = function(prop) {
-      console.log("remove:", prop.filename(), prop.fileId());
+      // cons ole.log("remove:", prop.filename(), prop.fileId());
       return false;
     };
     
