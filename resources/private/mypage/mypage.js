@@ -49,10 +49,14 @@
       this.attachmentType = ko.observable(attachmentType);
       this.fileId = ko.observable();
       this.filename = ko.observable();
+      this.contentType = ko.observable();
+      this.size = ko.observable();
       this.update = function(from) {
         this
-          .filename(from && val(from.filename))
-          .fileId(from && val(from.fileId));
+          .filename(from && val(from["filename"]))
+          .fileId(from && val(from["file-id"]))
+          .contentType(from && val(from["content-type"]))
+          .size(from && val(from["size"]));
         return self;
       }
     }
@@ -113,12 +117,12 @@
     };
     
     self.downloadFile = function(prop) {
-      // cons ole.log("download:", prop.filename(), prop.fileId());
+      console.log("download:", prop.filename(), prop.fileId());
       return false;
     };
     
     self.removeFile = function(prop) {
-      // cons ole.log("remove:", prop.filename(), prop.fileId());
+      console.log("remove:", prop.filename(), prop.fileId());
       return false;
     };
     
