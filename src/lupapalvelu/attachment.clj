@@ -318,19 +318,17 @@
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.attachmentTypeNotAllowed)))))
 
-(defcommand "approve-attachment"
+(defcommand approve-attachment
   {:description "Authority can approve attachement, moves to ok"
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :ok}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :ok}}))
 
 (defcommand "reject-attachment"
   {:description "Authority can reject attachement, requires user action."
