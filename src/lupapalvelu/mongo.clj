@@ -1,8 +1,8 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count])
-  (:use monger.operators
-        clojure.tools.logging)
-  (:require [sade.env :as env]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error fatal)]
+            [monger.operators :refer :all]
+            [sade.env :as env]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -98,7 +98,7 @@
   (mc/drop collection))
 
 (defn remove-many
-  "Returns all documents matching query."
+  "Removes all documents matching query."
   [collection query] (mc/remove collection query))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
@@ -241,7 +241,7 @@
       (gfs/remove-all)
       ; Collections must be dropped individially, otherwise index cache will be stale
       (doseq [coll (db/get-collection-names)]
-        (when-not (.startsWith coll "system") (mc/drop coll)))
+        (when-not (or (.startsWith coll "system") (= "poi" coll)) (mc/drop coll)))
       (ensure-indexes))))
 
 (defstatus :mongo (server-status))

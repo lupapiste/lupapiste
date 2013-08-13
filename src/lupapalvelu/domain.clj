@@ -1,8 +1,8 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
-        [clojure.tools.logging]
         [sade.util :only [lower-case]])
-  (:require [lupapalvelu.mongo :as mongo]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn warnf error fatal)]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.model :as model]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
@@ -109,10 +109,10 @@
       strip-nils
       strip-empty-maps)))
 
-(defn ->yritys-public-area [{:keys [id firstName lastName email phone street zip city]}]
+(defn ->yritys [{:keys [id firstName lastName email phone street zip city]}]
   (->
     {;:userId                        {:value id}
-     :vastuuhenkilo {:henkilotiedot {:etunimi       {:value firstName}
+     :yhteyshenkilo {:henkilotiedot {:etunimi       {:value firstName}
                                      :sukunimi      {:value lastName}}
                      :yhteystiedot {:email          {:value email}
                                     :puhelin        {:value phone}}}
@@ -128,4 +128,3 @@
 
 (defn set-software-version [m]
   (assoc m :_software_version "1.0.5"))
-

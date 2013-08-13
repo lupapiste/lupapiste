@@ -663,7 +663,7 @@ var docgen = (function () {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating')) {
+        if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
@@ -828,7 +828,7 @@ var docgen = (function () {
     }
 
     function disableBasedOnOptions() {
-      if (options && options.disabled) {
+      if (!self.authorizationModel.ok("update-doc") || options && options.disabled) {
         $(self.element).find('input, textarea').attr("readonly", true);
         $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();
@@ -937,7 +937,7 @@ var docgen = (function () {
       title.setAttribute("data-doc-id", self.docId);
       title.setAttribute("data-app-id", self.appId);
       title.onclick = accordion.click;
-      if (self.schema.info.removable && !isDisabled(options)) {
+      if (self.schema.info.removable && !isDisabled(options) && authorizationModel.ok('remove-doc')) {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
@@ -980,7 +980,7 @@ var docgen = (function () {
 
       docgenDiv.append(new DocModel(schema, doc.data, doc.meta, doc.id, application, authorizationModel, options).element);
 
-      if (schema.info.repeating && !isDisabled(options)) {
+      if (schema.info.repeating && !isDisabled(options) && authorizationModel.ok('create-doc')) {
         var btn = makeButton(schema.info.name + "_append_btn", loc(schema.info.name + "._append_label"));
 
         $(btn).click(function () {

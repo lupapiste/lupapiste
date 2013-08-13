@@ -44,6 +44,14 @@ Mikko inspects inforequest and sees his initial comments
   Open inforequest  create-info  753-416-25-22
   Wait until  Xpath Should Match X Times  //section[@id='inforequest']//table[@data-test-id='comments-table']//span[text()='Hoblaa']  1
 
+LUPA-585
+  Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  roskaa
+  # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
+  Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
+
+  Create inforequest the fast way  create-info-2  753  753-416-25-22  init-comment-2
+  Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
+
 Mikko creates new application
   Go to page  applications
   Wait until  Element should be visible  xpath=//*[@data-test-id='applications-create-new']
@@ -64,7 +72,7 @@ Mikko closes application at Latokuja 3 and logs out
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application  create-veikko-auth-app  837  837-416-17-15
+  Create application the fast way  create-veikko-auth-app  837  837-416-17-15
   Wait until  Application state should be  open
   It is possible to add operation
 

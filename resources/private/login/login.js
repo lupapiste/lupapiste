@@ -12,10 +12,7 @@
         var redirectLocation = "/app/" + loc.getCurrentLanguage() + "/" + applicationpage;
         // get the server-stored hashbang to redirect to right page (see web.clj for details)
         ajax.get("/api/hashbang")
-          .success(function(e) {
-            var bang = (e.bang.indexOf("#") !== 0) ? "#" + e.bang : e.bang;
-            window.parent.location = redirectLocation + bang;
-          })
+          .success(function(e) { window.parent.location = redirectLocation + "#!/" + e.bang; })
           .error(function() { window.parent.location = redirectLocation; })
           .call();
       })

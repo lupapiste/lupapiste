@@ -1,69 +1,84 @@
 (ns sade.dummy-email-server
-  (:use [clojure.java.io :only [input-stream]]
-        [clojure.tools.logging]
-        [clojure.pprint :only [pprint]]
-        [noir.core :only [defpage]]
-        [lupapalvelu.core :only [defquery ok]])
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [sade.email]
             [sade.env :as env]
-            [net.cgrand.enlive-html :as enlive])
-  (:import [javax.mail.internet MimeUtility]
-           [com.dumbster.smtp SimpleSmtpServer SmtpMessage]))
+            [clojure.pprint]
+            [noir.core :refer [defpage]]
+            [net.cgrand.enlive-html :as enlive]
+            [clojure.java.io :as io]
+            [lupapalvelu.core :refer [defquery defcommand ok fail now]]))
 
-(defonce server (atom nil))
+;;
+;; Dummy email server:
+;;
 
-(defn stop []
-  (swap! server (fn [s] (when s (debug "Stopping dummy mail server") (.stop s)) nil)))
+(when (get-in (env/get-config) [:email :dummy-server])
 
-(defn start []
-  (stop)
-  (let [port (env/value :email :port)]
-    (debug "Starting dummy mail server on port" port)
-    (swap! server (constantly (SimpleSmtpServer/start port)))))
+  (warn "Initializing dummy email server")
+  
+  (def sent-messages (atom []))
 
-(defn- message-header [message headers header-name]
-  (assoc headers (keyword header-name) (.getHeaderValue message header-name)))
-
-(defn- parse-message [message]
-  (when message
-    {:body    (-> (.getBody message) (s/replace #"=([^A-Z]{2})" "$1" ) ; strip extra '=' chars that are not part of quotation
-                (.getBytes "US-ASCII") (input-stream) (MimeUtility/decode "quoted-printable") (slurp))
-     :headers (reduce (partial message-header message) {} (iterator-seq (.getHeaderNames message)))}))
-
-(defn messages [& {:keys [reset]}]
-  (when-let [s @server]
-    (let [messages (map parse-message (iterator-seq (.getReceivedEmail s)))]
-      (when reset
-        (start))
-      messages)))
-
-(defn dump []
-  (doseq [message (messages)]
-    (pprint message)))
-
-(env/in-dev
-
+  (defn parse-body [body {content-type :type content :content}]
+    (if (and content-type content)
+      (assoc body (condp = content-type
+                    "text/plain; charset=utf-8" :plain
+                    "text/html; charset=utf-8"  :html
+                    content-type) content)
+      body))
+  
+  (defn deliver-email [to subject body]
+    (assert to "must provide 'to'")
+    (assert subject "must provide 'subject'")
+    (assert body "must provide 'body'")
+    (swap! sent-messages conj {:to to
+                               :subject subject
+                               :body (reduce parse-body {} body)
+                               :time (now)})
+    nil)
+  
+  (alter-var-root (var sade.email/deliver-email) (constantly deliver-email))
+  
+  (defn reset-sent-messages []
+    (reset! sent-messages []))
+  
+  (defn messages [& {reset :reset :or {reset false}}]
+    (let [m @sent-messages]
+      (when reset (reset-sent-messages))
+      m))
+  
+  (defn dump-sent-messages []
+    (doseq [message (messages)]
+      (clojure.pprint/pprint message)))
+  
+  (defcommand "send-email"
+    {:parameters [:to :subject :template]}
+    [{{:keys [to subject template] :as data} :data}]
+    (if-let [error (sade.email/send-email-message to subject template (dissoc data :from :to :subject :template))]
+      (fail "send-email-message failed" error)
+      (ok)))
+  
   (defquery "sent-emails"
     {}
-    [{{reset :reset} :data}]
+    [{{reset :reset :or {reset false}} :data}]
     (ok :messages (messages :reset reset)))
-
+  
   (defquery "last-email"
     {}
-    [{{reset :reset} :data}]
+    [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
+  
+  (defpage "/api/last-email" {reset :reset}
+    (if-let [msg (last (messages :reset reset))]
+      (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8")))
+                      (enlive/transform [:head] (enlive/append {:tag :title :content (:subject msg)}))
+                      (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
+                                                                                     {:tag :dd :attrs {:id "to"} :content [(:to msg)]}
+                                                                                     {:tag :dt :content "Subject"}
+                                                                                     {:tag :dd :attrs {:id "subject"} :content [(:subject msg)]}
+                                                                                     {:tag :dt :content "Time"}
+                                                                                     {:tag :dd :attrs {:id "time"} :content [(:time msg)]}]}
+                                                                 {:tag :hr}]))))
+      {:status 404 :body "No emails"}))
+  
+  (info "Dummy email server initialized"))
 
-  (defpage "/api/last-email" []
-    (if-let [msg (last (messages))]
-      (let [html     (first (re-find #"(?ms)<html>(.*)</html>" (:body msg)))
-            subject  (get-in msg [:headers :Subject])
-            to       (get-in msg [:headers :To])]
-        (debug (get-in msg [:headers]))
-        (enlive/emit* (-> (enlive/html-resource (input-stream (.getBytes html "UTF-8")))
-                        (enlive/transform [:head] (enlive/append {:tag :title :content subject}))
-                        (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
-                                                                                       {:tag :dd :attrs {:id "to"} :content to}
-                                                                                       {:tag :dt :content "Subject"}
-                                                                                       {:tag :dd :attrs {:id "subject"} :content subject}]}
-                                                                   {:tag :hr}])))))
-      {:response 404 :body "No emails"})))

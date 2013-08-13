@@ -39,7 +39,7 @@
     form))
 
 (defmacro fact* [& form]
-  `(do ~@(checkables-to-facts-in-lets form)))
+  `(fact (do ~@(checkables-to-facts-in-lets form))))
 
 (defmacro facts* [& form]
   `(fact* ~@form))

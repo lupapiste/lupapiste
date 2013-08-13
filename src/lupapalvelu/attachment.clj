@@ -1,12 +1,12 @@
 (ns lupapalvelu.attachment
   (:use [monger.operators]
         [lupapalvelu.core]
-        [clojure.tools.logging]
         [lupapalvelu.domain :only [get-application-as get-application-no-access-checking application-query-for]]
         [lupapalvelu.i18n :only [loc *lang* with-lang]]
         [clojure.string :only [split join trim]]
         [swiss-arrows.core :only [-<> -<>>]])
-  (:require [clojure.java.io :as io]
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info infof warn warnf error errorf fatal)]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.mongo :as mongo]
@@ -32,73 +32,88 @@
 ;; Metadata
 ;;
 
-(def attachment-types [:hakija [:valtakirja
-                                :ote_kauppa_ja_yhdistysrekisterista
-                                :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
-                       :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
-                                                 :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
-                                                 :rasitustodistus
-                                                 :todistus_erityisoikeuden_kirjaamisesta
-                                                 :jaljennos_vuokrasopimuksesta
-                                                 :jaljennos_perunkirjasta]
-                       :rakennuspaikka [:ote_alueen_peruskartasta
-                                        :ote_asemakaavasta_jos_asemakaava_alueella
-                                        :ote_kiinteistorekisteristerista
-                                        :tonttikartta_tarvittaessa
-                                        :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
-                                        :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
-                       :paapiirustus [:asemapiirros
-                                      :pohjapiirros
-                                      :leikkauspiirros
-                                      :julkisivupiirros]
-                       :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
-                                                   :selvitys_naapurien_kuulemisesta
-                                                   :elyn_tai_kunnan_poikkeamapaatos
-                                                   :suunnittelutarveratkaisu
-                                                   :ymparistolupa]
-                       :muut [:selvitys_rakennuspaikan_terveellisyydesta
-                              :selvitys_rakennuspaikan_korkeusasemasta
-                              :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
-                              :julkisivujen_varityssuunnitelma
-                              :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
-                              :piha_tai_istutussuunnitelma
-                              :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
-                              :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
-                              :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
-                              :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
-                              :energiataloudellinen_selvitys
-                              :paloturvallisuussuunnitelma
-                              :liikkumis_ja_esteettomyysselvitys
-                              :kerrosalaselvitys
-                              :vaestonsuojasuunnitelma
-                              :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
-                              :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
-                              :selvitys_kiinteiston_jatehuollon_jarjestamisesta
-                              :rakennesuunnitelma
-                              :ilmanvaihtosuunnitelma
-                              :lammityslaitesuunnitelma
-                              :radontekninen_suunnitelma
-                              :kalliorakentamistekninen_suunnitelma
-                              :paloturvallisuusselvitys
-                              :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
-                              :merkki_ja_turvavalaistussuunnitelma
-                              :sammutusautomatiikkasuunnitelma
-                              :rakennusautomaatiosuunnitelma
-                              :valaistussuunnitelma
-                              :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
-                              :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
-                              :muu]])
+(def ^:private attachment-types-R
+  [:hakija [:valtakirja
+            :ote_kauppa_ja_yhdistysrekisterista
+            :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta]
+   :rakennuspaikan_hallinta [:jaljennos_myonnetyista_lainhuudoista
+                             :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
+                             :rasitustodistus
+                             :todistus_erityisoikeuden_kirjaamisesta
+                             :jaljennos_vuokrasopimuksesta
+                             :jaljennos_perunkirjasta]
+   :rakennuspaikka [:ote_alueen_peruskartasta
+                    :ote_asemakaavasta_jos_asemakaava_alueella
+                    :ote_kiinteistorekisteristerista
+                    :tonttikartta_tarvittaessa
+                    :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
+                    :kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma]
+   :paapiirustus [:asemapiirros
+                  :pohjapiirros
+                  :leikkauspiirros
+                  :julkisivupiirros]
+   :ennakkoluvat_ja_lausunnot [:naapurien_suostumukset
+                               :selvitys_naapurien_kuulemisesta
+                               :elyn_tai_kunnan_poikkeamapaatos
+                               :suunnittelutarveratkaisu
+                               :ymparistolupa]
+   :muut [:selvitys_rakennuspaikan_terveellisyydesta
+          :selvitys_rakennuspaikan_korkeusasemasta
+          :selvitys_liittymisesta_ymparoivaan_rakennuskantaan
+          :julkisivujen_varityssuunnitelma
+          :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
+          :piha_tai_istutussuunnitelma
+          :selvitys_rakenteiden_kokonaisvakavuudesta_ja_lujuudesta
+          :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta
+          :selvitys_rakennuksen_aaniteknisesta_toimivuudesta
+          :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista
+          :energiataloudellinen_selvitys
+          :paloturvallisuussuunnitelma
+          :liikkumis_ja_esteettomyysselvitys
+          :kerrosalaselvitys
+          :vaestonsuojasuunnitelma
+          :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo
+          :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo
+          :selvitys_kiinteiston_jatehuollon_jarjestamisesta
+          :rakennesuunnitelma
+          :ilmanvaihtosuunnitelma
+          :lammityslaitesuunnitelma
+          :radontekninen_suunnitelma
+          :kalliorakentamistekninen_suunnitelma
+          :paloturvallisuusselvitys
+          :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
+          :merkki_ja_turvavalaistussuunnitelma
+          :sammutusautomatiikkasuunnitelma
+          :rakennusautomaatiosuunnitelma
+          :valaistussuunnitelma
+          :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
+          :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta
+          :muu]])
 
-(def attachment-types-public-areas [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
-                                                     :tilapainen-liikennejarjestelysuunnitelma
-                                                     :tyyppiratkaisu
-                                                     :tieto-kaivupaikkaan-liittyvista-johtotiedoista
-                                                     :liitoslausunto
-                                                     :asemapiirros]])
+(def ^:private attachment-types-YA
+  [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
+                    :tilapainen-liikennejarjestelysuunnitelma
+                    :tyyppiratkaisu
+                    :tieto-kaivupaikkaan-liittyvista-johtotiedoista
+                    :liitoslausunto
+                    :asemapiirros]])
 
+;;
+;; Api
+;;
+
+(defn get-attachment-types-by-permit-type
+  "Returns partitioned list of allowed attachment types or throws exception"
+  [permit-type]
+  (partition 2
+    (condp = (keyword permit-type)
+      :R  attachment-types-R
+      :YA attachment-types-YA
+      (fail! "unsupported permit-type"))))
+
+;; TODO: return attachment type based on what types of operations the given organization is having.
 (defn organization-attachments [organization]
-  ;; TODO: return attachment type based on what types of operations the given organization is having.
-  attachment-types)
+  attachment-types-R)
 
 (defn make-attachment [now target locked op attachement-type]
   {:id (mongo/create-id)
@@ -279,61 +294,55 @@
 (defn- to-key-types-vec [r [k v]]
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
-(defquery "attachment-types"
+(defquery attachment-types
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [command]
   (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
 
-(defcommand "set-attachment-type"
-  {:parameters [:id :attachmentId :attachmentType]
+(defcommand set-attachment-type
+  {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId attachmentType]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (let [attachment-type (parse-attachment-type attachmentType)]
-        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
-          (do
-            (mongo/update
-              :applications
-              {:_id (:id application)
-               :attachments {$elemMatch {:id attachmentId}}}
-              {$set {:attachments.$.type attachment-type}})
-            (ok))
-          (do
-            (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
-            (fail :error.attachmentTypeNotAllowed)))))))
+  [{:keys [application]}]
+  (let [attachment-type (parse-attachment-type attachmentType)]
+    (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
+      (do
+        (mongo/update
+          :applications
+          {:_id (:id application)
+           :attachments {$elemMatch {:id attachmentId}}}
+          {$set {:attachments.$.type attachment-type}})
+        (ok))
+      (do
+        (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
+        (fail :error.attachmentTypeNotAllowed)))))
 
-(defcommand "approve-attachment"
+(defcommand approve-attachment
   {:description "Authority can approve attachement, moves to ok"
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :ok}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :ok}}))
 
-(defcommand "reject-attachment"
+(defcommand reject-attachment
   {:description "Authority can reject attachement, requires user action."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :requires_user_action}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :requires_user_action}}))
 
-(defcommand "create-attachments"
+(defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
@@ -343,26 +352,22 @@
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
-(defcommand "delete-attachment"
+(defcommand delete-attachment
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (delete-attachment application attachmentId)
-      (ok))))
+  [{:keys [application]}]
+  (delete-attachment application attachmentId)
+  (ok))
 
-(defcommand "delete-attachment-version"
+(defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-   :parameters  [:id :attachmentId :fileId]
+   :parameters  [:id attachmentId fileId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId fileId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (if (file-id-in-application? application attachmentId fileId)
-        (delete-attachment-version application attachmentId fileId)
-        (fail :file_not_linked_to_the_document)))))
+  [{:keys [application]}]
+  (if (file-id-in-application? application attachmentId fileId)
+    (delete-attachment-version application attachmentId fileId)
+    (fail :file_not_linked_to_the_document)))
 
 (defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
@@ -374,7 +379,7 @@
           (not (-> command :user :role (= "authority"))))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defcommand "upload-attachment"
+(defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
    :validators [attachment-is-not-locked authority-viewing-verdictGiven-application]
@@ -452,6 +457,23 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn- output-attachment-if-logged-in [attachment-id download? user]
+  (if user
+    (output-attachment attachment-id download? (partial get-attachment-as user))
+    {:status 401
+     :headers {"Content-Type" "text/plain"}
+     :body "401 Unauthorized"}))
+
+(defraw "view-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id false user))
+
+(defraw "download-attachment"
+  {:parameters [:attachment-id]}
+  [{{:keys [attachment-id]} :data user :user}]
+  (output-attachment-if-logged-in attachment-id true user))
+
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
     (.putNextEntry zip (ZipEntry. (encode-filename (str file-id "_" file-name))))
@@ -466,19 +488,20 @@
 (defn- append-attachment [zip {:keys [filename fileId]}]
   (append-gridfs-file zip filename fileId))
 
-(defn- get-all-attachments [application loc lang]
+(defn- get-all-attachments [application lang]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
+      (let [zip (ZipOutputStream. out)
+            loc (i18n/localizer lang)]
         ; Add all attachments:
         (doseq [attachment (:attachments application)]
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate submitted-application lang)))
+          (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (loc "attachment.zip.pdf.filename.submitted") (ke6666/generate application lang))
+        (append-stream zip (loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -490,16 +513,17 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
-(defn output-all-attachments [application-id user lang]
-  (let [loc (i18n/localizer lang)]
-    (if-let [application (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})]
-      {:body (temp-file-input-stream (get-all-attachments application loc lang))
-       :status 200
+(defraw "download-all-attachments"
+  {:parameters [:id]}
+  [{:keys [application lang]}]
+  (if application
+    {:status 200
        :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (loc "attachment.zip.filename") "\"")}}
-      {:body "404"
-       :status 404
-       :headers {"Content-Type" "text/plain"}})))
+                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+       :body (temp-file-input-stream (get-all-attachments application lang))}
+    {:status 404
+     :headers {"Content-Type" "text/plain"}
+     :body "404"}))
 
 ;;
 ;; Stamping:
@@ -588,7 +612,7 @@
     (future (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     job))
 
-(defcommand "stamp-attachments"
+(defcommand stamp-attachments
   {:parameters [:id :files :xMargin :yMargin]
    :roles      [:authority]
    :states     [:verdictGiven]
@@ -605,7 +629,7 @@
                   :y-margin (->long (:yMargin data))
                   :transparency (->long (or (:transparency data) 0))})))))
 
-(defquery "stamp-attachments-job"
+(defquery stamp-attachments-job
   {:parameters [:job-id :version]
    :roles      [:authority]
    :description "Returns state of stamping job"}

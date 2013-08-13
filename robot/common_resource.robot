@@ -41,10 +41,12 @@ Go to login page
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
   Title should be  Lupapiste
+  Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority applications page should be open
   Location should contain  ${AUTHORITY APPLICATIONS PATH}
   #Title should be  Lupapiste - Viranomainen
+  Wait Until  Element should be visible  xpath=//*[@data-test-id='own-applications']
 
 Authority-admin front page should be open
   Wait until page contains element  admin-header
@@ -119,6 +121,7 @@ User is not logged in
 
 Login
   [Arguments]  ${username}  ${password}
+  Wait until  Element should be visible  login-username
   Input text  login-username  ${username}
   Input text  login-password  ${password}
   # for IE8
@@ -251,12 +254,20 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
+  Wait until  Element should be visible  user-name  
+  # Temporarily an extra sleep to prevent this:
+  # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
+  Sleep  2
   Execute Javascript  ajax.command("create-application", {"infoRequest":false,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":[],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/application/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Wait Until  Page Should Contain Element  xpath=//textarea[@name='kuvaus']
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
+  Wait until  Element should be visible  user-name  
+  # Temporarily an extra sleep to prevent this:
+  # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
+  Sleep  2
   Execute Javascript  ajax.command("create-application", {"infoRequest":true,"operation":"asuinrakennus","y":6610000,"x":10000.1,"address":"${address}","propertyId":util.prop.toDbFormat("${propertyId}"),"messages":["${message}"],"municipality":"${municipality}"}).success(function(d){window.location.hash = "!/inforequest/" + d.id;}).call();
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
@@ -272,7 +283,6 @@ Create inforequest
   Prepare new request  ${address}  ${municipality}  ${propertyId}
   Click by test id  create-proceed-to-inforequest
   # Needed for animation to finish.
-  # Sleep  1
   Wait until page contains element  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Wait until  Element should be visible  xpath=//textarea[@data-test-id="create-inforequest-message"]
   Input text  xpath=//textarea[@data-test-id="create-inforequest-message"]  ${message}
@@ -297,6 +307,7 @@ Prepare new request
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="create"]//div[@class="tree-content"]//*[text()="Asuinrakennuksen rakentaminen"]
+  Wait until  Element should be visible  xpath=//*[@class="attachments-list"]/span[text()="Asemapiirros"]
   Wait until  Element should be visible  xpath=//section[@id="create"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
