@@ -374,7 +374,7 @@
            :state     :canceled}}))
 
 (defcommand request-for-complement
-  {:parameters [id]
+  {:parameters [:id]
    :roles      [:authority]
    :notify     "state-change"
    :states     [:sent]}
