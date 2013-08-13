@@ -345,17 +345,17 @@
 ;; Assign
 ;;
 
-(defcommand "assign-to-me"
+(defcommand assign-to-me
   {:parameters [:id]
    :roles      [:authority]}
   [{user :user :as command}]
   (update-application command
     {$set {:authority (security/summary user)}}))
 
-(defcommand "assign-application"
-  {:parameters  [:id :assigneeId]
+(defcommand assign-application
+  {:parameters  [:id assigneeId]
    :roles       [:authority]}
-  [{{:keys [assigneeId]} :data user :user :as command}]
+  [{user :user :as command}]
   (update-application command
     (if assigneeId
       {$set   {:authority (security/summary (mongo/select-one :users {:_id assigneeId}))}}
@@ -365,28 +365,29 @@
 ;;
 ;;
 
-(defcommand "cancel-application"
+(defcommand cancel-application
   {:parameters [:id]
    :roles      [:applicant]
    :notify     "state-change"
    :states     [:draft :info :open :submitted]}
-  [{{id :id} :data {:keys [host]} :web created :created :as command}]
+  [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
            :state     :canceled}}))
 
-(defcommand "request-for-complement"
-  {:parameters [:id]
+(defcommand request-for-complement
+  {:parameters [id]
    :roles      [:authority]
    :notify     "state-change"
    :states     [:sent]}
-  [{{id :id} :data {host :host} :web created :created :as command}]
+  [{:keys [created] :as command}]
   (update-application command
     {$set {:modified  created
            :state :complement-needed}}))
 
-(defcommand "approve-application"
-  {:parameters [:id :lang]
+;; FIXME: does not set state if complement-needed
+(defcommand approve-application
+  {:parameters [:id lang]
    :roles      [:authority]
    :notify     "state-change"
    :states     [:submitted :complement-needed]}
@@ -399,7 +400,7 @@
             organization (mongo/by-id :organizations (:organization application))]
         (if (nil? (:authority application))
           (executed "assign-to-me" command))
-        (try (rl-mapping/get-application-as-krysp application (-> command :data :lang) submitted-application organization)
+        (try (rl-mapping/get-application-as-krysp application lang submitted-application organization)
           (mongo/update
             :applications {:_id (:id application) :state new-state}
             {$set {:state :sent}})
@@ -407,7 +408,7 @@
             (.printStackTrace e)
             (fail (.getMessage e))))))))
 
-(defcommand "submit-application"
+(defcommand submit-application
   {:parameters [:id]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :complement-needed]
@@ -416,27 +417,25 @@
   [{{:keys [host]} :web :keys [created] :as command}]
   (with-application command
     (fn [{:keys [id opened] :as application}]
-      (let [new-state      :submitted
-            opened         (or opened created)]
-        (mongo/update
-          :applications
-          {:_id id}
-          {$set {:state     new-state
-                 :opened    opened
-                 :submitted created}})
-        (try
-          (mongo/insert
-            :submitted-applications
-            (assoc (dissoc application :id) :_id id))
-          (catch com.mongodb.MongoException$DuplicateKey e
-            ; This is ok. Only the first submit is saved.
-            ))))))
+      (mongo/update
+        :applications
+        {:_id id}
+        {$set {:state     :submitted
+               :opened    (or opened created)
+               :submitted created}})
+      (try
+        (mongo/insert
+          :submitted-applications
+          (assoc (dissoc application :id) :_id id))
+        (catch com.mongodb.MongoException$DuplicateKey e
+          ; This is ok. Only the first submit is saved.
+            )))))
 
-(defcommand "save-application-shape"
-  {:parameters [:id :shape]
+(defcommand save-application-shape
+  {:parameters [:id shape]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]}
-  [{{:keys [shape]} :data :as command}]
+  [command]
   (update-application command
     {$set {:shapes [shape]}}))
 
@@ -574,33 +573,31 @@
       (autofill-rakennuspaikka application created)
       (ok :id id))))
 
-(defcommand "add-operation"
-  {:parameters [:id :operation]
+(defcommand add-operation
+  {:parameters [id operation]
    :roles      [:applicant :authority]
    :states     [:draft :open :complement-needed]
    :input-validators [operation-validator]
    :validators [(permit/validate-permit-type-is permit/R)]}
-  [command]
+  [{:keys [created] :as command}]
   (with-application command
     (fn [application]
-      (let [id         (get-in command [:data :id])
-            created    (:created command)
-            op-id      (mongo/create-id)
-            op         (make-op (get-in command [:data :operation]) created)
+      (let [op-id      (mongo/create-id)
+            op         (make-op operation created)
             new-docs   (make-documents nil created op application)]
         (mongo/update-by-id :applications id {$push {:operations op}
                                               $pushAll {:documents new-docs
                                                         :attachments (make-attachments created op (:organization application))}
                                               $set {:modified created}})))))
 
-(defcommand "change-location"
-  {:parameters [:id :x :y :address :propertyId]
+(defcommand change-location
+  {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
    :states     [:draft :info :answered :open :complement-needed :submitted]
    :input-validators [(partial non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
                       validate-x validate-y]}
-  [{{:keys [id x y address propertyId]} :data created :created application :application}]
+  [{:keys [created application]}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (mongo/update-by-id :applications id {$set {:location      (->location x y)
                                                 :address       (trim address)
@@ -609,11 +606,11 @@
                                                 :modified      created}})
     (fail :error.property-in-other-muinicipality)))
 
-(defcommand "convert-to-application"
-  {:parameters [:id]
+(defcommand convert-to-application
+  {:parameters [id]
    :roles      [:applicant]
    :states     [:draft :info :answered]}
-  [{{:keys [id]} :data :keys [user created application] :as command}]
+  [{:keys [user created application] :as command}]
   (let [op          (first (:operations application))
         permit-type (permit/permit-type application)]
     (mongo/update-by-id :applications id
@@ -632,16 +629,14 @@
   (when (or (< status 1) (> status 42))
     (fail :error.false.status.out.of.range.when.giving.verdict)))
 
-(defcommand "give-verdict"
-  {:parameters [:id :verdictId :status :name :given :official]
+(defcommand give-verdict
+  {:parameters [id verdictId status name given official]
    :input-validators [validate-status]
    :states     [:submitted :complement-needed :sent]
    :notify     "verdict"
    :roles      [:authority]}
-  [{{:keys [id verdictId status name given official]} :data {:keys [host]} :web created :created}]
-  (mongo/update
-    :applications
-    {:_id id}
+  [{:keys [created] :as command}]
+  (update-application command
     {$set {:modified created
            :state    :verdictGiven}
      $push {:verdict  {:id verdictId
@@ -681,10 +676,10 @@
           (ok))
         (fail :no-legacy-available)))))
 
-(defcommand "get-building-info-from-legacy"
-  {:parameters [:id]
+(defcommand get-building-info-from-legacy
+  {:parameters [id]
    :roles      [:applicant :authority]}
-  [{{:keys [id]} :data :as command}]
+  [command]
   (with-application command
     (fn [{:keys [organization propertyId] :as application}]
       (if-let [legacy   (organization/get-legacy organization)]
