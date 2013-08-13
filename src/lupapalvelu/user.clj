@@ -120,7 +120,7 @@
         filename          (mime/sanitize-filename filename)
         attachment-type   (keyword attachment-type)
         new-file-id       (mongo/create-id)
-        old-file-id       (get-in user [:attachments attachment-type :file-id])
+        old-file-id       (get-in user [:attachment attachment-type :file-id])
         file-info         {:file-id new-file-id
                            :filename filename
                            :content-type content-type
@@ -144,18 +144,14 @@
 (defraw "download-user-attachment"
   {:parameters [attachment-id]}
   [{user :user}]
-  #_(when-not user (fail! )
-    (println "DOWNLOAD:" attachment-id user))
-  (throw+ {:status 401 :body "oh noes"})
-  (ok))
-
-
-#_(defn- output-attachment-if-logged-in [attachment-id download? user]
-  (if user
-    (output-attachment attachment-id download? (partial get-attachment-as user))
-    {:status 401
-     :headers {"Content-Type" "text/plain"}
-     :body "401 Unauthorized"}))
+  (when-not user (throw+ {:status 401 :body "forbidden"}))
+  (if-let [attachment (mongo/download attachment-id)]
+    {:status 200
+     :body ((:content attachment))
+     :headers {"Content-Type" (:content-type attachment)
+               "Content-Length" (str (:content-length attachment))}}
+    {:status 404
+     :body (str "can't file attachment: id=" attachment-id)}))
 
 (defcommand remove-user-attachment
   {:parameters [attachmentType fileId]}
