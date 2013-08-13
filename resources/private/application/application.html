@@ -220,7 +220,7 @@
           </div>
 
           <button
-              data-bind="click: application.addParty, ltext: 'application.addParty'"
+              data-bind="click: application.addParty, ltext: 'application.addParty', visible: authorization.ok('create-doc')"
               class="btn btn-primary modal"
               data-test-id="add-party">
           </button>
