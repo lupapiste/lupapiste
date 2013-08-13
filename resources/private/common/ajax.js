@@ -43,12 +43,7 @@ var ajax = (function() {
 
     self.successHandler = function(e) { };
     self.errorHandler = function(e) { notify.error("error",e); };
-    self.failHandler = function(jqXHR, textStatus, errorThrown) {
-      // Error is not logged if the request was just cancelled
-      if (jqXHR && jqXHR.readyState !== 0 && jqXHR.status !== 0) {
-        error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
-      }
-    };
+    self.failHandler = function(jqXHR, textStatus, errorThrown) {error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);};
     self.completeHandler = function() { };
     self.headers = {};
 
