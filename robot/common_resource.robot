@@ -232,11 +232,10 @@ Select From List by test id
 
 Click by test id
   [Arguments]  ${id}
-  ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait until  Page should contain element  ${path}
-  Wait until  Element should be visible  ${path}
+  ${selector} =   Set Variable  $("[data-test-id='${id}']:visible")
   # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
-  Execute Javascript  $("[data-test-id='${id}']:visible").click();
+  Wait For Condition  return ${selector}.length===1;  10
+  Execute Javascript  ${selector}.click();
 
 Click enabled by test id
   [Arguments]  ${id}
