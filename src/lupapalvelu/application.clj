@@ -124,13 +124,13 @@
 (defn- app-post-processor [user]
   (comp without-system-keys (partial with-meta-fields user)))
 
-(defquery "applications" {:authenticated true :verified true} [{user :user}]
+(defquery applications {:authenticated true :verified true} [{user :user}]
   (ok :applications (map (app-post-processor user) (mongo/select :applications (domain/application-query-for user)))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users {:organizations (:organization app) :role "authority"} {:firstName 1 :lastName 1}))
 
-(defquery "application"
+(defquery application
   {:authenticated true
    :parameters [:id]}
   [{app :application user :user}]
@@ -141,7 +141,7 @@
 
 ;; Gets an array of application ids and returns a map for each application that contains the
 ;; application id and the authorities in that organization.
-(defquery "authorities-in-applications-organization"
+(defquery authorities-in-applications-organization
   {:parameters [:id]
    :authenticated true}
   [{app :application}]
@@ -154,7 +154,7 @@
         (= true (get-in (schemas/get-schemas) [name :info :repeating]))))
     names))
 
-(defquery "party-document-names"
+(defquery party-document-names
   {:parameters [:id]
    :authenticated true}
   [command]
@@ -170,7 +170,7 @@
 ;; Invites
 ;;
 
-(defquery "invites"
+(defquery invites
   {:authenticated true
    :verified true}
   [{{:keys [id]} :user}]
@@ -772,11 +772,11 @@
 ;; Query that returns number of applications or info-requests user has:
 ;;
 
-(defquery "applications-count"
-  {:parameters [:kind]
+(defquery applications-count
+  {:parameters [kind]
    :authenticated true
    :verified true}
-  [{user :user {kind :kind} :data}]
+  [{:keys [user]}]
   (let [base-query (domain/application-query-for user)
         query (condp = kind
                 "inforequests" (assoc base-query :infoRequest true)
