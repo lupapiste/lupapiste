@@ -145,7 +145,7 @@
   {:parameters [attachment-id]}
   [{user :user}]
   (when-not user (throw+ {:status 401 :body "forbidden"}))
-  (if-let [attachment (mongo/download attachment-id)]
+  (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
     {:status 200
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
