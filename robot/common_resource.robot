@@ -257,7 +257,7 @@ Click enabled by test id
 
 Create application the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}
-  Wait until  Element should be visible  user-name  
+  Wait until  Element should be visible  user-name
   # Temporarily an extra sleep to prevent this:
   # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
   Sleep  2
@@ -267,7 +267,7 @@ Create application the fast way
 
 Create inforequest the fast way
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${message}
-  Wait until  Element should be visible  user-name  
+  Wait until  Element should be visible  user-name
   # Temporarily an extra sleep to prevent this:
   # The last error was: The text of element 'xpath=//span[@data-test-id='application-property-id']' should have been '753-416-25-22' but in fact it was ''.
   Sleep  2
@@ -346,11 +346,13 @@ Open the request
 Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
+  Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
 
 Open inforequest
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
+  Wait until  Element Should Be Visible  inforequest
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='inforequest-property-id']  ${propertyId}
 
 Request should be visible
