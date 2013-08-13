@@ -342,7 +342,7 @@
     {$set {:modified (:created command)
            :attachments.$.state :requires_user_action}}))
 
-(defcommand "create-attachments"
+(defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
@@ -352,15 +352,13 @@
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
-(defcommand "delete-attachment"
+(defcommand delete-attachment
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (delete-attachment application attachmentId)
-      (ok))))
+  [{:keys [application]}]
+  (delete-attachment application attachmentId)
+  (ok))
 
 (defcommand "delete-attachment-version"
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
