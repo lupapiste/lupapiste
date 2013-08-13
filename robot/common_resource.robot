@@ -223,7 +223,7 @@ Input text by test id
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Input text  xpath=//input[@data-test-id="${id}"]  ${value}
+  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
