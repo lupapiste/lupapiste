@@ -663,7 +663,7 @@ var docgen = (function () {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating')) {
+        if (subSchema.repeating && !isDisabled(options) && features.enabled('removeRepeating') && authorizationModel.ok('remove-document-data')) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
@@ -937,7 +937,7 @@ var docgen = (function () {
       title.setAttribute("data-doc-id", self.docId);
       title.setAttribute("data-app-id", self.appId);
       title.onclick = accordion.click;
-      if (self.schema.info.removable && !isDisabled(options)) {
+      if (self.schema.info.removable && !isDisabled(options) && authorizationModel.ok('remove-doc')) {
         $(title)
           .append($("<span>")
             .addClass("icon remove inline-right")
