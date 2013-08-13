@@ -20,7 +20,7 @@
     (if-not (nil? timestamp)
       (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
 
-(defn to-xml-datetime-from-string [date-as-string]
+(defn to-xml-date-from-string [date-as-string]
   (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
     (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d)))
 

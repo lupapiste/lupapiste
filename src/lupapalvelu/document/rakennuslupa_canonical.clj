@@ -305,7 +305,7 @@
   (let [toimenpide (:data purku-doc)]
     {:Toimenpide {:purkaminen (conj (get-toimenpiteen-kuvaus purku-doc)
                                    {:purkamisenSyy (-> toimenpide :poistumanSyy :value)}
-                                   {:poistumaPvm (to-xml-datetime-from-string (-> toimenpide :poistumanAjankohta :value))})
+                                   {:poistumaPvm (to-xml-date-from-string (-> toimenpide :poistumanAjankohta :value))})
                   :rakennustieto (get-rakennus-data toimenpide application purku-doc)}
      :created (:created purku-doc)}))
 

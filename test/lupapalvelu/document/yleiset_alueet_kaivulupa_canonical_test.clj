@@ -154,10 +154,18 @@
                   :text "Savupiippu pit\u00e4\u00e4 olla."}])
 
 (def application
-  {:permitType "YA",
+  {:_id "LP-753-2013-00001",
+   :permitType "YA",
    :created 1372331179008,
    :opened 1372331643985,
    :modified 1372342070624,
+; TODO: Mista tama pitaisi saada? (ei ole Kaivuluvassa luonnostaan mukana).
+;       Tarvitaan kasittelytietoon (on tosin vapaaehtoinen).
+;   :authority {:id "777777777777777777000023",
+;               :username "sonja",
+;               :firstName "Sonja",
+;               :lastName "Sibbo",
+;               :role "authority"},
    :state "open",
    :title "Latokuja 1",
    :address "Latokuja 1",
@@ -179,8 +187,13 @@
         yleinenAlueAsiatieto (first (:yleinenAlueAsiatieto YleisetAlueet)) => truthy
         Tyolupa (:Tyolupa yleinenAlueAsiatieto) => truthy
 
+        Kasittelytieto (-> Tyolupa :kasittelytietotieto :Kasittelytieto) => truthy
+
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
+
+        ;;  TODO: Ota tama kayttoon!
+;        Sijainti (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
 
         ;; TODO: Naita voi yhdistella perakkain '->':lla... Refaktoroi.
         Maksaja (-> Tyolupa :maksajatieto :Maksaja) => truthy
@@ -199,7 +212,8 @@
         maksaja-yksityinen-nimi (:nimi maksaja-yksityinen-Henkilo) => truthy
         maksaja-yksityinen-osoite (:osoite maksaja-yksityinen-Henkilo) => truthy
 
-        Toimintajakso (-> Tyolupa :toimintajaksotieto :Toimintajakso) => truthy
+        alkuPvm (-> Tyolupa :alkuPvm) => truthy
+        loppuPvm (-> Tyolupa :loppuPvm) => truthy
 
         lupaAsianKuvaus (:lupaAsianKuvaus Tyolupa) => truthy
         Sijoituslupaviite (-> Tyolupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy
@@ -233,8 +247,16 @@
 
       (fact "contains nil" (contains-value? canonical nil?) => falsey)
 
+      (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified application)))
+      (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "0 Kesken")
+      (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:_id application))
+
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => "kaivu- tai katuty\u00f6lupa")
       (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false) ;; TODO: Onko tama checkki ok?
+
+      ;; Sijainti   TODO: Ota nama kayttoon!
+;      (fact "Sijainti-x" (:x Sijainti) => (-> application :location :x))
+;      (fact "Sijainti-y" (:y Sijainti) => (-> application :location :y))
 
       ;; Maksajan tiedot
       (fact "maksaja-etunimi" (:etunimi maksaja-henkilo-nimi) => (-> nimi :etunimi :value))
@@ -302,12 +324,9 @@
       (fact "tyomaasta-vastaava-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
       ;(fact "tyomaasta-vastaava-yksityinen-hetu" (:henkilotunnus tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> henkilotiedot :hetu :value))
 
-
-;      (println "\n Toimintajakso: " Toimintajakso)
-;      (println "\n Toimintajakso alkuHetki: " (:alkuHetki Toimintajakso))
-      ;; Toimintajakso
-      (fact "Toimintajakso-alkuHetki" (:alkuHetki Toimintajakso) => (to-xml-datetime-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
-      (fact "Toimintajakso-loppuHetki" (:loppuHetki Toimintajakso) => (to-xml-datetime-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
+      ;; Käytön alku/loppu pvm
+      (fact "alkuPvm" alkuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
+      (fact "loppuPvm" loppuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
 
       ;; Hankkeen kuvaus
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))
