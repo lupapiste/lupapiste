@@ -230,24 +230,18 @@ Select From List by test id
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
 
-Focus on visible
-  [Arguments]  ${path}
-  Wait until  Page should contain element  ${path}
-  Wait until  Element should be visible  ${path}
-  Focus  ${path}
-
 Click by test id
   [Arguments]  ${id}
   ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Focus on visible  ${path}
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  Execute Javascript  window.scrollTo(0, $("[data-test-id='${id}']").position().top - 130);
-  Click element  ${path}
+  Wait until  Page should contain element  ${path}
+  Wait until  Element should be visible  ${path}
+  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
+  Execute Javascript  $("[data-test-id='${id}']:visible").click();
 
 Click enabled by test id
   [Arguments]  ${id}
   ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Focus on visible  ${path}
+  Wait until  Page should contain element  ${path}
   Wait Until  Element should be enabled  ${path}
   Click by test id  ${id}
 
