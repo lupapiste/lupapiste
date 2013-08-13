@@ -19,30 +19,12 @@ Sonja adds some neighbors
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Click by test id  manage-neighbors
-  # Add neighbor "a"
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  a
-  Input text by test id  neighbors.edit.email  a@example.com
-  Click by test id  neighbors.edit.ok
-  # Add neighbor "b"
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  b
-  Input text by test id  neighbors.edit.email  b@example.com
-  Click by test id  neighbors.edit.ok
+  Add neighbor  1-2-3-4  a  a@example.com
+  Add neighbor  1-2-3-4  b  b@example.com
   # Add neighbor "c" with wrong email, ups. Sonja must correct that later.
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  c
-  Input text by test id  neighbors.edit.email  x@example.com
-  Click by test id  neighbors.edit.ok
+  Add neighbor  1-2-3-4  c  x@example.com
   # Add neighbor "d". This is a mistake that Sonja must fix later.
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  d
-  Input text by test id  neighbors.edit.email  d@example.com
-  Click by test id  neighbors.edit.ok
+  Add neighbor  1-2-3-4  d  d@example.com
   # Check that they are all listed
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-a@example.com']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-b@example.com']
@@ -188,3 +170,16 @@ Sonja can see neighbor sotu
   [Tags]  fail  integration
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-userid']  210281-9988
   Click element  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-ok']
+
+
+*** Keywords ***
+Add neighbor
+  [Arguments]  ${propertyId}  ${name}  ${email}
+  Click enabled by test id  manager-neighbors-add
+  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Input text by test id  neighbors.edit.propertyId  ${propertyId}
+  Input text by test id  neighbors.edit.name  ${name}
+  Input text by test id  neighbors.edit.email  ${email}
+  Click by test id  neighbors.edit.ok
+  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Wait Until  Page Should Contain  ${email}
