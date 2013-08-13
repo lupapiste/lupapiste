@@ -20,17 +20,17 @@
 
 (def tyo-aika
   (body
-    {:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
+    {:name "tyoaika-alkaa-pvm" :type :date}                                     ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date}))
 
 (def tapahtuman-tiedot
   (body
     {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
     {:name "tapahtumapaikka" :type :string :size "l"}
-    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
+    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                              ;; kayttojaksotietoType
     {:name "tapahtuma-aika-paattyy-pvm" :type :date}))
 
-#_(def tapahtumien-syotto                                                      ;; merkinnatJaPiirroksettietoType
+#_(def tapahtumien-syotto                                                       ;; merkinnatJaPiirroksettietoType
   {:info {:name "tapahtumien-syotto"
           :order 68
           :removable true
@@ -40,9 +40,9 @@
 (def mainostus-tapahtuma
   (body
     tapahtuman-tiedot
-    [{:name "mainostus-alkaa-pvm" :type :date}                                 ;; toimintajaksotietoType
+    [{:name "mainostus-alkaa-pvm" :type :date}                                  ;; toimintajaksotietoType
      {:name "mainostus-paattyy-pvm" :type :date}]
-    {:name "haetaan-kausilupaa" :type :checkbox}                               ;; lupakohtainenLisatietoType ?
+    {:name "haetaan-kausilupaa" :type :checkbox}                                ;; lupakohtainenLisatietoType ?
     #_tapahtumien-syotto))
 
 (def viitoitus-tapahtuma
