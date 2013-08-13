@@ -19,7 +19,7 @@
         xml (element-to-xml canonical kaivulupa_to_krysp)
         xml-s (indent-str xml)]
 
-    (println "\n xml-s: ")
+    (println "\n xml-s: \n")
     (println xml-s)
     (println "\n")
 

@@ -46,9 +46,6 @@
                         :child mapping-common/yritys-child-ns-yht}]}
               {:tag :laskuviite}])
 
-(def toimintajakso [{:tag :alkuHetki :ns "yht"}
-                    {:tag :loppuHetki :ns "yht"}])
-
 (def osapuoli [{:tag :Osapuoli
                 :child [{:tag :henkilotieto
                          :child [{:tag :Henkilo
@@ -73,9 +70,11 @@
 (def kaivulupa_to_krysp
   {:tag :YleisetAlueet
    :ns "yak"
+;   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
    :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
+;         :xmlns:gml "http://www.opengis.net/gml"  ;;TODO: Lisaa tama ja rivi ylla, jos tarvit naita "sijaintitiedossa"
          ;; TODO: Tarvitaanko naita kahta?
          :xmlns:xlink "http://www.w3.org/1999/xlink"
          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"
@@ -84,7 +83,18 @@
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
            {:tag :yleinenAlueAsiatieto
             :child [{:tag :Tyolupa
-                     :child [{:tag :kayttotarkoitus}
+                     :child [{:tag :kasittelytietotieto
+                              :child [{:tag :Kasittelytieto
+                                       :child [{:tag :muutosHetki :ns "yht"}
+                                               {:tag :hakemuksenTila :ns "yht"}
+                                               {:tag :asiatunnus :ns "yht"}
+;; TODO: Lisaa nama?
+;                                               {:tag :tilanMuutosHetki :ns "yht"}
+;                                               {:tag :kunnanYhteyshenkilo :ns "yht"}
+;                                               {:tag :paivaysPvm :ns "yht"}
+;                                               {:tag :kasittelija}
+                                               ]}]}
+                             {:tag :kayttotarkoitus}
                              {:tag :johtoselvitysviitetieto
                               :child [{:tag :Johtoselvitysviite
                                        :child [{:tag :vaadittuKytkin
@@ -93,9 +103,8 @@
                              {:tag :maksajatieto
                               :child [{:tag :Maksaja
                                        :child maksaja}]}
-                             {:tag :toimintajaksotieto
-                              :child [{:tag :Toimintajakso
-                                       :child toimintajakso}]}
+                             {:tag :alkuPvm}
+                             {:tag :loppuPvm}
                              {:tag :lupaAsianKuvaus}
                              {:tag :sijoituslupaviitetieto
                               :child [{:tag :Sijoituslupaviite
@@ -105,7 +114,17 @@
                               ;; hakija ja tyomaasta-vastaava (yritys-osa)
                               :child osapuoli}
                              {:tag :vastuuhenkilotieto
-                              :child vastuuhenkilo}]  ;; tyomaasta-vastaava (henkilo-osa)
+                              :child vastuuhenkilo}   ;; tyomaasta-vastaava (henkilo-osa)
+;; TODO: Lisaa tama?
+                             #_{:tag :sijaintitieto
+                              :child [{:tag :Sijainti
+                                       :child [{:tag :piste :ns "yht"
+                                                :child [{:tag :Point :ns "gml"
+                                                         :child [{:tag :pos}]}]}]}]}
+;; TODO: Lisaa tama?
+                             #_{:tag :paatostieto
+                              :child [{:tag :Paatos
+                                       :child [{:tag :takuuaikaPaivat}]}]}]
                      }]}]})
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
