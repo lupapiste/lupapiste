@@ -27,3 +27,5 @@ userinfo.architect.upload.state.ready: Tiedoston lataaminen onnistui
 userinfo.architect.upload.state.error: Tapahtui virhe, yritä myöhemmin uudeleen.
 userinfo.architect.upload.no-file: Tiedostoa ei valittuna
 userinfo.architect.upload.filename: Valittu tiedosto:
+userinfo.architect.remove.title: Poista liite?
+userinfo.architect.remove.message: Oletko varma että haluat poistaa liitteen?
