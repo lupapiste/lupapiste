@@ -612,7 +612,7 @@
     (future (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     job))
 
-(defcommand "stamp-attachments"
+(defcommand stamp-attachments
   {:parameters [:id :files :xMargin :yMargin]
    :roles      [:authority]
    :states     [:verdictGiven]
