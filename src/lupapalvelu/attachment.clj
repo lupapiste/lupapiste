@@ -360,16 +360,14 @@
   (delete-attachment application attachmentId)
   (ok))
 
-(defcommand "delete-attachment-version"
+(defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-   :parameters  [:id :attachmentId :fileId]
+   :parameters  [:id attachmentId fileId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId fileId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (if (file-id-in-application? application attachmentId fileId)
-        (delete-attachment-version application attachmentId fileId)
-        (fail :file_not_linked_to_the_document)))))
+  [{:keys [application]}]
+  (if (file-id-in-application? application attachmentId fileId)
+    (delete-attachment-version application attachmentId fileId)
+    (fail :file_not_linked_to_the_document)))
 
 (defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
