@@ -294,31 +294,29 @@
 (defn- to-key-types-vec [r [k v]]
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
-(defquery "attachment-types"
+(defquery attachment-types
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [command]
   (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
 
-(defcommand "set-attachment-type"
-  {:parameters [:id :attachmentId :attachmentType]
+(defcommand set-attachment-type
+  {:parameters [:id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId attachmentType]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (let [attachment-type (parse-attachment-type attachmentType)]
-        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
-          (do
-            (mongo/update
-              :applications
-              {:_id (:id application)
-               :attachments {$elemMatch {:id attachmentId}}}
-              {$set {:attachments.$.type attachment-type}})
-            (ok))
-          (do
-            (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
-            (fail :error.attachmentTypeNotAllowed)))))))
+  [{:keys [application]}]
+  (let [attachment-type (parse-attachment-type attachmentType)]
+    (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
+      (do
+        (mongo/update
+          :applications
+          {:_id (:id application)
+           :attachments {$elemMatch {:id attachmentId}}}
+          {$set {:attachments.$.type attachment-type}})
+        (ok))
+      (do
+        (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
+        (fail :error.attachmentTypeNotAllowed)))))
 
 (defcommand "approve-attachment"
   {:description "Authority can approve attachement, moves to ok"
