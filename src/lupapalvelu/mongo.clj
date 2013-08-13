@@ -120,8 +120,8 @@
     (gfs/content-type content-type)
     (gfs/metadata (assoc (apply hash-map metadata) :uploaded (System/currentTimeMillis)))))
 
-(defn download [file-id]
-  (when-let [attachment (gfs/find-one {:_id file-id})]
+(defn download-find [query]
+  (when-let [attachment (gfs/find-one query)]
     (let [metadata (from-db-object (.getMetaData attachment) :true)]
       {:content (fn [] (.getInputStream attachment))
        :content-type (.getContentType attachment)
@@ -129,6 +129,9 @@
        :file-name (.getFilename attachment)
        :metadata metadata
        :application (:application metadata)})))
+
+(defn download [file-id]
+  (download-find {:_id file-id}))
 
 (defn delete-file [query]
   (let [query (with-_id query)]
