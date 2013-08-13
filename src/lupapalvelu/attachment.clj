@@ -379,7 +379,7 @@
           (not (-> command :user :role (= "authority"))))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defcommand "upload-attachment"
+(defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
    :validators [attachment-is-not-locked authority-viewing-verdictGiven-application]
@@ -629,7 +629,7 @@
                   :y-margin (->long (:yMargin data))
                   :transparency (->long (or (:transparency data) 0))})))))
 
-(defquery "stamp-attachments-job"
+(defquery stamp-attachments-job
   {:parameters [:job-id :version]
    :roles      [:authority]
    :description "Returns state of stamping job"}
