@@ -3,6 +3,7 @@
         [lupapalvelu.core]
         [lupapalvelu.i18n :only [*lang*]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn warnf error fatal)]
+            [slingshot.slingshot :refer [throw+]]
             [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
@@ -119,25 +120,50 @@
         filename          (mime/sanitize-filename filename)
         attachment-type   (keyword attachment-type)
         new-file-id       (mongo/create-id)
-        old-file-id       (get-in user [attachment-type :file-id])
+        old-file-id       (get-in user [:attachments attachment-type :file-id])
         file-info         {:file-id new-file-id
                            :filename filename
                            :content-type content-type
                            :size size}]
     
+    (println user)
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size)
 
     (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
     (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
     
     (mongo/upload new-file-id filename content-type tempfile :user-id (:id user) :attachment-type attachment-type)
-    (mongo/update-by-id :users (:id user) {$set {attachment-type file-info}})
-    (when old-file-id (mongo/delete-file old-file-id))
+    (mongo/update-by-id :users (:id user) {$set {(str "attachment." (name attachment-type)) file-info}})
+    (when old-file-id (mongo/delete-file-by-id old-file-id))
     
     (->> (assoc file-info :ok true) 
       (resp/json)
       (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.  
       (resp/status 200))))
+
+(defraw "download-user-attachment"
+  {:parameters [attachment-id]}
+  [{user :user}]
+  #_(when-not user (fail! )
+    (println "DOWNLOAD:" attachment-id user))
+  (throw+ {:status 401 :body "oh noes"})
+  (ok))
+
+
+#_(defn- output-attachment-if-logged-in [attachment-id download? user]
+  (if user
+    (output-attachment attachment-id download? (partial get-attachment-as user))
+    {:status 401
+     :headers {"Content-Type" "text/plain"}
+     :body "401 Unauthorized"}))
+
+(defcommand remove-user-attachment
+  {:parameters [attachmentType fileId]}
+  [{user :user}]
+  (info "Removing user attachment: attachmentType:" attachmentType "file:" fileId)
+  (mongo/update-by-id :users (:id user) {$unset {(str "attachment." attachmentType) nil}})
+  (mongo/delete-file {:id fileId :metadata.user-id (:id user)})
+  (ok))
 
 (env/in-dev
   (defcommand "create-apikey"

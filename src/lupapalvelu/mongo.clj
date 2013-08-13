@@ -130,9 +130,13 @@
        :metadata metadata
        :application (:application metadata)})))
 
-(defn delete-file [file-id]
-  (info "removing file" file-id)
-  (gfs/remove {:_id file-id}))
+(defn delete-file [query]
+  (let [query (with-_id query)]
+    (info "removing file" query)
+    (gfs/remove query)))
+
+(defn delete-file-by-id [file-id]
+  (delete-file {:id file-id}))
 
 (defn count
   "returns count of objects in collection"
