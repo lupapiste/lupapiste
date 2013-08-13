@@ -88,7 +88,7 @@
   ;
   
   (upload-user-attachment pena "examination" true)
-  (let [file-1 (:examination (current-user pena))
+  (let [file-1 (get-in (current-user pena) [:attachment :examination])
         att-1 (mongo/download (:file-id file-1))]
     (fact "filename of file 1"    file-1  => (contains {:filename "test-attachment.txt"}))
     (fact "db has same filename"  att-1   => (contains {:file-name "test-attachment.txt"}))
@@ -99,12 +99,10 @@
     ;
     
     (upload-user-attachment pena "examination" true)
-    (let [file-2 (:examination (current-user pena))
+    (let [file-2 (get-in (current-user pena) [:attachment :examination])
           att-2 (mongo/download (:file-id file-2))]
       (fact "filename of file 2"   file-2  => (contains {:filename "test-attachment.txt"}))
       (fact "db has same filename" att-2   => (contains {:file-name "test-attachment.txt"}))
       (fact "file 2 metadata"      att-2   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})})))
     
-    (fact "old file is deleted"  (mongo/download (:file-id file-1)) => nil?)
-    
-    ))
+    (fact "old file is deleted"  (mongo/download (:file-id file-1)) => nil?)))
