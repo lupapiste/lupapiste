@@ -30,8 +30,11 @@ var authorization = (function() {
     };
   }
 
+  var model = new AuthorizationModel();
+
   return {
-    create: function() { return new AuthorizationModel(); }
+    create: function() { return new AuthorizationModel(); },
+    ok: function(command) { return model.ok(command); }
   };
 
 })();
