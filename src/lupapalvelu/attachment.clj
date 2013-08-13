@@ -330,19 +330,17 @@
     {$set {:modified (:created command)
            :attachments.$.state :ok}}))
 
-(defcommand "reject-attachment"
+(defcommand reject-attachment
   {:description "Authority can reject attachement, requires user action."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :requires_user_action}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :requires_user_action}}))
 
 (defcommand "create-attachments"
   {:description "Authority can set a placeholder for an attachment"
