@@ -230,22 +230,25 @@ Select From List by test id
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
 
+Focus on visible
+  [Arguments]  ${path}
+  Wait until  Page should contain element  ${path}
+  Wait until  Element should be visible  ${path}
+  Focus  ${path}
+
 Click by test id
   [Arguments]  ${id}
-  Wait until  Page should contain element  xpath=//*[@data-test-id='${id}']
-  Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
+  ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
+  Focus on visible  ${path}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   Execute Javascript  window.scrollTo(0, $("[data-test-id='${id}']").position().top - 130);
-  # IE8
-  Focus  xpath=//*[@data-test-id='${id}']
-  Wait until  Element should be visible  xpath=//*[@data-test-id='${id}']
-  Click element  xpath=//*[@data-test-id='${id}']
+  Click element  ${path}
 
 Click enabled by test id
   [Arguments]  ${id}
-  Wait until  Page should contain element  xpath=//*[@data-test-id="${id}"]
-  Focus  xpath=//*[@data-test-id='${id}']
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id="${id}"]
+  ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
+  Focus on visible  ${path}
+  Wait Until  Element should be enabled  ${path}
   Click by test id  ${id}
 
 #
