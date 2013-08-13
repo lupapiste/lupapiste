@@ -52,18 +52,21 @@
 
 (defjson "/system/apis" [] @apis)
 
+(defn parse-json-body [request]
+  (let [json-body (if (ss/starts-with (:content-type request) "application/json")
+                    (if-let [body (:body request)]
+                      (-> body
+                        (io/reader :encoding (or (:character-encoding request) "utf-8"))
+                        json/parse-stream
+                        keywordize-keys)
+                      {}))]
+    (if json-body
+      (assoc request :json json-body :params json-body)
+      (assoc request :json nil))))
+
 (defn parse-json-body-middleware [handler]
   (fn [request]
-    (let [json-body (if (ss/starts-with (:content-type request) "application/json")
-                      (if-let [body (:body request)]
-                        (-> body
-                          (io/reader :encoding (or (:character-encoding request) "utf-8"))
-                          json/parse-stream
-                          keywordize-keys)
-                        {}))
-          request (assoc request :json json-body)
-          request (if json-body (assoc request :params json-body) request)]
-      (handler request))))
+    (handler (parse-json-body request))))
 
 (defn from-json [request]
   (:json request))
