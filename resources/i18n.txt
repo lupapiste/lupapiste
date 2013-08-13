@@ -1,8 +1,3 @@
-\R: 	Rakennuslupa
-YA: Yleisten alueiden lupa
-Y: 	Ympäristölupa
-P: 	Poikkeamislupa
-
 userinfo.architect: Olen suunnittelija
 userinfo.architect.company.name: Yritys
 userinfo.architect.company.id: Y-tunnus

@@ -294,61 +294,55 @@
 (defn- to-key-types-vec [r [k v]]
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
-(defquery "attachment-types"
+(defquery attachment-types
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [command]
   (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
 
-(defcommand "set-attachment-type"
-  {:parameters [:id :attachmentId :attachmentType]
+(defcommand set-attachment-type
+  {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId attachmentType]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (let [attachment-type (parse-attachment-type attachmentType)]
-        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
-          (do
-            (mongo/update
-              :applications
-              {:_id (:id application)
-               :attachments {$elemMatch {:id attachmentId}}}
-              {$set {:attachments.$.type attachment-type}})
-            (ok))
-          (do
-            (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
-            (fail :error.attachmentTypeNotAllowed)))))))
+  [{:keys [application]}]
+  (let [attachment-type (parse-attachment-type attachmentType)]
+    (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
+      (do
+        (mongo/update
+          :applications
+          {:_id (:id application)
+           :attachments {$elemMatch {:id attachmentId}}}
+          {$set {:attachments.$.type attachment-type}})
+        (ok))
+      (do
+        (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
+        (fail :error.attachmentTypeNotAllowed)))))
 
-(defcommand "approve-attachment"
+(defcommand approve-attachment
   {:description "Authority can approve attachement, moves to ok"
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :ok}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :ok}}))
 
-(defcommand "reject-attachment"
+(defcommand reject-attachment
   {:description "Authority can reject attachement, requires user action."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :requires_user_action}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :requires_user_action}}))
 
-(defcommand "create-attachments"
+(defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
@@ -358,26 +352,22 @@
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
-(defcommand "delete-attachment"
+(defcommand delete-attachment
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (delete-attachment application attachmentId)
-      (ok))))
+  [{:keys [application]}]
+  (delete-attachment application attachmentId)
+  (ok))
 
-(defcommand "delete-attachment-version"
+(defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-   :parameters  [:id :attachmentId :fileId]
+   :parameters  [:id attachmentId fileId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId fileId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (if (file-id-in-application? application attachmentId fileId)
-        (delete-attachment-version application attachmentId fileId)
-        (fail :file_not_linked_to_the_document)))))
+  [{:keys [application]}]
+  (if (file-id-in-application? application attachmentId fileId)
+    (delete-attachment-version application attachmentId fileId)
+    (fail :file_not_linked_to_the_document)))
 
 (defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
@@ -389,7 +379,7 @@
           (not (-> command :user :role (= "authority"))))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defcommand "upload-attachment"
+(defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
    :validators [attachment-is-not-locked authority-viewing-verdictGiven-application]
@@ -622,7 +612,7 @@
     (future (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     job))
 
-(defcommand "stamp-attachments"
+(defcommand stamp-attachments
   {:parameters [:id :files :xMargin :yMargin]
    :roles      [:authority]
    :states     [:verdictGiven]
@@ -639,7 +629,7 @@
                   :y-margin (->long (:yMargin data))
                   :transparency (->long (or (:transparency data) 0))})))))
 
-(defquery "stamp-attachments-job"
+(defquery stamp-attachments-job
   {:parameters [:job-id :version]
    :roles      [:authority]
    :description "Returns state of stamping job"}

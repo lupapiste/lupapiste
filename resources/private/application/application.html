@@ -750,10 +750,6 @@
                 <td data-bind="ltext: 'neighbors.status-dialog.user.lastName'"></td>
                 <td data-bind="text: lastName" data-test-id="neighbor-status-lastName"></td>
               </tr>
-              <tr data-bind="visible: userid">
-                <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
-                <td data-bind="text: userid" data-test-id="neighbor-status-userid"></td>
-              </tr>
               <tr>
                 <td data-bind="ltext: 'neighbors.status-dialog.user.time'"></td>
                 <td data-bind="dateTimeString: created"></td>
@@ -761,7 +757,7 @@
             </tbody>
           </table>
 
-          <div data-bind="visible: message">
+          <div data-bind="visible: message" class="neighbors-message">
             <div data-bind="text: loc('neighbors.status-dialog.message-title', state())"></div>
             <div data-bind="text: message"  data-test-id="neighbor-status-message"></div>
           </div>

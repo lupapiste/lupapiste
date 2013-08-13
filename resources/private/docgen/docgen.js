@@ -828,7 +828,7 @@ var docgen = (function () {
     }
 
     function disableBasedOnOptions() {
-      if (options && options.disabled) {
+      if (!self.authorizationModel.ok("update-doc") || options && options.disabled) {
         $(self.element).find('input, textarea').attr("readonly", true);
         $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
         $(self.element).find('button').hide();
