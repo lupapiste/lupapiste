@@ -48,13 +48,12 @@
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
 
-          <div data-bind="with: $parent.authorities" class="comment-request">
+          <div data-bind="with: $parent.authorities, visible: $root.authorization.ok('can-target-comment-to-authority')" class="comment-request">
             <label data-bind="ltext: 'comment-request-label'"></label>
             <select
               data-bind="options: $data,
                          optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
                          optionsValue: 'id',
-                         visible: $root.authorization.ok('can-target-comment-to-authority'),
                          value: $parent.to,
                          optionsCaption: loc('comment-request-prompt')"
               data-test-id="application-assigneed-authority">

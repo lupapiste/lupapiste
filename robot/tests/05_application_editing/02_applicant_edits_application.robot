@@ -12,20 +12,20 @@ Mikko opens an application
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-416-17-15
   Create application the fast way  ${appname}  753  ${propertyId}
-  Open application  ${appname}  ${propertyId}
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
-  Click Element  //span[@data-test-class="delete-schemas.huoneistot"]
+  Execute Javascript  $("span[data-test-class='delete-schemas.huoneistot']").click();
   Wait Until  Element Should Be Visible  xpath=//button[@data-test-id='confirm-yes']
-  Click Element  xpath=//button[@data-test-id='confirm-yes']
+  Click enabled by test id  confirm-yes
   Wait Until  Element Should Not Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
 
 Mikko goes to parties tab of an application
   Open tab  parties
 
 Mikko decides to delete maksaja
-  Wait and click  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
+  Execute Javascript  $("span[data-test-class='delete-schemas.maksaja']").click();
   Click enabled by test id   confirm-yes
   Wait Until  Element Should Not Be Visible  dynamic-yes-no-confirm-dialog
 
