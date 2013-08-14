@@ -46,19 +46,29 @@
     function val(f) { return _.isFunction(f) ? f() : f; }
     
     function FileInfo(attachmentType) {
-      this.attachmentType = ko.observable(attachmentType);
-      this.fileId = ko.observable();
-      this.filename = ko.observable();
-      this.contentType = ko.observable();
-      this.size = ko.observable();
-      this.update = function(from) {
-        this
+      var info = this;
+      info.attachmentType = ko.observable(attachmentType);
+      info.fileId = ko.observable();
+      info.filename = ko.observable();
+      info.contentType = ko.observable();
+      info.size = ko.observable();
+      info.update = function(from) {
+        console.log("UPDATE:", attachmentType, from);
+        info
           .filename(from && val(from["filename"]))
           .fileId(from && val(from["file-id"]))
           .contentType(from && val(from["content-type"]))
           .size(from && val(from["size"]));
         return self;
-      }
+      };
+      info.clear = function() {
+        info
+          .filename(null)
+          .fileId(null)
+          .contentType(null)
+          .size(null);
+        return self;
+      };
     }
     
     // Attachments:
@@ -87,9 +97,9 @@
         .companyStreet(u.companyStreet)
         .companyZip(u.companyZip)
         .companyCity(u.companyCity)
-        .examination.update(u.examination) 
-        .proficiency.update(u.proficiency)
-        .cv.update(u.cv);
+        .examination.update(u.attachment && u.attachment.examination) 
+        .proficiency.update(u.attachment && u.attachment.proficiency)
+        .cv.update(u.attachment && u.attachment.cv);
     };
 
     self.clear = function() {
@@ -120,19 +130,39 @@
       console.log("download:", prop.filename(), prop.fileId());
       return false;
     };
-    
-    self.removeFile = function(prop) {
-      console.log("remove:", prop.filename(), prop.fileId());
-      return false;
-    };
+
     
     self.upload   = function(prop) { return self.uploadFile.bind(self, prop); };
     self.download = function(prop) { return self.downloadFile.bind(self, prop); };
-    self.remove   = function(prop) { return self.removeFile.bind(self, prop); };
+    
+    self.fileToRemove = null;
+
+    self.remove   = function(prop) {
+      return function() {
+        self.fileToRemove = prop;
+        LUPAPISTE.ModalDialog.open("#dialog-confirm-mypage-attachment-remove");
+      };
+    };
+    
+    self.doRemove = function() {
+      var p = self.fileToRemove;
+      ajax
+        .command("remove-user-attachment", {attachmentType: p.attachmentType(), fileId: p.fileId()})
+        .success(p.clear)
+        .call();
+    }
 
     self.saved.subscribe(self.updateUserName);
 
-    window.oi = self;
+    $(function() {
+      LUPAPISTE.ModalDialog.newYesNoDialog(
+        "dialog-confirm-mypage-attachment-remove",
+        loc("userinfo.architect.remove.title"),
+        loc("userinfo.architect.remove.message"),
+        loc("yes"),
+        self.doRemove,
+        loc("no"));
+    });
     
   }
 
@@ -216,6 +246,9 @@
       }
     });
 
+    self.fileId.subscribe(function(id) {
+      self.prop().fileId(id);
+    });
     self.state.subscribe(function(value) {
       if (value === self.stateDone) self.prop().update(self);
     });
@@ -230,6 +263,7 @@
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
 
   $(function() {
+    
     $("#mypage")
       .find("#own-info-form").applyBindings(ownInfo).end()
       .find("#pw-form").applyBindings(pw).end()
@@ -254,6 +288,7 @@
             done: function(e, data) { uploadModel.fileId(data.response().result.fileId).done(); },
             fail: uploadModel.error
           });
+    
   });
 
 })();

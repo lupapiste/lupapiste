@@ -95,7 +95,7 @@
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.examination'"></td>
                   <td>
-                    <a data-bind="click: download(examination), visible: examination.filename, text: examination.filename" href="#"></a>
+                    <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + examination.fileId()}, visible: examination.filename, text: examination.filename" href="#" target="_blank"></a>
                     <a data-bind="click: remove(examination), visible: examination.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
                     <a data-bind="click: upload(examination), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
                   </td>
