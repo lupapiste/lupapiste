@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.migrations
   (:require [lupapalvelu.migration.core :refer [defmigration]]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]))
 
@@ -23,20 +24,22 @@
                                                           "body.name" "muutostapa"}}}}}})
 
 (defn update-rakennuslupa-documents-schemas [application]
-  (let [value-to-add lupapalvelu.document.schemas/muutostapa
-        rakennuslupa-schemas (lupapalvelu.document.schemas/get-schemas)
+  (let [value-to-add schemas/muutostapa
+        rakennuslupa-schemas (schemas/get-schemas)
         updated (map (fn [document] (let [name (get-in document [:info :name] rakennuslupa-schemas)
                                           new-schema (name rakennuslupa-schemas)]
-                                      (assoc document :schema new-schema)
-                                      )) (:documents application))
+                                      (assoc document :schema new-schema)))
+                     (:documents application))
+        updated-application (assoc application :documents updated)
         ]
-    (assoc application :documents updated)))
+
+    (mongo/update application {:_id updated-application} updated-application)))
 
 (defmigration add-muutostapa-to-huoneistot
   :apply-when (pos? (mongo/count :applications muutostapa-not-exits-query))
-  (let [applications-to-update mongo/select :applications muutostapa-not-exits-query]
-    for ([application applications-to-update]
-          (add-muutostapa-to-application application))))
+  (let [applications-to-update (mongo/select :applications muutostapa-not-exits-query)]
+    (for [application applications-to-update]
+          (update-rakennuslupa-documents-schemas application))))
 
 
 
