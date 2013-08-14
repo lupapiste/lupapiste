@@ -26,8 +26,8 @@
 (defn update-rakennuslupa-documents-schemas [application]
   (let [value-to-add schemas/muutostapa
         updated (map (fn [document] (let [name (get-in document [:schema :info :name])
-                                         new-schema (schemas/get-schema name)
-                                         old-schema (:schema document)]
+                                          new-schema (schemas/get-schema name)
+                                          old-schema (:schema document)]
                                       (assoc document :schema new-schema)))
                      (:documents application))
         updated-application (assoc application :documents updated)]
@@ -37,7 +37,7 @@
   :apply-when (pos? (mongo/count :applications muutostapa-not-exits-query))
   (let [applications-to-update (mongo/select :applications muutostapa-not-exits-query)]
     (for [application applications-to-update]
-          (update-rakennuslupa-documents-schemas application))))
+      (update-rakennuslupa-documents-schemas application))))
 
 
 
