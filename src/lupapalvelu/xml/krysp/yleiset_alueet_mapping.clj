@@ -96,11 +96,20 @@
                                                ]}]}
                              {:tag :alkuPvm}
                              {:tag :loppuPvm}
-;                             {:tag :sijaintitieto
-;                              :child [{:tag :Sijainti
-;                                       :child [{:tag :piste :ns "yht"
-;                                                :child [{:tag :Point :ns "gml"
-;                                                         :child [{:tag :pos}]}]}]}]}
+                             mapping-common/sijantitieto
+                             #_{:tag :sijaintitieto
+                              :child [{:tag :Sijainti
+                                       :child [{:tag :tyhja :ns "yht"}
+                                               {:tag :osoite :ns "yht"
+                                                :child [{:tag :yksilointitieto}
+                                                        {:tag :alkuHetki}
+                                                        {:tag :osoitenimi
+                                                         :child [{:tag :teksti}]}]}]}]}
+                             #_{:tag :sijaintitieto
+                              :child [{:tag :Sijainti
+                                       :child [{:tag :piste :ns "yht"
+                                                :child [{:tag :Point :ns "gml"
+                                                         :child [{:tag :pos}]}]}]}]}
                              {:tag :osapuolitieto
                               ;; hakija ja tyomaasta-vastaava (yritys-osa)
                               :child osapuoli}

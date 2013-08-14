@@ -192,7 +192,11 @@
         Tyolupa-kayttotarkoitus (:kayttotarkoitus Tyolupa) => truthy
         Tyolupa-Johtoselvitysviite (-> Tyolupa :johtoselvitysviitetieto :Johtoselvitysviite) => truthy
 
-        ;;  TODO: Ota tama kayttoon!
+        Sijainti-osoite (-> Tyolupa :sijaintitieto :Sijainti :osoite) => truthy
+        Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
+        Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
+        Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
+        Sijainti-tyhja (-> Tyolupa :sijaintitieto :Sijainti :tyhja) => truthy
 ;        Sijainti (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
 
         ;; TODO: Naita voi yhdistella perakkain '->':lla... Refaktoroi.
@@ -254,7 +258,12 @@
       (fact "Tyolupa-kayttotarkoitus" Tyolupa-kayttotarkoitus => "kaivu- tai katuty\u00f6lupa")
       (fact "Tyolupa-Johtoselvitysviite-vaadittuKytkin" (:vaadittuKytkin Tyolupa-Johtoselvitysviite) => false) ;; TODO: Onko tama checkki ok?
 
-      ;; Sijainti   TODO: Ota nama kayttoon!
+      ;; Sijainti
+      (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:_id application))
+;      (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
+      (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address application))
+      (fact "Sijainti-tyhja" Sijainti-tyhja => empty-tag)
+
 ;      (fact "Sijainti-x" (:x Sijainti) => (-> application :location :x))
 ;      (fact "Sijainti-y" (:y Sijainti) => (-> application :location :y))
 
