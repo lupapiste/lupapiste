@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [count])
   (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error fatal)]
             [monger.operators :refer :all]
+            [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
             [monger.core :as m]
             [monger.collection :as mc]
@@ -105,25 +106,40 @@
   (.setId input id)
   input)
 
-(defn upload [applicationId file-id filename content-type tempfile timestamp]
+(defn upload [file-id filename content-type tempfile & metadata]
+  (assert (and (string? file-id)
+               (string? filename)
+               (string? content-type)
+               (instance? java.io.File tempfile)
+               (sequential? metadata)
+               (even? (clojure.core/count metadata))))
   (gfs/store-file
     (gfs/make-input-file tempfile)
     (set-file-id file-id)
     (gfs/filename filename)
     (gfs/content-type content-type)
-    (gfs/metadata {:uploaded timestamp, :application applicationId})))
+    (gfs/metadata (assoc (apply hash-map metadata) :uploaded (System/currentTimeMillis)))))
+
+(defn download-find [query]
+  (when-let [attachment (gfs/find-one (with-_id query))]
+    (let [metadata (from-db-object (.getMetaData attachment) :true)]
+      {:content (fn [] (.getInputStream attachment))
+       :content-type (.getContentType attachment)
+       :content-length (.getLength attachment)
+       :file-name (.getFilename attachment)
+       :metadata metadata
+       :application (:application metadata)})))
 
 (defn download [file-id]
-  (if-let [attachment (gfs/find-one {:_id file-id})]
-    {:content (fn [] (.getInputStream attachment))
-     :content-type (.getContentType attachment)
-     :content-length (.getLength attachment)
-     :file-name (.getFilename attachment)
-     :application (.getString (.getMetaData attachment) "application")}))
+  (download-find {:_id file-id}))
 
-(defn delete-file [file-id]
-  (info "removing file" file-id)
-  (gfs/remove {:_id file-id}))
+(defn delete-file [query]
+  (let [query (with-_id query)]
+    (info "removing file" query)
+    (gfs/remove query)))
+
+(defn delete-file-by-id [file-id]
+  (delete-file {:id file-id}))
 
 (defn count
   "returns count of objects in collection"

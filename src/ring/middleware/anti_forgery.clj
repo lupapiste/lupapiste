@@ -38,8 +38,8 @@
          (:multipart-params request)))
 
 (defn- request-token [request]
-  (or (-> request form-params (get (name token-key)))
-      (-> request :headers (get "x-anti-forgery-token"))))
+  (or (get-in request [:params token-key])
+      (get-in request [:headers "x-anti-forgery-token"])))
 
 (defn- secure-eql? [^String a ^String b]
   (if (and a b (= (.length a) (.length b)))
@@ -107,5 +107,5 @@
 (defn set-token-in-cookie [request response cookie-name cookie-attrs]
   (when response
     (if (get-in request [:cookies cookie-name :value])
-        response
-        (assoc-in response [:cookies cookie-name] (assoc cookie-attrs :value (default-token-generation-fn) :path "/")))))
+      response
+      (assoc-in response [:cookies cookie-name] (assoc cookie-attrs :value (default-token-generation-fn) :path "/")))))

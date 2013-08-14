@@ -3,14 +3,18 @@
         [lupapalvelu.core]
         [lupapalvelu.i18n :only [*lang*]])
   (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn warnf error fatal)]
+            [slingshot.slingshot :refer [throw+]]
             [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.mime :as mime]
             [sade.security :as sadesecurity]
             [sade.util :refer [lower-case trim] :as util]
             [sade.env :as env]
+            [sade.strings :as ss]
             [noir.session :as session]
+            [noir.core :refer [defpage]]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
             [noir.response :as resp]))
@@ -34,6 +38,13 @@
     (do
       (info "login failed, username:" username)
       (fail :error.login))))
+
+(defn refresh-user!
+  "Loads user information from db and saves it to session. Call this after you make changes to user information."
+  []
+  (when-let [user (security/load-current-user)]
+    (debug "user session refresh successful, username:" (:username user))
+    (session/put! :user user)))
 
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]
@@ -98,17 +109,71 @@
   (ok :user user))
 
 (defcommand "save-user-info"
-  {:parameters [:firstName :lastName :street :city :zip :phone]
+  {:parameters [:firstName :lastName]
    :authenticated true
    :verified true}
   [{data :data {user-id :id} :user}]
   (mongo/update-by-id
     :users
     user-id
-    {$set (select-keys data [:firstName :lastName :street :city :zip :phone])})
+    {$set (select-keys data [:firstName :lastName :street :city :zip :phone
+                             :architect :degree :experience :fise :qualification
+                             :companyName :companyId :companyStreet :companyZip :companyCity])})
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
 
+(defquery user-attachments
+  {:authenticated true}
+  [{user :user}]
+  (ok :attachments (:attachment user)))
+
+(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
+  (let [user              (security/current-user)
+        filename          (mime/sanitize-filename filename)
+        attachment-type   (keyword attachment-type)
+        new-file-id       (mongo/create-id)
+        old-file-id       (get-in user [:attachment attachment-type :file-id])
+        file-info         {:file-id new-file-id
+                           :filename filename
+                           :content-type content-type
+                           :size size}]
+    
+    (println user)
+    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size)
+
+    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
+    (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
+    
+    (mongo/upload new-file-id filename content-type tempfile :user-id (:id user) :attachment-type attachment-type)
+    (mongo/update-by-id :users (:id user) {$set {(str "attachment." (name attachment-type)) file-info}})
+    (refresh-user!)
+    (when old-file-id (mongo/delete-file-by-id old-file-id))
+    
+    (->> (assoc file-info :ok true) 
+      (resp/json)
+      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.  
+      (resp/status 200))))
+
+(defraw "download-user-attachment"
+  {:parameters [attachment-id]}
+  [{user :user}]
+  (when-not user (throw+ {:status 401 :body "forbidden"}))
+  (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
+    {:status 200
+     :body ((:content attachment))
+     :headers {"Content-Type" (:content-type attachment)
+               "Content-Length" (str (:content-length attachment))}}
+    {:status 404
+     :body (str "can't file attachment: id=" attachment-id)}))
+
+(defcommand remove-user-attachment
+  {:parameters [attachmentType fileId]}
+  [{user :user}]
+  (info "Removing user attachment: attachmentType:" attachmentType "file:" fileId)
+  (mongo/update-by-id :users (:id user) {$unset {(str "attachment." attachmentType) nil}})
+  (refresh-user!)
+  (mongo/delete-file {:id fileId :metadata.user-id (:id user)})
+  (ok))
 
 (env/in-dev
   (defcommand "create-apikey"

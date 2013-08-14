@@ -4,29 +4,35 @@
         [clojure.pprint :only [pprint]])
   (:require [clj-http.client :as c]))
 
-(with-anti-csrf
-  (fact "Valid apikey bypasses CSRF check"
-    (success (query mikko :allowed-actions)) => true)
+(fact "Valid apikey bypasses CSRF check"
+  (with-anti-csrf
+    (raw-query mikko :allowed-actions) => (contains {:status 200 :body (contains {:ok true})})))
 
-  (fact "CSRF check must not be bypassed if there is no apikey"
-    (invalid-csrf-token (query nil :allowed-actions)) => true)
+(fact "CSRF check must not be bypassed if there is no apikey"
+  (with-anti-csrf
+    (invalid-csrf-token? (raw-query nil :allowed-actions)) => true))
 
-  (fact "Calling a non-protected resource returns a csrf token"
+(fact "Calling a non-protected resource returns a csrf token"
+  (with-anti-csrf
     (let [resp (c/get (str (server-address) "/app/fi/welcome"))
           cookie (get-in resp [:cookies "anti-csrf-token"])]
       (:status resp) => 200
       cookie => truthy
-      (:path cookie) => "/"))
+      (:path cookie) => "/")))
 
-  (fact "Sending the cookie and a header passes CSRF protection"
+(fact "Sending the cookie and a header passes CSRF protection"
+  (with-anti-csrf
     (let [resp (c/get (str (server-address) "/api/query/allowed-actions")
                  {:cookies {"anti-csrf-token" {:value "my-token"}}
                   :headers {"x-anti-forgery-token" "my-token"}})]
-      (success (decode-response resp)) => true))
+      resp => (contains {:status 200}))))
 
-  (fact "Failing to send the header fails CSRF check"
+(fact "Failing to send the header fails CSRF check"
+  (with-anti-csrf 
     (let [resp (c/get (str (server-address) "/api/query/allowed-actions")
                  {:cookies {"anti-csrf-token" {:value "my-token"}}
                   :query-params {:id 123}
-                  :headers {"Referer" "http://attacker.example.com/"}})]
-      (invalid-csrf-token (decode-response resp)) => true)))
+                  :headers {"Referer" "http://attacker.example.com/"}
+                  :follow-redirects false
+                  :throw-exceptions false})]
+      (invalid-csrf-token? (decode-response resp)) => true)))
