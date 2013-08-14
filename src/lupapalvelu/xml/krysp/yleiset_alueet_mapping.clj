@@ -70,8 +70,8 @@
 (def kaivulupa_to_krysp
   {:tag :YleisetAlueet
    :ns "yak"
-;   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
    :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
+;   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
 ;         :xmlns:gml "http://www.opengis.net/gml"  ;;TODO: Lisaa tama ja rivi ylla, jos tarvit naita "sijaintitiedossa"
@@ -94,37 +94,36 @@
 ;                                               {:tag :paivaysPvm :ns "yht"}
 ;                                               {:tag :kasittelija}
                                                ]}]}
-                             {:tag :kayttotarkoitus}
-                             {:tag :johtoselvitysviitetieto
-                              :child [{:tag :Johtoselvitysviite
-                                       :child [{:tag :vaadittuKytkin
-                                                ;:tag :tunniste
-                                                }]}]}
-                             {:tag :maksajatieto
-                              :child [{:tag :Maksaja
-                                       :child maksaja}]}
                              {:tag :alkuPvm}
                              {:tag :loppuPvm}
-                             {:tag :lupaAsianKuvaus}
-                             {:tag :sijoituslupaviitetieto
-                              :child [{:tag :Sijoituslupaviite
-                                       :child [{:tag :vaadittuKytkin}
-                                               {:tag :tunniste}]}]}
+;                             {:tag :sijaintitieto
+;                              :child [{:tag :Sijainti
+;                                       :child [{:tag :piste :ns "yht"
+;                                                :child [{:tag :Point :ns "gml"
+;                                                         :child [{:tag :pos}]}]}]}]}
                              {:tag :osapuolitieto
                               ;; hakija ja tyomaasta-vastaava (yritys-osa)
                               :child osapuoli}
                              {:tag :vastuuhenkilotieto
                               :child vastuuhenkilo}   ;; tyomaasta-vastaava (henkilo-osa)
-;; TODO: Lisaa tama?
-                             #_{:tag :sijaintitieto
-                              :child [{:tag :Sijainti
-                                       :child [{:tag :piste :ns "yht"
-                                                :child [{:tag :Point :ns "gml"
-                                                         :child [{:tag :pos}]}]}]}]}
+                             {:tag :maksajatieto
+                              :child [{:tag :Maksaja
 ;; TODO: Lisaa tama?
                              #_{:tag :paatostieto
                               :child [{:tag :Paatos
-                                       :child [{:tag :takuuaikaPaivat}]}]}]
+                                       :child [{:tag :takuuaikaPaivat}]}]}
+                             {:tag :lupaAsianKuvaus}
+                             {:tag :sijoituslupaviitetieto
+                              :child [{:tag :Sijoituslupaviite
+                                       :child [{:tag :vaadittuKytkin}
+                                               {:tag :tunniste}]}]}
+                                       :child maksaja}]}
+                             {:tag :kayttotarkoitus}
+                             {:tag :johtoselvitysviitetieto
+                              :child [{:tag :Johtoselvitysviite
+                                       :child [{:tag :vaadittuKytkin
+                                                ;:tag :tunniste
+                                                }]}]}]
                      }]}]})
 
 (defn save-application-as-krysp [application lang submitted-application output-dir begin-of-link]
