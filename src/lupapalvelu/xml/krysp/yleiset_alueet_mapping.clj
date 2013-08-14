@@ -118,7 +118,7 @@
                              {:tag :maksajatieto
                               :child [{:tag :Maksaja
 ;; TODO: Lisaa tama?
-                             #_{:tag :paatostieto
+                             {:tag :paatostieto
                               :child [{:tag :Paatos
                                        :child [{:tag :takuuaikaPaivat}]}]}
                              {:tag :lupaAsianKuvaus}
