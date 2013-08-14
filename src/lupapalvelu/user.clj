@@ -39,6 +39,13 @@
       (info "login failed, username:" username)
       (fail :error.login))))
 
+(defn refresh-user!
+  "Loads user information from db and saves it to session. Call this after you make changes to user information."
+  []
+  (when-let [user (security/load-current-user)]
+    (debug "user session refresh successful, username:" (:username user))
+    (session/put! :user user)))
+
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]
    :verified   true}
@@ -115,6 +122,11 @@
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
 
+(defquery user-attachments
+  {:authenticated true}
+  [{user :user}]
+  (ok :attachments (:attachment user)))
+
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
   (let [user              (security/current-user)
         filename          (mime/sanitize-filename filename)
@@ -134,6 +146,7 @@
     
     (mongo/upload new-file-id filename content-type tempfile :user-id (:id user) :attachment-type attachment-type)
     (mongo/update-by-id :users (:id user) {$set {(str "attachment." (name attachment-type)) file-info}})
+    (refresh-user!)
     (when old-file-id (mongo/delete-file-by-id old-file-id))
     
     (->> (assoc file-info :ok true) 
@@ -158,6 +171,7 @@
   [{user :user}]
   (info "Removing user attachment: attachmentType:" attachmentType "file:" fileId)
   (mongo/update-by-id :users (:id user) {$unset {(str "attachment." attachmentType) nil}})
+  (refresh-user!)
   (mongo/delete-file {:id fileId :metadata.user-id (:id user)})
   (ok))
 

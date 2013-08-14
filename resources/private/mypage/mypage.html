@@ -103,7 +103,7 @@
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.proficiency'"></td>
                   <td>
-                    <a data-bind="click: download(proficiency), visible: proficiency.filename, text: proficiency.filename" href="#"></a>
+                    <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + proficiency.fileId()}, visible: proficiency.filename, text: proficiency.filename" href="#" target="_blank"></a>
                     <a data-bind="click: remove(proficiency), visible: proficiency.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
                     <a data-bind="click: upload(proficiency), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
                   </td>
@@ -111,7 +111,7 @@
                 <tr>
                   <td data-bind="ltext: 'userinfo.architect.attachments.name.cv'"></td>
                   <td>
-                    <a data-bind="click: download(cv), visible: cv.filename, text: cv.filename" href="#"></a>
+                    <a data-bind="attr: {href: '/api/raw/download-user-attachment?attachment-id=' + cv.fileId()}, visible: cv.filename, text: cv.filename" href="#" target="_blank"></a>
                     <a data-bind="click: remove(cv), visible: cv.filename, ltext: 'userinfo.architect.attachments.remove'" href="#"></a>
                     <a data-bind="click: upload(cv), ltext: 'userinfo.architect.attachments.add'" href="#"></a>
                   </td>

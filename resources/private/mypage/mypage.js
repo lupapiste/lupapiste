@@ -17,6 +17,33 @@
     };
   }
 
+  function val(f) { return _.isFunction(f) ? f() : f; }
+
+  function FileInfo(context, attachmentType) {
+    var self = this;
+    self.attachmentType = ko.observable(attachmentType);
+    self.fileId = ko.observable();
+    self.filename = ko.observable();
+    self.contentType = ko.observable();
+    self.size = ko.observable();
+    self.update = function(from) {
+      self
+        .filename(from && val(from["filename"]))
+        .fileId(from && val(from["file-id"]))
+        .contentType(from && val(from["content-type"]))
+        .size(from && val(from["size"]));
+      return context;
+    };
+    self.clear = function() {
+      self
+        .filename(null)
+        .fileId(null)
+        .contentType(null)
+        .size(null);
+      return context;
+    };
+  }
+
   function OwnInfo() {
 
     var self = this;
@@ -43,38 +70,11 @@
     
     self.availableQualifications = ["AA", "A", "B", "C"];
 
-    function val(f) { return _.isFunction(f) ? f() : f; }
-    
-    function FileInfo(attachmentType) {
-      var info = this;
-      info.attachmentType = ko.observable(attachmentType);
-      info.fileId = ko.observable();
-      info.filename = ko.observable();
-      info.contentType = ko.observable();
-      info.size = ko.observable();
-      info.update = function(from) {
-        console.log("UPDATE:", attachmentType, from);
-        info
-          .filename(from && val(from["filename"]))
-          .fileId(from && val(from["file-id"]))
-          .contentType(from && val(from["content-type"]))
-          .size(from && val(from["size"]));
-        return self;
-      };
-      info.clear = function() {
-        info
-          .filename(null)
-          .fileId(null)
-          .contentType(null)
-          .size(null);
-        return self;
-      };
-    }
-    
     // Attachments:
-    self.examination = new FileInfo("examination");
-    self.proficiency = new FileInfo("proficiency");
-    self.cv = new FileInfo("cv");
+    self.examination = new FileInfo(self, "examination");
+    self.proficiency = new FileInfo(self, "proficiency");
+    self.cv = new FileInfo(self, "cv");
+    self.loadingAttachments = ko.observable(false);
     
     self.init = function(u) {
       return self
@@ -97,11 +97,30 @@
         .companyStreet(u.companyStreet)
         .companyZip(u.companyZip)
         .companyCity(u.companyCity)
-        .examination.update(u.attachment && u.attachment.examination) 
-        .proficiency.update(u.attachment && u.attachment.proficiency)
-        .cv.update(u.attachment && u.attachment.cv);
+        .examination.clear() 
+        .proficiency.clear()
+        .cv.clear()
+        .updateAttachments();
     };
 
+    self.updateAttachments = function() {
+      ajax
+        .query("user-attachments", {})
+        .pending(self.loadingAttachments)
+        .success(self.setAttachments)
+        .call();
+      return self;
+    };
+    
+    self.setAttachments = function(data) {
+      console.log("setAttachments", data);
+      var attachments = data.attachments || {}; 
+      return self
+        .examination.update(attachments.examination) 
+        .proficiency.update(attachments.proficiency)
+        .cv.update(attachments.cv);
+    };
+    
     self.clear = function() {
       return self.saved(false).error(null);
     };
@@ -121,23 +140,16 @@
       return self;
     };
     
-    self.uploadFile = function(prop) {
-      uploadModel.init(prop).open();
-      return false;
+    self.upload = function(prop) {
+      return function() {
+        uploadModel.init(prop).open();
+        return false;
+      };
     };
-    
-    self.downloadFile = function(prop) {
-      console.log("download:", prop.filename(), prop.fileId());
-      return false;
-    };
-
-    
-    self.upload   = function(prop) { return self.uploadFile.bind(self, prop); };
-    self.download = function(prop) { return self.downloadFile.bind(self, prop); };
     
     self.fileToRemove = null;
 
-    self.remove   = function(prop) {
+    self.remove = function(prop) {
       return function() {
         self.fileToRemove = prop;
         LUPAPISTE.ModalDialog.open("#dialog-confirm-mypage-attachment-remove");
@@ -148,9 +160,9 @@
       var p = self.fileToRemove;
       ajax
         .command("remove-user-attachment", {attachmentType: p.attachmentType(), fileId: p.fileId()})
-        .success(p.clear)
+        .success(self.updateAttachments)
         .call();
-    }
+    };
 
     self.saved.subscribe(self.updateUserName);
 
@@ -218,9 +230,7 @@
         .state(self.stateInit)
         .filename(null)
         .filesize(null)
-        .fileId(null)
         .start(null)
-        .prop(prop)
         .attachmentType(prop.attachmentType())
         .csrf($.cookie("anti-csrf-token"));
     };
@@ -246,11 +256,8 @@
       }
     });
 
-    self.fileId.subscribe(function(id) {
-      self.prop().fileId(id);
-    });
     self.state.subscribe(function(value) {
-      if (value === self.stateDone) self.prop().update(self);
+      if (value === self.stateDone) ownInfo.updateAttachments();
     });
 
   }
@@ -285,7 +292,7 @@
                 .ready();
             },
             send: uploadModel.sending,
-            done: function(e, data) { uploadModel.fileId(data.response().result.fileId).done(); },
+            done: function(e, data) { uploadModel.done(); },
             fail: uploadModel.error
           });
     
