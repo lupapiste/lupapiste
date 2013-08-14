@@ -56,7 +56,8 @@
                          #"[\/\\]test[\/\\]"
                          #"openlayers"
                          #"underscore"
-                         #"lodash"]}
+                         #"lodash"
+                         #"hgnotes"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
