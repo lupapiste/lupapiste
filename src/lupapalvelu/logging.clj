@@ -24,7 +24,7 @@
       \[ userId \] \space
       ns)))
 
-(def time-format "yyyy-MM-dd HH:mm:ss.S")
+(def time-format "yyyy-MM-dd HH:mm:ss.SSS")
 
 (timbre/set-level! env/log-level)
 (timbre/set-config! [:timestamp-pattern] time-format)

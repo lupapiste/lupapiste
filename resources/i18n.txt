@@ -1,0 +1,31 @@
+userinfo.architect: Olen suunnittelija
+userinfo.architect.company.name: Yritys
+userinfo.architect.company.id: Y-tunnus
+userinfo.architect.company.street: Katuosoite
+userinfo.architect.company.zip: Postinumero
+userinfo.architect.company.city: Postitoimipaikka
+userinfo.architect.degree: Tutkinto
+userinfo.architect.experience: Kokemus (vuosia)
+userinfo.architect.fise: FISE pätevyyskortti (linkki)
+userinfo.architect.qualification: Pätevyysluokka
+userinfo.architect.qualification.choose: Valitse...
+userinfo.architect.attachments: Todistukset
+userinfo.architect.attachments.add: Lisää tiedosto
+userinfo.architect.attachments.remove: Poista
+userinfo.architect.attachments.name: Todistus
+userinfo.architect.attachments.file: Tiedosto
+userinfo.architect.attachments.name.examination: Tutkintotodistus
+userinfo.architect.attachments.name.proficiency: Pätevyystodistus
+userinfo.architect.attachments.name.cv: CV
+userinfo.architect.upload.title: Lisää tiedosto
+userinfo.architect.upload.ok: Lisää
+userinfo.architect.upload.cancel: Peruuta
+userinfo.architect.upload.ready: Sulje
+userinfo.architect.upload.state.init: Lähetä uusi
+userinfo.architect.upload.state.sending: Tiedostoa ladataan...
+userinfo.architect.upload.state.ready: Tiedoston lataaminen onnistui
+userinfo.architect.upload.state.error: Tapahtui virhe, yritä myöhemmin uudeleen.
+userinfo.architect.upload.no-file: Tiedostoa ei valittuna
+userinfo.architect.upload.filename: Valittu tiedosto:
+userinfo.architect.remove.title: Poista liite?
+userinfo.architect.remove.message: Oletko varma että haluat poistaa liitteen?

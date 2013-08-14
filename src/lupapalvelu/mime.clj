@@ -1,6 +1,7 @@
 (ns lupapalvelu.mime
   (:use [clojure.string :only [split join trim]]
-        [clojure.java.io :only [reader file]])
+        [clojure.java.io :only [reader file]]
+        [sade.strings :as ss])
   (:require [sade.strings :as strings]))
 
 ;; Reads mime.types file provided by Apache project.
@@ -40,3 +41,6 @@
 (defn allowed-file? [filename]
   (when-let [t (mime-type filename)]
       (re-matches mime-type-pattern t)))
+
+(defn sanitize-filename [filename]
+  (-> filename (ss/suffix "\\") (ss/suffix "/")))

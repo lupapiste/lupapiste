@@ -9,13 +9,13 @@
     (are [status req] (= (:status (handler req)) status)
       403 (request :post "/")
       403 (-> (request :post "/")
-              (assoc :form-params {"__anti-forgery-token" "foo"}))
+              (assoc :params {:__anti-forgery-token "foo"}))
       403 (-> (request :post "/")
               (assoc :session {:__anti-forgery-token "foo"})
-              (assoc :form-params {"__anti-forgery-token" "bar"}))
+              (assoc :params {:__anti-forgery-token "bar"}))
       200 (-> (request :post "/")
               (assoc :session {:__anti-forgery-token "foo"})
-              (assoc :form-params {"__anti-forgery-token" "foo"})))))
+              (assoc :params {:__anti-forgery-token "foo"})))))
 
 (deftest setting-token-via-header-test
   (let [response {:status 200, :headers {}, :body "Foo"}
@@ -36,7 +36,7 @@
         handler  (wrap-anti-forgery (constantly response))]
     (is (= (-> (request :post "/")
                (assoc :session {:__anti-forgery-token "foo"})
-               (assoc :multipart-params {"__anti-forgery-token" "foo"})
+               (assoc :params {:__anti-forgery-token "foo"})
                handler
                :status)
            200))))
@@ -89,4 +89,3 @@
                                         (assoc-in [:session "foo"] "bar"))))]
     (is (contains? session :__anti-forgery-token))
     (is (= (session "foo") "bar"))))
-
