@@ -113,7 +113,6 @@
     };
     
     self.setAttachments = function(data) {
-      console.log("setAttachments", data);
       var attachments = data.attachments || {}; 
       return self
         .examination.update(attachments.examination) 
