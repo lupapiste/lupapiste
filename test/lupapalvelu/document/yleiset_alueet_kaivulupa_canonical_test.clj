@@ -35,6 +35,11 @@
                             :liikeJaYhteisoTunnus {:modified 1372331320811, :value "2492773-2"}})
 
 
+(def henkilo-without-hetu {:henkilotiedot nimi,
+                           :osoite osoite,
+                           :userId user-id,
+                           :yhteystiedot yhteystiedot})
+
 (def henkilo {:henkilotiedot henkilotiedot,
               :osoite osoite,
               :userId user-id,
@@ -70,7 +75,7 @@
                                    :type "party",
                                    :order 61}},
                          :data {:_selected {:modified 1372342063565, :value "yritys"},
-                                :henkilo henkilo,
+                                :henkilo henkilo-without-hetu,
                                 :yritys yritys}})
 
 (def _laskuviite {:modified 1372331605911, :value "1234567890"})
@@ -233,7 +238,7 @@
         ;; tyomaasta-vastaavan henkilotieto-osa
         Vastuuhenkilo-henkilo (-> Tyolupa :vastuuhenkilotieto :Vastuuhenkilo) => truthy
 
-        ;; Testataan muunnosfunktiota henkilo-tyyppisella tyomaasta vastaavalla
+        ;; Testataan muunnosfunktiota henkilo-tyyppisella tyomaasta-vastaavalla
         tyomaasta-vastaava-henkilo (get-tyomaasta-vastaava
                                      (assoc-in (:data tyomaasta-vastaava) [:_selected :value] "henkilo")) => truthy
         tyomaasta-vastaava-Vastuuhenkilo (-> tyomaasta-vastaava-henkilo :vastuuhenkilotieto :Vastuuhenkilo) => truthy
@@ -263,7 +268,6 @@
 ;      (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
       (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address application))
       (fact "Sijainti-tyhja" Sijainti-tyhja => empty-tag)
-
 ;      (fact "Sijainti-x" (:x Sijainti) => (-> application :location :x))
 ;      (fact "Sijainti-y" (:y Sijainti) => (-> application :location :y))
 
@@ -328,10 +332,9 @@
       (fact "tyomaasta-vastaava-yksityinen-sukunimi" (:sukunimi tyomaasta-vastaava-Vastuuhenkilo) => (-> nimi :sukunimi :value))
       (fact "tyomaasta-vastaava-yksityinen-sahkopostiosoite" (:sahkopostiosoite tyomaasta-vastaava-Vastuuhenkilo) => (-> yhteystiedot :email :value))
       (fact "tyomaasta-vastaava-yksityinen-puhelin" (:puhelinnumero tyomaasta-vastaava-Vastuuhenkilo) => (-> yhteystiedot :puhelin :value))
-      (fact "tyomaasta-vastaava-yksityinen-osoitenimi" (-> tyomaasta-vastaava-Vastuuhenkilo-osoite :osoitenimi) => (-> osoite :katu :value))
+      (fact "tyomaasta-vastaava-yksityinen-osoitenimi" (:osoitenimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :katu :value))
       (fact "tyomaasta-vastaava-yksityinen-postinumero" (:postinumero tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postinumero :value))
       (fact "tyomaasta-vastaava-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
-      ;(fact "tyomaasta-vastaava-yksityinen-hetu" (:henkilotunnus tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> henkilotiedot :hetu :value))
 
       ;; Käytön alku/loppu pvm
       (fact "alkuPvm" alkuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))

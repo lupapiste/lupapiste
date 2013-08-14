@@ -86,7 +86,9 @@
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
            :type :party
            :order 61}
-    :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
+    :body (schema-body-without-element-by-name
+            (schema-body-without-element-by-name party "turvakieltoKytkin")
+            "hetu")}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
            :type :party
            :order 62}
