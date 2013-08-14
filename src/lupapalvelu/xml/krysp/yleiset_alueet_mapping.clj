@@ -117,6 +117,7 @@
                               :child vastuuhenkilo}   ;; tyomaasta-vastaava (henkilo-osa)
                              {:tag :maksajatieto
                               :child [{:tag :Maksaja
+                                       :child maksaja}]}
 ;; TODO: Lisaa tama?
                              {:tag :paatostieto
                               :child [{:tag :Paatos
@@ -126,7 +127,6 @@
                               :child [{:tag :Sijoituslupaviite
                                        :child [{:tag :vaadittuKytkin}
                                                {:tag :tunniste}]}]}
-                                       :child maksaja}]}
                              {:tag :kayttotarkoitus}
                              {:tag :johtoselvitysviitetieto
                               :child [{:tag :Johtoselvitysviite
