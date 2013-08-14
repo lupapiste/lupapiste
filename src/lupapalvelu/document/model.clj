@@ -140,7 +140,7 @@
       (concat
         (validate-fields schema-body nil data [])
         (validate-required-fields schema-body [] data [])
-        (when (env/feature? :vrk) (validator/validate document))))))
+        (validator/validate document)))))
 
 (defn valid-document?
   "Checks weather document is valid."

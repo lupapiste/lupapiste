@@ -193,7 +193,6 @@
               :response "comments"
               :message "kehno suunta") => invalid-token?)
 
-
           (fact "neighbour cant see application anymore"
             (query pena :neighbor-application
               :applicationId application-id

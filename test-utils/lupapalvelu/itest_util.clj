@@ -7,7 +7,8 @@
             [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
             [lupapalvelu.vetuma :as vetuma]
             [clojure.java.io :as io]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [sade.util :refer [fn-> fn->>]]))
 
 (defn- find-user [username] (some #(when (= (:username %) username) %) users))
 (defn- id-for [username] (:id (find-user username)))
@@ -33,8 +34,7 @@
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
 (defn decode-response [resp]
-  (if (= (:status resp) 200)
-      (-> (:body resp) (json/decode) (keywordize-keys))))
+  (assoc resp :body (-> (:body resp) json/decode keywordize-keys)))
 
 (defn printed [x] (println x) x)
 
@@ -45,21 +45,35 @@
      :query-params (apply hash-map args)
      :throw-exceptions false}))
 
+(defn raw-query [apikey query-name & args]
+  (decode-response
+    (c/get
+      (str (server-address) "/api/query/" (name query-name))
+      {:headers {"authorization" (str "apikey=" apikey)
+                 "accepts" "application/json;charset=utf-8"}
+       :query-params (apply hash-map args)
+       :follow-redirects false
+       :throw-exceptions false})))
+
 (defn query [apikey query-name & args]
-  (let [resp (c/get
-               (str (server-address) "/api/query/" (name query-name))
-               {:headers {"authorization" (str "apikey=" apikey)
-                          "accepts" "application/json;charset=utf-8"}
-                :query-params (apply hash-map args)})]
-    (decode-response resp)))
+  (let [{status :status body :body} (apply raw-query apikey query-name args)]
+    (when (= status 200)
+      body)))
+
+(defn raw-command [apikey command-name & args]
+  (decode-response
+    (c/post
+      (str (server-address) "/api/command/" (name command-name))
+      {:headers {"authorization" (str "apikey=" apikey)
+                 "content-type" "application/json;charset=utf-8"}
+       :body (json/encode (apply hash-map args))
+       :follow-redirects false
+       :throw-exceptions false})))
 
 (defn command [apikey command-name & args]
-  (let [resp (c/post
-               (str (server-address) "/api/command/" (name command-name))
-               {:headers {"authorization" (str "apikey=" apikey)
-                          "content-type" "application/json;charset=utf-8"}
-                :body (json/encode (apply hash-map args))})]
-    (decode-response resp)))
+  (let [{status :status body :body} (apply raw-command apikey command-name args)]
+    (when (= status 200)
+      body)))
 
 (defn apply-remote-fixture [fixture-name]
   (let [resp (query sonja "apply-fixture" :name fixture-name)]
@@ -89,21 +103,20 @@
   (fact (:text resp) => "error.unauthorized")
   (= (:ok resp) false))
 
-(defn invalid-csrf-token [resp]
-  (fact (:text resp) => "error.invalid-csrf-token")
-  (= (:ok resp) false))
+(defn invalid-csrf-token? [{:keys [status body]}]
+  (and
+    (= status 403)
+    (= (:ok body) false)
+    (= (:text body) "error.invalid-csrf-token")))
 
 ;;
 ;; Test predicates: TODO: comment test, add facts to get real cause
 ;;
 
-(defn invalid-csrf-token? [{:keys [ok text]}]
-  (and (= ok false) (= text "error.invalid-csrf-token")))
-
 (fact "invalid-csrf-token?"
-  (invalid-csrf-token? {:ok false :text "error.invalid-csrf-token"}) => true
-  (invalid-csrf-token? {:ok false :text "error.SOME_OTHER_REASON"}) => false
-  (invalid-csrf-token? {:ok true}) => false)
+  (invalid-csrf-token? {:status 403 :body {:ok false :text "error.invalid-csrf-token"}}) => true
+  (invalid-csrf-token? {:status 403 :body {:ok false :text "error.SOME_OTHER_REASON"}}) => false
+  (invalid-csrf-token? {:status 200 :body {:ok true}}) => false)
 
 (defn unauthorized? [{:keys [ok text]}]
   (and (= ok false) (= text "error.unauthorized")))
@@ -147,9 +160,10 @@
 (defmacro with-anti-csrf [& body]
   `(let [old-value# (feature? :disable-anti-csrf)]
      (set-anti-csrf! true)
-     (do ~@body)
-     (set-anti-csrf! false)
-     "By the power of Grayskull."))
+     (try
+       (do ~@body)
+       (finally
+         (set-anti-csrf! old-value#)))))
 
 (defn create-app-id [apikey & args]
   (let [resp (apply create-app apikey args)
@@ -187,7 +201,7 @@
 (defn upload-attachment [apikey application-id attachment-id expect-to-succeed]
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/upload")
+        uri         (str (server-address) "/api/upload/attachment")
         resp        (c/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
@@ -207,7 +221,7 @@
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         application (query apikey :application :id application-id)
-        uri         (str (server-address) "/api/upload")
+        uri         (str (server-address) "/api/upload/attachment")
         resp        (c/post uri
                       {:headers {"authorization" (str "apikey=" apikey)}
                        :multipart [{:name "applicationId"  :content application-id}
@@ -239,12 +253,16 @@
 ;;
 
 (defn vetuma! [{:keys [userid firstname lastname] :as data}]
-  (decode-response
+  (->
     (c/get
       (str (server-address) "/dev/api/vetuma")
-      {:query-params (select-keys data [:userid :firstname :lastname])})))
+      {:query-params (select-keys data [:userid :firstname :lastname])})
+    decode-response
+    :body))
 
 (defn vetuma-stamp! []
   (-> {:userid "123"
        :firstname "Pekka"
-       :lastname "Banaani"} vetuma! :stamp))
+       :lastname "Banaani"}
+    vetuma!
+    :stamp))

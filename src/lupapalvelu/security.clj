@@ -23,16 +23,24 @@
     (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn current-user
-  "fetches the current user"
+  "fetches the current user from session"
   ([] (current-user (request/ring-request)))
   ([request] (request :user)))
+
+(defn- load-user [username]
+  (mongo/select-one :users {:username username}))
+
+(defn load-current-user
+  "fetch the current user from db"
+  []
+  (when-let [user (load-user (:username (current-user)))]
+    (non-private user)))
 
 (defn login
   "returns non-private information of enabled user with the username and password"
   [username password]
-  (when-let [user (mongo/select-one :users {:username username})]
+  (when-let [user (load-user username)]
     (and
-      (:enabled user)
       (check-password password (-> user :private :password))
       (non-private user))))
 

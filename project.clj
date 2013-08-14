@@ -37,7 +37,7 @@
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.1.0"]
                              [lein-nitpicker "0.3.0"]
-                             [lein-hgnotes "0.1.0"]]
+                             [lein-hgnotes "0.2.0-SNAPSHOT"]]
                    :source-paths ["test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"
                               "-Xmx1G" "-XX:MaxPermSize=256M"]}
@@ -56,7 +56,8 @@
                          #"[\/\\]test[\/\\]"
                          #"openlayers"
                          #"underscore"
-                         #"lodash"]}
+                         #"lodash"
+                         #"hgnotes"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"

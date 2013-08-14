@@ -268,7 +268,7 @@
   "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
   [{:keys [id attachments] :as application} attachmentId]
   (info "1/3 deleting files of attachment" attachmentId)
-  (dorun (map mongo/delete-file (attachment-file-ids application attachmentId)))
+  (dorun (map mongo/delete-file-by-id (attachment-file-ids application attachmentId)))
   (info "2/3 deleted files of attachment" attachmentId)
   (mongo/update-by-id :applications id {$pull {:attachments {:id attachmentId}}})
   (info "3/3 deleted meta-data of attachment" attachmentId))
@@ -278,7 +278,7 @@
   [{:keys [id attachments] :as application} attachmentId fileId]
   (let [latest-version (latest-version-after-removing-file attachments attachmentId fileId)]
     (infof "1/3 deleting file %s of attachment %s" fileId attachmentId)
-    (mongo/delete-file fileId)
+    (mongo/delete-file-by-id fileId)
     (infof "2/3 deleted file %s of attachment %s" fileId attachmentId)
     (mongo/update
       :applications
@@ -294,61 +294,55 @@
 (defn- to-key-types-vec [r [k v]]
   (conj r {:group k :types (map (fn [v] {:name v}) v)}))
 
-(defquery "attachment-types"
+(defquery attachment-types
   {:parameters [:id]
    :roles      [:applicant :authority]}
   [command]
   (with-application command (comp (partial ok :attachmentTypes) :allowedAttachmentTypes)))
 
-(defcommand "set-attachment-type"
-  {:parameters [:id :attachmentId :attachmentType]
+(defcommand set-attachment-type
+  {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :states     [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId attachmentType]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (let [attachment-type (parse-attachment-type attachmentType)]
-        (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
-          (do
-            (mongo/update
-              :applications
-              {:_id (:id application)
-               :attachments {$elemMatch {:id attachmentId}}}
-              {$set {:attachments.$.type attachment-type}})
-            (ok))
-          (do
-            (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
-            (fail :error.attachmentTypeNotAllowed)))))))
+  [{:keys [application]}]
+  (let [attachment-type (parse-attachment-type attachmentType)]
+    (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachment-type)
+      (do
+        (mongo/update
+          :applications
+          {:_id (:id application)
+           :attachments {$elemMatch {:id attachmentId}}}
+          {$set {:attachments.$.type attachment-type}})
+        (ok))
+      (do
+        (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
+        (fail :error.attachmentTypeNotAllowed)))))
 
-(defcommand "approve-attachment"
+(defcommand approve-attachment
   {:description "Authority can approve attachement, moves to ok"
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :ok}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :ok}}))
 
-(defcommand "reject-attachment"
+(defcommand reject-attachment
   {:description "Authority can reject attachement, requires user action."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :roles       [:authority]
    :states      [:draft :info :open :complement-needed :submitted]}
-  [{{:keys [attachmentId]} :data created :created :as command}]
-  (with-application command
-    (fn [{id :id}]
-      (mongo/update
-        :applications
-        {:_id id, :attachments {$elemMatch {:id attachmentId}}}
-        {$set {:modified (:created command)
-               :attachments.$.state :requires_user_action}}))))
+  [{:keys [created]}]
+  (mongo/update
+    :applications
+    {:_id id, :attachments {$elemMatch {:id attachmentId}}}
+    {$set {:modified (:created command)
+           :attachments.$.state :requires_user_action}}))
 
-(defcommand "create-attachments"
+(defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
@@ -358,26 +352,22 @@
     (ok :applicationId application-id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
-(defcommand "delete-attachment"
+(defcommand delete-attachment
   {:description "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-   :parameters  [:id :attachmentId]
+   :parameters  [id attachmentId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (delete-attachment application attachmentId)
-      (ok))))
+  [{:keys [application]}]
+  (delete-attachment application attachmentId)
+  (ok))
 
-(defcommand "delete-attachment-version"
+(defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
-   :parameters  [:id :attachmentId :fileId]
+   :parameters  [:id attachmentId fileId]
    :states      [:draft :info :open :submitted :complement-needed]}
-  [{{:keys [id attachmentId fileId]} :data :as command}]
-  (with-application command
-    (fn [application]
-      (if (file-id-in-application? application attachmentId fileId)
-        (delete-attachment-version application attachmentId fileId)
-        (fail :file_not_linked_to_the_document)))))
+  [{:keys [application]}]
+  (if (file-id-in-application? application attachmentId fileId)
+    (delete-attachment-version application attachmentId fileId)
+    (fail :file_not_linked_to_the_document)))
 
 (defn attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
   (when (-> (get-attachment-info application attachmentId) :locked (= true))
@@ -389,7 +379,7 @@
           (not (-> command :user :role (= "authority"))))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(defcommand "upload-attachment"
+(defcommand upload-attachment
   {:parameters [:id :attachmentId :attachmentType :filename :tempfile :size]
    :roles      [:applicant :authority]
    :validators [attachment-is-not-locked authority-viewing-verdictGiven-application]
@@ -398,12 +388,12 @@
   [{:keys [created user application] {:keys [id attachmentId attachmentType filename tempfile size text target locked]} :data :as command}]
   (if (> size 0)
     (let [file-id (mongo/create-id)
-          sanitazed-filename (ss/suffix (ss/suffix filename "\\") "/")]
+          sanitazed-filename (mime/sanitize-filename filename)]
       (debugf "Create GridFS file: id=%s attachmentId=%s attachmentType=%s filename=%s temp=%s size=%d text=\"%s\"" id attachmentId attachmentType filename tempfile size text)
       (if (mime/allowed-file? sanitazed-filename)
         (if (allowed-attachment-type-for? (:allowedAttachmentTypes application) attachmentType)
           (let [content-type (mime/mime-type sanitazed-filename)]
-            (mongo/upload id file-id sanitazed-filename content-type tempfile created)
+            (mongo/upload file-id sanitazed-filename content-type tempfile :application id)
             (.delete (io/file tempfile))
             (if-let [attachment-version (update-or-create-attachment id attachmentId attachmentType file-id sanitazed-filename content-type size created user target locked)]
               (executed "add-comment"
@@ -591,7 +581,7 @@
     (with-open [in ((:content (mongo/download fileId)))
                 out (io/output-stream temp-file)]
       (stamper/stamp stamp contentType in out (:x-margin context) (:y-margin context) (:transparency context)))
-    (mongo/upload application-id new-file-id filename contentType temp-file created)
+    (mongo/upload new-file-id filename contentType temp-file :application application-id)
     (let [new-version (if re-stamp?
                         (update-version-content application-id attachment-id new-file-id (.length temp-file) created)
                         (set-attachment-version application-id attachment-id new-file-id filename contentType (.length temp-file) created user true))]
@@ -622,7 +612,7 @@
     (future (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     job))
 
-(defcommand "stamp-attachments"
+(defcommand stamp-attachments
   {:parameters [:id :files :xMargin :yMargin]
    :roles      [:authority]
    :states     [:verdictGiven]
@@ -639,7 +629,7 @@
                   :y-margin (->long (:yMargin data))
                   :transparency (->long (or (:transparency data) 0))})))))
 
-(defquery "stamp-attachments-job"
+(defquery stamp-attachments-job
   {:parameters [:job-id :version]
    :roles      [:authority]
    :description "Returns state of stamping job"}

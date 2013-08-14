@@ -19,30 +19,12 @@ Sonja adds some neighbors
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Click by test id  manage-neighbors
-  # Add neighbor "a"
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  a
-  Input text by test id  neighbors.edit.email  a@example.com
-  Click by test id  neighbors.edit.ok
-  # Add neighbor "b"
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  b
-  Input text by test id  neighbors.edit.email  b@example.com
-  Click by test id  neighbors.edit.ok
+  Add neighbor  1-2-3-4  a  a@example.com
+  Add neighbor  1-2-3-4  b  b@example.com
   # Add neighbor "c" with wrong email, ups. Sonja must correct that later.
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  c
-  Input text by test id  neighbors.edit.email  x@example.com
-  Click by test id  neighbors.edit.ok
+  Add neighbor  1-2-3-4  c  x@example.com
   # Add neighbor "d". This is a mistake that Sonja must fix later.
-  Click by test id  manager-neighbors-add
-  Input text by test id  neighbors.edit.propertyId  1-2-3-4
-  Input text by test id  neighbors.edit.name  d
-  Input text by test id  neighbors.edit.email  d@example.com
-  Click by test id  neighbors.edit.ok
+  Add neighbor  1-2-3-4  d  d@example.com
   # Check that they are all listed
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-a@example.com']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-b@example.com']
@@ -55,7 +37,7 @@ Sonja removes mistakenly added neighbor d
   Wait until  Element should be visible  xpath=//div[@id='dialog-confirm-neighbor-remove']
   Click element  xpath=//div[@id='dialog-confirm-neighbor-remove']//*[@data-test-id='confirm-yes']
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-d@example.com']//a[@data-test-id='manage-neighbors-remove']
-  
+
 Sonja corrects the email address of neighbor c
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-edit']
   Click element  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-edit']
@@ -75,14 +57,14 @@ Sonja checks that everything is ok
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//span[@data-test-id='neighbors-row-status-open']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//span[@data-test-id='neighbors-row-status-open']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-c@example.com']//span[@data-test-id='neighbors-row-status-open']
-  
+
 Sonja meets user 'a' IRL and marks her as 'done'
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
   Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbor-row-mark-done']
-  
-Sonja opens status details dialog 
+
+Sonja opens status details dialog
   Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-mark-done']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-firstName']
   Element Text Should Be  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-firstName']  Sonja
@@ -90,7 +72,7 @@ Sonja opens status details dialog
   Element should not be visible  xpath=//div[@id='dialog-neighbor-status']//td[@data-test-id='neighbor-status-usereid']
   Click element  xpath=//div[@id='dialog-neighbor-status']//button[@data-test-id='neighbor-status-ok']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-neighbor-status']
-  
+
 Sonja has done her part
   Logout
 
@@ -114,20 +96,20 @@ Mikko sends an email invitation to neighbor 'b'
   Click element  xpath=//div[@id='dialog-send-neighbor-email']//button[@data-test-id='neighbors-sendemail-send']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-send-neighbor-email']
   Logout
-  
+
 Mail is sent
   Go to  ${SERVER}/api/last-email
   Wait until  Element should contain  id=to  b@example.com
-  
+
 Neighbor clicks on email link and sees epplication
   Click element  xpath=//a
   Wait until  Element should be visible  xpath=//*[@data-test-id='application-title']
   Wait until  Element should contain  xpath=//*[@data-test-id='application-title']  ${appname}
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
   Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinrakennuksen rakentaminen
-  
+
 Neighbor clicks vetuma button to identify herself
-  [Tags]  integration
+  [Tags]  fail  integration
   Click element  xpath=//*[@data-test-id='vetuma-init']
   Click element  xpath=//img[@alt='Pankkitunnistus']
   Click element  xpath=//a[@class='nordea']
@@ -135,9 +117,9 @@ Neighbor clicks vetuma button to identify herself
   Click element  xpath=//input[@name='Ok']
   Click element  xpath=//input[@type='submit']
   Click element  xpath=//button[@type='submit']
-  
+
 Neighbor is back and leaves a comment
-  [Tags]  integration
+  [Tags]  fail  integration
   Wait until  Element should be visible  xpath=//input[@data-test-id='neighbor-response-comments']
   Click element  xpath=//input[@data-test-id='neighbor-response-comments']
   Wait until  Element should be enabled  xpath=//*[@data-test-id='neighbor-response-message']
@@ -146,34 +128,34 @@ Neighbor is back and leaves a comment
   Click element  xpath=//*[@data-test-id='neighbor-response-send']
   Wait until  Element should be visible  xpath=//*[@data-test-id='neighbor-response-done']
   Element text should be  xpath=//*[@data-test-id='neighbor-response-done']  KIITOS VASTAUKSESTASI!
-  
+
 Mikko sees that the neighbor has given a comment
-  [Tags]  integration
+  [Tags]  fail  integration
   Go to login page
   Mikko logs in
   Open application  ${appname}  753-416-25-22
   Open tab  statement
   Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']
-  
+
 Mikko opens dialog to see neighbors response
-  [Tags]  integration
+  [Tags]  fail  integration
   Click element  xpath=//tr[@data-test-id='neighbors-row-email-b@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
-  
+
 Mikko can not see neighbor sotu
-  [Tags]  integration
+  [Tags]  fail  integration
   Element should not be visible  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-userid']
-  
+
 Mikko goes to pursuit happines in life
-  [Tags]  integration
+  [Tags]  fail  integration
   Click element  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-ok']
   Logout
 
 Sonja sees that the neighbour has given a comment
-  [Tags]  integration
+  [Tags]  fail  integration
   Sonja logs in
   Open application  ${appname}  753-416-25-22
   Open tab  statement
@@ -183,8 +165,21 @@ Sonja sees that the neighbour has given a comment
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
-  
+
 Sonja can see neighbor sotu
-  [Tags]  integration
+  [Tags]  fail  integration
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-userid']  210281-9988
   Click element  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-ok']
+
+
+*** Keywords ***
+Add neighbor
+  [Arguments]  ${propertyId}  ${name}  ${email}
+  Click enabled by test id  manager-neighbors-add
+  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Input text by test id  neighbors.edit.propertyId  ${propertyId}
+  Input text by test id  neighbors.edit.name  ${name}
+  Input text by test id  neighbors.edit.email  ${email}
+  Click by test id  neighbors.edit.ok
+  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Wait Until  Page Should Contain  ${email}
