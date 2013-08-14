@@ -56,8 +56,8 @@
                         {:tag :rooliKoodi}]}])
 
 (def vastuuhenkilo [{:tag :Vastuuhenkilo
-                     :child [{:tag :etunimi}
-                             {:tag :sukunimi}
+                     :child [{:tag :sukunimi}
+                             {:tag :etunimi}
                              {:tag :osoitetieto
                               :child [{:tag :osoite
                                        :child mapping-common/postiosoite-children-ns-yht}]}
@@ -70,14 +70,12 @@
 (def kaivulupa_to_krysp
   {:tag :YleisetAlueet
    :ns "yak"
-   :attr {:xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
-;   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
+   :attr {:xsi:schemaLocation "http://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.0.9/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.1/YleisenAlueenKaytonLupahakemus.xsd"
          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
          :xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset"
-;         :xmlns:gml "http://www.opengis.net/gml"  ;;TODO: Lisaa tama ja rivi ylla, jos tarvit naita "sijaintitiedossa"
-         ;; TODO: Tarvitaanko naita kahta?
-         :xmlns:xlink "http://www.w3.org/1999/xlink"
+         :xmlns:gml "http://www.opengis.net/gml"
          :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance"
+;         :xmlns:xlink "http://www.w3.org/1999/xlink"           ;; TODO: Tarvitaanko tata?
          }
 
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -96,18 +94,14 @@
                                                ]}]}
                              {:tag :alkuPvm}
                              {:tag :loppuPvm}
-                             mapping-common/sijantitieto
-                             #_{:tag :sijaintitieto
+                             {:tag :sijaintitieto
                               :child [{:tag :Sijainti
-                                       :child [{:tag :tyhja :ns "yht"}
-                                               {:tag :osoite :ns "yht"
+                                       :child [{:tag :osoite :ns "yht"
                                                 :child [{:tag :yksilointitieto}
                                                         {:tag :alkuHetki}
                                                         {:tag :osoitenimi
-                                                         :child [{:tag :teksti}]}]}]}]}
-                             #_{:tag :sijaintitieto
-                              :child [{:tag :Sijainti
-                                       :child [{:tag :piste :ns "yht"
+                                                         :child [{:tag :teksti}]}]}
+                                               {:tag :piste :ns "yht"
                                                 :child [{:tag :Point :ns "gml"
                                                          :child [{:tag :pos}]}]}]}]}
                              {:tag :osapuolitieto

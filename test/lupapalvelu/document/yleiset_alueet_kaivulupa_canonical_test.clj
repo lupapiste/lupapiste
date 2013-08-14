@@ -201,8 +201,7 @@
         Sijainti-yksilointitieto (-> Sijainti-osoite :yksilointitieto) => truthy
         Sijainti-alkuHetki (-> Sijainti-osoite :alkuHetki) => truthy
         Sijainti-osoitenimi (-> Sijainti-osoite :osoitenimi :teksti) => truthy
-        Sijainti-tyhja (-> Tyolupa :sijaintitieto :Sijainti :tyhja) => truthy
-;        Sijainti (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
+        Sijainti-piste (-> Tyolupa :sijaintitieto :Sijainti :piste :Point :pos) => truthy
 
         ;; TODO: Naita voi yhdistella perakkain '->':lla... Refaktoroi.
         Maksaja (-> Tyolupa :maksajatieto :Maksaja) => truthy
@@ -237,6 +236,7 @@
         Vastuuhenkilo-yritys-Postiosoite (-> Vastuuhenkilo-yritys-yritystieto :postiosoitetieto :Postiosoite) => truthy
         ;; tyomaasta-vastaavan henkilotieto-osa
         Vastuuhenkilo-henkilo (-> Tyolupa :vastuuhenkilotieto :Vastuuhenkilo) => truthy
+        Vastuuhenkilo-henkilo-osoite (-> Vastuuhenkilo-henkilo :osoitetieto :osoite) => truthy
 
         ;; Testataan muunnosfunktiota henkilo-tyyppisella tyomaasta-vastaavalla
         tyomaasta-vastaava-henkilo (get-tyomaasta-vastaava
@@ -267,9 +267,7 @@
       (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:_id application))
 ;      (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
       (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address application))
-      (fact "Sijainti-tyhja" Sijainti-tyhja => empty-tag)
-;      (fact "Sijainti-x" (:x Sijainti) => (-> application :location :x))
-;      (fact "Sijainti-y" (:y Sijainti) => (-> application :location :y))
+      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location :x) " " (-> application :location :y)))
 
       ;; Maksajan tiedot
       (fact "maksaja-etunimi" (:etunimi maksaja-henkilo-nimi) => (-> nimi :etunimi :value))
@@ -313,6 +311,12 @@
         (:etunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :etunimi :value))
       (fact "Vastuuhenkilo-henkilo-sukunimi"
         (:sukunimi Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :henkilotiedot :sukunimi :value))
+      (fact "Vastuuhenkilo-henkilo-osoite-osoitenimi"
+        (-> Vastuuhenkilo-henkilo-osoite :osoitenimi :teksti) => (-> tyomaasta-vastaava :data :yritys :osoite :katu :value))
+      (fact "Vastuuhenkilo-henkilo-osoite-postinumero"
+        (:postinumero Vastuuhenkilo-henkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postinumero :value))
+      (fact "Vastuuhenkilo-henkilo-osoite-postitoimipaikannimi"
+        (:postitoimipaikannimi Vastuuhenkilo-henkilo-osoite) => (-> tyomaasta-vastaava :data :yritys :osoite :postitoimipaikannimi :value))
       (fact "Vastuuhenkilo-henkilo-puhelinnumero"
         (:puhelinnumero Vastuuhenkilo-henkilo) => (-> tyomaasta-vastaava :data :yritys :vastuuhenkilo :yhteystiedot :puhelin :value))
       (fact "Vastuuhenkilo-henkilo-sahkopostiosoite"
@@ -332,7 +336,7 @@
       (fact "tyomaasta-vastaava-yksityinen-sukunimi" (:sukunimi tyomaasta-vastaava-Vastuuhenkilo) => (-> nimi :sukunimi :value))
       (fact "tyomaasta-vastaava-yksityinen-sahkopostiosoite" (:sahkopostiosoite tyomaasta-vastaava-Vastuuhenkilo) => (-> yhteystiedot :email :value))
       (fact "tyomaasta-vastaava-yksityinen-puhelin" (:puhelinnumero tyomaasta-vastaava-Vastuuhenkilo) => (-> yhteystiedot :puhelin :value))
-      (fact "tyomaasta-vastaava-yksityinen-osoitenimi" (:osoitenimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :katu :value))
+      (fact "tyomaasta-vastaava-yksityinen-osoitenimi" (-> tyomaasta-vastaava-Vastuuhenkilo-osoite :osoitenimi :teksti) => (-> osoite :katu :value))
       (fact "tyomaasta-vastaava-yksityinen-postinumero" (:postinumero tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postinumero :value))
       (fact "tyomaasta-vastaava-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
 
