@@ -2,6 +2,7 @@
   (:use clojure.test
         midje.sweet)
   (:require [monger.collection :as mc]
+            [monger.gridfs :as gfs]
             [lupapalvelu.mongo :as mongo]))
 
 (def valid-id "502770568de2282ae6fbb0be")
@@ -27,3 +28,9 @@
   (fact (mongo/insert "c" {:data "data"}) => nil
         (provided
           (mc/insert "c" {:data "data"}) => nil)))
+
+(facts "delete-file"
+  (mongo/delete-file ...query...) => nil
+    (provided (gfs/remove ...query...) => nil)
+  (mongo/delete-file-by-id ...id...) => nil
+    (provided (gfs/remove {:_id ...id...}) => nil))

@@ -1,14 +1,13 @@
 (ns lupapalvelu.web
   (:use [noir.core :only [defpage]]
-        [lupapalvelu.core :only [ok fail defcommand defquery]]
+        [lupapalvelu.core :only [ok fail defcommand defquery now]]
         [lupapalvelu.i18n :only [*lang*]]
-        [clojure.tools.logging]
-        [clojure.tools.logging]
-        [clj-logging-config.log4j :only [with-logging-context]]
         [clojure.walk :only [keywordize-keys]]
         [clojure.string :only [blank?]]
         [lupapalvelu.security :only [current-user]])
-  (:require [noir.request :as request]
+  (:require [taoensso.timbre :as timbre :refer (trace tracef debug info infof warn warnf error errorf fatal spy)]
+            [lupapalvelu.logging :refer [with-logging-context]]
+            [noir.request :as request]
             [noir.response :as resp]
             [noir.session :as session]
             [noir.server :as server]
@@ -30,13 +29,14 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [clojure.string :as s]
-            [sade.util :as util]
+            [sade.util :refer [lower-case] :as util]
             [cheshire.core :as json]
             [clojure.java.io :as io]
             [clj-http.client :as client]
             [ring.middleware.anti-forgery :as anti-forgery]
             [lupapalvelu.neighbors])
-  (:import [java.io ByteArrayInputStream]))
+  (:import [java.io ByteArrayInputStream]
+           [java.util.concurrent TimeUnit]))
 
 ;;
 ;; Helpers
@@ -52,18 +52,21 @@
 
 (defjson "/system/apis" [] @apis)
 
+(defn parse-json-body [request]
+  (let [json-body (if (ss/starts-with (:content-type request) "application/json")
+                    (if-let [body (:body request)]
+                      (-> body
+                        (io/reader :encoding (or (:character-encoding request) "utf-8"))
+                        json/parse-stream
+                        keywordize-keys)
+                      {}))]
+    (if json-body
+      (assoc request :json json-body :params json-body)
+      (assoc request :json nil))))
+
 (defn parse-json-body-middleware [handler]
   (fn [request]
-    (let [json-body (if (ss/starts-with (:content-type request) "application/json")
-                      (if-let [body (:body request)]
-                        (-> body
-                          (io/reader :encoding (or (:character-encoding request) "utf-8"))
-                          json/parse-stream
-                          keywordize-keys)
-                        {}))
-          request (assoc request :json json-body)
-          request (if json-body (assoc request :params json-body) request)]
-      (handler request))))
+    (handler (parse-json-body request))))
 
 (defn from-json [request]
   (:json request))
@@ -117,13 +120,13 @@
 
 (defn enriched [m]
   (merge m {:user (current-user)
+            :lang *lang*
             :web  (web-stuff)}))
 
-;; MDC will throw NPE on nil values. Fix sent to clj-logging-config.log4j (Tommi 17.2.2013)
 (defn execute [action]
   (with-logging-context
-    {:applicationId (or (get-in action [:data :id]) "")
-     :userId        (or (get-in action [:user :id]) "")}
+    {:applicationId (get-in action [:data :id])
+     :userId        (get-in action [:user :id])}
     (core/execute action)))
 
 (defn- execute-command [name]
@@ -134,6 +137,12 @@
 
 (defjson "/api/query/:name" {name :name}
   (execute (enriched (core/query name (from-query)))))
+
+(defpage "/api/raw/:name" {name :name}
+  (let [response (execute (enriched (core/raw name (from-query))))]
+    (if-not (= (:ok response) false)
+      response
+      (resp/status 404 (resp/json response)))))
 
 ;;
 ;; Web UI:
@@ -189,11 +198,6 @@
 (def apps-pattern
   (re-pattern (str "(" (clojure.string/join "|" (map name (keys auth-methods))) ")")))
 
-(defn- local? [uri] (and uri (= -1 (.indexOf uri ":"))))
-
-(defjson "/api/hashbang" []
-  (ok :bang (session/get! :hashbang "")))
-
 (defn redirect [lang page]
   (resp/redirect (str "/app/" (name lang) "/" page)))
 
@@ -208,11 +212,25 @@
       (redirect lang application-page)
       (redirect-to-frontpage lang))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
-  ;; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
-  (when (and hashbang (local? hashbang))
+(defn- ->hashbang [v]
+  (when (and v (= -1 (.indexOf v ":")))
+    (second (re-matches #"^[#!/]{0,3}(.*)" v))))
+
+(defn serve-app [app hashbang]
+  ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
+  (when-let [hashbang (->hashbang hashbang)]
     (session/put! :hashbang hashbang))
   (single-resource :html (keyword app) (redirect-to-frontpage :fi)))
+
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
+
+; Same as above, but with an extra path.
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang}
+  (serve-app app hashbang))
+
+(defjson "/api/hashbang" []
+  (ok :bang (session/get! :hashbang "")))
 
 (defcommand "frontend-error" {}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
@@ -222,7 +240,7 @@
                              (str (.substring line 0 limit) "... (truncated)")
                              line)))
         sanitized-page (sanitize (or page "(unknown)"))
-        user           (or email "(anonymous)")
+        user           (or (lower-case email) "(anonymous)")
         sanitized-ua   (sanitize user-agent)
         sanitized-msg  (sanitize (str message))]
     (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
@@ -286,7 +304,7 @@
 
 (defn- get-apikey [request]
   (let [authorization (get-in request [:headers "authorization"])]
-    (parse "apikey" authorization)))
+    (spy (parse "apikey" authorization))))
 
 (defn authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
@@ -301,12 +319,12 @@
   (and (get-apikey request) (logged-in? request)))
 
 ;;
-;; File upload/download:
+;; File upload
 ;;
 
-(defpage [:post "/api/upload"]
+(defpage [:post "/api/upload/attachment"]
   {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
-  (tracef "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
+  (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
   (let [target (if (every? s/blank? [targetId targetType]) nil (if (s/blank? targetId) {:type targetType} {:type targetType :id targetId}))
         upload-data (assoc upload
                            :id applicationId
@@ -323,30 +341,13 @@
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.0.5.html"
-                                           {:applicationId (or applicationId "")
-                                            :attachmentId (or attachmentId "")
-                                            :attachmentType (or attachmentType "")
-                                            :locked (or locked "false")
-                                            :authority (or authority "false")
-                                            :typeSelector (or typeSelector "")
-                                            :errorMessage (result :text)}))))))
-
-(defn- output-attachment [attachment-id download?]
-  (if (logged-in?)
-    (attachment/output-attachment attachment-id download? (partial attachment/get-attachment-as (current-user)))
-    (resp/status 401 "Unauthorized\r\n")))
-
-(defpage "/api/view-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id false))
-
-(defpage "/api/download-attachment/:attachment-id" {attachment-id :attachment-id}
-  (output-attachment attachment-id true))
-
-(defpage "/api/download-all-attachments/:application-id" {application-id :application-id}
-  (attachment/output-all-attachments application-id (current-user) *lang*))
-
-(defpage "/api/pdf-export/:application-id" {application-id :application-id}
-  (ke6666/export application-id (current-user) *lang*))
+                                           (-> (:params (request/ring-request))
+                                             (dissoc :upload)
+                                             (dissoc ring.middleware.anti-forgery/token-key)
+                                             (assoc  :errorMessage (result :text)))))))))
+;;
+;; Server is alive
+;;
 
 (defjson "/api/alive" [] {:ok (if (security/current-user) true false)})
 
@@ -379,22 +380,44 @@
 
 (defn- csrf-attack-hander [request]
   (with-logging-context
-    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)) "???")
-     :userId        (or (:id (current-user request)) "???")}
-    (warn "CSRF attempt blocked."
-          "Client IP:" (client-ip request)
-          "Referer:" (get-in request [:headers "referer"]))
-    (resp/json (fail :error.invalid-csrf-token))))
+    {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
+     :userId        (:id (current-user request) "???")}
+    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (client-ip request) (get-in request [:headers "referer"]))
+    (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf
   [handler]
   (fn [request]
-    (let [cookie-name "anti-csrf-token"
-          cookie-attrs (dissoc (env/value :cookie) :http-only)]
-      (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
-               (not (logged-in-with-apikey? request)))
-        (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
-        (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs)))))
+    (if (env/feature? :disable-anti-csrf)
+      (handler request)
+      (let [cookie-name "anti-csrf-token"
+            cookie-attrs (dissoc (env/value :cookie) :http-only)]
+        (if (and (re-matches #"^/api/(command|query|upload).*" (:uri request))
+                 (not (logged-in-with-apikey? request)))
+          (anti-forgery/crosscheck-token handler request cookie-name csrf-attack-hander)
+          (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
+
+;;
+;; Session timeout:
+;;
+;;    Middleware that checks session timeout.
+;;
+
+(defn get-session-timeout [request]
+  (get-in request [:session :noir :user :session-timeout] (.toMillis TimeUnit/HOURS 1)))
+
+(defn session-timeout-handler [handler request]
+  (let [now (now)
+        expires (session/get :expires now)
+        expired? (< expires now)]
+    (if expired?
+      (session/clear!)
+      (if (re-find #"^/api/(command|query)/" (:uri request))
+        (session/put! :expires (+ now (get-session-timeout request)))))
+    (handler request)))
+
+(defn session-timeout [handler]
+  (fn [request] (session-timeout-handler handler request)))
 
 ;;
 ;; dev utils:

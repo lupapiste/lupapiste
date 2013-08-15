@@ -11,6 +11,9 @@ var ajax = (function() {
         clearTimeout(self.pendingHandler);
         self.pendingListener(false);
       }
+      if (self.processingListener) {
+        self.processingListener(false);
+      }
       self.completeHandler(jqXHR, textStatus);
     };
 
@@ -40,7 +43,7 @@ var ajax = (function() {
 
     self.successHandler = function(e) { };
     self.errorHandler = function(e) { notify.error("error",e); };
-    self.failHandler = function(jqXHR, textStatus, errorThrown) { error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown); };
+    self.failHandler = function(jqXHR, textStatus, errorThrown) {error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);};
     self.completeHandler = function() { };
     self.headers = {};
 
@@ -111,6 +114,14 @@ var ajax = (function() {
       return self;
     };
 
+    self.processing = function(listener) {
+      if (!listener) { return self; }
+      if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
+      self.processingListener = listener;
+      self.processingListener(false);
+      return self;
+    };
+
     self.pending = function(listener, timeout) {
       if (!listener) { return self; }
       if (!_.isFunction(listener)) { throw "Argument must be a function: " + listener; }
@@ -121,6 +132,9 @@ var ajax = (function() {
     };
 
     self.call = function() {
+      if (self.processingListener) {
+        self.processingListener(true);
+      }
       if (self.pendingListener) {
         self.pendingHandler = setTimeout(_.partial(self.pendingListener, true), self.pendingTimeout);
       }

@@ -24,7 +24,7 @@
     :lastName "Viranomainen"
     :phone "03121991"
     :username "veikko"
-    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG" ;; veikko
               :salt "$2a$10$s4OOPduvZeH5yQzsCFSKIu"
               :apikey "5051ba0caa2480f374dcfeff"}}
    ;; Sonja Sibbo - Sipoon lupa-arkkitehti
@@ -241,64 +241,74 @@
     :role  "applicant"}
    ])
 
-(def organizations[{:id "186-R"
-                      :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
-                      :municipalities ["186"]
-                      :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
-                               :url "http://www.jarvenpaa.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
-                     {:id "753-R"
-                      :name {:fi "Sipoon rakennusvalvonta"}
-                      :municipalities ["753"]
-                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                               :url "http://sipoo.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
-                      :operations-attachments {:asuinrakennus [[:paapiirustus :asemapiirros]
-                                                               [:paapiirustus :pohjapiirros]
-                                                               [:hakija :valtakirja]
-                                                               [:muut :vaestonsuojasuunnitelma]]
-                                               :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
-                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
-                                                                          [:muut :vaestonsuojasuunnitelma]
-                                                                          [:muut :valaistussuunnitelma]]}
-                      ;;:legacy "http://212.213.116.162/geoserver/wfs"}
-                      :legacy "http://localhost:8000/krysp/building.xml"
-                      :rakennus-ftp-user "sipoo"
-                      :statementPersons [{:id "516560d6c2e6f603beb85147"
-                                          :text "Paloviranomainen",
-                                          :email "sonja.sibbo@sipoo.fi",
-                                          :name "Sonja Sibbo"}]}
-                     {:id "837-R"
-                      :name {:fi "Tampereen rakennusvalvonta"}
-                      :municipalities ["837"]
-                      :links [{:name {:fi "Tampere" :sv "Tammerfors"}
-                               :url "http://tampere.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
-                              {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
-                               :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
-                     {:id "638-R"
-                      :name {:fi "Porvoon rakennusvalvonta"}
-                      :municipalities ["638"]
-                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
-                               :url "http://www.porvoo.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                               :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
-                     {:id "564-R"
-                      :name {:fi "Oulun rakennusvalvonta"}
-                      :municipalities ["564"]
-                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                               :url "http://www.ouka.fi"}
-                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
-                               :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
-                     {:id "529-R"
-                      :name {:fi "Naantalin rakennusvalvonta"}
-                      :municipalities ["529"]}
-                     {:id "069-R"
-                      :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne "}
-                      :municipalities ["069","317","626","691"]}])
+(def organizations [{:id "186-R"
+                     :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
+                     :municipalities ["186"]
+                     :scope [{:municipality "186" :permitType "R"}]
+                     :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
+                              :url "http://www.jarvenpaa.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]}
+                    {:id "753-R"
+                     :name {:fi "Sipoon rakennusvalvonta"}
+                     :municipalities ["753"]
+                     :scope [{:municipality "753" :permitType "R"}]
+                     :links [{:name {:fi "Sipoo", :sv "Sibbo"}
+                              :url "http://sipoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                     :operations-attachments {:asuinrakennus [[:paapiirustus :asemapiirros]
+                                                              [:paapiirustus :pohjapiirros]
+                                                              [:hakija :valtakirja]
+                                                              [:muut :vaestonsuojasuunnitelma]]
+                                              :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
+                                                                         [:hakija :ote_kauppa_ja_yhdistysrekisterista]
+                                                                         [:muut :vaestonsuojasuunnitelma]
+                                                                         [:muut :valaistussuunnitelma]]}
+                     ;;:legacy "http://212.213.116.162/geoserver/wfs"}
+                     :legacy "http://localhost:8000/krysp/building.xml"
+                     :rakennus-ftp-user "sipoo"
+                     :statementPersons [{:id "516560d6c2e6f603beb85147"
+                                         :text "Paloviranomainen",
+                                         :email "sonja.sibbo@sipoo.fi",
+                                         :name "Sonja Sibbo"}]}
+                    {:id "837-R"
+                     :name {:fi "Tampereen rakennusvalvonta"}
+                     :municipalities ["837"]
+                     :scope [{:municipality "837" :permitType "R"}]
+                     :links [{:name {:fi "Tampere" :sv "Tammerfors"}
+                              :url "http://tampere.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
+                             {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
+                              :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]}
+                    {:id "638-R"
+                     :name {:fi "Porvoon rakennusvalvonta"}
+                     :municipalities ["638"]
+                     :scope [{:municipality "638" :permitType "R"}]
+                     :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
+                              :url "http://www.porvoo.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                              :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                    {:id "564-R"
+                     :name {:fi "Oulun rakennusvalvonta"}
+                     :municipalities ["564"]
+                     :scope [{:municipality "564" :permitType "R"}]
+                     :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                              :url "http://www.ouka.fi"}
+                             {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
+                              :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
+                    {:id "529-R"
+                     :name {:fi "Naantalin rakennusvalvonta"}
+                     :municipalities ["529"]
+                     :scope [{:municipality "529" :permitType "R"}]}
+                    {:id "069-R"
+                     :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"}
+                     :municipalities ["069","317","626","691"]
+                     :scope [{:municipality "069" :permitType "R"}
+                             {:municipality "317" :permitType "R"}
+                             {:municipality "626" :permitType "R"}
+                             {:municipality "691" :permitType "R"}]}])
 
 (deffixture "minimal" {}
   (mongo/clear!)

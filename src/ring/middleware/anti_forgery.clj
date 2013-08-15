@@ -15,8 +15,10 @@
           in POST forms if the handler is wrapped in wrap-anti-forgery."}
   *anti-forgery-token*)
 
+(def token-key :__anti-forgery-token)
+
 (defn- session-token [request token-gen-fn log-fn]
-  (or (get-in request [:session :__anti-forgery-token])
+  (or (get-in request [:session token-key])
       (token-gen-fn)))
 
 (defn- assoc-in-session
@@ -26,18 +28,18 @@
     (assoc-in response [:session] (merge (:session request) {k v}))))
 
 (defn- assoc-session-token [response request token log-fn]
-  (let [old-token (get-in request [:session :__anti-forgery-token])]
+  (let [old-token (get-in request [:session token-key])]
     (if (= old-token token)
       response
-      (assoc-in-session response request :__anti-forgery-token token))))
+      (assoc-in-session response request token-key token))))
 
 (defn- form-params [request]
   (merge (:form-params request)
          (:multipart-params request)))
 
 (defn- request-token [request]
-  (or (-> request form-params (get "__anti-forgery-token"))
-      (-> request :headers (get "x-anti-forgery-token"))))
+  (or (get-in request [:params token-key])
+      (get-in request [:headers "x-anti-forgery-token"])))
 
 (defn- secure-eql? [^String a ^String b]
   (if (and a b (= (.length a) (.length b)))
@@ -105,5 +107,5 @@
 (defn set-token-in-cookie [request response cookie-name cookie-attrs]
   (when response
     (if (get-in request [:cookies cookie-name :value])
-        response
-        (assoc-in response [:cookies cookie-name] (assoc cookie-attrs :value (default-token-generation-fn) :path "/")))))
+      response
+      (assoc-in response [:cookies cookie-name] (assoc cookie-attrs :value (default-token-generation-fn) :path "/")))))

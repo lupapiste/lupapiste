@@ -1,12 +1,12 @@
 (ns lupapalvelu.document.model
-  (:use [clojure.tools.logging]
-        [sade.strings]
-        [lupapalvelu.document.schemas :only [schemas]]
+  (:use [sade.strings]
         [clojure.walk :only [keywordize-keys]])
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [clojure.string :as s]
             [clj-time.format :as timeformat]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.vrk]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
             [lupapalvelu.document.validator :as validator]
@@ -20,7 +20,11 @@
 (def default-max-len 255)
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
-(def latin1-encoder (.newEncoder (java.nio.charset.Charset/forName "ISO-8859-1")))
+(def ^:private latin1 (java.nio.charset.Charset/forName "ISO-8859-1"))
+
+(defn- latin1-encoder
+  "Creates a new ISO-8859-1 CharsetEncoder instance, which is not thread safe."
+  [] (.newEncoder latin1))
 
 ;;
 ;; Field validation
@@ -34,7 +38,7 @@
 (defmethod validate-field :string [{:keys [max-len min-len] :as elem} v]
   (cond
     (not= (type v) String) [:err "illegal-value:not-a-string"]
-    (not (.canEncode latin1-encoder v)) [:warn "illegal-value:not-latin1-string"]
+    (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
     (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
@@ -73,8 +77,8 @@
 ;; Neue api:
 ;;
 
-(defn- find-by-name [schema-body [k & ks]]
-  (when-let [elem (some #(when (= (:name %) k) %) schema-body)]
+(defn find-by-name [schema-body [k & ks]]
+  (when-let [elem (some #(when (= (:name %) (name k)) %) schema-body)]
     (if (nil? ks)
       elem
       (if (:repeating elem)
@@ -136,7 +140,7 @@
       (concat
         (validate-fields schema-body nil data [])
         (validate-required-fields schema-body [] data [])
-        (when (env/feature? :vrk) (validator/validate document))))))
+        (validator/validate document)))))
 
 (defn valid-document?
   "Checks weather document is valid."
@@ -145,7 +149,7 @@
 (defn validate-against-current-schema
   "Validates document against the latest schema and returns list of errors."
   [{{{schema-name :name} :info} :schema document-data :data :as document}]
-  (let [latest-schema (get schemas schema-name)
+  (let [latest-schema (schemas/get-schema schema-name)
         pimped-doc    (assoc document :schema latest-schema)]
     (validate pimped-doc)))
 

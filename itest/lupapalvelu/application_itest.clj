@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-itest
   (:use [lupapalvelu.itest-util]
         [midje.sweet]
+        [lupapalvelu.factlet]
         [clojure.pprint :only [pprint]])
   (:require [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
@@ -9,15 +10,14 @@
 (apply-remote-minimal)
 
 #_(fact "can't inject js in 'x' or 'y' params"
-  (create-app pena :x ";alert(\"foo\");" :y "what ever") => not-ok?
-  (create-app pena :x "0.1x" :y "1.0")                   => not-ok?
-  (create-app pena :x "1x2" :y "1.0")                    => not-ok?
-  (create-app pena :x "2" :y "1.0")                      => not-ok?
-  (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
+   (create-app pena :x ";alert(\"foo\");" :y "what ever") =not=> ok?
+   (create-app pena :x "0.1x" :y "1.0")                   =not=> ok?
+   (create-app pena :x "1x2" :y "1.0")                    =not=> ok?
+   (create-app pena :x "2" :y "1.0")                      =not=> ok?
+   (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
 
 (fact "creating application without message"
-  (let [resp  (create-app pena)
-        id    (:id resp)
+  (let [id    (create-app-id pena)
         resp  (query pena :application :id id)
         app   (:application resp)]
     app => (contains {:id id
@@ -33,8 +33,7 @@
     (:allowedAttachmentTypes app) => (complement empty?)))
 
 (fact "creating application with message"
-  (let [resp            (create-app pena :messages ["hello"])
-        application-id  (:id resp)
+  (let [application-id  (create-app-id pena :messages ["hello"])
         resp            (query pena :application :id application-id)
         application     (:application resp)
         hakija (domain/get-document-by-name application "hakija")]
@@ -45,40 +44,35 @@
     (-> hakija :data :henkilo :henkilotiedot) => (contains {:etunimi {:value "Pena"} :sukunimi {:value "Panaani"}})))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
-  (let [resp            (create-app pena :municipality "753")
-        application-id  (:id resp)
+  (let [application-id  (create-app-id pena :municipality "753")
         resp            (query pena :application :id application-id)
         application     (:application resp)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "753-R"))
 
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
-  (let [resp            (create-app pena :municipality "837")
-        application-id  (:id resp)
+  (let [application-id  (create-app-id pena :municipality "837")
         resp            (query pena :application :id application-id)
         application     (:application resp)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "837-R"))
 
 (fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
-  (let [resp            (create-app pena :municipality "626")
-        application-id  (:id resp)
+  (let [application-id  (create-app-id pena :municipality "626")
         resp            (query pena :application :id application-id)
         application     (:application resp)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "069-R"))
 
 (fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
-  (let [created-resp (create-app pena :municipality sonja-muni)
-        id (:id created-resp)]
-    (success created-resp) => true
+  (let [id (create-app-id pena :municipality sonja-muni)]
     (comment-application id pena)
     (let [query-resp   (query sonja :authorities-in-applications-organization :id id)]
       (success query-resp) => true
       (count (:authorityInfo query-resp)) => 2)))
 
 (fact "Assign application to an authority"
-  (let [application-id (:id (create-app pena :municipality sonja-muni))
+  (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment to change state to open
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
@@ -94,13 +88,10 @@
     authority-before-assignation => nil
     authority-after-assignation => (contains {:id (:id authority)})
     (fact "Authority is not able to submit"
-          (let [resp (query sonja :allowed-actions :id application-id)]
-            (success resp) => true
-            (get-in resp [:actions :submit-application :ok]) => falsey
-            (unauthorized (command sonja :submit-application :id application-id))))))
+      sonja =not=> (allowed? sonja :submit-application :id application-id))))
 
 (fact "Assign application to an authority and then to no-one"
-  (let [application-id (:id (create-app pena :municipality sonja-muni))
+  (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment change set state to open
         _ (comment-application application-id pena)
         application (:application (query sonja :application :id application-id))
@@ -116,41 +107,62 @@
 
 (fact "Applicaton shape is saved"
   (let [shape "POLYGON((460620 7009542,362620 6891542,467620 6887542,527620 6965542,460620 7009542))"
-        application-id (:id (create-app pena))
+        application-id (create-app-id pena)
         resp (command pena :save-application-shape :id application-id :shape shape)
         resp (query pena :application :id application-id)
         app   (:application resp)]
     (first (:shapes app)) => shape))
 
 (fact "Authority is able to create an application to a municipality in own organization"
-  (let [command-resp    (create-app sonja :municipality sonja-muni)
-        application-id  (:id command-resp)]
-    (success command-resp) => true
+  (let [application-id  (create-app-id sonja :municipality sonja-muni)]
     (fact "Application is open"
        (let [query-resp      (query sonja :application :id application-id)
              application     (:application query-resp)]
-         (success query-resp)   => true
+         query-resp  => ok?
          application => truthy
          (:state application) => "open"
          (:opened application) => truthy
          (:opened application) => (:created application)))
     (fact "Authority could submit her own application"
-       (let [resp (query sonja :allowed-actions :id application-id)]
-         (success resp) => true
-         (get-in resp [:actions :submit-application :ok]) => true))
+      sonja => (allowed? :submit-application :id application-id))
     (fact "Application is submitted"
       (let [resp        (command sonja :submit-application :id application-id)
             application (:application (query sonja :application :id application-id))]
-        (success resp) => true
+        resp => ok?
         (:state application) => "submitted"))))
+
+(facts* "Application has opened when submitted from draft"
+  (let [resp (create-app pena) => ok?
+        id   (:id resp)
+        app1 (query pena :application :id id) => ok?
+        resp (command pena :submit-application :id id) => ok?
+        resp (query pena :application :id id) => ok?
+        app2 (:application resp)]
+    (:opened app1) => nil
+    (:opened app2) => number?))
+
+(fact "Authority is able to add an attachment to an application after verdict has been given for it"
+  (doseq [user [sonja pena]]
+    (let [application-id  (create-app-id user :municipality sonja-muni)
+          resp            (command user :submit-application :id application-id)
+          application     (:application (query user :application :id application-id))]
+      (success resp) => true
+      (:state application) => "submitted"
+
+      (let [resp        (command sonja :give-verdict :id application-id :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official sonja-id)
+            application (:application (query sonja :application :id application-id))]
+        (success resp) => true
+        (:state application) => "verdictGiven"
+
+        (let [attachment-id (first (get-attachment-ids application))]
+          (upload-attachment sonja (:id application) attachment-id true)
+          (upload-attachment pena (:id application) attachment-id false))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
   (unauthorized (create-app sonja :municipality veikko-muni)) => true)
 
 (facts "Add operations"
-  (let [command-resp (create-app mikko :municipality veikko-muni)
-        application-id  (:id command-resp)]
-    command-resp => ok?
+  (let [application-id  (create-app-id mikko :municipality veikko-muni)]
     (comment-application application-id mikko)
     (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
@@ -159,6 +171,23 @@
 
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
+
+(fact "adding comments"
+  (let [{id :id}  (create-and-submit-application pena)]
+    (fact "applicant can't comment with to"
+      pena =not=> (allowed? :can-target-comment-to-authority)
+      pena =not=> (allowed? :add-comment :id id :to irrelevant)
+      (command pena :add-comment :id id :text "comment1" :target "application") => ok?
+      (command pena :add-comment :id id :text "comment1" :target "application" :to sonja-id) =not=> ok?)
+    (fact "authority can comment with to"
+      sonja => (allowed? :can-target-comment-to-authority)
+      sonja => (allowed? :add-comment :id id :to sonja-id)
+      (command sonja :add-comment :id id :text "comment1" :target "application") => ok?
+      (command sonja :add-comment :id id :text "comment1" :target "application" :to sonja-id) => ok?)))
+
+(fact "create-and-submit-application"
+  (let [app  (create-and-submit-application pena)]
+    (:state app) => "submitted"))
 
 (comment
   (apply-remote-minimal)

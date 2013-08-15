@@ -2,9 +2,27 @@ LUPAPISTE.ChangeLocationModel = function() {
   var self = this;
   self.dialogSelector = "#dialog-change-location";
 
-  // Model
+  var _map = null;
 
-  self.map = {};
+  self.map = function() {
+    if (!_map) _map = gis
+        .makeMap("change-location-map")
+        .center(404168, 6693765, 10)
+        .addClickHandler(function(x, y) {
+          self
+            .address("")
+            .propertyId("")
+            .beginUpdateRequest()
+            .setXY(x, y)
+            .searchPropertyId(x, y)
+            .searchAddress(x, y);
+          return false;
+        });
+    return _map;
+  };
+
+  // Model
+  
   self.id = 0;
   self.municipalityCode = 0;
   self.x = 0;
@@ -13,27 +31,26 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.propertyId = ko.observable("");
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
+  self.processing = ko.observable();
+  self.pending = ko.observable();
 
   self.ok = ko.computed(function() {
     return util.prop.isPropertyId(self.propertyId()) && self.address();
   });
 
   self.drawLocation = function() {
-    self.map.clear().add(self.x, self.y);
+    return self.map().clear().add(self.x, self.y);
   };
 
   self.setXY = function(x, y) {
     self.x = x;
     self.y = y;
-    if (self.map) {
-      self.drawLocation();
-    }
+    self.drawLocation();
+    return self;
   };
 
   self.center = function(zoom) {
-    if (self.map) {
-      self.map.center(self.x, self.y, zoom);
-    }
+    self.map().center(self.x, self.y, zoom);
   };
 
   self.reset = function(app) {
@@ -43,8 +60,10 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.address(app.address());
     self.propertyId(app.propertyId());
     self.errorMessage(null);
-    self.map.clear().updateSize();
+    self.map().clear().updateSize();
     self.center(10);
+    self.processing(false);
+    self.pending(false);
   };
 
   //
@@ -94,7 +113,12 @@ LUPAPISTE.ChangeLocationModel = function() {
 
   self.saveNewLocation = function() {
     var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
-    ajax.command("change-location", data).success(self.onSuccess).error(self.onError).call();
+    ajax.command("change-location", data)
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(self.onSuccess)
+      .error(self.onError)
+      .call();
     return false;
   };
 
@@ -104,18 +128,6 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.reset(app);
     self.drawLocation();
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
-  };
-
-  // Click on the map
-
-  self.click = function(x, y) {
-    self.setXY(x, y);
-
-    self.address("");
-    self.propertyId("");
-
-    self.beginUpdateRequest().searchPropertyId(x, y).searchAddress(x, y);
-    return false;
   };
 
   // Service functions
@@ -154,9 +166,4 @@ LUPAPISTE.ChangeLocationModel = function() {
     return self;
   };
 
-  // DOM ready
-  $(function() {
-    self.map = gis.makeMap("change-location-map").center(404168, 6693765, 10);
-    self.map.addClickHandler(self.click);
-  });
 };

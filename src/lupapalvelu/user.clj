@@ -1,17 +1,20 @@
 (ns lupapalvelu.user
   (:use [monger.operators]
         [lupapalvelu.core]
-        [lupapalvelu.i18n :only [*lang*]]
-        [clojure.string :only [trim]]
-        [clojure.tools.logging])
-  (:require [lupapalvelu.mongo :as mongo]
+        [lupapalvelu.i18n :only [*lang*]])
+  (:require [taoensso.timbre :as timbre :refer (trace debug info infof warn warnf error fatal)]
+            [slingshot.slingshot :refer [throw+]]
+            [lupapalvelu.mongo :as mongo]
             [camel-snake-kebab :as kebab]
             [lupapalvelu.security :as security]
             [lupapalvelu.vetuma :as vetuma]
+            [lupapalvelu.mime :as mime]
             [sade.security :as sadesecurity]
-            [sade.util :as util]
+            [sade.util :refer [lower-case trim] :as util]
             [sade.env :as env]
+            [sade.strings :as ss]
             [noir.session :as session]
+            [noir.core :refer [defpage]]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notifications]
             [noir.response :as resp]))
@@ -23,7 +26,7 @@
 (defcommand "login"
   {:parameters [:username :password] :verified false}
   [{{:keys [username password]} :data}]
-  (if-let [user (security/login username password)]
+  (if-let [user (security/login (-> username lower-case trim) password)]
     (do
       (info "login successful, username:" username)
       (session/put! :user user)
@@ -36,12 +39,19 @@
       (info "login failed, username:" username)
       (fail :error.login))))
 
+(defn refresh-user!
+  "Loads user information from db and saves it to session. Call this after you make changes to user information."
+  []
+  (when-let [user (security/load-current-user)]
+    (debug "user session refresh successful, username:" (:username user))
+    (session/put! :user user)))
+
 (defcommand "register-user"
   {:parameters [:stamp :email :password :street :zip :city :phone]
    :verified   true}
   [{{:keys [stamp] :as data} :data}]
   (if-let [vetuma-data (vetuma/get-user stamp)]
-    (let [email (trim (:email data))]
+    (let [email (-> data :email lower-case trim)]
       (if (.contains email "@")
         (try
           (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
@@ -75,21 +85,23 @@
   {:parameters    [:email]
    :notified      true
    :authenticated false}
-  [{{email :email} :data}]
-  (infof "Password resert request: email=%s" email)
-  (if (mongo/select-one :users {:email email :enabled true})
-    (let [token (token/make-token :password-reset {:email email})]
-      (infof "password reset request: email=%s, token=%s" email token)
-      (notifications/send-password-reset-email! email token)
-      (ok))
-    (do
-      (warnf "password reset request: unknown email: email=%s" email)
-      (fail :email-not-found))))
+  [{data :data}]
+  (let [email (lower-case (:email data))]
+    (infof "Password resert request: email=%s" email)
+    (if (mongo/select-one :users {:email email :enabled true})
+      (let [token (token/make-token :password-reset {:email email})]
+        (infof "password reset request: email=%s, token=%s" email token)
+        (notifications/send-password-reset-email! email token)
+        (ok))
+      (do
+        (warnf "password reset request: unknown email: email=%s" email)
+        (fail :email-not-found)))))
 
-(defmethod token/handle-token :password-reset [{{email :email} :data} {password :password}]
-  (security/change-password email password)
-  (infof "password reset performed: email=%s" email)
-  (resp/status 200 (resp/json {:ok true})))
+(defmethod token/handle-token :password-reset [{data :data} {password :password}]
+  (let [email (lower-case (:email data))]
+    (security/change-password email password)
+    (infof "password reset performed: email=%s" email)
+    (resp/status 200 (resp/json {:ok true}))))
 
 (defquery "user"
   {:authenticated true :verified true}
@@ -97,17 +109,71 @@
   (ok :user user))
 
 (defcommand "save-user-info"
-  {:parameters [:firstName :lastName :street :city :zip :phone]
+  {:parameters [:firstName :lastName]
    :authenticated true
    :verified true}
   [{data :data {user-id :id} :user}]
   (mongo/update-by-id
     :users
     user-id
-    {$set (select-keys data [:firstName :lastName :street :city :zip :phone])})
+    {$set (select-keys data [:firstName :lastName :street :city :zip :phone
+                             :architect :degree :experience :fise :qualification
+                             :companyName :companyId :companyStreet :companyZip :companyCity])})
   (session/put! :user (security/get-non-private-userinfo user-id))
   (ok))
 
+(defquery user-attachments
+  {:authenticated true}
+  [{user :user}]
+  (ok :attachments (:attachment user)))
+
+(defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachment-type :attachmentType}
+  (let [user              (security/current-user)
+        filename          (mime/sanitize-filename filename)
+        attachment-type   (keyword attachment-type)
+        new-file-id       (mongo/create-id)
+        old-file-id       (get-in user [:attachment attachment-type :file-id])
+        file-info         {:file-id new-file-id
+                           :filename filename
+                           :content-type content-type
+                           :size size}]
+    
+    (println user)
+    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size)
+
+    (when-not (#{:examination :proficiency :cv} attachment-type) (fail! "unknown attachment type" :attachment-type attachment-type))
+    (when-not (mime/allowed-file? filename) (fail! "unsupported file type" :filename filename))
+    
+    (mongo/upload new-file-id filename content-type tempfile :user-id (:id user) :attachment-type attachment-type)
+    (mongo/update-by-id :users (:id user) {$set {(str "attachment." (name attachment-type)) file-info}})
+    (refresh-user!)
+    (when old-file-id (mongo/delete-file-by-id old-file-id))
+    
+    (->> (assoc file-info :ok true) 
+      (resp/json)
+      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.  
+      (resp/status 200))))
+
+(defraw "download-user-attachment"
+  {:parameters [attachment-id]}
+  [{user :user}]
+  (when-not user (throw+ {:status 401 :body "forbidden"}))
+  (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
+    {:status 200
+     :body ((:content attachment))
+     :headers {"Content-Type" (:content-type attachment)
+               "Content-Length" (str (:content-length attachment))}}
+    {:status 404
+     :body (str "can't file attachment: id=" attachment-id)}))
+
+(defcommand remove-user-attachment
+  {:parameters [attachmentType fileId]}
+  [{user :user}]
+  (info "Removing user attachment: attachmentType:" attachmentType "file:" fileId)
+  (mongo/update-by-id :users (:id user) {$unset {(str "attachment." attachmentType) nil}})
+  (refresh-user!)
+  (mongo/delete-file {:id fileId :metadata.user-id (:id user)})
+  (ok))
 
 (env/in-dev
   (defcommand "create-apikey"

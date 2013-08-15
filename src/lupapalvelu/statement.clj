@@ -1,9 +1,10 @@
 (ns lupapalvelu.statement
   (:use [monger.operators]
-        [clojure.tools.logging]
         [lupapalvelu.core]
-        [sade.env])
-  (:require [sade.security :as sadesecurity]
+        [sade.env]
+        [sade.util :only [lower-case]])
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+            [sade.security :as sadesecurity]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.domain :as domain]
@@ -23,7 +24,7 @@
 
 (defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
   (let [{{statement-email :email} :person} (get-statement application statementId)]
-    (when-not (= statement-email user-email)
+    (when-not (= (lower-case statement-email) (lower-case user-email))
       (fail :error.not-statement-owner))))
 
 (defn statement-given? [application statementId]
@@ -50,7 +51,8 @@
    :roles      [:authorityAdmin]}
   [{{:keys [email text]} :data {:keys [organizations] :as user} :user}]
   (let [organization-id (first organizations)
-        organization    (mongo/select-one :organizations {:_id organization-id})]
+        organization    (mongo/select-one :organizations {:_id organization-id})
+        email           (lower-case email)]
     (with-user email
       (fn [{:keys [firstName lastName] :as user}]
         (if-not (security/authority? user)

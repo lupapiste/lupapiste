@@ -28,11 +28,13 @@
 
 (defn to-xml-date [timestamp]
   (let [d (from-long timestamp)]
-    (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") d)))
+    (if-not (nil? timestamp)
+      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") d))))
 
 (defn to-xml-datetime [timestamp]
   (let [d (from-long timestamp)]
-    (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d)))
+    (if-not (nil? timestamp)
+      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
 
 (defn to-xml-datetime-from-string [date-as-string]
   (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
@@ -48,7 +50,6 @@
 
 (defn- get-yhteystiedot-data [yhteystiedot]
   {:sahkopostiosoite (-> yhteystiedot :email :value)
-  :faksinumero (-> yhteystiedot :fax :value)
   :puhelin (-> yhteystiedot :puhelin :value)})
 
 (defn- get-simple-yritys [yritys]
@@ -60,7 +61,6 @@
     (merge (get-simple-yritys yritys)
            {:postiosoite (get-simple-osoite (:osoite yritys))
             :puhelin (-> yhteystiedot :puhelin :value)
-            :faksinumero (-> yhteystiedot :fax :value)
             :sahkopostiosoite (-> yhteystiedot :email :value)})))
 
 (defn- get-name [henkilotiedot]
@@ -95,7 +95,7 @@
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
     (kuntaRoolikoodit party-type)
-    (get-in party [:patevyys :kuntaRoolikoodi :value] "ei tiedossa")))
+    (get-in party [:kuntaRoolikoodi :value] "ei tiedossa")))
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -205,7 +205,8 @@
               huoneistoPorras (-> huoneisto :huoneistoTunnus :porras :value)
               jakokirjain (-> huoneisto :huoneistoTunnus :jakokirjain :value)]
         :when (seq huoneisto)]
-    (merge {:huoneluku (-> tyyppi :huoneluku :value)
+    (merge {:muutostapa (-> huoneisto :muutostapa :value)
+            :huoneluku (-> tyyppi :huoneluku :value)
             :keittionTyyppi (-> huoneisto :keittionTyyppi :value)
             :huoneistoala (-> tyyppi :huoneistoala :value)
             :varusteet {:WCKytkin (true? (-> varusteet :WCKytkin :value))
@@ -241,14 +242,14 @@
                                           (-> lammitys :lammonlahde :value)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali :value)
                                       :julkisivumateriaali (-> rakenne :julkisivu :value))
-        lammitystapa (-> lammitys :lammitystapa :value)]
+        lammitystapa (-> lammitys :lammitystapa :value)
+        huoneistot {:huoneisto (get-huoneisto-data huoneistot)}]
     {:yksilointitieto id
      :alkuHetki (to-xml-datetime  created)
      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
      :rakentajatyyppi (-> kaytto :rakentajaTyyppi :value)
      :omistajatieto (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))
-     :rakennuksenTiedot (merge {
-                                :kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
+     :rakennuksenTiedot (merge {:kayttotarkoitus (-> kaytto :kayttotarkoitus :value)
                                 :tilavuus (-> mitat :tilavuus :value)
                                 :kokonaisala (-> mitat :kokonaisala :value)
                                 :kellarinpinta-ala (-> mitat :kellarinpinta-ala :value)
@@ -277,14 +278,16 @@
                                             :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin :value))
                                             :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin :value))
                                             :saunoja (-> toimenpide :varusteet :saunoja :value)
-                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}
-                                :asuinhuoneistot {:huoneisto (get-huoneisto-data huoneistot)}}
+                                            :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja :value)}}
                                (when (-> toimenpide :rakennusnro :value)
                                    {:rakennustunnus {:jarjestysnumero (-> toimenpide :rakennusnro :value)
                                                     :kiinttun (:propertyId application)}})
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
-                               (when julkisivu-map {:julkisivu julkisivu-map}))}))
+                               (when julkisivu-map {:julkisivu julkisivu-map})
+                               (when huoneistot (if (not-empty (:huoneisto huoneistot))
+                                                  {:asuinhuoneistot huoneistot})
+                                 ))}))
 
 (defn- get-rakennus-data [toimenpide application doc]
   {:Rakennus (get-rakennus toimenpide application doc)})
@@ -365,16 +368,19 @@
     {:Asiantiedot {:vahainenPoikkeaminen (or (-> asian-tiedot :poikkeamat :value) empty-tag)
                    :rakennusvalvontaasianKuvaus (str (-> asian-tiedot :kuvaus :value) (apply str maisematyo_kuvaukset))}}))
 
+(defn- change-value-to-when [value to_compare new_val]
+  (if (= value to_compare) new_val
+    value))
+
 (defn- get-bulding-places [documents application]
   (for [doc (:rakennuspaikka documents)
         :let [rakennuspaikka (:data doc)
               kiinteisto (:kiinteisto rakennuspaikka)
-              id (:id doc)
-              created (:created doc)]]
+              id (:id doc)]]
     {:Rakennuspaikka
      {:yksilointitieto id
-      :alkuHetki (to-xml-datetime created)
-      :kaavanaste (-> rakennuspaikka :kaavanaste :value)
+      :alkuHetki (to-xml-datetime (now))
+      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste :value) "eiKaavaa" "ei kaavaa")
       :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
                                       {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus :value))
                                        :hallintaperuste (-> rakennuspaikka :hallintaperuste :value)
@@ -392,15 +398,19 @@
                      :yes "puoltaa"})
 
 (defn- get-statement [statement]
-  {:Lausunto {:id (:id statement)
-              :pyydetty {:viranomainen (get-in statement [:person :text])
-                         :pyyntoPvm (to-xml-date (:requested statement))}
-              :lausunto {:viranomainen (get-in statement [:person :name])
-                         :lausuntoPvm (to-xml-date (:given statement))
-                         :lausunto {:lausunto (:text statement)}
-                         :puoltotieto (if (nil? (:status statement))
-                                        {:puolto "ei tiedossa"}
-                                        {:puolto ((keyword (:status statement)) puolto-mapping)})}}})
+  (let [lausunto {:Lausunto
+                  {:id (:id statement)
+                   :viranomainen (get-in statement [:person :text])
+                   :pyyntoPvm (to-xml-date (:requested statement))}}]
+    (if-not (:status statement)
+      lausunto
+      (assoc-in lausunto [:Lausunto :lausuntotieto] {:Lausunto
+                                                     {:viranomainen (get-in statement [:person :text])
+                                                      :lausunto (:text statement)
+                                                      :lausuntoPvm (to-xml-date (:given statement))
+                                                      :puoltotieto
+                                                      {:Puolto
+                                                       {:puolto ((keyword (:status statement)) puolto-mapping)}}}}))))
 
 (defn- get-statements [statements]
   ;Returing vector because this element to be Associative

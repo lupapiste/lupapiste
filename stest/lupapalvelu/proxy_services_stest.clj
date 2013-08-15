@@ -11,12 +11,15 @@
 (c/post (str (server-address) "/api/proxy-ctrl/on"))
 
 (defn- proxy-request [apikey proxy-name & args]
-  (let [resp (c/post
-               (str (server-address) "/proxy/" (name proxy-name))
-               {:headers {"authorization" (str "apikey=" apikey)
-                          "content-type" "application/json;charset=utf-8"}
-                :body (json/encode (apply hash-map args))})]
-    (decode-response resp)))
+  (-> (c/post
+        (str (server-address) "/proxy/" (name proxy-name))
+        {:headers {"authorization" (str "apikey=" apikey)
+                   "content-type" "application/json;charset=utf-8"}
+         :socket-timeout 10000
+         :conn-timeout 10000
+         :body (json/encode (apply hash-map args))})
+    decode-response
+    :body))
 
 (facts "find-addresses-proxy"
   (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere")]

@@ -1,10 +1,11 @@
 (ns sade.env
-  (:use [sade.util :only [deep-merge-with]]
+  (:use [sade.util]
         [sade.strings :only [numeric?]])
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.walk :as walk]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [monger.collection :as mc])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
@@ -39,7 +40,7 @@
     (let [decryptor (EncryptableProperties. (doto (StandardPBEStringEncryptor.)
                                               (.setAlgorithm "PBEWITHSHA1ANDDESEDE") ; SHA-1 & Triple DES is supported by most JVMs out of the box.
                                               (.setPassword password)))]
-      (with-open [resource (clojure.lang.RT/resourceAsStream nil file-name)]
+      (with-open [resource (io/input-stream (io/resource file-name))]
         (.load decryptor resource)
         (merge
           (clojure.walk/keywordize-keys
@@ -50,21 +51,9 @@
                      (assoc-in {} (clojure.string/split k #"\.") (read-value v)))))
           mongo-connection-info)))))
 
-(def ^:private config (atom {:last (java.lang.System/currentTimeMillis)
-                             :data (read-config prop-file)}))
+(def ^:private config (atom (read-config prop-file)))
 
-(defn get-config
-  "If value autoreload=true, rereads the configuration file,
-   otherwise returns cached configuration. Cache time 10s."
-  []
-  (let [modified   (-> config deref :last)
-        now        (java.lang.System/currentTimeMillis)
-        autoreload (-> config deref :data :autoreload str read-value true?)]
-    (:data
-      (if (and autoreload (> now (+ 10000 modified)))
-        (reset! config {:last now
-                        :data (read-config prop-file)})
-        @config))))
+(defn get-config [] @config)
 
 (defn value
   "Returns a value from config."
@@ -80,6 +69,18 @@
     str
     read-value
     true?))
+
+(defn set-feature!
+  "sets feature value in-memory."
+  [value path] (swap! config assoc-in (concat [:feature] (map keyword path)) value))
+
+(defn enable-feature!
+  "enables feature value in-memory."
+  [& feature] (set-feature! true feature))
+
+(defn disable-feature!
+  "disables feature value in-memory."
+  [& feature] (set-feature! false feature))
 
 (defn features
   "Returns a list of all enabled features."

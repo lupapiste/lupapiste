@@ -30,14 +30,13 @@ var LUPAPISTE = LUPAPISTE || {};
     trace("pageId", pageId, "pagePath", pagePath);
 
     if (pageId !== self.currentPage) {
-
       $(".page").removeClass("visible");
 
       var page = $("#" + pageId);
       if (page.length === 0) {
         error("Unknown page", pageId);
         // firefox bug: does not compute with hashbangs (LUPA-80)
-        pageId = allowAnonymous ? "login" : pageId = "404";
+        pageId = allowAnonymous ? "login" : "404";
         pagePath = [];
         page = $("#" + pageId);
       }
@@ -120,7 +119,8 @@ var LUPAPISTE = LUPAPISTE || {};
   hub.subscribe({type: "connection", status: "session-dead"}, function () {
     if (wasLoggedIn) {
       LUPAPISTE.ModalDialog.mask.unbind("click");
-      LUPAPISTE.ModalDialog.open("#session-dead-dialog");
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("session-dead.title"), loc("session-dead.message"),
+          {title: loc("session-dead.logout"), fn: function() {hub.send("logout");return false;}});
     }
   });
 
@@ -159,20 +159,5 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     $("nav").applyBindings(model);
-
-    $("<div id='session-dead-dialog' class='window autosized-yes-no'>" +
-        "<div class='dialog-header'>" +
-          "<p class='dialog-title'></p>" +
-        "</div>" +
-        "<div class='dialog-content'>" +
-          "<p></p>" +
-          "<button class='btn btn-primary btn-dialog logout'></button>" +
-        "</div>" +
-      "</div>")
-      .find(".dialog-title").text(loc("session-dead.title")).end()
-      .find(".dialog-content p").text(loc("session-dead.message")).end()
-      .find(".dialog-content button").text(loc("session-dead.logout")).end()
-      .find(".logout").click(function() { hub.send("logout"); return false; }).end()
-      .appendTo($("body"));
   };
 };

@@ -10,7 +10,9 @@
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var inviteModel = new LUPAPISTE.InviteModel();
 
-  function isNum(s) { return s && s.match(/^\s*\d+\s*$/) != null; }
+  function isNum(s) {
+    return s && s.match(/^\s*\d+\s*$/) !== null;
+  }
 
   var transparencies = _.map([0,25,50,75,100], function(v) {
     return {text: loc("stamp.transparency", v.toString()), value: Math.round(255 * v / 100.0)};
@@ -43,13 +45,16 @@
     self.transparencies = transparencies;
 
     function stampableAttachment(a) {
-      var ct = (a.latestVersion && a.latestVersion.contentType()) || "";
+      var ct = "";
+      if (a.latestVersion && typeof a.latestVersion.contentType === "function") {
+        ct = a.latestVersion.contentType();
+      }
       return ct === "application/pdf" || ct.search(/^image\//) === 0;
     }
 
     function normalizeAttachment(a) {
       var versions = _(a.versions()).reverse().value(),
-          restamp = versions[0].stamped(),
+          restamp = (typeof versions[0].stamped === "function" && versions[0].stamped()),
           selected = restamp ? versions[1] : versions[0];
       return {
         id:           a.id(),
@@ -413,7 +418,21 @@
       var applicationId = self.id();
       ajax.command("approve-application", { id: applicationId, lang: loc.getCurrentLanguage()})
         .success(function() {
+        //FIXME parempi tapa ilmoittaa onnistumisesta
           notify.success("hakemus hyv\u00E4ksytty",model);
+          repository.load(applicationId);
+        })//FIXME parempi/tyylikaampi virheilmoitus
+        .error(function(resp) {alert(resp.text);})
+        .call();
+      return false;
+    };
+
+    self.refreshKTJ = function(model) {
+      var applicationId = self.id();
+      ajax.command("refresh-ktj", { id: applicationId})
+        .success(function() {
+          //FIXME parempi tapa ilmoittaa onnistumisesta
+          notify.success("KTJ tiedot p\u00e4ivitetty",model);
           repository.load(applicationId);
         })//FIXME parempi/tyylikaampi virheilmoitus
         .error(function(resp) {alert(resp.text);})
@@ -457,7 +476,7 @@
     };
 
     self.exportPdf = function() {
-      window.open("/api/pdf-export/" + self.id() + "?lang=" + loc.currentLanguage, "_blank");
+      window.open("/api/raw/pdf-export?id=" + self.id() + "&lang=" + loc.currentLanguage, "_blank");
       return false;
     };
 
@@ -482,15 +501,18 @@
       var targetTab = $target.attr("data-target");
       window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
     };
-
-    // TODO: This needs to be removed and replace its usage in application.html by usage of authorization.ok().
-    self.notPublicAreaTypeOperation = function() {
-      return !self.operations()
-             || self.operations().length === 0
-             || self.operations()[self.operations().length-1]['operation-type'] === undefined
-             || self.operations()[self.operations().length-1]['operation-type']() != 'publicArea';
+     self.nextTab = function(model,event) {
+      var $target = $(event.target);
+      while ($target.is("span")) {
+        $target = $target.parent();
+      }
+      var targetTab = $target.attr("data-target");
+      window.location.hash = "#!/application/" + self.id() + "/" + targetTab;
+      var y = $('#applicationTabs').position().top + 40;
+      window.scrollTo(0,y);
     };
-  };
+  }
+
   var application = new ApplicationModel();
 
   var authorities = ko.observableArray([]);
@@ -613,12 +635,9 @@
         $('#application-map').css("display", "inline-block");
       }
 
-      (application.infoRequest() ? inforequestMap : applicationMap).clear().center(x, y, 10).add(x, y);
-
-      if (application.shapes && application.shapes().length > 0) {
-        applicationMap.drawShape(application.shapes()[0]);
-        inforequestMap.drawShape(application.shapes()[0]);
-      }
+      var map = getOrCreateMap(application.infoRequest() ? "inforequest" : "application")
+      map.clear().center(x, y, 10).add(x, y);
+      if (application.shapes && application.shapes().length > 0) map.drawShape(application.shapes()[0]);
 
       if (application.infoRequest()) {
         ajax.command("mark-seen", {id: app.id, type: "comments"}).call();
@@ -726,13 +745,27 @@
     };
   }();
 
+  function createMap(divName) { return gis.makeMap(divName, false).center([{x: 404168, y: 6693765}], 12); }
+
+  function getOrCreateMap(kind) {
+    if (kind === "application") {
+      if (!applicationMap) applicationMap = createMap("application-map");
+      return applicationMap;
+    } else if (kind === "inforequest") {
+      if (!inforequestMap) inforequestMap = createMap("inforequest-map");
+      return inforequestMap;
+    } else {
+      throw "Unknown kind: " + kind;
+    }
+  }
+
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
     if (newId !== currentId || !tab) {
       pageutil.showAjaxWait();
       currentId = newId;
-      ((kind === "inforequest") ? applicationMap : inforequestMap).updateSize();
+      getOrCreateMap(kind).updateSize();
       repository.load(currentId);
     }
     selectTab(tab || "info");
@@ -747,17 +780,50 @@
     }
   });
 
+  function NeighborStatusModel() {
+    var self = this;
+
+    self.state = ko.observable();
+    self.created = ko.observable();
+    self.message = ko.observable();
+    self.firstName = ko.observable();
+    self.lastName = ko.observable();
+    self.userid = ko.observable();
+
+    self.init = function(neighbor) {
+      var l = neighbor.lastStatus;
+      var u = l.vetuma || l.user;
+      return self
+        .state(l.state())
+        .created(l.created())
+        .message(l.message && l.message())
+        .firstName(u.firstName && u.firstName())
+        .lastName(u.lastName && u.lastName())
+        .userid(u.userid && u.userid());
+    };
+
+    self.open = function() { LUPAPISTE.ModalDialog.open("#dialog-neighbor-status"); return self; };
+  }
+
+  var neighborStatusModel = new NeighborStatusModel();
+
   var neighborActions = {
     manage: function(application) {
       window.location.hash = "!/neighbors/" + application.id();
       return false;
     },
-    upload: function(neighbor) { /* TODO: */ },
     markDone: function(neighbor) {
       ajax
         .command("neighbor-mark-done", {id: currentId, neighborId: neighbor.neighborId()})
         .complete(_.partial(repository.load, currentId, util.nop))
         .call();
+    },
+    statusCompleted: function(neighbor) {
+      return _.contains(["mark-done", "response-given-ok", "response-given-comments"], neighbor.lastStatus.state());
+    },
+    showStatus: function(neighbor) {
+      neighborStatusModel.init(neighbor).open();
+      return false;
     }
   };
 
@@ -769,10 +835,9 @@
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
-    self.message = ko.observable();
 
     self.ok = ko.computed(function() {
-      return util.isValidEmailAddress(self.email()) && !_.isBlank(self.message());
+      return util.isValidEmailAddress(self.email());
     });
 
     self.open = function(neighbor) {
@@ -781,12 +846,11 @@
         .neighborId(neighbor.neighborId())
         .propertyId(neighbor.neighbor.propertyId())
         .name(neighbor.neighbor.owner.name())
-        .email(neighbor.neighbor.owner.email())
-        .message("");
+        .email(neighbor.neighbor.owner.email());
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
-    var paramNames = ["id", "neighborId", "propertyId", "name", "email", "message"];
+    var paramNames = ["id", "neighborId", "propertyId", "name", "email"];
     function paramValue(paramName) { return self[paramName](); }
 
     self.send = function() {
@@ -803,9 +867,6 @@
   var sendNeighborEmailModel = new SendNeighborEmailModel();
 
   $(function() {
-    applicationMap = gis.makeMap("application-map", false).center([{x: 404168, y: 6693765}], 12);
-    inforequestMap = gis.makeMap("inforequest-map", false).center([{x: 404168, y: 6693765}], 12);
-
     var bindings = {
       application: application,
       authorities: authorities,
@@ -823,7 +884,8 @@
       stampModel: stampModel,
       changeLocationModel: changeLocationModel,
       neighbor: neighborActions,
-      sendNeighborEmailModel: sendNeighborEmailModel
+      sendNeighborEmailModel: sendNeighborEmailModel,
+      neighborStatusModel: neighborStatusModel
     };
 
     $("#application").applyBindings(bindings);

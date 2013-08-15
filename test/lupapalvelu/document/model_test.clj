@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.model-test
   (:use [lupapalvelu.document.model]
-        [lupapalvelu.document.schemas]
         [lupapalvelu.document.validators]
-        [midje.sweet]))
+        [midje.sweet])
+  (:require [lupapalvelu.document.schemas :as schemas]))
 
 ;; Define a "random" timestamp used in test.
 ;; Midje metaconstraints seems to mess with tools/unwrapped.
@@ -33,15 +33,14 @@
                                      :body [{:name "single2" :type :string}
                                             {:name "repeats2" :type :string :subtype :digit :repeating true}]}]})
 
-;; Tests for internals:
-
-(def find-by-name #'lupapalvelu.document.model/find-by-name)
-
-(facts "Facts about internals"
+(facts "Find-by-name"
   (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
   (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
   (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
+  (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :boolean})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
+
+;; Tests for internals:
 
 (facts "has-errors?"
   (has-errors? [])                  => false
@@ -103,13 +102,17 @@
 
 (facts "with real schemas - important field for paasuunnittelija"
   (with-timestamp some-time
-    (let [document (new-document (schemas "paasuunnittelija") ..now..)]
+    (let [document (new-document (schemas/get-schema "paasuunnittelija") ..now..)]
       (-> document
         (apply-update [:henkilotiedot :etunimi] "Tauno")
         (apply-update [:henkilotiedot :sukunimi] "Palo")
+        (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
+        (apply-update [:yritys :yritysnimi] "Suunnittelu Palo")
         (apply-update [:osoite :katu] "katu")
         (apply-update [:osoite :postinumero] "12345")
         (apply-update [:osoite :postitoimipaikannimi] "Demola")
+        (apply-update [:patevyys :koulutus] "Demotehti")
+        (apply-update [:patevyys :patevyysluokka] "AA")
         (apply-update [:yhteystiedot :email] "tauno@example.com")
         (apply-update [:yhteystiedot :puhelin] "050")) => valid?
       (-> document
@@ -216,15 +219,17 @@
 
 (facts "with real schemas - required fields for henkilo hakija"
   (with-timestamp some-time
-    (let [document (-> (new-document (schemas "hakija") ..now..)
+    (let [document (-> (new-document (schemas/get-schema "hakija") ..now..)
                    (apply-update [:_selected] "henkilo")
                    (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
                    (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
+                   (apply-update [:henkilo :henkilotiedot :hetu] "230470-658B")
                    (apply-update [:henkilo :osoite :katu] "katu")
                    (apply-update [:henkilo :osoite :postinumero] "12345")
                    (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
                    (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
                    (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
+
       document => valid?
       (-> document
         (apply-update [:_selected])) => valid?
@@ -237,12 +242,17 @@
 
 (facts "with real schemas - required fields for yritys hakija"
   (with-timestamp some-time
-    (let [document (-> (new-document (schemas "hakija") ..now..)
+    (let [document (-> (new-document (schemas/get-schema "hakija") ..now..)
                      (apply-update [:_selected] "yritys")
                      (apply-update [:yritys :yritysnimi] "Solita")
+                     (apply-update [:yritys :liikeJaYhteisoTunnus] "1060155-5")
                      (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
                      (apply-update [:yritys :osoite :postinumero] "33720")
-                     (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere"))]
+                     (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere")
+                     (apply-update [:yritys :yhteyshenkilo :henkilotiedot :etunimi] "Tauno")
+                     (apply-update [:yritys :yhteyshenkilo :henkilotiedot :sukunimi] "Palo")
+                     (apply-update [:yritys :yhteyshenkilo :yhteystiedot :email] "tauno@example.com")
+                     (apply-update [:yritys :yhteyshenkilo  :yhteystiedot :puhelin] "050"))]
       document => valid?
       (-> document
         (apply-update [:yritys :osoite :katu])) => missing-required-fields?
@@ -355,7 +365,7 @@
                   :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
                                                                 :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
                                                                 :timestamp 1370856511356}}}}
-                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas "uusiRakennus"))}}]
+                  :schema {:info {:approvable true, :op {:id "51b59c112438736b8f1b9d0d", :name "asuinrakennus", :created 1370856465069}, :name "uusiRakennus", :removable true}, :body (:body (schemas/get-schema "uusiRakennus"))}}]
     (modifications-since-approvals real-doc) => 0))
 
 ;;

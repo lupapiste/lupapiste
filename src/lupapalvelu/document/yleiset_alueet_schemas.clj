@@ -1,50 +1,34 @@
 (ns lupapalvelu.document.yleiset-alueet-schemas
+  (:require [lupapalvelu.document.tools :refer :all])
   (:use [lupapalvelu.document.schemas]))
 
 
 (def hankkeen-kuvaus-kaivulupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "sijoitusLuvanTunniste" :type :string}))                             ;; sijoituslupaviitetietoType
+    {:name "sijoitusLuvanTunniste" :type :string :size "l"}))                   ;; sijoituslupaviitetietoType
 
 (def hankkeen-kuvaus-sijoituslupa
   (body
     {:name "kayttotarkoitus" :type :text :max-len 4000 :layout :full-width}     ;; LupaAsianKuvaus
-    {:name "kaivuLuvanTunniste" :type :string}))                                ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
+    {:name "kaivuLuvanTunniste" :type :string :size "l"}))                      ;; sijoituslupaviitetietoType??  TODO: Mika tahan?
 
 (def yleiset-alueet-maksaja
   (body
-    {:name "yritys" :type :group :body yritys-minimal}
-    simple-osoite
-    yhteystiedot
+    (schema-body-without-element-by-name party "turvakieltoKytkin")
     {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
-
-(def tyomaasta-vastaava
-  (body
-    party-public-area))
 
 (def tyo-aika
   (body
-    [{:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
-     {:name "tyoaika-paattyy-pvm" :type :date}]))
+    {:name "tyoaika-alkaa-pvm" :type :date}                                   ;; toimintajaksotietoType
+    {:name "tyoaika-paattyy-pvm" :type :date}))
 
 (def tapahtuman-tiedot
   (body
     {:name "tapahtuman-nimi" :type :text :max-len 4000 :layout :full-width}
-    {:name "tapahtumapaikka" :type :string}
-    [{:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
-     {:name "tapahtuma-aika-paattyy-pvm" :type :date}]))
-
-#_(def party [{:name "_selected" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-            {:name "henkilo" :type :group :body henkilo}
-            {:name "yritys" :type :group :body yritys}])
-
-#_{:info {:name "hakija"
-          :order 3
-          :removable true
-          :repeating true
-          :type :party}
-   :body party}
+    {:name "tapahtumapaikka" :type :string :size "l"}
+    {:name "tapahtuma-aika-alkaa-pvm" :type :date}                            ;; kayttojaksotietoType
+    {:name "tapahtuma-aika-paattyy-pvm" :type :date}))
 
 #_(def tapahtumien-syotto                                                      ;; merkinnatJaPiirroksettietoType
   {:info {:name "tapahtumien-syotto"
@@ -75,38 +59,57 @@
      {:name "viitoitus-tapahtuma-valinta" :type :group
       :body viitoitus-tapahtuma}]))
 
+(def sijoituslupa-sijoituksen-tarkoitus
+  (body
+    [{:name "sijoituksen-tarkoitus" :type :select
+      :body [{:name "sahko"}
+             {:name "tele"}
+             {:name "kaivo-(tele/sahko)"}
+             {:name "jakokaappi-(tele/sahko)"}
+             {:name "kaukolampo"}
+             {:name "kaivo-(kaukolampo)"}
+             {:name "liikennevalo"}
+             {:name "katuvalo"}
+             {:name "jate--tai-sadevesi"}
+             {:name "kaivo-(vesi,-jate--tai-sadevesi)"}
+             {:name "vesijohto"}
+             {:name "muu"}]}
+     ;; TODO: Saako taman enabloiduksi vain jos edellisesta dropdownista on valittu "Muu"?
+     {:name "muu-sijoituksen-tarkoitus" :type :string :size "l" :layout :full-width}
+     {:name "lisatietoja-sijoituskohteesta" :type :text :max-len 4000 :layout :full-width}]))
 
-(def kaivuulupa
-  (to-map-by-name
-    [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
-             :order 60}
-      :body hankkeen-kuvaus-kaivulupa}
-     {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
-             :type :party
-             :order 61}
-      :body tyomaasta-vastaava}
-     {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
-             :type :party
-             :order 62}
-      :body yleiset-alueet-maksaja}
-     {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
-             :type :group
-             :order 63}
-            :body tyo-aika}]))
 
-(def kayttolupa-mainoslaitteet-ja-opasteviitat
-  (to-map-by-name
-    [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
-            :type :group
-;            :removable false  ;; TODO: Miten voi poistaa raksin?
-            :order 64}
-     :body mainostus-tai-viitoitus-tapahtuma-valinta}]))
+(defschemas
+  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"
+           :order 60}
+    :body hankkeen-kuvaus-kaivulupa}
+   {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
+           :type :party
+           :order 61}
+    :body (schema-body-without-element-by-name party "turvakieltoKytkin")}
+   {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
+           :type :party
+           :order 62}
+    :body yleiset-alueet-maksaja}
+   {:info {:name "tyoaika"                                                 ;; kayttojaksotietoType ja toimintajaksotietoType (kts. ylla)
+           :type :group
+           :order 63}
+    :body tyo-aika}])
 
-(def sijoituslupa
-  (to-map-by-name
-    [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
-             :order 65}
-      :body hankkeen-kuvaus-sijoituslupa}]))
+(defschemas
+  [{:info {:name "mainosten-tai-viitoitusten-sijoittaminen"
+           :type :group
+           ;            :removable false  ;; TODO: Miten voi poistaa raksin?
+           :order 64}
+    :body mainostus-tai-viitoitus-tapahtuma-valinta}])
+
+(defschemas
+  [{:info {:name "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+           :order 65}
+    :body hankkeen-kuvaus-sijoituslupa}
+   {:info {:name "sijoituslupa-sijoituksen-tarkoitus"
+           :order 66}
+    :body sijoituslupa-sijoituksen-tarkoitus}])
 
 ;;
 ;; TODO: Liikennetta haittavan tyon lupa

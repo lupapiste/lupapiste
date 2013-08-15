@@ -1,6 +1,6 @@
 (ns lupapalvelu.server
-  (:use clojure.tools.logging)
-  (:require [noir.server :as server]
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal tracef debugf infof warnf errorf fatalf)]
+            [noir.server :as server]
             [clojure.tools.nrepl.server :as nrepl]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
@@ -24,7 +24,9 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.etag :as etag]
-            [sade.security-headers :as headers]))
+            [sade.security-headers :as headers]
+            [sade.dummy-email-server]
+            [lupapalvelu.migration.migration :as migration]))
 
 (defn -main [& _]
   (infof "Server starting in %s mode" env/mode)
@@ -37,6 +39,7 @@
   (info "Running on Clojure" (clojure-version))
   (mongo/connect!)
   (mongo/ensure-indexes)
+  (migration/update!)
   (server/add-middleware i18n/lang-middleware)
   (server/add-middleware web/parse-json-body-middleware)
   (server/add-middleware uach/add-ua-compatible-header)
@@ -44,29 +47,26 @@
   (server/add-middleware headers/add-security-headers)
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/authentication)
+  (server/add-middleware web/session-timeout)
   (server/add-middleware etag/if-none-match-build-number)
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
-    ((resolve 'lupapalvelu.perf-mon/init))
+    ((resolve 'lupapalvelu.perf-mon/init)))
+  (when (env/feature? :nrepl)
     (warn "*** Starting nrepl")
-    (nrepl/start-server :port 9090)
-    (when (env/value [:email :dummy-server])
-      (require 'sade.dummy-email-server)
-      ((resolve 'sade.dummy-email-server/start))))
-  (with-logs "lupapalvelu"
-    (let [jetty-opts (into
-                       {:max-threads 250}
-                       (when (env/dev-mode?)
-                         {:ssl? true
-                          :ssl-port 8443
-                          :keystore "./keystore"
-                          :key-password "lupapiste"}))]
-      (server/start env/port {:mode env/mode
-                              :ns 'lupapalvelu.web
-                              :jetty-options jetty-opts
-                              :session-cookie-attrs (env/value :cookie)})))
-  "ok")
+    (nrepl/start-server :port 9090))
+  (let [jetty-opts (into
+                     {:max-threads 250}
+                     (when (env/dev-mode?)
+                       {:ssl? true
+                        :ssl-port 8443
+                        :keystore "./keystore"
+                        :key-password "lupapiste"}))]
+    (server/start env/port {:mode env/mode
+                            :ns 'lupapalvelu.web
+                            :jetty-options jetty-opts
+                            :session-cookie-attrs (env/value :cookie)}))
+  "server running")
 
-(comment
-  (-main))
+"server ready to start"

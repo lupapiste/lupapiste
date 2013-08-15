@@ -50,6 +50,7 @@
       var nonpartyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type !== "party"; });
       var partyDocs = _.filter(a.documents, function(doc) {return doc.schema.info.type === "party"; });
       var options = {disabled: true, validate: false};
+      
       docgen.displayDocuments("#neighborDocgen", a, nonpartyDocs, authorizationModel, options);
       docgen.displayDocuments("#neighborPartiesDocgen", a, partyDocs, authorizationModel, options);
 
@@ -58,6 +59,9 @@
         a.latestVersion = _.last(a.versions);
         return a;
       }));
+      
+      self.operationsCount(_.map(_.countBy(a.operations, "name"), function(v, k) { return {name: k, count: v}; }));
+      
       return self;
     };
 
@@ -84,7 +88,6 @@
     self.done = ko.observable();
     self.response = ko.observable();
     self.message = ko.observable();
-    self.operations = ko.observable();
     self.operationsCount = ko.observable();
     self.inError = ko.observable(false);
     self.errorText = ko.observable("");

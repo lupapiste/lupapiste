@@ -8,33 +8,37 @@
           <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
           <span data-bind="if: latestVersion">
             <span data-bind="ltext: 'attachment.version'">versio</span>
-            <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>,
-            <span data-bind="ltext: 'attachment.editDate'">muokattu</span>
-            <span data-bind="dateTimeString: latestVersion().created"></span>
+            <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
           </span>
         </h1>
+        <p data-bind="ltext: 'attachment.view.desc'" class="tab-info"></p>
+         <button class="attachment-delete inline-block" data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
+          style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
+        <a class="btn attachment-back inline-block" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment"> <span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a>
+        <div data-bind="with: $root.approve" class="inline-block">
+          <button id="test-attachment-approve" data-bind="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
+          <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+        </div>
+
         <div class="form-entry">
-          <a class="btn attachment-back" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }, ltext: 'attachment.return'"></a>
           <label for="attachment-type-select" class="form-label">
            <span data-bind="ltext: 'attachment.changeType'">Vaihda liitteen tyyppi</span>
            <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
           </label>
           <div><select id="attachment-type-select"></select></div>
-          <br>
-          <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
-          style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
+
         </div>
       </div>
 
       <!-- Preview images and pdf files only -->
       <div class="file-preview" data-bind="visible: hasPreview()">
         <div class="file-preview-image" data-bind="if: isImage()">
-          <a data-bind="attr: {href: '/api/view-attachment/' + latestVersion().fileId}">
-            <img data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
+          <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}">
+            <img data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
           </a>
         </div>
         <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
-          <iframe id="file-preview-iframe" data-bind="attr: {src: '/api/view-attachment/' + latestVersion().fileId}"></iframe>
+          <iframe id="file-preview-iframe" data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}"></iframe>
         </div>
       </div>
 
@@ -43,10 +47,6 @@
       </div>
 
       <div class="attachment-file-versions">
-        <div data-bind="with: $root.approve">
-          <button id="test-attachment-approve" data-bind="ltext: 'attachment.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyväksy</button>
-          <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
-        </div>
         <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
         <table class="table table-striped">
           <thead>
@@ -61,7 +61,7 @@
           </thead>
           <tbody data-bind="foreach: versions()">
             <tr style="cursor: pointer;">
-              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/download-attachment/' + $data.fileId}"></a></td>
+              <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></td>
               <td data-bind="size: size"></td>
               <td data-bind="version: version"></td>
               <td data-bind="dateTimeString: created">31.10.2012</td>
@@ -85,7 +85,7 @@
 
       <div class="attachment-file-conversation">
         <h3 data-bind="ltext: 'attachment.conversation'">Keskustele liitteestä:</h3>
-        <div data-bind="template: {name: 'comment-template', data: $root.commentsModel}"></div>
+        <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel}}"></div>
       </div>
 
     </div>

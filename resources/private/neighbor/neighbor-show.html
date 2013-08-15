@@ -48,6 +48,15 @@
               <!-- Operations: -->
               <div>
                 <p data-bind="ltext: 'application.operations'"></p>
+                <ul data-bind="foreach: $root.operationsCount">
+                  <li>
+                    <span data-bind="visible: count > 1">
+                      <span data-bind="text: count"></span>
+                      <span>&#x00D7;</span>
+                    </span>
+                    <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -55,13 +64,15 @@
         <div class="container">
 
           <h1 data-bind="ltext: 'neighbor.show.welcome'"></h1>
-          <p data-bind="ltext: 'neighbor.show.welcome.desc'" class="tab-info"></p>
+          <p data-bind="ltext: 'neighbor.show.welcome.desc1'" class="tab-info"></p>
+          <p data-bind="ltext: 'neighbor.show.welcome.desc2'" class="tab-info-continued"></p>
+          <p data-bind="ltext: 'neighbor.show.welcome.desc3'" class="tab-info-continued"></p>
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
 
           <!-- docgen generated content: -->
-          <div class="application_section">
-            <div id="neighborDocgen"/>
-            <div id="neighborPartiesDocgen"/>
+          <div class="application_section tab-content-container">
+            <div id="neighborDocgen"></div>
+            <div id="neighborPartiesDocgen"></div>
           </div>
 
           <!-- attachments: -->
@@ -93,14 +104,14 @@
                   </td>
                   <td>
                     <span data-bind="if: $data.latestVersion">
-                      <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/neighbor/download-attachment/' + $root.neighborId() + '/' + $root.token() + '/' + latestVersion.fileId}"></a><br/>
+                      <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/neighbor-download-attachment?neighbor-id=' + $root.neighborId() + '&token=' + $root.token() + '&file-id=' + latestVersion.fileId}"></a><br/>
                       <i data-bind="ltext: latestVersion.contentType"></i>
                       <i data-bind="size: latestVersion.size"></i>
                     </span>
                   </td>
                   <td>
                     <span data-bind="if: $data.latestVersion">
-                    <span data-bind="dateString: modified"></span>
+                    <span data-bind="dateTimeString: modified"></span>
                       <span data-bind="fullName: latestVersion.user"></span>
                     </span>
                   </td>
@@ -113,6 +124,7 @@
 
           <div data-bind="visible: pending" class="pending"></div>
           <h1 data-bind="ltext: 'neighbor.show.form'"></h1>
+          <p data-bind="ltext: 'neighbor.show.responce.desc'" class="tab-info"></p>
           <div class="neighbor-reply-form">
             <div data-bind="ifnot: tupasUser">
               <!-- generated vetuma-form comes here -->
@@ -122,8 +134,14 @@
               <div id="vetuma-neighbor2"></div>
               <p data-bind="ltext: 'neighbor.show.reply.text'"></p>
               <form>
-                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="ok"><label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label> <br>
-                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="comments"><label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
+
+                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="ok" data-test-id="neighbor-response-ok" />
+                <label data-bind="ltext: 'neighbor.show.responce.ok'" for="response"></label>
+
+                <br>
+
+                <input type="radio" name="response" data-bind="checked: response, enable: !done()" value="comments" data-test-id="neighbor-response-comments" />
+                <label data-bind="ltext: 'neighbor.show.responce.comments'" for="response"></label>
 
                 <textarea
                   data-bind="
@@ -131,21 +149,29 @@
                     enable: response() === 'comments' && !done(),
                     valueUpdate: 'afterkeydown',
                     attr: {placeholder: loc('neighbor.show.message.placeholder')}"
-                  id="response-message"
+                  data-test-id="neighbor-response-message"
                   class="form-input textarea really-long high"
-                  rows=10></textarea>
+                  rows=10>
+                </textarea>
+
                 <button
                   data-bind="
                     click: send,
                     enable: response() && !saving() && !done(),
                     visible: !done(),
-                    ltext: 'neighbor.show.ok'">
+                    ltext: 'neighbor.show.ok'"
+                  data-test-id="neighbor-response-send">
                 </button>
+
                 <span data-bind="visible: saving">
                   <img src="/img/ajax-loader-12.gif" alt="loader"/>
                   <span data-bind="ltext: 'neighbor.show.response.pending'"></span>
                 </span>
-                <h1 data-bind="visible: done, ltext: 'neighbor.show.response.done'"></h1>
+
+                <h1 data-bind="visible: done, ltext: 'neighbor.show.response.done'" data-test-id="neighbor-response-done"></h1>
+                <p data-bind="visible: done, ltext: 'neighbor.show.response.done.desc'"> <p>
+
+
               </form>
             </div>
           </div>

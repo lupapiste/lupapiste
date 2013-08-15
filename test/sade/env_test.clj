@@ -42,7 +42,14 @@
     (provided (get-config) => {:feature false})
 
     (feature? :a) => false
-    (provided (get-config) => {})))
+    (provided (get-config) => {}))
+
+  (fact "enabling & disabling features"
+    (feature?         :k :i :k :k :a) => false
+    (enable-feature!  :k :i :k :k :a)
+    (feature?         :k :i :k :k :a) => true
+    (disable-feature! :k :i :k :k :a)
+    (feature?         :k :i :k :k :a) => false))
 
 (facts "features"
   (features) => {:a true

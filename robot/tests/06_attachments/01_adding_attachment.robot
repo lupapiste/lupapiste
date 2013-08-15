@@ -67,7 +67,7 @@ Change attachment type
   [Tags]  attachments
   Select From List  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
-  Click Link  Palaa hakemukseen
+  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Tab should be visible  attachments
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 

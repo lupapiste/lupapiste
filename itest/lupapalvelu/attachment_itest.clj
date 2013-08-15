@@ -49,23 +49,33 @@
       (fact "uploading files"
         (let [application (:application (query pena :application :id application-id))
               _           (upload-attachment-to-all-placeholders pena application)
-              application (:application (query pena :application :id application-id))
-              auth-get    (fn [& uri] (c/get (apply str (server-address) uri) {:headers {"authorization" (str "apikey=" pena)}}))]
+              application (:application (query pena :application :id application-id))]
 
           (fact "download all"
-            (auth-get "/api/download-all-attachments/" application-id))
+            (let [resp (raw pena "download-all-attachments" :id application-id)]
+              resp => http200?
+              (get-in resp [:headers "content-disposition"]) => "attachment;filename=\"liitteet.zip\"")
+              (fact "p\u00e5 svenska"
+                (get-in (raw pena "download-all-attachments" :id application-id :lang "sv") [:headers "content-disposition"])
+                => "attachment;filename=\"bilagor.zip\""))
 
           (fact "pdf export"
-            (auth-get "/api/pdf-export/" application-id))
+            (raw pena "pdf-export" :id application-id) => http200?)
 
           (doseq [attachment-id (get-attachment-ids application)
                   :let [file-id  (attachment-latest-file-id application attachment-id)]]
 
-            (fact "view-attachment"
-              (auth-get "/api/view-attachment/" file-id))
+            (fact "view-attachment anonymously should not be possible"
+              (raw nil "view-attachment" :attachment-id file-id) => http401?)
 
-            (fact "download-attachment"
-              (auth-get "/api/download-attachment/" file-id)))))
+            (fact "view-attachment as pena should be possible"
+              (raw pena "view-attachment" :attachment-id file-id) => http200?)
+
+            (fact "download-attachment anonymously should not be possible"
+              (raw nil "download-attachment" :attachment-id file-id) => http401?)
+
+            (fact "download-attachment as pena should be possible"
+              (raw pena  "download-attachment" :attachment-id file-id) => http200?))))
 
       (fact "Veikko can approve attachment"
         (approve-attachment application-id (first attachment-ids)))
@@ -81,5 +91,10 @@
         (approve-attachment application-id (first attachment-ids)))
 
       (fact "Veikko can still reject attachment"
-        (reject-attachment application-id (first attachment-ids))))))
+        (reject-attachment application-id (first attachment-ids)))
 
+      (fact "pdf does not work with YA-lupa"
+        (let [{application-id :id :as response} (create-YA-app pena :municipality veikko-muni)]
+          response => ok?
+          pena =not=> (allowed? :pdf-export :id application-id)
+          (raw pena "pdf-export" :id application-id) => http404?)))))

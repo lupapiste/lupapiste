@@ -1,19 +1,48 @@
 (ns lupapalvelu.organization
   (:use [monger.operators]
-        [lupapalvelu.core]
-        [clojure.tools.logging])
-  (:require [clojure.string :as s]
+        [lupapalvelu.core])
+  (:require [taoensso.timbre :as timbre :refer (trace debug debugf info warn error errorf fatal)]
+            [clojure.string :as s]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.attachment :as attachments]
             [lupapalvelu.operations :as operations]))
 
+;;
+;; local api
+;;
+
+(defn get-organization [id]
+  (and id (mongo/select-one :organizations {:_id id})))
+
+(defn get-organization-attachments-for-operation [organization operation]
+  (-> organization :operations-attachments ((-> operation :name keyword))))
+
+(defn municipality-by-propertyId [id]
+  (when (and (>= (count id) 3) (not (s/blank? id)))
+    (subs id 0 3)))
+
+(defn get-legacy [organization-id]
+  (let [organization (mongo/select-one :organizations {:_id organization-id})
+        legacy       (:legacy organization)]
+    (when-not (s/blank? legacy) legacy)))
+
+(defn municipalities-with-organization []
+  (let [id-and-scopes (mongo/select :organizations {} {:scope 1})]
+    (distinct
+      (for [{id :id scopes :scope} id-and-scopes
+            {:keys [municipality]} scopes] municipality))))
+
 (defn find-user-organizations [user]
   (mongo/select :organizations {:_id {$in (:organizations user)}}))
 
 (defn find-user-municipalities [user]
   (distinct (reduce into [] (map #(:municipalities %) (find-user-organizations user)))))
+
+;;
+;; Actions
+;;
 
 (defquery "users-in-same-organizations"
   {:roles [:authority]}
@@ -31,7 +60,7 @@
     (ok :organization (assoc organization :operations-attachments ops)
         :attachmentTypes (partition 2 (attachments/organization-attachments organization)))))
 
-(defcommand "organization-link-add"
+(defcommand "add-organization-link"
   {:description "Adds link to organization."
    :parameters [:url :nameFi :nameSv]
    :roles [:authorityAdmin]
@@ -41,7 +70,7 @@
     (mongo/update :organizations {:_id organization} {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "organization-link-update"
+(defcommand "update-organization-link"
   {:description "Updates organization link."
    :parameters [:url :nameFi :nameSv :index]
    :roles [:authorityAdmin]
@@ -51,7 +80,7 @@
     (mongo/update :organizations {:_id organization} {$set {(str "links." i) {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defcommand "organization-link-rm"
+(defcommand "remove-organization-link"
   {:description "Removes organization link."
    :parameters [:nameFi :nameSv :url]
    :roles [:authorityAdmin]
@@ -61,47 +90,38 @@
     (mongo/update :organizations {:_id organization} {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
     (ok)))
 
-(defquery "organizations"
+(defquery "organization-names"
   {:authenticated true
    :verified true}
   [{user :user}]
   (ok :organizations (mongo/select :organizations {} {:name 1})))
 
-(defquery "municipalities-for-new-application"
-  {:authenticated true
-   :verified true}
-  [{user :user}]
-  (ok :municipalities
-     (map (fn [id] {:id id :operations (operations/municipality-operations id)})
-          (->> (mongo/select :organizations {} {"municipalities" 1}) (mapcat :municipalities) (distinct)))))
+(defquery "municipalities-with-organization"
+  {} [_] (ok :municipalities (municipalities-with-organization)))
 
-(defquery "organization"
-  {:parameters [:organizationId] :verified true}
-  [{{organizationId :organizationId} :data}]
-  (if-let [result (mongo/select-one :organizations {:_id organizationId} {"links" 1})]
+(defquery "operations-for-municipality"
+  {:authenticated true}
+  [{{:keys [municipality]} :data}]
+  (ok :operations (operations/municipality-operations municipality)))
+
+(defn resolve-organization [municipality permit-type]
+  (when-let [organizations (mongo/select :organizations {$and [{:scope.municipality municipality} {:scope.permitType permit-type}]})]
+    (when (> (count organizations) 1)
+      (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type))
+    (first organizations)))
+
+(defquery "organization-details"
+  {:parameters [:municipality :operation] :verified true}
+  [{{:keys [municipality operation]} :data}]
+  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1 "operations-attachments" 1})]
     (ok :links (:links result)
-        :operations (operations/municipality-operations organizationId)
-        :attachments (attachments/organization-attachments organizationId))
-    (fail :unknown-organization)))
-
-; Returns the organization based on municipality and operation.
-; For example in municipality 753 with operation of type R the organization is 753-R
-(defn resolve-organization [municipality operation]
-  (mongo/select-one :organizations {:municipalities municipality}))
-
-; return the organization by municipality (eg. 753) and operation type (eg. 'R'), resulting to eg. organization 753-R
-; TODO: operation does not have permitModule
-(defquery "get-organization-details"
-  {:parameters [:municipality] :verified true}
-  [{{municipality :municipality operation :operation} :data}]
-  (if-let [result (mongo/select-one :organizations {:municipalities municipality} {"links" 1})]
-    (ok :links (:links result))
+        :attachmentsForOp (-> result :operations-attachments ((keyword operation))))
     (fail :unknown-organization)))
 
 (defcommand "organization-operations-attachments"
   {:parameters [:operation :attachments]
    :roles [:authorityAdmin]}
-  [{{operation :operation attachments :attachments} :data user :user}]
+  [{{:keys [operation attachments]} :data user :user}]
   ; FIXME: validate operation and attachments
   (let [organizations (:organizations user)
         organization  (first organizations)]
@@ -123,26 +143,8 @@
   [{{:keys [legacy]} :data {:keys [organizations] :as user} :user}]
   (let [organization (first organizations)]
     (if (or (s/blank? legacy) (krysp/legacy-is-alive? legacy))
-      (do
-        (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
-        (ok))
+      (mongo/update :organizations {:_id organization} {$set {:legacy legacy}})
       (fail :legacy_is_dead))))
-
-;;
-;; local api
-;;
-
-(defn get-organization [id]
-  (and id (mongo/select-one :organizations {:_id id})))
-
-(defn municipality-by-propertyId [id]
-  (when (and (>= (count id) 3) (not (s/blank? id)))
-    (subs id 0 3)))
-
-(defn get-legacy [organization-id]
-  (let [organization (mongo/select-one :organizations {:_id organization-id})
-        legacy       (:legacy organization)]
-    (when-not (s/blank? legacy) legacy)))
 
 ;;
 ;; Helpers

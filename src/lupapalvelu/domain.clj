@@ -1,7 +1,9 @@
 (ns lupapalvelu.domain
   (:use [monger.operators]
-        [clojure.tools.logging])
-  (:require [lupapalvelu.mongo :as mongo]
+        [sade.util :only [lower-case]])
+  (:require [taoensso.timbre :as timbre :refer (trace debug info warn warnf error fatal)]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.model :as model]
             [sade.common-reader :refer [strip-nils strip-empty-maps]]))
 
 ;;
@@ -76,32 +78,41 @@
   (map :invite (filter :invite auth)))
 
 (defn invite [application email]
-  (first (filter #(-> % :email (= email)) (invites application))))
+  (first (filter #(-> % :email (= (lower-case email))) (invites application))))
 
 (defn invited? [{invites :invites} email]
-  (or (some #(= email (-> % :user :username)) invites) false))
+  (or (some #(= (lower-case email) (-> % :user :username)) invites) false))
 
 ;;
 ;; Conversion between Lupapiste and documents
 ;;
 
-(defn ->henkilo [{:keys [id firstName lastName email phone street zip city]}]
-  (->
-    {:userId                        {:value id}
-     :henkilotiedot {:etunimi       {:value firstName}
-                     :sukunimi      {:value lastName}}
-     :yhteystiedot {:email          {:value email}
-                    :puhelin        {:value phone}}
-     :osoite {:katu                 {:value street}
-              :postinumero          {:value zip}
-              :postitoimipaikannimi {:value city}}}
-    strip-nils
-    strip-empty-maps))
+(defn has-hetu?
+  ([schema]
+    (has-hetu? schema [:henkilo]))
+  ([schema-body base-path]
+    (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
+      (boolean (model/find-by-name schema-body full-path)))))
 
-(defn ->yritys-public-area [{:keys [id firstName lastName email phone street zip city]}]
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId]} & {:keys [with-hetu]}]
+  (letfn [(merge-hetu [m] (if with-hetu (assoc-in m [:henkilotiedot :hetu :value] personId) m))]
+    (->
+      {:userId                        {:value id}
+       :henkilotiedot {:etunimi       {:value firstName}
+                       :sukunimi      {:value lastName}}
+       :yhteystiedot {:email          {:value email}
+                      :puhelin        {:value phone}}
+       :osoite {:katu                 {:value street}
+                :postinumero          {:value zip}
+                :postitoimipaikannimi {:value city}}}
+      merge-hetu
+      strip-nils
+      strip-empty-maps)))
+
+(defn ->yritys [{:keys [id firstName lastName email phone street zip city]}]
   (->
     {;:userId                        {:value id}
-     :vastuuhenkilo {:henkilotiedot {:etunimi       {:value firstName}
+     :yhteyshenkilo {:henkilotiedot {:etunimi       {:value firstName}
                                      :sukunimi      {:value lastName}}
                      :yhteystiedot {:email          {:value email}
                                     :puhelin        {:value phone}}}
@@ -117,4 +128,3 @@
 
 (defn set-software-version [m]
   (assoc m :_software_version "1.0.5"))
-
