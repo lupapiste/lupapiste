@@ -494,7 +494,7 @@
  (def ktj-format (tf/formatter "yyyyMMdd"))
  (def output-format (tf/formatter "dd.MM.yyyy"))
 
- (defn- autofill-rakennuspaikka [application created]
+ (defn- autofill-rakennuspaikka [application time]
    (let [rakennuspaikka   (domain/get-document-by-name application "rakennuspaikka")
          kiinteistotunnus (:propertyId application)
          ktj-tiedot       (ktj/rekisteritiedot-xml kiinteistotunnus)]
@@ -509,7 +509,7 @@
            (:id application)
            rakennuspaikka
            updates
-           created)))))
+           time)))))
 
  (defn user-is-authority-in-organization? [user-id organization-id]
    (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
