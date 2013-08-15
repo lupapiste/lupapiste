@@ -284,9 +284,9 @@
     ;(clojure.pprint/pprint canonical-with-statement-attachments)
     ;(println xml-s)
     (validate xml-s)
+    (fs/mkdirs output-dir)  ;; this has to be called before calling with-open below
     (with-open [out-file-stream (writer tempfile)]
       (emit xml out-file-stream))
-    (fs/mkdirs output-dir)
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)
 
