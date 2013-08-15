@@ -162,8 +162,14 @@
                      henkilo-valitsin
                      designer-basic
                      {:name "patevyys" :type :group :body patevyys}))
+(def muutostapa {:name "muutostapa" :type :select
+                 :body [{:name "poisto"}
+                        {:name "lis\u00e4ys"}
+                        {:name "muutos"}
+                        {:name "ei tiedossa"}]})
 
-(def huoneisto [{:name "huoneistoTunnus" :type :group
+(def huoneisto [muutostapa
+                {:name "huoneistoTunnus" :type :group
                  :body [{:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
                         {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s"}
                         {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}]}

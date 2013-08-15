@@ -76,33 +76,33 @@
 
 (facts "uploading user attachment"
   (apply-remote-minimal)
-  
+
   ;
   ; Initially pena does not have examination?
   ;
-  
-  (:examination (current-user pena)) => nil?
-  
+
+  (fact "Initially pena does not have examination?" (:examination (current-user pena)) => nil?)
+
   ;
   ; Pena uploads an examination:
   ;
-  
+
   (upload-user-attachment pena "examination" true)
   (let [file-1 (get-in (current-user pena) [:attachment :examination])
         att-1 (mongo/download (:file-id file-1))]
     (fact "filename of file 1"    file-1  => (contains {:filename "test-attachment.txt"}))
     (fact "db has same filename"  att-1   => (contains {:file-name "test-attachment.txt"}))
     (fact "file 1 metadata"       att-1   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})}))
-  
+
     ;
     ; Pena updates the examination:
     ;
-    
+
     (upload-user-attachment pena "examination" true)
     (let [file-2 (get-in (current-user pena) [:attachment :examination])
           att-2 (mongo/download (:file-id file-2))]
       (fact "filename of file 2"   file-2  => (contains {:filename "test-attachment.txt"}))
       (fact "db has same filename" att-2   => (contains {:file-name "test-attachment.txt"}))
       (fact "file 2 metadata"      att-2   => (contains {:metadata (contains {:user-id pena-id :attachment-type "examination"})})))
-    
+
     (fact "old file is deleted"  (mongo/download (:file-id file-1)) => nil?)))
