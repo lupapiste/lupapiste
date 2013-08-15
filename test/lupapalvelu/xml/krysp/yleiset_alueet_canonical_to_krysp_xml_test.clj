@@ -19,9 +19,9 @@
         xml (element-to-xml canonical kaivulupa_to_krysp)
         xml-s (indent-str xml)]
 
-    (println "\n xml-s: \n")
-    (println xml-s)
-    (println "\n")
+;    (println "\n xml-s: \n")
+;    (println xml-s)
+;    (println "\n")
 
 ;    (println "\n application: ")
 ;    (clojure.pprint/pprint application)
@@ -35,11 +35,6 @@
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:yleiset-alueet-ftp-user "sipoo"}) ;TODO: own test
 
-    (with-open
-      [out-file (writer "/Users/jarias/krysp-muunnos-oma-testi.xml" )]
-      (emit xml out-file))
-
     (fact "xml exist" xml => truthy)
 
-    (validator/validate xml-s)
-    ))
+    (validator/validate xml-s)))
