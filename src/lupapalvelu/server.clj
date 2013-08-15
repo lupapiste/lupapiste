@@ -21,6 +21,7 @@
             [lupapalvelu.operations]
             [lupapalvelu.statement]
             [lupapalvelu.proxy-services]
+            [lupapalvelu.licenses]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.etag :as etag]
