@@ -1,6 +1,5 @@
 (ns lupapalvelu.user-itest
   (:require [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.mongo :as mongo]
             [midje.sweet :refer :all]
             [clojure.pprint :refer [pprint]]
             [clojure.java.io :as io]
