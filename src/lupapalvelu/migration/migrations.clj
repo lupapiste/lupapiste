@@ -33,9 +33,8 @@
 
 (defmigration add-muutostapa-to-huoneistot
   :apply-when (pos? (mongo/count :applications muutostapa-not-exits-query))
-  (let [applications-to-update (mongo/select :applications muutostapa-not-exits-query)]
-    (for [application applications-to-update]
-      (update-rakennuslupa-documents-schemas application))))
+  (doseq [application (mongo/select :applications muutostapa-not-exits-query)]
+    (update-rakennuslupa-documents-schemas application)))
 
 
 
