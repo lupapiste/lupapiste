@@ -88,7 +88,6 @@
   ;
 
   (upload-user-attachment pena "examination" true)
-  (mongo/connect!)
   (let [file-1 (get-in (current-user pena) [:attachment :examination])
         att-1 (mongo/download (:file-id file-1))]
     (fact "filename of file 1"    file-1  => (contains {:filename "test-attachment.txt"}))
