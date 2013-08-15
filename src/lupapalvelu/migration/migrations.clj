@@ -19,15 +19,13 @@
 
 
 (def muutostapa-not-exits-query {:documents {$elemMatch {"schema.info.name"
-                         {$in  ["uusiRakennus" "rakennuksen-muuttaminen" "rakennuksen-laajentaminen" "purku"]}
-                         "schema.body" {$not {$elemMatch {"name" "huoneistot"
-                                                          "body.name" "muutostapa"}}}}}})
+                                                         {$in  ["uusiRakennus" "rakennuksen-muuttaminen" "rakennuksen-laajentaminen" "purku"]}
+                                                         "schema.body" {$not {$elemMatch {"name" "huoneistot"
+                                                                                          "body.name" "muutostapa"}}}}}})
 
 (defn update-rakennuslupa-documents-schemas [application]
-  (let [value-to-add schemas/muutostapa
-        updated (map (fn [document] (let [name (get-in document [:schema :info :name])
-                                          new-schema (schemas/get-schema name)
-                                          old-schema (:schema document)]
+  (let [updated (map (fn [document] (let [name (get-in document [:schema :info :name])
+                                          new-schema (schemas/get-schema name)]
                                       (assoc document :schema new-schema)))
                      (:documents application))
         updated-application (assoc application :documents updated)]
