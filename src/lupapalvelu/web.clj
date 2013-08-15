@@ -135,8 +135,11 @@
 (defjson [:post "/api/command/:name"] {name :name}
   (execute-command name))
 
+(defn- execute-query [name params]
+  (execute (enriched (core/query name params))))
+
 (defjson "/api/query/:name" {name :name}
-  (execute (enriched (core/query name (from-query)))))
+  (execute-query name (from-query)))
 
 (defpage "/api/raw/:name" {name :name}
   (let [response (execute (enriched (core/raw name (from-query))))]
@@ -429,6 +432,9 @@
 
   (defjson "/dev/user" []
     (current-user))
+
+  (defjson "/dev/fixture/:name" {:keys [name]}
+    (execute-query "apply-fixture" {:name name}))
 
   ;; send ascii over the wire with wrong encofing (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt

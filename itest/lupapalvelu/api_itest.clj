@@ -4,9 +4,8 @@
   (:require [lupapalvelu.domain :as domain]))
 
 (facts "Secury! SECURITY!!"
+  (apply-remote-minimal)
   (with-anti-csrf
-    (apply-remote-minimal)
-
     (fact "Disabled user must not be able to create an application!"
       (raw-command dummy :create-application :operation "asuinrakennus"
                                              :propertyId "75312312341234"
